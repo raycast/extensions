@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, Toast } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { createTodo, getProjectPeople } from "../oauth/auth";
 import { showToast } from "@raycast/api";
 import { useState, useEffect } from "react";
@@ -16,11 +16,13 @@ interface CreateTodoFormValues {
 }
 
 export default function CreateTodoForm({
+  isLoading,
   accountId,
   projectId,
   todoListId,
   onSuccess,
 }: {
+  isLoading: boolean;
   accountId: string;
   projectId: number;
   todoListId: number;
@@ -28,6 +30,8 @@ export default function CreateTodoForm({
 }) {
   const [projectPeople, setProjectPeople] = useState<BasecampPerson[]>([]);
   const [isLoadingProjectPeople, setIsLoadingProjectPeople] = useState(false);
+  const { removeValue: removeDefaultTodoListConfig } = useLocalStorage<string>("defaultTodoListConfig", "");
+  const { pop } = useNavigation();
 
   useEffect(() => {
     const loadProjectPeople = async () => {
@@ -46,6 +50,11 @@ export default function CreateTodoForm({
       loadProjectPeople();
     }
   }, []);
+
+  const handleClearDefaultTodoList = () => {
+    removeDefaultTodoListConfig();
+    pop();
+  };
 
   const { handleSubmit, itemProps, values } = useForm<CreateTodoFormValues>({
     async onSubmit(values) {
@@ -82,9 +91,10 @@ export default function CreateTodoForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
+          <Action title="Clear Default Todo List" onAction={handleClearDefaultTodoList} />
         </ActionPanel>
       }
-      isLoading={isLoadingProjectPeople}
+      isLoading={isLoading || isLoadingProjectPeople}
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="Describe this to-do..." autoFocus />
       <Form.TagPicker title="Assigned to" {...itemProps.assigneeIds}>

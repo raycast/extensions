@@ -11,10 +11,24 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "view-all-basecamps",
+      "title": "View All Basecamps",
+      "subtitle": "Basecamp",
+      "description": "View all Basecamps connected to your Basecamp account",
+      "mode": "view"
+    },
+    {
       "name": "view-projects",
       "title": "View Projects",
       "subtitle": "Basecamp",
-      "description": "View all of your projects in Basecamp",
+      "description": "View all projects in default basecamp",
+      "mode": "view"
+    },
+    {
+      "name": "create-todo",
+      "title": "Create Todo",
+      "subtitle": "Basecamp",
+      "description": "Create a todo in default todo list. You can set this by going to the 'View All Basecamps' command, locating the todo list you want to use, and clicking the 'Set Default Todo List' button.",
       "mode": "view"
     }
   ],

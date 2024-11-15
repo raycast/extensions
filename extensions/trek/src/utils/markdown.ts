@@ -68,19 +68,6 @@ function encodeHtmlEntities(str: string): string {
   return str.replace(/[&<>"']/g, (match) => htmlEntities[match]);
 }
 
-// function decodeHtmlEntities(str: string): string {
-//   return str.replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g, (match) => {
-//     const reverse: { [key: string]: string } = {
-//       "&amp;": "&",
-//       "&lt;": "<",
-//       "&gt;": ">",
-//       "&quot;": '"',
-//       "&#39;": "'",
-//     };
-//     return reverse[match];
-//   });
-// }
-
 export function htmlToMarkdown(html: string): string {
   if (!html) return "";
 
@@ -94,27 +81,10 @@ export function htmlToMarkdown(html: string): string {
 export function markdownToHtml(markdownInput: string): string {
   if (!markdownInput) return "";
 
-  let html = markdownInput;
+  // Remove any existing HTML tags first
+  let html = markdownInput.replace(/<[^>]*>/g, "");
 
-  // Add two newlines to help with paragraph parsing
-  html = "\n\n" + html + "\n\n";
-
-  // Convert horizontal rules
-  html = html.replace(commonMarkRules.horizontalRule, "<hr />");
-
-  // Convert blockquotes
-  const blockquotes = html.match(commonMarkRules.blockquote);
-  if (blockquotes) {
-    const blockquoteHtml = blockquotes.map((item) => item.replace(/^>\s/, "")).join("<br>");
-    html = html.replace(blockquotes.join("\n"), `<blockquote>${blockquoteHtml}</blockquote>`);
-  }
-
-  // Convert headers
-  html = html.replace(
-    commonMarkRules.heading,
-    (_, level, text) => `<h${level.length}>${text.trim()}</h${level.length}>`,
-  );
-
+  // Convert markdown formatting first
   // Convert bold
   html = html.replace(commonMarkRules.bold, "<strong>$1</strong>");
 
@@ -123,13 +93,26 @@ export function markdownToHtml(markdownInput: string): string {
   html = html.replace(commonMarkRules.italicUnderscore, "<em>$1</em>");
 
   // Convert code blocks
-  html = html.replace(commonMarkRules.codeBlock, "<pre><code>$1</code></pre>");
+  html = html.replace(commonMarkRules.codeBlock, "$1");
 
   // Convert inline code
-  html = html.replace(commonMarkRules.inlineCode, "<code>$1</code>");
+  html = html.replace(commonMarkRules.inlineCode, "$1");
 
   // Convert links
   html = html.replace(commonMarkRules.link, '<a href="$2">$1</a>');
+
+  // Convert horizontal rules
+  html = html.replace(commonMarkRules.horizontalRule, "<p>---</p>");
+
+  // Convert headers
+  html = html.replace(commonMarkRules.heading, (_, __, text) => `<h1>${text.trim()}</h1>`);
+
+  // Convert blockquotes
+  const blockquotes = html.match(commonMarkRules.blockquote);
+  if (blockquotes) {
+    const blockquoteHtml = blockquotes.map((item) => item.replace(/^>\s/, "")).join("<br />");
+    html = html.replace(blockquotes.join("\n"), `<blockquote>${blockquoteHtml}</blockquote>`);
+  }
 
   // Convert unordered lists
   const unorderedItems = html.match(commonMarkRules.unorderedList);
@@ -145,26 +128,34 @@ export function markdownToHtml(markdownInput: string): string {
     html = html.replace(orderedItems.join("\n"), `<ol>${listHtml}</ol>`);
   }
 
-  // Convert paragraphs
-  html = html.replace(commonMarkRules.paragraph, "<p>$1</p>");
+  // Now handle paragraphs and line breaks
+  // First split by any number of newlines while capturing the newlines
+  const segments = html.split(/(\n+)/);
+  html = segments
+    .map((segment) => {
+      // If this segment is just newlines
+      if (/^\n+$/.test(segment)) {
+        // Count pairs of newlines and add a br for each pair
+        const brCount = Math.floor(segment.length / 2);
+        return Array(brCount).fill("<br />").join("");
+      }
 
-  // Before final wrapping, encode HTML entities in text content
+      // Otherwise, wrap the content in a paragraph if it's not empty
+      segment = segment.trim();
+      return segment ? `<p>${segment}</p>` : "";
+    })
+    .join("");
+
+  // Encode HTML entities in text content
   html = html.replace(/>([^<]+)</g, (match, text) => {
     return ">" + encodeHtmlEntities(text) + "<";
   });
 
-  // Replace newlines with <br> tags (except within <pre> tags)
-  const parts = html.split(/(<pre>.*?<\/pre>)/gs);
-  html = parts
-    .map((part, index) => {
-      // Skip even indices which are <pre> blocks
-      if (index % 2 === 1) return part;
-      return part.replace(/\n/g, "<br>");
-    })
-    .join("");
+  // Remove any empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, "");
 
-  // Clean up any extra <br> tags and wrap in a div
-  html = `<div>${html.replace(/<br>\s*<br>/g, "<br>").trim()}</div>`;
+  // Wrap in a div
+  html = `<div>${html.trim()}</div>`;
 
   return html;
 }

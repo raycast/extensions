@@ -4,15 +4,15 @@ import { fetchProjects } from "../oauth/auth";
 import { DockItemsList } from "./DockItemsList";
 
 interface ProjectsListProps {
-  accountId: string;
+  accountId: number;
   accountName: string;
 }
 
 export default function ProjectsList({ accountId, accountName }: ProjectsListProps) {
   const { isLoading, data, pagination } = usePromise(
-    (accountId: string) => async (options: { page: number }) => {
+    (accountId: number) => async (options: { page: number }) => {
       try {
-        const response = await fetchProjects(accountId, options.page);
+        const response = await fetchProjects(accountId.toString(), options.page);
         return {
           data: response.data,
           hasMore: response.nextPage !== null,
@@ -42,7 +42,10 @@ export default function ProjectsList({ accountId, accountName }: ProjectsListPro
           icon={project.bookmarked ? Icon.Tack : undefined}
           actions={
             <ActionPanel>
-              <Action.Push title="Select Project" target={<DockItemsList accountId={accountId} project={project} />} />
+              <Action.Push
+                title="Select Project"
+                target={<DockItemsList accountId={accountId.toString()} project={project} />}
+              />
               <Action.OpenInBrowser
                 title="Open Project"
                 url={`https://3.basecamp.com/${accountId}/projects/${project.id}`}

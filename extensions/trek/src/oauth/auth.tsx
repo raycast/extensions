@@ -71,7 +71,7 @@ export async function fetchAccounts() {
     throw new Error("HTTP error " + response.status);
   }
 
-  const json = (await response.json()) as { identity: { id: string }; accounts: { id: string; name: string }[] };
+  const json = (await response.json()) as { identity: { id: string }; accounts: { id: number; name: string }[] };
 
   return json.accounts;
 }
