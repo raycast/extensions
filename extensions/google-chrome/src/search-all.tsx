@@ -71,8 +71,8 @@ export default function Command() {
         {bookmarkData.length === 0 ? (
           <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
         ) : (
-          bookmarkData.map((tab) => (
-            <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+          bookmarkData.map((e) => (
+            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile}  />
           ))
         )}
       </List.Section>
