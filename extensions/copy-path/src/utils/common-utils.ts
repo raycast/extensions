@@ -17,7 +17,7 @@ import {
   showToast,
   Toast,
   updateCommandMetadata,
-  getPreferenceValues
+  getPreferenceValues,
 } from "@raycast/api";
 import {
   copyUrlContent,
