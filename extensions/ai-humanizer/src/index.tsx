@@ -37,7 +37,7 @@ export default function Command() {
       console.log("API Response:", response.data);
 
       return response.data.output;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error in humanize function:", error);
       showToast({
         style: Toast.Style.Failure,
