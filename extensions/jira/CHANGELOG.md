@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Added Child Issues support] - {PR_MERGE_DATE}
+## [Added Child Issues support] - 2024-11-15
 
 - Implemented the ability to view and manage child-related issues within the issue detail view, as well as a new component that provides a comprehensive list of all current issue child issues.
 - Resolved an issue where the child’s status updates were not reflected in the user interface upon changing their status.
