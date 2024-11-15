@@ -14,6 +14,6 @@ Some examples:
 
 This extension converts your text by using pseudofonts made with unicode characters.
 
-_Note:_ Some of these fonts might not be reconisable by screen-readers. So please use them care.
+_Note:_ Some of these fonts might not be recognizable by screen-readers. So please use them with care.
 
 Credits to [fancy-fonts-text](https://github.com/waterrmalann/fancy-fonts-generator) for the inspiration.
