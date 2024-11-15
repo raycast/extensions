@@ -1,6 +1,6 @@
 # 5Devs Changelog
 
-## [2024-11-07] - Added Keywords to Improve Search Functionality
+## [Added Keywords to Improve Search Functionality] - {PR_MERGE_DATE}
 
 - Added `keywords` to every `List.Item` to improve search functionality within the list items.
 
