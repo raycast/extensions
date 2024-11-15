@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Added Child Issues support] - 2024-11-15
+
+- Implemented the ability to view and manage child-related issues within the issue detail view, as well as a new component that provides a comprehensive list of all current issue child issues.
+- Resolved an issue where the child’s status updates were not reflected in the user interface upon changing their status.
+
 ## [Fix number search to include issue keys for all projects.] - 2024-09-30
 
 - When a user searches for a number without a project selected, the extension matches the number against issue keys in all projects.
