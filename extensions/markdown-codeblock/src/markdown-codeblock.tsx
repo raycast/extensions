@@ -20,7 +20,7 @@ type Item = {
 
 async function paste(item: Item, text?: string) {
   if (!text?.trim()) {
-    showToast({ title: "No text selected to paste.", style: Toast.Style.Failure });
+    showToast({ title: "No text to paste.", style: Toast.Style.Failure });
     return;
   }
 
@@ -124,7 +124,7 @@ export default function Command() {
               <Action
                 title="Paste Selected Text in Active App"
                 onAction={async () => {
-                  await paste(item, await getSelectedText());
+                  await paste(item, await getSelectedText().catch(() => ""));
                 }}
               />
             </ActionPanel>
