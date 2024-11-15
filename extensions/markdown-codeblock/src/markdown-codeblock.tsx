@@ -95,7 +95,6 @@ export default function Command() {
   }, [recentlyUsed]);
 
   function handleFiltering(searchText: string) {
-    if (!searchText) return;
     const filteredItems = LIST_ITEMS.filter(
       (item) =>
         item.keywords.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
