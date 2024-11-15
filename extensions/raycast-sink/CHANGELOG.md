@@ -1,5 +1,10 @@
 # Raycast Sink Changelog
 
+## [Fix and New Features] - 2024-11-15
+
+- Added statistics to the detail view
+- Fixed the duplicate question mark issue when opening the manage URL page
+
 ## [Initial Release] - 2024-10-15
 
 - Integrated Sink API for short link management

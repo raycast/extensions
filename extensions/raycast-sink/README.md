@@ -8,13 +8,15 @@ A Raycast extension for effortlessly managing short links using [Sink](https://g
 
 ![Raycast Sink Intro](./docs/images/raycast-sink-intro.png)
 
-## Installation
+## 📥 Installation
 
-### Raycast Store
+### Option 1: Raycast Store (Recommended)
 
-- [ ] ⏳ Waiting Raycast team to review.
+Install directly from [Raycast Store: Sink Short Links Manager](https://www.raycast.com/luolei/raycast-sink)
 
-### Manual Installation
+![Raycast Sink Store](./docs/images/raycast-sink-store.png)
+
+### Option 2: Manual Installation
 
 ```bash
 git clone https://github.com/foru17/raycast-sink.git
@@ -23,21 +25,21 @@ npm install && npm run dev
 # Enjoy it
 ```
 
-## Features
+## ✨ Features
 
 - **View, Create, Search, and Query** short links directly within Raycast
 - **Quick Access**: Open short links in your default browser with a single click
 - **Clipboard Integration**: Copy short links to your clipboard instantly
 - **Seamless Sink Integration**: Leverage the power of Sink's Cloudflare-based link shortening
 
-## Prerequisites
+## 📑 Prerequisites
 
 Before you begin, ensure you have the following:
 
 - A deployed Sink instance (follow the [Sink deployment instructions](https://github.com/ccbikai/sink#%EF%B8%8F-deployment))
 - Sink API credentials (obtain these from your Sink instance)
 
-## Configuration
+## 🚦 Configuration
 
 After installation, you'll need to set up the extension with your Sink instance details:
 
@@ -46,7 +48,7 @@ After installation, you'll need to set up the extension with your Sink instance 
 3. Find "Sink" in the list of installed extensions
 4. Enter your Sink API URL and API Key in the provided fields
 
-## Usage
+## 🎯 Usage
 
 Here's how to make the most of the Raycast Sink extension:
 
@@ -56,7 +58,7 @@ Here's how to make the most of the Raycast Sink extension:
 - **Open Link**: Select a short link and use the "Open in Browser" action to visit the destination URL
 - **Copy Link**: Quickly copy a short link to your clipboard for sharing
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 If you encounter any issues:
 
@@ -66,7 +68,7 @@ If you encounter any issues:
 
 If problems persist, please [open an issue](https://github.com/foru17/raycast-sink/issues) on the GitHub repository.
 
-## Contributing
+## 👥 Contributing
 
 Contributions are welcome and appreciated! Here's how you can contribute:
 
@@ -78,15 +80,15 @@ Contributions are welcome and appreciated! Here's how you can contribute:
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## Credits
+## 🙏 Credits
 
 This extension is built on top of the [Sink](https://github.com/ccbikai/sink) project by [ccbikai](https://github.com/ccbikai). We're grateful for their work in creating such a robust and efficient link shortener.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## ⭐ Support
 
 If you find this extension helpful, consider:
 
