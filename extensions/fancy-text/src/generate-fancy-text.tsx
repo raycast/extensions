@@ -1,5 +1,5 @@
 import React from "react";
-import { List, Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import fonts from "./fonts.json";
 
@@ -47,6 +47,7 @@ export default function Command() {
   const defaultText = "Stay in the flow";
   const [searchText, setSearchText] = React.useState("");
   const [pinnedFonts, setPinnedFonts] = useCachedState<string[]>("pinned-fonts", []);
+  const { defaultAction } = getPreferenceValues<Preferences>();
 
   const togglePin = (fontName: string) => {
     setPinnedFonts((current) =>
@@ -81,6 +82,9 @@ export default function Command() {
     const convertedText = font.convert(searchText || defaultText);
     const isPinned = pinnedFonts.includes(font.fontName);
 
+    const pasteAction = <Action.Paste title="Paste Fancy Text" content={convertedText} />;
+    const copyAction = <Action.CopyToClipboard title="Copy Fancy Text" content={convertedText} />;
+
     return (
       <List.Item
         key={font.fontName}
@@ -88,7 +92,8 @@ export default function Command() {
         accessories={[{ text: font.fontName }]}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Fancy Text" content={convertedText} />
+            {defaultAction === "copy" ? copyAction : pasteAction}
+            {defaultAction === "copy" ? pasteAction : copyAction}
             <Action
               title={isPinned ? "Unpin Font" : "Pin Font"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}

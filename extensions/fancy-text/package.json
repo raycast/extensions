@@ -25,6 +25,27 @@
       ]
     }
   ],
+  "preferences": [
+    {
+  "name": "defaultAction",
+  "description": "Default Action",
+  "type": "dropdown",
+  "required": false,
+  "title": "Default Action",
+  "default": "copy",
+  "placeholder": "Default Action",
+  "data": [
+    {
+      "title": "Copy to Clipboard",
+      "value": "copy"
+    },
+    {
+      "title": "Paste",
+      "value": "paste"
+    }
+  ]
+}
+  ],
   "dependencies": {
     "@raycast/api": "^1.85.0",
     "@raycast/utils": "^1.17.0"
