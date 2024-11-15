@@ -3,7 +3,7 @@
   "name": "spring-initializr",
   "title": "Spring Initializr",
   "description": "Spring Initializr is a tool that simplifies the creation of Spring Boot projects.",
-  "icon": "SpringLeaf_2024.png",
+  "icon": "spring-leaf.png",
   "author": "danvega",
   "categories": [
     "Developer Tools"
