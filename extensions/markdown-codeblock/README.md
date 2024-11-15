@@ -10,8 +10,15 @@ This works well when chatting with AI, as it provides more context for the code 
 
 ## How to Use
 
+### Paste from Clipboard
+
 1. copy the code you want to wrap in a codeblock and run the command
-2. select the language you want to use for the codeblock and press enter
+2. select the language you want to use for the codeblock and press enter (⏎)
+
+### Paste from Selection
+
+1. select the code you want to wrap in a codeblock and run the command
+2. select the language you want to use for the codeblock and press cmd + enter (⌘⏎)
 
 ![Markdown Codeblock](metadata/markdown-codeblock-2.gif)
 
