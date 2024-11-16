@@ -6,7 +6,6 @@ import { File } from "../types";
 import FileListItem from "./FileListItem";
 import path from "node:path";
 
-
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 function midnight(daysAgo: number): Date {
