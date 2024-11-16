@@ -4,17 +4,17 @@ import CreatePersonForm from "./create-person";
 import CreateCompanyForm from "./create-company";
 
 export default function ListPeople() {
-  const { people } = useGetPeople();
+  const { people, isLoading } = useGetPeople();
 
   return (
-    <List isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail>
       {people.map((person) => (
         <List.Item
           key={person.id}
           title={person.name.firstName + " " + person.name.lastName}
           subtitle="Person"
           actions={
-            <ActionPanel title="#1 in raycast/extensions">
+            <ActionPanel>
               <Action.CopyToClipboard
                 title="Copy Person Name"
                 content={person.name.firstName}

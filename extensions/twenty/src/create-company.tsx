@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useAuthHeaders } from "./hooks/use-auth-headers";
 import { Company } from "./types";
 import ListCompanies from "./list-companies";
+import { useApiUrl } from "./hooks/use-api-url";
 
 interface CreateCompanyFormProps {
   name: string;
@@ -101,7 +102,7 @@ const createCompany = async (values: CreateCompanyFormProps): Promise<Company | 
   try {
     console.log("Creating company", values);
     const response = await axios.post<Company>(
-      "https://api.twenty.com/rest/companies",
+      useApiUrl("companies"),
       {
         name: values.name,
         domainName: {
