@@ -11,7 +11,7 @@ function isUserStylesYaml(data: unknown): data is UserStylesYaml {
   return data && typeof data === "object" && "userstyles" in data;
 }
 
-export function useFetchData<T>(dataKey: "ports" | "styles") {
+export function useFetchData<T>(dataKey: "ports" | "userstyles") {
   const [data, setData] = useState<Record<string, T>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -22,7 +22,7 @@ export function useFetchData<T>(dataKey: "ports" | "styles") {
         const dataJSON = await fetchData(dataKey);
         if (dataKey === "ports" && isPortsYaml(dataJSON)) {
           setData(dataJSON.ports as Record<string, T>);
-        } else if (dataKey === "styles" && isUserStylesYaml(dataJSON)) {
+        } else if (dataKey === "userstyles" && isUserStylesYaml(dataJSON)) {
           setData(dataJSON.userstyles as Record<string, T>);
         } else {
           throw new Error("Invalid data format");

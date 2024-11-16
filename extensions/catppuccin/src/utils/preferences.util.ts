@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { CatppuccinFlavor } from "@catppuccin/palette";
+import type { FlavorName } from "@catppuccin/palette";
 import { flavors } from "@catppuccin/palette";
 
 export interface Preferences {
@@ -11,10 +11,9 @@ export const getPreferences = (): Preferences => {
   return getPreferenceValues<Preferences>();
 };
 
-export const getFlavorPreference = (): CatppuccinFlavor => {
+export const getFlavorPreference = (): FlavorName => {
   const preferences = getPreferences();
-  const flavorName = preferences.flavor || "mocha";
-  return flavors[flavorName];
+  return preferences.flavor || "mocha";
 };
 
 export const getGridSize = (): number => {

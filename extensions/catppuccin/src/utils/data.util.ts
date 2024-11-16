@@ -2,7 +2,7 @@ import axios from "axios";
 import * as yaml from "js-yaml";
 import Ajv from "ajv";
 
-type DataType = "ports" | "styles";
+type DataType = "ports" | "userstyles";
 
 const ajv = new Ajv();
 
@@ -71,13 +71,4 @@ const fetchData = async <T>(type: DataType): Promise<T> => {
   }
 };
 
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export { fetchData, isValidUrl };
+export { fetchData };

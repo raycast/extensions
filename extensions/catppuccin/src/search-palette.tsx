@@ -1,32 +1,41 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { useState, useMemo } from "react";
 import { Grid, ActionPanel, Action } from "@raycast/api";
-import type { CatppuccinFlavor, FlavorName } from "@catppuccin/palette";
-import { getGridSize } from "./utils/preferences.util";
-import { getAllFlavors, getFlavorColors, capitalize } from "./utils/palette.util";
+import { flavors, flavorEntries, type FlavorName } from "@catppuccin/palette";
+import { getFlavorPreference, getGridSize } from "./utils/preferences.util";
+import Fuse, { type IFuseOptions } from "fuse.js";
+
+type FlavorOrAll = FlavorName | "all";
 
 export default function SearchPalette() {
   const [searchText, setSearchText] = useState<string>("");
+  const [selectedFlavor, setSelectedFlavor] = useState<FlavorOrAll>(getFlavorPreference());
 
-  const flavorOptions = getAllFlavors();
-  const [selectedFlavor, setSelectedFlavor] = useState<FlavorName>(flavorOptions[0] || "mocha");
-
-  const flavorColors = useMemo<CatppuccinFlavor>(() => {
-    return getFlavorColors(selectedFlavor);
-  }, [selectedFlavor]);
+  const fuseOptions = {
+    keys: ["identifier", "hex"],
+    threshold: 0.5,
+  } satisfies IFuseOptions<unknown>;
 
   const filteredColors = useMemo(() => {
-    if (!searchText) return flavorColors.colorEntries;
+    const colors =
+      selectedFlavor == "all"
+        ? flavorEntries.flatMap(([i, f]) =>
+            f.colorEntries.map(([identifier, color]) => {
+              return { identifier, flavor: i, ...color };
+            }),
+          )
+        : flavors[selectedFlavor].colorEntries.map(([identifier, color]) => {
+            return { identifier, flavor: selectedFlavor, ...color };
+          });
+    if (!searchText) return colors;
 
-    const lowerSearchText = searchText.toLowerCase();
-    return flavorColors.colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
-  }, [searchText, flavorColors.colorEntries]);
+    const fuse = new Fuse(colors, fuseOptions);
+    const results = fuse.search(searchText);
+
+    return results.map((result) => result.item);
+  }, [searchText, selectedFlavor]);
 
   const columns = getGridSize();
-
-  const handleFlavorChange = (newValue: string) => {
-    setSelectedFlavor(newValue as FlavorName);
-  };
 
   return (
     <Grid
@@ -34,18 +43,23 @@ export default function SearchPalette() {
       searchBarPlaceholder="Search colors..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Flavor" storeValue onChange={handleFlavorChange}>
-          {flavorOptions.map((flavor) => (
-            <Grid.Dropdown.Item key={flavor} value={flavor} title={capitalize(flavor)} />
+        <Grid.Dropdown
+          tooltip="Select Flavor"
+          storeValue
+          onChange={(newValue) => setSelectedFlavor(newValue as FlavorOrAll)}
+        >
+          <Grid.Dropdown.Item key="all" value="all" title="All" />
+          {flavorEntries.map(([identifier, flavor]) => (
+            <Grid.Dropdown.Item key={identifier} value={identifier} title={flavor.name} />
           ))}
         </Grid.Dropdown>
       }
     >
-      {filteredColors.map(([identifier, { rgb, hsl, hex, name }]) => {
+      {filteredColors.map(({ rgb, hsl, hex, name, identifier, flavor }) => {
         return (
           <Grid.Item
-            key={identifier}
-            title={name}
+            key={flavor + identifier}
+            title={selectedFlavor === "all" ? flavors[flavor].name + " " + name : name}
             subtitle={hex}
             content={{
               color: {
