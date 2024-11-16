@@ -8,7 +8,7 @@ type VersionAPIResponse = {
 };
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch<VersionAPIResponse>("https://wpbones.com/api/version");
+  const { isLoading, data } = useFetch<VersionAPIResponse>("https://wpbones.com/api/version");
   const {
     value: versionStorage,
     setValue: setVersionStorage,
@@ -41,9 +41,8 @@ export default function Command() {
             const version = parseInt(data.version.replace(/\./g, ""));
             setVersionStorage(version);
           }
-
           open("https://wpbones.com/docs/release-notes");
-          revalidate();
+          setNewVersion(false);
         }}
       />
 

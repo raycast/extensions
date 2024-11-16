@@ -1,19 +1,8 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { SearchList } from "./components/SearchList";
 import { isValidUrl } from "./utils/data.util";
-
-interface UserStyleDetails {
-  name: string | string[];
-  categories?: string[];
-  icon?: string;
-  color?: string;
-  readme?: {
-    "app-link"?: string | string[];
-    usage?: string;
-  };
-  currentMaintainers?: string[];
-  pastMaintainers?: string[];
-}
+import { getDefaultIcon, getIcon } from "./utils/icons.util";
+import type { UserStyleDetails } from "./types";
 
 const getAppLink = (appLink?: string | string[]) => {
   if (!appLink) return undefined;
@@ -43,6 +32,12 @@ export default function SearchUserStyles() {
             {appLink && isValidUrl(appLink) && <Action.OpenInBrowser url={appLink} title="Open App Link" />}
           </ActionPanel>
         }
+        icon={{
+          value: userStyleDetails.icon
+            ? getIcon(userStyleDetails.icon, userStyleDetails.color)
+            : getDefaultIcon(userStyleDetails.color),
+          tooltip: styleKey,
+        }}
       />
     );
   };
@@ -56,7 +51,7 @@ export default function SearchUserStyles() {
   return (
     <SearchList<UserStyleDetails>
       dataKey="styles"
-      searchBarPlaceholder="Search user styles..."
+      searchBarPlaceholder="Search userstyles..."
       renderItem={renderItem}
       filterFunction={filterFunction}
     />

@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Handle notification icon retrieval error] - 2024-11-08
+
+- Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
 ## [Improved options for My Issues] - 2024-11-04
 
 - My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
