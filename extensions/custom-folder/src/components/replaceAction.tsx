@@ -1,7 +1,7 @@
 import { Action, popToRoot } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { FC, useEffect, useState } from "react";
-import { replaceIconScript } from "./utils/replaceIconScript";
+import { FC, useState } from "react";
+import { replaceIconScript } from "../utils/replaceIconScript";
 
 interface ReplaceActionProps {
   iconPath: string;
@@ -13,7 +13,7 @@ export const ReplaceAction: FC<ReplaceActionProps> = ({ iconPath, targetFolderPa
   const [shouldExec, setShouldExec] = useState<boolean>(false);
   const scriptContent = replaceIconScript(iconPath, targetFolderPath);
 
-  const { error } = useExec(`${scriptContent}`, {
+  useExec(`${scriptContent}`, {
     shell: true,
     execute: shouldExec || false,
     failureToastOptions: {
@@ -22,10 +22,6 @@ export const ReplaceAction: FC<ReplaceActionProps> = ({ iconPath, targetFolderPa
     },
     onData: () => popToRoot(),
   });
-
-  useEffect(() => {
-    // console.error("error: ", error);
-  }, [error]);
 
   return (
     <Action
