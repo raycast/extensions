@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2024-11-16
+
+- Adds support for Windsurf as an option in the extension settings.
+
 ## [Chore] - 2024-09-02
 
 - Added missing contributor
