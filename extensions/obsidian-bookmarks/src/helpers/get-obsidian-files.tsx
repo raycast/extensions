@@ -11,22 +11,33 @@ function isFulfilledPromise<T>(v: PromiseSettledResult<T>): v is PromiseFulfille
   return v.status === "fulfilled";
 }
 
+async function getMarkdownFiles(dir: string): Promise<Array<string>> {
+  let markdownFiles: Array<string> = [];
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const subDirFiles = await getMarkdownFiles(fullPath);
+      markdownFiles = markdownFiles.concat(subDirFiles);
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      markdownFiles.push(fullPath);
+    }
+  }
+  return markdownFiles;
+}
+
 export default async function getObsidianFiles(): Promise<Array<File>> {
   const bookmarksPath = await getOrCreateBookmarksPath();
-
-  const files = await fs.readdir(bookmarksPath);
-  const markdown = files.filter((file) => file.endsWith(".md"));
-  const promises = markdown.map((file) =>
-    fs.readFile(path.join(bookmarksPath, file), { encoding: "utf-8" }).then((val) => ({
+  const markdownFiles = await getMarkdownFiles(bookmarksPath);
+  const promises = markdownFiles.map((file) =>
+    fs.readFile(file, { encoding: "utf-8" }).then((val) => ({
       ...frontMatter<FrontMatter>(val),
-      fileName: file,
-      fullPath: path.join(bookmarksPath, file),
+      fileName: path.basename(file),
+      fullPath: file,
     }))
   );
-
   const results = await Promise.allSettled(promises);
-  const fileResults = await results.filter(isFulfilledPromise).map((result) => result.value);
+  const fileResults = results.filter(isFulfilledPromise).map((result) => result.value);
   await replaceLocalStorageFiles(fileResults);
-
   return fileResults;
 }

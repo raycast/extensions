@@ -1,5 +1,10 @@
 # Obsidian Bookmarks Changelog
 
+## [1.0.5] - 2024-11-16
+
+- Find bookmarks in subdirectories of the specificed Bookmarks subfolder
+- Allow search filtering by bookmark subdirectory
+
 ## [1.0.4] - 2024-07-30
 
 - Fixed bug with useEffect
