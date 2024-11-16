@@ -2,9 +2,10 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetchData } from "../hooks/useFetchData";
 import Fuse, { IFuseOptions } from "fuse.js";
+import { DataType } from "../utils/data.util";
 
 interface SearchListProps<T> {
-  dataKey: "ports" | "userstyles";
+  dataKey: DataType;
   searchBarPlaceholder: string;
   renderItem: (identifier: string, item: T) => JSX.Element;
 }

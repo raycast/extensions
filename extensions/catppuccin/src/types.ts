@@ -1,4 +1,4 @@
-import { ColorName } from "@catppuccin/palette";
+import type { ColorName } from "@catppuccin/palette";
 
 export interface Port {
   name: string;
