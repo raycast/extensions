@@ -41,8 +41,8 @@ export const fetchLatestHash = async () => {
 
   const keyRegex = /concat\("([a-zA-Z0-9]+)"\)/g;
   const matches = [...text.matchAll(keyRegex)];
-  const hashParts = matches.map(match => match[1]);
-  const hash = hashParts.join('');
+  const hashParts = matches.map((match) => match[1]);
+  const hash = hashParts.join("");
 
   if (hash) {
     return hash;
