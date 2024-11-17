@@ -36,7 +36,6 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
     isLoading: universesLoading,
     revalidate: revalidateUniverses,
   } = usePromise(getFaviouriteGames);
-
   const favourited = !universesLoading && universes?.includes(universeId);
 
   async function revalidate() {

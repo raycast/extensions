@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
@@ -123,7 +123,7 @@ export function GamePage({ universeId }: RenderGamePageProps) {
     gameData.data[0];
 
   const detailMarkdown = `
-# 🌟 Game Page
+# ${name}
 ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
     `;
 
@@ -152,13 +152,17 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
           <Action.Open title="Play with Roblox" target={gameDeeplink} />
           <Action.Open title="Open in Roblox Studio" target={studioDeeplink} />
           <Action.Push icon={Icon.List} title="View Places" target={<PlacesPage universeId={universeId} />} />
-          <Action icon={Icon.Star} title="Add to Favourites" onAction={() => addGameToFavourites(universeId)} />
+
+          <Action
+            icon={Icon.Star}
+            title="Add to Favourites"
+            shortcut={Keyboard.Shortcut.Common.Pin}
+            onAction={() => addGameToFavourites(universeId)}
+          />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
-          <Detail.Metadata.Label title="Root Place ID" text={rootPlaceId.toString()} />
           <Detail.Metadata.Label title="Name" text={name} />
           <Detail.Metadata.Label title="Creator" text={creatorText} />
 
@@ -174,6 +178,9 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
             {genre_l1 && <Detail.Metadata.TagList.Item text={genre_l1} />}
             {genre && <Detail.Metadata.TagList.Item text={genre} />}
           </Detail.Metadata.TagList>
+
+          <Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
+          <Detail.Metadata.Label title="Root Place ID" text={rootPlaceId.toString()} />
         </Detail.Metadata>
       }
     />
