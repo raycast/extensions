@@ -1,6 +1,6 @@
 # Contentful Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-11-17
 
 - Fix: `Assets` crashing when an item has no _file_
 - Fix: `Content` displaying incorrect _status_ `tag`
