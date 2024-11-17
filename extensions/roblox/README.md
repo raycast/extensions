@@ -27,3 +27,5 @@ Raycast Extension for finding games, users & more on Roblox
 - View User Info With ID or Username
 - View Your Own User Profile
 - Launches Roblox Games in Roblox Client & Studio
+- Favourite Games and find them easily
+- View a Favourite Game's Player Count on the Menu Bar
