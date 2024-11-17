@@ -1,5 +1,9 @@
 # Vim Bro Changelog
 
+## [Add copy to clipboard action] - 2024-11-16
+
+- Strip colon from copied commands
+
 ## [Add copy to clipboard action] - 2024-11-11
 
 - Added a quick action to copy to clipboard with a toast for feedback
