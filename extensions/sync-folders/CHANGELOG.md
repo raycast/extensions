@@ -1,6 +1,6 @@
 # Sync Folders Changelog
 
-## [New features and improvements] - {PR_MERGE_DATE}
+## [New features and improvements] - 2024-11-17
 
 - Added an icon to the Sync Folders preset for improved visual identification and user experience
 - Added "Duplicate" command to Sync Folders preset context menu, simplifying preset management and workflow efficiency
