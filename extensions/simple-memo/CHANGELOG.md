@@ -1,6 +1,6 @@
 # Simple Memo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-17
 
 Initial version with core features:
 
