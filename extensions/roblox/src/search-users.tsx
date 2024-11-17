@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List, type LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, type LaunchProps } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { UserPage } from "./components/user-page";
@@ -112,7 +112,7 @@ function UserListItem({ user, headshotURL }: { user: UserData; headshotURL: stri
       icon={userIcon}
       actions={
         <ActionPanel>
-          <Action.Push title="View" target={<UserPage userId={userId} copyField="UserID" />} />
+          <Action.Push icon={Icon.AppWindow} title="View" target={<UserPage userId={userId} copyField="UserID" />} />
         </ActionPanel>
       }
       accessories={accesories}

@@ -1,9 +1,12 @@
 import { useFetch } from "@raycast/utils";
+import BetterCache from "../modules/better-cache";
+
+const CACHE_TIMEOUT = 2 * 60; // 2 minutes
 
 type Creator = {
   id: number;
   name: string;
-  type: string;
+  type: "Group" | "User";
   isRNVAccount: boolean;
   hasVerifiedBadge: boolean;
 };
@@ -34,25 +37,60 @@ type GameDetailsResponse = {
   data: GameDetails[];
 };
 
-export function useBatchGameDetails(universeIds: number[]) {
-  const sortedUniverseIds = [...universeIds].sort((a, b) => a.toString().localeCompare(b.toString()));
-  const queryString = sortedUniverseIds.map((id) => `universeIds=${id}`).join("&");
+const cache = new BetterCache<GameDetails>({
+  namespace: "roblox-game-details",
+  capacity: 100000,
+  defaultTTL: CACHE_TIMEOUT,
+});
+
+export function useBatchGameDetails(universeIds: number[], useCache?: boolean) {
+  const gameDetails: Record<number, GameDetails> = {};
+
+  const sortedUniverseIds = universeIds
+    .map((id) => {
+      if (useCache !== false) {
+        const cachedData = cache.get(id.toString());
+        if (cachedData) {
+          gameDetails[id] = cachedData;
+          return null;
+        }
+      }
+      return id;
+    })
+    .filter((id) => id !== null)
+    .sort((a, b) => a.toString().localeCompare(b.toString()));
+
+  const queryString = sortedUniverseIds.map((id) => `${id}`).join(",");
   const { data: gameDetailsResponse, isLoading: gameDetailsLoading } = useFetch<GameDetailsResponse>(
-    `https://games.roblox.com/v1/games?${queryString}`,
+    `https://games.roblox.com/v1/games?universeIds=${queryString}`,
     {
       execute: sortedUniverseIds.length > 0,
     },
   );
 
-  const gameDetails: Record<number, GameDetails> = {};
   if (gameDetailsResponse) {
     gameDetailsResponse.data.forEach((data) => {
       gameDetails[data.id] = data;
+      cache.set(data.id.toString(), data);
     });
   }
 
   return {
     data: gameDetails,
     isLoading: gameDetailsLoading,
+  };
+}
+
+export function useGameDetails(universeId: number, useCache?: boolean) {
+  const { data: batchGameDetails, isLoading } = useBatchGameDetails([universeId], useCache);
+
+  let gameDetails = null;
+  if (!isLoading && batchGameDetails) {
+    gameDetails = batchGameDetails[universeId];
+  }
+
+  return {
+    data: gameDetails,
+    isLoading,
   };
 }

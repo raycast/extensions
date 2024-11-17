@@ -4,43 +4,7 @@ import { getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
 import { useGameThumbnails } from "../hooks/game-thumbnails";
 import { addGameToFavourites } from "../modules/favourite-games";
-
-type GameResponse = {
-  data: Array<{
-    id: number;
-    rootPlaceId: number;
-    name: string;
-    description: string;
-    sourceName: string;
-    sourceDescription: string;
-    creator: {
-      id: number;
-      name: string;
-      type: "Group" | "User";
-      isRNVAccount: boolean;
-      hasVerifiedBadge: boolean;
-    };
-    price: number | null;
-    allowedGearGenres: string[];
-    allowedGearCategories: string[];
-    isGenreEnforced: boolean;
-    copyingAllowed: boolean;
-    playing: number;
-    visits: number;
-    maxPlayers: number;
-    created: string;
-    updated: string;
-    studioAccessToApisAllowed: boolean;
-    createVipServersAllowed: boolean;
-    universeAvatarType: string;
-    genre: string;
-    genre_l1: string;
-    genre_l2: string;
-    isAllGenre: boolean;
-    isFavoritedByUser: boolean;
-    favoritedCount: number;
-  }>;
-};
+import { useGameDetails } from "../hooks/batch-game-details";
 
 type PlaceResponse = {
   previousPageCursor: string | null;
@@ -84,8 +48,16 @@ export function PlacesPage({ universeId }: RenderPlacesPageProps) {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={placeUrl} />
-                <Action.CopyToClipboard title="Copy Place Id" content={placeId} />
-                <Action.Open title="Open in Roblox Studio" target={studioDeeplink} />
+                <Action.CopyToClipboard
+                  title="Copy Place Id"
+                  content={placeId}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+                <Action.Open
+                  title="Open in Roblox Studio"
+                  target={studioDeeplink}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
               </ActionPanel>
             }
           />
@@ -99,9 +71,7 @@ type RenderGamePageProps = {
   universeId: number;
 };
 export function GamePage({ universeId }: RenderGamePageProps) {
-  const { data: gameData, isLoading: gameDataLoading } = useFetch<GameResponse>(
-    `https://games.roblox.com/v1/games?universeIds=${universeId}`,
-  );
+  const { data: gameData, isLoading: gameDataLoading } = useGameDetails(universeId);
 
   const { data: thumbnailUrls, isLoading: thumbnailDataLoading } = useGameThumbnails(universeId);
 
@@ -115,12 +85,7 @@ export function GamePage({ universeId }: RenderGamePageProps) {
     return <Detail markdown={"# 😔 No Game Found...\nCannot find game!"} />;
   }
 
-  if (!gameData || gameData.data.length === 0) {
-    return <Detail markdown={"# 😔 No Game Found...\nCannot find game!"} />;
-  }
-
-  const { rootPlaceId, name, creator, playing, visits, favoritedCount, updated, genre, genre_l1, genre_l2 } =
-    gameData.data[0];
+  const { rootPlaceId, name, creator, playing, visits, favoritedCount, updated, genre, genre_l1, genre_l2 } = gameData;
 
   const detailMarkdown = `
 # ${name}
@@ -147,11 +112,28 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={gameURL} />
-          <Action.CopyToClipboard title="Copy Universe Id" content={universeId} />
-          <Action.CopyToClipboard title="Copy Root Place Id" content={rootPlaceId} />
-          <Action.Open title="Play with Roblox" target={gameDeeplink} />
-          <Action.Open title="Open in Roblox Studio" target={studioDeeplink} />
-          <Action.Push icon={Icon.List} title="View Places" target={<PlacesPage universeId={universeId} />} />
+          <Action.CopyToClipboard
+            title="Copy Universe Id"
+            content={universeId}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+          <Action.CopyToClipboard
+            title="Copy Root Place Id"
+            content={rootPlaceId}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
+          <Action.Open title="Play with Roblox" target={gameDeeplink} shortcut={Keyboard.Shortcut.Common.Open} />
+          <Action.Open
+            title="Open in Roblox Studio"
+            target={studioDeeplink}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
+          <Action.Push
+            icon={Icon.List}
+            title="View Places"
+            target={<PlacesPage universeId={universeId} />}
+            shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+          />
 
           <Action
             icon={Icon.Star}

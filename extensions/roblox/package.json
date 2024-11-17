@@ -98,6 +98,23 @@
       "title": "Favourite Games",
       "description": "Get Favourited Roblox Games!",
       "mode": "view"
+    },
+    {
+      "name": "favourite-game-players",
+      "title": "Favourite Game Players",
+      "description": "Check Player Count of a Game!",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "gameId",
+          "title": "Game ID",
+          "description": "The Roblox Universe ID to check",
+          "type": "textfield",
+          "placeholder": "Game ID",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
