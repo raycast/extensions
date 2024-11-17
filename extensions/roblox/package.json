@@ -40,6 +40,20 @@
       ]
     },
     {
+      "name": "search-users",
+      "title": "Search for Users",
+      "description": "Search for a Roblox User!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "startingQuery",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "get-my-account",
       "title": "Get My Info",
       "description": "Get your Roblox Account info!",
