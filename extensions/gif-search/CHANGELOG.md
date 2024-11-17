@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Add download location preference] - 2024-11-17
+
+- Adds a new preference to define the download location of GIFs
+
 ## [Hide Filename on Copy or Download] - 2024-11-04
 
 - Adds a new preference to hide the original GIF filename when copying or downloading GIFs
