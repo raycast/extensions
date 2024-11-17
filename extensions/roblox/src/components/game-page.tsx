@@ -115,7 +115,7 @@ export function GamePage({ universeId }: RenderGamePageProps) {
   );
 
   const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<ThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=1&defaults=true&size=480x270&format=Png&isCircular=false`,
+    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=10&defaults=true&size=480x270&format=Png&isCircular=false`,
   );
 
   const isLoading = gameDataLoading || thumbnailDataLoading;
@@ -135,17 +135,17 @@ export function GamePage({ universeId }: RenderGamePageProps) {
   const { rootPlaceId, name, creator, playing, visits, favoritedCount, updated, genre, genre_l1, genre_l2 } =
     gameData.data[0];
 
-  let thumbnailUrl = "";
+  const thumbnailUrls: string[] = [];
+
   if (thumbnailData) {
-    const imgUrl = thumbnailData.data[0].thumbnails[0]?.imageUrl;
-    if (imgUrl) {
-      thumbnailUrl = imgUrl;
-    }
+    thumbnailData.data[0]?.thumbnails.forEach((data) => {
+      thumbnailUrls.push(data.imageUrl);
+    });
   }
 
   const detailMarkdown = `
 # 🌟 Game Page
-![](${thumbnailUrl})
+${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
     `;
 
   const updatedDateText = getUpdatedText(updated);
