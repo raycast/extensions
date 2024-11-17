@@ -1,5 +1,6 @@
 export interface SyncFolders {
   id?: string;
+  icon?: string;
   name?: string;
   source_folder?: string;
   dest_folder?: string;
@@ -8,6 +9,7 @@ export interface SyncFolders {
 }
 
 export interface SyncFoldersFormValues extends Omit<SyncFolders, "source_folder" | "dest_folder"> {
+  icon: string;
   name: string;
   source_folder: string[];
   dest_folder: string[];

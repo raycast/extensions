@@ -92,8 +92,6 @@ export default function Command() {
                   dest_folder,
                   delete_dest,
                 });
-
-                console.log("!!!! GO GO GO", source_folder, dest_folder, delete_dest);
               }
             }}
           />
