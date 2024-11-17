@@ -14,10 +14,12 @@ function CommandToSearchRooms() {
   return (
     <List isLoading={isLoading}>
       {CWRooms.map(room => {
-        const updated = new Date(room.last_update_time*1000);
         const accessories: List.Item.Accessory[] = [];
         if (room.sticky) accessories.push({icon: Icon.Tack});
-        accessories.push({ date: updated, tooltip: `Updated: ${updated.toString()}` })
+        if (room.last_update_time) {
+          const updated = new Date(room.last_update_time*1000);
+          accessories.push({ date: updated, tooltip: `Updated: ${updated.toString()}` })
+        }
         return <List.Item
         key={room.room_id}
         icon={room.icon_path}
@@ -26,6 +28,7 @@ function CommandToSearchRooms() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
+              icon={Constants.CW_LOGO_NAME}
               title="Open in Chatwork"
               url={Constants.getCWAppLinkUrlForRoom(room.room_id)}
             />

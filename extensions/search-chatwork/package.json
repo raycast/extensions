@@ -28,6 +28,13 @@
       "subtitle": "Chatwork",
       "description": "search rooms at Chatwork",
       "mode": "view"
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "subtitle": "Chatwork",
+      "description": "search contacts at Chatwork",
+      "mode": "view"
     }
   ],
   "preferences": [

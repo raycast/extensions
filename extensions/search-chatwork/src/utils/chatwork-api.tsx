@@ -48,11 +48,8 @@ export async function getRooms(): Promise<CWRoom[]> {
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const rooms: any = await response.json();
-    const rooms_obj: CWRoom[] = [];
-    rooms.forEach((room: any) => {
-      rooms_obj.push(room as CWRoom);
-    });
+    const rooms = await response.json() as CWRoom[];
+    const rooms_obj = rooms;
     return rooms_obj;
   } catch (error) {
     throw new Error(error as string);
@@ -84,10 +81,10 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
       return messages_obj;
     }
 
-    const messages: any = await response.json();
-    messages.forEach((message: any) => {
+    const messages = await response.json() as CWMessage[];
+    messages.forEach((message) => {
       const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
-      cwmsg.copyValueFromJson(message as CWMessage);
+      cwmsg.copyValueFromJson(message);
       if (cwmsg.body !== "") {
         messages_obj.push(cwmsg);
       }
@@ -119,4 +116,37 @@ export async function getMessagesOfAllRooms(CWRooms: CWRoom[]): Promise<CWMessag
   } catch (error) {
     throw new Error(error as string);
   }
+}
+
+/**
+ *  get all the contacts the user has
+ *
+ * @returns all the contacts the user has
+ */
+export async function getContacts() {
+  type Contact = {
+    account_id: number;
+    room_id: number;
+    name: string;
+    chatwork_id: string;
+    organization_id: number;
+    organization_name: string;
+    department: string;
+    avatar_image_url: string;
+  }
+
+  headers = authorizeApi(headers);
+  const response = await fetch(`${Constants.CW_API_URL}contacts`, {
+    method: "get",
+    headers: headers,
+  });
+
+  if (!response.ok) {
+    const result = await response.json() as { errors: string[] };
+    throw new Error(result.errors[0]);
+  }
+  if (response.status === 204) return [];
+
+  const contacts = await response.json() as Contact[];
+  return contacts;
 }

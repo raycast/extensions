@@ -41,6 +41,7 @@ function CommandToSearchChatWork() {
                         }
                       />
                       <Action.OpenInBrowser
+                        icon={Constants.CW_LOGO_NAME}
                         title="Open in Chatwork"
                         url={Constants.getCWAppLinkUrlForChat(
                           room.CWRoom.room_id,
