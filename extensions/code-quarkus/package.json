@@ -4,8 +4,8 @@
   "title": "Code Quarkus",
   "description": "Create new Quarkus project",
   "icon": "quarkus.png",
-  "author": "lomagnette",
-  "version": "0.1.3",
+  "author": "Loic Magnette",
+  "version": "0.1.4",
   "categories": [
     "Developer Tools"
   ],
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "code-quarkus",
-      "title": "Create Quarkus project",
+      "title": "Create Quarkus Project",
       "description": "create a new quarkus project",
       "mode": "view"
     }

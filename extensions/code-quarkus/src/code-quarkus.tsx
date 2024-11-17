@@ -51,8 +51,7 @@ export interface JavaCompatibility {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [depedencies, setDepedencies] = useState<Dependency[]>([]);
-  const [quarkusVersions, setQuarkusVersions] = useState<QuarkusVersion[]>([]);
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [recommendedVersion, setRecommendedVersion] = useState<QuarkusVersion|null>(null);
 
   async function fetchQuarkusVersions() {
@@ -61,7 +60,6 @@ export default function Command() {
       throw new Error(`Failed to fetch quarkus version: ${response.status} ${response.statusText}`);
     }
     const versions = await response.json() as QuarkusVersion[];
-    setQuarkusVersions(versions);
     setRecommendedVersion(versions.filter(v => v.recommended)[0] || null);
   }
 
@@ -81,10 +79,10 @@ export default function Command() {
       const data = await response.json() as Dependency[];
       console.log("Metadata received successfully");
 
-      setDepedencies(data);
+      setDependencies(data);
       setIsLoading(false);
 
-      showToast({
+      await showToast({
         style: Toast.Style.Success,
         title: "Success",
         message: "Metadata loaded successfully"
@@ -92,7 +90,7 @@ export default function Command() {
     } catch (error) {
       console.error("Error fetching metadata:", error);
       setIsLoading(false);
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Error",
         message: error instanceof Error ? error.message : "Failed to load metadata",
@@ -140,8 +138,7 @@ export default function Command() {
     try {
       console.log("Submitting form with values:", values);
       const url = generateQuarkusUrl(values);
-      //https://code.quarkus.io/d?b=GRADLE_KOTLIN_DSL&j=17&e=rest&e=io.quarkiverse.langchain4j%3Aquarkus-langchain4j-ollama&cn=code.quarkus.io
-      showToast({ title: "Submitted form", message: "See logs for submitted values" });
+      await showToast({ title: "Submitted form", message: "See logs for submitted values" });
 
       // Show generating toast
       await showToast({
@@ -189,7 +186,7 @@ export default function Command() {
     );
   }
 
-  if (!depedencies) {
+  if (!dependencies) {
     return (
         <Form>
           <Form.Description text="Failed to load dependencies. Please try again." />
@@ -230,7 +227,7 @@ export default function Command() {
       <Form.Checkbox id="starterCode" label="Include starter code" storeValue />
       <Form.Separator />
       <Form.TagPicker id="dependencies" title="Dependencies">
-        {depedencies.map( dep => (
+        {dependencies.map( dep => (
             <Form.TagPicker.Item key={dep.id+":" + dep.order} value={dep.id} title={dep.name+" ["+dep.id.split(":")[1]+"]"} />
         ))}
       </Form.TagPicker>
