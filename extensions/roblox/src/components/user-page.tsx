@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { numberWithCommas } from "../modules/utils";
 import { generateUserProfileLink } from "../modules/roblox-links";
+import { useUserThumbnail } from "../hooks/user-thumbnail";
 
 type UserResponse = {
   description: string;
@@ -12,15 +13,6 @@ type UserResponse = {
   id: number;
   name: string;
   displayName: string;
-};
-
-type ThumbnailResponse = {
-  data: Array<{
-    targetId: number;
-    state: string;
-    imageUrl: string;
-    version: string;
-  }>;
 };
 
 type FollowerCountResponse = {
@@ -36,9 +28,7 @@ export function UserPage({ userId, copyField }: RenderUserPageProps) {
     `https://users.roblox.com/v1/users/${userId}`,
   );
 
-  const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<ThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=150x200&format=Png&isCircular=false`,
-  );
+  const { data: thumbnailUrl, isLoading: thumbnailDataLoading } = useUserThumbnail(userId);
 
   const { data: followerCount, isLoading: followerCountLoading } = useFetch<FollowerCountResponse>(
     `https://friends.roblox.com/v1/users/${userId}/followers/count`,
@@ -55,14 +45,6 @@ export function UserPage({ userId, copyField }: RenderUserPageProps) {
   }
 
   const { name: username, displayName, isBanned, hasVerifiedBadge, created } = userData;
-
-  let thumbnailUrl = "";
-  if (thumbnailData) {
-    const imgUrl = thumbnailData.data[0].imageUrl;
-    if (imgUrl) {
-      thumbnailUrl = imgUrl;
-    }
-  }
 
   const detailMarkdown = `
 # 🌟 User Profile

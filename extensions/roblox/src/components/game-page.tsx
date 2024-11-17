@@ -2,6 +2,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
+import { useGameThumbnails } from "../hooks/game-thumbnails";
 
 type GameResponse = {
   data: Array<{
@@ -37,19 +38,6 @@ type GameResponse = {
     isAllGenre: boolean;
     isFavoritedByUser: boolean;
     favoritedCount: number;
-  }>;
-};
-
-type ThumbnailResponse = {
-  data: Array<{
-    universeId: number;
-    error: null | string;
-    thumbnails: Array<{
-      targetId: number;
-      state: string;
-      imageUrl: string;
-      version: string;
-    }>;
   }>;
 };
 
@@ -114,9 +102,7 @@ export function GamePage({ universeId }: RenderGamePageProps) {
     `https://games.roblox.com/v1/games?universeIds=${universeId}`,
   );
 
-  const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<ThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=10&defaults=true&size=480x270&format=Png&isCircular=false`,
-  );
+  const { data: thumbnailUrls, isLoading: thumbnailDataLoading } = useGameThumbnails(universeId);
 
   const isLoading = gameDataLoading || thumbnailDataLoading;
 
@@ -134,14 +120,6 @@ export function GamePage({ universeId }: RenderGamePageProps) {
 
   const { rootPlaceId, name, creator, playing, visits, favoritedCount, updated, genre, genre_l1, genre_l2 } =
     gameData.data[0];
-
-  const thumbnailUrls: string[] = [];
-
-  if (thumbnailData) {
-    thumbnailData.data[0]?.thumbnails.forEach((data) => {
-      thumbnailUrls.push(data.imageUrl);
-    });
-  }
 
   const detailMarkdown = `
 # 🌟 Game Page

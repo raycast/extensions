@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, type LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { GamePage } from "./components/game-page";
 import { numberWithCommas } from "./modules/utils";
 import { generateGamePageLink } from "./modules/roblox-links";
@@ -60,16 +60,14 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
     `https://apis.roblox.com/search-api/omni-search?searchQuery=${encodeURIComponent(debouncedSearchText)}&pageToken=&sessionId=1&pageType=all`,
   );
 
-  const [games, setGames] = useState<GameData[]>([]);
-
-  useEffect(() => {
-    if (searchResultsLoading) {
-      return;
+  const games = useMemo(() => {
+    if (searchResultsLoading || !searchResults) {
+      return [];
     }
 
     const newGames: GameData[] = [];
 
-    searchResults?.searchResults.forEach((result) => {
+    searchResults.searchResults.forEach((result) => {
       if (result.contentGroupType == "Game") {
         result.contents.forEach((content) => {
           if (content.isSponsored) {
@@ -90,59 +88,57 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
       }
     });
 
-    setGames(newGames);
+    return newGames;
   }, [searchResults, searchResultsLoading]);
+
+  const handleSearchTextChange = useCallback((newSearchText: string) => {
+    setSearchText(newSearchText);
+  }, []);
 
   return (
     <List
       isLoading={searchResultsLoading}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
       navigationTitle="Search Games"
       searchBarPlaceholder="Search"
       filtering={false}
       isShowingDetail
     >
-      {games.map((game) => {
-        const { universeId, name, rootPlaceId, creatorName, playerCount, totalUpVotes, totalDownVotes } = game;
-
-        const gameURL = generateGamePageLink(rootPlaceId);
-
-        return (
-          <List.Item
-            key={universeId}
-            title={name}
-            actions={
-              <ActionPanel>
-                <Action.Push title="View" target={<GamePage universeId={universeId} />} />
-              </ActionPanel>
-            }
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
-                    <List.Item.Detail.Metadata.Label title="Name" text={name} />
-
-                    {creatorName && <List.Item.Detail.Metadata.Label title="Creator" text={creatorName} />}
-
-                    <List.Item.Detail.Metadata.Label
-                      title="Playing"
-                      text={`${numberWithCommas(playerCount)} players`}
-                    />
-
-                    <List.Item.Detail.Metadata.Label title="Likes" text={`${numberWithCommas(totalUpVotes)} likes`} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Dislikes"
-                      text={`${numberWithCommas(totalDownVotes)} dislikes`}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-          />
-        );
-      })}
+      {games.map((game) => (
+        <GameListItem key={game.universeId} game={game} />
+      ))}
     </List>
   );
 };
+
+function GameListItem({ game }: { game: GameData }) {
+  const { universeId, name, rootPlaceId, creatorName, playerCount, totalUpVotes, totalDownVotes } = game;
+
+  const gameURL = generateGamePageLink(rootPlaceId);
+
+  return (
+    <List.Item
+      title={name}
+      actions={
+        <ActionPanel>
+          <Action.Push title="View" target={<GamePage universeId={universeId} />} />
+        </ActionPanel>
+      }
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
+              <List.Item.Detail.Metadata.Label title="Name" text={name} />
+              {creatorName && <List.Item.Detail.Metadata.Label title="Creator" text={creatorName} />}
+              <List.Item.Detail.Metadata.Label title="Playing" text={`${numberWithCommas(playerCount)} players`} />
+              <List.Item.Detail.Metadata.Label title="Likes" text={`${numberWithCommas(totalUpVotes)} likes`} />
+              <List.Item.Detail.Metadata.Label title="Dislikes" text={`${numberWithCommas(totalDownVotes)} dislikes`} />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
+    />
+  );
+}
