@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add download location preference] - {PR_MERGE_DATE}
+## [Add download location preference] - 2024-11-17
 
 - Adds a new preference to define the download location of GIFs
 
