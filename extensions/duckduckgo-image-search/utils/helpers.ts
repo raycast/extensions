@@ -5,7 +5,13 @@ import {
   imageSearch,
   ImageSearchResult,
 } from "../utils/search";
-import { HEADERS, ImageLayout, MAX_RETRIES } from "../utils/consts";
+import {
+  HEADERS,
+  ImageLayout,
+  DEFAULT_RETRIES,
+  DEFAULT_SLEEP,
+  ImageLicenses,
+} from "../utils/consts";
 import { getCachedImagePath, setCachedImagePath } from "../utils/cache";
 import axios from "axios";
 import { tmpdir } from "os";
@@ -38,24 +44,39 @@ export async function searchImage({
   signal,
   layout,
 }: SearchImageParams): Promise<ImageSearchResult> {
-  const { moderate } = getPreferenceValues<Preferences.SearchImage>();
-
   if (!query) {
     return emptyResult;
   }
+
+  const {
+    moderate,
+    locale,
+    retries: retriesString,
+    sleep: sleepString,
+    license,
+  } = getPreferenceValues<Preferences.SearchImage>();
+  const retries = stringToPositiveNumber(retriesString) || DEFAULT_RETRIES;
+  const sleep = stringToPositiveNumber(sleepString) || DEFAULT_SLEEP;
+
   try {
     if (cursor) {
       return await imageNextSearch(
         cursor.next,
         cursor.vqd,
-        MAX_RETRIES,
+        retries,
+        sleep,
         signal,
       );
     }
     return await imageSearch(
       query,
-      { moderate, filters: { layout } },
-      MAX_RETRIES,
+      {
+        moderate,
+        filters: { layout, license: license as ImageLicenses },
+        locale,
+      },
+      retries,
+      sleep,
       signal,
     );
   } catch (err: any) {
@@ -140,4 +161,15 @@ export async function copyImageToClipboard(image: DuckDuckGoImage) {
 export async function pasteImage(image: DuckDuckGoImage) {
   const file = await downloadImage(image);
   await Clipboard.paste({ file });
+}
+
+export function stringToPositiveNumber(value: string): number | undefined {
+  const parsed = parseInt(value.trim());
+  if (isNaN(parsed)) {
+    return;
+  }
+  if (parsed < 1) {
+    return;
+  }
+  return parsed;
 }

@@ -19,6 +19,70 @@ import {
   searchImage,
 } from "../utils/helpers";
 import { ImageLayout } from "../utils/consts";
+import { DuckDuckGoImage } from "../utils/search";
+
+function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser title="Open Image in Browser" url={item.image} />
+      <Action
+        title="Paste Image"
+        shortcut={{
+          modifiers: ["cmd", "shift"],
+          key: "enter",
+        }}
+        icon={Icon.Clipboard}
+        onAction={() =>
+          pasteImage(item).then(async () => {
+            await closeMainWindow({
+              clearRootSearch: true,
+            });
+          })
+        }
+      />
+      <Action.OpenInBrowser
+        title="Open Site in Browser"
+        url={item.url}
+        shortcut={{
+          modifiers: ["shift"],
+          key: "enter",
+        }}
+      />
+      <Action
+        title="Copy Image"
+        shortcut={{
+          modifiers: ["cmd"],
+          key: "c",
+        }}
+        icon={Icon.Clipboard}
+        onAction={() =>
+          copyImageToClipboard(item).then(async () => {
+            await showHUD("Image copied!", {
+              clearRootSearch: true,
+              popToRootType: PopToRootType.Immediate,
+            });
+          })
+        }
+      />
+      <Action.CopyToClipboard
+        title="Copy Image URL"
+        content={item.image}
+        shortcut={{
+          modifiers: ["cmd", "opt"],
+          key: "c",
+        }}
+      />
+      <Action.CopyToClipboard
+        title="Copy Site URL"
+        content={item.url}
+        shortcut={{
+          modifiers: ["cmd", "shift", "opt"],
+          key: "c",
+        }}
+      />
+    </ActionPanel>
+  );
+}
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -42,6 +106,7 @@ export default function Command() {
       abortable,
     },
   );
+
   return (
     <Grid
       inset={Grid.Inset.Zero}
@@ -84,69 +149,7 @@ export default function Command() {
                 icon: Icon.Link,
                 tooltip: `Source: ${item.source}`,
               }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open Image in Browser"
-                    url={item.image}
-                  />
-                  <Action
-                    title="Paste Image"
-                    shortcut={{
-                      modifiers: ["cmd", "shift"],
-                      key: "enter",
-                    }}
-                    icon={Icon.Clipboard}
-                    onAction={() =>
-                      pasteImage(item).then(async () => {
-                        await closeMainWindow({
-                          clearRootSearch: true,
-                        });
-                      })
-                    }
-                  />
-                  <Action.OpenInBrowser
-                    title="Open Site in Browser"
-                    url={item.url}
-                    shortcut={{
-                      modifiers: ["shift"],
-                      key: "enter",
-                    }}
-                  />
-                  <Action
-                    title="Copy Image"
-                    shortcut={{
-                      modifiers: ["cmd"],
-                      key: "c",
-                    }}
-                    icon={Icon.Clipboard}
-                    onAction={() =>
-                      copyImageToClipboard(item).then(async () => {
-                        await showHUD("Image copied!", {
-                          clearRootSearch: true,
-                          popToRootType: PopToRootType.Immediate,
-                        });
-                      })
-                    }
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Image URL"
-                    content={item.image}
-                    shortcut={{
-                      modifiers: ["cmd", "opt"],
-                      key: "c",
-                    }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Site URL"
-                    content={item.url}
-                    shortcut={{
-                      modifiers: ["cmd", "shift", "opt"],
-                      key: "c",
-                    }}
-                  />
-                </ActionPanel>
-              }
+              actions={<ActionsPanel item={item} />}
             />
           ))}
     </Grid>

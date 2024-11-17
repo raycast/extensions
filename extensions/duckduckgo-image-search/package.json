@@ -12,6 +12,35 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "title": "Retry Count",
+      "name": "retries",
+      "description": "The number of times to retry a failed search (default: )",
+      "type": "textfield",
+      "default": "4",
+      "placeholder": "4",
+      "required": false
+    },
+    {
+      "title": "Sleep Time",
+      "name": "sleep",
+      "description": "The time (in milliseconds) to sleep between retries (default: 2000)",
+      "type": "textfield",
+      "default": "2000",
+      "placeholder": "2000",
+      "required": false
+    },
+    {
+      "title": "Locale",
+      "name": "locale",
+      "description": "The locale of the search (default: en-us)",
+      "type": "textfield",
+      "default": "en-us",
+      "placeholder": "en-us",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-image",
@@ -23,11 +52,49 @@
         {
           "title": "Moderate Search",
           "name": "moderate",
-          "description": "Moderate the search results",
+          "description": "Moderate the search results (may cause some results to be removed)",
           "type": "checkbox",
           "default": false,
           "required": false,
           "label": "Moderate Search"
+        },
+        {
+          "title": "License",
+          "name": "license",
+          "description": "The license of the images to search",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "All Licenses",
+              "value": ""
+            },
+            {
+              "title": "All Creative Commons",
+              "value": "Any"
+            },
+            {
+              "title": "Public Domain",
+              "value": "Public"
+            },
+            {
+              "title": "Free to Share and Use",
+              "value": "Share"
+            },
+            {
+              "title": "Free to Share and Use Commercially",
+              "value": "ShareCommercially"
+            },
+            {
+              "title": "Free to Modify, Share, and Use",
+              "value": "Modify"
+            },
+            {
+              "title": "Free to Modify, Share, and Use Commercially",
+              "value": "ModifyCommercially"
+            }
+          ]
         }
       ]
     }

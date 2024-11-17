@@ -2,7 +2,13 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { decode } from "html-entities";
 
-import { DDG_URL, HEADERS, ImageSearchOptions, MAX_RETRIES } from "./consts";
+import {
+  DDG_URL,
+  HEADERS,
+  ImageSearchOptions,
+  DEFAULT_RETRIES,
+  DEFAULT_SLEEP,
+} from "./consts";
 
 export interface DuckDuckGoImage {
   height: number;
@@ -17,7 +23,7 @@ export interface DuckDuckGoImage {
 }
 
 interface DuckDuckGoSearchResponse {
-  next?: string; // 'i.js?q=Query&o=json&p=-1&s=100&u=bing&f=,,,&l=wt-wt'
+  next?: string; // 'i.js?q=Query&o=json&p=-1&s=100&u=bing&f=,,,&l=en-us'
   query: string;
   queryEncoded: string;
   response_type: "images";
@@ -30,7 +36,7 @@ export interface ImageSearchResult {
   results: DuckDuckGoImage[];
 }
 
-function sleep(ms: number) {
+function sleepPromise(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
@@ -52,7 +58,7 @@ async function getVQD(query: string, ia = "web") {
       params: { q: query, ia },
     });
     return VQD_REGEX.exec(response.data)![1];
-  } catch (e) {
+  } catch {
     throw new Error(`Failed to get the VQD for query "${query}".`);
   }
 }
@@ -78,7 +84,7 @@ async function makeNextFromQuery(
   ];
 
   const queryObject: Record<string, string> = {
-    l: options.locale || "wt-wt",
+    l: options.locale || "en-us",
     o: "json",
     q: query,
     p: options.moderate ? "1" : "-1",
@@ -94,17 +100,19 @@ async function makeNextFromQuery(
 export async function imageSearch(
   query: string,
   options: ImageSearchOptions = {},
-  retries: number = MAX_RETRIES,
+  retries: number = DEFAULT_RETRIES,
+  sleep: number = DEFAULT_SLEEP,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
   const { next, vqd } = await makeNextFromQuery(query, options);
-  return await imageNextSearch(next, vqd, retries, signal);
+  return await imageNextSearch(next, vqd, retries, sleep, signal);
 }
 
 export async function imageNextSearch(
   next: string,
   vqd: string,
-  retries: number = MAX_RETRIES,
+  retries: number = DEFAULT_RETRIES,
+  sleep: number = DEFAULT_SLEEP,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
   const reqUrl = DDG_URL + next + `&vqd=${vqd}`;
@@ -133,7 +141,7 @@ export async function imageNextSearch(
         if (attempt > retries) {
           throw Error("attempt finished");
         }
-        await sleep(2000);
+        await sleepPromise(sleep);
         continue;
       }
     }

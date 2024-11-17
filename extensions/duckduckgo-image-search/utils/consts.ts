@@ -10,7 +10,8 @@ export const HEADERS = {
   referer: "https://duckduckgo.com/",
   authority: "duckduckgo.com",
 };
-export const MAX_RETRIES = 4;
+export const DEFAULT_RETRIES = 4;
+export const DEFAULT_SLEEP = 2000; // 2 seconds
 
 /** The types of image sizes. */
 export enum ImageSize {
@@ -32,7 +33,7 @@ export enum ImageType {
   ALL = "",
   /** Any regular photos. */
   PHOTOGRAPH = "photo",
-  /** Clipart. */
+  /** Clip-art. */
   CLIPART = "clipart",
   /** Animated GIFs. */
   GIF = "gif",
@@ -105,6 +106,8 @@ export enum ImageLicense {
   MODIFY_COMMERCIALLY = "ModifyCommercially",
 }
 
+export type ImageLicenses = (typeof ImageLicense)[keyof typeof ImageLicense];
+
 export interface ImageSearchOptionsFilters {
   /** The color filter of the images. */
   color?: ImageColor;
@@ -115,7 +118,7 @@ export interface ImageSearchOptionsFilters {
   /** The type of the images to search. */
   type?: ImageType;
   /** The license of the images to search. */
-  license?: ImageLicense;
+  license?: ImageLicenses;
 }
 
 /** The options for {@link searchImages}. */
