@@ -1,66 +1,65 @@
-import {Form, ActionPanel, Action, showToast, Toast} from "@raycast/api";
-import {useEffect, useState} from "react";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import path from "path";
-import {writeFileSync} from "fs";
+import { writeFileSync } from "fs";
 
 type Values = {
-  quarkusVersion:string;
-  group:string;
-  artifact:string;
-  buildTool:string;
-  javaVersion:string;
-  starterCode:boolean;
-  dependencies:string[];
+  quarkusVersion: string;
+  group: string;
+  artifact: string;
+  buildTool: string;
+  javaVersion: string;
+  starterCode: boolean;
+  dependencies: string[];
 };
 
 export interface Dependency {
-  id: string
-  shortId: string
-  version: string
-  name: string
-  description: string
-  shortName: string
-  category: string
-  transitiveExtensions: string[]
-  tags: string[]
-  keywords: string[]
-  providesExampleCode: boolean
-  providesCode: boolean
-  guide: string
-  order: number
-  platform: boolean
-  bom: string
+  id: string;
+  shortId: string;
+  version: string;
+  name: string;
+  description: string;
+  shortName: string;
+  category: string;
+  transitiveExtensions: string[];
+  tags: string[];
+  keywords: string[];
+  providesExampleCode: boolean;
+  providesCode: boolean;
+  guide: string;
+  order: number;
+  platform: boolean;
+  bom: string;
 }
 
 export interface QuarkusVersion {
-  key: string
-  quarkusCoreVersion: string
-  javaCompatibility: JavaCompatibility
-  platformVersion: string
-  recommended: boolean
-  status: string
-  lts: boolean
+  key: string;
+  quarkusCoreVersion: string;
+  javaCompatibility: JavaCompatibility;
+  platformVersion: string;
+  recommended: boolean;
+  status: string;
+  lts: boolean;
 }
 
 export interface JavaCompatibility {
-  versions: number[]
-  recommended: number
+  versions: number[];
+  recommended: number;
 }
-
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
-  const [recommendedVersion, setRecommendedVersion] = useState<QuarkusVersion|null>(null);
+  const [recommendedVersion, setRecommendedVersion] = useState<QuarkusVersion | null>(null);
 
   async function fetchQuarkusVersions() {
     const response = await fetch("https://code.quarkus.io/api/streams", {});
     if (!response.ok) {
       throw new Error(`Failed to fetch quarkus version: ${response.status} ${response.statusText}`);
     }
-    const versions = await response.json() as QuarkusVersion[];
-    setRecommendedVersion(versions.filter(v => v.recommended)[0] || null);
+    const versions = (await response.json()) as QuarkusVersion[];
+    setRecommendedVersion(versions.filter((v) => v.recommended)[0] || null);
   }
 
   async function fetchDependencies() {
@@ -68,7 +67,10 @@ export default function Command() {
       setIsLoading(true);
       console.log("Fetching metadata...");
       //const response = {ok:false, status:'', statusText:'',json: () => Promise.resolve([])};
-      const response = await fetch("https://code.quarkus.io/api/extensions/stream/io.quarkus.platform:3.16?platformOnly=false", {});
+      const response = await fetch(
+        "https://code.quarkus.io/api/extensions/stream/io.quarkus.platform:3.16?platformOnly=false",
+        {},
+      );
 
       console.log("Response status:", response.status);
 
@@ -76,7 +78,7 @@ export default function Command() {
         throw new Error(`Failed to fetch Quarkus dependencies: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json() as Dependency[];
+      const data = (await response.json()) as Dependency[];
       console.log("Metadata received successfully");
 
       setDependencies(data);
@@ -85,7 +87,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Success,
         title: "Success",
-        message: "Metadata loaded successfully"
+        message: "Metadata loaded successfully",
       });
     } catch (error) {
       console.error("Error fetching metadata:", error);
@@ -128,13 +130,10 @@ export default function Command() {
   }
 
   useEffect(() => {
-    fetchQuarkusVersions().then(() => fetchDependencies())
-
+    fetchQuarkusVersions().then(() => fetchDependencies());
   }, []);
 
-
   async function handleSubmit(values: Values) {
-
     try {
       console.log("Submitting form with values:", values);
       const url = generateQuarkusUrl(values);
@@ -157,7 +156,7 @@ export default function Command() {
 
       // Save to Downloads folder (macOS)
       const homeDir = process.env.HOME;
-      const downloadsPath = path.join(homeDir || "", 'Downloads', `${values.artifact}.zip`);
+      const downloadsPath = path.join(homeDir || "", "Downloads", `${values.artifact}.zip`);
 
       writeFileSync(downloadsPath, buffer);
 
@@ -166,7 +165,6 @@ export default function Command() {
         title: "Project Downloaded",
         message: `Saved to Downloads folder as ${values.artifact}.zip`,
       });
-
     } catch (error) {
       console.error("Error generating project:", error);
       await showToast({
@@ -177,28 +175,27 @@ export default function Command() {
     }
   }
 
-
   if (isLoading) {
     return (
-        <Form>
-          <Form.Description text="Loading Code.Quarkus metadata... Please wait." />
-        </Form>
+      <Form>
+        <Form.Description text="Loading Code.Quarkus metadata... Please wait." />
+      </Form>
     );
   }
 
   if (!dependencies) {
     return (
-        <Form>
-          <Form.Description text="Failed to load dependencies. Please try again." />
-          <ActionPanel>
-            <Action
-                title="Retry"
-                onAction={() => {
-                  setIsLoading(true);
-                }}
-            />
-          </ActionPanel>
-        </Form>
+      <Form>
+        <Form.Description text="Failed to load dependencies. Please try again." />
+        <ActionPanel>
+          <Action
+            title="Retry"
+            onAction={() => {
+              setIsLoading(true);
+            }}
+          />
+        </ActionPanel>
+      </Form>
     );
   }
 
@@ -211,7 +208,10 @@ export default function Command() {
       }
     >
       <Form.Description text="Create a new Quarkus project" />
-      <Form.Description title="Quarkus version" text={recommendedVersion?.platformVersion + (recommendedVersion?.lts? " [LTS":"")} />
+      <Form.Description
+        title="Quarkus version"
+        text={recommendedVersion?.platformVersion + (recommendedVersion?.lts ? " [LTS" : "")}
+      />
       <Form.Dropdown id="buildTool" title="Build tool">
         <Form.Dropdown.Item value="MAVEN" title="Maven" />
         <Form.Dropdown.Item value="GRADLE" title="Gradle" />
@@ -227,11 +227,14 @@ export default function Command() {
       <Form.Checkbox id="starterCode" label="Include starter code" storeValue />
       <Form.Separator />
       <Form.TagPicker id="dependencies" title="Dependencies">
-        {dependencies.map( dep => (
-            <Form.TagPicker.Item key={dep.id+":" + dep.order} value={dep.id} title={dep.name+" ["+dep.id.split(":")[1]+"]"} />
+        {dependencies.map((dep) => (
+          <Form.TagPicker.Item
+            key={dep.id + ":" + dep.order}
+            value={dep.id}
+            title={dep.name + " [" + dep.id.split(":")[1] + "]"}
+          />
         ))}
       </Form.TagPicker>
     </Form>
-
   );
 }

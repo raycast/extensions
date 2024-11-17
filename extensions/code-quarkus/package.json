@@ -4,8 +4,8 @@
   "title": "Code Quarkus",
   "description": "Create new Quarkus project",
   "icon": "quarkus.png",
-  "author": "Loic Magnette",
-  "version": "0.1.4",
+  "author": "loic_magnette",
+  "version": "0.1.5",
   "categories": [
     "Developer Tools"
   ],
