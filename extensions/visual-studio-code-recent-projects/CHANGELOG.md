@@ -1,6 +1,6 @@
 # Visual Studio Code Search Recent Projects Changelog
 
-## [Update] - 2024-11-16
+## [Update] - 2024-11-17
 
 - Adds support for Windsurf as an option in the extension settings.
 

@@ -21,12 +21,14 @@
     "tm.wrnr",
     "tleo19",
     "lin",
-    "yug2005"
+    "yug2005",
+    "vatsalsanjay"
   ],
   "keywords": [
     "vscode",
     "cursor",
-    "codium"
+    "codium",
+    "windsurf"
   ],
   "license": "MIT",
   "commands": [
@@ -95,6 +97,10 @@
         {
           "value": "Cursor",
           "title": "Cursor"
+        },
+        {
+          "value": "Windsurf",
+          "title": "Windsurf"
         }
       ]
     },
