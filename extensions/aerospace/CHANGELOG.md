@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Bug Fixes] - 2024-11-14
+
+- Update shortcut description to allow for fuzzy finding without dashes
+
 ## [New Feature] - 2024-10-13
 
 - Adds functionality to switch between apps in current workspace
