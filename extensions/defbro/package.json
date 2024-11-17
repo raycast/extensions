@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "change_browser",
-      "title": "Change Default browser",
+      "title": "Change Default Browser",
       "description": "Change Default browser",
       "mode": "view",
       "icon": "defbro_icon.png"
