@@ -116,11 +116,11 @@ export default function Command() {
       />
       <List.Item
         icon={Icon.RotateClockwise}
-        title="Track past habit"
+        title="Track past habits"
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              title="Track past habit"
+              title="Track Past Habits"
               url="https://www.supahabits.com/dashboard/past-habits"
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />
