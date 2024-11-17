@@ -1,9 +1,7 @@
-import { Action, ActionPanel, List, type LaunchProps } from "@raycast/api";
+import { List, type LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { GamePage } from "./components/game-page";
-import { numberWithCommas } from "./modules/utils";
-import { generateGamePageLink } from "./modules/roblox-links";
+import { GameData, GamesListItem } from "./components/games-list";
 
 type SearchResponse = {
   searchResults: Array<{
@@ -30,16 +28,6 @@ type SearchResponse = {
     }>;
     topicId: string;
   }>;
-};
-
-type GameData = {
-  universeId: number;
-  name: string;
-  rootPlaceId: number;
-  creatorName: string;
-  playerCount: number;
-  totalUpVotes: number;
-  totalDownVotes: number;
 };
 
 export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
@@ -106,39 +94,8 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
       isShowingDetail
     >
       {games.map((game) => (
-        <GameListItem key={game.universeId} game={game} />
+        <GamesListItem key={game.universeId} game={game} options={{}} />
       ))}
     </List>
   );
 };
-
-function GameListItem({ game }: { game: GameData }) {
-  const { universeId, name, rootPlaceId, creatorName, playerCount, totalUpVotes, totalDownVotes } = game;
-
-  const gameURL = generateGamePageLink(rootPlaceId);
-
-  return (
-    <List.Item
-      title={name}
-      actions={
-        <ActionPanel>
-          <Action.Push title="View" target={<GamePage universeId={universeId} />} />
-        </ActionPanel>
-      }
-      detail={
-        <List.Item.Detail
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
-              <List.Item.Detail.Metadata.Label title="Name" text={name} />
-              {creatorName && <List.Item.Detail.Metadata.Label title="Creator" text={creatorName} />}
-              <List.Item.Detail.Metadata.Label title="Playing" text={`${numberWithCommas(playerCount)} players`} />
-              <List.Item.Detail.Metadata.Label title="Likes" text={`${numberWithCommas(totalUpVotes)} likes`} />
-              <List.Item.Detail.Metadata.Label title="Dislikes" text={`${numberWithCommas(totalDownVotes)} dislikes`} />
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-    />
-  );
-}

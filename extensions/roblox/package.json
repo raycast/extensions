@@ -92,6 +92,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "favourite-games",
+      "title": "Favourite Games",
+      "description": "Get Favourited Roblox Games!",
+      "mode": "view"
     }
   ],
   "preferences": [

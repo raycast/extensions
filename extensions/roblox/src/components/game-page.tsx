@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
 import { useGameThumbnails } from "../hooks/game-thumbnails";
+import { addGameToFavourites } from "../modules/favourite-games";
 
 type GameResponse = {
   data: Array<{
@@ -147,9 +148,11 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
         <ActionPanel>
           <Action.OpenInBrowser url={gameURL} />
           <Action.CopyToClipboard title="Copy Universe Id" content={universeId} />
+          <Action.CopyToClipboard title="Copy Root Place Id" content={rootPlaceId} />
           <Action.Open title="Play with Roblox" target={gameDeeplink} />
           <Action.Open title="Open in Roblox Studio" target={studioDeeplink} />
           <Action.Push icon={Icon.List} title="View Places" target={<PlacesPage universeId={universeId} />} />
+          <Action icon={Icon.Star} title="Add to Favourites" onAction={() => addGameToFavourites(universeId)} />
         </ActionPanel>
       }
       metadata={

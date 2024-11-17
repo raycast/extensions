@@ -32,7 +32,7 @@ type UserData = {
   verified: boolean;
 };
 
-export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
+export default (props: LaunchProps<{ arguments: Arguments.SearchUsers }>) => {
   const { startingQuery } = props.arguments;
 
   const [searchText, setSearchText] = useState(startingQuery ?? "");
