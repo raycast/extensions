@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "get-user-with-username",
-      "title": "Get User With Username",
+      "title": "Get User with Username",
       "description": "Show a Roblox User with their username!",
       "mode": "view",
       "arguments": [
@@ -27,7 +27,7 @@
     },
     {
       "name": "get-user-with-id",
-      "title": "Get User With ID",
+      "title": "Get User with ID",
       "description": "Show a Roblox User with their User ID!",
       "mode": "view",
       "arguments": [
@@ -47,7 +47,7 @@
     },
     {
       "name": "get-game-with-id",
-      "title": "Get Game With ID",
+      "title": "Get Game with ID",
       "description": "Show a Roblox Game with their ID!",
       "mode": "view",
       "arguments": [
@@ -67,7 +67,7 @@
     },
     {
       "name": "search-games",
-      "title": "Search For Games",
+      "title": "Search for Games",
       "description": "Search for a Roblox Game!",
       "mode": "view",
       "arguments": [

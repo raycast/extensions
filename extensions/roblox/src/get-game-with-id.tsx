@@ -3,37 +3,39 @@ import { useFetch } from "@raycast/utils";
 import { GamePage } from "./components/game-page";
 
 type Result = {
-    "universeId": number
-}
+  universeId: number;
+};
 
 function NotFound() {
-    return <Detail markdown={"# 😔 No Game Found...\nNo game found with that Place ID."} />
+  return <Detail markdown={"# 😔 No Game Found...\nNo game found with that Place ID."} />;
 }
 
 export default (props: LaunchProps<{ arguments: Arguments.GetGameWithId }>) => {
-    const { placeId: enteredPlaceId, universeId: enteredUniverseId } = props.arguments;
+  const { placeId: enteredPlaceId, universeId: enteredUniverseId } = props.arguments;
 
-    const placeId = Number(enteredPlaceId);
-    const universeId = Number(enteredUniverseId);
+  const placeId = Number(enteredPlaceId);
+  const universeId = Number(enteredUniverseId);
 
-    if (!placeId && !universeId) {
-        return <NotFound />
-    }
+  if (!placeId && !universeId) {
+    return <NotFound />;
+  }
 
-    if (universeId) {
-        return <GamePage universeId={universeId} />
-    }
+  if (universeId) {
+    return <GamePage universeId={universeId} />;
+  }
 
-    const { data, isLoading } = useFetch<Result>(`https://apis.roblox.com/universes/v1/places/${enteredPlaceId}/universe`)
+  const { data, isLoading } = useFetch<Result>(
+    `https://apis.roblox.com/universes/v1/places/${enteredPlaceId}/universe`,
+  );
 
-    if (isLoading) {
-        return <Detail isLoading={isLoading} markdown={"Loading..."} />
-    }
+  if (isLoading) {
+    return <Detail isLoading={isLoading} markdown={"Loading..."} />;
+  }
 
-    if (!data?.universeId) {
-        return <NotFound />
-    }
+  if (!data?.universeId) {
+    return <NotFound />;
+  }
 
-    const { universeId: foundUniverseId } = data;
-    return <GamePage universeId={foundUniverseId} />
+  const { universeId: foundUniverseId } = data;
+  return <GamePage universeId={foundUniverseId} />;
 };
