@@ -51,7 +51,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
 
   const body = dedent`
   # [${values.title.replace(/[[\]]/g, "")}](${values.url})
-  
+
   ${values.description}
   `;
 
@@ -82,6 +82,10 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
 }
 
 export default async function saveToObsidian(file: File): Promise<string> {
+  // Combine the form tags with the required tags
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+  const combinedTags = file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags);
+
   const template = dedent`
     ---
     title: ${JSON.stringify(file.attributes.title)}
@@ -89,7 +93,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     source: ${JSON.stringify(file.attributes.source)}
     publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
-    tags: ${JSON.stringify(file.attributes.tags.flatMap((t) => tagify(t)))}
+    tags: ${JSON.stringify(combinedTags)}
     ---
 
     ${file.body}

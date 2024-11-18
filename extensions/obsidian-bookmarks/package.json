@@ -152,6 +152,14 @@
       "required": false
     },
     {
+      "name": "requiredTags",
+      "title": "Required Tags",
+      "description": "Use this preference to include a list of (comma-separated) tags. These tags will automatically be added to future saved bookmarks. Search actions will ignore notes which don't contain one or more of these tags.",
+      "type": "textfield",
+      "placeholder": "bookmark, clipping",
+      "required": false
+    },
+    {
       "name": "datePrefix",
       "label": "Date Prefix",
       "title": "Date Prefix",

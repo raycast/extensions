@@ -1,11 +1,13 @@
+import { getPreferenceValues } from "@raycast/api";
 import fs from "node:fs/promises";
 import path from "node:path";
 
 import frontMatter from "front-matter";
 
-import { File, FrontMatter } from "../types";
+import { File, FrontMatter, Preferences } from "../types";
 import { replaceLocalStorageFiles } from "./localstorage-files";
 import { getOrCreateBookmarksPath } from "./vault-path";
+import tagify from "../helpers/tagify";
 
 function isFulfilledPromise<T>(v: PromiseSettledResult<T>): v is PromiseFulfilledResult<T> {
   return v.status === "fulfilled";
@@ -38,6 +40,17 @@ export default async function getObsidianFiles(): Promise<Array<File>> {
   );
   const results = await Promise.allSettled(promises);
   const fileResults = results.filter(isFulfilledPromise).map((result) => result.value);
-  await replaceLocalStorageFiles(fileResults);
-  return fileResults;
+
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+  let filteredFileResults = fileResults;
+  // Only filter if requiredTags is non-empty
+  if (requiredTags.length > 0) {
+    filteredFileResults = fileResults.filter((file) => {
+      const tags = file.attributes.tags || [];
+      return tags.some((tag) => requiredTags.includes(tag));
+    });
+  }
+
+  await replaceLocalStorageFiles(filteredFileResults);
+  return filteredFileResults;
 }
