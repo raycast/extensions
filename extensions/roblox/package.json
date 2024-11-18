@@ -57,7 +57,17 @@
       "name": "get-my-account",
       "title": "Get My Info",
       "description": "Get your Roblox Account info!",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "myUserId",
+          "title": "Your User ID",
+          "description": "Your Roblox User ID",
+          "type": "textfield",
+          "placeholder": "User ID",
+          "required": true
+        }
+      ]
     },
     {
       "name": "get-game-with-id",
@@ -117,16 +127,7 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "userId",
-      "title": "Your User ID",
-      "description": "Your Roblox User ID",
-      "type": "textfield",
-      "placeholder": "User ID",
-      "required": false
-    }
-  ],
+  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.85.2",
     "@raycast/utils": "^1.17.0"

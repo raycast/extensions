@@ -1,13 +1,13 @@
-import { getPreferenceValues, openExtensionPreferences, showHUD } from "@raycast/api";
+import { getPreferenceValues, openCommandPreferences, showHUD } from "@raycast/api";
 import { UserPage } from "./components/user-page";
 
 export default () => {
-  const { userId: myUserId } = getPreferenceValues<Preferences>();
+  const { myUserId } = getPreferenceValues<Preferences.GetMyAccount>();
 
   const userId = Number(myUserId);
   if (!userId) {
-    showHUD("🔴 You must set a valid User ID first!");
-    openExtensionPreferences();
+    showHUD("🔴 Invalid User ID!");
+    openCommandPreferences();
     return <></>;
   }
 
