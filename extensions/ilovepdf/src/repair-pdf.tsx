@@ -101,7 +101,7 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "failure";
-        toast.message = `Failed to repair the PDF. Reason ${getErrorMessage(error)}`;
+        toast.message = `Failed to repair the ${fileName} PDF. Reason ${getErrorMessage(error)}`;
         setStatus("failure");
         setIsLoading(false);
         break;

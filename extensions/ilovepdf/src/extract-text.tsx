@@ -102,7 +102,7 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "failure";
-        toast.message = `Error happened during extracting the text. Reason ${getErrorMessage(error)}`;
+        toast.message = `Error happened during extracting the ${fileName} text. Reason ${getErrorMessage(error)}`;
         setStatus("failure");
         setIsLoading(false);
         console.log(error);

@@ -191,7 +191,7 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "failure";
-        toast.message = `Error happened during converting the file. Reason ${error}`;
+        toast.message = `Error happened during converting the ${fileName} file. Reason ${error}`;
         setStatus("failure");
         setIsLoading(false);
         console.log(error);
