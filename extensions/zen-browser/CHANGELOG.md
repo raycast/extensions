@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Fix Bookmark Search] - {PR_MERGE_DATE}
+## [Fix Bookmark Search] - 2024-11-18
 
 - Fix Bookmark search by using the SQlite DB instead of bookmarkbackups directory.
 
