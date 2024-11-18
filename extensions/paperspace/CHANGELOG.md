@@ -1,6 +1,6 @@
 # Paperspace Changlog
 
-## [Update Logo] - {PR_MERGE_DATE}
+## [Update Logo] - 2024-11-18
 
 - Update Logo
 - Action to `OpenExtensionPreferences` on invalid token
