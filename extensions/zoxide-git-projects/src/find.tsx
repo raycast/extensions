@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getGitProjects } from "./git-projects";
-import { Preferences } from "./types";
 import { homedir } from "os";
 
 export default function Command() {
