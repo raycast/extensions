@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doppler",
   "title": "Doppler",
-  "description": "",
+  "description": "View Projects with their Configs, Environments and Secrets.",
   "icon": "doppler.png",
   "author": "xmok",
   "categories": [
@@ -16,14 +16,14 @@
       "required": true,
       "type": "password",
       "placeholder": "dp.pt_xx...xxx",
-      "description": ""
+      "description": "Personal token from Doppler Workplace settings"
     }
   ],
   "commands": [
     {
       "name": "search-projects",
       "title": "Search Projects",
-      "description": "",
+      "description": "View Projects with their Configs, Environments and Secrets.",
       "mode": "view"
     }
   ],
