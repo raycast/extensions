@@ -22,7 +22,7 @@ type RenderPlacesPageProps = {
 };
 export function PlacesPage({ universeId }: RenderPlacesPageProps) {
   const { data: placesData, isLoading: placesDataLoading } = useFetch<PlaceResponse>(
-    `https://develop.roblox.com/v1/universes/${universeId}/places?isUniverseCreation=false&limit=10&sortOrder=Asc`,
+    `https://develop.roblox.com/v1/universes/${universeId}/places?isUniverseCreation=false&limit=100&sortOrder=Asc`,
   );
 
   if (placesDataLoading) {

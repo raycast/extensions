@@ -17,9 +17,9 @@ export default () => {
     }
   }, [universes]);
 
-  const { data: gameDetails } = useBatchGameDetails(gameIds);
+  const { data: gameDetails, isLoading: gameDetailsLoading } = useBatchGameDetails(gameIds);
 
-  const isLoading = universesLoading || thumbnailsLoading;
+  const isLoading = universesLoading || thumbnailsLoading || gameDetailsLoading;
 
   return (
     <List isLoading={isLoading} navigationTitle="Search Favourite Games" searchBarPlaceholder="Search" isShowingDetail>
