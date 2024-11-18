@@ -15,10 +15,8 @@ Install this extension through the Raycast Store.
 1. Open Raycast
 2. Run the "Fetch YouTube Transcript" command
 3. Paste the YouTube video URL
-4. Choose or confirm the download location
-
-## Preferences
-- **Default Download Folder**: Set a custom folder to save transcripts (defaults to Downloads if not specified)
+    - Provide the full YouTube video URL (e.g., https://www.youtube.com/watch?v=exampleID or https://youtu.be/exampleID)
+4. **It will automatically fetch the transcript and save it to the downloads folder.**
 
 ## Author
 Apoorv Khandelwal

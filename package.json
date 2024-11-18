@@ -15,7 +15,14 @@
       "name": "fetch-youtube-transcript",
       "title": "Fetch YouTube Transcript",
       "description": "Fetches and saves the transcript of a YouTube video",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "videoUrl",
+          "type": "text",
+          "placeholder": "Enter YouTube video URL"
+        }
+      ]
     }
   ],
   "preferences": [
