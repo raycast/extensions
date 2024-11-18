@@ -18,12 +18,15 @@ export const ActionPickFile = ({
 }: SelectFileProps): JSX.Element => {
   const handleSelectFromFinder = useCallback(async () => {
     try {
-      const path = await runAppleScript(`
+      const path = await runAppleScript(
+        `
         set chosenFile to choose file with prompt "${prompt}:"${type != null ? `of type {"${type}"}` : ""}
         set raycastPath to POSIX path of (path to application "Raycast")
         do shell script "open " & raycastPath
         return POSIX path of chosenFile
-      `, { timeout: 30 * 60 * 1000 });  // 30 minutes, can't go with 0 since raycast utils seem to ignore falsy values
+      `,
+        { timeout: 30 * 60 * 1000 },
+      ); // 30 minutes, can't go with 0 since raycast utils seem to ignore falsy values
       if (path) {
         onSelect(path);
       } else {
