@@ -1,4 +1,3 @@
-import { showHUD } from "@raycast/api";
 import { runYabaiCommand } from "./helpers/scripts";
 import { showFailureToast } from "@raycast/utils";
 
