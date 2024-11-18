@@ -5,9 +5,22 @@ import { exec } from "child_process";
 const execPromise = util.promisify(exec);
 
 export async function isFFmpegInstalled(): Promise<boolean> {
-  const ffmpegPath = "/usr/local/bin/ffmpeg";
-  const altPath = "/opt/homebrew/bin/ffmpeg";
-  return fs.existsSync(ffmpegPath) || fs.existsSync(altPath);
+  try {
+    const ffmpegPath = "/usr/local/bin/ffmpeg";
+    const altPath = "/opt/homebrew/bin/ffmpeg";
+    const exists = fs.existsSync(ffmpegPath) || fs.existsSync(altPath);
+
+    if (!exists) {
+      // Try checking with which command as fallback
+      const { stdout } = await execPromise("which ffmpeg");
+      return stdout.trim().length > 0;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error checking FFmpeg installation:", error);
+    return false;
+  }
 }
 
 export async function getFFmpegPath(): Promise<string> {

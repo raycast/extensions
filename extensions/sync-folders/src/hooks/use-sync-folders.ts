@@ -1,4 +1,4 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import { LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { SyncFolders, SyncFoldersFormValues } from "../types";
 import { createMD5HashFromStrings, executeRsync } from "../utils";
@@ -8,19 +8,27 @@ const SYNC_FOLDER_STORAGE_KEY = "my-sync-folders";
 export function useSyncFolders() {
   const { value, setValue, isLoading } = useLocalStorage<SyncFolders[]>(SYNC_FOLDER_STORAGE_KEY, []);
 
+  const mutate = async () => {
+    const item = await LocalStorage.getItem<string>(SYNC_FOLDER_STORAGE_KEY);
+    const parsed = JSON.parse(item ?? "[]");
+    setValue(parsed as SyncFolders[]);
+  };
+
   /**
    * Adds a new sync folder configuration to the current list of sync folders.
    *
    * @param {SyncFoldersFormValues} newSyncFolderFormValue - The form values containing the details of the new sync folder.
+   * @param {string} newSyncFolderFormValue.icon - The icon for the sync folder.
    * @param {string} newSyncFolderFormValue.name - The name of the sync folder.
    * @param {string[]} newSyncFolderFormValue.source_folder - The source folder paths.
    * @param {string[]} newSyncFolderFormValue.dest_folder - The destination folder paths.
    * @param {boolean} newSyncFolderFormValue.delete_dest - Flag indicating whether to delete the destination folder.
    */
   function setSyncFolders(newSyncFolderFormValue: SyncFoldersFormValues) {
-    const { name, source_folder, dest_folder, delete_dest } = newSyncFolderFormValue;
+    const { name, icon, source_folder, dest_folder, delete_dest } = newSyncFolderFormValue;
 
     const id = createMD5HashFromStrings(
+      icon,
       name,
       source_folder[0],
       dest_folder[0],
@@ -29,6 +37,7 @@ export function useSyncFolders() {
 
     const newSyncFolder: SyncFolders = {
       id,
+      icon,
       name,
       source_folder: source_folder[0],
       dest_folder: dest_folder[0],
@@ -59,6 +68,7 @@ export function useSyncFolders() {
    *
    * @param id - The unique identifier of the sync folder to update.
    * @param newSyncFolderFormValue - The new values for the sync folder.
+   * @param newSyncFolderFormValue.icon - The new icon for the sync folder.
    * @param newSyncFolderFormValue.name - The new name of the sync folder.
    * @param newSyncFolderFormValue.source_folder - The new source folder path.
    * @param newSyncFolderFormValue.dest_folder - The new destination folder path.
@@ -66,32 +76,35 @@ export function useSyncFolders() {
    * @param newSyncFolderFormValue.last_sync - The last synchronization timestamp.
    */
   function updateSyncFolders(id: string, newSyncFolderFormValue: SyncFoldersFormValues) {
-    const { name, source_folder, dest_folder, delete_dest, last_sync } = newSyncFolderFormValue;
+    const { name, icon, source_folder, dest_folder, delete_dest, last_sync } = newSyncFolderFormValue;
 
     const syncFolderIndex = value?.findIndex((syncFolder) => syncFolder.id === id);
 
-    if (syncFolderIndex === -1 || !syncFolderIndex || !value) {
-      return;
+    if (syncFolderIndex !== undefined && syncFolderIndex >= 0 && value) {
+      const newId = createMD5HashFromStrings(
+        icon,
+        name,
+        source_folder[0],
+        dest_folder[0],
+        delete_dest ? "delete_dest" : "no_delete_dest",
+      );
+
+      const newSyncFolder: SyncFolders = {
+        id: newId,
+        icon,
+        name,
+        source_folder: source_folder[0],
+        dest_folder: dest_folder[0],
+        delete_dest,
+        last_sync,
+      };
+
+      value[syncFolderIndex] = newSyncFolder;
+
+      const newValue = [...value];
+
+      setValue(newValue);
     }
-
-    const newId = createMD5HashFromStrings(
-      name,
-      source_folder[0],
-      dest_folder[0],
-      delete_dest ? "delete_dest" : "no_delete_dest",
-    );
-
-    const newSyncFolder: SyncFolders = {
-      id: newId,
-      name,
-      source_folder: source_folder[0],
-      dest_folder: dest_folder[0],
-      delete_dest,
-      last_sync,
-    };
-
-    value[syncFolderIndex] = newSyncFolder;
-    setValue(value);
   }
 
   function deleteSyncFolders(id?: string) {
@@ -121,8 +134,6 @@ export function useSyncFolders() {
    * 8. Updates the last synchronization time for the specified folder.
    */
   async function runSyncFolders(syncFolder: SyncFolders | string) {
-    console.log("!!!!!! runSyncFolders", syncFolder, value);
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Syncing folders",
@@ -162,8 +173,6 @@ export function useSyncFolders() {
       }
       toast.style = Toast.Style.Success;
       toast.title = "Folders synced";
-
-      console.log(`Output standard: ${stdout}`);
     });
 
     updateLastSync(syncFolder.id);
@@ -179,5 +188,6 @@ export function useSyncFolders() {
     updateSyncFolders,
     updateLastSync,
     isLoading,
+    mutate,
   } as const;
 }

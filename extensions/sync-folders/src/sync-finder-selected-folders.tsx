@@ -46,8 +46,6 @@ export default async function Command() {
         }
         toast.style = Toast.Style.Success;
         toast.title = "Folders synced";
-
-        console.log(`Output standard: ${stdout}`);
       });
 
       await showHUD("Folders synced 🙌");

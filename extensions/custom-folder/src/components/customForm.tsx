@@ -1,31 +1,24 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { FolderForm, PathError } from "./types";
-import Result from "./result";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useState } from "react";
-import { isNonEmptyDirectory, isNonEmptyFile, isPngFile } from "./utils/verifications";
+import { isNonEmptyDirectory, isNonEmptyFile, isPngFile } from "../utils/verifications";
+import { FolderForm, PathError } from "../types";
 
-export default function CreateForm() {
+export const CustomForm = ({
+  handleSubmit,
+  withFilePicker = false,
+  defaultOutput = "image path",
+  defaultPadding = "45",
+  pathError,
+  setPathError,
+}: {
+  handleSubmit: (values: FolderForm) => void;
+  withFilePicker?: boolean;
+  defaultOutput?: string;
+  defaultPadding?: string;
+  pathError?: PathError;
+  setPathError?: (pathError: PathError) => void;
+}) => {
   const [paddingError, setPaddingError] = useState<string | undefined>();
-  const [pathError, setPathError] = useState<PathError>({
-    imagePath: undefined,
-    outputPath: undefined,
-  });
-
-  const { push } = useNavigation();
-  function handleSubmit(values: FolderForm) {
-    const file = values.file[0];
-    const outputFolder = values.output && values.output?.length > 0 ? values.output[0] : "";
-    if (!isNonEmptyFile(file)) {
-      setPathError({ ...pathError, imagePath: "Field shouldn't be empty!" });
-      return false;
-    }
-
-    if (outputFolder && !isNonEmptyDirectory(outputFolder)) {
-      return false;
-    }
-    push(<Result formValues={{ ...values, padding: parseInt(values.padding as string) }} />);
-  }
-
   function dropPaddingErrorIfNeeded() {
     if (paddingError && paddingError.length > 0) {
       setPaddingError(undefined);
@@ -33,14 +26,15 @@ export default function CreateForm() {
   }
   function dropPathErrorIfNeeded(stringPath: string, dir?: boolean) {
     if (!dir) {
-      if (isPngFile(stringPath) && isNonEmptyFile(stringPath)) {
+      if (isPngFile(stringPath) && isNonEmptyFile(stringPath) && pathError && setPathError) {
         setPathError({
           ...pathError,
           imagePath: undefined,
         });
-      } else if (!isPngFile(stringPath)) setPathError({ ...pathError, imagePath: "File should be a PNG!" });
+      } else if (!isPngFile(stringPath) && pathError && setPathError)
+        setPathError({ ...pathError, imagePath: "File should be a PNG!" });
     } else {
-      if (isNonEmptyDirectory(stringPath)) {
+      if (isNonEmptyDirectory(stringPath) && pathError && setPathError) {
         setPathError({
           ...pathError,
           outputPath: undefined,
@@ -48,7 +42,6 @@ export default function CreateForm() {
       }
     }
   }
-
   return (
     <Form
       navigationTitle={"Custom folder"}
@@ -58,20 +51,22 @@ export default function CreateForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker
-        id="file"
-        title="Image path"
-        allowMultipleSelection={false}
-        info={"The png image."}
-        defaultValue={[]}
-        onChange={(newValue: string[]) => {
-          dropPathErrorIfNeeded(newValue[0] || "");
-        }}
-        error={pathError?.imagePath}
-        onBlur={(event) => {
-          dropPathErrorIfNeeded(event?.target?.value?.[0] || "");
-        }}
-      />
+      {withFilePicker && (
+        <Form.FilePicker
+          id="file"
+          title="Image path"
+          allowMultipleSelection={false}
+          info={"The png image."}
+          defaultValue={[]}
+          onChange={(newValue: string[]) => {
+            dropPathErrorIfNeeded(newValue[0] || "");
+          }}
+          error={pathError?.imagePath}
+          onBlur={(event) => {
+            dropPathErrorIfNeeded(event?.target?.value?.[0] || "");
+          }}
+        />
+      )}
       <Form.FilePicker
         id="targetFolderPath"
         title="Target path"
@@ -82,16 +77,16 @@ export default function CreateForm() {
       />
       <Form.FilePicker
         id="output"
-        title="Output path"
+        title="Download path"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
-        info={"Optional output path (default is image path)."}
+        info={`Optional download path (default is ${defaultOutput}).`}
       />
       <Form.TextField
         id="padding"
         title={"Padding"}
-        defaultValue="45"
+        defaultValue={defaultPadding}
         info={"Optional image padding parameter (default is 45)."}
         error={paddingError}
         onChange={dropPaddingErrorIfNeeded}
@@ -115,4 +110,4 @@ export default function CreateForm() {
       />
     </Form>
   );
-}
+};
