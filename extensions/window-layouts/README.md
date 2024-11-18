@@ -1,5 +1,7 @@
 # Window Layouts
 
+### Requires Raycast PRO
+
 This extension takes X amount of open windows and tiles them into a chosen layout. Affected amount of windows depends on each individual layout.
 
 You can choose a gap in extension settings that is applied between and around the windows.
