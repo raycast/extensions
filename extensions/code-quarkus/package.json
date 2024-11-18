@@ -5,7 +5,7 @@
   "description": "Create new Quarkus project",
   "icon": "quarkus.png",
   "author": "loic_magnette",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "categories": [
     "Developer Tools"
   ],
@@ -19,8 +19,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

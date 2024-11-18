@@ -9,12 +9,16 @@ Generate Quarkus project directly from Raycast, powered by the official https://
 - Downloads directly to your Downloads folder
 
 ## Usage
-Open Raycast
-Search for "Create Quarkus Project"
-Fill in your project details
-Select dependencies
-Generate and download your project
-Projects are automatically saved to your Downloads folder.
+- Open Raycast
+- Search for "Create Quarkus Project"
+- Fill in your project configuration (Quarkus version, build tool, groupId, artifact name, java version)
+
+  ![image](assets/config.png)
+- Select dependencies
+
+  ![image](assets/dependencies.png)
+- Generate and download your project
+- Projects are automatically saved to your Downloads folder.
 
 ## Requirements
 macOS

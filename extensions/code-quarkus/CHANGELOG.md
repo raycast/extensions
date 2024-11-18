@@ -1,3 +1,3 @@
 # Code Quarkus Changelog
 
-## [Initial Version] - 2024-11-15
+## [Initial Configure] - 2024-11-15
