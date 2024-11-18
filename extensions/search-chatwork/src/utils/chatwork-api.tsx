@@ -48,7 +48,7 @@ export async function getRooms(): Promise<CWRoom[]> {
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const rooms = await response.json() as CWRoom[];
+    const rooms = (await response.json()) as CWRoom[];
     const rooms_obj = rooms;
     return rooms_obj;
   } catch (error) {
@@ -81,7 +81,7 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
       return messages_obj;
     }
 
-    const messages = await response.json() as CWMessage[];
+    const messages = (await response.json()) as CWMessage[];
     messages.forEach((message) => {
       const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
       cwmsg.copyValueFromJson(message);
@@ -133,7 +133,7 @@ export async function getContacts() {
     organization_name: string;
     department: string;
     avatar_image_url: string;
-  }
+  };
 
   headers = authorizeApi(headers);
   const response = await fetch(`${Constants.CW_API_URL}contacts`, {
@@ -142,11 +142,11 @@ export async function getContacts() {
   });
 
   if (!response.ok) {
-    const result = await response.json() as { errors: string[] };
+    const result = (await response.json()) as { errors: string[] };
     throw new Error(result.errors[0]);
   }
   if (response.status === 204) return [];
 
-  const contacts = await response.json() as Contact[];
+  const contacts = (await response.json()) as Contact[];
   return contacts;
 }

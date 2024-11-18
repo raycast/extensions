@@ -22,5 +22,5 @@ export const provider = new OAuthService({
   authorizeUrl: Constants.CW_OAUTH_LOGIN,
   tokenUrl: Constants.CW_OAUTH_TOKEN,
   personalAccessToken: useChatworkApiKey ? chatworkApiKey : undefined,
-  bodyEncoding: "url-encoded"
+  bodyEncoding: "url-encoded",
 });
