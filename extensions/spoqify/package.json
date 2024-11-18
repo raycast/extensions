@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "anonymize",
-      "title": "Anonymize",
+      "title": "Anonymize Song Radio",
+      "subtitle": "Spoqify",
       "description": "Anonymize a song radio",
       "mode": "no-view"
     },
