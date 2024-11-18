@@ -39,15 +39,6 @@
       "description": "Application to open projects with",
       "type": "appPicker",
       "required": true
-    },
-    {
-      "name": "cacheTimeout",
-      "title": "Cache Timeout",
-      "description": "How long to cache the project list in seconds (0 to disable)",
-      "type": "textfield",
-      "required": false,
-      "default": "0",
-      "placeholder": "Enter cache timeout in seconds"
     }
   ],
   "scripts": {
