@@ -23,7 +23,7 @@ export const ActionPickFile = ({
         set raycastPath to POSIX path of (path to application "Raycast")
         do shell script "open " & raycastPath
         return POSIX path of chosenFile
-      `);
+      `, { timeout: 30 * 60 * 1000 });  // 30 minutes, can't go with 0 since raycast utils seem to ignore falsy values
       if (path) {
         onSelect(path);
       } else {

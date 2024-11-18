@@ -72,7 +72,11 @@ export default function Command() {
     };
 
     const pasteJsonDocument = () => Clipboard.readText().then(initDocument);
-    const loadJsonDocument = (fileName: string) => readFile(fileName, "utf-8").then(initDocument);
+    const loadJsonDocument = (fileName: string | null) => {
+      if (fileName !== null) {
+        readFile(fileName, "utf-8").then(initDocument);
+      }
+    };
     return [loadJsonDocument, pasteJsonDocument];
   }, [setQuery, setJsonDocument]);
 
