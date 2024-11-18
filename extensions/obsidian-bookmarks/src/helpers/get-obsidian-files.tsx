@@ -32,11 +32,20 @@ export default async function getObsidianFiles(): Promise<Array<File>> {
   const bookmarksPath = await getOrCreateBookmarksPath();
   const markdownFiles = await getMarkdownFiles(bookmarksPath);
   const promises = markdownFiles.map((file) =>
-    fs.readFile(file, { encoding: "utf-8" }).then((val) => ({
-      ...frontMatter<FrontMatter>(val),
-      fileName: path.basename(file),
-      fullPath: file,
-    }))
+    fs.readFile(file, { encoding: "utf-8" }).then((val) => {
+      const frontMatterData = frontMatter<FrontMatter>(val);
+      const attributes = frontMatterData.attributes || {};
+      // Set a default title if it doesn't exist
+      if (!attributes.title) {
+        attributes.title = path.basename(file, path.extname(file)); // Use the file name without extension as the default title
+      }
+      return {
+        ...frontMatterData,
+        attributes,
+        fileName: path.basename(file),
+        fullPath: file,
+      };
+    })
   );
   const results = await Promise.allSettled(promises);
   const fileResults = results.filter(isFulfilledPromise).map((result) => result.value);
