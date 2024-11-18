@@ -89,7 +89,7 @@ export function GamePage({ universeId }: RenderGamePageProps) {
 
   const detailMarkdown = `
 # ${name}
-${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl})`).join("\n\n")}
+${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`).join("\n\n")}
     `;
 
   const updatedDateText = getUpdatedText(updated);

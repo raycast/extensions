@@ -47,8 +47,8 @@ export function UserPage({ userId, copyField }: RenderUserPageProps) {
   const { name: username, displayName, isBanned, hasVerifiedBadge, created } = userData;
 
   const detailMarkdown = `
-# 🌟 User Profile
-![](${thumbnailUrl})
+# 🌟 ${displayName} (@${username})
+![](${thumbnailUrl}?raycast-height=280)
     `;
 
   const creationDate = new Date(created).toLocaleDateString("en-US");

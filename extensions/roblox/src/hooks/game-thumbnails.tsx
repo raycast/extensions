@@ -29,7 +29,7 @@ export function useGameThumbnails(universeId: number, max?: number) {
   const cachedThumbnails = cache.get(cacheKey);
 
   const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<GameThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=10&defaults=true&size=480x270&format=Png&isCircular=false`,
+    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=10&defaults=true&size=768x432&format=Png&isCircular=false`,
     {
       execute: !cachedThumbnails,
     },

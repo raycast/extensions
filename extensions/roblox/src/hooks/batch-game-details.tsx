@@ -47,17 +47,16 @@ export function useBatchGameDetails(universeIds: number[], useCache?: boolean) {
   const gameDetails: Record<number, GameDetails> = {};
 
   const sortedUniverseIds = universeIds
-    .map((id) => {
+    .filter((id) => {
       if (useCache !== false) {
         const cachedData = cache.get(id.toString());
         if (cachedData) {
           gameDetails[id] = cachedData;
-          return null;
+          return false;
         }
       }
-      return id;
+      return true;
     })
-    .filter((id) => id !== null)
     .sort((a, b) => a.toString().localeCompare(b.toString()));
 
   const queryString = sortedUniverseIds.map((id) => `${id}`).join(",");

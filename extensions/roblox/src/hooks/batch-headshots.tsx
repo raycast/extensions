@@ -23,17 +23,21 @@ const cache = new BetterCache<string>({
   defaultTTL: CACHE_TIMEOUT,
 });
 
-export function useBatchHeadshot(userIds: number[]) {
+export function useBatchHeadshot(userIds: number[], useCache?: boolean) {
   const headshots: Record<number, string> = {};
 
-  const uncachedUserIds = userIds.filter((userId) => {
-    const cachedUrl = cache.get(userId.toString());
-    if (cachedUrl) {
-      headshots[userId] = cachedUrl;
-      return false;
-    }
-    return true;
-  });
+  const uncachedUserIds = userIds
+    .filter((userId) => {
+      if (useCache !== false) {
+        const cachedUrl = cache.get(userId.toString());
+        if (cachedUrl) {
+          headshots[userId] = cachedUrl;
+          return false;
+        }
+      }
+      return true;
+    })
+    .sort((a, b) => a.toString().localeCompare(b.toString()));
 
   const requestBody = uncachedUserIds.map((userId) => ({
     requestId: `${userId}:undefined:AvatarHeadshot:150x150:webp:regular`,
@@ -65,5 +69,19 @@ export function useBatchHeadshot(userIds: number[]) {
   return {
     data: headshots,
     isLoading: headshotDataLoading,
+  };
+}
+
+export function useHeadshot(userId: number, useCache?: boolean) {
+  const { data, isLoading } = useBatchHeadshot([userId], useCache);
+
+  let userHeadshot = null;
+  if (!isLoading && data) {
+    userHeadshot = data[userId];
+  }
+
+  return {
+    data: userHeadshot,
+    isLoading,
   };
 }
