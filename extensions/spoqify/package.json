@@ -21,6 +21,7 @@
     {
       "name": "open-in-spotify",
       "title": "Open in Spotify",
+      "subtitle": "Spoqify",
       "description": "Open anonymized song radio in Spotify",
       "mode": "no-view"
     }
