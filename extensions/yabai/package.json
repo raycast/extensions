@@ -7,7 +7,8 @@
   "author": "krzysztoff1",
   "contributors": [
     "rubentsirunyan",
-    "webdesus"
+    "webdesus",
+    "d34dh0r53"
   ],
   "categories": [
     "Developer Tools",
@@ -110,14 +111,14 @@
     {
       "name": "create-space-and-focus",
       "title": "Create & Focus New Space",
-      "subtitle": "yabai",
+      "subtitle": "Yabai",
       "description": "Creates a new workspace and focuses it.",
       "mode": "no-view"
     },
     {
       "name": "focus-space",
       "title": "Focus Space",
-      "subtitle": "yabai",
+      "subtitle": "Yabai",
       "description": "Focuses the specified space.",
       "mode": "no-view",
       "arguments": [
@@ -132,8 +133,92 @@
     {
       "name": "destroy-space",
       "title": "Destroy Current Space",
-      "subtitle": "yabai",
+      "subtitle": "Yabai",
       "description": "Destroys the currently focused space.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-north",
+      "title": "Focus Active Window North",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the north of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-south",
+      "title": "Focus Active Window South",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the south of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-east",
+      "title": "Focus Active Window East",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the east of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window-west",
+      "title": "Focus Active Window West",
+      "subtitle": "Yabai",
+      "description": "Focus the window to the west of the currently focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-north",
+      "title": "Swap Active Window North",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the north of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-south",
+      "title": "Swap Active Window South",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the south of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-east",
+      "title": "Swap Active Window East",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the east of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-window-west",
+      "title": "Swap Active Window West",
+      "subtitle": "Yabai",
+      "description": "Swap window position and size with window to the west of the active window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-north",
+      "title": "Warp Active Window North",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the north of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-south",
+      "title": "Warp Active Window South",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the south of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-east",
+      "title": "Warp Active Window East",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the east of the focused window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "warp-window-west",
+      "title": "Warp Active Window West",
+      "subtitle": "Yabai",
+      "description": "Warp at window to the west of the focused window.",
       "mode": "no-view"
     }
   ],
@@ -149,7 +234,8 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
-    "execa": "^8.0.1"
+    "execa": "^8.0.1",
+    "ray": "^0.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",
