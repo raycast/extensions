@@ -31,24 +31,13 @@ async function getMarkdownFiles(dir: string): Promise<Array<string>> {
 export default async function getObsidianFiles(): Promise<Array<File>> {
   const bookmarksPath = await getOrCreateBookmarksPath();
   const markdownFiles = await getMarkdownFiles(bookmarksPath);
-  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
-
   const promises = markdownFiles.map((file) =>
     fs.readFile(file, { encoding: "utf-8" }).then((val) => {
       const frontMatterData = frontMatter<FrontMatter>(val);
       const attributes = frontMatterData.attributes || {};
-      // Filter based on requiredTags
-      if (requiredTags.length > 0) {
-        const tags = attributes.tags || [];
-        const hasRequiredTag = tags.some((tag) => requiredTags.includes(tag));
-        if (!hasRequiredTag) {
-          return null; // Return null or undefined to filter out this file
-        }
-      }
       // Set a default title if it doesn't exist
       if (!attributes.title) {
-        // Use the file name without extension as the default title
-        attributes.title = path.basename(file, path.extname(file));
+        attributes.title = path.basename(file, path.extname(file)); // Use the file name without extension as the default title
       }
       return {
         ...frontMatterData,
@@ -58,12 +47,19 @@ export default async function getObsidianFiles(): Promise<Array<File>> {
       };
     })
   );
-
   const results = await Promise.allSettled(promises);
-  const fileResults = results
-    .filter(isFulfilledPromise)
-    .map((result) => result.value)
-    .filter((file) => file !== null); // Filter out null results
-  await replaceLocalStorageFiles(fileResults);
-  return fileResults;
+  const fileResults = results.filter(isFulfilledPromise).map((result) => result.value);
+
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+  let filteredFileResults = fileResults;
+  // Only filter if requiredTags is non-empty
+  if (requiredTags.length > 0) {
+    filteredFileResults = fileResults.filter((file) => {
+      const tags = file.attributes.tags || [];
+      return tags.some((tag) => requiredTags.includes(tag));
+    });
+  }
+
+  await replaceLocalStorageFiles(filteredFileResults);
+  return filteredFileResults;
 }
