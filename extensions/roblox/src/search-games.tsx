@@ -2,6 +2,7 @@ import { List, type LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { GameData, GamesListItem } from "./components/games-list";
+import { useBatchGameThumbnails } from "./hooks/game-thumbnails";
 
 type SearchResponse = {
   searchResults: Array<{
@@ -83,9 +84,16 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
     setSearchText(newSearchText);
   }, []);
 
+  const gameIds = useMemo(() => {
+    return games.map((game) => game.universeId);
+  }, [games]);
+  const { data: thumbnails, isLoading: thumbnailsLoading } = useBatchGameThumbnails(gameIds, 1);
+
+  const isLoading = searchResultsLoading || thumbnailsLoading;
+
   return (
     <List
-      isLoading={searchResultsLoading}
+      isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
       navigationTitle="Search Games"
@@ -93,9 +101,23 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchGames }>) => {
       filtering={false}
       isShowingDetail
     >
-      {games.map((game) => (
-        <GamesListItem key={game.universeId} game={game} options={{}} />
-      ))}
+      {games.map((game) => {
+        const gameThumbnails = thumbnails[game.universeId];
+        let thumbnail: string | null = null;
+        if (gameThumbnails && gameThumbnails.length > 0) {
+          thumbnail = gameThumbnails[0];
+        }
+
+        return (
+          <GamesListItem
+            key={game.universeId}
+            game={game}
+            options={{
+              thumbnail: thumbnail,
+            }}
+          />
+        );
+      })}
     </List>
   );
 };

@@ -4,10 +4,13 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
+  open,
   openCommandPreferences,
+  showHUD,
 } from "@raycast/api";
-import { useGameDetails } from "./hooks/batch-game-details";
+import { useGameDetails } from "./hooks/game-details";
 import { formatNumber } from "./modules/utils";
+import { generateGameStartLink, generateGameStudioLink } from "./modules/roblox-links";
 
 export default () => {
   const { gameId: enteredGameId } = getPreferenceValues<Preferences.FavouriteGamePlayers>();
@@ -28,6 +31,20 @@ export default () => {
     players = formatNumber(data.playing);
   }
 
+  function openLink(linkType: "play" | "edit") {
+    if (!data || isLoading) {
+      return showHUD("Still loading!");
+    }
+
+    if (linkType === "play") {
+      const gameDeeplink = generateGameStartLink(data.rootPlaceId);
+      open(gameDeeplink);
+    } else if (linkType === "edit") {
+      const studioDeeplink = generateGameStudioLink(data.rootPlaceId);
+      open(studioDeeplink);
+    }
+  }
+
   return (
     <MenuBarExtra isLoading={isLoading} icon={Icon.TwoPeople} title={players}>
       <MenuBarExtra.Item
@@ -42,6 +59,8 @@ export default () => {
           })
         }
       />
+      <MenuBarExtra.Item title="Play Game" onAction={() => openLink("play")} />
+      <MenuBarExtra.Item title="Edit Game" onAction={() => openLink("edit")} />
     </MenuBarExtra>
   );
 };

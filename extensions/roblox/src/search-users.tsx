@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, List, type LaunchProps } from "@rayca
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { UserPage } from "./components/user-page";
-import { useBatchHeadshot } from "./hooks/batch-headshots";
+import { useBatchHeadshot } from "./hooks/user-headshots";
 
 type SearchResponse = {
   searchResults: Array<{

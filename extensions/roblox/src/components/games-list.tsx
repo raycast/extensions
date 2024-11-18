@@ -22,6 +22,7 @@ export type GameData = {
 };
 
 type GameListItemOptions = {
+  thumbnail?: string | null;
   onFavouritePage?: boolean;
   revalidateList?: () => void;
 };
@@ -60,6 +61,13 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
   async function moveDown() {
     await moveFavouriteGameDown(universeId);
     await revalidate();
+  }
+
+  let imageMarkdown = undefined;
+  if (options.thumbnail) {
+    imageMarkdown = `
+![](${options.thumbnail}?raycast-height=185)
+          `;
   }
 
   return (
@@ -106,6 +114,7 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
       }
       detail={
         <List.Item.Detail
+          markdown={imageMarkdown}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />

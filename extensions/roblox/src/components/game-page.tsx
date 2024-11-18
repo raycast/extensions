@@ -4,7 +4,7 @@ import { getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
 import { useGameThumbnails } from "../hooks/game-thumbnails";
 import { addGameToFavourites } from "../modules/favourite-games";
-import { useGameDetails } from "../hooks/batch-game-details";
+import { useGameDetails } from "../hooks/game-details";
 
 type PlaceResponse = {
   previousPageCursor: string | null;

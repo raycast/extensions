@@ -24,31 +24,82 @@ const cache = new BetterCache<string[]>({
   defaultTTL: CACHE_TIMEOUT,
 });
 
-export function useGameThumbnails(universeId: number, max?: number) {
-  const cacheKey = `${universeId}:${max || "all"}`;
-  const cachedThumbnails = cache.get(cacheKey);
+function limitThumbnails(thumbnails: string[], max?: number) {
+  if (max && max < thumbnails.length) {
+    return thumbnails.slice(0, max);
+  }
+  return thumbnails;
+}
 
-  const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<GameThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${universeId}&countPerUniverse=10&defaults=true&size=768x432&format=Png&isCircular=false`,
+export function useBatchGameThumbnails(universeIds: number[], max?: number, useCache?: boolean) {
+  const ignoreCache = useCache == false;
+
+  const gameThumbnails: Record<number, string[]> = {};
+
+  const sortedUniverseIds = [...universeIds].sort((a, b) => a.toString().localeCompare(b.toString()));
+
+  const uncachedUniverseIds = sortedUniverseIds.filter((id) => {
+    if (!ignoreCache) {
+      const cachedData = cache.get(id.toString());
+      if (cachedData) {
+        gameThumbnails[id] = limitThumbnails(cachedData, max);
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const queryString = sortedUniverseIds.map((id) => `${id}`).join(",");
+  const {
+    data: thumbnailData,
+    isLoading: thumbnailDataLoading,
+    revalidate,
+  } = useFetch<GameThumbnailResponse>(
+    `https://thumbnails.roblox.com/v1/games/multiget/thumbnails?universeIds=${queryString}&countPerUniverse=10&defaults=true&size=768x432&format=Png&isCircular=false`,
     {
-      execute: !cachedThumbnails,
+      execute: uncachedUniverseIds.length > 0,
     },
   );
 
-  let thumbnailUrls: string[] = cachedThumbnails || [];
+  function revalidateData() {
+    universeIds.forEach((id) => {
+      cache.remove(id.toString());
+    });
+    revalidate();
+  }
 
-  if (!thumbnailDataLoading && thumbnailData && thumbnailData.data.length > 0) {
-    thumbnailUrls = thumbnailData.data[0]?.thumbnails.reduce((acc, data) => {
-      if (max && acc.length >= max) return acc;
-      acc.push(data.imageUrl);
-      return acc;
-    }, [] as string[]);
+  if (!thumbnailDataLoading && thumbnailData) {
+    thumbnailData.data.forEach((data) => {
+      const id = data.universeId;
+      const thumbnails = data.thumbnails?.map((thumbData) => {
+        return thumbData.imageUrl;
+      });
 
-    cache.set(cacheKey, thumbnailUrls);
+      if (!data.error && thumbnails) {
+        gameThumbnails[id] = limitThumbnails(thumbnails, max);
+        cache.set(id.toString(), thumbnails);
+      }
+    });
   }
 
   return {
-    data: thumbnailUrls,
-    isLoading: !cachedThumbnails && thumbnailDataLoading,
+    data: gameThumbnails,
+    isLoading: thumbnailDataLoading,
+    revalidate: revalidateData,
+  };
+}
+
+export function useGameThumbnails(universeId: number, max?: number, useCache?: boolean) {
+  const { data: batchGameThumbnails, isLoading, revalidate } = useBatchGameThumbnails([universeId], max, useCache);
+
+  let gameThumbnails: string[] = [];
+  if (!isLoading && batchGameThumbnails) {
+    gameThumbnails = batchGameThumbnails[universeId];
+  }
+
+  return {
+    data: gameThumbnails,
+    isLoading,
+    revalidate,
   };
 }

@@ -24,22 +24,24 @@ const cache = new BetterCache<string>({
 });
 
 export function useBatchHeadshot(userIds: number[], useCache?: boolean) {
+  const ignoreCache = useCache == false;
+
   const headshots: Record<number, string> = {};
 
-  const uncachedUserIds = userIds
-    .filter((userId) => {
-      if (useCache !== false) {
-        const cachedUrl = cache.get(userId.toString());
-        if (cachedUrl) {
-          headshots[userId] = cachedUrl;
-          return false;
-        }
-      }
-      return true;
-    })
-    .sort((a, b) => a.toString().localeCompare(b.toString()));
+  const sortedUserIds = [...userIds].sort((a, b) => a.toString().localeCompare(b.toString()));
 
-  const requestBody = uncachedUserIds.map((userId) => ({
+  const uncachedUserIds = sortedUserIds.filter((userId) => {
+    if (!ignoreCache) {
+      const cachedUrl = cache.get(userId.toString());
+      if (cachedUrl) {
+        headshots[userId] = cachedUrl;
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const requestBody = sortedUserIds.map((userId) => ({
     requestId: `${userId}:undefined:AvatarHeadshot:150x150:webp:regular`,
     type: "AvatarHeadShot",
     targetId: userId,
@@ -47,19 +49,27 @@ export function useBatchHeadshot(userIds: number[], useCache?: boolean) {
     size: "150x150",
   }));
 
-  const { data: headshotData, isLoading: headshotDataLoading } = useFetch<HeadshotResponse>(
-    "https://thumbnails.roblox.com/v1/batch",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-      execute: uncachedUserIds.length > 0,
+  const {
+    data: headshotData,
+    isLoading: headshotDataLoading,
+    revalidate,
+  } = useFetch<HeadshotResponse>("https://thumbnails.roblox.com/v1/batch", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(requestBody),
+    execute: uncachedUserIds.length > 0,
+  });
 
-  if (headshotData) {
+  function revalidateData() {
+    userIds.forEach((id) => {
+      cache.remove(id.toString());
+    });
+    revalidate();
+  }
+
+  if (!headshotDataLoading && headshotData) {
     headshotData.data.forEach((data) => {
       headshots[data.targetId] = data.imageUrl;
       cache.set(data.targetId.toString(), data.imageUrl);
@@ -69,11 +79,12 @@ export function useBatchHeadshot(userIds: number[], useCache?: boolean) {
   return {
     data: headshots,
     isLoading: headshotDataLoading,
+    revalidate: revalidateData,
   };
 }
 
 export function useHeadshot(userId: number, useCache?: boolean) {
-  const { data, isLoading } = useBatchHeadshot([userId], useCache);
+  const { data, isLoading, revalidate } = useBatchHeadshot([userId], useCache);
 
   let userHeadshot = null;
   if (!isLoading && data) {
@@ -83,5 +94,6 @@ export function useHeadshot(userId: number, useCache?: boolean) {
   return {
     data: userHeadshot,
     isLoading,
+    revalidate,
   };
 }

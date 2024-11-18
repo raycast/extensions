@@ -44,30 +44,40 @@ const cache = new BetterCache<GameDetails>({
 });
 
 export function useBatchGameDetails(universeIds: number[], useCache?: boolean) {
+  const ignoreCache = useCache == false;
+
   const gameDetails: Record<number, GameDetails> = {};
 
-  const sortedUniverseIds = universeIds
-    .filter((id) => {
-      if (useCache !== false) {
-        const cachedData = cache.get(id.toString());
-        if (cachedData) {
-          gameDetails[id] = cachedData;
-          return false;
-        }
+  const sortedUniverseIds = [...universeIds].sort((a, b) => a.toString().localeCompare(b.toString()));
+
+  const uncachedUniverseIds = sortedUniverseIds.filter((id) => {
+    if (!ignoreCache) {
+      const cachedData = cache.get(id.toString());
+      if (cachedData) {
+        gameDetails[id] = cachedData;
+        return false;
       }
-      return true;
-    })
-    .sort((a, b) => a.toString().localeCompare(b.toString()));
+    }
+    return true;
+  });
 
   const queryString = sortedUniverseIds.map((id) => `${id}`).join(",");
-  const { data: gameDetailsResponse, isLoading: gameDetailsLoading } = useFetch<GameDetailsResponse>(
-    `https://games.roblox.com/v1/games?universeIds=${queryString}`,
-    {
-      execute: sortedUniverseIds.length > 0,
-    },
-  );
+  const {
+    data: gameDetailsResponse,
+    isLoading: gameDetailsLoading,
+    revalidate,
+  } = useFetch<GameDetailsResponse>(`https://games.roblox.com/v1/games?universeIds=${queryString}`, {
+    execute: uncachedUniverseIds.length > 0,
+  });
 
-  if (gameDetailsResponse) {
+  function revalidateData() {
+    universeIds.forEach((id) => {
+      cache.remove(id.toString());
+    });
+    revalidate();
+  }
+
+  if (!gameDetailsLoading && gameDetailsResponse) {
     gameDetailsResponse.data.forEach((data) => {
       gameDetails[data.id] = data;
       cache.set(data.id.toString(), data);
@@ -77,11 +87,12 @@ export function useBatchGameDetails(universeIds: number[], useCache?: boolean) {
   return {
     data: gameDetails,
     isLoading: gameDetailsLoading,
+    revalidate: revalidateData,
   };
 }
 
 export function useGameDetails(universeId: number, useCache?: boolean) {
-  const { data: batchGameDetails, isLoading } = useBatchGameDetails([universeId], useCache);
+  const { data: batchGameDetails, isLoading, revalidate } = useBatchGameDetails([universeId], useCache);
 
   let gameDetails = null;
   if (!isLoading && batchGameDetails) {
@@ -91,5 +102,6 @@ export function useGameDetails(universeId: number, useCache?: boolean) {
   return {
     data: gameDetails,
     isLoading,
+    revalidate,
   };
 }
