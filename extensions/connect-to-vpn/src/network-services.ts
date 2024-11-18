@@ -58,6 +58,7 @@ export function useNetworkServices() {
         [service.id]: { ...service, status: updatedStatus },
       }));
     } catch (err) {
+      console.error(`Error updating service status for ${service.name}:`, err);
       setError(err as Error);
     }
   };
@@ -70,6 +71,7 @@ export function useNetworkServices() {
         [service.id]: { ...service, status },
       }));
     } catch (err) {
+      console.error(`Error fetching service status for ${service.name}:`, err);
       setError(err as Error);
     }
   };
@@ -86,7 +88,7 @@ export function useNetworkServices() {
             setTimeout(checkStatus, 500);
           }
         } catch (err) {
-          // If there's an error, we'll continue polling
+          console.error(`Error checking final status for ${service.name}:`, err);
           setTimeout(checkStatus, 500);
         }
       };
@@ -197,6 +199,7 @@ export function useNetworkServices() {
 
       setNetworkServices(servicesMap);
     } catch (err) {
+      console.error("Error fetching data with favorites:", err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -335,12 +338,26 @@ const saveFavoriteOrder = async (order: Record<string, number>) => {
 
 const execPromise = (command: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    exec(command, (err, stdout) => {
+    const child = exec(command, (err, stdout, stderr) => {
       if (err) {
+        console.error(`Error executing command: ${command}`, err);
         reject(err);
+      } else if (stderr) {
+        console.warn(`Command stderr: ${stderr}`);
+        resolve(stdout.trim());
       } else {
         resolve(stdout.trim());
       }
+    });
+
+    // Ensure the child process is cleaned up
+    child.on("exit", (code) => {
+      console.log(`Command exited with code: ${code}`);
+    });
+
+    child.on("error", (err) => {
+      console.error(`Failed to start command: ${command}`, err);
+      reject(err);
     });
   });
 
