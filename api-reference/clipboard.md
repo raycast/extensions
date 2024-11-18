@@ -188,6 +188,10 @@ type Content =
     }
   | {
       file: PathLike;
+    }
+  | {
+      html: string;
+      text?: string; // The alternative text representation of the content.
     };
 ```
 
