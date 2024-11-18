@@ -51,7 +51,7 @@ export default () => {
         title="View Game"
         onAction={() =>
           launchCommand({
-            name: "get-game-with-id",
+            name: "show-game",
             arguments: {
               universeId: gameId.toString(),
             },

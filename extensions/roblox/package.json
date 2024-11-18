@@ -12,30 +12,22 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "get-user-with-username",
-      "title": "Get User with Username",
-      "description": "Show a Roblox User with their username!",
+      "name": "show-user",
+      "title": "Show User",
+      "description": "Show a Roblox User!",
       "mode": "view",
       "arguments": [
         {
           "name": "username",
           "placeholder": "Username",
           "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "get-user-with-id",
-      "title": "Get User with ID",
-      "description": "Show a Roblox User with their User ID!",
-      "mode": "view",
-      "arguments": [
+          "required": false
+        },
         {
           "name": "id",
           "placeholder": "User ID",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -70,9 +62,9 @@
       ]
     },
     {
-      "name": "get-game-with-id",
-      "title": "Get Game with ID",
-      "description": "Show a Roblox Game with their ID!",
+      "name": "show-game",
+      "title": "Show Game",
+      "description": "Show a Roblox Game!",
       "mode": "view",
       "arguments": [
         {

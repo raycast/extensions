@@ -7,10 +7,10 @@ type Result = {
 };
 
 function NotFound() {
-  return <Detail markdown={"# 😔 No Game Found...\nNo game found with that Place ID."} />;
+  return <Detail markdown={`# ⚠️ Invalid Input\nPlease enter a valid Place ID or Universe ID.`} />;
 }
 
-export default (props: LaunchProps<{ arguments: Arguments.GetGameWithId }>) => {
+export default (props: LaunchProps<{ arguments: Arguments.ShowGame }>) => {
   const { placeId: enteredPlaceId, universeId: enteredUniverseId } = props.arguments;
 
   const placeId = Number(enteredPlaceId);
