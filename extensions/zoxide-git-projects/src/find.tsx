@@ -8,13 +8,9 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { application } = getPreferenceValues<Preferences>();
 
-  const { data: projects = [], isLoading } = useCachedPromise(
-    async () => {
-      return getGitProjects();
-    },
-    [],
-    {},
-  );
+  const { data: projects = [], isLoading } = useCachedPromise(async () => {
+    return getGitProjects();
+  });
 
   const filteredProjects = searchText
     ? projects.filter((project) => {
