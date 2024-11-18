@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Download Threads Video",
-      "subtitle": "Download Threads Video With URL",
       "description": "Download threads video with URL",
       "mode": "no-view",
       "arguments": [
