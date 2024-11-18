@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import commandsRaw from "./commands.json";
 import { Command, CommandGroup } from "./types";
-import { searchKeywordInCommandGroups } from "./utils";
+import { searchKeywordInCommandGroups, formatCommandForClipboard } from "./utils";
 
 export default function CommandSearch() {
   const commandGroups = commandsRaw as CommandGroup[];
@@ -17,7 +17,6 @@ export default function CommandSearch() {
 
   return (
     <List
-      enableFiltering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Vim Commands"
       searchBarPlaceholder="Learn new command by searching it here."
@@ -39,10 +38,11 @@ export default function CommandSearch() {
                         title="Copy Command"
                         icon={Icon.Clipboard}
                         onAction={async () => {
-                          await Clipboard.copy(command.kbd);
+                          const formattedCommand = formatCommandForClipboard(command.kbd);
+                          await Clipboard.copy(formattedCommand);
                           await showToast({
                             title: "Copied to Clipboard",
-                            message: command.kbd,
+                            message: formattedCommand,
                           });
                         }}
                       />
