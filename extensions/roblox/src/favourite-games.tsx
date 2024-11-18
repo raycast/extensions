@@ -9,7 +9,7 @@ import { useBatchGameThumbnails } from "./hooks/game-thumbnails";
 export default () => {
   const { data: universes, isLoading: universesLoading, revalidate } = usePromise(getFaviouriteGames);
   const [gameIds, setGameIds] = useState<number[]>([]);
-  const { data: thumbnails, isLoading: thumbnailsLoading } = useBatchGameThumbnails(gameIds, 1);
+  const { data: thumbnails, isLoading: thumbnailsLoading } = useBatchGameThumbnails(gameIds);
 
   useEffect(() => {
     if (!universesLoading && universes) {
@@ -47,17 +47,12 @@ export default () => {
         };
 
         const gameThumbnails = thumbnails[game.universeId];
-        let thumbnail: string | null = null;
-        if (gameThumbnails && gameThumbnails.length > 0) {
-          thumbnail = gameThumbnails[0];
-        }
-
         return (
           <GamesListItem
             key={game.universeId}
             game={game}
             options={{
-              thumbnail: thumbnail,
+              thumbnails: gameThumbnails,
               onFavouritePage: true,
               revalidateList: revalidate,
             }}

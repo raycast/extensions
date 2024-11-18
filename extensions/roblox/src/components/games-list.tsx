@@ -10,6 +10,9 @@ import {
   removeGameFromFavourites,
 } from "../modules/favourite-games";
 import { usePromise } from "@raycast/utils";
+import { useState, useEffect } from "react";
+
+const THUMBNAIL_SWITCH_INTERVAL = 2500;
 
 export type GameData = {
   universeId: number;
@@ -22,13 +25,14 @@ export type GameData = {
 };
 
 type GameListItemOptions = {
-  thumbnail?: string | null;
+  thumbnails?: string[] | null;
   onFavouritePage?: boolean;
   revalidateList?: () => void;
 };
 
 export function GamesListItem({ game, options }: { game: GameData; options: GameListItemOptions }) {
   const { universeId, name, rootPlaceId, creatorName, playerCount, totalUpVotes, totalDownVotes } = game;
+  const [currentThumbnail, setCurrentThumbnail] = useState<string | undefined>(undefined);
 
   const gameURL = generateGamePageLink(rootPlaceId);
 
@@ -39,13 +43,31 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
   } = usePromise(getFaviouriteGames);
   const favourited = !universesLoading && universes?.includes(universeId);
 
+  const [currentThumbnailIndex, setCurrentThumbnailIndex] = useState(0);
+  useEffect(() => {
+    if (options.thumbnails && options.thumbnails.length > 0) {
+      const switchThumbnail = () => {
+        setCurrentThumbnailIndex((prevIndex) => (prevIndex + 1) % options.thumbnails!.length);
+      };
+
+      setCurrentThumbnail(options.thumbnails[0]); // Set initial thumbnail
+      const intervalId = setInterval(switchThumbnail, THUMBNAIL_SWITCH_INTERVAL);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [options.thumbnails]);
+  useEffect(() => {
+    if (options.thumbnails && options.thumbnails.length > 0) {
+      setCurrentThumbnail(options.thumbnails[currentThumbnailIndex]);
+    }
+  }, [currentThumbnailIndex, options.thumbnails]);
+
   async function revalidate() {
     await revalidateUniverses();
     if (options.revalidateList) {
       options.revalidateList();
     }
   }
-
   async function favouriteGame() {
     await addGameToFavourites(universeId);
     await revalidate();
@@ -64,9 +86,9 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
   }
 
   let imageMarkdown = undefined;
-  if (options.thumbnail) {
+  if (currentThumbnail) {
     imageMarkdown = `
-![](${options.thumbnail}?raycast-height=185)
+![](${currentThumbnail}?raycast-height=185)
           `;
   }
 

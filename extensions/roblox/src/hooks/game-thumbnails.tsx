@@ -71,9 +71,14 @@ export function useBatchGameThumbnails(universeIds: number[], max?: number, useC
   if (!thumbnailDataLoading && thumbnailData) {
     thumbnailData.data.forEach((data) => {
       const id = data.universeId;
-      const thumbnails = data.thumbnails?.map((thumbData) => {
-        return thumbData.imageUrl;
-      });
+      const thumbnails = data.thumbnails
+        ?.map((thumbData) => {
+          if (thumbData.state !== "Completed") {
+            return null;
+          }
+          return thumbData.imageUrl;
+        })
+        .filter((val) => val !== null);
 
       if (!data.error && thumbnails) {
         gameThumbnails[id] = limitThumbnails(thumbnails, max);
