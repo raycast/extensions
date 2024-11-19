@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "deals",
-      "title": "deals",
+      "title": "Show Deals",
       "subtitle": "Search for coupons, deals, and referral codes",
       "description": "",
       "mode": "view"
