@@ -13,10 +13,7 @@ export default function Command() {
       homedir(),
       "Library/Containers/com.evernote.Evernote/Data/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
     ),
-    resolve(
-      homedir(),
-      "Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
-    ),
+    resolve(homedir(), "Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com"),
   ];
 
   useEffect(() => {
