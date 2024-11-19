@@ -15,7 +15,7 @@
     {
       "name": "divide-by-8",
       "title": "Divide by 8",
-      "description": "Only command. Checks if divisible by 8 and if not offers to pasted rounded (up or down) number to front-most application",
+      "description": "Only command. Check if the number you highlighted is divisable by 8. If it isn't, paste the up- or down rounded number",
       "mode": "view"
     }
   ],
