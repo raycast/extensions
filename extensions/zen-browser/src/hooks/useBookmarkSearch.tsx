@@ -15,13 +15,21 @@ const getBookmarkQuery = (query?: string) => {
   const terms = query ? query.trim().split(" ") : [];
   const whereClause = terms.length > 0 ? `AND ${whereClauses(terms)}` : "";
 
-  return `SELECT 
-      moz_bookmarks.id, moz_places.url, moz_bookmarks.title, 
-      datetime(moz_bookmarks.lastModified/1000000,'unixepoch') as lastModified
-    FROM moz_bookmarks
-    JOIN moz_places ON moz_bookmarks.fk = moz_places.id
-    WHERE moz_bookmarks.type = 1 ${whereClause}
-    ORDER BY lastModified DESC LIMIT ${preferences.limitResults};`;
+  return `WITH BookmarkEntries AS (
+    SELECT
+      b.*,
+      p.url,
+      datetime(b.lastModified/1000000,'unixepoch') as lastModified,
+      ROW_NUMBER() OVER (PARTITION BY b.fk ORDER BY b.id) as rn
+    FROM moz_bookmarks b
+    JOIN moz_places p ON b.fk = p.id
+    WHERE b.type = 1 ${whereClause}
+  )
+  SELECT id, url, title, lastModified
+  FROM BookmarkEntries
+  WHERE rn = 1
+  ORDER BY lastModified DESC
+  LIMIT ${preferences.limitResults};`;
 };
 
 export function useBookmarkSearch(query: string | undefined): SearchResult<HistoryEntry> {
