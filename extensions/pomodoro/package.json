@@ -20,6 +20,9 @@
     "pomodoro",
     "timer"
   ],
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -45,12 +48,6 @@
       "title": "View Pomodoro Stats",
       "mode": "view",
       "description": "Shows the stats of the Pomodoro timer"
-    },
-    {
-      "name": "install-pomodoro-dnd-shortcut",
-      "title": "Install Pomodoro DND Shortcut",
-      "mode": "no-view",
-      "description": "Installs/Verifys the Do Not Disturb shortcut necessary for enabling Do Not Disturb mode on Mac. Requires Shortcuts application. Enable 'Do Not Disturb while focused' in preferences to use this feature."
     },
     {
       "name": "slack-pomodoro-menu-bar",
@@ -317,12 +314,11 @@
     },
     {
       "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
       "type": "checkbox",
-      "description": "Enables do not disturb mode of Mac when enabled. Requires use of Shortcuts application (setup is automatic the first time)",
-      "required": true,
-      "title": "Do Not Disturb while focused",
-      "default": false,
-      "label": "Enable Do Not Disturb mode while focused"
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
     },
     {
       "name": "completionImage",
@@ -439,7 +435,8 @@
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.12.4",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

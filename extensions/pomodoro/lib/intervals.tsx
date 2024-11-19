@@ -1,7 +1,7 @@
 import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
-import { turnOnDND, turnOffDND } from "./focus";
+import { setDND } from "./doNotDisturb";
 
 const cache = new Cache();
 
@@ -53,7 +53,6 @@ export function isPaused({ parts }: Interval): boolean {
 
 export function createInterval(type: IntervalType, isFreshStart?: boolean): Interval {
   let completedCount = 0;
-
   if (isFreshStart) {
     cache.set(COMPLETED_POMODORO_COUNT_CACHE_KEY, completedCount.toString());
   } else {
@@ -73,13 +72,13 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean): Inte
   };
   cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   saveIntervalHistory(interval).then();
-  if (type === "focus") turnOnDND();
+  if (type === "focus") setDND(true)
   return interval;
 }
 
 export function pauseInterval(): Interval | undefined {
   let interval = getCurrentInterval();
-  turnOffDND();
+  if (interval?.type === "focus") setDND(false)
   if (interval) {
     const parts = [...interval.parts];
     parts[parts.length - 1].pausedAt = currentTimestamp();
@@ -101,13 +100,13 @@ export function continueInterval(): Interval | undefined {
       parts,
     };
     cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
-    if (interval.type === "focus") turnOnDND();
+    if (interval.type === "focus") setDND(true)
   }
   return interval;
 }
 
 export function resetInterval() {
-  turnOffDND();
+  if (getCurrentInterval()?.type === "focus") setDND(false)
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
@@ -115,7 +114,7 @@ export function restartInterval() {
   const currentInterval = getCurrentInterval();
   if (currentInterval) {
     const { type } = currentInterval;
-    if (type === "focus") turnOnDND();
+    if (type === "focus") setDND(true);
     createInterval(type, false); // Uses existing caching mechanism to reset interval
   }
 }
@@ -129,7 +128,7 @@ export function getCurrentInterval(): Interval | undefined {
 
 export function endOfInterval(currentInterval: Interval) {
   try {
-    currentInterval.type === "focus" && turnOffDND();
+    if (currentInterval.type === "focus") setDND(false);
     currentInterval.parts[currentInterval.parts.length - 1].endAt = currentTimestamp();
     saveIntervalHistory(currentInterval).then();
     launchCommand({
