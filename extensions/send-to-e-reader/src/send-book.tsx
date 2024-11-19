@@ -1,5 +1,12 @@
-import { ActionPanel, Action, Form, Toast, showToast } from "@raycast/api";
-import { useState } from "react";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Toast,
+  showToast,
+  popToRoot,
+} from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
@@ -12,126 +19,143 @@ interface FormValues {
   kindlegen: boolean;
   cropMargins: boolean;
   transliterate: boolean;
+  timeout: string;
 }
 
 export default function SendBook() {
   const base_url = "https://send.djazz.se/upload";
-  const timeout = 30000; // 30 seconds
-  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(values: FormValues) {
-    let fileStream = null;
+  const { handleSubmit, itemProps, reset } = useForm<FormValues>({
+    async onSubmit(values) {
+      const timeout = Number(values.timeout) * 1000;
+      let fileStream = null;
+      let toast: Toast | null = null;
 
-    try {
-      setIsLoading(true);
+      try {
+        const bookPath = values.bookFile[0];
+        const key = values.key.trim().toUpperCase();
 
-      const bookPath = values.bookFile[0];
-      const key = values.key.trim().toUpperCase();
+        // Show progress toast
+        toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Sending to e-reader...",
+        });
 
-      // Validate key
-      if (key.length !== 4) {
-        throw new Error("Key must be 4 characters");
-      }
+        // Create form data
+        const formData = new FormData();
 
-      // Show progress toast
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Sending to e-reader...",
-      });
+        // Add form fields BEFORE file, This order matters for the form-data processing
+        formData.append("key", key);
+        formData.append("kepubify", values.kepubify ? "on" : "off");
+        formData.append("kindlegen", values.kindlegen ? "on" : "off");
+        formData.append("pdfcropmargins", values.cropMargins ? "on" : "off");
+        formData.append("transliteration", values.transliterate ? "on" : "off");
 
-      // Create form data
-      const formData = new FormData();
+        // Add file AFTER form fields
+        fileStream = fs.createReadStream(bookPath);
+        formData.append("file", fileStream, {
+          filename: path.basename(bookPath),
+          contentType: "application/octet-stream",
+        });
 
-      // Add form fields BEFORE file, This order matters for multipart/form-data processing
-      formData.append("key", key);
-      formData.append("kepubify", values.kepubify ? "on" : "off");
-      formData.append("kindlegen", values.kindlegen ? "on" : "off");
-      formData.append("pdfcropmargins", values.cropMargins ? "on" : "off");
-      formData.append("transliteration", values.transliterate ? "on" : "off");
+        // Set headers
+        const headers = {
+          ...formData.getHeaders(),
+          Accept: "*/*",
+        };
 
-      // Add file AFTER form fields
-      fileStream = fs.createReadStream(bookPath);
-      formData.append("file", fileStream, {
-        filename: path.basename(bookPath),
-        contentType: "application/octet-stream",
-      });
+        const response = await axios({
+          method: "post",
+          url: base_url,
+          data: formData,
+          headers: headers,
+          responseType: "text",
+          validateStatus: (status) => status >= 200 && status < 300,
+          timeout: timeout,
+          onUploadProgress: (progressEvent) => {
+            if (!toast) return;
 
-      // Set headers
-      const headers = {
-        ...formData.getHeaders(),
-        Accept: "*/*",
-      };
+            if (progressEvent.loaded === progressEvent.total) {
+              toast.message = "Processing...";
+            } else if (progressEvent.total) {
+              const progress = Math.round(
+                (progressEvent.loaded / progressEvent.total) * 100,
+              );
+              toast.message = `Uploading... ${progress}%`;
+            } else {
+              toast.message = "Uploading...";
+            }
+          },
+        });
 
-      const response = await axios({
-        method: "post",
-        url: base_url,
-        data: formData,
-        headers: headers,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-        responseType: "text",
-        validateStatus: (status) => status >= 200 && status < 300,
-        timeout: timeout,
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.loaded === progressEvent.total) {
-            toast.message = "Processing...";
-          } else if (progressEvent.total) {
-            const progress =
-              Math.round(progressEvent.loaded / progressEvent.total) * 100;
-            toast.message = `Uploading... ${progress}%`;
-          } else {
-            toast.message = "Uploading...";
+        // Successful response
+        if (response.status >= 200 && response.status < 300) {
+          if (toast) {
+            toast.style = Toast.Style.Success;
+            toast.title = "Success!";
+            toast.message = "Book sent to e-reader";
           }
-        },
-      });
 
-      if (response.status === 200) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Success!";
-        toast.message = "Book sent to e-reader";
-      } else {
-        throw new Error("Upload failed");
-      }
-    } catch (error) {
-      console.error("Detailed Error", error);
-
-      let errorMessage = "An unknown error occurred";
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          console.log("Response Error:", {
-            status: error.response.status,
-            headers: error.response.headers,
-            data: error.response.data,
-          });
-          errorMessage = `${error.response.status} ${error.response.statusText}`;
-        } else if (error.request) {
-          console.log("Request Error:", error.request);
-          errorMessage = "Network error occurred";
+          // Reset form and navigate to the root
+          reset();
+          await popToRoot({ clearSearchBar: true });
+          return true;
         } else {
-          console.log("Axios Error:", error.message);
+          throw new Error("Upload failed with status: " + response.status);
+        }
+      } catch (error) {
+        console.error(error);
+
+        let errorMessage = "An unknown error occurred";
+
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            errorMessage = `${error.response.status}: ${error.response.statusText || "Upload failed"}`;
+          } else if (error.request) {
+            errorMessage = `${error.message || "Request failed"}`;
+          } else {
+            errorMessage = `${error.message}`;
+          }
+        } else if (error instanceof Error) {
           errorMessage = error.message;
         }
-      } else {
-        console.log("Error:", error);
-        errorMessage = "An unknown error occurred";
-      }
 
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: errorMessage,
-      });
-    } finally {
-      if (fileStream) {
-        fileStream.destroy();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: errorMessage,
+        });
+        return false;
+      } finally {
+        if (fileStream) {
+          fileStream.destroy();
+        }
       }
-      setIsLoading(false);
-    }
-  }
+    },
+    initialValues: {
+      kepubify: true,
+      kindlegen: true,
+      cropMargins: false,
+      transliterate: false,
+      timeout: "60",
+    },
+    validation: {
+      bookFile: FormValidation.Required,
+      key: (value) => {
+        if (!value || value.trim().length !== 4) {
+          return "Key must be 4 characters";
+        }
+      },
+      timeout: (value) => {
+        if (!value || isNaN(Number(value))) {
+          return "Timeout must be a number";
+        }
+      },
+    },
+  });
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Send" onSubmit={handleSubmit} />
@@ -139,37 +163,31 @@ export default function SendBook() {
       }
     >
       <Form.FilePicker
-        id="bookFile"
+        {...itemProps.bookFile}
         title="Book File"
         allowMultipleSelection={false}
         canChooseFiles={true}
         canChooseDirectories={false}
       />
       <Form.TextField
-        id="key"
+        {...itemProps.key}
         title="E-Reader Key"
         placeholder="Enter 4-character key shown on your device"
       />
       <Form.Checkbox
-        id="kepubify"
+        {...itemProps.kepubify}
         label="Convert to Kobo format (with Kepubify)"
-        defaultValue={true}
       />
       <Form.Checkbox
-        id="kindlegen"
+        {...itemProps.kindlegen}
         label="Convert to Kindle format (with KindleGen)"
-        defaultValue={true}
       />
+      <Form.Checkbox {...itemProps.cropMargins} label="Crop PDF margins" />
       <Form.Checkbox
-        id="cropMargins"
-        label="Crop PDF margins"
-        defaultValue={false}
-      />
-      <Form.Checkbox
-        id="transliterate"
+        {...itemProps.transliterate}
         label="Transliterate filename"
-        defaultValue={false}
       />
+      <Form.TextField {...itemProps.timeout} title="Timeout (seconds)" />
       <Form.Description
         title="Note"
         text='Open "https://send.djazz.se/" on your e-reader to get the "E-Reader key"'
