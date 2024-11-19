@@ -20,7 +20,7 @@ export function AddLinkForm({ onSubmit }: AddLinkFormProps) {
     }
     onSubmit({
       id: uniqueId(),
-      title: values.description || '',
+      title: values.description || "",
       url: values.url,
     });
     pop();
@@ -30,25 +30,12 @@ export function AddLinkForm({ onSubmit }: AddLinkFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={t.addLink}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={t.addLink} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="url"
-        title={t.urlLabel}
-        placeholder={t.urlPlaceholder}
-        autoFocus
-        error={urlError}
-      />
-      <Form.TextField
-        id="description"
-        title={t.description}
-        placeholder={t.descriptionPlaceholder}
-      />
+      <Form.TextField id="url" title={t.urlLabel} placeholder={t.urlPlaceholder} autoFocus error={urlError} />
+      <Form.TextField id="description" title={t.description} placeholder={t.descriptionPlaceholder} />
     </Form>
   );
-} 
+}

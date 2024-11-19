@@ -17,7 +17,7 @@ export default function Command() {
   const { needShowMetadata, showMetadata, hideMetadata } = useShowMetadata();
   useEffect(() => {
     if (selectedLink) {
-      generateQRCode(selectedLink).then(url => {
+      generateQRCode(selectedLink).then((url) => {
         setQrCodeUrl(url || "");
       });
     }
@@ -35,7 +35,6 @@ export default function Command() {
     }
   };
 
-
   return (
     <List
       navigationTitle={t.title}
@@ -44,8 +43,8 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push 
-              title={t.addLink} 
+            <Action.Push
+              title={t.addLink}
               icon={Icon.Plus}
               target={<AddLinkForm onSubmit={handleAddLink} />}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -60,7 +59,7 @@ export default function Command() {
         </ActionPanel>
       }
       onSelectionChange={(id) => {
-        const selected = links.find(link => link.id === id);
+        const selected = links.find((link) => link.id === id);
         if (selected) {
           setSelectedLink(selected.url);
         }

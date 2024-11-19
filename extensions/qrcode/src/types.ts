@@ -1,23 +1,23 @@
 export interface LinkItem {
-    id: string;
-    title: string;
-    url: string;
+  id: string;
+  title: string;
+  url: string;
 }
 
 export interface URLInfo {
-    protocol: string;
-    host: string;
-    path: string;
-    query: string;
-    hash: string;
+  protocol: string;
+  host: string;
+  path: string;
+  query: string;
+  hash: string;
 }
 
 export interface Preferences {
-    language: string;
+  language: string;
 }
 
 export interface Language {
-    id: string;
-    name: string;
-    code: string;
+  id: string;
+  name: string;
+  code: string;
 }

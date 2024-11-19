@@ -13,14 +13,14 @@ interface LinkListItemProps {
   onPushAddForm: () => void;
 }
 
-export function LinkListItem({ 
-  link, 
-  selectedLink, 
+export function LinkListItem({
+  link,
+  selectedLink,
   qrCodeUrl,
   showMetadata,
   onToggleMetadata,
   onDeleteLink,
-  onPushAddForm 
+  onPushAddForm,
 }: LinkListItemProps) {
   const t = useTranslation();
 
@@ -29,21 +29,14 @@ export function LinkListItem({
       id={link.id}
       title={link.url}
       accessories={[
-        { 
+        {
           tag: {
             value: link.title || null,
-            color: Color.Blue
-          }
-        }
+            color: Color.Blue,
+          },
+        },
       ]}
-      detail={
-        <LinkDetail 
-          link={link} 
-          selectedLink={selectedLink} 
-          qrCodeUrl={qrCodeUrl}
-          showMetadata={showMetadata}
-        />
-      }
+      detail={<LinkDetail link={link} selectedLink={selectedLink} qrCodeUrl={qrCodeUrl} showMetadata={showMetadata} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -87,4 +80,4 @@ export function LinkListItem({
       }
     />
   );
-} 
+}
