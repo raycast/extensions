@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import fs from "fs";
 import { useSyncFolders } from "../hooks";
@@ -10,26 +10,32 @@ type SyncFoldersFormProps = {
 };
 
 export function SyncFoldersForm(props: SyncFoldersFormProps) {
-  const { syncFolders, setSyncFolders, updateSyncFolders } = useSyncFolders();
+  const { setSyncFolders, updateSyncFolders } = useSyncFolders();
   const { pop } = useNavigation();
 
   const { draftValues, syncFolder } = props;
 
+  const id = syncFolder?.id;
+
   const editSyncFolder: SyncFoldersFormValues | undefined = syncFolder && {
+    icon: syncFolder.icon as string,
     name: syncFolder.name as string,
     source_folder: syncFolder.source_folder ? [syncFolder.source_folder] : [],
     dest_folder: syncFolder.dest_folder ? [syncFolder.dest_folder] : [],
     delete_dest: syncFolder.delete_dest as boolean,
   };
 
-  console.log("SyncFoldersForm", syncFolders);
+  const icons = Object.entries(Icon).map(([key, value]) => {
+    return [key, value] as [string, Icon];
+  });
 
   const { handleSubmit, itemProps } = useForm<Partial<SyncFoldersFormValues>>({
-    onSubmit(values) {
+    async onSubmit(values) {
       const { name } = values;
 
-      if (syncFolder) {
-        updateSyncFolders(syncFolder.id as string, values as SyncFoldersFormValues);
+      if (id) {
+        await updateSyncFolders(id as string, values as SyncFoldersFormValues);
+
         showToast({
           style: Toast.Style.Success,
           title: "Yay!",
@@ -42,12 +48,12 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
           message: `Sync Folders "${name}" created`,
         });
 
-        setSyncFolders(values as SyncFoldersFormValues);
+        await setSyncFolders(values as SyncFoldersFormValues);
       }
 
       pop();
     },
-    initialValues: editSyncFolder || draftValues,
+    initialValues: { ...(editSyncFolder || draftValues), icon: editSyncFolder?.icon || Icon.Folder },
     validation: {
       name: FormValidation.Required,
 
@@ -79,13 +85,19 @@ export function SyncFoldersForm(props: SyncFoldersFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={`${editSyncFolder ? "Update" : "Create"} Sync Folders`}
+            title={`${id ? "Update" : "Create"} Sync Folders`}
             style={Action.Style.Regular}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
+      <Form.Dropdown {...itemProps.icon} title="Icon">
+        {icons.map(([key, value]) => {
+          return <Form.Dropdown.Item key={key} title={key} value={key} icon={value} />;
+        })}
+      </Form.Dropdown>
+
       <Form.TextField title="Name" placeholder="Enter a name" {...itemProps.name} />
 
       <Form.FilePicker
