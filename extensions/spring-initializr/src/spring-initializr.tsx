@@ -70,7 +70,7 @@ export default function Command() {
         console.log("Fetching metadata...");
         const response = await fetch("https://start.spring.io", {
           headers: {
-            "Accept": "application/vnd.initializr.v2.2+json",
+            Accept: "application/vnd.initializr.v2.2+json",
             "User-Agent": "Raycast-Spring-Initializr",
           },
         });
@@ -81,7 +81,7 @@ export default function Command() {
           throw new Error(`Failed to fetch Spring Initializr metadata: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json() as InitializrMetadata;
+        const data = (await response.json()) as InitializrMetadata;
         console.log("Metadata received successfully");
 
         setMetadata(data);
@@ -90,7 +90,7 @@ export default function Command() {
         showToast({
           style: Toast.Style.Success,
           title: "Success",
-          message: "Metadata loaded successfully"
+          message: "Metadata loaded successfully",
         });
       } catch (error) {
         console.error("Error fetching metadata:", error);
@@ -140,7 +140,7 @@ export default function Command() {
 
       // Save to Downloads folder (macOS)
       const homeDir = process.env.HOME;
-      const downloadsPath = path.join(homeDir || "", 'Downloads', `${values.artifactId}.zip`);
+      const downloadsPath = path.join(homeDir || "", "Downloads", `${values.artifactId}.zip`);
 
       writeFileSync(downloadsPath, buffer);
 
@@ -149,7 +149,6 @@ export default function Command() {
         title: "Project Downloaded",
         message: `Saved to Downloads folder as ${values.artifactId}.zip`,
       });
-
     } catch (error) {
       console.error("Error generating project:", error);
       await showToast({
@@ -188,10 +187,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Generate Project"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Generate Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -217,32 +213,13 @@ export default function Command() {
 
       <Form.Separator />
 
-      <Form.TextField
-        id="groupId"
-        title="Group ID"
-        placeholder="com.example"
-        defaultValue="com.example"
-      />
+      <Form.TextField id="groupId" title="Group ID" placeholder="com.example" defaultValue="com.example" />
 
-      <Form.TextField
-        id="artifactId"
-        title="Artifact ID"
-        placeholder="demo"
-        defaultValue="demo"
-      />
+      <Form.TextField id="artifactId" title="Artifact ID" placeholder="demo" defaultValue="demo" />
 
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="demo"
-        defaultValue="demo"
-      />
+      <Form.TextField id="name" title="Name" placeholder="demo" defaultValue="demo" />
 
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Demo project for Spring Boot"
-      />
+      <Form.TextField id="description" title="Description" placeholder="Demo project for Spring Boot" />
 
       <Form.TextField
         id="packageName"
@@ -270,12 +247,8 @@ export default function Command() {
       <Form.TagPicker id="dependencies" title="Dependencies">
         {metadata.dependencies.values.flatMap((group) =>
           group.values.map((dep) => (
-            <Form.TagPicker.Item
-              key={dep.id}
-              value={dep.id}
-              title={`${group.name}: ${dep.name}`}
-            />
-          ))
+            <Form.TagPicker.Item key={dep.id} value={dep.id} title={`${group.name}: ${dep.name}`} />
+          )),
         )}
       </Form.TagPicker>
     </Form>
