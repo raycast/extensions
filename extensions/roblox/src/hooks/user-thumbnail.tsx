@@ -24,7 +24,7 @@ export function useUserThumbnail(userId: number) {
   const cachedThumbnail = cache.get(userId.toString());
 
   const { data: thumbnailData, isLoading: thumbnailDataLoading } = useFetch<UserThumbnailResponse>(
-    `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=150x200&format=Png&isCircular=false`,
+    `https://thumbnails.roblox.com/v1/users/avatar?userIds=${userId}&size=720x720&format=Png&isCircular=false`,
     {
       execute: !cachedThumbnail,
     },
