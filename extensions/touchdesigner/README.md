@@ -1,5 +1,3 @@
-# Invitation App
+# Touch Designer
 
-invitation.app - referral codes, deals and invites.
-
-Warning: This extension is not compliant with the Terms of Service of invitation.app. Use at your own risk.
+This extension lets you access docs for TD operators quickly. More features soon.
