@@ -1799,5 +1799,6 @@
   "danieldeichfuss/zod-documentation": "zod-documentation",
   "raycast/zoom": "zoom",
   "prashantv/zoom-meeting-control": "zoom-control",
-  "reckoning-dev/zotero": "zotero"
+  "reckoning-dev/zotero": "zotero",
+  "theherk/zoxide-git-projects": "zoxide-git-projects"
 }
