@@ -2,8 +2,6 @@ import React, { useMemo } from "react";
 import { ActionPanel, Action, List, environment } from "@raycast/api";
 import { operatorData } from "./tdOperators";
 
-
-
 // Better typed interfaces
 interface Operator {
   id: string;
@@ -24,8 +22,6 @@ interface OperatorFamily {
   sweet_16?: Sweet16Operator[];
   types?: Record<string, string[]>;
 }
-
- 
 
 // Constants
 const BASE_DOC_URL = "https://derivative.ca/UserGuide";
