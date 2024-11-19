@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flow-tracker",
+  "title": "Flow Tracker",
+  "description": "A minimalist extension designed to effortlessly assist you in tracking and logging your focus time. Whether you are studying, working, or immersing yourself in a deep flow state, Flow Tracker ensures you remain cognizant of your productivity. Additionally, it provides a Stats and Achievements page for comprehensive analysis and recognition of your accomplishments.",
+  "icon": "extension-icon.png",
+  "author": "leandro.maia",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "track-flow",
+      "title": "Menu Bar Flow Tracker",
+      "subtitle": "Flow Tracker",
+      "description": "Track your focus time and stay in the zone",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "stats",
+      "title": "Flow Tracker Stats",
+      "subtitle": "Flow Tracker",
+      "description": "View detailed statistics of your flow sessions",
+      "mode": "view"
+    },
+    {
+      "name": "achievements",
+      "title": "Flow Tracker Achievements",
+      "subtitle": "Flow Tracker",
+      "description": "View your achievements and progress",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0",
+    "@types/chart.js": "^2.9.0",
+    "@types/react-vis": "^1.11.15",
+    "chart.js": "^4.4.6",
+    "react-chartjs-2": "^5.2.0",
+    "react-vis": "^1.12.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "^18.3.1",
+    "@types/uuid": "^9.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
