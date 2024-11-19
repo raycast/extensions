@@ -1,10 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
 import { existsSync } from "fs";
+import { ReactElement, useState } from "react";
 import { NotInstalledError } from "../components";
 import { HistoryEntry, Preferences, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
-import { useSQL } from "@raycast/utils";
-import { ReactElement, useState } from "react";
 
 const whereClauses = (terms: string[]) => {
   return terms.map((t) => `b.title LIKE '%${t}%'`).join(" AND ");
