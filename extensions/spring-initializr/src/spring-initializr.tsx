@@ -88,6 +88,7 @@ export default function Command() {
         setIsLoading(false);
 
         showToast({
+          style: Toast.Style.Success,
           title: "Success",
           message: "Metadata loaded successfully"
         });
@@ -95,9 +96,9 @@ export default function Command() {
         console.error("Error fetching metadata:", error);
         setIsLoading(false);
         showToast({
+          style: Toast.Style.Failure,
           title: "Error",
           message: error instanceof Error ? error.message : "Failed to load metadata",
-          style: "failure"
         });
       }
     }

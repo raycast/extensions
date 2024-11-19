@@ -29,7 +29,7 @@ Projects are automatically saved to your Downloads folder.
 
 ## Author
 
-[Your Name]
+Dan Vega (danvega@gmail.com)
 
 ## License
 
