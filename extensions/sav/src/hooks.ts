@@ -3,11 +3,11 @@ import { useFetch } from "@raycast/utils";
 import { ActiveDomain, Result } from "./types";
 
 const { api_url, api_key } = getPreferenceValues<Preferences>();
-  const headers = {
+  export const headers = {
     Host: "api.sav.com",
     APIKEY: api_key
   }
-  const parseResponse = async <T>(response: Response) => {
+  export const parseResponse = async <T>(response: Response) => {
     const text = await response.text();
     if (!text.startsWith("{")) throw new Error(response.statusText);
     const result: Result<T> = JSON.parse(text);

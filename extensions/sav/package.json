@@ -3,7 +3,7 @@
   "name": "sav",
   "title": "Sav",
   "description": "Manage Sav",
-  "icon": "extension-icon.png",
+  "icon": "sav.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
