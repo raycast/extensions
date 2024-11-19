@@ -44,12 +44,9 @@ interface ListItemData {
 }
 
 const createListItem = (family: string, operator: Operator): ListItemData => {
-  const subtitle = [
-    family,
-    operator.sweet ? "Sweet 16" : "",
-    operator.category,
-    operator.description
-  ].filter(Boolean).join(" | ");
+  const subtitle = [family, operator.sweet ? "Sweet 16" : "", operator.category, operator.description]
+    .filter(Boolean)
+    .join(" | ");
 
   return {
     id: `${family}-${operator.name}`,
