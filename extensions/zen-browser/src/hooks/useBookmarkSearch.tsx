@@ -7,7 +7,7 @@ import { HistoryEntry, Preferences, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 
 const whereClauses = (terms: string[]) => {
-  return terms.map((t) => `moz_bookmarks.title LIKE '%${t}%'`).join(" AND ");
+  return terms.map((t) => `b.title LIKE '%${t}%'`).join(" AND ");
 };
 
 const getBookmarkQuery = (query?: string) => {
