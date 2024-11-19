@@ -1,4 +1,4 @@
-import { environment, Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { writeFileSync } from "fs";
