@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Add Copy Vue & Svelte Component Feature] - 2024-11-04
+
+- Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.
+
 ## [Add Copy SVG URL Feature] - 2024-09-17
 
 - Add the commands `Copy SVG URL` and `Copy SVG Wordmark URL` to copy the SVG URL to the clipboard.

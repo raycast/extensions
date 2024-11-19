@@ -21,11 +21,18 @@ export function getIngredientDisplay(ingredient: IngredientResult): IngredientDi
       accessories: [{ tag: { value: "Vegan", color: Color.Green } }],
     };
   }
-  if (ingredient.maybeVegan) {
+  if (ingredient.maybeNotVegan) {
     return {
-      icon: { source: Icon.QuestionMark, tintColor: Color.Orange },
+      icon: { source: Icon.XMarkCircleHalfDash, tintColor: Color.Orange },
+      statusText: "Maybe not vegan",
+      accessories: [{ tag: { value: "Maybe not vegan", color: Color.Orange } }],
+    };
+  }
+  if (ingredient.unknown) {
+    return {
+      icon: { source: Icon.QuestionMark, tintColor: Color.SecondaryText },
       statusText: "Unknown",
-      accessories: [{ tag: { value: "Unknown", color: Color.Orange } }],
+      accessories: [{ tag: { value: "Unknown", color: Color.SecondaryText } }],
     };
   }
   if (ingredient.isVegan === true) {

@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Chore] - 2024-10-28
+
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-10-02
 
 - Rename extension title

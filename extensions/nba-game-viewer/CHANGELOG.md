@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Fixes] - 2024-10-28
+
+- Removed year from standings to default to current season.
+
 ## [Improvements] - 2024-08-28
 
 - Added a score command that shows the scores of the games that are currently in progress and the games from the last 7 days.
