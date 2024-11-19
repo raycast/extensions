@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Fix Bookmark Duplicates Issue] - 2024-11-19
+## [Fix Bookmark Duplicates Issue] - {PR_MERGE_DATE}
 
 - Fix duplicate entries in bookmark search results. Previously, bookmarks would show up multiple times if they had tags. Now each bookmark appears only once regardless of how many tags it has.
 
