@@ -1,3 +1,3 @@
 # Defbro Changelog
 
-## [Initial Version] - 2024-11-13
+## [Initial Version] - {PR_MERGE_DATE}

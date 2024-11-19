@@ -9,12 +9,14 @@ import { Browser } from "./types";
 export default function BrowserList() {
   const [searchText, setSearchText] = useState("");
   const [browsers, setBrowsers] = useState<Browser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const isInstalled = useIsDefbroInstalled();
 
   useEffect(() => {
     const fetchData = async () => {
       const browserData = await getBrowsers();
       setBrowsers(browserData);
+      setIsLoading(false);
     };
 
     if (isInstalled) {
@@ -40,7 +42,12 @@ export default function BrowserList() {
   }
 
   return (
-    <List onSearchTextChange={setSearchText} searchBarPlaceholder="Search Browser" navigationTitle="Search Browser">
+    <List
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Browser"
+      navigationTitle="Search Browser"
+      isLoading={isLoading}
+    >
       {filteredBrowsers.map((browser) => (
         <List.Item
           key={browser.id}
