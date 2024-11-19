@@ -349,6 +349,7 @@
   "HerbertLu/deduplicator": "deduplicator",
   "mooxl/deepcast": "deepcast",
   "jaredliu233/deepl-api-usage": "deepl-api-usage",
+  "fernando_barrios/defbro": "defbro",
   "adrian-schnell/defichain-dobby": "defichain-dobby",
   "adrian-schnell/defichain-lottery": "defichain-lottery",
   "adrian-schnell/defiscan": "defiscan",
@@ -1446,11 +1447,12 @@
   "tonka3000/speedtest": "speedtest",
   "Gorzog/spell": "spell",
   "xmorse/spiceblow-database": "spiceblow-database",
-  "spike.sh/spike": "spike",
+  "spike/spike": "spike",
   "marcbouchenoire/splatoon": "splatoon",
   "xmorse/split-video-scenes": "split-video-scenes",
   "splix.app/splix": "splix",
   "Visual-Studio-Coder/spoiler-converter": "spoiler-converter",
+  "truex/spoqify": "spoqify",
   "mattisssa/spotify-beta": "spotify-beta",
   "thomas/spotify-controls": "spotify-controls",
   "mattisssa/spotify-player": "spotify-player",
@@ -1797,5 +1799,6 @@
   "danieldeichfuss/zod-documentation": "zod-documentation",
   "raycast/zoom": "zoom",
   "prashantv/zoom-meeting-control": "zoom-control",
-  "reckoning-dev/zotero": "zotero"
+  "reckoning-dev/zotero": "zotero",
+  "theherk/zoxide-git-projects": "zoxide-git-projects"
 }

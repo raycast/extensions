@@ -350,6 +350,7 @@
 /extensions/deduplicator                                            @lryong
 /extensions/deepcast                                                @mooxl @peter-gy @Popalay @MonsterDeveloper @YamenSharaf @EvanZhouDev @erics118 @riadhrebei
 /extensions/deepl-api-usage                                         @DophinL @pernielsentikaer
+/extensions/defbro                                                  @jfernandogt
 /extensions/defichain-dobby                                         @adrian-schnell
 /extensions/defichain-lottery                                       @adrian-schnell @pernielsentikaer
 /extensions/defiscan                                                @adrian-schnell
@@ -1353,7 +1354,7 @@
 /extensions/script-kit                                              @pomdtr
 /extensions/scss-compile                                            @SuoweiHu
 /extensions/search-astro-docs                                       @ElianCodes @pernielsentikaer
-/extensions/search-chatwork                                         @nagauta
+/extensions/search-chatwork                                         @nagauta @xmok
 /extensions/search-composer-packagist                               @danyelkeddah @macbookandrew
 /extensions/search-hexpm                                            @jordelver
 /extensions/search-hookmark                                         @QIanGua
@@ -1452,6 +1453,7 @@
 /extensions/split-video-scenes                                      @remorses
 /extensions/splix                                                   @cwooldridge1
 /extensions/spoiler-converter                                       @Visual-Studio-Coder @varunsatish2017
+/extensions/spoqify                                                 @ajtruex
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
 /extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu
@@ -1799,3 +1801,4 @@
 /extensions/zoom                                                    @thomaslombart @Visual-Studio-Coder
 /extensions/zoom-control                                            @prashantv @pernielsentikaer @JackCasica
 /extensions/zotero                                                  @sadanand-singh @lazarjov @joshuahhh
+/extensions/zoxide-git-projects                                     @theherk
