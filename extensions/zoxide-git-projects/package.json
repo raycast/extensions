@@ -35,7 +35,7 @@
   "preferences": [
     {
       "name": "application",
-      "title": "Git Application",
+      "title": "Application",
       "description": "Application to open projects with",
       "type": "appPicker",
       "required": true
