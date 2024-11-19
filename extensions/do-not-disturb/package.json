@@ -6,7 +6,8 @@
   "icon": "dnd-icon.png",
   "author": "yakitrak",
   "contributors": [
-    "leyang"
+    "leyang",
+    "mikikiv"
   ],
   "categories": [
     "Productivity"
@@ -40,6 +41,17 @@
       "subtitle": "Do Not Disturb",
       "description": "Display Do Not Disturb status",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "supressHUD",
+      "title": "Suppress HUD",
+      "label": "Suppress HUD notification when toggling Do Not Disturb",
+      "description": "This option exists for compatibility with other extensions.",
+      "type": "checkbox",
+      "defaultValue": false,
+      "required": false
     }
   ],
   "dependencies": {

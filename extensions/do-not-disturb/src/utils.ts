@@ -1,5 +1,7 @@
 import { exec } from "child_process";
-import { open, showHUD, closeMainWindow } from "@raycast/api";
+import { open, showHUD, closeMainWindow, getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues();
 
 const DNDshortcutName = `DND Raycast`;
 
@@ -34,7 +36,7 @@ export async function turnOnDND() {
   if (!isInstalled) return;
   await executeCommand(`echo "on" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (isOn) {
+  if (isOn && preferences.supressHUD === true) {
     await showHUD(`Do Not Disturb is on`);
   }
 }
@@ -44,7 +46,7 @@ export async function turnOffDND() {
   if (!isInstalled) return;
   await executeCommand(`echo "off" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (!isOn) {
+  if (!isOn && preferences.supressHUD === true) {
     await showHUD(`Do Not Disturb is off`);
   }
 }
@@ -53,7 +55,9 @@ export async function statusDND() {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   const isOn = await getDNDStatus();
-  await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
+  if (preferences.supressHUD === true) {
+    await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
+  }
 }
 
 export async function toggleDND() {
