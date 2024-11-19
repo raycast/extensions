@@ -1,5 +1,4 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
-import { getIcon } from "./invt/resultUtils";
 import { useSearch } from "./invt/useSearch";
 
 
