@@ -1,6 +1,6 @@
 # Chatwork Search Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-11-19
 
 - _Cache_ "Rooms" with the help of `useCachedPromise`
 - Make _OAuth_ more robust with the use of OAuth Util
