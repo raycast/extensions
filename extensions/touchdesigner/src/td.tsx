@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ActionPanel, Action, List, environment } from "@raycast/api";
-import { operatorData } from "./tdOperators";
+import { operatorData, Operator } from "./tdOperators";
 
 // Constants
 const BASE_DOC_URL = "https://derivative.ca/UserGuide";
@@ -46,10 +46,9 @@ interface ListItemData {
 const createListItem = (family: string, operator: Operator): ListItemData => {
   const subtitle = [family, operator.sweet ? "Sweet 16" : "", operator.category, operator.description]
     .filter(Boolean)
-    .join(" | ");
-
+    .join(" - ");
   return {
-    id: `${family}-${operator.name}`,
+    id: `${family}_${operator.name}`,
     title: operator.name,
     subtitle,
     icon: getFamilyIcon(family),
