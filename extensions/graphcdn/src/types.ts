@@ -41,7 +41,7 @@ export type ErrorResponse = {
       | {
           [key: string]: {
             code: string;
-            detais?: unknown;
+            details?: unknown;
           };
         };
   }>;
