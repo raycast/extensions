@@ -33,7 +33,7 @@ export default function Base64ToImage() {
       return;
     }
 
-    const cleanedBase64 = base64.replaceAll('"', "").split(",").pop() || "";
+    const cleanedBase64 = base64.replaceAll('"', "").replaceAll("'", "");
     if (!isValidBase64(cleanedBase64)) {
       showToast({
         title: "Error",
@@ -46,12 +46,12 @@ export default function Base64ToImage() {
     let imageData: string;
     let extension: string;
 
-    if (!base64.startsWith("data:image/")) {
-      imageData = `data:image/${outputFormat};base64,${base64}`;
+    if (!cleanedBase64.startsWith("data:image/")) {
+      imageData = `data:image/${outputFormat};base64,${cleanedBase64}`;
       extension = outputFormat;
     } else {
-      imageData = base64.replaceAll('"', "");
-      extension = outputFormat || base64.split(",")[0].split("/")[1];
+      imageData = cleanedBase64;
+      extension = outputFormat || cleanedBase64.split(",")[0].split("/")[1];
     }
 
     try {
