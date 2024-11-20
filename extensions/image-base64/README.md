@@ -1,4 +1,4 @@
-# image-base64
+# Image Base64 Converter
 
 Convert between base64 strings and images easily.
 
