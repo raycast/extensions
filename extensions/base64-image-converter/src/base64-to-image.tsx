@@ -3,7 +3,8 @@ import { useState } from "react";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { calculateBase64Size, getImageDimensionsFromBase64, isValidBase64 } from "./libs/imageUtils";
+import { calculateBase64Size, getImageDimensionsFromBase64 } from "./libs/imageUtils";
+import isBase64 from "is-base64";
 
 type Values = {
   base64: string;
@@ -33,8 +34,8 @@ export default function Base64ToImage() {
       return;
     }
 
-    const cleanedBase64 = base64.replaceAll('"', "").split(",").pop() || "";
-    if (!isValidBase64(cleanedBase64)) {
+    const cleanedBase64 = base64.replaceAll('"', "").replaceAll("'", "");
+    if (!isBase64(cleanedBase64, { allowMime: true })) {
       showToast({
         title: "Error",
         message: "Invalid base64 string. Please check your input.",
@@ -46,16 +47,16 @@ export default function Base64ToImage() {
     let imageData: string;
     let extension: string;
 
-    if (!base64.startsWith("data:image/")) {
-      imageData = `data:image/${outputFormat};base64,${base64}`;
+    if (!cleanedBase64.startsWith("data:image/")) {
+      imageData = `data:image/${outputFormat};base64,${cleanedBase64}`;
       extension = outputFormat;
     } else {
-      imageData = base64.replaceAll('"', "");
-      extension = outputFormat || base64.split(",")[0].split("/")[1];
+      imageData = cleanedBase64;
+      extension = outputFormat || cleanedBase64.split(",")[0].split("/")[1];
     }
 
     try {
-      const dimensions = getImageDimensionsFromBase64(base64);
+      const dimensions = getImageDimensionsFromBase64(imageData);
       setImage({
         image: imageData,
         extension: extension,

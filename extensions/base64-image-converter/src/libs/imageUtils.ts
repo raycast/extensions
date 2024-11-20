@@ -47,9 +47,3 @@ export function calculateBase64Size(base64String: string): number {
   const padding = base64String.endsWith("==") ? 2 : base64String.endsWith("=") ? 1 : 0;
   return (base64String.length * 3) / 4 - padding;
 }
-
-export function isValidBase64(str: string): boolean {
-  if (!str) return false;
-  const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-  return base64Regex.test(str);
-}
