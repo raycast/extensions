@@ -6,7 +6,8 @@
   "icon": "dnd-icon.png",
   "author": "yakitrak",
   "contributors": [
-    "leyang"
+    "leyang",
+    "mikikiv"
   ],
   "categories": [
     "Productivity"
@@ -44,7 +45,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.63.0",
-    "child-process": "^1.0.2"
+    "child-process": "^1.0.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

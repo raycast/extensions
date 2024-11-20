@@ -8,11 +8,11 @@ This is a Raycast extension for [Hestia Control Panel](https://hestiacp.com/) Ad
 
 ## 🚀 Getting Started
 
-1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/hestiacp-admin) OR via Raycast Store
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/hestiacp-admin) OR `install` via Raycast Store
 
 2. **Enter your HestiaCP Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
 
-    a. The URL of your HestiaCP instance (w/ Port) (e.g. demo.hestiacp.com:8083)
+    a. The URL of your HestiaCP instance (w/ Port) (e.g. https://demo.hestiacp.com:8083)
 
     b. HestiaCP Admin Username (this is almost always `admin`)
 
@@ -31,8 +31,7 @@ Before using API you need to enable API and whitelist the IPs you will be using.
 
 1. METHOD 1 (recommended)
     - `ssh` into your HestiaCP instance
-    - use HestiaCP CLI to run `v-generate-api-key`
-    - use HestiaCP CLI to run `v-add-access-key admin '*'` (AS ADMIN) (this will grant all API permissions)
+    - use HestiaCP CLI to run `v-add-access-key admin '*' Raycast` (AS ADMIN) (this will grant all API permissions and add a comment as 'Raycast')
     - finally, `copy` the Access Keys (they will be output on the terminal)
     
 2. METHOD 2 (this method is not recommended as it does not grant all API permissions athough you could use Method 2 to generate the key and then use CLI from METHOD 1 to grant all permissions)
@@ -43,6 +42,9 @@ Before using API you need to enable API and whitelist the IPs you will be using.
 
 </details>
 
+## 🗒️ NOTE
+
+If you get a *self-signed certificate* error, you need to fix the SSL of your instance (https://hestiacp.com/docs/server-administration/ssl-certificates.html).
 
 ## ○ Commands/Endpoints
 
@@ -51,7 +53,7 @@ Before using API you need to enable API and whitelist the IPs you will be using.
 
 | cmd | included | commments |
 |-----|----------|-----------|
-| v-acknowledge-user-notification | ❌ | - |
+| v-acknowledge-user-notification | ✅ | - |
 | v-add-access-key | ❌ | - |
 | v-add-backup-host | ❌ | - |
 | v-add-cron-hestia-autoupdate | ❌ | - |

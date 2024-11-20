@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function useAuthHeaders() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const accessToken = preferences.token;
 
   return {

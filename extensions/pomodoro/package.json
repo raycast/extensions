@@ -20,6 +20,9 @@
     "pomodoro",
     "timer"
   ],
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -306,6 +309,14 @@
       ]
     },
     {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
+    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,
@@ -420,7 +431,8 @@
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.12.4",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

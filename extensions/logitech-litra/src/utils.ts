@@ -18,7 +18,7 @@ const joinWordsWithCommasThenOr = (words: string[]): string => {
 };
 
 const MINIMUM_SUPPORTED_LITRA_VERSION = "0.2.0";
-const SUPPORTED_MAJOR_LITRA_VERSIONS = [0, 1];
+const SUPPORTED_MAJOR_LITRA_VERSIONS = [0, 1, 2];
 const ALLOWED_MAJOR_VERSIONS_STRING = joinWordsWithCommasThenOr(
   SUPPORTED_MAJOR_LITRA_VERSIONS.map((majorVersion) => `v${majorVersion}.x`),
 );

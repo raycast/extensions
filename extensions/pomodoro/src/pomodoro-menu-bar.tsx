@@ -16,6 +16,7 @@ import {
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
+import { checkDNDExtensionInstall } from "../lib/doNotDisturb";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",
@@ -31,6 +32,7 @@ export default function TogglePomodoroTimer() {
   }
 
   function onStart(type: IntervalType) {
+    checkDNDExtensionInstall();
     setCurrentInterval(createInterval(type));
   }
 

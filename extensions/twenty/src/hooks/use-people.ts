@@ -1,5 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { useAuthHeaders } from "./use-auth-headers";
+import { useApiUrl } from "./use-api-url";
 
 interface People {
   id: string;
@@ -45,7 +46,7 @@ interface PeopleResponse {
 }
 
 export function useGetPeople() {
-  const { data, isLoading, error, revalidate } = useFetch<PeopleResponse>(`https://api.twenty.com/rest/people`, {
+  const { data, isLoading, error, revalidate } = useFetch<PeopleResponse>(useApiUrl("people"), {
     headers: useAuthHeaders(),
   });
 
