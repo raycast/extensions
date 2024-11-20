@@ -12,7 +12,7 @@ export async function setDND(enabled: boolean) {
     {
       ...dndLaunchOptions,
       name: enabled ? "on" : "off",
-      context: { supressHUD: true },
+      context: { supressHUD: !enabled },
     },
     false
   ).catch(() => {
