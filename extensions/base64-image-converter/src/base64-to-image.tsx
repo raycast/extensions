@@ -35,7 +35,7 @@ export default function Base64ToImage() {
     }
 
     const cleanedBase64 = base64.replaceAll('"', "").replaceAll("'", "");
-    if (!isBase64(cleanedBase64, { allowMime: true })) {
+    if (cleanedBase64.length < 40 || !isBase64(cleanedBase64, { allowMime: true })) {
       showToast({
         title: "Error",
         message: "Invalid base64 string. Please check your input.",
