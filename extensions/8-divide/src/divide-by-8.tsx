@@ -1,14 +1,14 @@
-import { 
-  Clipboard, 
-  showHUD, 
-  ActionPanel, 
-  Action, 
-  List, 
+import {
+  Clipboard,
+  showHUD,
+  ActionPanel,
+  Action,
+  List,
   Detail,
   closeMainWindow,
   getFrontmostApplication,
   popToRoot,
-  getSelectedText
+  getSelectedText,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
