@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
-import { generateGamePageLink } from "../modules/roblox-links";
+import { generateGamePageLink, generateGameStartLink } from "../modules/roblox-links";
 import { GamePage } from "./game-page";
 import { numberWithCommas } from "../modules/utils";
 import {
@@ -92,12 +92,16 @@ export function GamesListItem({ game, options }: { game: GameData; options: Game
           `;
   }
 
+  const gameDeeplink = generateGameStartLink(rootPlaceId);
+
   return (
     <List.Item
       title={name}
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.AppWindow} title="View" target={<GamePage universeId={universeId} />} />
+
+          <Action.Open title="Play with Roblox" target={gameDeeplink} shortcut={Keyboard.Shortcut.Common.Open} />
 
           {!favourited && (
             <Action
