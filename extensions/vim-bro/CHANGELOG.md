@@ -1,5 +1,9 @@
 # Vim Bro Changelog
 
+## [Added more commands] - 2024-11-20
+
+-  New commands for window management have been added
+
 ## [Add copy to clipboard action] - 2024-11-16
 
 - Strip colon from copied commands
