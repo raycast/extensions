@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import axios from "axios";
 
 const { token } = getPreferenceValues<ExtensionPreferences>();
@@ -235,6 +235,12 @@ type AppSpec = {
     output_dir: string;
   }>;
   region: string;
+  envs?: Array<{
+    key: string;
+    value: string;
+    scope: string;
+    type?: "SECRET";
+  }>;
   alerts: Array<{
     rule: string;
   }>;
@@ -341,6 +347,18 @@ const useAuthorizedFetch =
     useFetch<T>(`${baseURL}/${!params || !params.length || typeof path === "string" ? path : path(...params)}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      async onError(error) {
+        await showFailureToast(error, {
+          title: "Failed to fetch latest data",
+          primaryAction:
+            error.message !== "Unauthorized"
+              ? undefined
+              : {
+                  title: "Open Extension Preferences",
+                  onAction: openExtensionPreferences,
+                },
+        });
       },
     });
 

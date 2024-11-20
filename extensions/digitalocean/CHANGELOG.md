@@ -2,7 +2,9 @@
 
 ## [Minor Changes] - {PR_MERGE_DATE}
 
-- Update item in `Search App Platform`
+- View "Env Vars" in `Search App Platform`
+- Update item in `Search App Platform` to be similar to online
+- `Open Extension Preferences` when _Unauthorized_
 
 ## [Add `Search App Platforms` Command] - 2024-08-05
 
