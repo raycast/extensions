@@ -1090,6 +1090,7 @@
 /extensions/paper                                                   @luctst
 /extensions/paperless-ngx                                           @Padamdam @ibrikin
 /extensions/papermatch                                              @marlonjames71 @AndrewMonty
+/extensions/papersize                                               @mihaeltomic
 /extensions/paperspace                                              @yuri-becker @xmok
 /extensions/parabol                                                 @parabol @BartoszJarocki
 /extensions/parallels-virtual-machines                              @danpalmer
@@ -1626,7 +1627,7 @@
 /extensions/twitter                                                 @tonka3000 @peduarte
 /extensions/twitter-trendscast                                      @pradeepb28
 /extensions/twitter-video-downloader                                @kaanrkaraman
-/extensions/two-factor-authentication-code-generator                @cjdenio @97albertus @LitoMore
+/extensions/two-factor-authentication-code-generator                @cjdenio @97albertus @LitoMore @cristiangrojas
 /extensions/twos                                                    @ekafyi
 /extensions/tyme-3-time-tracker                                     @melkstam
 /extensions/tynyfy                                                  @kusthi
