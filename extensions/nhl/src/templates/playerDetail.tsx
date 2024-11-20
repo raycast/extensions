@@ -213,12 +213,21 @@ export default function PlayerDetail({ id }: { id: number }) {
   if (playerData.isLoading || playerBio.isLoading)
     return <Detail isLoading={true} markdown={userInterface.loading[getLanguageKey()]} />;
 
-  if (!playerData.data && !playerBio.data) return <Unresponsive />;
+  // Add additional check for playerData.data
+  if (!playerData?.data) return <Unresponsive />;
 
   const player = playerData.data;
-  const heroImage = player?.heroImage ? `![](${player.heroImage})` : "";
 
-  let playerMarkdown = `# ${player.firstName?.default} ${player.lastName?.default} ${player.sweaterNumber ? `#${player.sweaterNumber}` : ""}, ${player.position} <img src="${player.headshot}" width="50" height="50" /> ${player.inHHOF ? '<img src="https://assets.nhle.com/badges/hockey_hof.svg" width="50" height="50" />' : ""} ${player.inTop100AllTime ? '<img src="https://assets.nhle.com/badges/100_greatest_players.svg" width="50" height="50">' : ""} \n --- \n ${heroImage} \n `;
+  // Add null checks for all nested properties
+  let playerMarkdown = `# ${player.firstName?.default || ""} ${player.lastName?.default || ""} ${
+    player.sweaterNumber ? `#${player.sweaterNumber}` : ""
+  }, ${player.position || ""} <img src="${player.headshot || ""}" width="50" height="50" /> ${
+    player.inHHOF ? '<img src="https://assets.nhle.com/badges/hockey_hof.svg" width="50" height="50" />' : ""
+  } ${
+    player.inTop100AllTime
+      ? '<img src="https://assets.nhle.com/badges/100_greatest_players.svg" width="50" height="50">'
+      : ""
+  } \n --- \n ${player.heroImage ? `![](${player.heroImage})` : ""} \n `;
 
   // Last season
   if (player.featuredStats?.regularSeason?.subSeason) {
@@ -271,8 +280,8 @@ export default function PlayerDetail({ id }: { id: number }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title={gameActions.gameCenter[lang]}
-            url={`https://www.nhl.com/${player.teamCommonName.default?.toLowerCase()}/player/${player.firstName.default}-${player.lastName.default}-${player.playerId}`}
+            title={gameActions.playerCenter[lang]}
+            url={`https://www.nhl.com/player/${player.playerSlug}`}
           />
         </ActionPanel>
       }

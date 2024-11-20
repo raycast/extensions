@@ -46,11 +46,25 @@ const gameTime = function (game: Game) {
   }
 };
 
-export default function GameList({ title, games }: { title: string; games: Game[] }) {
+export default function GameList({
+  title,
+  games,
+  favTeam = false,
+}: {
+  title: string;
+  games: Game[];
+  favTeam?: boolean;
+}) {
+  const favoriteTeam = getPreferenceValues().team as string;
+
+  const filteredGames = favTeam
+    ? games.filter((game) => game.homeTeam.abbrev === favoriteTeam || game.awayTeam.abbrev === favoriteTeam)
+    : games;
+
   return (
     <List.Section title={title}>
-      {games.length > 0
-        ? games.map((game) => (
+      {filteredGames.length > 0
+        ? filteredGames.map((game) => (
             <List.Item
               key={game.id}
               title={`${game.awayTeam.name[languageKey]} @ ${game.homeTeam.name[languageKey]}`}

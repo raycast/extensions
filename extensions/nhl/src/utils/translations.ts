@@ -27,9 +27,21 @@ export const userInterface = {
     default: "Awards",
     fr: "Récompenses",
   },
+  searchSchedule: {
+    default: "Search schedule for",
+    fr: "Rechercher le calendrier pour",
+  },
+  gamesRemaining: {
+    default: "games remaining",
+    fr: "matchs restants",
+  },
 };
 
 export const gameTitles = {
+  favorite: {
+    default: "Favorite Team",
+    fr: "Équipe Favorite",
+  },
   today: {
     default: "Today's Games",
     fr: "Matchs d'aujourd'hui",
@@ -53,6 +65,10 @@ export const gameActions = {
     default: "Open in Game Center",
     fr: "Ouvrir dans Game Center",
   },
+  playerCenter: {
+    default: "Open in Player Center",
+    fr: "Ouvrir dans Player Center",
+  },
   findTickets: {
     default: "Find Tickets",
     fr: "Trouver des Billets",
@@ -60,6 +76,10 @@ export const gameActions = {
   threeMinRecap: {
     default: "Three Min Recap",
     fr: "Résumé de Trois Minutes",
+  },
+  view: {
+    default: "View",
+    fr: "Voir",
   },
   viewRoster: {
     default: "View Roster",
@@ -304,5 +324,32 @@ export const playerTitleStrings = {
   goalies: {
     default: "Goalies",
     fr: "Gardiens",
+  },
+};
+
+export const divisionStrings = {
+  central: {
+    default: "Central",
+    fr: "Centrale",
+  },
+  metropolitan: {
+    default: "Metropolitan",
+    fr: "Métropolitaine",
+  },
+  pacific: {
+    default: "Pacific",
+    fr: "Pacifique",
+  },
+  atlantic: {
+    default: "Atlantic",
+    fr: "Atlantique",
+  },
+  eastern: {
+    default: "Eastern",
+    fr: "Est",
+  },
+  western: {
+    default: "Western",
+    fr: "Ouest",
   },
 };

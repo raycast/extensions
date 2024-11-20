@@ -102,6 +102,148 @@
           "value": "America/Los_Angeles"
         }
       ]
+    },
+    {
+      "name": "team",
+      "title": "Favorite Team",
+      "description": "Choose your favorite NHL team",
+      "type": "dropdown",
+      "required": false,
+      "default": "default",
+      "data": [
+        {
+          "title": "None",
+          "value": "default"
+        },
+        {
+          "title": "Anaheim Ducks",
+          "value": "ANA"
+        },
+        {
+          "title": "Boston Bruins",
+          "value": "BOS"
+        },
+        {
+          "title": "Buffalo Sabres",
+          "value": "BUF"
+        },
+        {
+          "title": "Calgary Flames",
+          "value": "CGY"
+        },
+        {
+          "title": "Carolina Hurricanes",
+          "value": "CAR"
+        },
+        {
+          "title": "Chicago Blackhawks",
+          "value": "CHI"
+        },
+        {
+          "title": "Colorado Avalanche",
+          "value": "COL"
+        },
+        {
+          "title": "Columbus Blue Jackets",
+          "value": "CBJ"
+        },
+        {
+          "title": "Dallas Stars",
+          "value": "DAL"
+        },
+        {
+          "title": "Detroit Red Wings",
+          "value": "DET"
+        },
+        {
+          "title": "Edmonton Oilers",
+          "value": "EDM"
+        },
+        {
+          "title": "Florida Panthers",
+          "value": "FLA"
+        },
+        {
+          "title": "Los Angeles Kings",
+          "value": "LAK"
+        },
+        {
+          "title": "Minnesota Wild",
+          "value": "MIN"
+        },
+        {
+          "title": "Montreal Canadiens",
+          "value": "MTL"
+        },
+        {
+          "title": "Nashville Predators",
+          "value": "NSH"
+        },
+        {
+          "title": "New Jersey Devils",
+          "value": "NJD"
+        },
+        {
+          "title": "New York Islanders",
+          "value": "NYI"
+        },
+        {
+          "title": "New York Rangers",
+          "value": "NYR"
+        },
+        {
+          "title": "Ottawa Senators",
+          "value": "OTT"
+        },
+        {
+          "title": "Philadelphia Flyers",
+          "value": "PHI"
+        },
+        {
+          "title": "Pittsburgh Penguins",
+          "value": "PIT"
+        },
+        {
+          "title": "San Jose Sharks",
+          "value": "SJS"
+        },
+        {
+          "title": "Seattle Kraken",
+          "value": "SEA"
+        },
+        {
+          "title": "St. Louis Blues",
+          "value": "STL"
+        },
+        {
+          "title": "Tampa Bay Lightning",
+          "value": "TBL"
+        },
+        {
+          "title": "Toronto Maple Leafs",
+          "value": "TOR"
+        },
+        {
+          "title": "Vancouver Canucks",
+          "value": "VAN"
+        },
+        {
+          "title": "Vegas Golden Knights",
+          "value": "VGK"
+        },
+        {
+          "title": "Washington Capitals",
+          "value": "WSH"
+        },
+        {
+          "title": "Winnipeg Jets",
+          "value": "WPG"
+        },
+        {
+          "title": "Utah Hockey Club",
+          "value": "UHC"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,60 +1,126 @@
 import React from "react";
 import { PlayerOnIce } from "../utils/types";
 import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, teamLogo } from "../utils/helpers";
-import { timeStrings } from "../utils/translations";
+import { gameActions, timeStrings } from "../utils/translations";
 import { Action, ActionPanel, List } from "@raycast/api";
 import PlayerDetail from "./playerDetail";
 
 export default function PlayerListItem({ player }: { player: PlayerOnIce }) {
-  const headshot = function (player: PlayerOnIce) {
+  if (!player) return null;
+
+  const headshot = (player: PlayerOnIce): string => {
+    if (!player) return "";
     if (player.headshot) return player.headshot;
-    return `https://assets.nhle.com/mugs/nhl/${player.lastSeasonId}/${player.lastTeamAbbrev}/${player.playerId}.png`;
+
+    const seasonId = player.lastSeasonId ?? "";
+    const teamAbbrev = player.lastTeamAbbrev ?? "";
+    const playerId = player.playerId ?? "";
+
+    return playerId ? `https://assets.nhle.com/mugs/nhl/${seasonId}/${teamAbbrev}/${playerId}.png` : "";
   };
 
   const getPlayerName = (player: PlayerOnIce): string => {
+    if (!player) return "";
+
     if (typeof player.name === "string") return player.name;
-    if (typeof player.name === "object") return player.name.default;
-    if (player.firstName && player.lastName) {
-      return `${player.firstName.default} ${player.lastName.default}`;
+
+    if (player.name && typeof player.name === "object" && "default" in player.name) {
+      return player.name.default ?? "";
     }
+
+    if (player.firstName && player.lastName) {
+      const first = typeof player.firstName === "object" ? (player.firstName?.default ?? "") : (player.firstName ?? "");
+      const last = typeof player.lastName === "object" ? (player.lastName?.default ?? "") : (player.lastName ?? "");
+      return `${first} ${last}`.trim();
+    }
+
     return "";
   };
 
   const getBirthCity = (player: PlayerOnIce): string => {
+    if (!player) return "";
+    if (!player.birthCity) return "";
+
     if (typeof player.birthCity === "string") return player.birthCity;
-    if (typeof player.birthCity === "object") return player.birthCity.default;
-    return "";
+
+    return player.birthCity?.default ?? "";
   };
 
-  const playerSubtitle = function (player: PlayerOnIce): string {
-    let subtitle = player.teamAbbrev ? `${player.teamAbbrev}, ` : "";
-    subtitle += player.sweaterNumber ? `#${player.sweaterNumber}, ` : "";
-    subtitle += player.positionCode ? `${player.positionCode}` : "";
-    return subtitle;
+  const playerSubtitle = (player: PlayerOnIce): string => {
+    if (!player) return "";
+
+    const parts: string[] = [];
+
+    if (player.teamAbbrev) parts.push(player.teamAbbrev);
+    if (player.sweaterNumber) parts.push(`#${player.sweaterNumber}`);
+    if (player.positionCode) parts.push(player.positionCode);
+
+    return parts.join(", ");
   };
+
+  // Safely get player ID
+  const playerId = Number(player.playerId || player.id || 0);
+  if (!playerId) return null;
+
+  // Prepare accessories array with type checking
+  const accessories: List.Item.Accessory[] = [];
+
+  // Birth location accessory
+  const birthCity = getBirthCity(player);
+  const birthCountry = player.birthCountry;
+  if (birthCity || birthCountry) {
+    const birthLocation = [
+      birthCity && `${birthCity},`,
+      birthCountry && `${birthCountry} ${getFlagEmoji(birthCountry)}`,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    if (birthLocation) {
+      accessories.push({ text: birthLocation });
+    }
+  }
+
+  // Last played season accessory
+  if (player.lastSeasonId) {
+    accessories.push({
+      text: `${timeStrings.lastPlayed[getLanguageKey()]}:${player.lastSeasonId.slice(-4)}`,
+    });
+  }
+
+  // Height accessory
+  if (player.heightInInches) {
+    accessories.push({
+      tag: { value: convertInchesToFeetAndInches(player.heightInInches) },
+    });
+  }
+
+  // Weight accessory
+  if (player.weightInPounds) {
+    accessories.push({
+      tag: { value: `${player.weightInPounds} lb` },
+    });
+  }
+
+  // Team logo accessory
+  if (player.teamAbbrev) {
+    accessories.push({
+      icon: teamLogo(player.teamAbbrev),
+    });
+  }
 
   return (
     <List.Item
-      key={player.playerId ?? player.id}
+      key={playerId}
       icon={headshot(player)}
       title={getPlayerName(player)}
       subtitle={playerSubtitle(player)}
-      accessories={[
-        {
-          text: `${getBirthCity(player) ? `${getBirthCity(player)},` : ""} ${player.birthCountry ? `${player.birthCountry} ${getFlagEmoji(player.birthCountry)}` : ""}`,
-        },
-        ...(player.lastSeasonId
-          ? [{ text: timeStrings.lastPlayed[getLanguageKey()] + ":" + player.lastSeasonId.slice(-4) }]
-          : []),
-        ...(player.heightInInches ? [{ tag: { value: convertInchesToFeetAndInches(player.heightInInches) } }] : []),
-        ...(player.weightInPounds ? [{ tag: { value: `${player.weightInPounds} lb` } }] : []),
-        { icon: player.teamAbbrev ? teamLogo(player.teamAbbrev) : "" },
-      ]}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <Action.Push
-            title={`View ${getPlayerName(player)}'s Profile`}
-            target={<PlayerDetail id={Number(player.playerId || player.id)} />}
+            title={`${gameActions.view[getLanguageKey()]} ${getPlayerName(player)}`}
+            target={<PlayerDetail id={playerId} />}
           />
         </ActionPanel>
       }

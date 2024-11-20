@@ -27,9 +27,10 @@ export default function Command() {
 
   return (
     <List>
-      <GameList title={gameTitles.today[languageKey]} games={games.todayGames} />
-      <GameList title={gameTitles.past[languageKey]} games={games.pastGames} />
-      <GameList title={gameTitles.future[languageKey]} games={games.futureGames} />
+      <GameList title={gameTitles.favorite[languageKey]} games={games.todayGames} favTeam={true} />
+      <GameList title={gameTitles.today[languageKey]} games={games.todayGames} favTeam={false} />
+      <GameList title={gameTitles.past[languageKey]} games={games.pastGames} favTeam={false} />
+      <GameList title={gameTitles.future[languageKey]} games={games.futureGames} favTeam={false} />
     </List>
   );
 }

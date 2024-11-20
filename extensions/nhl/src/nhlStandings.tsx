@@ -1,16 +1,16 @@
 import React from "react";
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, getPreferenceValues } from "@raycast/api";
 import { getNHL } from "./utils/nhlData";
 import { StandingsResponse, TeamStanding } from "./utils/types";
 import { getLanguageKey, getCurrentDate, teamLogo } from "./utils/helpers";
+import { gameTitles, divisionStrings, userInterface, gameActions } from "./utils/translations";
+
+import Unresponsive from "./templates/unresponsive";
 import TeamRoster from "./templates/teamRoster";
 import TeamSchedule from "./templates/teamSchedule";
 
-import Unresponsive from "./templates/unresponsive";
-import { gameActions } from "./utils/translations";
-
 const lang = getLanguageKey();
-
+const favoriteTeam = getPreferenceValues().team as string;
 interface today {
   data: StandingsResponse;
   isLoading: boolean;
@@ -31,7 +31,6 @@ function organizeDivision(
   conference: Conference,
   division: Division,
 ): StandingsResponse["standings"] {
-  // Validate that the division belongs to the conference
   if (!DIVISION_MAP[conference].includes(division)) {
     throw new Error(`${division} division is not in the ${conference} conference`);
   }
@@ -89,11 +88,52 @@ const renderDivision = (team: TeamStanding[], division: string) => {
   );
 };
 
+interface TeamStandingsData {
+  conferencePlace: string;
+  divisionPlace: string;
+  points: string;
+  teamName: string;
+  gamesRemaining: number;
+  seasonId: number;
+  wildcardPlace?: string;
+}
+
+function getTeamStandings(data: StandingsResponse, teamAbbreviation: string): TeamStandingsData {
+  const teamData = data.standings.find((team) => team.teamAbbrev.default === teamAbbreviation);
+
+  if (!teamData) {
+    return {
+      conferencePlace: "Team not found",
+      divisionPlace: "Team not found",
+      points: "0 pts",
+      teamName: "Team not found",
+      gamesRemaining: 0,
+      seasonId: 0,
+    };
+  }
+
+  const totalConferenceTeams = data.standings.filter((team) => team.conferenceName === teamData.conferenceName).length;
+
+  const totalDivisionTeams = data.standings.filter((team) => team.divisionName === teamData.divisionName).length;
+
+  const wildcardPlace =
+    data.wildCardIndicator && teamData.wildcardSequence ? `WC: ${teamData.wildcardSequence}` : undefined;
+
+  return {
+    conferencePlace: `${teamData.conferenceName}: ${teamData.conferenceSequence}/${totalConferenceTeams}`,
+    divisionPlace: `${teamData.divisionName}: ${teamData.divisionSequence}/${totalDivisionTeams}`,
+    points: `${teamData.points} pts`,
+    teamName: teamData.teamName[lang],
+    gamesRemaining: 82 - teamData.gamesPlayed,
+    seasonId: teamData.seasonId,
+    wildcardPlace,
+  };
+}
+
 export default function Command() {
   const standingsToday = getNHL(`standings/${getCurrentDate()}`) as today;
 
   if (standingsToday.isLoading) return <List isLoading={true} />;
-
   if (!standingsToday?.data) return <Unresponsive />;
 
   const eastAtlanticDivision = organizeDivision(standingsToday.data, "Eastern", "Atlantic"),
@@ -101,12 +141,44 @@ export default function Command() {
     westCentralDivision = organizeDivision(standingsToday.data, "Western", "Central"),
     westPacificDivision = organizeDivision(standingsToday.data, "Western", "Pacific");
 
+  const teamStandings = getTeamStandings(standingsToday.data, favoriteTeam);
+
   return (
     <List>
-      {renderDivision(eastAtlanticDivision, "Eastern: Atlantic")}
-      {renderDivision(eastMetroDivision, "Eastern: Metropolitan")}
-      {renderDivision(westCentralDivision, "Western: Central")}
-      {renderDivision(westPacificDivision, "Eastern: Pacific")}
+      {favoriteTeam && (
+        <List.Section title={gameTitles.favorite[lang]}>
+          <List.Item
+            title={teamStandings.teamName}
+            icon={teamLogo(favoriteTeam)}
+            subtitle={`${teamStandings.gamesRemaining} ${userInterface.gamesRemaining[lang]}`}
+            accessories={[
+              { text: teamStandings.divisionPlace },
+              { text: teamStandings.conferencePlace },
+              { text: teamStandings.points },
+              ...(teamStandings.wildcardPlace ? [{ text: teamStandings.wildcardPlace }] : []),
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title={gameActions.viewRoster[lang]}
+                  icon={Icon.PersonLines}
+                  target={<TeamRoster team={favoriteTeam} season={teamStandings.seasonId} />}
+                />
+                <Action.Push
+                  title={gameActions.viewSchedule[lang]}
+                  icon={Icon.Calendar}
+                  target={<TeamSchedule team={favoriteTeam} />}
+                />
+                <Action.OpenInBrowser url={`https://nhl.com/${favoriteTeam.toLowerCase()}`} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+      {renderDivision(eastAtlanticDivision, `${divisionStrings.eastern[lang]}: ${divisionStrings.atlantic[lang]}`)}
+      {renderDivision(eastMetroDivision, `${divisionStrings.eastern[lang]}: ${divisionStrings.metropolitan[lang]}`)}
+      {renderDivision(westCentralDivision, `${divisionStrings.western[lang]}: ${divisionStrings.central[lang]}`)}
+      {renderDivision(westPacificDivision, `${divisionStrings.western[lang]}: ${divisionStrings.pacific[lang]}`)}
     </List>
   );
 }
