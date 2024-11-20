@@ -1,7 +1,11 @@
 import { exec } from "child_process";
-import { open, showHUD, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { open, showHUD, closeMainWindow } from "@raycast/api";
+import { LaunchOptions } from "raycast-cross-extension";
 
-const preferences = getPreferenceValues();
+export type LaunchContext = {
+  supressHUD?: boolean;
+  callbackLaunchOptions?: LaunchOptions;
+};
 
 const DNDshortcutName = `DND Raycast`;
 
@@ -31,31 +35,31 @@ async function checkAndInstallDNDShortcuts(): Promise<boolean> {
   return true;
 }
 
-export async function turnOnDND() {
+export async function turnOnDND({ launchContext }: { launchContext?: LaunchContext }) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   await executeCommand(`echo "on" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (isOn && preferences.supressHUD === true) {
+  if (isOn && launchContext?.supressHUD === false) {
     await showHUD(`Do Not Disturb is on`);
   }
 }
 
-export async function turnOffDND() {
+export async function turnOffDND({ launchContext }: { launchContext?: LaunchContext }) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   await executeCommand(`echo "off" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (!isOn && preferences.supressHUD === true) {
+  if (!isOn && launchContext?.supressHUD === false) {
     await showHUD(`Do Not Disturb is off`);
   }
 }
 
-export async function statusDND() {
+export async function statusDND({ launchContext }: { launchContext?: LaunchContext }) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   const isOn = await getDNDStatus();
-  if (preferences.supressHUD === true) {
+  if (launchContext?.supressHUD === false) {
     await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
   }
 }
@@ -65,9 +69,9 @@ export async function toggleDND() {
   if (!isInstalled) return;
   const isOn = await getDNDStatus();
   if (isOn) {
-    await turnOffDND();
+    await turnOffDND({ launchContext: {} });
   } else {
-    await turnOnDND();
+    await turnOnDND({ launchContext: {} });
   }
 }
 

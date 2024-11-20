@@ -43,20 +43,10 @@
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "supressHUD",
-      "title": "Suppress HUD",
-      "label": "Suppress HUD notification when toggling Do Not Disturb",
-      "description": "This option exists for compatibility with other extensions.",
-      "type": "checkbox",
-      "defaultValue": false,
-      "required": false
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.63.0",
-    "child-process": "^1.0.2"
+    "child-process": "^1.0.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
