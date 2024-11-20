@@ -1,4 +1,4 @@
-# image-base64 Changelog
+# Image Base64 Converter Changelog
 
 ## [Initial Version] - 2024-11-13
 
