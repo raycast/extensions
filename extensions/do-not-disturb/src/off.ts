@@ -1,5 +1,5 @@
-import { turnOffDND } from "./utils";
+import { LaunchContext, turnOffDND } from "./utils";
 
-export default async () => {
-  await turnOffDND();
+export default async ({ launchContext = { supressHUD: false } }: { launchContext?: LaunchContext }) => {
+  await turnOffDND({ launchContext });
 };
