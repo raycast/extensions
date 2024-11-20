@@ -1,8 +1,8 @@
 # Do Not Disturb Changelog
 
-## [Feature] - 2024-11-18
+## [Update] - 2024-11-18
 
-- Add preference to suppress HUD notifications
+- Updated the code to enable the extension to communicate with other extensions without displaying a notification
 
 ## [Fix] - 2024-02-23
 
