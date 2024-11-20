@@ -5,7 +5,6 @@
   "description": "Check if the number you highlighted is divisable by 8. If it isn't, paste the up- or down rounded number",
   "icon": "icon.png",
   "author": "pkliem",
-  "owner": "",
   "categories": [
     "Design Tools",
     "Productivity"
