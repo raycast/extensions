@@ -47,3 +47,39 @@ export function calculateBase64Size(base64String: string): number {
   const padding = base64String.endsWith("==") ? 2 : base64String.endsWith("=") ? 1 : 0;
   return (base64String.length * 3) / 4 - padding;
 }
+
+export function isValidBase64(str: string): boolean {
+  try {
+    if (!str) return false;
+
+    let base64Data = str;
+    if (str.startsWith("data:image/")) {
+      const parts = str.split(",");
+      if (parts.length !== 2) return false;
+      base64Data = parts[1];
+    }
+
+    if (base64Data.length % 4 !== 0) return false;
+    if (!/^[A-Za-z0-9+/=]*$/.test(base64Data)) return false;
+
+    const lastPadding = base64Data.indexOf("=");
+    if (lastPadding !== -1) {
+      if (lastPadding !== base64Data.length - 1 && lastPadding !== base64Data.length - 2) return false;
+      if (base64Data.indexOf("=") !== lastPadding) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function formatFileSize(bytes: number): string {
+  const MB = 1024 * 1024;
+  const KB = 1024;
+
+  if (bytes > MB) {
+    return `${(bytes / MB).toFixed(2)} MB`;
+  }
+  return `${(bytes / KB).toFixed(2)} KB`;
+}

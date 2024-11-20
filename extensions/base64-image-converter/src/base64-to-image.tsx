@@ -3,8 +3,7 @@ import { useState } from "react";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { calculateBase64Size, getImageDimensionsFromBase64 } from "./libs/imageUtils";
-import isBase64 from "is-base64";
+import { calculateBase64Size, formatFileSize, getImageDimensionsFromBase64, isValidBase64 } from "./libs/imageUtils";
 
 type Values = {
   base64: string;
@@ -35,7 +34,7 @@ export default function Base64ToImage() {
     }
 
     const cleanedBase64 = base64.replaceAll('"', "").replaceAll("'", "");
-    if (cleanedBase64.length < 40 || !isBase64(cleanedBase64, { allowMime: true })) {
+    if (cleanedBase64.length < 40 || !isValidBase64(cleanedBase64)) {
       showToast({
         title: "Error",
         message: "Invalid base64 string. Please check your input.",
@@ -134,7 +133,7 @@ export default function Base64ToImage() {
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Dimensions" text={`${image.dimensions.width}x${image.dimensions.height}`} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Size" text={`${(image.size / 1024).toFixed(2)} KB`} />
+            <Detail.Metadata.Label title="Size" text={formatFileSize(image.size)} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.TagList title="Actions">
               <Detail.Metadata.TagList.Item text="Download" color={Color.Blue} />

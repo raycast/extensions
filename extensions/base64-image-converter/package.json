@@ -24,12 +24,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "is-base64": "^1.1.0"
+    "@raycast/api": "^1.78.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/is-base64": "^1.1.3",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Detail, Toast, Icon, Clipboard } 
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getImageDimensionsFromBase64 } from "./libs/imageUtils";
+import { formatFileSize, getImageDimensionsFromBase64 } from "./libs/imageUtils";
 
 interface Image {
   base64: string;
@@ -89,7 +89,7 @@ export default function ImageToBase64() {
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Dimensions" text={`${image.dimensions.width}x${image.dimensions.height}`} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Size" text={`${(image.size / 1024).toFixed(2)} KB`} />
+            <Detail.Metadata.Label title="Size" text={formatFileSize(image.size)} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.TagList title="Actions">
               <Detail.Metadata.TagList.Item text="Copy Base64" color={"#32D74B"} />
