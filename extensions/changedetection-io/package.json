@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "changedetection-io",
   "title": "changedetection.io",
-  "description": "Website Change Detection For Clever People\n",
-  "icon": "extension-icon.png",
+  "description": "Website Change Detection For Clever People",
+  "icon": "changedetection.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
