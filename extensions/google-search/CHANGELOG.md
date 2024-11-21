@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-11-21
 
 - Add a command to search Google with the selected text
 
