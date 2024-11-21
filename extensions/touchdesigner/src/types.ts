@@ -13,7 +13,3 @@ export type OperatorData = {
     };
   };
 };
-
-declare module "tdOperators" {
-  export const operatorData: OperatorData;
-}
