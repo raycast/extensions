@@ -1,6 +1,6 @@
 # DigitalOcean Changelog
 
-## [Minor Changes] - {PR_MERGE_DATE}
+## [Minor Changes] - 2024-11-21
 
 - View "Env Vars" in `Search App Platform`
 - Update item in `Search App Platform` to be similar to online
