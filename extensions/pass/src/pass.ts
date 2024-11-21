@@ -18,7 +18,6 @@ export async function pass(cmd: string, storeDir: string = ''): Promise<string> 
   const { stdout, stderr } = await execAsync(passCmd, {
     timeout: 10000,
     env: {
-      ...process.env,
       PATH: await envPath(),
       PASSWORD_STORE_DIR: storeDir,
     },
