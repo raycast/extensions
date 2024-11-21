@@ -10,6 +10,7 @@ The first time you run this action, you will be prompted to install a shortcut. 
 
 - Turn On - Turn on "Do Not Disturb"
 - Turn Off - Turn off "Do Not Disturb"
+- Toggle - Toggle "Do Not Disturb" status
 - Status - Get the current status of "Do Not Disturb"
 
 ## API
