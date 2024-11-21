@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest
 - Fix confirm dialog not showing issue
