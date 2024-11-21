@@ -1,6 +1,6 @@
 # Evernote Changelog
 
-## 2024-11-19
+## [Update] - 2024-11-19
 
 - Added fallback to other known locations for the Evernote database.
 
