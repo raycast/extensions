@@ -1,5 +1,17 @@
 # Cobalt Changelog
 
+## [General improvements, API update] - 2024-11-20
+
+- Updated dependencies
+- Updated default API instance URL to `cobalt.aelew.dev` (see [imputnet/cobalt#860](https://github.com/imputnet/cobalt/discussions/860))
+- Updated download logic to be compatible with the latest API version (v10.3.3)
+- Added a toast notifying the user if they are using an old API instance URL
+- Added `API Instance Key` preference
+- Added `Always Proxy` preference
+- Added `Disable Metadata` preference
+- Added `YouTube: Use HLS` preference
+- Removed `Mute Video Audio` preference (now under `Mode`)
+
 ## [Bug fixes and improvements] - 2024-08-16
 
 - Updated dependencies
