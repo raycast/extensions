@@ -24,3 +24,19 @@ export const getUpdatedText = (updated: string) => {
     return updatedDate.toLocaleDateString("en-US");
   }
 };
+
+export function formatTime(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.round(totalSeconds % 60);
+
+  let result = "";
+
+  if (hours > 0) {
+    result += `${hours.toString().padStart(2, "0")}:`;
+  }
+
+  result += `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+  return result;
+}

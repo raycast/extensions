@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { getUpdatedText, numberWithCommas } from "../modules/utils";
+import { formatTime, getUpdatedText, numberWithCommas } from "../modules/utils";
 import { generateGamePageLink, generateGameStartLink, generateGameStudioLink } from "../modules/roblox-links";
 import { useGameThumbnails } from "../hooks/game-thumbnails";
 import { addGameToFavourites } from "../modules/favourite-games";
 import { useGameDetails } from "../hooks/game-details";
+import { useEffect, useReducer } from "react";
+import { useIPInfo } from "../hooks/ip-info";
 
 type PlaceResponse = {
   previousPageCursor: string | null;
@@ -16,6 +18,20 @@ type PlaceResponse = {
     description: string;
   }>;
 };
+
+function getIPLocation(serverIP?: string | null) {
+  const { data: ipData, isLoading: ipDataLoading } = useIPInfo(serverIP);
+
+  if (ipDataLoading) {
+    return null;
+  }
+
+  if (ipData) {
+    return ipData.country;
+  }
+
+  return null;
+}
 
 type RenderPlacesPageProps = {
   universeId: number;
@@ -67,13 +83,63 @@ export function PlacesPage({ universeId }: RenderPlacesPageProps) {
   );
 }
 
+export type ServerType = "Regular" | "Private" | "Reserved";
+
+type GamePageOptions = {
+  timeJoined: Date | null | undefined;
+  serverIP: string | null | undefined;
+  serverType: ServerType | null | undefined;
+};
+
+function getSessionData(options?: GamePageOptions) {
+  let sessionPlayTimeText: string | null = null;
+  const joinTime = options?.timeJoined;
+  const serverIP = options?.serverIP;
+  if (joinTime) {
+    const playTimeSeconds = Math.max((Date.now() - joinTime.getTime()) / 1000, 0);
+    sessionPlayTimeText = formatTime(playTimeSeconds);
+  }
+
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  useEffect(() => {
+    if (!joinTime) return;
+
+    const intervalId = setInterval(() => {
+      forceUpdate();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [joinTime]);
+
+  let serverLocationText = null;
+
+  const serverLocation = getIPLocation(serverIP);
+  if (serverLocation) {
+    serverLocationText = `${serverLocation} (${serverIP})`;
+  } else if (serverIP) {
+    serverLocationText = serverIP;
+  }
+
+  const hasSessionData = sessionPlayTimeText || serverIP;
+
+  return {
+    hasSessionData,
+    sessionPlayTimeText,
+    serverLocationText,
+    serverTypeText: options?.serverType,
+  };
+}
+
 type RenderGamePageProps = {
   universeId: number;
+  options?: GamePageOptions;
 };
-export function GamePage({ universeId }: RenderGamePageProps) {
+export function GamePage({ universeId, options }: RenderGamePageProps) {
   const { data: gameData, isLoading: gameDataLoading } = useGameDetails(universeId);
 
   const { data: thumbnailUrls, isLoading: thumbnailDataLoading } = useGameThumbnails(universeId);
+
+  const { hasSessionData, sessionPlayTimeText, serverLocationText, serverTypeText } = getSessionData(options);
 
   const isLoading = gameDataLoading || thumbnailDataLoading;
 
@@ -145,6 +211,12 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`)
       }
       metadata={
         <Detail.Metadata>
+          {serverLocationText && <Detail.Metadata.Label title="Server Location" text={serverLocationText} />}
+          {sessionPlayTimeText && <Detail.Metadata.Label title="Session Time" text={sessionPlayTimeText} />}
+          {serverTypeText && <Detail.Metadata.Label title="Server Type" text={serverTypeText} />}
+
+          {hasSessionData && <Detail.Metadata.Separator />}
+
           <Detail.Metadata.Label title="Name" text={name} />
           <Detail.Metadata.Label title="Creator" text={creatorText} />
 
@@ -160,6 +232,8 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`)
             {genre_l1 && <Detail.Metadata.TagList.Item text={genre_l1} />}
             {genre && <Detail.Metadata.TagList.Item text={genre} />}
           </Detail.Metadata.TagList>
+
+          <Detail.Metadata.Separator />
 
           <Detail.Metadata.Link title="Universe ID" text={universeId.toString()} target={gameURL} />
           <Detail.Metadata.Label title="Root Place ID" text={rootPlaceId.toString()} />

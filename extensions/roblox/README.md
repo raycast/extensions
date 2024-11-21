@@ -21,11 +21,25 @@ Raycast Extension for finding games, users & more on Roblox
 </p>
 </div>
 
+## Information
+
+This extension does not directly interact with Roblox Client/Studio, so they are not needed for basic functionality of the extension!
+
 ## Features
-- Searching for Games
+
+### Games
+
+- Get Currently Playing Game, Session Time, Server Location & Server Type
+- Favourite Games and find them easily
+- Search for Games
 - View Games with ID
+- Launch Games in Roblox Client & Studio
+
+### Users
+
 - View User Info With ID or Username
 - View Your Own User Profile
-- Launches Roblox Games in Roblox Client & Studio
-- Favourite Games and find them easily
+
+### Extra
+
 - View a Favourite Game's Player Count on the Menu Bar

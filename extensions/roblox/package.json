@@ -102,6 +102,12 @@
       "mode": "view"
     },
     {
+      "name": "playing-game",
+      "title": "Get Playing Game",
+      "description": "Get Currently Playing Roblox Game!",    
+      "mode": "view"
+    },
+    {
       "name": "favourite-game-players",
       "title": "Favourite Game Players",
       "description": "Check Player Count of a Game!",
