@@ -1,4 +1,7 @@
 # Wireguard Changelog
+
+## [] - 
+
 ## [Fixed] - 2023-11-28
 
 - Fixed VPN not starting via `scutil` with too long a name

@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { getConnectedVPNSNArray } from "./getVPN";
 import { disconnectVPNBySN } from "./toggle";
 
@@ -8,6 +8,7 @@ export default async () => {
     for (const sn of connectedVPNSNArray) {
       await disconnectVPNBySN(sn);
     }
+    await showHUD(`${connectedVPNSNArray.length} VPNs DISCONNECTED`);
   }
   await closeMainWindow({ clearRootSearch: true });
 };

@@ -1,3 +1,4 @@
+import { showHUD } from "@raycast/api";
 import { VPN } from "./type";
 import { CMD_PATH, runScript } from "./utils";
 
@@ -9,6 +10,7 @@ export default async (VPN: VPN) => {
     await connectVPNBySN(sn, true);
   }
 
+  await showHUD(`${VPN.name} is ${VPN.isConnected ? "DISCONNECTED" : "CONNECTED"}`);
   /*
     setTimeout(async ()=> {
         console.log("trigger notification");
