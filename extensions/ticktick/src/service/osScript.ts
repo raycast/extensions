@@ -180,8 +180,9 @@ export const addTask = async (data: {
   description: string;
   dueDate?: string;
   isAllDay: boolean;
+  priority?: string;
 }) => {
-  const { projectId, title, description, dueDate, isAllDay } = data;
+  const { projectId, title, description, dueDate, isAllDay, priority } = data;
   const installed = await checkAppInstalled();
   if (!installed) return undefined;
 
@@ -191,7 +192,7 @@ export const addTask = async (data: {
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
       dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
-    } from "raycast"
+    } ${priority ? ` priority "${priority}"` : ""} from "raycast"
     end tell
   `)) as string;
     if (result === "missing value") {
