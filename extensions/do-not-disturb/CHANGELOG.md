@@ -1,6 +1,6 @@
 # Do Not Disturb Changelog
 
-## [Chore & Fixes]
+## [Chore & Fixes] - {PR_MERGE_DATE}
 
 - Bump all dependencies to the latest
 - Fix `launchContext` variable name
