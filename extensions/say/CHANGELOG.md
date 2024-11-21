@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest
 - Fix argument types for spawn
