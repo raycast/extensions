@@ -145,7 +145,7 @@ export default function Command() {
 
   return (
     <List>
-      {favoriteTeam && (
+      {favoriteTeam && favoriteTeam !== "default" && (
         <List.Section title={gameTitles.favorite[lang]}>
           <List.Item
             title={teamStandings.teamName}

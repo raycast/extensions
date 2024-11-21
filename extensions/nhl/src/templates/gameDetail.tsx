@@ -78,7 +78,16 @@ export default function GameDetail({ game }: { game: Game }) {
   switch (game.gameState) {
     case "FUT":
     case "PRE":
-      return <Detail markdown={preGameDetails(gameLanding, gameSidebar)} />;
+      return (
+        <Detail
+          markdown={preGameDetails(gameLanding, gameSidebar)}
+          actions={
+            <ActionPanel>
+              <GameActions game={game} />
+            </ActionPanel>
+          }
+        />
+      );
     case "LIVE":
     case "CRIT":
     default:
