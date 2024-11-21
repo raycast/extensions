@@ -30,8 +30,8 @@ export function useSearch() {
 
   // Static result and filter history
   useEffect(() => {
-    const lowerSearchText = searchText.toLowerCase();
-    setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
+    const lowerSearchText = searchText?.toLowerCase();
+    setHistoryResults(history.filter((item) => item.query?.toLowerCase().includes(lowerSearchText)));
   }, [searchText, history]);
 
   // Autosuggestions
