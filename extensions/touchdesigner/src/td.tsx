@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { ActionPanel, Action, List, environment } from "@raycast/api";
-import { operatorData, Operator } from "./tdOperators";
+import { Operator } from "./types";
+import { operatorData } from "./tdOperators";
 
 // Constants
 const BASE_DOC_URL = "https://derivative.ca/UserGuide";
@@ -63,6 +64,7 @@ export default function Command() {
 
     try {
       Object.entries(operatorData.operators).forEach(([family, data]) => {
+        console.log("!!!!!!", family, data);
         data.operators.forEach((op) => {
           operators.push(createListItem(family, op));
         });
