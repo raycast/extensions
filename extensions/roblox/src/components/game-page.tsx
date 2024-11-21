@@ -120,13 +120,15 @@ function getSessionData(options?: GamePageOptions) {
     serverLocationText = serverIP;
   }
 
-  const hasSessionData = sessionPlayTimeText || serverIP;
+  const serverTypeText = options?.serverType;
+
+  const hasSessionData = sessionPlayTimeText || serverIP || serverTypeText;
 
   return {
     hasSessionData,
     sessionPlayTimeText,
     serverLocationText,
-    serverTypeText: options?.serverType,
+    serverTypeText,
   };
 }
 
