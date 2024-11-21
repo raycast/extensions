@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "spring-initializr",
-      "title": "Spring Initializr",
-      "subtitle": "Create a new Spring Boot Application",
+      "title": "Create new Spring Boot Application",
       "description": "Create a new Spring Boot Application",
       "mode": "view"
     }
