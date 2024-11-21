@@ -1,10 +1,22 @@
 # Gumroad Sales
 
-View your sales and products from Gumroad.
+View your sales and products from [Gumroad](https://gumroad.com/).
 
-## Obtaining an Access Token
+## Connect your Gumroad account
 
-In order to use this extension, you need to obtain a Gumroad access token. To do so, follow these steps:
+The extension uses **OAuth** to allow you to securely log in:
+
+1. `Run` any command
+
+2. `Click` to **Sign in with Gumroad** when prompted
+
+3. `Log In` (if not already) and `Allow` the application access (at the moment we only use "read-only" permissions)
+
+4. `Enjoy` the extension!
+
+## (OPTIONAL) Obtaining an Access Token
+
+Instead of logging in via Gumroad you might prefer to use an access token. To do so, follow these steps:
 
 1. Go to [Gumroad](https://gumroad.com) and log in to your account.
 
