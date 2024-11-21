@@ -4,6 +4,10 @@ import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, teamLogo } 
 import { gameActions, timeStrings } from "../utils/translations";
 import { Action, ActionPanel, List } from "@raycast/api";
 import PlayerDetail from "./playerDetail";
+import { PlayerAction } from "./gameActions";
+import { getLanguageKey } from "../utils/helpers";
+
+const lang = getLanguageKey();
 
 export default function PlayerListItem({ player }: { player: PlayerOnIce }) {
   if (!player) return null;
@@ -119,9 +123,10 @@ export default function PlayerListItem({ player }: { player: PlayerOnIce }) {
       actions={
         <ActionPanel>
           <Action.Push
-            title={`${gameActions.view[getLanguageKey()]} ${getPlayerName(player)}`}
+            title={`${gameActions.view[lang]} ${getPlayerName(player)}`}
             target={<PlayerDetail id={playerId} />}
           />
+          <PlayerAction name={getPlayerName(player)} slug={player.playerId as string} />
         </ActionPanel>
       }
     />

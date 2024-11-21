@@ -26,7 +26,9 @@ Access real-time NHL scores, standings, and comprehensive player statistics dire
 - Review player biographical information
 
 #### Preferences
+
 There are a few preferences in this extension you can use to enhance your experience:
+
 - Timezone: Useful for getting times in your local timezone.
 - Language: Raycast doesn't support multi-languages by default, but the NHL API supports both English and French. This preference lets you get your data back in either of these languages.
 - Favorite Team: Save your favorite to have that data filtered to the top in the Standings & Scores commands.

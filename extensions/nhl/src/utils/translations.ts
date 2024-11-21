@@ -89,6 +89,10 @@ export const gameActions = {
     default: "View Schedule",
     fr: "Voir le Calendrier",
   },
+  onGameCenter: {
+    default: "on Game Center",
+    fr: "sur Game Center",
+  },
 };
 
 export const gameStates = {

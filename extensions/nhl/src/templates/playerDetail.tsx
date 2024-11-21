@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, Action, Detail } from "@raycast/api";
+import { ActionPanel, Detail } from "@raycast/api";
 import { getNHL } from "../utils/nhlData";
 import {
   PlayerDetailResponse,
@@ -16,10 +16,12 @@ import {
 } from "../utils/types";
 import { userInterface } from "../utils/translations";
 import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, calculateAge } from "../utils/helpers";
-import { playerTitleStrings, gameStrings, gameActions, timeStrings } from "../utils/translations";
-import Unresponsive from "./unresponsive";
+import { playerTitleStrings, gameStrings, timeStrings } from "../utils/translations";
 import { useFetch } from "@raycast/utils";
 import { TABLE_HEADERS } from "../utils/constants";
+
+import Unresponsive from "./unresponsive";
+import { PlayerAction } from "./gameActions";
 
 const lang = getLanguageKey();
 
@@ -279,10 +281,7 @@ export default function PlayerDetail({ id }: { id: number }) {
     <Detail
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title={gameActions.playerCenter[lang]}
-            url={`https://www.nhl.com/player/${player.playerSlug}`}
-          />
+          <PlayerAction name={`${player.firstName[lang]} ${player.lastName[lang]}`} slug={player.playerSlug} />
         </ActionPanel>
       }
       metadata={

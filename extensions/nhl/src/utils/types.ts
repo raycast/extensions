@@ -836,6 +836,7 @@ export type PlayerOnIce = {
   birthDate?: string;
   shootsCatches?: string;
   active?: boolean;
+  playerSlug?: string;
 };
 
 export type TeamIceSurface = {

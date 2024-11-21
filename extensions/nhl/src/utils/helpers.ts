@@ -243,7 +243,7 @@ export function starsOfTheGame(game: Game) {
   starsContent += `| ${playerTitleStrings.photo[languageKey]} | ${playerTitleStrings.info[languageKey]} | ${playerTitleStrings.stats[languageKey]} | \n`;
   starsContent += `| :---: | --- | --- | \n`;
   stars.forEach((star: PlayerOnIce) => {
-    const playerName = typeof star.name === "string" ? star.name : star.name.default;
+    const playerName = typeof star.name === "string" ? star.name : (star.name?.default ?? "");
     if (star.position === "G") {
       starsContent += `| &nbsp;<img alt="${star.teamAbbrev}'s ${playerName} ${playerTitleStrings.stats[languageKey]}" src="${star.headshot}" width="90" height="90" /> | ${star.teamAbbrev} • ${playerName} • ${star.sweaterNo} • ${star.position} | GAA: ${star.goalsAgainstAverage ? star.goalsAgainstAverage.toFixed(2) : ""} SV%: ${star.savePctg ? (star.savePctg * 100).toFixed(1) : "N/A"}% | \n`;
     } else {

@@ -17,7 +17,7 @@ import {
 import { getNHL } from "../utils/nhlData";
 import { gameStrings, timeStrings } from "../utils/translations";
 import Unresponsive from "./unresponsive";
-import GameActions from "./gameActions";
+import GameActions, { PlayerAction } from "./gameActions";
 
 const languageKey = getLanguageKey();
 
@@ -88,6 +88,14 @@ export default function GameDetail({ game }: { game: Game }) {
           actions={
             <ActionPanel>
               <GameActions game={game} />
+              {gameLanding.data?.summary?.threeStars &&
+                gameLanding.data.summary?.threeStars.map((star, index) => (
+                  <PlayerAction
+                    name={typeof star.name === "string" ? star.name : (star.name?.default ?? "")}
+                    slug={star.playerId as string}
+                    key={index}
+                  />
+                ))}
             </ActionPanel>
           }
         />
