@@ -64,7 +64,6 @@ export default function Command() {
 
     try {
       Object.entries(operatorData.operators).forEach(([family, data]) => {
-        console.log("!!!!!!", family, data);
         data.operators.forEach((op) => {
           operators.push(createListItem(family, op));
         });
