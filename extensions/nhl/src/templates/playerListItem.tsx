@@ -5,7 +5,6 @@ import { gameActions, timeStrings } from "../utils/translations";
 import { Action, ActionPanel, List } from "@raycast/api";
 import PlayerDetail from "./playerDetail";
 import { PlayerAction } from "./gameActions";
-import { getLanguageKey } from "../utils/helpers";
 
 const lang = getLanguageKey();
 
