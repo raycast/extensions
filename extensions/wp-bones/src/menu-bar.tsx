@@ -1,48 +1,48 @@
-import { Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { Color, Icon, Image, Keyboard, launchCommand, LaunchType, MenuBarExtra, open } from "@raycast/api";
 import { useEffect, useState } from "react";
-import templates from "./templates";
-
-type VersionAPIResponse = {
-  version: string;
-};
+import { useBoilerplates } from "./hooks/use-boilerplates";
+import { useVersion } from "./hooks/use-version";
+import { getIcon } from "./utils";
 
 export default function Command() {
-  const { isLoading, data } = useFetch<VersionAPIResponse>("https://wpbones.com/api/version");
-  const {
-    value: versionStorage,
-    setValue: setVersionStorage,
-    isLoading: isLoadingVersionStorage,
-  } = useLocalStorage("wpbones-version", 160);
+  const [iconMenu, setIconMenu] = useState<Image.ImageLike>("menu-bar.svg");
+  const [titleMenu, setTitleMenu] = useState("WP Bones");
 
-  const [newVersion, setNewVersion] = useState<boolean>(false);
+  const { isThereNewVersion, version, flushNewVersion, isLoading, error } = useVersion();
+
+  const { boilerplates } = useBoilerplates();
 
   useEffect(() => {
-    if (data && versionStorage) {
-      const version = parseInt(data.version.replace(/\./g, ""));
-      if (version > versionStorage) {
-        setNewVersion(true);
-      }
-      //setVersionStorage(version);
+    if (error) {
+      setIconMenu({
+        source: Icon.ExclamationMark,
+        tintColor: Color.Red,
+      });
+      setTitleMenu("Error fetching version");
     }
-  }, [data, versionStorage]);
+
+    if (isLoading) {
+      setIconMenu("loading.svg");
+      setTitleMenu("Loading version");
+    }
+
+    if (isThereNewVersion) {
+      setIconMenu("menu-bar-updates.svg");
+      setTitleMenu(`New version available: ${version}`);
+    } else {
+      setIconMenu("menu-bar.svg");
+      setTitleMenu(`WP Bones v${version}`);
+    }
+  }, [error, version, isThereNewVersion, isLoading]);
 
   return (
-    <MenuBarExtra
-      isLoading={isLoading || isLoadingVersionStorage}
-      icon={`menu-bar${newVersion ? "-updates" : ""}.svg`}
-      tooltip="WP Bones"
-    >
+    <MenuBarExtra isLoading={isLoading} icon={iconMenu} tooltip="WP Bones">
       <MenuBarExtra.Item
-        icon={`menu-bar${newVersion ? "-updates" : ""}.svg`}
-        title={newVersion ? `New version available: ${data?.version}` : `WP Bones v${data?.version}`}
+        icon={iconMenu}
+        title={titleMenu}
         onAction={() => {
-          if (data) {
-            const version = parseInt(data.version.replace(/\./g, ""));
-            setVersionStorage(version);
-          }
+          flushNewVersion();
           open("https://wpbones.com/docs/release-notes");
-          setNewVersion(false);
         }}
       />
 
@@ -60,20 +60,50 @@ export default function Command() {
           icon={Icon.Book}
           onAction={() => launchCommand({ name: "search-documentation", type: LaunchType.UserInitiated })}
         />
-        <MenuBarExtra.Submenu icon="github-white.png" title="Clone a WP Bones Repository">
-          {templates.map((template) =>
-            template.name === "WPKirk" ? null : (
-              <MenuBarExtra.Item
-                key={template.name}
-                title={template.title}
-                icon={template?.icon}
-                shortcut={template?.shortcut as Keyboard.Shortcut}
-                onAction={() => {
-                  open(`https://github.com/new?template_name=${template.name}&template_owner=wpbones`);
-                }}
-              />
-            ),
-          )}
+
+        <MenuBarExtra.Submenu icon="brand-wordpress.svg" title="See Boilerplate in Action">
+          {boilerplates &&
+            boilerplates.map((template) =>
+              template.slug === "deprecated" ? null : (
+                <MenuBarExtra.Item
+                  key={template.name}
+                  title={template.title}
+                  icon={getIcon(template?.icon)}
+                  shortcut={template?.shortcut as Keyboard.Shortcut}
+                  onAction={() => {
+                    open(
+                      `https://playground.wordpress.net/?blueprint-url=https://www.wpbones.com/wpkirk${template.slug === "base" ? "" : `-${template.slug}`}-boilerplate.json`,
+                    );
+                  }}
+                />
+              ),
+            )}
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title="Complete Demo"
+              icon="box.svg"
+              onAction={() => {
+                open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
+              }}
+            />
+          </MenuBarExtra.Section>
+        </MenuBarExtra.Submenu>
+
+        <MenuBarExtra.Submenu icon="github-white.png" title="Create a WP Bones Repository">
+          {boilerplates &&
+            boilerplates.map((template) =>
+              template.slug === "deprecated" ? null : (
+                <MenuBarExtra.Item
+                  key={template.name}
+                  title={template.title}
+                  icon={getIcon(template?.icon)}
+                  shortcut={template?.shortcut as Keyboard.Shortcut}
+                  onAction={() => {
+                    open(`https://github.com/new?template_name=${template.name}&template_owner=wpbones`);
+                  }}
+                />
+              ),
+            )}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               title="Complete Demo"
@@ -87,12 +117,12 @@ export default function Command() {
 
         <MenuBarExtra.Item
           title="Open an issue"
-          icon={Icon.Bug}
+          icon={{ source: Icon.Bug, tintColor: Color.Orange }}
           onAction={() => open("https://github.com/wpbones/WPBones/issues")}
         />
         <MenuBarExtra.Item
           title="WP Bones AI"
-          icon={"brand-github-copilot.svg"}
+          icon={{ source: "brand-github-copilot.svg", tintColor: Color.Blue }}
           onAction={() => open("https://wpbones.ownai.com/")}
         />
       </MenuBarExtra.Section>
