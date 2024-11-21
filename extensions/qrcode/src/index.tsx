@@ -1,38 +1,43 @@
-import { List, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { LinkItem } from "./types";
 import { generateQRCode } from "./utils";
 import { AddLinkForm } from "./components/AddLinkForm";
-import { LinkListItem } from "./components/LinkListItem";
 import { useLinks } from "./hooks/useLinks";
 import { useTranslation } from "./i18n";
-import { useShowMetadata } from "./hooks/useShowMeta";
+import { DetailViewDropdown } from "./components/ViewDropDown";
+import { DetailView } from "./components/DetailView";
 
 export default function Command() {
-  const { push } = useNavigation();
   const { links, addLink, deleteLink } = useLinks();
-  const [selectedLink, setSelectedLink] = useState<string>("");
+  const [selectedLink, setSelectedLink] = useState<LinkItem>();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const t = useTranslation();
-  const { needShowMetadata, showMetadata, hideMetadata } = useShowMetadata();
+  const [detailView, setDetailView] = useState<string>("qrcode");
+
   useEffect(() => {
     if (selectedLink) {
-      generateQRCode(selectedLink).then((url) => {
+      generateQRCode(selectedLink.url).then((url) => {
         setQrCodeUrl(url || "");
       });
     }
   }, [selectedLink]);
 
   const handleAddLink = (link: LinkItem) => {
+    setSelectedLink(link);
     addLink(link);
   };
 
-  const handleDeleteLink = (id: string, url: string) => {
+  const handleDeleteLink = (id: string) => {
     deleteLink(id);
-    if (selectedLink === url) {
-      setSelectedLink("");
+    if (selectedLink?.id === id) {
+      setSelectedLink(undefined);
       setQrCodeUrl("");
     }
+  };
+
+  const onDetailViewChange = (newValue: string) => {
+    setDetailView(newValue);
   };
 
   return (
@@ -40,41 +45,77 @@ export default function Command() {
       navigationTitle={t.title}
       searchBarPlaceholder={t.searchPlaceholder}
       isShowingDetail
+      searchBarAccessory={<DetailViewDropdown onDetailViewChange={onDetailViewChange} />}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push
-              title={t.addLink}
-              icon={Icon.Plus}
-              target={<AddLinkForm onSubmit={handleAddLink} />}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
-            <Action
-              title={needShowMetadata ? t.hideMetadata : t.showMetadata}
-              icon={needShowMetadata ? Icon.EyeSlash : Icon.Eye}
-              onAction={needShowMetadata ? hideMetadata : showMetadata}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
-            />
-          </ActionPanel.Section>
+          <Action.Push
+            title={t.addLink}
+            icon={Icon.Plus}
+            target={<AddLinkForm onSubmit={handleAddLink} />}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
         </ActionPanel>
       }
       onSelectionChange={(id) => {
         const selected = links.find((link) => link.id === id);
         if (selected) {
-          setSelectedLink(selected.url);
+          setSelectedLink(selected);
         }
       }}
+      selectedItemId={selectedLink?.id}
     >
       {links.map((link) => (
-        <LinkListItem
+        <List.Item
           key={link.id}
-          link={link}
-          selectedLink={selectedLink}
-          qrCodeUrl={qrCodeUrl}
-          showMetadata={needShowMetadata}
-          onToggleMetadata={needShowMetadata ? hideMetadata : showMetadata}
-          onDeleteLink={handleDeleteLink}
-          onPushAddForm={() => push(<AddLinkForm onSubmit={handleAddLink} />)}
+          id={link.id}
+          title={link.url}
+          accessories={[
+            {
+              tag: {
+                value: link.title || null,
+                color: Color.Blue,
+              },
+            },
+          ]}
+          detail={<DetailView link={link} selectedLink={selectedLink} qrCodeUrl={qrCodeUrl} viewType={detailView} />}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action.Push
+                  title={t.addLink}
+                  icon={Icon.Plus}
+                  target={<AddLinkForm onSubmit={handleAddLink} />}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  onPop={() => {
+                    setSelectedLink(links[0]);
+                  }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.CopyToClipboard
+                  title={t.copyFullUrl}
+                  content={link.url}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                {qrCodeUrl && selectedLink?.url === link.url && (
+                  <Action.CopyToClipboard
+                    title={t.copyQRCode}
+                    content={qrCodeUrl}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                )}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title={t.deleteLink}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => handleDeleteLink(link.id)}
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
         />
       ))}
     </List>

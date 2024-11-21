@@ -34,7 +34,7 @@ export function AddLinkForm({ onSubmit }: AddLinkFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title={t.urlLabel} placeholder={t.urlPlaceholder} autoFocus error={urlError} />
+      <Form.TextArea id="url" title={t.urlLabel} placeholder={t.urlPlaceholder} autoFocus error={urlError} />
       <Form.TextField id="description" title={t.description} placeholder={t.descriptionPlaceholder} />
     </Form>
   );

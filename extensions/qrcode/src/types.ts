@@ -14,10 +14,16 @@ export interface URLInfo {
 
 export interface Preferences {
   language: string;
+  detailView: "qrcode" | "metadata";
 }
 
 export interface Language {
   id: string;
   name: string;
   code: string;
+}
+
+export interface DetailViewType {
+  id: string;
+  name: string;
 }

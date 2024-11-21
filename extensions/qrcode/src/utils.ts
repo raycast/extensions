@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 export async function generateQRCode(url: string) {
   try {
     const dataUrl = await QRCode.toDataURL(url, {
-      width: 200,
+      width: 300,
     });
     return dataUrl;
   } catch (error) {

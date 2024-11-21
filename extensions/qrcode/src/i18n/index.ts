@@ -35,6 +35,8 @@ const translations = {
     desc: "描述",
     showMetadata: "显示元数据",
     hideMetadata: "隐藏元数据",
+    qrcode: "二维码",
+    metadata: "元信息",
   },
   en: {
     title: "QR Code Generator",
@@ -66,6 +68,8 @@ const translations = {
     desc: "Description",
     showMetadata: "Show Metadata",
     hideMetadata: "Hide Metadata",
+    qrcode: "QRCode",
+    metadata: "Metadata",
   },
 };
 

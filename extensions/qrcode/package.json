@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "generate qrcode",
-      "description": "generate qrcode",
+      "title": "make qrcode",
+      "description": "generate qrcode from string",
       "mode": "view"
     }
   ],
