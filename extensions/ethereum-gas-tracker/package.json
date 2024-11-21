@@ -5,6 +5,9 @@
   "description": "See the current gas price of Ethereum.",
   "icon": "command-icon.png",
   "author": "vinch",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Web"
   ],

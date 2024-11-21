@@ -26,13 +26,14 @@ export default function Command() {
   const { data, isLoading } = useFetch(
     `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${apiKey}`,
     {
-      mapResult(result: Result) {
-        if (result.status === "0") throw new Error(result.result);
+      mapResult(res: Result) {
+        if (res.status === "0") throw new Error(res.result);
+        const { result } = res;
         return {
           data: {
-            low: parseInt(result.result.SafeGasPrice),
-            average: parseInt(result.result.ProposeGasPrice),
-            high: parseInt(result.result.FastGasPrice),
+            low: parseInt(result.SafeGasPrice),
+            average: parseInt(result.ProposeGasPrice),
+            high: parseInt(result.FastGasPrice),
           },
         };
       },
