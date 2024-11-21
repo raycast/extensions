@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Chore & Fixes] - {PR_MERGE_DATE}
+
+- Bump all dependencies to the latest
+- Fix argument types for spawn
+
 ## [Chore] - 2024-10-28
 
 - Bump all dependencies to the latest
