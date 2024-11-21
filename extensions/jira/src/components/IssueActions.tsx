@@ -169,6 +169,15 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        {issue.fields.parent && (
+          <Action.Push
+            target={<IssueDetail initialIssue={issue.fields.parent} issueKey={issue.fields.parent?.key} />}
+            title="Open Parent Issue"
+            icon={Icon.ChevronUp}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          />
+        )}
+
         {showChildIssuesAction && (
           <Action.Push
             target={<IssueChildIssues issue={issue} />}
