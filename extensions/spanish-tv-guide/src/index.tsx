@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import React, { useEffect, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 
 import { TvScheduleDto } from "./modules/tv/domain/tvScheduleDto";
 import { tvScheduleRepository } from "./modules/tv/repositories/tvScheduleRepository";
