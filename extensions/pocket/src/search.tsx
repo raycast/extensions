@@ -13,10 +13,10 @@ interface SearchArguments {
 }
 
 function SearchBookmarks(props: { arguments?: SearchArguments }) {
-  const [state, setState] = useState(preferences.defaultFilter);
+  const [state, setState] = useState<ReadState>(ReadState.All);
   const [tag, setTag] = useState<string>();
   const [contentType, setContentType] = useState<ContentType>();
-  const [search, setSearch] = useState(props.arguments?.title);
+  const [search, setSearch] = useState<string>(props.arguments?.title || "");
   const [tagSearch, setTagSearch] = useState<string>();
 
   const { tags } = useTags();
@@ -87,7 +87,7 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
-          title={bookmark.title || bookmark.originalUrl}
+          title={bookmark.title || bookmark.originalUrl || ""}
           icon={getFavicon(bookmark.originalUrl, { mask: Image.Mask.RoundedRectangle })}
           subtitle={bookmark.author}
           accessories={[
