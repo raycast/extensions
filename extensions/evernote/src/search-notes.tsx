@@ -8,10 +8,13 @@ import NotesList from "./components/NotesList";
 
 export default function Command() {
   const [evernoteDB, setEvernoteDB] = useState<string | null>(null);
-  const baseDir = resolve(
-    homedir(),
-    "Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
-  );
+  const knownEvernoteDirLocations = [
+    resolve(
+      homedir(),
+      "Library/Containers/com.evernote.Evernote/Data/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
+    ),
+    resolve(homedir(), "Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com"),
+  ];
 
   useEffect(() => {
     getApplications().then(async (applications) => {
@@ -32,16 +35,23 @@ export default function Command() {
         });
         return;
       }
+      let baseDir: string | null = null;
       if (evernoteDB) {
         return;
       }
-      if (!fs.existsSync(baseDir)) {
+      for (const directory of knownEvernoteDirLocations) {
+        if (fs.existsSync(directory)) {
+          baseDir = directory;
+          break;
+        }
+      }
+      if (!baseDir || !fs.existsSync(baseDir)) {
         await popToRoot();
         await showToast({
           style: Toast.Style.Failure,
           title: "Cannot find Evernote database.",
           message:
-            "The database should be in ~/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
+            "The database should be in ~/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com, but can be somewhere else.",
         });
         return;
       }

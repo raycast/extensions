@@ -60,11 +60,11 @@ export function generateTOTP(key: string, options: Options): number {
   return code;
 }
 
-export function parse(value: string): { secret: string; options: Options } {
+export function parse(value: string): { secret: string; options: Options; lastTimeUsed?: number } {
   try {
     return JSON.parse(value);
   } catch (e) {
-    return { secret: value, options: DEFAULT_OPTIONS };
+    return { secret: value, options: DEFAULT_OPTIONS, lastTimeUsed: new Date().getTime() };
   }
 }
 

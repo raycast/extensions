@@ -5,6 +5,9 @@
   "description": "Tile open windows into layouts",
   "icon": "icons/grid.png",
   "author": "teemu_suvinen",
+  "contributors": [
+    "Undolog"
+  ],
   "categories": [
     "System",
     "Productivity"
@@ -112,40 +115,36 @@
       "required": false,
       "data": [
         {
-          "title": "0",
+          "title": "None",
           "value": "0"
         },
         {
-          "title": "5",
-          "value": "5"
+          "title": "Tiny (8px)",
+          "value": "8"
         },
         {
-          "title": "10",
-          "value": "10"
+          "title": "Small (16px)",
+          "value": "16"
         },
         {
-          "title": "15",
-          "value": "15"
+          "title": "Small-M (24px)",
+          "value": "24"
         },
         {
-          "title": "20",
-          "value": "20"
+          "title": "Medium (32px)",
+          "value": "32"
         },
         {
-          "title": "25",
-          "value": "25"
-        },
-        {
-          "title": "30",
-          "value": "30"
-        },
-        {
-          "title": "35",
-          "value": "35"
-        },
-        {
-          "title": "40",
+          "title": "Medium-M (40px)",
           "value": "40"
+        },
+        {
+          "title": "Large (64px)",
+          "value": "64"
+        },
+        {
+          "title": "Extra Large (128px)",
+          "value": "128"
         }
       ]
     },
