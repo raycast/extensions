@@ -20,6 +20,10 @@ This is a Raycast extension to get a company's brand logos, colors, slogan, soci
   
     c. `Enter` this key in Preferences OR at first prompt
 
+## ⚙️ Configuration
+
+By default the secondary `Action` performs "Deletion" but if you prefer, you can change this in Preferences to be "New".
+
 ## 🗒️ NOTE
 
 The Free Plan of Brand.dev includes 100 API Calls per month so to reduce usage of API Calls, when you retrieve a Brand, it is stored locally in `LocalStorage`.
