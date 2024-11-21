@@ -1,3 +1,3 @@
-# Basecamp Changelog
+# Trek Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
