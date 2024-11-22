@@ -1,5 +1,15 @@
 # Pomodoro Changelog
 
+## [Chore & Fixes] - 2024-11-21
+
+- Bump all dependencies to the latest
+- Fix confirm dialog not showing issue
+- Fix cross-extension prompt if `Enable Mac Do Not Disturb while Focused` is disabled
+
+## [Enhancement] - 2024-10-31
+
+Offers the option to enable Apple's default Do Not Disturb mode when Pomodoro timer is on "Focus" mode
+
 ## [Fixed wording] - 2024-10-21
 
 Fixed wording in the Stats command

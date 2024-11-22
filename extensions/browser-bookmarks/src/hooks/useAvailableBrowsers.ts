@@ -16,6 +16,7 @@ export const BROWSERS_BUNDLE_ID = {
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
   edgeCanary: "com.microsoft.edgemac.canary",
+  prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
 };
 
