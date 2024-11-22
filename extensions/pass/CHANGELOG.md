@@ -2,7 +2,7 @@
 
 ## [1.2.0] - 2024-11-21
 
-- Fix: Remove process.env from pass execution.
+- Fix: Delete LC_ALL env variable messing with nix-darwin.
 
 ## [1.1.0] - 2024-06-16
 
