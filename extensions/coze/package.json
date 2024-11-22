@@ -2,25 +2,43 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coze",
   "title": "Coze",
-  "description": "coze plugin",
-  "icon": "extension-icon.png",
+  "description": "Coze is an AI assistant that can help you with various tasks, including writing, translation, and coding. This extension allows you to use Coze directly in Raycast.",
+  "icon": "coze.svg",
   "author": "chyroc",
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_base",
+      "title": "API Base",
+      "description": "The base URL of the Coze API",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.coze.com",
+      "placeholder": "https://api.coze.com"
+    }
+  ],
   "commands": [
     {
-      "name": "chat",
-      "title": "chat",
-      "subtitle": "chat",
-      "description": "",
-      "mode": "no-view"
+      "name": "bot-chat",
+      "title": "Chat With Bot",
+      "description": "Chat With Bot",
+      "mode": "view"
+    },
+    {
+      "name": "bot-list",
+      "title": "Bot List",
+      "description": "List all bots",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@coze/api": "^1.0.10",
     "@raycast/api": "^1.84.12",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
