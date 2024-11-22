@@ -4,6 +4,7 @@
 - Search and jump to currently open tabs in Microsoft Edge Browser
 - Search and open Microsoft Edge tabs from search query based on browser history across all profiles.
 - Search and open Microsoft Edge tabs from search query based on bookmarks across all profiles.
+- Directly copy the URL of the Topmost Active tab
 
 *Note*:
 
