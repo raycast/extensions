@@ -163,7 +163,7 @@ function WatchHistory({ id }: { id: string }) {
         Object.keys(data).map((timestamp) => (
           <List.Item
             key={timestamp}
-            title={new Date(+timestamp * 1000).toString()}
+            title={new Date(+timestamp * 1000).toUTCString()}
             accessories={[{ date: new Date(+timestamp * 1000) }]}
             actions={
               <ActionPanel>
