@@ -3,16 +3,11 @@
 // retrieves the video's transcript, processes it, and saves it to a local file.
 // The script uses the YouTube Data API and handles user preferences for download locations.
 
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 import ytdl from "ytdl-core";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
-
-// User Preferences Structure
-interface Preferences {
-  defaultDownloadFolder: string;
-}
 
 // Fetches the transcript for a given YouTube video ID
 async function getVideoTranscript(videoId: string): Promise<string> {
@@ -78,6 +73,14 @@ export default async function Command(props: { arguments: { videoUrl: string } }
       style: Toast.Style.Success,
       title: "Transcript fetched and saved",
       message: `Saved to: ${filename}`,
+      primaryAction: {
+        title: "Open File",
+        onAction: () => open(filename),
+      },
+      secondaryAction: {
+        title: "Open Folder",
+        onAction: () => open(downloadsFolder),
+      },
     });
   } catch (error) {
     await showToast({
