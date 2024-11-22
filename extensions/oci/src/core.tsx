@@ -1,17 +1,18 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+/* eslint-disable @raycast/prefer-title-case */
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import common = require("oci-common");
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
 import { useState } from "react";
 
+const provider: common.ConfigFileAuthenticationDetailsProvider = new common.ConfigFileAuthenticationDetailsProvider();
+const computeClient = new core.ComputeClient({  authenticationDetailsProvider: provider });
 export default function Core() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const { isLoading, data: instances } = useCachedPromise(
     async () => {
-      const provider: common.ConfigFileAuthenticationDetailsProvider = new common.ConfigFileAuthenticationDetailsProvider();
-      const computeClient = new core.ComputeClient({  authenticationDetailsProvider: provider });
       const instances = await computeClient.listInstances({ compartmentId: provider.getTenantId() });
       return instances.items;
     }, [], { initialData: [] }
@@ -51,7 +52,38 @@ ${Object.entries(instance.shapeConfig ?? {}).map(([key, val]) => `| ${key} | ${v
       <List.Item.Detail.Metadata.Label title="Time Created" text={instance.timeCreated.toString()} />
     </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
       <Action icon={Icon.AppWindowSidebarLeft} title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
+        <Action.Push icon={Icon.List} title="View VNIC Attachments" target={<ListInstanceVnicAttachments instanceId={instance.id} />} />
     </ActionPanel>} />
   })}
 </List>
+}
+
+function ListInstanceVnicAttachments({instanceId}: {instanceId: string}) {
+  const { isLoading, data: VNICs } = useCachedPromise(async () => {
+    const VNICs = await computeClient.listVnicAttachments({ compartmentId: provider.getTenantId(), instanceId });
+    return VNICs.items;
+  }, [], {initialData: []})
+
+  return <List navigationTitle="Core > Instances > VNIC" isLoading={isLoading}>
+    {VNICs.map(vnic => <List.Item key={vnic.id} title={vnic.displayName ?? ""} subtitle={vnic.availabilityDomain} accessories={[{date: new Date(vnic.timeCreated)}]} actions={<ActionPanel>
+      {vnic.vnicId && <Action.Push icon={Icon.Eye} title="View VNIC" target={<ViewVnic vnicId={vnic.vnicId} />} />}
+    </ActionPanel>} />)}
+  </List>
+}
+
+function ViewVnic({vnicId}: {vnicId: string}) {
+  const { isLoading, data: vnic } = useCachedPromise(async () => {
+    const vnicClient = new core.VirtualNetworkClient({ authenticationDetailsProvider: provider });
+    const res = await vnicClient.getVnic({ vnicId });
+    return res.vnic;
+  })
+
+  const vnicMarkdown = `
+| - | - |
+|---|---|
+${Object.entries(vnic ?? {}).map(([key, val]) => `| ${key} | ${val} |`).join(`\n`)}`;
+  return <Detail navigationTitle="Core > Instances > VNIC Attachment > VNIC" isLoading={isLoading} markdown={`VNIC: ${vnicId} \n\n ${vnicMarkdown}`} actions={<ActionPanel>
+      {vnic?.privateIp && <Action.CopyToClipboard title="Copy Private IP to Clipboard" content={vnic.privateIp} />}
+      {vnic?.publicIp && <Action.CopyToClipboard title="Copy Public IP to Clipboard" content={vnic.publicIp} />}
+  </ActionPanel>} />
 }

@@ -20,7 +20,7 @@
   "dependencies": {
     "@raycast/api": "^1.84.3",
     "@raycast/utils": "^1.17.0",
-    "oci-sdk": "^2.97.0"
+    "oci-sdk": "^2.99.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
