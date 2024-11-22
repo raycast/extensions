@@ -68,8 +68,8 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     const transcript = await getVideoTranscript(videoId);
 
-    const { defaultDownloadFolder } = getPreferenceValues<Preferences>();
-    const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
+    const preferences = getPreferenceValues<Preferences>();
+    const downloadsFolder = preferences.defaultDownloadFolder || path.join(os.homedir(), "Downloads");
     const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
 
     await fs.writeFile(filename, transcript);

@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fetch-youtube-transcript",
+  "version": "1.0.0",
   "title": "Fetch YouTube Transcript",
   "description": "Fetches and saves the transcript of a YouTube video",
   "icon": "extension_icon.png",
