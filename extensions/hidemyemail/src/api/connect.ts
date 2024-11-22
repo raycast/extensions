@@ -198,10 +198,10 @@ export class iCloudService {
   private webservices!: Record<string, unknown>;
   private sessionData: Record<string, unknown> = {};
   private data!: {
-    dsInfo: Record<string, unknown>,
-    webservices: Record<string, unknown>,
-    hsaChallengeRequired?: string,
-    hsaTrustedBrowser?: string,
+    dsInfo: Record<string, unknown>;
+    webservices: Record<string, unknown>;
+    hsaChallengeRequired?: string;
+    hsaTrustedBrowser?: string;
   };
 
   constructor(appleID: string) {
@@ -447,7 +447,7 @@ export class iCloudService {
   }
 
   getWebserviceUrl(wsKey: string): string {
-    const hmeService = (this.webservices?.[wsKey] as { url: string });
+    const hmeService = this.webservices?.[wsKey] as { url: string };
     return hmeService?.url ?? "";
   }
 
