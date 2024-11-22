@@ -23,7 +23,19 @@
       "description": "Select the directory where JSON reports will be saved.",
       "default": "",
       "required": true
+    },
+    {
+      "name": "lighthousePath",
+      "type": "textfield",
+      "title": "Lighthouse Path",
+      "description": "Optional: Set a custom path to the Lighthouse executable (e.g., ~/.nvm/versions/node/v21.5.0/bin/lighthouse)😜",
+      "default": "",
+      "placeholder": "opt/homebrew/bin/lighthouse",
+      "required": false
     }
+
+
+
   ],
   "commands": [
     {

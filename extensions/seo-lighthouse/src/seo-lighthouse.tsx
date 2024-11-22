@@ -31,6 +31,7 @@ interface FormValues {
 
 interface Preferences {
   outputPath?: string;
+  lighthousePath?: string;
 }
 
 interface LighthouseReport {
@@ -78,7 +79,18 @@ function isValidUrl(url: string): boolean {
 }
 
 // Lighthouse Path Finding Function
-async function findLighthousePath(): Promise<string | null> {
+async function findLighthousePath(
+  preferences: Preferences
+): Promise<string | null> {
+  if (preferences.lighthousePath) {
+    try {
+      await nodeFs.access(preferences.lighthousePath, nodeFs.constants.X_OK);
+      return preferences.lighthousePath;
+    } catch (error) {
+      console.error('Invalid Lighthouse path:', error);
+    }
+  }
+
   const potentialPaths = [
     '/usr/local/bin/lighthouse',
     '/usr/bin/lighthouse',
@@ -92,13 +104,16 @@ async function findLighthousePath(): Promise<string | null> {
     try {
       await nodeFs.access(potentialPath, nodeFs.constants.X_OK);
       return potentialPath;
-    } catch {}
+    } catch (error) {
+      // Continue searching
+    }
   }
 
   try {
     const { stdout } = await execPromise('which lighthouse');
-    return stdout.trim();
-  } catch {
+    return stdout.trim() || null;
+  } catch (error) {
+    console.error('Lighthouse not found in PATH:', error);
     return null;
   }
 }
@@ -121,7 +136,7 @@ function LighthouseReportView({ reportPath }: { reportPath: string }) {
 
         setReport(parsedReport);
       } catch (error) {
-        console.error('Failed to load report', error);
+        console.error('Failed to load report:', error);
         setError(
           error instanceof Error
             ? error.message
@@ -255,6 +270,24 @@ export default function Command() {
   const [outputPath, setOutputPath] = useState<string>(
     preferences.outputPath || nodeOs.tmpdir()
   );
+  const [lighthousePath, setLighthousePath] = useState<string>(
+    preferences.lighthousePath || ''
+  );
+
+  useEffect(() => {
+    // If lighthousePath is not set, try to find it
+    if (!lighthousePath) {
+      const findPath = async () => {
+        const foundPath = await findLighthousePath(preferences);
+        if (foundPath) {
+          setLighthousePath(foundPath);
+        } else {
+          console.error('Lighthouse CLI not found.');
+        }
+      };
+      findPath();
+    }
+  }, [lighthousePath, preferences]);
 
   // If a report path exists, show the report view
   if (reportPath) {
@@ -276,6 +309,7 @@ export default function Command() {
         });
       }
     } catch (error) {
+      console.error('Directory selection failed:', error);
       await showToast({
         style: Toast.Style.Failure,
         title: 'Directory Selection Failed',
@@ -303,11 +337,17 @@ export default function Command() {
       }
 
       // Find Lighthouse path
-      const lighthousePath = await findLighthousePath();
-      if (!lighthousePath) {
-        throw new Error(
-          'Lighthouse CLI not found. Please install it globally.'
-        );
+      const finalLighthousePath = await findLighthousePath(preferences);
+      if (!finalLighthousePath) {
+        if (!preferences.lighthousePath) {
+          throw new Error(
+            'Lighthouse CLI not found. Please set the path manually in settings.'
+          );
+        } else {
+          throw new Error(
+            'Specified Lighthouse CLI path is invalid. Please set the path manually in settings.'
+          );
+        }
       }
 
       // Prepare categories
@@ -334,7 +374,8 @@ export default function Command() {
         if (!stats.isDirectory()) {
           throw new Error('Selected output path is not a directory.');
         }
-      } catch {
+      } catch (error) {
+        console.error('Output directory validation failed:', error);
         throw new Error(
           'Invalid output path. Please provide a valid directory.'
         );
@@ -347,7 +388,7 @@ export default function Command() {
 
       // Construct Lighthouse CLI command with enhanced configuration
       const command = [
-        lighthousePath,
+        `"${finalLighthousePath}"`,
         `"${formattedUrl}"`,
         `--output=json`,
         `--output-path="${outputFilePath}"`,
@@ -373,7 +414,7 @@ export default function Command() {
 
       try {
         // Execute Lighthouse with enhanced error handling
-        const { stdout, stderr } = await execPromise(fullCommand, {
+        await execPromise(fullCommand, {
           env: {
             ...process.env,
             PATH: `${process.env.PATH || ''}:/usr/bin:/usr/local/bin:/opt/homebrew/bin:/bin`,
@@ -382,14 +423,11 @@ export default function Command() {
           timeout: 120000, // 2-minute timeout
         });
 
-        console.log('Lighthouse stdout:', stdout);
-        console.log('Lighthouse stderr:', stderr);
-
         // Check if report was created
         try {
           await nodeFs.access(outputFilePath);
-        } catch {
-          // If report file doesn't exist, throw an error
+        } catch (error) {
+          console.error('Report generation failed:', error);
           throw new Error('Failed to generate Lighthouse report');
         }
 
@@ -446,15 +484,22 @@ export default function Command() {
       });
 
       // Additional specific error handling
-      if (errorMessage.includes('Lighthouse CLI not found')) {
+      if (
+        errorMessage.includes('Lighthouse CLI not found') ||
+        errorMessage.includes('invalid')
+      ) {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'Lighthouse CLI Not Found',
+          title: 'Lighthouse CLI Path Issue',
           message:
-            'Please install Lighthouse globally using:\n\nnpm install -g lighthouse',
+            'Please set the Lighthouse CLI path manually in the extension settings.',
         });
       }
     }
+  }
+
+  async function handleChangeLighthousePath(): Promise<void> {
+    await openCommandPreferences();
   }
 
   return (
@@ -464,6 +509,11 @@ export default function Command() {
           <Action.SubmitForm
             title="Run Lighthouse Analysis"
             onSubmit={handleSubmit}
+          />
+          <Action
+            title="Change Lighthouse Path"
+            onAction={handleChangeLighthousePath}
+            icon={Icon.Gear}
           />
           <Action
             title="Choose Output Directory"
