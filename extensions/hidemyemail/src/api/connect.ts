@@ -26,6 +26,7 @@ import { getNestedHeader, hashPassword } from "./utils";
 
 interface ErrorData {
   error?: string;
+  reason?: string;
   [key: string]: unknown;
 }
 
@@ -194,9 +195,14 @@ export class iCloudService {
   private clientID: string;
   private session: iCloudSession;
 
-  private webservices!: unknown;
+  private webservices!: Record<string, unknown>;
   private sessionData: Record<string, unknown> = {};
-  private data!: Record<string, unknown>;
+  private data!: {
+    dsInfo: Record<string, unknown>,
+    webservices: Record<string, unknown>,
+    hsaChallengeRequired?: string,
+    hsaTrustedBrowser?: string,
+  };
 
   constructor(appleID: string) {
     this.appleID = appleID;
@@ -249,6 +255,7 @@ export class iCloudService {
     }
 
     this.webservices = this.data?.webservices;
+    console.log(this.webservices);
   }
 
   async srpAuthenticate(password: string) {
@@ -429,10 +436,10 @@ export class iCloudService {
 
     if (addSessionData) {
       if (this.sessionData?.scnt) {
-        headers.set("scnt", this.sessionData.scnt);
+        headers.set("scnt", this.sessionData.scnt as string);
       }
       if (this.sessionData?.sessionID) {
-        headers.set("X-Apple-ID-Session-Id", this.sessionData.sessionID);
+        headers.set("X-Apple-ID-Session-Id", this.sessionData.sessionID as string);
       }
     }
 
@@ -440,7 +447,8 @@ export class iCloudService {
   }
 
   getWebserviceUrl(wsKey: string): string {
-    return this.webservices?.[wsKey]?.url || "";
+    const hmeService = (this.webservices?.[wsKey] as { url: string });
+    return hmeService?.url ?? "";
   }
 
   get cookieJarKey() {
