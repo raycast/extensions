@@ -174,7 +174,7 @@ export default function IssueActions({
             target={<IssueDetail initialIssue={issue.fields.parent} issueKey={issue.fields.parent?.key} />}
             title="Open Parent Issue"
             icon={Icon.ChevronUp}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           />
         )}
 
