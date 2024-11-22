@@ -6,7 +6,8 @@
   "icon": "changedetection.png",
   "author": "xmok",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "preferences": [
@@ -31,7 +32,7 @@
     {
       "name": "list-watches",
       "title": "List Watches",
-      "description": "",
+      "description": "List Watches and go to Preview, Edit, History",
       "mode": "view"
     }
   ],
