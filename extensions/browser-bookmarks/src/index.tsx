@@ -27,6 +27,7 @@ import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
@@ -111,6 +112,7 @@ export default function Command() {
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
@@ -126,6 +128,7 @@ export default function Command() {
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
@@ -146,6 +149,7 @@ export default function Command() {
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
@@ -194,6 +198,7 @@ export default function Command() {
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
@@ -214,6 +219,7 @@ export default function Command() {
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
@@ -343,6 +349,9 @@ export default function Command() {
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
+    if (hasPrismaAccess) {
+      prismaAccess.mutate();
+    }
     if (hasSafari) {
       safari.mutate();
     }
@@ -404,6 +413,7 @@ export default function Command() {
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
         vivaldi.isLoading
@@ -566,6 +576,15 @@ export default function Command() {
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
+                    name="Prisma Access"
+                    icon="prisma-access.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    profiles={prismaAccess.profiles}
+                    currentProfile={prismaAccess.currentProfile}
+                    setCurrentProfile={prismaAccess.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
