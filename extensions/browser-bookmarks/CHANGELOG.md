@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support Zen Browser] - {PR_MERGE_DATE}
+
+- Added support for Zen Browser Desktop.
+
 ## [Support for Prisma Access] - 2024-11-24
 
 - Add support for `Prisma Access` browser.
