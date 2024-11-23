@@ -21,8 +21,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.0",
-    "algoliasearch": "^4.14.2",
-    "striptags": "^3.2.0"
+    "html-entities": "^2.5.2",
+    "meilisearch": "^0.45.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

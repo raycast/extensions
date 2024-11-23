@@ -1,90 +1,52 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import algoliasearch from "algoliasearch/lite";
-import striptags from "striptags";
+import { useState } from "react";
+import { MeiliSearch } from "meilisearch";
+import fetch from "node-fetch";
 
-type docList = {
-  [key: string]: {
-    url: string;
-    title: string;
-  }[];
-};
-
-const DOCS: { [key: string]: docList } = {
-  "3.x": require("./documentation/3.x.json"),
-};
-
-const APPID = "BH4D9OD16A";
-const APIKEY = "b5e8f73c7462a6d5c8b525ef183aabec";
-const INDEX = "statamic_3";
-
-type KeyValueHierarchy = {
-  [key: string]: string;
-};
-
-type StatamicDocsHit = {
+type SearchResult = {
+  id: string;
+  hierarchy_lvl0: string;
+  hierarchy_lvl1: string;
+  search_content: string;
   url: string;
-  hierarchy: KeyValueHierarchy;
-  objectID: string;
-  _highlightResult: {
-    content:
-      | {
-          value: string;
-          matchlevel: string;
-          fullyHighlighted: boolean;
-          matchedWords: string[];
-        }
-      | undefined;
-    hierarchy: {
-      [key: string]: {
-        value: string;
-        matchLevel: string;
-        matchedWords: string[];
-      };
-    };
-  };
 };
+
+const client = new MeiliSearch({
+  host: "https://search.statamic.dev",
+  apiKey: "a8b8f82076221f9595dceca971be29c36cbccd772de5dbdb7f43dfac41557f95",
+  httpClient: async (url, opts) => {
+    const response = await fetch(url, {
+      method: opts?.method?.toLocaleUpperCase() ?? "GET",
+      headers: opts?.headers,
+      body: opts?.body,
+    });
+
+    return response.json();
+  }
+});
+
+const index = client.index("default");
 
 export default function main() {
-  const algoliaClient = useMemo(() => {
-    return algoliasearch(APPID, APIKEY);
-  }, [APPID, APIKEY]);
-
-  const algoliaIndex = useMemo(() => {
-    return algoliaClient.initIndex(INDEX);
-  }, [algoliaClient, INDEX]);
-
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
-    return Object.values(hierarchy)
-      .filter((hierarchyEntry: string | unknown) => hierarchyEntry)
-      .map((hierarchyEntry: string) => hierarchyEntry.replaceAll("&amp;", "&"));
+  const getTitle = (hit: SearchResult): string => {
+    return hit.hierarchy_lvl1	|| hit.hierarchy_lvl0 || "";
   };
 
-  const getTitle = (hit: StatamicDocsHit): string => {
-    return hierarchyToArray(hit.hierarchy).pop() || "";
-  };
+  const getSubtitle = (hit: SearchResult): string => {
+    const { decode } = require('html-entities');
 
-  const getSubTitle = (hit: StatamicDocsHit): string => {
-    const highlightResult = striptags(hit._highlightResult?.content?.value || "");
-    if (highlightResult) {
-      return highlightResult;
-    }
-
-    const hierarchy = hierarchyToArray(hit.hierarchy) || [];
-    hierarchy.pop();
-    return hierarchy.join(" > ");
+    return decode(hit.search_content || "");
   };
 
   const search = async (query = "") => {
     if (query === "") {
       return;
     }
-    setIsLoading(true);
 
-    return await algoliaIndex
+    return await index
       .search(query, {
         hitsPerPage: 20,
       })
@@ -94,60 +56,35 @@ export default function main() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(Toast.Style.Failure, "Error searching Statamic Documentation", err.message);
+        showToast(Toast.Style.Failure, "Failed to search the Statamic documentation", err.message);
         return [];
       });
   };
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
-
-  const currentDocs = DOCS["3.x"];
 
   return (
     <List
       throttle={true}
       isLoading={isLoading}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      onSearchTextChange={async (query) => {
+        setSearchResults(await search(query));
+      }}
     >
-      {searchResults?.map((hit: StatamicDocsHit) => {
+      {searchResults?.map((hit: SearchResult) => {
         return (
           <List.Item
-            key={hit.objectID}
+            key={hit.id}
             title={getTitle(hit)}
-            subtitle={getSubTitle(hit)}
+            subtitle={getSubtitle(hit)}
             icon="command-icon.png"
             actions={
-              <ActionPanel title={hit.url}>
-                <Action.OpenInBrowser url={hit.url} title="Open in Browser" />
-                <Action.CopyToClipboard content={hit.url} title="Copy URL" />
+              <ActionPanel title={`https://statamic.dev${hit.url}`}>
+                <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
+                <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
               </ActionPanel>
             }
           />
         );
-      }) ||
-        Object.entries(currentDocs).map(([section, items]: Array<any>) => {
-          return (
-            <List.Section title={section} key={section}>
-              {items.map((item: any) => {
-                return (
-                  <List.Item
-                    key={item.url}
-                    title={item.title}
-                    icon="command-icon.png"
-                    actions={
-                      <ActionPanel title={item.url}>
-                        <Action.OpenInBrowser url={item.url} title="Open in Browser" />
-                        <Action.CopyToClipboard content={item.url} title="Copy URL" />
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        })}
+      })}
     </List>
   );
 }
