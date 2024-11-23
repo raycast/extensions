@@ -16,4 +16,10 @@ export const dataModelSchema = z.array(
   }),
 );
 
+export const getActiveDataModelsSchema = z.object({
+  data: z.object({
+    objects: dataModelSchema,
+  }),
+});
+
 export type DataModel = z.infer<typeof dataModelSchema>;

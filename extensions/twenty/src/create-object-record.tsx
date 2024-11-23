@@ -1,30 +1,18 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { randomUUID } from "crypto";
 
-import { DataModel } from "./services/zod/schema/dataModelSchema";
 import twenty from "./services/TwentySDK";
 import { ObjectIcons } from "./enum/icons";
 import { OpenCreateObjectRecordForm } from "./pages";
+import { usePromise } from "@raycast/utils";
 
 export default function CreateObjectRecord() {
-  const [activeDataModels, setActiveDataModels] = useState<DataModel | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { isLoading, data: activeDataModels } = usePromise(async () => {
+    const activeDataModels = await twenty.getActiveDataModels();
+    return activeDataModels;
+  });
+
   const { push } = useNavigation();
-
-  useEffect(
-    function () {
-      async function onLoad() {
-        const [activeDataModels] = await Promise.all([twenty.getActiveDataModels()]);
-        setActiveDataModels(activeDataModels);
-        setIsLoading(false);
-      }
-
-      if (activeDataModels) return;
-      onLoad();
-    },
-    [isLoading],
-  );
 
   const standardActiveModel = activeDataModels?.filter((model) => !model.isCustom);
   const customActiveModel = activeDataModels?.filter((model) => model.isCustom);

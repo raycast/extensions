@@ -2,7 +2,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Api } from "../enum/api";
 import fetch from "node-fetch";
-import { dataModelSchema } from "./zod/schema/dataModelSchema";
+import { getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
 import { dataModelsFieldsSchema } from "./zod/schema/recordFieldSchema";
 
 class TwentySDK {
@@ -16,21 +16,17 @@ class TwentySDK {
   }
 
   async getActiveDataModels() {
-    try {
-      const response = await fetch(this.url + "/metadata/objects", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          [Api.KEY]: this.token,
-        },
-      });
-      const data = (await response.json()) as any;
-      const dataModel = await dataModelSchema.parseAsync(data?.data?.objects);
-      const activeDataModel = await dataModel.filter((model) => !model.isSystem && model.isActive);
-      return activeDataModel;
-    } catch (err) {
-      throw new Error(err as string);
-    }
+    const response = await fetch(this.url + "/metadata/objects", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        [Api.KEY]: this.token,
+      },
+    });
+    const rawData = await response.json();
+    const data = getActiveDataModelsSchema.parse(rawData);
+    const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
+    return activeDataModel;
   }
 
   async getRecordFieldsForDataModel(id: string) {
