@@ -6,7 +6,8 @@
   "icon": "logo.png",
   "author": "NabhagMotivaras",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Other"
   ],
   "license": "MIT",
   "commands": [
