@@ -20,4 +20,4 @@ This is the official Raycast Extension for [CLIPPyX](https://github.com/0ssamaak
 
 # Installation
 
-Refer to [installation guide](https://github.com/0ssamaak0/CLIPPyX?tab=readme-ov-file#getting-started) in CLIPPyX original Repo.
+Refer to [installation guide](https://github.com/0ssamaak0/CLIPPyX?tab=readme-ov-file#getting-started) in CLIPPyX Repo.

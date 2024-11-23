@@ -40,6 +40,7 @@
     {
       "name": "text",
       "title": "Text Content Search",
+      "subtitle": "CLIPPyX",
       "description": "Serch images by text content",
       "mode": "view",
       "preferences": [
