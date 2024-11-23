@@ -235,7 +235,7 @@ function SearchBrand({ search, onSearched }: SearchBrandProps) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />
+          {!isLoading && <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >
@@ -322,6 +322,8 @@ function formatSocialType(type: string) {
       return "X (formerly Twitter)";
     case "linkedin":
       return "LinkedIn";
+    case "youtube":
+      return "YouTube";
     default:
       return type.charAt(0).toUpperCase() + type.slice(1);
   }
