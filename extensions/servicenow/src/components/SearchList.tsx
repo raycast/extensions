@@ -156,7 +156,7 @@ export default function SearchList() {
     _updateHistory(
       request,
       {
-        before: `Removing "${title}" from favorites`,
+        before: `Removing ${title} from favorites`,
         success: `${title} removed from favorites`,
         failure: "Failed removing favorite",
       },

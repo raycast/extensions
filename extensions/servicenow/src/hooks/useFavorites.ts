@@ -232,7 +232,7 @@ const useFavorites = () => {
     _updateFavorites(
       request,
       {
-        before: `Adding "${title}" to favorites`,
+        before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
         failure: "Failed adding favorite group",
       },
@@ -266,7 +266,7 @@ const useFavorites = () => {
     _updateFavorites(
       request,
       {
-        before: `Adding "${title}" to favorites`,
+        before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
         failure: "Failed adding favorite",
       },
@@ -308,7 +308,7 @@ const useFavorites = () => {
     _updateFavorites(
       request,
       {
-        before: `Adding "${title}" to favorites`,
+        before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
         failure: "Failed adding favorite",
       },
@@ -341,7 +341,7 @@ const useFavorites = () => {
     _updateFavorites(
       request,
       {
-        before: `Adding "${title}" to favorites`,
+        before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
         failure: "Failed adding favorite group",
       },
@@ -427,7 +427,7 @@ const useFavorites = () => {
     _updateFavorites(
       request,
       {
-        before: `Removing "${title}" from favorites`,
+        before: `Removing ${title} from favorites`,
         success: `${title} removed from favorites`,
         failure: "Failed removing favorite",
       },

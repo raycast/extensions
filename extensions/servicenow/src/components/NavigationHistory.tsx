@@ -134,7 +134,7 @@ export default function NavigationHistory() {
                   },
                   {
                     icon: Icon.Link,
-                    tooltip: historyEntry.url,
+                    tooltip: historyEntry.url[0] == "/" ? `${historyEntry.url}` : `/${historyEntry.url}`,
                   },
                 ];
 
