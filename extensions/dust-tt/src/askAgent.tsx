@@ -92,9 +92,10 @@ export function useGetSelectedText() {
 }
 
 export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentType; initialQuestion?: string }) {
+  const trimmedQuestion = initialQuestion?.trim();
   const { push } = useNavigation();
   const { handleSubmit, itemProps } = useForm<AskAgentQuestionFormValues>({
-    initialValues: { question: initialQuestion ? initialQuestion.trim() + "\n\n" : "" },
+    initialValues: { question: trimmedQuestion ? trimmedQuestion + "\n\n" : "" },
     onSubmit(values) {
       push(
         <AskDustCommand launchType={LaunchType.UserInitiated} arguments={{ agent: agent, search: values.question }} />,
