@@ -23,7 +23,7 @@ const client = new MeiliSearch({
     });
 
     return response.json();
-  }
+  },
 });
 
 const index = client.index("default");
@@ -33,7 +33,7 @@ export default function main() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   const getTitle = (hit: SearchResult): string => {
-    return hit.hierarchy_lvl1	|| hit.hierarchy_lvl0 || "";
+    return hit.hierarchy_lvl1 || hit.hierarchy_lvl0 || "";
   };
 
   const getSubtitle = (hit: SearchResult): string => {
@@ -65,7 +65,7 @@ export default function main() {
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
-        const results = await search(query) as SearchResult[];
+        const results = (await search(query)) as SearchResult[];
         setSearchResults(results);
       }}
     >
