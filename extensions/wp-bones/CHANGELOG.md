@@ -1,6 +1,6 @@
 # WP Bones Changelog
 
-## [News features and improvements] - {PR_MERGE_DATE}
+## [News features and improvements] - 2024-11-23
 
 - ✨ Added `useVersion()` hooks with comprehensive error handling mechanisms
 - ✨ Added `useBoilerplates()`API fetch to retrieve boilerplate list with comprehensive error handling and fallback mechanism
