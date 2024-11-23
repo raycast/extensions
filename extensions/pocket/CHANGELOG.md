@@ -1,6 +1,6 @@
 # Pocket Changelog
 
-## [Improved Type Safety] - {PR_MERGE_DATE}
+## [Improved Type Safety] - 2024-11-23
 - Added `Preferences` type to `preferences.ts`
 - Added `zod` for runtime validation and type inference
 - Added fallback values for `List.Item`
