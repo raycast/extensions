@@ -2,6 +2,7 @@ import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { MeiliSearch } from "meilisearch";
 import fetch from "node-fetch";
+import { decode } from "html-entities";
 
 type SearchResult = {
   id: string;
@@ -36,8 +37,6 @@ export default function main() {
   };
 
   const getSubtitle = (hit: SearchResult): string => {
-    const { decode } = require('html-entities');
-
     return decode(hit.search_content || "");
   };
 
