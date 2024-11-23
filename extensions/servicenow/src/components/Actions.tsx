@@ -1,24 +1,23 @@
 import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 
 import useInstances from "../hooks/useInstances";
 import Instances from "./InstancesList";
-import { Instance } from "../types";
 
-export default function Actions({ mutate }: { mutate: () => void }) {
-  const { instances } = useInstances();
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+export default function Actions({ cantRefresh, revalidate }: { cantRefresh?: boolean; revalidate: () => void }) {
+  const { instances, selectedInstance, setSelectedInstance } = useInstances();
 
   return (
     <>
-      <List.Dropdown.Section title="List">
-        <Action
-          icon={Icon.ArrowClockwise}
-          title="Refresh"
-          onAction={mutate}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-        />
-      </List.Dropdown.Section>
+      {!cantRefresh && (
+        <List.Dropdown.Section title="List">
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Refresh"
+            onAction={revalidate}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+        </List.Dropdown.Section>
+      )}
       <List.Dropdown.Section title="Instance Profiles">
         <Action.Push
           icon={Icon.Gear}
