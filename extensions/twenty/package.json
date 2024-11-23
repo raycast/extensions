@@ -24,14 +24,14 @@
   ],
   "preferences": [
     {
-      "name": "api_token",
+      "name": "token",
       "description": "Enter your Twenty API Token",
       "type": "password",
       "title": "API Token",
       "required": true
     },
     {
-      "name": "self_host_api_url",
+      "name": "url",
       "description": "Enter your self-host API URL (Optional)",
       "type": "textfield",
       "title": "Self Host API URL",

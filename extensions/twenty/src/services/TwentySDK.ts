@@ -10,9 +10,9 @@ class TwentySDK {
   private token!: string;
 
   constructor() {
-    const { api_token, self_host_api_url }: { api_token: string; self_host_api_url: string } = getPreferenceValues();
-    this.token = `Bearer ${api_token}`;
-    this.url = self_host_api_url ? `${self_host_api_url}/rest` : `https://api.twenty.com/rest`;
+    const { token, url }: { token: string; url: string } = getPreferenceValues();
+    this.token = `Bearer ${token}`;
+    this.url = url ? `${url}/rest` : `https://api.twenty.com/rest`;
   }
 
   async getActiveDataModels() {
