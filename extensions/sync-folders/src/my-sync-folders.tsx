@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  confirmAlert,
-  Icon,
-  launchCommand,
-  LaunchType,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { SyncFoldersForm } from "./components/SyncFoldersForm";
 import { useSyncFolders } from "./hooks";
@@ -19,22 +8,9 @@ import { lastSyncDate } from "./utils";
 type SyncFoldersType = { id: string; name: string };
 
 export default function Command() {
-  const { syncFolders, deleteSyncFolders: deleteSyncFolder, runSyncFolders, isLoading } = useSyncFolders();
+  const { syncFolders, deleteSyncFolders: deleteSyncFolder, runSyncFolders, isLoading, mutate } = useSyncFolders();
 
   const [dropDownFilter, setDropDownFilter] = useState<string>();
-
-  console.log("!!!!!!!! >", syncFolders);
-
-  /**
-   * Opens the "Create Sync Folders" command.
-   *
-   * This function launches a command named "create-sync-folders" which is
-   * initiated by the user. It is used to open the interface or functionality
-   * for creating synchronization folders.
-   */
-  function handleOpenCreateSyncFolders() {
-    launchCommand({ name: "create-sync-folders", type: LaunchType.UserInitiated });
-  }
 
   /**
    * Executes the synchronization of folders based on the provided ID.
@@ -138,7 +114,7 @@ export default function Command() {
           return false;
         })
         ?.map((sync_folders) => {
-          const { id, name, source_folder, dest_folder, delete_dest, last_sync } = sync_folders;
+          const { id, icon, name, source_folder, dest_folder, delete_dest, last_sync } = sync_folders;
 
           const accessories = [
             {
@@ -152,7 +128,10 @@ export default function Command() {
           return (
             <List.Item
               key={id}
-              icon={delete_dest ? "folders-orange.svg" : "folders-green.svg"}
+              icon={{
+                source: icon ? Icon[icon as keyof typeof Icon] : Icon.Folder,
+                tintColor: delete_dest ? Color.Orange : Color.Green,
+              }}
               title={name as string}
               actions={
                 <ActionPanel title="Start Sync">
@@ -167,6 +146,7 @@ export default function Command() {
                     target={
                       <SyncFoldersForm
                         syncFolder={{
+                          icon,
                           id,
                           name,
                           source_folder,
@@ -175,14 +155,21 @@ export default function Command() {
                         }}
                       />
                     }
+                    onPop={mutate}
                     icon={Icon.Pencil}
+                  />
+                  <Action.Push
+                    title="Duplicate"
+                    target={<SyncFoldersForm syncFolder={{ ...sync_folders, id: undefined, name: `${name} Copy` }} />}
+                    onPop={mutate}
+                    icon={Icon.Duplicate}
                   />
                   <ActionPanel.Section>
                     <Action.Push
-                      target={null}
                       title="Create Sync Folders"
                       icon={Icon.Plus}
-                      onPush={handleOpenCreateSyncFolders}
+                      target={<SyncFoldersForm />}
+                      onPop={mutate}
                     />
                   </ActionPanel.Section>
 
@@ -234,12 +221,7 @@ export default function Command() {
         description="Create a new Sync Folders by pressing the ⏎ key."
         actions={
           <ActionPanel>
-            <Action.Push
-              target={null}
-              title="Create Sync Folders"
-              icon={Icon.Plus}
-              onPush={handleOpenCreateSyncFolders}
-            />
+            <Action.Push title="Create Sync Folders" icon={Icon.Plus} target={<SyncFoldersForm />} onPop={mutate} />
           </ActionPanel>
         }
       />

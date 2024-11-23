@@ -23,6 +23,7 @@ export type Preferences = {
   focusIntervalDuration: string;
   shortBreakIntervalDuration: string;
   longBreakIntervalDuration: string;
+  enableFocusWhileFocused: boolean;
   completionImage: string;
   sound: string;
   enableTimeOnMenuBar: boolean;

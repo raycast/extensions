@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aerospace",
   "title": "Aerospace Tiling Window Manager",
-  "description": "Aerospace Tiling Window Manager Extension for Raycast to see and configure your shortcuts",
+  "description": "Aerospace Tiling Window Manager Extension for Raycast",
   "icon": "aerospace-icon.png",
   "author": "limonkufu",
   "contributors": [
-    "AmmarCodes"
+    "AmmarCodes",
+    "thewinger"
   ],
   "categories": [
     "Productivity",
@@ -43,6 +44,49 @@
       "title": "Enable Aerospace Menubar Shortcuts",
       "description": "See your Aerospace shortcuts at a glance",
       "mode": "menu-bar"
+    },
+    {
+      "name": "switchApps",
+      "title": "Switch Apps in Workspace",
+      "description": "Switch between the apps opened",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultWorkspace",
+          "title": "Default Search",
+          "description": "Set the default workspace to search: All or focused",
+          "required": true,
+          "type": "dropdown",
+          "default": "focused",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "workspace",
+          "placeholder": "Focused or All",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -67,4 +111,3 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
-

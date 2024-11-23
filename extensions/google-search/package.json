@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "mblode",
   "contributors": [
-    "VBenny42"
+    "VBenny42",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "categories": [
@@ -18,6 +19,12 @@
       "title": "Google Search",
       "description": "Google search with autosuggestions",
       "mode": "view"
+    },
+    {
+      "name": "searchSelectText",
+      "title": "Google Search Selected Text",
+      "description": "Google search with selected text",
+      "mode": "no-view"
     }
   ],
   "preferences": [

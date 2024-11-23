@@ -1,5 +1,17 @@
 # Dust.tt Changelog
 
+## [Feature] - 2024-11-09
+
+- Add support for Oauth connexion flow.
+- Add Command to Select Workspace (oauth only)
+- Add Command for Claude-3
+- Use official Dust Client (removed custom implementation)
+- Support dust favorite assistants feature (oauth only, removed the localStorage implementation)
+- Fix icons for referenced documents
+- Fix labels for assistant scopes
+- Update wording to match Dust (especially agent -> assistant).
+- Improve UX (thinking animation, abort fetching when exiting view...)
+
 ## [Feature] - 2024-10-01
 
 - allow user to specify custom API URL

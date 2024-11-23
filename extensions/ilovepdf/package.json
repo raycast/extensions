@@ -5,6 +5,9 @@
   "description": "Set of commands to interact with iLovePDF",
   "icon": "command-icon.png",
   "author": "mohamedk1",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Data"
   ],
@@ -94,7 +97,7 @@
       "description": "Add page number to PDF using iLovePDF API.",
       "mode": "view"
     },
-     {
+    {
       "name": "add-watermark-to-pdf",
       "title": "Add Watermark to PDF",
       "subtitle": "iLovePDF",
@@ -155,6 +158,15 @@
       "required": false,
       "default": false,
       "label": "Ask before download"
+    },
+    {
+      "name": "SelectFileInFinder",
+      "title": "Select files in Finder",
+      "description": "Select files in Finder",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Select file in Finder"
     }
   ],
   "dependencies": {

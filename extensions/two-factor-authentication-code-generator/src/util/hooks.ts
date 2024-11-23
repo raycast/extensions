@@ -5,26 +5,31 @@ import { generateTOTP, Options, parse } from "./totp";
 interface UseAppsOptions {
   doUpdates?: boolean;
 }
+export interface App {
+  name: string;
+  key: string;
+  code: string;
+  percent: number;
+  time: string;
+  secret: string;
+  options: Options;
+}
+
 export function useApps(options?: UseAppsOptions) {
-  const [apps, setApps] = useState<
-    {
-      name: string;
-      key: string;
-      code: string;
-      percent: number;
-      time: string;
-      secret: string;
-      options: Options;
-    }[]
-  >([]);
+  const [apps, setApps] = useState<Array<App>>([]);
 
   async function updateApps() {
     const _apps = await LocalStorage.allItems();
     setApps(
       Object.keys(_apps)
-        .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => {
+          const parsedA = parse(_apps[a]).lastTimeUsed ?? 1;
+          const parsedB = parse(_apps[b]).lastTimeUsed ?? 1;
+          const timeComparison = parsedB - parsedA;
+          return timeComparison === 0 ? a.localeCompare(b) : timeComparison;
+        })
         .map((name) => {
-          const token: { secret: string; options: Options } = parse(_apps[name]);
+          const token: { secret: string; options: Options; lastTimeUsed?: number } = parse(_apps[name]);
           return {
             name,
             key: _apps[name].toString(),

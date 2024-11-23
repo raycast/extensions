@@ -9,7 +9,7 @@ import {
   resetInterval
 } from "../intervals";
 import { Interval, IntervalType } from "../types";
-import { clearStatus, endSnooze, setSnooze, setStatus } from "./slackApi";
+import { clearStatus, endSnooze, setSnooze, setStatus } from "./slackAPI";
 import { FocusText, LongBreakText, ShortBreakText } from "../constants";
 
 export async function slackCreateInterval(intervalType: IntervalType, slackToken: string, isFreshStart = true) {
