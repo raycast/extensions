@@ -30,7 +30,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action icon={{ source: Icon.Plug, tintColor: VPN.isConnected ? Color.Red : Color.Green }} title={VPN.isConnected ? "Disconnect" : "Connect"} onAction={() => toggle(VPN)} />
+                <Action
+                  icon={{ source: Icon.Plug, tintColor: VPN.isConnected ? Color.Red : Color.Green }}
+                  title={VPN.isConnected ? "Disconnect" : "Connect"}
+                  onAction={() => toggle(VPN)}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

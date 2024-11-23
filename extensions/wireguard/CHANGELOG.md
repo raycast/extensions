@@ -1,6 +1,9 @@
 # Wireguard Changelog
 
-## [] - 
+## [Add Toasts and Huds] - {PR_MERGE_DATE}
+
+- `showToast` then `showHud` on **toggle**
+- `showToast` then `showHud` on **disconnectAll**
 
 ## [Fixed] - 2023-11-28
 

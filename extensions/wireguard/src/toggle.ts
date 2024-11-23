@@ -1,8 +1,9 @@
-import { showHUD } from "@raycast/api";
+import { showHUD, showToast, Toast } from "@raycast/api";
 import { VPN } from "./type";
 import { CMD_PATH, runScript } from "./utils";
 
 export default async (VPN: VPN) => {
+  await showToast(Toast.Style.Animated, VPN.isConnected ? "Disconnecting" : "Connecting");
   const sn = VPN.sn;
   if (VPN.isConnected) {
     await disconnectVPNBySN(sn, true);
