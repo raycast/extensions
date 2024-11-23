@@ -29,7 +29,7 @@ const index = client.index("default");
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   const getTitle = (hit: SearchResult): string => {
     return hit.hierarchy_lvl1	|| hit.hierarchy_lvl0 || "";
@@ -52,7 +52,7 @@ export default function main() {
       })
       .then((res) => {
         setIsLoading(false);
-        return res.hits;
+        return res.hits as SearchResult[];
       })
       .catch((err) => {
         setIsLoading(false);
@@ -66,10 +66,11 @@ export default function main() {
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
-        setSearchResults(await search(query));
+        const results = await search(query) as SearchResult[];
+        setSearchResults(results);
       }}
     >
-      {searchResults?.map((hit: SearchResult) => {
+      {searchResults?.map((hit: SearchResult): React.ReactNode => {
         return (
           <List.Item
             key={hit.id}
