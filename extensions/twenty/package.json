@@ -25,10 +25,11 @@
   "preferences": [
     {
       "name": "token",
-      "description": "Enter your Twenty API Token",
+      "description": "Enter your Twenty API Key",
       "type": "password",
-      "title": "API Token",
-      "required": true
+      "title": "API Key",
+      "required": true,
+      "placeholder": "Enter your Twenty API Key..."
     },
     {
       "name": "url",

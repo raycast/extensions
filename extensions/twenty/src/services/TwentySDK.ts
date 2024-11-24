@@ -4,15 +4,18 @@ import { Api } from "../enum/api";
 import fetch from "node-fetch";
 import { getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
 import { dataModelsFieldsSchema } from "./zod/schema/recordFieldSchema";
+import { removeTrailingSlash } from "../helper/removeTrailingSlash";
+import { isUrl } from "../helper/isUrl";
 
 class TwentySDK {
   private url!: string;
   private token!: string;
 
   constructor() {
-    const { token, url }: { token: string; url: string } = getPreferenceValues();
+    const { token, url: providedUrl } = getPreferenceValues<Preferences>();
+    const url = removeTrailingSlash(providedUrl);
     this.token = `Bearer ${token}`;
-    this.url = url ? `${url}/rest` : `https://api.twenty.com/rest`;
+    this.url = isUrl(url) ? `${url}/rest` : `https://api.twenty.com/rest`;
   }
 
   async getActiveDataModels() {
