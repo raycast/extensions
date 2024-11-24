@@ -63,7 +63,7 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     const transcript = await getVideoTranscript(videoId);
 
-    const { defaultDownloadFolder } = getPreferenceValues<Preferences>();
+    const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
     const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
     const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
 
