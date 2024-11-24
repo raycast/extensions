@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Api } from "../enum/api";
 import fetch from "node-fetch";
 import { getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
-import { dataModelsFieldsSchema } from "./zod/schema/recordFieldSchema";
+import { getDataModelWithFieldsSchema } from "./zod/schema/recordFieldSchema";
 import { removeTrailingSlash } from "../helper/removeTrailingSlash";
 import { isUrl } from "../helper/isUrl";
 
@@ -19,20 +19,6 @@ class TwentySDK {
   }
 
   async getActiveDataModels() {
-    const response = await fetch(this.url + "/metadata/objects", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        [Api.KEY]: this.token,
-      },
-    });
-    const rawData = await response.json();
-    const data = getActiveDataModelsSchema.parse(rawData);
-    const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
-    return activeDataModel;
-  }
-
-  async getRecordFieldsForDataModel(id: string) {
     try {
       const response = await fetch(this.url + "/metadata/objects", {
         method: "GET",
@@ -41,17 +27,34 @@ class TwentySDK {
           [Api.KEY]: this.token,
         },
       });
-      const data = (await response.json()) as any;
-      const objectRecords = await dataModelsFieldsSchema.parseAsync(data?.data?.objects);
-      const objectRecordWithFieldsMetadata = await objectRecords.find((object) => object.id === id)!;
+      const rawData = await response.json();
+      const data = getActiveDataModelsSchema.parse(rawData);
+      const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
+      return activeDataModel;
+    } catch (err) {
+      throw new Error(err as string);
+    }
+  }
+
+  async getRecordFieldsForDataModel(id: string) {
+    try {
+      const response = await fetch(this.url + `/metadata/objects/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          [Api.KEY]: this.token,
+        },
+      });
+      const rawData = await response.json();
+      const objectRecordWithFieldsMetadata = getDataModelWithFieldsSchema.parse(rawData);
       const excludeFieldsWithName = ["updatedAt", "deletedAt"];
-      objectRecordWithFieldsMetadata.fields = objectRecordWithFieldsMetadata.fields
+      objectRecordWithFieldsMetadata.data.object.fields = objectRecordWithFieldsMetadata.data.object.fields
         .filter((object) => !object.isSystem)
         .filter((object) => object.isActive)
         .filter((object) => object.type !== "RELATION" && object.type !== "ACTOR") // handle relation later
         .filter((object) => !excludeFieldsWithName.includes(object.name));
 
-      return objectRecordWithFieldsMetadata;
+      return objectRecordWithFieldsMetadata.data.object;
     } catch (err) {
       throw new Error(err as string);
     }
