@@ -14,18 +14,19 @@ function isFulfilledPromise<T>(v: PromiseSettledResult<T>): v is PromiseFulfille
 }
 
 async function getMarkdownFiles(dir: string): Promise<Array<string>> {
-  let markdownFiles: Array<string> = [];
   const entries = await fs.readdir(dir, { withFileTypes: true });
-  for (const entry of entries) {
+  const tasks = entries.map(async (entry) => {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      const subDirFiles = await getMarkdownFiles(fullPath);
-      markdownFiles = markdownFiles.concat(subDirFiles);
+      return getMarkdownFiles(fullPath);
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
-      markdownFiles.push(fullPath);
+      return [fullPath];
+    } else {
+      return [];
     }
-  }
-  return markdownFiles;
+  });
+  const results = await Promise.all(tasks);
+  return results.flat();
 }
 
 export default async function getObsidianFiles(): Promise<Array<File>> {

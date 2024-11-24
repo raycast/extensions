@@ -7,7 +7,7 @@ export function isFrontMatter(v: unknown): v is FrontMatter {
   return (
     typeof frontMatter.source === "string" &&
     typeof frontMatter.title === "string" &&
-    typeof frontMatter.saved === "string" &&
+    // typeof frontMatter.saved === "string" &&
     typeof frontMatter.read === "boolean" &&
     (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
     isStringArray(frontMatter.tags)
