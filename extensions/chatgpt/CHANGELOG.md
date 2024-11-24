@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-11-24
 
 - Fix: Fixed Images not rendering if their paths have spaces in them.
 
