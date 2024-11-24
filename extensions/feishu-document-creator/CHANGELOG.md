@@ -1,6 +1,6 @@
 # Feishu Document Creator Changelog
 
-## [Bug fix] - 2024-11-21
+## [Bug fix] - {PR_MERGE_DATE}
 
 - Select the correct default application.
 
