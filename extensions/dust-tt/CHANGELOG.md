@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [fixes] - 2024-11-21
+
+- Use the proper oauth audience and add scopes to limit api access.
+
 ## [Feature] - 2024-11-09
 
 - Add support for Oauth connexion flow.
