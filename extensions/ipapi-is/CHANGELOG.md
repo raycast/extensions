@@ -3,6 +3,8 @@
 ## [Enhancements] - {PR_MERGE_DATE}
 
 - Add "Abuse object"
+- Show `Toast` on error
+- Remove "_clever_" code to reduce chances of errors
 
 ## [Omit Argument to use your own IP] - 2024-10-22
 

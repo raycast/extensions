@@ -26,7 +26,7 @@ type Company = {
   network: string;
   whois: string;
 };
-type ASN = {
+export type ASN = {
   asn: number;
   abuser_score: string;
   descr: string;
@@ -72,12 +72,12 @@ type Abuse = {
   phone: string;
 }
 
-type ASNRespones = ASN & {
+export type ASNRespones = ASN & {
   elapsed_ms: number;
-  prefixes: string[];
+  prefixes?: string[];
   prefixesIPv6?: string[];
 };
-type IPResponse = {
+export type IPResponse = {
   ip: string;
   rir: "AFRNIC" | "APNIC" | "ARIN" | "LACNIC" | "RIPE NCC";
   is_bogon: boolean;
@@ -89,11 +89,11 @@ type IPResponse = {
   is_vpn: boolean;
   is_abuser: boolean;
   datacenter?: Datacenter;
-  company?: Company;
-  asn?: ASN;
-  location?: Location;
-  vpn?: VPN;
-  abuse?: Abuse;
+  company?: Company | null;
+  asn?: ASN | null;
+  location?: Location | null;
+  vpn?: VPN | null;
+  abuse?: Abuse | null;
   elapsed_ms: number;
 };
 export type SuccessResponse = IPResponse | ASNRespones;
