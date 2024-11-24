@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Chore] - 2024-11-24
+
+- Fixed wording in description
+
 ## [Fix] - 2024-08-12
 
 - Fix issue when showing processes that consume more than 9Gb of RAM
