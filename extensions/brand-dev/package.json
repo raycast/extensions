@@ -34,6 +34,26 @@
           "type": "text",
           "required": false
         }
+      ],
+      "preferences": [
+        {
+          "name": "action",
+          "title": "Secondary Action",
+          "description": "Set your Secondary Action",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Delete",
+              "value": "del"
+            },
+            {
+              "title": "New",
+              "value": "new"
+            }
+          ],
+          "default": "del",
+          "required": false
+        }
       ]
     }
   ],
