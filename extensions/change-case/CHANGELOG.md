@@ -1,6 +1,7 @@
 # Change Case Changelog
 
 ## [Focus last used case] - {PR_MERGE_DATE}
+- Focus the last used case when opening the extension
 
 ## [Fix logic regarding preserve casing] - 2024-09-02
 - Properly handle the logic regarding the `Preserve Casing` preference
