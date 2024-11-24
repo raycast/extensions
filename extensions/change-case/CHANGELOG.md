@@ -1,5 +1,7 @@
 # Change Case Changelog
 
+## [Focus last used case] - {PR_MERGE_DATE}
+
 ## [Fix logic regarding preserve casing] - 2024-09-02
 - Properly handle the logic regarding the `Preserve Casing` preference
 - Rewrote some of the documentation to make it clearer
