@@ -11,6 +11,12 @@ jobs:
     name: "PR Bot"
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the repository (PR fork)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}  # Checkout the pull request from the forked repo
+          token: ${{ secrets.GITHUB_TOKEN }}  # Use the GitHub token for authentication
+
       - name: Get changed extensions
         id: get_changed_extensions
         uses: raycast/github-actions/get-changed-extensions@v1.16.0
