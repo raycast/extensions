@@ -1,7 +1,7 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Keyboard, showToast, Toast, open } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { envato } from "./utils";
-import { NodeHtmlMarkdown } from "node-html-markdown";
+import { ItemDetail } from "./itemDetail";
 
 export default function ListPurchases() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-purchase-details", false);
@@ -16,11 +16,43 @@ export default function ListPurchases() {
     }
   );
 
+  async function download(id: number) {
+    const toast = await showToast(Toast.Style.Animated, "Starting Download");
+    const res = await envato.private.getDownloadLink({ item_id: id });
+    toast.style = Toast.Style.Success;
+    toast.title = "Download Started";
+    await open(res);
+  }
+
+  const isEmpty = !isLoading && !purchases.length;
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search your purchases" isShowingDetail={isShowingDetail}>
-      {purchases.map((purchase) => {
-        const markdown = `## Description \n\n --- \n ${NodeHtmlMarkdown.translate(purchase.item.description)}`;
-        return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search your purchases"
+      isShowingDetail={!isEmpty && isShowingDetail}
+    >
+      {isEmpty ? (
+        <List.EmptyView
+          title="You haven't bought anything yet."
+          description="Discover the most popular items available or browse our hottest new items."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon="icon.png"
+                title="Most Popular Items"
+                url="https://themeforest.net/page/top_sellers"
+              />
+              <Action.OpenInBrowser
+                icon="icon.png"
+                title="Hottest New Items"
+                url="https://themeforest.net/category/all"
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        purchases.map((purchase) => (
           <List.Item
             key={purchase.code}
             icon={purchase.item.previews.icon_preview?.icon_url ?? Icon.Dot}
@@ -29,37 +61,7 @@ export default function ListPurchases() {
             accessories={
               isShowingDetail ? undefined : [{ date: purchase.sold_at, tooltip: purchase.sold_at.toString() }]
             }
-            detail={
-              <List.Item.Detail
-                markdown={markdown}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="ID" text={purchase.item.id.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Name" text={purchase.item.name} />
-                    <List.Item.Detail.Metadata.Link
-                      title="Author"
-                      text={purchase.item.author_username}
-                      target={purchase.item.author_url}
-                    />
-                    <List.Item.Detail.Metadata.Link title="URL" text={purchase.item.url} target={purchase.item.url} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Supported Until"
-                      text={purchase.supported_until.toDateString()}
-                    />
-                    <List.Item.Detail.Metadata.Link
-                      title="Site"
-                      text={purchase.item.site}
-                      target={`https://${purchase.item.site}`}
-                    />
-                    <List.Item.Detail.Metadata.TagList title="Tags">
-                      {purchase.item.tags.map((tag) => (
-                        <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
-                      ))}
-                    </List.Item.Detail.Metadata.TagList>
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            detail={<ItemDetail item={purchase.item} />}
             actions={
               <ActionPanel>
                 <Action
@@ -67,12 +69,17 @@ export default function ListPurchases() {
                   title="Toggle Details"
                   onAction={() => setIsShowingDetail((prev) => !prev)}
                 />
-                <Action.OpenInBrowser icon="icon.png" url={purchase.item.url} />
+                <Action icon={Icon.Download} title="Download" onAction={() => download(purchase.item.id)} />
+                <Action.OpenInBrowser
+                  icon="icon.png"
+                  url={purchase.item.url}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
               </ActionPanel>
             }
           />
-        );
-      })}
+        ))
+      )}
     </List>
   );
 }

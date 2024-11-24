@@ -47,8 +47,15 @@
       "subtitle": "Envato",
       "description": "List Purchases",
       "mode": "view"
+    },
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "subtitle": "Envato",
+      "description": "Search Items in Envato Market Catalog",
+      "mode": "view"
     }
-  ],
+      ],
   "preferences": [
     {
       "name": "token",

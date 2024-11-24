@@ -1,5 +1,11 @@
 # Envato Changelog
 
+## [Search Items + Purchases Enhancements] - {PR_MERGE_DATE}
+
+- New "Search Items" command lets you conveniently search across one or all Envato sites
+- Open download link for Purchases
+- `EmptyView` when no purchases
+
 ## [List Purchases] - 2024-11-06
 
 - View your purchases
