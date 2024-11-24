@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "td",
-      "title": "Td",
-      "subtitle": "TouchDesigner Operators",
+      "title": "Show TouchDesigner Operators",
       "description": "Search TOPs, CHOPs, DATs, etc",
       "mode": "view"
     }
