@@ -29,7 +29,7 @@ To allow non-admin users to view and delete their past search terms, you'll need
 
 #### Steps to install:
 
-1. Download the following update set from ServiceNow Share: [ACLs for Raycast Extension.xml](https://developer.servicenow.com/connect.do#!/share/contents/3108109_servicenow_raycast_extension).
+1. Download the following update set from ServiceNow Share: [ACLs for Raycast Extension](https://developer.servicenow.com/connect.do#!/share/contents/3108109_servicenow_raycast_extension).
 2. Navigate to **System Update Sets > Retrieved Update Sets** in your ServiceNow instance.
 3. Click **Import Update Set from XML** and upload the file.
 4. Commit the update set to enable the functionality.

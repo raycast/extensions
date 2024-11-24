@@ -119,7 +119,8 @@ export default function NavigationHistory() {
               subtitle={`${sections[section].length} ${sections[section].length == 1 ? "result" : "results"}`}
             >
               {sections[section].map((historyEntry) => {
-                const url = `${instanceUrl}${historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`}`;
+                const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
+                const url = `${instanceUrl}${path}`;
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -134,7 +135,7 @@ export default function NavigationHistory() {
                   },
                   {
                     icon: Icon.Link,
-                    tooltip: historyEntry.url[0] == "/" ? `${historyEntry.url}` : `/${historyEntry.url}`,
+                    tooltip: decodeURIComponent(path),
                   },
                 ];
 

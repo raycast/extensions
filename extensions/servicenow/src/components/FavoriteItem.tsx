@@ -17,6 +17,7 @@ export default function FavoriteItem(props: {
   const { selectedInstance } = useInstances();
   const { name: instanceName = "", full } = selectedInstance || {};
   const instanceUrl = `https://${instanceName}.service-now.com`;
+  const path = favorite.url?.startsWith("/") ? favorite.url : `/${favorite.url}` || "";
 
   if (favorite.separator) {
     return favorite.favorites?.map((f) => {
@@ -33,7 +34,7 @@ export default function FavoriteItem(props: {
     });
   }
 
-  const url = favorite.url!.startsWith("/") ? `${instanceUrl}${favorite.url}` : `${instanceUrl}/${favorite.url}`;
+  const url = `${instanceUrl}${path}`;
   const table = favorite.table ? favorite.table : extractParamFromURL(url).path;
   const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 
@@ -45,7 +46,7 @@ export default function FavoriteItem(props: {
   const accessories: List.Item.Accessory[] = [
     {
       icon: Icon.Link,
-      tooltip: decodeURIComponent(favorite.url || ""),
+      tooltip: decodeURIComponent(path),
     },
   ];
 
