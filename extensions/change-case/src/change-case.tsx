@@ -144,9 +144,7 @@ export default function Command(props: LaunchProps) {
         title="Copy to Clipboard"
         icon={Icon.Clipboard}
         onAction={() => {
-          if (!props.pinned) {
-            setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
-          }
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
@@ -170,9 +168,7 @@ export default function Command(props: LaunchProps) {
         title={`Paste in ${frontmostApp.name}`}
         icon={{ fileIcon: frontmostApp.path }}
         onAction={() => {
-          if (!props.pinned) {
-            setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
-          }
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
@@ -283,7 +279,7 @@ export default function Command(props: LaunchProps) {
   };
 
   return (
-    <List isShowingDetail={true}>
+    <List isShowingDetail={true} isLoading={!pinned || !recent} selectedItemId={recent[0]}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
           const modified = modifyCasesWrapper(content, key);
@@ -299,18 +295,20 @@ export default function Command(props: LaunchProps) {
         })}
       </List.Section>
       <List.Section title="Recent">
-        {recent.map((key) => {
-          const modified = modifyCasesWrapper(content, key);
-          return (
-            <CaseItem
-              key={key}
-              case={key as CaseType}
-              modified={modified.rawText}
-              detail={modified.markdown}
-              recent={true}
-            />
-          );
-        })}
+        {recent
+          .filter((key) => !pinned.includes(key))
+          .map((key) => {
+            const modified = modifyCasesWrapper(content, key);
+            return (
+              <CaseItem
+                key={key}
+                case={key as CaseType}
+                modified={modified.rawText}
+                detail={modified.markdown}
+                recent={true}
+              />
+            );
+          })}
       </List.Section>
       <List.Section title="All Cases">
         {Object.keys(functions)
