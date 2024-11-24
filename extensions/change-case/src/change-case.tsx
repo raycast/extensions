@@ -144,7 +144,7 @@ export default function Command(props: LaunchProps) {
         title="Copy to Clipboard"
         icon={Icon.Clipboard}
         onAction={() => {
-          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
@@ -168,7 +168,7 @@ export default function Command(props: LaunchProps) {
         title={`Paste in ${frontmostApp.name}`}
         icon={{ fileIcon: frontmostApp.path }}
         onAction={() => {
-          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4));
+          setRecent([props.case, ...recent.filter((c) => c !== props.case)].slice(0, 4 + pinned.length));
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
