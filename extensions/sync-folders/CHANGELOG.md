@@ -1,5 +1,9 @@
 # Sync Folders Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- ✨ Improved images background color to match the Raycast theme
+
 ## [New features and improvements] - 2024-11-17
 
 - Added an icon to the Sync Folders preset for improved visual identification and user experience
