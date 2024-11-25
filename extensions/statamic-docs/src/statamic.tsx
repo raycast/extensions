@@ -12,6 +12,13 @@ type SearchResult = {
   url: string;
 };
 
+type FallbackResultList = {
+  [key: string]: {
+    url: string;
+    title: string;
+  }[];
+};
+
 const client = new MeiliSearch({
   host: "https://search.statamic.dev",
   apiKey: "a8b8f82076221f9595dceca971be29c36cbccd772de5dbdb7f43dfac41557f95",
@@ -27,6 +34,8 @@ const client = new MeiliSearch({
 });
 
 const index = client.index("default");
+
+const fallbackResults = require("./../fallback-results.json") as FallbackResultList;
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +92,27 @@ export default function main() {
               </ActionPanel>
             }
           />
+        );
+      }) ||
+      Object.entries(fallbackResults).map(([section, items]: Array<any>) => {
+        return (
+          <List.Section title={section} key={section}>
+            {items.map((item: any) => {
+              return (
+                <List.Item
+                  key={item.url}
+                  title={item.title}
+                  icon="command-icon.png"
+                  actions={
+                    <ActionPanel title={item.url}>
+                      <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                      <Action.CopyToClipboard content={item.url} title="Copy URL" />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+          </List.Section>
         );
       })}
     </List>
