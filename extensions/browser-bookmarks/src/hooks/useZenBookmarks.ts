@@ -14,7 +14,6 @@ import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
 const read = promisify(readFile);
 
 const ZEN_FOLDER = path.join(process.env.HOME || "", "Library", "Application Support", "zen");
-const PROFILES_FOLDER = path.join(ZEN_FOLDER, "Profiles");
 
 const folderNames: Record<string, string> = {
   menu: "Bookmark Menu",
@@ -36,7 +35,7 @@ async function getZenProfiles() {
     .filter((key) => {
       if (key.startsWith("Profile")) {
         const profilePath = iniFile[key].Path;
-        const fullProfilePath = path.join(PROFILES_FOLDER, profilePath);
+        const fullProfilePath = path.join(ZEN_FOLDER, profilePath);
         return fs.existsSync(path.join(fullProfilePath, "places.sqlite"));
       }
       return false;
@@ -199,7 +198,7 @@ export default function useZenBookmarks(enabled: boolean) {
     async (profile, enabled) => {
       if (!profile || !enabled) return null;
 
-      const dbPath = path.join(PROFILES_FOLDER, profile, "places.sqlite");
+      const dbPath = path.join(ZEN_FOLDER, profile, "places.sqlite");
 
       if (!fs.existsSync(dbPath)) {
         console.log("Database not found at:", dbPath);
