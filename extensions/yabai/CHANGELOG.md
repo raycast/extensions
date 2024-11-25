@@ -1,18 +1,5 @@
 # Yabai Changelog
 
-## [Initial Version] - 2023-12-23
-
-## [Enhancements] - 2024-06-28
-
--- Adds "Restart" command.
--- Adds "Start" command.
--- Adds "Stop" command.
--- Adds "Layout BSP" command.
--- Adds "Layout Stack" command.
--- Adds "Layout Float" command.
-
-## [Added MenuBar to indicate the current screen and listed windows of the current screen] - 2024-07-05
-
 ## [Added window movement commands] - {PR_MERGE_DATE}
 
 - Adds "Focus Active Window" commands
@@ -30,3 +17,16 @@
   - "Warps Active Window South" warps the active window with the window to the south.
   - "Warps Active Window East" warps the active window with the window to the east.
   - "Warps Active Window West" warps the active window with the window to the west.
+
+## [Added MenuBar to indicate the current screen and listed windows of the current screen] - 2024-07-05
+
+## [Enhancements] - 2024-06-28
+
+-- Adds "Restart" command.
+-- Adds "Start" command.
+-- Adds "Stop" command.
+-- Adds "Layout BSP" command.
+-- Adds "Layout Stack" command.
+-- Adds "Layout Float" command.
+
+## [Initial Version] - 2023-12-23
