@@ -1,6 +1,6 @@
 # Gumroad Sales Changelog
 
-## [OAuth Support] - {PR_MERGE_DATE}
+## [OAuth Support] - 2024-11-25
 
 Use OAuth via Raycast's OAuth Proxy to log in OR continue to use Access Token
 
