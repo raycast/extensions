@@ -50,7 +50,7 @@ export const exportEnteAuthSecrets = (): boolean => {
 
 export const deleteEnteExport = (): boolean => {
   try {
-    fse.removeSync(`${DEFAULT_EXPORT_PATH}/ente_auth.txt`);
+    fse.removeSync(EXPORT_FILE_PATH);
   } catch (error) {
     console.error("Error during removal:", error);
     return false;
