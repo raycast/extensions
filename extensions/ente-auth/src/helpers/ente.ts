@@ -9,6 +9,8 @@ export const createEntePath = (path: string): string => {
   if (!fse.existsSync(path)) {
     fse.mkdirSync(path);
     console.log("Ente folder created at", path);
+  } else {
+    console.log("Ente folder already exists at", path);
   }
 
   return path;
