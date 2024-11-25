@@ -1,9 +1,8 @@
+// getObsidianFiles.ts
 import { getPreferenceValues } from "@raycast/api";
 import fs from "node:fs/promises";
 import path from "node:path";
-
 import frontMatter from "front-matter";
-
 import { File, FrontMatter, Preferences } from "../types";
 import { replaceLocalStorageFiles } from "./localstorage-files";
 import { getOrCreateBookmarksPath } from "./vault-path";
@@ -73,25 +72,20 @@ function extractFrontMatter(content: string): {
 
 async function processFile(filePath: string, cachedFiles: Map<string, File>): Promise<File | null> {
   try {
-    // Get file stats first - this is faster than reading the file
     const stats = await fs.stat(filePath);
     const cachedFile = cachedFiles.get(filePath);
 
-    // If we have a valid cached file with matching mtime, use it
     if (cachedFile && cachedFile.mtime !== 0 && stats.mtimeMs === cachedFile.mtime) {
       return cachedFile;
     }
 
-    // If we need to load the file, do it now
     const content = await fs.readFile(filePath, { encoding: "utf-8" });
     const { attributes, frontmatter, bodyBegin } = extractFrontMatter(content);
 
-    // If title is empty after parsing, use filename
     if (!attributes.title) {
       attributes.title = path.basename(filePath, path.extname(filePath));
     }
 
-    // Extract body if we successfully parsed frontmatter
     let body = undefined;
     if (bodyBegin > 0) {
       body = content.slice(bodyBegin).trim();
@@ -112,42 +106,48 @@ async function processFile(filePath: string, cachedFiles: Map<string, File>): Pr
   }
 }
 
-export default async function getObsidianFiles(cachedFiles: File[]): Promise<Array<File>> {
+type ProcessCallback = (file: File) => void;
+
+export default async function getObsidianFiles(cachedFiles: File[], onProcess?: ProcessCallback): Promise<Array<File>> {
   const bookmarksPath = await getOrCreateBookmarksPath();
+
+  const cachedFilesMap = new Map(cachedFiles.map((file) => [file.fullPath, file]));
+  const currentFilePaths = new Set<string>();
+  const processedFiles: File[] = [];
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+
   const markdownFiles = await getMarkdownFiles(bookmarksPath);
 
-  // Create lookup map for cached files
-  const cachedFilesMap = new Map(cachedFiles.map((file) => [file.fullPath, file]));
+  // Process files concurrently but collect results as they complete
+  const promises = markdownFiles.map(async (filePath) => {
+    currentFilePaths.add(filePath);
+    const file = await processFile(filePath, cachedFilesMap);
 
-  // Create set of current file paths for deletion check
-  const currentFilePaths = new Set(markdownFiles);
+    if (file && (requiredTags.length === 0 || file.attributes.tags.some((tag) => requiredTags.includes(tag)))) {
+      processedFiles.push(file);
+      onProcess?.(file);
+      return file;
+    }
+    return null;
+  });
 
-  // Process all files concurrently
-  const results = await Promise.allSettled(markdownFiles.map((filePath) => processFile(filePath, cachedFilesMap)));
-
-  // Get successful results
+  const results = await Promise.allSettled(promises);
   const files = results
-    .filter((result): result is PromiseFulfilledResult<File | null> => result.status === "fulfilled")
-    .map((result) => result.value)
-    .filter((file): file is File => file !== null);
+    .filter(
+      (result): result is PromiseFulfilledResult<File | null> => result.status === "fulfilled" && result.value !== null
+    )
+    .map((result) => result.value as File);
 
-  // Apply required tags filter
-  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
-  const fileResults =
-    requiredTags.length === 0
-      ? files
-      : files.filter((file) => file.attributes.tags.some((tag) => requiredTags.includes(tag)));
-
-  // Check for changes: new/modified files OR deleted files
+  // Check for changes after all files are processed
   const hasChanges =
-    fileResults.some((file) => {
+    processedFiles.some((file) => {
       const cached = cachedFilesMap.get(file.fullPath);
       return !cached || cached.mtime !== file.mtime;
     }) || cachedFiles.some((file) => !currentFilePaths.has(file.fullPath));
 
   if (hasChanges) {
-    await replaceLocalStorageFiles(fileResults);
+    await replaceLocalStorageFiles(processedFiles);
   }
 
-  return fileResults;
+  return files;
 }

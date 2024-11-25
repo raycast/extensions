@@ -22,9 +22,12 @@ export default function useFiles(): FilesHook {
         setFiles(localFiles);
         setLoading(false);
 
-        // Then load files from Obsidian
-        const obsidianFiles = await getObsidianFiles(localFiles);
-        setFiles(obsidianFiles); // This replaces all files with the Obsidian results
+        // Process files and update as they complete
+        const loadedFiles: File[] = [];
+        await getObsidianFiles(localFiles, (file) => {
+          loadedFiles.push(file);
+          setFiles([...loadedFiles]);
+        });
       } catch (error) {
         console.error("Error loading files:", error);
       } finally {
