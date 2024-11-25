@@ -1,6 +1,6 @@
 # Sync Folders Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-11-25
 
 - ✨ Improved images background color to match the Raycast theme
 
