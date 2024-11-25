@@ -1,15 +1,17 @@
-import { getPreferenceValues, List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { SalesResponse, ProductsResponse, Sale } from "./types";
 import { formatDate } from "./utils";
 import { SaleDetails } from "./sale-details";
 import { BASE_URL, SALES_ENDPOINT, PRODUCTS_ENDPOINT } from "./const";
+import { provider } from "./oauth";
 
-const token = getPreferenceValues<Preferences>().token;
-const TOKEN_PARAM = `access_token=${token}`;
+export default withAccessToken(provider)(Command);
 
-export default function Command() {
+function Command() {
+  const { token } = getAccessToken();
+  const TOKEN_PARAM = `access_token=${token}`;
   const [pageUrl, setPageUrl] = useState<string>(`${BASE_URL}${SALES_ENDPOINT}?${TOKEN_PARAM}`);
   const [sales, setSales] = useState<Sale[] | undefined>(undefined);
   const [productId, setProductId] = useState<string>("");

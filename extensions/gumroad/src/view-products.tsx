@@ -1,13 +1,15 @@
-import { getPreferenceValues, List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { ProductsResponse } from "./types";
 import { ProductDetails } from "./product-details";
 import { formatNumber } from "./utils";
 import { BASE_URL, PRODUCTS_ENDPOINT } from "./const";
+import { provider } from "./oauth";
 
-const token = getPreferenceValues<Preferences>().token;
+export default withAccessToken(provider)(Command);
 
-export default function Command() {
+function Command() {
+  const { token } = getAccessToken();
   const { data, isLoading } = useFetch<ProductsResponse>(`${BASE_URL}${PRODUCTS_ENDPOINT}?access_token=${token}`);
 
   return (
@@ -29,7 +31,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" target={<ProductDetails product={product} />} icon={Icon.Sidebar} />
-              <Action.OpenInBrowser url={product.short_url} />
+              <Action.OpenInBrowser
+                icon={{ source: product.thumbnail_url, fallback: Icon.Globe }}
+                url={product.short_url}
+              />
             </ActionPanel>
           }
         />
