@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import getObsidianFiles from "../helpers/get-obsidian-files";
 import { getLocalStorageFiles } from "../helpers/localstorage-files";
-import { File, unique } from "../types";
+import { File } from "../types";
 
 export type FilesHook = {
   files: File[];
@@ -14,57 +14,27 @@ export default function useFiles(): FilesHook {
   const [loading, setLoading] = useState(true);
   const [backgroundLoading, setBackgroundLoading] = useState(true);
 
-  const addFiles = useCallback(
-    (newFiles: File[]) => {
-      setFiles((orig) => {
-        const unsorted = unique([...orig, ...newFiles]);
-        const sorted = unsorted.sort((a, b) => a.attributes.title.localeCompare(b.attributes.title));
-        return sorted;
-      });
-    },
-    [setFiles]
-  );
-
   useEffect(() => {
-    let mounted = true;
-
-    const loadInitialFiles = async () => {
+    async function loadFiles() {
       try {
+        // Load initial files from localStorage
         const localFiles = await getLocalStorageFiles();
-        if (mounted) {
-          addFiles(localFiles);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error loading local storage files:", error);
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
+        setFiles(localFiles);
+        setLoading(false);
 
-    const loadObsidianFiles = async () => {
-      try {
-        const obsidianFiles = await getObsidianFiles();
-        if (mounted) {
-          addFiles(obsidianFiles);
-        }
+        // Then load files from Obsidian
+        const obsidianFiles = await getObsidianFiles(localFiles);
+        setFiles(obsidianFiles); // This replaces all files with the Obsidian results
       } catch (error) {
-        console.error("Error loading Obsidian files:", error);
+        console.error("Error loading files:", error);
       } finally {
-        if (mounted) {
-          setBackgroundLoading(false);
-        }
+        setLoading(false);
+        setBackgroundLoading(false);
       }
-    };
+    }
 
-    loadInitialFiles();
-    loadObsidianFiles();
-
-    return () => {
-      mounted = false;
-    };
-  }, [addFiles]);
+    loadFiles();
+  }, []);
 
   return {
     files,

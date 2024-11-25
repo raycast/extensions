@@ -17,56 +17,56 @@ function isFileArray(v: unknown): v is File[] {
   return Array.isArray(v) && v.every((val) => isFile(val));
 }
 
-function ensureDate(date: Date | string | undefined): Date {
-  if (date instanceof Date) return date;
-  if (typeof date === "string") return new Date(date);
-  return new Date(); // Default to current date if undefined
-}
-
 async function getLocalStorageFilesInternal(): Promise<File[]> {
   const stored = await LocalStorage.getItem<string>("obsidian-files");
   if (!stored) return [];
 
-  const json = JSON.parse(stored);
-  if (isFileArray(json)) {
-    // Convert saved dates from ISO strings back to Date objects
-    return json.map((file) => ({
-      ...file,
-      attributes: {
-        ...file.attributes,
-        saved: new Date(file.attributes.saved),
-      },
-    }));
-  } else {
-    throw new Error(`Unexpected format for obsidian files in Local Storage: ${stored}`);
+  try {
+    const json = JSON.parse(stored);
+    if (isFileArray(json)) {
+      // Convert saved dates and ensure mtime is preserved as a number
+      return json.map((file) => ({
+        ...file,
+        attributes: {
+          ...file.attributes,
+          saved: new Date(file.attributes.saved),
+        },
+        mtime: Number(file.mtime), // Ensure mtime is a number
+      }));
+    } else {
+      throw new Error(`Unexpected format for obsidian files in Local Storage: ${stored}`);
+    }
+  } catch (error) {
+    console.error("Error parsing stored files:", error);
+    return [];
   }
 }
 
 async function replaceLocalStorageFilesInternal(files: File[]): Promise<void> {
-  const sanitizedFiles = files.map((file) => {
-    // Ensure we have a valid date
-    const saved = ensureDate(file.attributes.saved);
-
-    return {
-      attributes: {
-        source: file.attributes.source || "",
-        publisher: file.attributes.publisher || null,
-        title: file.attributes.title || "",
-        tags: file.attributes.tags || [],
-        saved: saved.toISOString(),
-        read: !!file.attributes.read, // Ensure boolean
-      },
-      fileName: file.fileName || "",
-      fullPath: file.fullPath || "",
-      frontmatter: file.frontmatter || null,
-      bodyBegin: file.bodyBegin || null,
-    };
-  });
+  const sanitizedFiles = files.map((file) => ({
+    ...file,
+    attributes: {
+      ...file.attributes,
+      source: file.attributes.source || "",
+      publisher: file.attributes.publisher || null,
+      title: file.attributes.title || "",
+      tags: file.attributes.tags || [],
+      saved: file.attributes.saved.toISOString(),
+      read: !!file.attributes.read,
+    },
+    mtime: Number(file.mtime), // Ensure mtime is stored as a number
+    frontmatter: file.frontmatter || null,
+    bodyBegin: file.bodyBegin || null,
+  }));
 
   try {
     const json = JSON.stringify(sanitizedFiles);
     // Validate that we can parse it back
-    JSON.parse(json);
+    const parsed = JSON.parse(json);
+    // Verify mtime is preserved
+    if (!parsed.every((f: any) => typeof f.mtime === "number" && f.mtime > 0)) {
+      console.error("Validation failed: some files have invalid mtime");
+    }
     await LocalStorage.setItem("obsidian-files", json);
   } catch (error) {
     console.error("Failed to serialize files:", error);
@@ -77,7 +77,7 @@ async function replaceLocalStorageFilesInternal(files: File[]): Promise<void> {
 async function addToLocalStorageFilesInternal(files: File[]): Promise<void> {
   const existing = await getLocalStorageFilesInternal();
   const newSet = unique([...existing, ...files]);
-  await replaceLocalStorageFilesInternal(newSet);
+  await replaceLocalStorageFiles(newSet);
 }
 
 export const getLocalStorageFiles = safelyRun(getLocalStorageFilesInternal, Promise.resolve([]));
