@@ -11,8 +11,12 @@ Manage your DevPod workspaces directly from Raycast. This extension allows you t
 
 ## Requirements
 
-- [DevPod](https://devpod.sh/) must be installed on your system and accessible in your `~/bin/`.
+- [DevPod](https://devpod.sh/) must be installed on your system.
 - Verify that `devpod` is available from the command line and you have a default [provider](https://devpod.sh/docs/managing-providers/add-provider) set up.
+
+Devpod will be set in one of 3 locations:
+
+![Screenshot of devpod installation locations](/devpod-path.png)
 
 ## Installation
 
