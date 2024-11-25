@@ -46,7 +46,7 @@ export default function SearchItems() {
       {data.map((item) => (
         <List.Item
           key={item.id}
-          icon={item.previews.icon_preview?.icon_url ?? Icon.Dot}
+          icon={item.previews.icon_with_square_preview?.icon_url ?? item.previews.icon_with_landscape_preview?.icon_url ?? Icon.Dot}
           title={item.name}
           detail={<ItemDetail item={item} />}
           actions={

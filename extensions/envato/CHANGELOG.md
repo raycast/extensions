@@ -2,7 +2,9 @@
 
 ## [Search Items + Purchases Enhancements] - {PR_MERGE_DATE}
 
+- Tweak title and description of extension
 - New "Search Items" command lets you conveniently search across one or all Envato sites
+- Show more Item Details
 - Open download link for Purchases
 - `EmptyView` when no purchases
 
