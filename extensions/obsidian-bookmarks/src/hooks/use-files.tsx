@@ -3,10 +3,17 @@ import getObsidianFiles from "../helpers/get-obsidian-files";
 import { getLocalStorageFiles } from "../helpers/localstorage-files";
 import { File, unique } from "../types";
 
-export type FilesHook = { loading: boolean; files: File[] };
+export type FilesHook = {
+  files: File[];
+  loading: boolean;
+  backgroundLoading: boolean;
+};
+
 export default function useFiles(): FilesHook {
-  const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [backgroundLoading, setBackgroundLoading] = useState(true);
+
   const addFiles = useCallback(
     (newFiles: File[]) => {
       setFiles((orig) => {
@@ -19,11 +26,49 @@ export default function useFiles(): FilesHook {
   );
 
   useEffect(() => {
-    const obsidian = getObsidianFiles().then((files) => addFiles(files));
-    const localStorage = getLocalStorageFiles().then((files) => addFiles(files));
+    let mounted = true;
 
-    Promise.allSettled([obsidian, localStorage]).then(() => setLoading(false));
-  }, [addFiles, setLoading]);
+    const loadInitialFiles = async () => {
+      try {
+        const localFiles = await getLocalStorageFiles();
+        if (mounted) {
+          addFiles(localFiles);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error loading local storage files:", error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  return { files, loading };
+    const loadObsidianFiles = async () => {
+      try {
+        const obsidianFiles = await getObsidianFiles();
+        if (mounted) {
+          addFiles(obsidianFiles);
+        }
+      } catch (error) {
+        console.error("Error loading Obsidian files:", error);
+      } finally {
+        if (mounted) {
+          setBackgroundLoading(false);
+        }
+      }
+    };
+
+    loadInitialFiles();
+    loadObsidianFiles();
+
+    return () => {
+      mounted = false;
+    };
+  }, [addFiles]);
+
+  return {
+    files,
+    loading,
+    backgroundLoading,
+  };
 }
