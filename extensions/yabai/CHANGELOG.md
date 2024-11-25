@@ -1,6 +1,6 @@
 # Yabai Changelog
 
-## [Added window movement commands] - {PR_MERGE_DATE}
+## [Added window movement commands] - 2024-11-25
 
 - Adds "Focus Active Window" commands
   - "Focus Active Window North" moves window focus to the north.
