@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Cross-Extension] - 2024-07-09
 
 - Bump dependencies

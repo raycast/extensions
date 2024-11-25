@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Better Results] - 2024-04-19
 
 - The extension now uses GIPHY Pro and Tenor v2 to have better GIF results

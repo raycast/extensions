@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Fix video not found] - 2024-08-01
 
 - Update the `@dustube/ytdl-core` dependency to fix the video not found issue
