@@ -1,66 +1,40 @@
-import { Detail, showToast, Toast, useNavigation } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import useAPI, { PagedData } from "./net/api";
+import { useNavigation } from "@raycast/api";
 import { SimpleBot, WorkSpace } from "@coze/api";
 import WorkspaceListView from "./views/WorkspaceListView";
 import BotListView from "./views/BotListView";
-import BotChatView from "./views/BotChatView";
-
+import ChatFormView from "./views/ChatFormView";
+import useAPI from "./hooks/useAPI";
 
 export default function CommandBotList() {
   const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [initialized, setInitialized] = useState<boolean>(false);
-  const [workspaces, setWorkspaces] = useState<PagedData<WorkSpace>>({
-    items: [],
-    has_more: false,
-  });
-  const api = useRef<Awaited<ReturnType<typeof useAPI>>>();
+  const { isLoading, api } = useAPI();
+
+  const onBotSelect = async (workspaceId: string, bot: SimpleBot) => {
+    api?.log(`onBotSelect: ${bot.bot_id}`);
+
+    push(
+      <ChatFormView
+        isLoading={isLoading}
+        api={api}
+        workspaceId={workspaceId}
+        botId={bot.bot_id}
+        autoFocusQuery={true}
+      />,
+    );
+  };
 
   const onWorkspaceSelect = async (workspace: WorkSpace) => {
-    const pagedBots = await api.current?.listBots({ space_id: workspace.id });
-    push(<BotListView
-      pagedBots={pagedBots}
-      onSelect={async (bot: SimpleBot) => {
-        console.log(`select bot: ${bot.bot_id} ${bot.bot_name}`);
+    api?.log(`[BotList] workspace selected: ${workspace.id}`);
 
-        push(<BotChatView api={api?.current}/>);
-      }}
-    />);
-  }
+    push(
+      <BotListView
+        isLoading={isLoading}
+        api={api}
+        workspaceId={workspace.id}
+        onSelect={onBotSelect}
+      />,
+    );
+  };
 
-  useEffect(() => {
-    (async () => {
-      api.current = await useAPI();
-      setInitialized(true);
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      if (!initialized) return;
-      setIsLoading(true);
-      try {
-        const workspacePaged = await api.current?.listWorkspaces({});
-        workspacePaged && setWorkspaces(workspacePaged);
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
-      }
-    })();
-  }, [initialized]);
-
-
-  if (isLoading) {
-    return <Detail isLoading={isLoading}/>;
-  }
-
-  return (
-    <WorkspaceListView
-      workspaces={workspaces}
-      onSelect={onWorkspaceSelect}
-    />
-  );
+  return <WorkspaceListView isLoading={isLoading} api={api} onSelect={onWorkspaceSelect} />;
 }

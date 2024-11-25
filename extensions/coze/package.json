@@ -18,6 +18,15 @@
       "required": true,
       "default": "https://api.coze.com",
       "placeholder": "https://api.coze.com"
+    },
+    {
+      "name": "debug",
+      "title": "Debug",
+      "description": "Enable debug mode",
+      "type": "checkbox",
+      "label": "Debug",
+      "required": false,
+      "default": false
     }
   ],
   "commands": [
@@ -25,6 +34,12 @@
       "name": "bot-chat",
       "title": "Chat With Bot",
       "description": "Chat With Bot",
+      "mode": "view"
+    },
+    {
+      "name": "chat-history",
+      "title": "Chat History",
+      "description": "Chat History",
       "mode": "view"
     },
     {
