@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Detail, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
 const API_BASE_URL = "https://connect.mailerlite.com/api";
 
@@ -34,58 +33,54 @@ interface CampaignDetailResponse {
 }
 
 const CampaignList = () => {
-  const { mailerliteApiKey } = getPreferenceValues();
-  const [campaignListData, setCampaignListData] = useState<CampaignListResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { mailerliteApiKey } = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${API_BASE_URL}/campaigns?filter[status]=sent`, {
-          headers: {
-            Authorization: `Bearer ${mailerliteApiKey}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const jsonData = await response.json();
-        const data: CampaignListResponse = jsonData as CampaignListResponse;
-        setCampaignListData(data);
-      } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [mailerliteApiKey]);
-
-  useEffect(() => {
-    if (error) {
+  const { isLoading, data: campaigns } = useFetch(`${API_BASE_URL}/campaigns?filter[status]=sent`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${mailerliteApiKey}`,
+      "Content-Type": "application/json",
+    },
+    mapResult(result: CampaignListResponse) {
+      return {
+        data: result.data,
+      };
+    },
+    initialData: [],
+    async onError(error) {
       let title = "Failed to fetch campaigns";
-      let message = error.message;
+      let message = `HTTP error! status: ${error.message}`;
 
       if (error.message.includes("401")) {
         title = "Invalid API Key";
         message = "Please check your MailerLite API key in preferences.";
       }
 
-      showToast(Toast.Style.Failure, title, message);
-    }
-  }, [error]);
+      await showFailureToast(message, { title });
+    },
+  });
 
   if (isLoading) {
     return <Detail isLoading />;
   }
 
-  const campaigns = campaignListData?.data || [];
-
   return (
     <List>
+      {!isLoading && !campaigns.length && (
+        <List.EmptyView
+          title="Create your first campaign"
+          description="Pick any editor and design a campaign in minutes, then enhance it with advanced features."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                icon={Icon.ArrowNe}
+                title="Create"
+                url="https://dashboard.mailerlite.com/campaigns/status/sent"
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {campaigns.map((campaign) => (
         <List.Item
           key={campaign.id}
@@ -104,44 +99,40 @@ const CampaignList = () => {
 };
 
 const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
-  const { mailerliteApiKey } = getPreferenceValues();
-  const [campaignData, setCampaignData] = useState<CampaignDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [, setError] = useState<Error | null>(null);
+  const { mailerliteApiKey } = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
-          headers: {
-            Authorization: `Bearer ${mailerliteApiKey}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = (await response.json()) as CampaignDetailResponse;
-        setCampaignData(data);
-      } catch (e) {
-        setError(e as Error);
-      } finally {
-        setIsLoading(false);
+  const { isLoading, data: campaign } = useFetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${mailerliteApiKey}`,
+      "Content-Type": "application/json",
+    },
+    mapResult(result: CampaignDetailResponse) {
+      return {
+        data: result.data,
+      };
+    },
+    async onError(error) {
+      let title = "Failed to fetch campaign details";
+      let message = `HTTP error! status: ${error.message}`;
+
+      if (error.message.includes("401")) {
+        title = "Invalid API Key";
+        message = "Please check your MailerLite API key in preferences.";
       }
-    };
-    fetchData();
-  }, [campaignId, mailerliteApiKey]);
+
+      await showFailureToast(message, { title });
+    },
+  });
 
   if (isLoading) {
     return <Detail isLoading />;
   }
 
-  if (!campaignData) {
+  if (!campaign) {
     return <Detail markdown="No campaign data available." />;
   }
 
-  const campaign = campaignData.data;
   const stats = campaign.stats;
   const screenshotURL = campaign.emails[0]?.screenshot_url;
 
