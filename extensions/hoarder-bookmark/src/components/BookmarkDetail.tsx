@@ -1,12 +1,18 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
-import { ARCHIVED_COLOR, DEFAULT_COLOR, FAVOURED_COLOR, TAG_AI_COLOR, TAG_HUMAN_COLOR } from "../constants";
+import {
+  ARCHIVED_COLOR,
+  DEFAULT_COLOR,
+  DEFAULT_SCREENSHOT_FILENAME,
+  FAVOURED_COLOR,
+  TAG_AI_COLOR,
+  TAG_HUMAN_COLOR,
+} from "../constants";
 import { useConfig } from "../hooks/useConfig";
+import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
 import { getScreenshot } from "../utils/screenshot";
-import { DEFAULT_SCREENSHOT_FILENAME } from "../constants";
-import { useTranslation } from "../hooks/useTranslation";
 
 interface BookmarkDetailProps {
   bookmark: Bookmark;
@@ -118,7 +124,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
     switch (bookmark.content.type) {
       case "link":
         if (screenshotUrl) {
-          parts.push(`![预览图](${screenshotUrl})`);
+          parts.push(`![${bookmark.content.title}](${screenshotUrl})`);
         }
         parts.push(`### ${bookmark.content.title || t("bookmark.untitled")}`);
         break;
@@ -132,7 +138,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
       case "asset":
         if (bookmark.content.assetType === "image") {
           if (assetImageUrl) {
-            parts.push(`\n![图片](${assetImageUrl})`);
+            parts.push(`\n![${bookmark.content.fileName}](${assetImageUrl})`);
           }
           parts.push(`### ${bookmark.content.fileName || t("bookmark.untitledImage")}`);
         }
@@ -183,17 +189,24 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         </ActionPanel.Section>
         <ActionPanel.Section>
           {bookmark.content.type === "link" && bookmark.content.url && (
-            <Action title={t("bookmark.actions.aiSummary")} onAction={handleSummarize} icon={Icon.Wand} />
+            <Action
+              title={t("bookmark.actions.aiSummary")}
+              onAction={handleSummarize}
+              icon={Icon.Wand}
+              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+            />
           )}
           <Action
             title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
             onAction={() => handleUpdate({ favourited: !bookmark.favourited })}
             icon={bookmark.favourited ? Icon.StarCircle : Icon.Star}
+            shortcut={{ modifiers: ["ctrl"], key: "f" }}
           />
           <Action
             title={bookmark.archived ? t("bookmark.actions.unarchive") : t("bookmark.actions.archive")}
             onAction={() => handleUpdate({ archived: !bookmark.archived })}
             icon={bookmark.archived ? Icon.BlankDocument : Icon.SaveDocument}
+            shortcut={{ modifiers: ["ctrl"], key: "a" }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
