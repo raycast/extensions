@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hoarder-bookmark",
+  "title": "Hoarder Bookmark",
+  "description": "Bookmark your favorite websites with Hoarder",
+  "icon": "logo-icon.png",
+  "author": "luolei",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Bookmarks",
+      "subtitle": "Hoarder Bookmark",
+      "description": "List all your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Lists",
+      "subtitle": "Hoarder Bookmark",
+      "description": "List all your lists",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "Hoarder Bookmark",
+      "description": "List all your tags",
+      "mode": "view"
+    },
+    {
+      "name": "createBookmark",
+      "title": "Create Bookmark",
+      "subtitle": "Hoarder Bookmark",
+      "description": "Create a new bookmark",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Select your preferred language",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "label": "Show Website Preview Icon",
+      "name": "showWebsitePreview",
+      "title": "Show Website Preview Icon",
+      "description": "Display website preview icon in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "API Host",
+      "description": "Enter the API host URL",
+      "placeholder": "https://your-hoarder.host.com",
+      "default": ""
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter your API key",
+      "placeholder": "Enter your Hoarder API key",
+      "default": ""
+    }
+  ]
+}
