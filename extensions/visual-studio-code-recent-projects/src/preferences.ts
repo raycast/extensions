@@ -13,6 +13,8 @@ function getBundleIdentifier() {
       return "VSCodium";
     case VSCodeBuild.Cursor:
       return "Cursor";
+    case VSCodeBuild.Windsurf:
+      return "Windsurf";
   }
 }
 

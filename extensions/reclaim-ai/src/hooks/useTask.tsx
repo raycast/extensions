@@ -1,175 +1,113 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { useMemo } from "react";
-import { NativePreferences } from "../types/preferences";
+import { showHUD } from "@raycast/api";
+import { RequestInit } from "node-fetch";
 import { Task } from "../types/task";
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
-import { CreateTaskProps } from "./useTask.types";
+import useApi from "./useApi";
+import { CreateTaskProps, PlannerActionIntermediateResult } from "./useTask.types";
+import { fetchPromise } from "../utils/fetcher";
 
-const useTask = () => {
-  const { fetcher } = reclaimApi();
+export const useTasks = () => {
+  const { data: tasks, error, isLoading } = useApi<Task[]>("/tasks?instances=true");
 
-  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+  return {
+    tasks,
+    isLoading,
+    error,
+  };
+};
 
-  const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    }),
-    [apiToken]
-  );
-
-  const useFetchTasks = () =>
-    useFetch<[Task]>(`${apiUrl}/tasks?instances=true`, {
-      headers,
-      keepPreviousData: true,
-    });
+export const useTaskActions = () => {
+  const executeTaskAction = async <T,>(url: string, options?: RequestInit, payload?: unknown): Promise<T> => {
+    const [response, error] = await fetchPromise<T>(url, { init: options, payload });
+    if (error) throw error;
+    if (!response) throw new Error("No response");
+    return response;
+  };
 
   const createTask = async (task: CreateTaskProps) => {
-    try {
-      const data = {
-        eventCategory: "WORK",
-        timeSchemeId: task.timePolicy,
-        title: task.title,
-        timeChunksRequired: task.timeNeeded,
-        snoozeUntil: task.snoozeUntil,
-        due: task.due,
-        minChunkSize: task.durationMin,
-        maxChunkSize: task.durationMax,
-        notes: task.notes,
-        alwaysPrivate: task.alwaysPrivate,
-        priority: task.priority,
-        onDeck: task.onDeck,
-      };
+    const data = {
+      eventCategory: task.category,
+      timeSchemeId: task.timePolicy,
+      title: task.title,
+      timeChunksRequired: task.timeNeeded,
+      snoozeUntil: task.snoozeUntil,
+      due: task.due,
+      minChunkSize: task.durationMin,
+      maxChunkSize: task.durationMax,
+      notes: task.notes,
+      alwaysPrivate: task.alwaysPrivate,
+      priority: task.priority,
+      onDeck: task.onDeck,
+    };
 
-      const [createdTask, error] = await axiosPromiseData<Task>(
-        fetcher("/tasks", {
-          method: "POST",
-          data,
-        })
-      );
-      if (!createTask && error) throw error;
-
-      return createdTask;
-    } catch (error) {
-      console.error("Error while creating task", error);
-    }
+    return await executeTaskAction<Task>("/tasks", { method: "POST" }, data);
   };
 
-  const handleStartTask = async (id: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(fetcher(`/planner/start/task/${id}`, { method: "POST" }));
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while starting task", error);
-    }
+  const startTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/start/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Started Task");
+    return response;
   };
 
-  const handleRestartTask = async (id: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(fetcher(`/planner/restart/task/${id}`, { method: "POST" }));
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while restarting task", error);
-    }
+  const restartTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/restart/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Restarted Task");
+    return response;
   };
 
-  const handleStopTask = async (id: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(fetcher(`/planner/stop/task/${id}`, { method: "POST" }));
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while stopping task", error);
-    }
+  const stopTask = async (id: string) => {
+    const response = await executeTaskAction<PlannerActionIntermediateResult>(`/planner/stop/task/${id}`, {
+      method: "POST",
+    });
+    await showHUD("Stopped Task");
+    return response;
   };
 
   // Add time
   const addTime = async (task: Task, time: number) => {
-    try {
-      const [updatedTime, error] = await axiosPromiseData(
-        fetcher(`/planner/add-time/task/${task.id}?minutes=${time}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedTime || error) throw error;
-      return updatedTime;
-    } catch (error) {
-      console.error("Error while adding time", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(
+      `/planner/add-time/task/${task.id}?minutes=${time}`,
+      { method: "POST" }
+    );
   };
 
   // Update task
   const updateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
-    try {
-      const [updatedTask] = await axiosPromiseData(
-        fetcher(`/tasks/${task.id}`, {
-          method: "PATCH",
-          responseType: "json",
-          data: payload,
-        })
-      );
-      return updatedTask;
-    } catch (error) {
-      console.error("Error while updating task", error);
-      throw error;
-    }
+    return await executeTaskAction<Task>(`/tasks/${task.id}`, { method: "PATCH" }, payload);
   };
 
   // Set task to done
   const doneTask = async (task: Task) => {
-    try {
-      const [updatedStatus, error] = await axiosPromiseData(
-        fetcher(`/planner/done/task/${task.id}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedStatus || error) throw error;
-      return updatedStatus;
-    } catch (error) {
-      console.error("Error while updating task", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(`/planner/done/task/${task.id}`, {
+      method: "POST",
+    });
   };
 
   // Set task to incomplete
   const incompleteTask = async (task: Task) => {
-    try {
-      const [updatedStatus, error] = await axiosPromiseData(
-        fetcher(`/planner/unarchive/task/${task.id}`, { method: "POST", responseType: "json" })
-      );
-      if (!updatedStatus || error) throw error;
-      return updatedStatus;
-    } catch (error) {
-      console.error("Error while updating task", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(`/planner/unarchive/task/${task.id}`, {
+      method: "POST",
+    });
   };
 
   // Snooze Task
   const rescheduleTask = async (taskId: string, rescheduleCommand: string, relativeFrom?: string) => {
-    try {
-      const [task, error] = await axiosPromiseData(
-        fetcher(
-          `/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${
-            relativeFrom ? relativeFrom : null
-          }`,
-          {
-            method: "POST",
-          }
-        )
-      );
-      if (!task || error) throw error;
-      return task;
-    } catch (error) {
-      console.error("Error while rescheduling event", error);
-    }
+    return await executeTaskAction<PlannerActionIntermediateResult>(
+      `/planner/task/${taskId}/snooze?snoozeOption=${rescheduleCommand}&relativeFrom=${
+        relativeFrom ? relativeFrom : null
+      }`,
+      { method: "POST" }
+    );
   };
 
   return {
-    useFetchTasks,
     createTask,
-    handleStartTask,
-    handleRestartTask,
-    handleStopTask,
+    startTask,
+    restartTask,
+    stopTask,
     addTime,
     updateTask,
     doneTask,
@@ -177,5 +115,3 @@ const useTask = () => {
     rescheduleTask,
   };
 };
-
-export { useTask };

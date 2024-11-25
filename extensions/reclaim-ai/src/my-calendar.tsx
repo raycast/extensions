@@ -1,118 +1,16 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import {
-  addDays,
-  differenceInHours,
-  endOfDay,
-  formatDistance,
-  isAfter,
-  isBefore,
-  isWithinInterval,
-  startOfDay,
-} from "date-fns";
-import { useEffect, useMemo, useState } from "react";
-import { useEventActions, useEvents } from "./hooks/useEvent";
-import { EventActions } from "./hooks/useEvent.types";
+import "./initSentry";
+
+import { List } from "@raycast/api";
+import { addDays, differenceInHours, endOfDay, isAfter, isBefore, isWithinInterval, startOfDay } from "date-fns";
+import { useMemo, useState } from "react";
+import { MyCalendarEventListSection } from "./components/MyCalendarEventListSection";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { useEvents } from "./hooks/useEvent";
 import { Event } from "./types/event";
-import { eventColors } from "./utils/events";
-import { useTask } from "./hooks/useTask";
-import { SNOOZE_OPTIONS } from "./consts/tasks.consts";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
-const EventActionsList = ({ event }: { event: Event }) => {
-  const [eventActions, setEventActions] = useState<EventActions>([]);
-
-  const { getEventActions } = useEventActions();
-  const { rescheduleTask } = useTask();
-
-  const loadEventActions = () => {
-    const actions = getEventActions(event);
-    setEventActions(actions);
-  };
-
-  const handleRescheduleTask = async (taskId: string, reschedule: string, startDate?: Date) => {
-    await showToast(Toast.Style.Animated, "Rescheduling event...");
-    try {
-      const task = await rescheduleTask(taskId, reschedule, startDate?.toISOString());
-
-      if (task) {
-        showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
-      } else {
-        throw new Error("Rescheduling failed.");
-      }
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error while rescheduling",
-        message: String(error),
-      });
-    }
-  };
-
-  useEffect(() => {
-    void loadEventActions();
-  }, []);
-
-  return (
-    <ActionPanel>
-      {eventActions.map((action) => (
-        <Action
-          key={action.title}
-          title={action.title}
-          icon={action.icon}
-          onAction={() => {
-            action.action();
-          }}
-        />
-      ))}
-      {event.reclaimManaged === true && event.assist?.eventType === "TASK_ASSIGNMENT" && (
-        <ActionPanel.Submenu title="Snooze Task" icon={Icon.ArrowClockwise}>
-          {SNOOZE_OPTIONS.map((option) => (
-            <Action
-              key={option.title}
-              title={option.title}
-              onAction={() => {
-                handleRescheduleTask(String(event.assist?.taskId), option.value);
-              }}
-            />
-          ))}
-        </ActionPanel.Submenu>
-      )}
-    </ActionPanel>
-  );
-};
-
-const now = new Date();
-
-const ListSection = ({ events, sectionTitle }: { sectionTitle: string; events: Event[] }) => {
-  const { showFormattedEventTitle } = useEventActions();
-
-  return (
-    <List.Section title={sectionTitle}>
-      {events.map((item, i) => (
-        <List.Item
-          key={`${i}- ${item.eventId}`}
-          title={showFormattedEventTitle(item)}
-          icon={{
-            tintColor: eventColors[item.color],
-            source: Icon.Dot,
-          }}
-          accessories={[
-            {
-              text: formatDistance(new Date(item.eventStart), now, {
-                addSuffix: true,
-              }).replace("about", ""),
-            },
-            { tag: { value: item.free ? "free" : "busy", color: Color.Blue } },
-          ]}
-          actions={<EventActionsList event={item} />}
-        />
-      ))}
-    </List.Section>
-  );
-};
-
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
 
@@ -193,8 +91,10 @@ export default function Command() {
       searchBarPlaceholder="Search your events"
     >
       {eventSections.map((section) => (
-        <ListSection key={section.section} sectionTitle={section.sectionTitle} events={section.events} />
+        <MyCalendarEventListSection key={section.section} sectionTitle={section.sectionTitle} events={section.events} />
       ))}
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

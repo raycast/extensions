@@ -21,12 +21,34 @@ export async function fetchDatabases() {
     const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
     const plistInformation = plist.parse(fs.readFileSync(plistVersionPath, "utf8")) as Readonly<plist.PlistObject>;
 
-    const groups = new Map<string, Group>(
-      groupList.map((group) => [
-        group.ID.toString(),
-        { id: group.ID.toString(), name: group.Name.toString(), connections: [] },
-      ]),
-    );
+    const groups = new Map<string, Group>();
+    const parentGroups = new Map<string, string>();
+
+    groupList.forEach((group) => {
+      const groupId = group.ID.toString();
+      const groupName = group.Name.toString();
+      const parentGroupId = group.GroupID?.toString() || "";
+
+      groups.set(groupId, {
+        id: groupId,
+        name: groupName,
+        connections: [],
+      });
+
+      if (parentGroupId) {
+        parentGroups.set(groupId, parentGroupId);
+      }
+    });
+
+    parentGroups.forEach((parentGroupId, groupId) => {
+      const parentGroup = groups.get(parentGroupId);
+      if (parentGroup) {
+        const group = groups.get(groupId);
+        if (group) {
+          group.name = `${parentGroup.name} - ${group.name}`;
+        }
+      }
+    });
 
     groups.set(EmptyGroupID, {
       id: EmptyGroupID,

@@ -1,5 +1,56 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-10-25
+- Don't hardcode task category to "work"
+
+## [Update] - 2024-10-16
+- Add Sentry support
+
+## [Fixes] - 2024-10-15
+- Don't cache moment data, should always be up to date
+
+## [Update] - 2024-10-14
+- Add the `Show Now Event in Menu Bar` configuration option for the Calendar menu bar
+
+## [Fixes] - 2024-09-05
+- Route useFetch through useApi
+
+## [Fixes] - 2024-09-04
+- Break out separate components and hook for Scheduling Links
+
+## [Fixes] - 2024-09-03
+- Replace axios with node-fetch
+
+## [Fixes] - 2024-08-23
+- Stopped rapid-fire calls to `GET:/api/smart-habits`
+    - New hook `useSyncCachedPromise`
+        - Only fires promise if previous fun is done
+        - Works when multiple components mount at the same time
+
+## [Fixes] - 2024-08-23
+- Fix state management now we are using useFetch
+
+## [Fixes] - 2024-08-21
+- Add useCallbackSafeRef hook
+- Fix component wrapping that was causing UI glitch
+
+## [Fixes] - 2024-08-19
+- Fix useTask return type
+- Separate state and actions in hooks
+- Break out subcomponents in my-calendar & notications
+
+## [Fixes] - 2024-08-19
+- Correct typings in `normalize` function so that they pass `tsconfig:strict`
+
+## [Fixes] - 2024-08-16
+- Handle possibly undefined
+
+## [Update] - 2024-08-13
+- Update contributors list
+- Just strip planner emojis
+- Have smart habit actions respect unscheduleRestartedOverride setting
+- Fail useFetch API calls silently
+
 ## [Update] - 2024-07-30
 - Add actions for Smart Meetings & Habits 2.0
 - Parity between Raycast actions and Omnibar Actions

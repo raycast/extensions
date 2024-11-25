@@ -1,9 +1,9 @@
 import {
-  getChromiumBrowserPath,
   copyFirefoxBrowserPath,
+  copySafariWebAppPath,
+  getChromiumBrowserPath,
   getFocusFinderPath,
   getFocusWindowTitle,
-  copySafariWebAppPath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
@@ -28,6 +28,7 @@ import {
 } from "../types/preferences";
 import parseUrl from "parse-url";
 import * as os from "node:os";
+import { firefoxBrowsers } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -76,7 +77,7 @@ const tryCopyBrowserUrl = async (app: Application) => {
 export const copyUnSupportedAppContent = async (app: Application) => {
   let hudIcon: string;
   let copyContent: string;
-  let shouleCopy = true;
+  let shouldCopy = true;
   switch (copyWhenUnSupported) {
     case "windowTitle": {
       hudIcon = "🖥️ ";
@@ -101,11 +102,11 @@ export const copyUnSupportedAppContent = async (app: Application) => {
     default: {
       hudIcon = "";
       copyContent = "";
-      shouleCopy = false;
+      shouldCopy = false;
       break;
     }
   }
-  if (shouleCopy) {
+  if (shouldCopy) {
     await Clipboard.copy(copyContent);
     await showSuccessHUD(hudIcon + copyContent);
     await customUpdateCommandMetadata(copyContent);
@@ -120,8 +121,10 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
   let url = await tryCopyBrowserUrl(frontmostApp);
   let shouldCopy = true; // if it has copied in copy***Path, then do not copy again
   let copyContent: string;
+  console.log(url);
+  console.log(frontmostApp);
   if (isEmpty(url)) {
-    if (frontmostApp.name.toLowerCase().includes("firefox")) {
+    if (firefoxBrowsers.includes(frontmostApp.name.toLowerCase())) {
       url = await copyFirefoxBrowserPath(frontmostApp.name);
     } else if (frontmostApp.bundleId?.startsWith("com.apple.Safari.WebApp")) {
       url = await copySafariWebAppPath(frontmostApp.name);
@@ -132,18 +135,22 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
   if (isEmpty(url)) {
     return url;
   } else {
-    // handle url
-    copyContent = parseURL(url);
-    if (showTabTitle) {
-      const windowTitle = await getFocusWindowTitle(frontmostApp);
-      copyContent = `${windowTitle}\n${copyContent}`;
+    try {
+      // handle url
+      copyContent = parseURL(url);
+      if (showTabTitle) {
+        const windowTitle = await getFocusWindowTitle(frontmostApp);
+        copyContent = `${windowTitle}\n${copyContent}`;
+      }
+      if (shouldCopy) {
+        await Clipboard.copy(copyContent);
+      }
+      await showSuccessHUD("🔗 " + copyContent);
+      await customUpdateCommandMetadata(new URL(url).hostname);
+      return url;
+    } catch (e) {
+      return url;
     }
-    if (shouldCopy) {
-      await Clipboard.copy(copyContent);
-    }
-    await showSuccessHUD("🔗 " + copyContent);
-    await customUpdateCommandMetadata(new URL(url).hostname);
-    return url;
   }
 };
 

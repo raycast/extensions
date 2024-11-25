@@ -11,11 +11,12 @@ import {
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import PdfJpgTask from "@ilovepdf/ilovepdf-js-core/tasks/PdfJpgTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { chooseDownloadLocation, getErrorMessage, getFilePath, handleOpenNow, validateFileType } from "./common/utils";
 import { Status } from "./common/types";
+import { useFetchSelectedFinderItems } from "./hook/use-fetch-selected-finder-items";
 
 type Values = {
   files: string[];
@@ -27,20 +28,36 @@ const {
   APISecretKey: secretKey,
   OpenNow: openNow,
   AskBeforeDownload: askBeforeDownload,
+  SelectFileInFinder: selectFileInFinder,
 } = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<Status>("init");
   const [destinationFilePath, setDestinationFilePath] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
+  const {
+    isLoading: isFinderLoading,
+    selectedFiles: finderSelectedFiles,
+    status: fetchStatus,
+  } = useFetchSelectedFinderItems(selectFileInFinder);
+
+  useEffect(() => {
+    setIsLoading(isFinderLoading);
+    setSelectedFiles(finderSelectedFiles);
+    setStatus(fetchStatus);
+  }, [isFinderLoading, finderSelectedFiles, fetchStatus]);
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
-    if (!values.files.length) {
+    if (!selectFileInFinder && !values.files.length) {
       await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
+    } else {
+      values.files = selectedFiles;
     }
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Converting PDF...");
@@ -126,7 +143,11 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      {selectFileInFinder ? (
+        <Form.Description title="Finder Selected File" text={selectedFiles.join("\n")} />
+      ) : (
+        <Form.FilePicker id="files" title="Choose PDF files" allowMultipleSelection={true} />
+      )}
       <Form.Dropdown id="mode" title="Conversion Mode" defaultValue="pages">
         <Form.Dropdown.Item value="pages" title="Convert every PDF page to a JPG image" />
         <Form.Dropdown.Item value="extract" title="Extract all embedded images to separate images" />

@@ -1,5 +1,13 @@
 # Things Changelog
 
+## [Focus Input Fields] - 2024-10-25
+
+- Add shortcuts to focus the input fields in both the `Add New To-Do` and `Add New Project` commands.
+
+## [Quick ToDo Fixes] - 2024-08-19
+
+- Quick ToDo Command: Disable Automatic Date (when & deadline), List parsing when AI is not enabled in preferences/is not available via environment.
+
 ## [Quick To-do Improvements] - 2024-08-05
 
 - Preference to disable date parsing for todo classification, sending all todo(s) to inbox.
@@ -27,7 +35,7 @@
 
 ## [Quick Add To-Do using natural language processing (NLP)] - 2023-09-05
 
-Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go. 
+Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go.
 
 Under the hood, it'll analyze and process your text to extract these parameters:
 - The title

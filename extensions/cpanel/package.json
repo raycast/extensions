@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpanel",
   "title": "cPanel",
-  "description": "View Domains and their DNS Zones, Email Accounts and their Disk Usage",
+  "description": "View Domains, DNS Zones, Email Accounts, Databases, Files and more",
   "icon": "cpanel.png",
   "author": "xmok",
   "categories": [
@@ -50,11 +50,60 @@
       "subtitle": "cPanel",
       "description": "View Domains and their DNS Zones",
       "mode": "view"
+    },
+    {
+      "name": "databases",
+      "title": "View Databases",
+      "subtitle": "cPanel",
+      "description": "View MySQL or PostgreSQL Databases",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "database_type",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "DATABASE_TYPE",
+          "data": [
+            {
+              "title": "MySQL",
+              "value": "Mysql"
+            },
+            {
+              "title": "PostgreSQL",
+              "value": "Postgresql"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "files",
+      "title": "View Files",
+      "subtitle": "cPanel",
+      "description": "View Directories and Files",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "show_raw_mime_type",
+          "label": "Show Raw Mime Type",
+          "description": "Show or Hide Raw Mime Type",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "account",
+      "title": "View Account",
+      "subtitle": "cPanel",
+      "description": "View Account",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

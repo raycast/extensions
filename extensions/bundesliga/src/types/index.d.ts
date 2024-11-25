@@ -184,3 +184,23 @@ export interface Playertext {
   paragraphs: string[];
   heading?: string;
 }
+
+export interface Broadcasts {
+  broadcasts: Broadcast[];
+}
+
+export interface Broadcast {
+  logo: string;
+  logoCategory: string;
+  logoDark: string;
+  logoCategoryDark: string;
+  link: Link;
+  broadcasterId: string;
+  broadcasterName: string;
+  dflDatalibraryMatchId: string;
+}
+
+export interface Link {
+  rel: string;
+  href: string;
+}

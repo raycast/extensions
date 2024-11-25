@@ -48,6 +48,11 @@ export const isLoggedIn = async (): Promise<boolean> => {
   return account !== undefined;
 };
 
+// Remove Account
+export const removeAccount = async (): Promise<void> => {
+  await LocalStorage.removeItem("account");
+};
+
 // Genrate Random String
 export const generateRandomString = (): string => {
   return Math.random().toString(36).substring(2, 15);
@@ -125,15 +130,21 @@ export const timeAgo = (date: string): string => {
   return "just now";
 };
 
-export const handleDelete = (action: () => Promise<void>, onSuccess: () => void, loadingMessage: string) => {
+export const handleAction = (
+  action: () => Promise<void>,
+  onSuccess: () => void,
+  loadingMessage: string,
+  successMessage: string,
+  failureMessage: string,
+) => {
   withToast({
     action,
     onSuccess: () => {
       onSuccess();
-      return `${loadingMessage} deleted`;
+      return successMessage;
     },
-    onFailure: () => `${loadingMessage} could not be deleted`,
-    loadingMessage: `Deleting ${loadingMessage}...`,
+    onFailure: () => failureMessage,
+    loadingMessage,
   })();
 };
 

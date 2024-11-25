@@ -1,6 +1,7 @@
 import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
+import { setDND } from "./doNotDisturb";
 
 const cache = new Cache();
 
@@ -71,11 +72,13 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean): Inte
   };
   cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   saveIntervalHistory(interval).then();
+  if (type === "focus") setDND(true);
   return interval;
 }
 
 export function pauseInterval(): Interval | undefined {
   let interval = getCurrentInterval();
+  if (interval?.type === "focus") setDND(false);
   if (interval) {
     const parts = [...interval.parts];
     parts[parts.length - 1].pausedAt = currentTimestamp();
@@ -97,11 +100,13 @@ export function continueInterval(): Interval | undefined {
       parts,
     };
     cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
+    if (interval.type === "focus") setDND(true);
   }
   return interval;
 }
 
 export function resetInterval() {
+  if (getCurrentInterval()?.type === "focus") setDND(false);
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
@@ -109,6 +114,7 @@ export function restartInterval() {
   const currentInterval = getCurrentInterval();
   if (currentInterval) {
     const { type } = currentInterval;
+    if (type === "focus") setDND(true);
     createInterval(type, false); // Uses existing caching mechanism to reset interval
   }
 }
@@ -122,6 +128,7 @@ export function getCurrentInterval(): Interval | undefined {
 
 export function endOfInterval(currentInterval: Interval) {
   try {
+    if (currentInterval.type === "focus") setDND(false);
     currentInterval.parts[currentInterval.parts.length - 1].endAt = currentTimestamp();
     saveIntervalHistory(currentInterval).then();
     launchCommand({
@@ -177,7 +184,7 @@ export function getNextIntervalExecutor(): IntervalExecutor {
 
 export const preferences = getPreferenceValues<Preferences>();
 export const intervalDurations: Record<IntervalType, number> = {
-  focus: parseInt(preferences.focusIntervalDuration) * 60,
-  "short-break": parseInt(preferences.shortBreakIntervalDuration) * 60,
-  "long-break": parseInt(preferences.longBreakIntervalDuration) * 60,
+  focus: parseFloat(preferences.focusIntervalDuration) * 60,
+  "short-break": parseFloat(preferences.shortBreakIntervalDuration) * 60,
+  "long-break": parseFloat(preferences.longBreakIntervalDuration) * 60,
 };

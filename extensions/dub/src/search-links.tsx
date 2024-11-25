@@ -4,10 +4,10 @@ import { useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
-import type { LinkSchema } from "dub/models/components";
+import type { LinkSchema } from "dub/dist/commonjs/models/components";
 import { withDubClient } from "./with-dub-client";
 
-function SearchLinks() {
+export function SearchLinks() {
   const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
 
   return (
@@ -47,7 +47,16 @@ function SearchLinks() {
         return (
           <List.Item
             key={shortUrl}
-            keywords={[domain, key, url, id, shortUrl, userId, comments ?? "", ...(tags ?? []).map((t) => t.name)]}
+            keywords={[
+              domain,
+              key,
+              url,
+              id,
+              shortUrl,
+              userId ?? "",
+              comments ?? "",
+              ...(tags ?? []).map((t) => t.name),
+            ]}
             icon={{ source: Icon.Link, tintColor: Color.Blue }}
             title={shortUrl}
             accessories={[
@@ -181,9 +190,7 @@ const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>
         title: "❗ Failed to delete link",
         primaryAction: {
           title: "Retry",
-          onAction: async () => {
-            await tryDeleteLink(linkId, mutate);
-          },
+          onAction: () => tryDeleteLink(linkId, mutate),
         },
       });
     });

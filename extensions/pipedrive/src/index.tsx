@@ -86,8 +86,19 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             {searchResult.ccEmail && ( // Conditionally render if person ccEmail exists
               <Action.CopyToClipboard title="Copy Deal Email" content={searchResult.ccEmail as string} />
             )}
-            {searchResult.organization && ( // Conditionally render if organization exists
-              <Action.CopyToClipboard title="Copy Org Name" content={searchResult.organization as string} />
+            {searchResult.ccEmail && ( // Conditionally render if organization exists on a deal
+              <Action.CopyToClipboard
+                title="Copy Deal Org Name"
+                content={accessoryTitleValue as string}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
+            )}
+            {searchResult.subtitle === "org" && ( // Conditionally render if an organization
+              <Action.CopyToClipboard
+                title="Copy Org Name"
+                content={searchResult.title as string}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>

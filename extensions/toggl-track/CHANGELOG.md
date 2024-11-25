@@ -1,5 +1,13 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2024-10-07
+
+- Add ability to create task for time entry form
+
+## [Bug Fixes] - 2024-08-20
+
+- Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.
+
 ## [Bug Fixes] - 2024-08-02
 
 - Resolve issue when stopping a running time entry doesn't work

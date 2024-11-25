@@ -1,5 +1,17 @@
 # PDFSearch Changelog
 
+## [1.2.2] - 2024-08-12
+
+- Improved form validation.
+- Added `Delete All Collections` action.
+- Added icons for actions.
+
+## [1.2.1] - 2024-08-09
+
+- Add multithreading to searchCollection Swift process.
+- Add streaming search results for long running searches.
+- Add logic to terminate old search processes.
+
 ## [1.2.0] - 2024-08-04
 
 - Revamp search logic to use the SearchKit API.

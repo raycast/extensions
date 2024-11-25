@@ -5,7 +5,7 @@ import { TopicType } from "./types/GithubType";
 import { getPageFromCache, checkForUpdates } from "./services/NextjsPage";
 import { usePromise } from "@raycast/utils";
 
-const TopicDetail = (props: { topic: TopicType }) => {
+const TopicDetail = (props: { topic: TopicType; url: string }) => {
   const { isLoading, data: markdown } = usePromise(
     async () => {
       const cached_data = await getPageFromCache(props.topic);
@@ -28,7 +28,7 @@ const TopicDetail = (props: { topic: TopicType }) => {
       markdown={markdown || ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser icon="command-icon.png" url={`https://nextjs.org/docs/${props.topic.filepath}`} />
+          <Action.OpenInBrowser icon="command-icon.png" url={props.url} />
         </ActionPanel>
       }
     />

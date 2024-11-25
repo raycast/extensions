@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "custom-folder",
   "title": "Custom Folder",
-  "description": "Create custom MacOS folder images.",
+  "description": "Customize MacOS folder icons.",
   "icon": "custom-folder-icon.png",
   "author": "phlo",
   "categories": [
@@ -13,15 +13,23 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create Folder Image",
-      "description": "Create a custom folder image.",
+      "title": "Customize Icon with PNG",
+      "description": "Create a custom folder image. Allows to save or directly apply.",
+      "mode": "view"
+    },
+    {
+      "name": "createFromEmoji",
+      "title": "Customize Icon with Emoji",
+      "description": "Create a custom folder image from an emoji",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.16.5",
+    "emoji-datasource-apple": "^15.1.2",
     "jimp": "^0.22.10",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

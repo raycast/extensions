@@ -5,6 +5,10 @@
   "description": "Google search with autosuggestions",
   "icon": "command-icon.png",
   "author": "mblode",
+  "contributors": [
+    "VBenny42",
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "categories": [
     "Web"
@@ -15,6 +19,12 @@
       "title": "Google Search",
       "description": "Google search with autosuggestions",
       "mode": "view"
+    },
+    {
+      "name": "searchSelectText",
+      "title": "Google Search Selected Text",
+      "description": "Google search with selected text",
+      "mode": "no-view"
     }
   ],
   "preferences": [

@@ -4,6 +4,7 @@ import { exec } from "child_process";
 
 import { Data, UUID } from "../types/tim";
 import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./apple-script";
+import { isNoActiveTaskError } from "../helpers/error";
 
 export async function installedWrapper<T extends () => void>(cb: T) {
   const timAvailable = await checkIfTimInstalled();
@@ -27,8 +28,9 @@ export async function getActiveTask(): Promise<UUID | undefined> {
     const script = buildScriptEnsuringTimIsRunning("getActiveTask");
     return await runAppleScript(script);
   } catch (error) {
+    if (isNoActiveTaskError(error)) return undefined;
+
     captureException(error);
-    return undefined;
   }
 }
 

@@ -3,9 +3,9 @@ import path from "node:path";
 import { access, constants } from "node:fs/promises";
 import process from "node:process";
 import { Color, Icon, Image, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
-import { $ } from "execa";
+import spawn from "nano-spawn";
 import { ProcessDescription, StartOptions } from "pm2";
-import { get } from "lodash";
+import get from "lodash/get.js";
 import { Pm2Command, Pm2Process, ProcessStatus, RuntimeOptions } from "./types.js";
 
 export const raycastNodePath = process.execPath;
@@ -19,7 +19,7 @@ export const fakeToast = async (): Promise<Toast> => {
 
 export const setupPm2Wrapeper = async () => {
   const { nodePath, npmPath } = getPreferenceValues<Preferences>();
-  await $({ cwd: pm2WrapperPath })`${nodePath} ${npmPath} ci --omit=dev`;
+  await spawn(nodePath, [npmPath, "ci", "--omit=dev"], { cwd: pm2WrapperPath, shell: true });
 };
 
 export const hasPm2WrapperInstalled = async () => {
@@ -70,21 +70,20 @@ export async function runPm2Command(
     return;
   }
   setupEnv({ runtimeOptions });
-  const commandLine = `node '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  const commands = [pm2WrapperIndexPath, command, `--options=${encodeParameters(options)}`];
   const toast =
     environment.commandMode === "view"
       ? await showToast({ title: "", message: `Running ${command} command...` })
       : await fakeToast();
   try {
-    await $({
-      shell: true,
+    await spawn("node", [pm2WrapperIndexPath, command, `--options=${encodeParameters(options)}`], {
       cwd: path.dirname(pm2WrapperIndexPath),
-    })(commandLine);
+    });
     toast.style = Toast.Style.Success;
     toast.message = `Operation done`;
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.message = error?.toString() ?? `Fail to execute '${commandLine}'`;
+    toast.message = error?.toString() ?? `Fail to execute 'node ${commands.join(" ")}'`;
   }
 }
 

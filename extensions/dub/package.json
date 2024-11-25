@@ -49,7 +49,7 @@
   "dependencies": {
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.16.0",
-    "dub": "^0.33.1",
+    "dub": "^0.43.9",
     "undici": "^6.19.2"
   },
   "devDependencies": {

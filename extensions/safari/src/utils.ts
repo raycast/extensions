@@ -1,10 +1,8 @@
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-import Fuse from "fuse.js";
-
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-
 import { HistoryItem, Tab } from "./types";
 
 type Preferences = {
@@ -73,12 +71,12 @@ export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-export const search = function (collection: object[], keys: string[], searchText: string) {
+export const search = function (collection: object[], keys: Array<FuseOptionKey<object>>, searchText: string) {
   if (!searchText) {
     return collection;
   }
 
-  return new Fuse(collection, { keys }).search(searchText).map((x) => x.item);
+  return new Fuse(collection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
 };
 
 const dtf = new Intl.DateTimeFormat(undefined, {

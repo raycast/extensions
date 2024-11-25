@@ -1,24 +1,72 @@
+import data from "@emoji-mart/data";
+import type { EmojiMartData as EmojiData } from "@emoji-mart/data";
 import {
   Action,
   ActionPanel,
+  Color,
   Form,
   getSelectedText,
   Icon,
   LaunchType,
   List,
-  LocalStorage,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useAgents } from "./agents";
+import { AgentConfigurationType, AgentType, getAgentScopeConfig } from "./utils";
 import AskDustCommand from "./ask";
-import { AgentConfigurationScope, AgentConfigurationType, AgentType } from "./dust_api/agent";
-import { useForm } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useCachedPromise, useForm, useFrecencySorting } from "@raycast/utils";
+import { useCallback, useEffect, useState } from "react";
+import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
+import { DustAPI } from "@dust-tt/client";
 
 interface AskAgentQuestionFormValues {
   question: string;
+}
+
+function useAgents(dustApi: DustAPI) {
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const {
+    data: agents,
+    isLoading,
+    mutate,
+  } = useCachedPromise(async () => {
+    const r = await dustApi.getAgentConfigurations();
+
+    if (r.isErr()) {
+      setError(r.error.message);
+      return undefined;
+    } else {
+      return r.value.filter((agent) => agent.status === "active");
+    }
+  }, []);
+
+  return { agents: agents, isLoading, mutate, error: error };
+}
+
+function subtitutePictureUrlIfEmoji(url: string) {
+  const EMOJI_URL_REGEXP = /\/emojis\/bg-([^/]*)\/([^/]*)\/([^/.]*)/;
+  const emojiData: EmojiData = data as EmojiData;
+
+  const match = url.match(EMOJI_URL_REGEXP);
+  if (match) {
+    const [, , id, unified] = match;
+
+    const emojiUnicodes = Object.values(emojiData.emojis).find((e) => e.id === id);
+    if (!emojiUnicodes) {
+      return url;
+    }
+
+    const skinEmoji = emojiUnicodes.skins.find((s) => s.unified === unified);
+    if (!skinEmoji) {
+      return url;
+    }
+
+    return `https://emoji.beeimg.com/${skinEmoji.native}/128/emojidex`;
+  }
+
+  return url;
 }
 
 export function useGetSelectedText() {
@@ -30,7 +78,6 @@ export function useGetSelectedText() {
       try {
         text = await getSelectedText();
       } catch (error) {
-        console.debug("Could not get selected text", error);
         setSelectedText("");
       }
       if (text) {
@@ -45,8 +92,10 @@ export function useGetSelectedText() {
 }
 
 export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentType; initialQuestion?: string }) {
+  const trimmedQuestion = initialQuestion?.trim();
   const { push } = useNavigation();
-  const { handleSubmit, itemProps, setValue } = useForm<AskAgentQuestionFormValues>({
+  const { handleSubmit, itemProps } = useForm<AskAgentQuestionFormValues>({
+    initialValues: { question: trimmedQuestion ? trimmedQuestion + "\n\n" : "" },
     onSubmit(values) {
       push(
         <AskDustCommand launchType={LaunchType.UserInitiated} arguments={{ agent: agent, search: values.question }} />,
@@ -61,12 +110,6 @@ export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentT
     },
   });
 
-  useEffect(() => {
-    if (!initialQuestion) {
-      return;
-    }
-    setValue("question", initialQuestion);
-  }, [initialQuestion]);
   return (
     <Form
       actions={
@@ -75,33 +118,22 @@ export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentT
         </ActionPanel>
       }
     >
-      <Form.Description title="Agent" text={agent.name} />
+      <Form.Description title="Assistant" text={`@${agent.name}`} />
       <Form.Description text={agent.description} />
-      <Form.TextArea title="Question" enableMarkdown {...itemProps.question} />
+      <Form.TextArea
+        title="Question"
+        {...itemProps.question}
+        placeholder="Type your question here..."
+        info="Press ⌥ + ↵ (Option + Return) to go to the next line."
+      />
     </Form>
   );
 }
 
-const QUICK_AGENT_KEY = "dust_favorite_agent";
-
-export default function AskDustAgentCommand() {
-  const { agents, error, isLoading: isLoadingAgents } = useAgents();
-  const [favoriteAgentId, setFavoriteAgentId] = useState<string | undefined>(undefined);
-  const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
+export default withPickedWorkspace(function AskDustAgentCommand() {
+  const dustClient = getDustClient();
+  const { agents, error, isLoading: isLoadingAgents, mutate: mutateAgents } = useAgents(dustClient);
   const { selectedText, isLoading: isLoadingSelectedText } = useGetSelectedText();
-
-  useEffect(() => {
-    async function fetchFavoriteAgent() {
-      if (!isLoadingFavorite) {
-        return;
-      }
-      const favoriteAgentString = await LocalStorage.getItem<string>("dust_favorite_agent");
-      const favoriteAgent = favoriteAgentString ? JSON.parse(favoriteAgentString) : undefined;
-      setFavoriteAgentId(favoriteAgent?.sId);
-      setIsLoadingFavorite(false);
-    }
-    fetchFavoriteAgent();
-  }, [isLoadingFavorite]);
 
   if (error) {
     showToast({
@@ -116,125 +148,127 @@ export default function AskDustAgentCommand() {
     });
   }
 
-  function sort(a: AgentConfigurationType, b: AgentConfigurationType) {
-    if (a.name < b.name) {
-      return -1;
-    }
-    if (a.name > b.name) {
-      return 1;
-    }
-    return 0;
-  }
-
-  async function saveFavoriteAgent(agent: AgentConfigurationType) {
-    setFavoriteAgentId(agent.sId);
-    await LocalStorage.setItem(QUICK_AGENT_KEY, JSON.stringify(agent));
-    setIsLoadingFavorite(true);
-    showToast({
-      style: Toast.Style.Success,
-      title: `${agent.name} added as favorite`,
+  const saveFavoriteAgent = useCallback(async (agent: { sId: string; name: string }) => {
+    const r = await dustClient.request({
+      method: "PATCH",
+      path: `/assistant/agent_configurations/${agent.sId}/`,
+      body: { userFavorite: true },
     });
-  }
+    if (r.isOk()) {
+      void mutateAgents();
+      showToast({
+        style: Toast.Style.Success,
+        title: `${agent.name} added as favorite`,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Could not add ${agent.name} as favorite: ${r.error.message}`,
+      });
+    }
+  }, []);
 
-  async function removeFavoriteAgent(agent: AgentConfigurationType) {
-    setFavoriteAgentId(undefined);
-    await LocalStorage.removeItem(QUICK_AGENT_KEY);
-    setIsLoadingFavorite(true);
-    showToast({
-      style: Toast.Style.Success,
-      title: `${agent.name} removed as favorite`,
+  const removeFavoriteAgent = useCallback(async (agent: { sId: string; name: string }) => {
+    const r = await dustClient.request({
+      method: "PATCH",
+      path: `/assistant/agent_configurations/${agent.sId}/`,
+      body: { userFavorite: false },
     });
-  }
+    if (r.isOk()) {
+      void mutateAgents();
+      showToast({
+        style: Toast.Style.Success,
+        title: `${agent.name} removed as favorite`,
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Could not remove ${agent.name} as favorite: ${r.error.message}`,
+      });
+    }
+  }, []);
 
-  const allAgents: AgentConfigurationType[] | undefined = agents ? Object.values(agents) : undefined;
-  const agentsSections = allAgents ? allAgents.map((agent) => agent.scope) : undefined;
-  const allSections = agentsSections
-    ? ["global", "workspace", "published", "private"].filter((section) => {
-        return agentsSections?.includes(section as AgentConfigurationScope);
-      })
-    : undefined;
+  const { data: sortedAgents, visitItem } = useFrecencySorting(agents, {
+    key: (agent) => agent.sId,
+    sortUnvisited: (a, b) =>
+      a.userFavorite != b.userFavorite ? (a.userFavorite ? -1 : 1) : a.name.localeCompare(b.name),
+  });
 
-  const isLoading = isLoadingAgents || isLoadingSelectedText || isLoadingFavorite;
+  const isLoading = isLoadingAgents || isLoadingSelectedText;
   return (
     <List isLoading={isLoading}>
-      {(!agents || isLoading) && <List.EmptyView icon={Icon.XMarkCircle} title="No Dust agents loaded" />}
-      {agents && favoriteAgentId && (
-        <AgentListItem
-          agent={agents[favoriteAgentId]}
-          isFavorite={true}
-          selectedText={selectedText}
-          onSaveFavorite={saveFavoriteAgent}
-          onRemoveFavorite={removeFavoriteAgent}
-        />
-      )}
-      {!isLoadingFavorite &&
-        agents &&
-        allSections?.map((section) => {
-          const agentsInSection = allAgents?.filter((agent) => agent.scope === section).sort(sort);
-          return (
-            <List.Section title={section} key={section}>
-              {agentsInSection?.map((agent) => {
-                return (
-                  <AgentListItem
-                    agent={agent}
-                    isFavorite={agent.sId === favoriteAgentId}
-                    selectedText={selectedText}
-                    onSaveFavorite={saveFavoriteAgent}
-                    onRemoveFavorite={removeFavoriteAgent}
-                    key={agent.sId}
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        })}
+      {(!sortedAgents || isLoading) && <List.EmptyView icon={Icon.XMarkCircle} title="No Dust agents loaded" />}
+
+      {sortedAgents?.map((agent) => {
+        return (
+          <AgentListItem
+            agent={agent}
+            isFavorite={agent.userFavorite}
+            selectedText={selectedText}
+            onVisit={() => visitItem(agent)}
+            onSaveFavorite={() => saveFavoriteAgent(agent)}
+            onRemoveFavorite={() => removeFavoriteAgent(agent)}
+            key={agent.sId}
+          />
+        );
+      })}
     </List>
   );
-}
+});
 
 function AgentListItem({
   agent,
   isFavorite,
   selectedText,
+  onVisit,
   onSaveFavorite,
   onRemoveFavorite,
 }: {
   agent: AgentConfigurationType;
   isFavorite: boolean;
   selectedText: string | undefined;
-  onSaveFavorite: (agent: AgentConfigurationType) => Promise<void>;
-  onRemoveFavorite: (agent: AgentConfigurationType) => Promise<void>;
+  onVisit: () => void;
+  onSaveFavorite: () => Promise<void>;
+  onRemoveFavorite: () => Promise<void>;
 }) {
   if (!agent) {
     return null;
   }
+
+  const config = getAgentScopeConfig(agent.scope);
+
   return (
     <List.Item
       key={agent.sId}
-      title={agent.name}
+      title={`@${agent.name}`}
       subtitle={agent.description}
-      icon={agent.pictureUrl}
-      accessories={[{ icon: isFavorite ? Icon.Bolt : null }, { tag: agent.scope }, { icon: Icon.ArrowRight }]}
+      icon={{ source: subtitutePictureUrlIfEmoji(agent.pictureUrl), fallback: Icon.Stars }}
+      accessories={[
+        { icon: isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : null },
+        { tag: { value: config.label, color: config.color } },
+        { icon: Icon.ArrowRight },
+      ]}
       actions={
         <ActionPanel>
           {selectedText ? (
             <>
               <Action.Push
+                title="Edit Question Before Asking"
+                icon={Icon.Highlight}
+                shortcut={{ key: "return", modifiers: [] }}
+                target={<AskAgentQuestionForm agent={agent} initialQuestion={selectedText} />}
+              />
+              <Action.Push
                 title="Ask for Selected Text"
                 icon={Icon.Message}
-                shortcut={{ key: "return", modifiers: [] }}
+                shortcut={{ key: "return", modifiers: ["cmd"] }}
                 target={
                   <AskDustCommand
                     launchType={LaunchType.UserInitiated}
                     arguments={{ agent: agent, search: selectedText }}
                   />
                 }
-              />
-              <Action.Push
-                title="Edit Question Before Asking"
-                icon={Icon.Highlight}
-                shortcut={{ key: "return", modifiers: ["cmd"] }}
-                target={<AskAgentQuestionForm agent={agent} initialQuestion={selectedText} />}
+                onPush={onVisit}
               />
             </>
           ) : (
@@ -247,20 +281,19 @@ function AgentListItem({
           )}
           {!isFavorite && (
             <Action
-              title="Quick Agent"
-              icon={Icon.Bolt}
-              onAction={async () => await onSaveFavorite(agent)}
-              shortcut={{ key: "f", modifiers: ["cmd", "shift"] }}
+              title="Add To Favorites"
+              icon={Icon.Star}
+              onAction={onSaveFavorite}
+              shortcut={{ key: "d", modifiers: ["cmd"] }}
             />
           )}
           {isFavorite && (
             <Action
-              title="Remove Quick Agent"
-              icon={Icon.BoltDisabled}
-              onAction={async () => {
-                await onRemoveFavorite(agent);
-              }}
+              title="Remove From Favorites"
+              icon={Icon.StarDisabled}
+              onAction={onRemoveFavorite}
               style={Action.Style.Destructive}
+              shortcut={{ key: "d", modifiers: ["cmd"] }}
             />
           )}
         </ActionPanel>

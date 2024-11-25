@@ -41,21 +41,23 @@ function AirtableBaseListItem(props: { baseMetadata: AirtableBaseMetadata }) {
         <ActionPanel>
           <Action.Push
             icon={Icon.ArrowRight}
-            title="Continue to List of tables"
+            title="Continue to List of Tables"
             target={<AirtableBaseSchemaTableListView baseMetadata={baseMetadata} />}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             onPush={() => incrementNumberOfClicksOnDetailForBaseAsync(baseMetadata.id)}
           />
-          <Action.OpenInBrowser title="Open Base in browser" url={baseMetadata.baseUrl} />
+          <Action.OpenInBrowser title="Open Base in Browser" url={baseMetadata.baseUrl} />
           <Action.Push
             icon={Icon.Sidebar}
             title="Details View: Tables Fields List"
             target={<AirtableBaseDetails baseMetadata={baseMetadata} />}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
           />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.OpenInBrowser title="Open API Docs in Browser" url={baseMetadata.apiDocsUrl} />
           <Action.CopyToClipboard
-            title={`Copy base ID (${baseMetadata.id})`}
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title={`Copy Base ID (${baseMetadata.id})`}
             content={baseMetadata.id}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
           />

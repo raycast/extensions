@@ -1,5 +1,8 @@
 # spanish-tv-guide Changelog
 
+## [Consume new dedicated API hosted on vercel] - 2024-11-19
+- Consume new API and adapt behaviour to the new API model
+
 ## [UX improvements and bug fixes] - 2024-06-02
 - Display if a program is live
 - Fix timezone issues

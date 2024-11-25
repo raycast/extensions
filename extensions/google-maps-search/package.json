@@ -10,7 +10,9 @@
   ],
   "contributors": [
     "lin",
-    "chrismessina"
+    "chrismessina",
+    "klaussner",
+    "krsntn"
   ],
   "keywords": [
     "directions",
@@ -78,19 +80,41 @@
       "data": [
         {
           "title": "Driving",
-          "value": "d"
+          "value": "driving"
         },
         {
           "title": "Transit",
-          "value": "t"
+          "value": "transit"
         },
         {
           "title": "Walking",
-          "value": "w"
+          "value": "walking"
         },
         {
           "title": "Cycling",
-          "value": "c"
+          "value": "bicycling"
+        }
+      ]
+    },
+    {
+      "name": "preferredOrigin",
+      "title": "Preferred Starting Location",
+      "description": "Select your preferred starting location.",
+      "type": "dropdown",
+      "required": true,
+      "default": "curloc",
+      "data": [
+        {
+          "title": "Current Location",
+          "value": "curloc"
+        },
+        {
+          "title": "Home",
+          "value": "home"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
         }
       ]
     },

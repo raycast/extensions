@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { contents, update } from "./util/clipboard";
 export default async () => {
   try {
@@ -7,7 +7,11 @@ export default async () => {
     await update(decoded);
   } catch (e) {
     if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Decode failed", e);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Decode failed",
+        message: e,
+      });
     }
   }
 };

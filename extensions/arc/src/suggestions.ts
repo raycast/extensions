@@ -136,7 +136,7 @@ export function useSuggestions(searchText: string) {
       return [...getDefaultSuggestions(searchText), ...parsed];
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {

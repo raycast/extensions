@@ -1,5 +1,21 @@
 # Google Maps Search Changelog
 
+## [Added preferred starting location] - 2024-11-20
+
+### Added
+
+- Added the ability to set a preferred starting location.
+
+## [Travel mode fixes and improvements] - 2024-08-21
+
+### Changed
+
+- Made naming of travel modes more consistent in the UI.
+
+### Fixed
+
+- Fixed wrong `travelmode` parameters being passed to the Google Maps API.
+
 ## Adding location history and Quick Search command - 2024-08-05
 
 ### Changed

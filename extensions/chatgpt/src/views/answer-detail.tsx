@@ -5,8 +5,15 @@ export const AnswerDetailView = (props: { chat: Chat; streamData?: Chat | undefi
   const { chat, streamData } = props;
   const isStreaming = streamData && streamData.id === chat.id;
 
-  const width = Math.floor(430 / Math.min(Math.max(chat.files.length, 1), 2));
-  const images: string = chat.files?.map((file) => `![](file://${file}?raycast-width=${width})`).join("\n") || "";
+  const width = Math.floor(430 / Math.min(Math.max(chat.files?.length ?? 0, 1), 2));
+
+  const images: string =
+    chat.files
+      ?.map((file) => {
+        const fileURI = encodeURI(`file://${file}?raycast-width=${width}`);
+        return `![](${fileURI})`;
+      })
+      .join("\n") || "";
 
   const markdown = `${
     isStreaming ? streamData?.answer : chat.answer

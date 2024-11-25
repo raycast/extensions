@@ -16,7 +16,8 @@
     "MonsterDeveloper",
     "Yamen",
     "EvanZhouDev",
-    "erics118"
+    "erics118",
+    "riadhrebei"
   ],
   "license": "MIT",
   "commands": [
@@ -26,6 +27,21 @@
       "subtitle": "Deepcast",
       "description": "Translate text using DeepL",
       "mode": "view"
+    },
+    {
+      "name": "arabic",
+      "title": "Translate into Arabic",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Arabic using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "bulgarian",

@@ -56,6 +56,18 @@
       "title": "Oura Activity",
       "description": "Get your today's activity data: like steps, calories, and distance.",
       "mode": "view"
+    },
+    {
+      "name": "resilience",
+      "title": "Oura Resilience",
+      "description": "Get the last two week's resilience and contributing factors.",
+      "mode": "view"
+    },
+    {
+      "name": "stress",
+      "title": "Oura Stress",
+      "description": "Get today's stress data: stress high, recovery high, and day summary.",
+      "mode": "view"
     }
   ],
   "preferences": [

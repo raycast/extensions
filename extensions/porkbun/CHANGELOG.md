@@ -1,5 +1,9 @@
 # Porkbun Changelog
 
+## [Fix Domain Pricing Crashing] - 2024-09-03
+
+- `Domain Pricing` command would crash if user tried to reload too many times. The "Reload Domain Pricing" action is now hidden if already fetching.
+
 ## [Labels in Domains + Update API hostname] - 2024-07-25
 
 - Labels applied in Porkbun dashboard to domains will now be fetched

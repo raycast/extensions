@@ -16,6 +16,7 @@ import {
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
+import { checkDNDExtensionInstall } from "../lib/doNotDisturb";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",
@@ -30,7 +31,8 @@ export default function TogglePomodoroTimer() {
     endOfInterval(currentInterval);
   }
 
-  function onStart(type: IntervalType) {
+  async function onStart(type: IntervalType) {
+    await checkDNDExtensionInstall();
     setCurrentInterval(createInterval(type));
   }
 
@@ -103,21 +105,21 @@ export default function TogglePomodoroTimer() {
             title={FocusText}
             subtitle={`${preferences.focusIntervalDuration}:00`}
             icon={`🎯`}
-            onAction={() => onStart("focus")}
+            onAction={async () => await onStart("focus")}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <MenuBarExtra.Item
             title={ShortBreakText}
             subtitle={`${preferences.shortBreakIntervalDuration}:00`}
             icon={`🧘‍♂️`}
-            onAction={() => onStart("short-break")}
+            onAction={async () => await onStart("short-break")}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <MenuBarExtra.Item
             title={LongBreakText}
             subtitle={`${preferences.longBreakIntervalDuration}:00`}
             icon={`🚶`}
-            onAction={() => onStart("long-break")}
+            onAction={async () => await onStart("long-break")}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
         </>
