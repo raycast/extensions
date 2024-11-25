@@ -17,15 +17,6 @@ type SearchResultList = {
   [key: string]: SearchResult[];
 }
 
-type FallbackResultListItem = {
-  url: string;
-  title: string;
-};
-
-type FallbackResultList = {
-  [key: string]: FallbackResultListItem[];
-};
-
 const client = new MeiliSearch({
   host: "https://search.statamic.dev",
   apiKey: "a8b8f82076221f9595dceca971be29c36cbccd772de5dbdb7f43dfac41557f95",
@@ -79,6 +70,12 @@ export default function main() {
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
+        if (! query) {
+          setSearchResults(fallbackResults as SearchResultList[]);
+          return;
+        }
+
+
         const results = (await search(query)) as SearchResult[];
 
         if (! results) {
@@ -102,9 +99,9 @@ export default function main() {
     >
       {
         Object.entries(searchResults as SearchResultList).map(
-          ([section, items]: [string, SearchResult[]]) => {
+          ([section, items]: [string, SearchResult[]], index: number) => {
             return (
-              <List.Section title={section} key={section}>
+              <List.Section title={section} key={index}>
                 {items.map((hit: SearchResult) => {
                   return (
                     <List.Item
@@ -125,30 +122,7 @@ export default function main() {
             );
           }
         )
-    }) || {
-        Object.entries(fallbackResults as FallbackResultList).map(
-          ([section, items]: [string, FallbackResultListItem[]]) => {
-            return (
-              <List.Section title={section} key={section}>
-                {items.map((item: FallbackResultListItem) => {
-                  return (
-                    <List.Item
-                      key={item.url}
-                      title={item.title}
-                      icon="command-icon.png"
-                      actions={
-                        <ActionPanel title={item.url}>
-                          <Action.OpenInBrowser url={item.url} title="Open in Browser" />
-                          <Action.CopyToClipboard content={item.url} title="Copy URL" />
-                        </ActionPanel>
-                      }
-                    />
-                  );
-                })}
-              </List.Section>
-            );
-          }
-        )}
+      }
     </List>
   );
 }

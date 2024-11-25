@@ -1,322 +1,398 @@
 {
     "Getting Started": [
         {
-            "title": "Requirements",
-            "url": "https://statamic.dev/requirements"
+            "hierarchy_lvl1": "Requirements",
+            "url": "\/requirements",
+            "id": "requirements"
         },
         {
-            "title": "Quick Start Guide",
-            "url": "https://statamic.dev/quick-start-guide"
+            "hierarchy_lvl1": "Quick Start Guide",
+            "url": "\/quick-start-guide",
+            "id": "quick-start-guide"
         },
         {
-            "title": "Upgrade Guides",
-            "url": "https://statamic.dev/upgrade-guide"
+            "hierarchy_lvl1": "Upgrade Guides",
+            "url": "\/upgrade-guide",
+            "id": "upgrade-guide"
         },
         {
-            "title": "Installing",
-            "url": "https://statamic.dev/installing"
+            "hierarchy_lvl1": "Installing",
+            "url": "\/installing",
+            "id": "installing"
         },
         {
-            "title": "Updating",
-            "url": "https://statamic.dev/updating"
+            "hierarchy_lvl1": "Updating",
+            "url": "\/updating",
+            "id": "updating"
         },
         {
-            "title": "Deploying",
-            "url": "https://statamic.dev/deploying"
+            "hierarchy_lvl1": "Deploying",
+            "url": "\/deploying",
+            "id": "deploying"
         }
     ],
     "Core Concepts": [
         {
-            "title": "Overview",
-            "url": "https://statamic.dev/core-concepts"
+            "hierarchy_lvl1": "Overview",
+            "url": "\/core-concepts",
+            "id": "core-concepts"
         },
         {
-            "title": "Assets",
-            "url": "https://statamic.dev/assets"
+            "hierarchy_lvl1": "Assets",
+            "url": "\/assets",
+            "id": "assets"
         },
         {
-            "title": "Configuration",
-            "url": "https://statamic.dev/configuration"
+            "hierarchy_lvl1": "Configuration",
+            "url": "\/configuration",
+            "id": "configuration"
         },
         {
-            "title": "Collections",
-            "url": "https://statamic.dev/collections"
+            "hierarchy_lvl1": "Collections",
+            "url": "\/collections",
+            "id": "collections"
         },
         {
-            "title": "Fields",
-            "url": "https://statamic.dev/fields"
+            "hierarchy_lvl1": "Fields",
+            "url": "\/fields",
+            "id": "fields"
         },
         {
-            "title": "Globals",
-            "url": "https://statamic.dev/globals"
+            "hierarchy_lvl1": "Globals",
+            "url": "\/globals",
+            "id": "globals"
         },
         {
-            "title": "Search",
-            "url": "https://statamic.dev/search"
+            "hierarchy_lvl1": "Search",
+            "url": "\/search",
+            "id": "search"
         },
         {
-            "title": "Navigation",
-            "url": "https://statamic.dev/navigation"
+            "hierarchy_lvl1": "Navigation",
+            "url": "\/navigation",
+            "id": "navigation"
         },
         {
-            "title": "Taxonomies",
-            "url": "https://statamic.dev/taxonomies"
+            "hierarchy_lvl1": "Taxonomies",
+            "url": "\/taxonomies",
+            "id": "taxonomies"
         },
         {
-            "title": "Users",
-            "url": "https://statamic.dev/users"
+            "hierarchy_lvl1": "Users",
+            "url": "\/users",
+            "id": "users"
         },
         {
-            "title": "YAML",
-            "url": "https://statamic.dev/yaml"
+            "hierarchy_lvl1": "YAML",
+            "url": "\/yaml",
+            "id": "yaml"
         }
     ],
     "Diving Deeper": [
         {
-            "title": "Augmentation",
-            "url": "https://statamic.dev/augmentation"
+            "hierarchy_lvl1": "Augmentation",
+            "url": "\/augmentation",
+            "id": "augmentation"
         },
         {
-            "title": "CLI",
-            "url": "https://statamic.dev/cli"
+            "hierarchy_lvl1": "CLI",
+            "url": "\/cli",
+            "id": "cli"
         },
         {
-            "title": "Caching",
-            "url": "https://statamic.dev/caching"
+            "hierarchy_lvl1": "Caching",
+            "url": "\/caching",
+            "id": "caching"
         },
         {
-            "title": "Computed Values",
-            "url": "https://statamic.dev/computed-values"
+            "hierarchy_lvl1": "Computed Values",
+            "url": "\/computed-values",
+            "id": "computed-values"
         },
         {
-            "title": "Data Inheritance",
-            "url": "https://statamic.dev/data-inheritance"
+            "hierarchy_lvl1": "Data Inheritance",
+            "url": "\/data-inheritance",
+            "id": "data-inheritance"
         },
         {
-            "title": "Debugging",
-            "url": "https://statamic.dev/debugging"
+            "hierarchy_lvl1": "Debugging",
+            "url": "\/debugging",
+            "id": "debugging"
         },
         {
-            "title": "Forms",
-            "url": "https://statamic.dev/forms"
+            "hierarchy_lvl1": "Forms",
+            "url": "\/forms",
+            "id": "forms"
         },
         {
-            "title": "OAuth",
-            "url": "https://statamic.dev/oauth"
+            "hierarchy_lvl1": "OAuth",
+            "url": "\/oauth",
+            "id": "oauth"
         },
         {
-            "title": "Multi-Site",
-            "url": "https://statamic.dev/multi-site"
+            "hierarchy_lvl1": "Multi-Site",
+            "url": "\/multi-site",
+            "id": "multi-site"
         },
         {
-            "title": "Preferences",
-            "url": "https://statamic.dev/preferences"
+            "hierarchy_lvl1": "Preferences",
+            "url": "\/preferences",
+            "id": "preferences"
         },
         {
-            "title": "Revisions",
-            "url": "https://statamic.dev/revisions"
+            "hierarchy_lvl1": "Revisions",
+            "url": "\/revisions",
+            "id": "revisions"
         },
         {
-            "title": "Relationships",
-            "url": "https://statamic.dev/relationships"
+            "hierarchy_lvl1": "Relationships",
+            "url": "\/relationships",
+            "id": "relationships"
         },
         {
-            "title": "Routing",
-            "url": "https://statamic.dev/routing"
+            "hierarchy_lvl1": "Routing",
+            "url": "\/routing",
+            "id": "routing"
         },
         {
-            "title": "Stache",
-            "url": "https://statamic.dev/stache"
+            "hierarchy_lvl1": "Stache",
+            "url": "\/stache",
+            "id": "stache"
         },
         {
-            "title": "Structures",
-            "url": "https://statamic.dev/structures"
+            "hierarchy_lvl1": "Structures",
+            "url": "\/structures",
+            "id": "structures"
         },
         {
-            "title": "Sending Email",
-            "url": "https://statamic.dev/email"
+            "hierarchy_lvl1": "Sending Email",
+            "url": "\/email",
+            "id": "email"
         },
         {
-            "title": "Static Caching",
-            "url": "https://statamic.dev/static-caching"
+            "hierarchy_lvl1": "Static Caching",
+            "url": "\/static-caching",
+            "id": "static-caching"
         },
         {
-            "title": "Task Scheduling",
-            "url": "https://statamic.dev/scheduling"
+            "hierarchy_lvl1": "Task Scheduling",
+            "url": "\/scheduling",
+            "id": "scheduling"
         },
         {
-            "title": "Validation",
-            "url": "https://statamic.dev/validation"
+            "hierarchy_lvl1": "Validation",
+            "url": "\/validation",
+            "id": "validation"
         }
     ],
     "Frontend": [
         {
-            "title": "Overview",
-            "url": "https://statamic.dev/frontend"
+            "hierarchy_lvl1": "Overview",
+            "url": "\/frontend",
+            "id": "frontend"
         },
         {
-            "title": "Antlers Templates",
-            "url": "https://statamic.dev/antlers"
+            "hierarchy_lvl1": "Antlers Templates",
+            "url": "\/antlers",
+            "id": "antlers"
         },
         {
-            "title": "Blade Templates",
-            "url": "https://statamic.dev/blade"
+            "hierarchy_lvl1": "Blade Templates",
+            "url": "\/blade",
+            "id": "blade"
         },
         {
-            "title": "Content Queries",
-            "url": "https://statamic.dev/content-queries"
+            "hierarchy_lvl1": "Content Queries",
+            "url": "\/content-queries",
+            "id": "content-queries"
         },
         {
-            "title": "Controllers",
-            "url": "https://statamic.dev/controllers"
+            "hierarchy_lvl1": "Controllers",
+            "url": "\/controllers",
+            "id": "controllers"
         },
         {
-            "title": "GraphQL API",
-            "url": "https://statamic.dev/graphql"
+            "hierarchy_lvl1": "GraphQL API",
+            "url": "\/graphql",
+            "id": "graphql"
         },
         {
-            "title": "Image Manipulation",
-            "url": "https://statamic.dev/image-manipulation"
+            "hierarchy_lvl1": "Image Manipulation",
+            "url": "\/image-manipulation",
+            "id": "image-manipulation"
         },
         {
-            "title": "Front-End Frameworks",
-            "url": "https://statamic.dev/javascript-frameworks"
+            "hierarchy_lvl1": "Front-End Frameworks",
+            "url": "\/javascript-frameworks",
+            "id": "javascript-frameworks"
         },
         {
-            "title": "Modifiers",
-            "url": "https://statamic.dev/modifiers"
+            "hierarchy_lvl1": "Modifiers",
+            "url": "\/modifiers",
+            "id": "modifiers"
         },
         {
-            "title": "Protecting Content",
-            "url": "https://statamic.dev/protecting-content"
+            "hierarchy_lvl1": "Protecting Content",
+            "url": "\/protecting-content",
+            "id": "protecting-content"
         },
         {
-            "title": "REST API",
-            "url": "https://statamic.dev/rest-api"
+            "hierarchy_lvl1": "REST API",
+            "url": "\/rest-api",
+            "id": "rest-api"
         },
         {
-            "title": "Tags",
-            "url": "https://statamic.dev/tags"
+            "hierarchy_lvl1": "Tags",
+            "url": "\/tags",
+            "id": "tags"
         },
         {
-            "title": "Tag Conditions",
-            "url": "https://statamic.dev/conditions"
+            "hierarchy_lvl1": "Tag Conditions",
+            "url": "\/conditions",
+            "id": "conditions"
         },
         {
-            "title": "Variables",
-            "url": "https://statamic.dev/variables"
+            "hierarchy_lvl1": "Variables",
+            "url": "\/variables",
+            "id": "variables"
         },
         {
-            "title": "Views",
-            "url": "https://statamic.dev/views"
+            "hierarchy_lvl1": "Views",
+            "url": "\/views",
+            "id": "views"
         },
         {
-            "title": "View Models",
-            "url": "https://statamic.dev/view-models"
+            "hierarchy_lvl1": "View Models",
+            "url": "\/view-models",
+            "id": "view-models"
         }
     ],
     "Control Panel": [
         {
-            "title": "Dashboard",
-            "url": "https://statamic.dev/dashboard"
+            "hierarchy_lvl1": "Dashboard",
+            "url": "\/dashboard",
+            "id": "dashboard"
         },
         {
-            "title": "Navigation",
-            "url": "https://statamic.dev/customizing-the-cp-nav"
+            "hierarchy_lvl1": "Navigation",
+            "url": "\/customizing-the-cp-nav",
+            "id": "customizing-the-cp-nav"
         },
         {
-            "title": "Blueprints",
-            "url": "https://statamic.dev/blueprints"
+            "hierarchy_lvl1": "Blueprints",
+            "url": "\/blueprints",
+            "id": "blueprints"
         },
         {
-            "title": "Fieldtypes",
-            "url": "https://statamic.dev/fieldtypes"
+            "hierarchy_lvl1": "Fieldtypes",
+            "url": "\/fieldtypes",
+            "id": "fieldtypes"
         },
         {
-            "title": "Fieldsets",
-            "url": "https://statamic.dev/fieldsets"
+            "hierarchy_lvl1": "Fieldsets",
+            "url": "\/fieldsets",
+            "id": "fieldsets"
         },
         {
-            "title": "Conditional Fields",
-            "url": "https://statamic.dev/conditional-fields"
+            "hierarchy_lvl1": "Conditional Fields",
+            "url": "\/conditional-fields",
+            "id": "conditional-fields"
         },
         {
-            "title": "Git Automation",
-            "url": "https://statamic.dev/git-automation"
+            "hierarchy_lvl1": "Git Automation",
+            "url": "\/git-automation",
+            "id": "git-automation"
         },
         {
-            "title": "Live Preview",
-            "url": "https://statamic.dev/live-preview"
+            "hierarchy_lvl1": "Live Preview",
+            "url": "\/live-preview",
+            "id": "live-preview"
         },
         {
-            "title": "Multi-User Collaboration",
-            "url": "https://statamic.dev/multi-user-collaboration"
+            "hierarchy_lvl1": "Multi-User Collaboration",
+            "url": "\/multi-user-collaboration",
+            "id": "multi-user-collaboration"
         },
         {
-            "title": "Translations",
-            "url": "https://statamic.dev/cp-translations"
+            "hierarchy_lvl1": "Translations",
+            "url": "\/cp-translations",
+            "id": "cp-translations"
         },
         {
-            "title": "White Labeling",
-            "url": "https://statamic.dev/white-labeling"
+            "hierarchy_lvl1": "White Labeling",
+            "url": "\/white-labeling",
+            "id": "white-labeling"
         },
         {
-            "title": "Widgets",
-            "url": "https://statamic.dev/widgets"
+            "hierarchy_lvl1": "Widgets",
+            "url": "\/widgets",
+            "id": "widgets"
         }
     ],
     "Addons": [
         {
-            "title": "Overview",
-            "url": "https://statamic.dev/addons"
+            "hierarchy_lvl1": "Overview",
+            "url": "\/addons",
+            "id": "addons"
         }
     ],
     "Starter Kits": [
         {
-            "title": "Overview",
-            "url": "https://statamic.dev/starter-kits"
+            "hierarchy_lvl1": "Overview",
+            "url": "\/starter-kits",
+            "id": "starter-kits"
         },
         {
-            "title": "Installing",
-            "url": "https://statamic.dev/starter-kits/installing-a-starter-kit"
+            "hierarchy_lvl1": "Installing",
+            "url": "\/starter-kits\/installing-a-starter-kit",
+            "id": "starter-kitsinstalling-a-starter-kit"
         },
         {
-            "title": "Creating",
-            "url": "https://statamic.dev/starter-kits/creating-a-starter-kit"
+            "hierarchy_lvl1": "Creating",
+            "url": "\/starter-kits\/creating-a-starter-kit",
+            "id": "starter-kitscreating-a-starter-kit"
         }
     ],
     "Resources": [
         {
-            "title": "Content Manager's Guide",
-            "url": "https://statamic.dev/content-managers-guide"
+            "hierarchy_lvl1": "Content Manager's Guide",
+            "url": "\/content-managers-guide",
+            "id": "content-managers-guide"
         },
         {
-            "title": "WordPress to Statamic",
-            "url": "https://statamic.dev/from-wordpress-to-statamic"
+            "hierarchy_lvl1": "WordPress to Statamic",
+            "url": "\/from-wordpress-to-statamic",
+            "id": "from-wordpress-to-statamic"
         },
         {
-            "title": "Code of Conduct",
-            "url": "https://statamic.dev/code-of-conduct"
+            "hierarchy_lvl1": "Code of Conduct",
+            "url": "\/code-of-conduct",
+            "id": "code-of-conduct"
         },
         {
-            "title": "Contributing",
-            "url": "https://statamic.dev/contributing"
+            "hierarchy_lvl1": "Contributing",
+            "url": "\/contributing",
+            "id": "contributing"
         },
         {
-            "title": "Licensing",
-            "url": "https://statamic.dev/licensing"
+            "hierarchy_lvl1": "Licensing",
+            "url": "\/licensing",
+            "id": "licensing"
         },
         {
-            "title": "Release Schedule",
-            "url": "https://statamic.dev/release-schedule-support-policy"
+            "hierarchy_lvl1": "Release Schedule",
+            "url": "\/release-schedule-support-policy",
+            "id": "release-schedule-support-policy"
         },
         {
-            "title": "Tips & Tricks",
-            "url": "https://statamic.dev/tips"
+            "hierarchy_lvl1": "Tips & Tricks",
+            "url": "\/tips",
+            "id": "tips"
         },
         {
-            "title": "Troubleshooting",
-            "url": "https://statamic.dev/troubleshooting"
+            "hierarchy_lvl1": "Troubleshooting",
+            "url": "\/troubleshooting",
+            "id": "troubleshooting"
         }
     ]
 }
