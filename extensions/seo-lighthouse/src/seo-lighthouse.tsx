@@ -51,6 +51,13 @@ interface LighthouseReport {
   };
 }
 
+function expandHomeDir(filePath: string): string {
+  if (filePath.startsWith('~')) {
+    return nodePath.join(nodeOs.homedir(), filePath.slice(1));
+  }
+  return filePath;
+}
+
 // Utility function to validate and process URL
 function processUrl(url: string): string {
   // Trim whitespace
@@ -83,18 +90,33 @@ async function findLighthousePath(
   preferences: Preferences
 ): Promise<string | null> {
   if (preferences.lighthousePath) {
+    const expandedPath = expandHomeDir(preferences.lighthousePath);
     try {
-      await nodeFs.access(preferences.lighthousePath, nodeFs.constants.X_OK);
-      return preferences.lighthousePath;
+      await nodeFs.access(expandedPath, nodeFs.constants.X_OK);
+      return expandedPath;
     } catch (error) {
       console.error('Invalid Lighthouse path:', error);
     }
   }
 
+  const localLighthousePath = nodePath.join(
+    __dirname,
+    'node_modules',
+    '.bin',
+    'lighthouse'
+  );
+
+  try {
+    await nodeFs.access(localLighthousePath, nodeFs.constants.X_OK);
+    return localLighthousePath;
+  } catch (error) {
+    console.error('Local Lighthouse CLI not found:', error);
+  }
+
   const potentialPaths = [
-    '/usr/local/bin/lighthouse',
-    '/usr/bin/lighthouse',
-    '/opt/homebrew/bin/lighthouse',
+    '/opt/homebrew/bin/lighthouse', // Homebrew path
+    '/usr/local/bin/lighthouse', // Typical npm global install path
+    '/usr/bin/lighthouse', // Another common path
     `${nodeOs.homedir()}/.npm-global/bin/lighthouse`,
     nodePath.join(nodeOs.homedir(), '.npm', 'bin', 'lighthouse'),
     nodePath.join(nodeOs.homedir(), 'node_modules', '.bin', 'lighthouse'),
@@ -111,11 +133,16 @@ async function findLighthousePath(
 
   try {
     const { stdout } = await execPromise('which lighthouse');
-    return stdout.trim() || null;
+    const path = stdout.trim();
+    if (path) {
+      await nodeFs.access(path, nodeFs.constants.X_OK);
+      return path;
+    }
   } catch (error) {
     console.error('Lighthouse not found in PATH:', error);
-    return null;
   }
+
+  return null;
 }
 
 // Lighthouse Report View Component
@@ -341,7 +368,7 @@ export default function Command() {
       if (!finalLighthousePath) {
         if (!preferences.lighthousePath) {
           throw new Error(
-            'Lighthouse CLI not found. Please set the path manually in settings.'
+            'Lighthouse CLI not found. Please set the path manually in settings or install globally using:\n\nnpm install -g lighthouse'
           );
         } else {
           throw new Error(
@@ -417,8 +444,9 @@ export default function Command() {
         await execPromise(fullCommand, {
           env: {
             ...process.env,
-            PATH: `${process.env.PATH || ''}:/usr/bin:/usr/local/bin:/opt/homebrew/bin:/bin`,
+            PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
           },
+          shell: '/bin/bash', // Specify the shell
           maxBuffer: 1024 * 1024 * 10, // Increase buffer size
           timeout: 120000, // 2-minute timeout
         });
@@ -505,13 +533,13 @@ export default function Command() {
   return (
     <Form
       actions={
-        <ActionPanel>
+        <ActionPanel title="Extension Preferences">
           <Action.SubmitForm
             title="Run Lighthouse Analysis"
             onSubmit={handleSubmit}
           />
           <Action
-            title="Change Lighthouse Path"
+            title="Open Extension Preferences"
             onAction={handleChangeLighthousePath}
             icon={Icon.Gear}
           />
@@ -519,11 +547,6 @@ export default function Command() {
             title="Choose Output Directory"
             onAction={handleChooseDirectory}
             icon={Icon.Folder}
-          />
-          <Action
-            title="Open Output Path Preferences"
-            onAction={openCommandPreferences}
-            icon={Icon.Gear}
           />
         </ActionPanel>
       }

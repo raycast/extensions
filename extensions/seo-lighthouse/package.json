@@ -21,7 +21,7 @@
       "type": "directory",
       "title": "Output Path",
       "description": "Select the directory where JSON reports will be saved.",
-      "default": "",
+      "default": "~/Downloads",
       "required": true
     },
     {
