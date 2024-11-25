@@ -1,5 +1,9 @@
 # MyIP Changelog
 
+## [Update] - 2024-11-25
+
+- Add display multiple local IPs with index in accessories
+
 ## [Update & refactor]
 
 - Remove `axios`, rewritten fetch using `node-fetch` & `@raycast/utils`
