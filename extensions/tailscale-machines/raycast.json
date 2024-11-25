@@ -1,0 +1,16 @@
+{
+    "schemaVersion": 1,
+    "title": "Tailscale Machines",
+    "mode": "fullOutput",
+    "icon": "🌐",
+    "arguments": [
+      {
+        "type": "text",
+        "placeholder": "Search query (optional)",
+        "optional": true
+      }
+    ],
+    "description": "Find and connect to Tailscale machines",
+    "author": "Thomas",
+    "script": "dist/tailscale.js"
+  }
