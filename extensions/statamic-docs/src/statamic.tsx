@@ -15,7 +15,7 @@ type SearchResult = {
 
 type SearchResultList = {
   [key: string]: SearchResult[];
-}
+};
 
 const client = new MeiliSearch({
   host: "https://search.statamic.dev",
@@ -70,14 +70,14 @@ export default function main() {
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
-        if (! query) {
+        if (!query) {
           setSearchResults(fallbackResults as SearchResultList[]);
           return;
         }
 
         const results = (await search(query)) as SearchResult[];
 
-        if (! results) {
+        if (!results) {
           return;
         }
 
@@ -96,32 +96,30 @@ export default function main() {
         );
       }}
     >
-      {
-        Object.entries(searchResults as SearchResultList).map(
-          ([section, items]: [string, SearchResult[]], index: number) => {
-            return (
-              <List.Section title={section} key={index}>
-                {items.map((hit: SearchResult) => {
-                  return (
-                    <List.Item
-                      key={hit.id}
-                      title={getTitle(hit)}
-                      subtitle={getSubtitle(hit)}
-                      icon="command-icon.png"
-                      actions={
-                        <ActionPanel title={`https://statamic.dev${hit.url}`}>
-                          <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
-                          <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
-                        </ActionPanel>
-                      }
-                    />
-                  );
-                })}
-              </List.Section>
-            );
-          }
-        )
-      }
+      {Object.entries(searchResults as SearchResultList).map(
+        ([section, items]: [string, SearchResult[]], index: number) => {
+          return (
+            <List.Section title={section} key={index}>
+              {items.map((hit: SearchResult) => {
+                return (
+                  <List.Item
+                    key={hit.id}
+                    title={getTitle(hit)}
+                    subtitle={getSubtitle(hit)}
+                    icon="command-icon.png"
+                    actions={
+                      <ActionPanel title={`https://statamic.dev${hit.url}`}>
+                        <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
+                        <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          );
+        }
+      )}
     </List>
   );
 }
