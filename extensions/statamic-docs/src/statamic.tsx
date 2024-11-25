@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MeiliSearch } from "meilisearch";
 import fetch from "node-fetch";
 import { decode } from "html-entities";
+import fallbackResults from "./../fallback-results.json";
 
 type SearchResult = {
   id: string;
@@ -12,11 +13,13 @@ type SearchResult = {
   url: string;
 };
 
+type FallbackResultListItem = {
+  url: string;
+  title: string;
+};
+
 type FallbackResultList = {
-  [key: string]: {
-    url: string;
-    title: string;
-  }[];
+  [key: string]: FallbackResultListItem[];
 };
 
 const client = new MeiliSearch({
@@ -34,8 +37,6 @@ const client = new MeiliSearch({
 });
 
 const index = client.index("default");
-
-const fallbackResults = require("./../fallback-results.json") as FallbackResultList;
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
@@ -94,27 +95,27 @@ export default function main() {
           />
         );
       }) ||
-      Object.entries(fallbackResults).map(([section, items]: Array<any>) => {
-        return (
-          <List.Section title={section} key={section}>
-            {items.map((item: any) => {
-              return (
-                <List.Item
-                  key={item.url}
-                  title={item.title}
-                  icon="command-icon.png"
-                  actions={
-                    <ActionPanel title={item.url}>
-                      <Action.OpenInBrowser url={item.url} title="Open in Browser" />
-                      <Action.CopyToClipboard content={item.url} title="Copy URL" />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        );
-      })}
+        Object.entries(fallbackResults as FallbackResultList).map(([section, items]: FallbackResultList) => {
+          return (
+            <List.Section title={section} key={section}>
+              {items.map((item: FallbackResultListItem) => {
+                return (
+                  <List.Item
+                    key={item.url}
+                    title={item.title}
+                    icon="command-icon.png"
+                    actions={
+                      <ActionPanel title={item.url}>
+                        <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                        <Action.CopyToClipboard content={item.url} title="Copy URL" />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
