@@ -192,6 +192,7 @@ ${renderStats()}
           <Action
             title="Purge Cache"
             icon={Icon.Trash}
+            style={Action.Style.Destructive}
             onAction={async () => {
               try {
                 await purgeCache(service.id);
