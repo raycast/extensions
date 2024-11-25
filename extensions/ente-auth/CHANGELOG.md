@@ -1,5 +1,8 @@
 # Ente Auth Changelog
 
+## [Bug fix] - 2024-11-14
+- Allow path to be resolved during runtime (e.g ~/Desktop/Ente)
+
 ## [Update Readme] - 2024-11-14
 - Fix a typo in the readme
 
