@@ -1,5 +1,5 @@
 # Fastly Changelog
 
-## [Added Fastly] - {PR_MERGE_DATE}
+## [Added Fastly] - 2024-11-25
 
 Initial version code
