@@ -4,7 +4,7 @@ export function ApiForm({ onSubmit }: { onSubmit: (values: { token: string }) =>
   const { pop } = useNavigation();
 
   const handleSubmit = async (values: { token: string }) => {
-    onSubmit(values);
+    await onSubmit(values);
     pop();
   };
 

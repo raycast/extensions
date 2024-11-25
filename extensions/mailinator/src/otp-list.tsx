@@ -1,30 +1,22 @@
 import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
 import { LoginAction } from "./components/login-action";
 import { useApi } from "./utils/use-api";
+import { usePersistedState } from "./utils/use-persisted-state";
 
 /**
  * Retrieve OTP
  */
 export default function Command() {
-  const { setValue: setToken } = useLocalStorage("api-token");
-  const { isLoading, data, isAuthenticated } = useApi();
+  const [token, setToken, isLoadingToken] = usePersistedState<string>("api-token", "");
+  const { isLoading: isLoadingApi, data, isAuthenticated } = useApi(token);
 
+  const isLoading = isLoadingToken || isLoadingApi;
   const otpItems = data.filter((item) => item.otpNumber);
 
   return (
     <List isLoading={isLoading}>
       {isAuthenticated && (
-        <List.EmptyView
-          icon="🧘🏻"
-          title="Your inbox is empty"
-          description="Can't find any messages!"
-          actions={
-            <ActionPanel>
-              <LoginAction setToken={setToken} />
-            </ActionPanel>
-          }
-        />
+        <List.EmptyView icon="🧘🏻" title="Your inbox is empty" description="Can't find any messages!" />
       )}
 
       {!isAuthenticated && (

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { formatTimeAgo, isPhoneNumber } from "./formatters";
 
 type MailinatorResponse = {
@@ -29,12 +29,14 @@ const transformData = (data?: MailinatorResponse) =>
     from: msg.from,
   }));
 
-export const useApi = () => {
-  const { value: apiToken } = useLocalStorage("api-token");
-  const isAuthenticated = !!apiToken;
+export const useApi = (token: string) => {
+  const isAuthenticated = !!token;
 
   const { isLoading, data, revalidate } = useFetch<MailinatorResponse>(
-    `https://api.mailinator.com/api/v2/domains/private/inboxes?token=${apiToken}&sort=descending&limit=10`,
+    `https://api.mailinator.com/api/v2/domains/private/inboxes?token=${token}&sort=descending&limit=10`,
+    {
+      execute: isAuthenticated,
+    },
   );
 
   const items = transformData(data);
@@ -49,5 +51,10 @@ export const useApi = () => {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  return { isLoading, data: items, revalidate, isAuthenticated };
+  return {
+    isLoading,
+    data: items,
+    revalidate,
+    isAuthenticated,
+  };
 };

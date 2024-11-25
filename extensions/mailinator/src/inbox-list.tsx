@@ -1,29 +1,35 @@
 import { ActionPanel, List, Icon } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
 import { LoginAction } from "./components/login-action";
 import { useApi } from "./utils/use-api";
+import { usePersistedState } from "./utils/use-persisted-state";
 
 /**
  * Inbox List
  */
 export default function Command() {
-  const { setValue: setToken } = useLocalStorage("api-token");
-  const { isLoading, data, isAuthenticated } = useApi();
+  const [token, setToken, isLoadingToken] = usePersistedState<string>("api-token", "");
+  const { isLoading: isLoadingApi, data, isAuthenticated } = useApi(token);
+
+  const isLoading = isLoadingToken || isLoadingApi;
 
   return (
     <List isLoading={isLoading} isShowingDetail={isAuthenticated}>
-      <List.EmptyView
-        icon={isAuthenticated ? "🧘🏻" : "🚧"}
-        title={isAuthenticated ? "Your inbox is empty" : "Sign in to view your messages"}
-        description={
-          isAuthenticated ? "Can't find any messages!" : "Press enter to sign in with your API token from Mailinator"
-        }
-        actions={
-          <ActionPanel>
-            <LoginAction setToken={setToken} />
-          </ActionPanel>
-        }
-      />
+      {isAuthenticated && (
+        <List.EmptyView icon="🧘🏻" title="Your inbox is empty" description="Can't find any messages!" />
+      )}
+
+      {!isAuthenticated && (
+        <List.EmptyView
+          icon="🚧"
+          title="Sign in to view your messages"
+          description="Press enter to sign in with your API token from Mailinator"
+          actions={
+            <ActionPanel>
+              <LoginAction setToken={setToken} />
+            </ActionPanel>
+          }
+        />
+      )}
 
       {data.map((item) => (
         <List.Item
