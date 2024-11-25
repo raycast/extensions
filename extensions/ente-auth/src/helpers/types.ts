@@ -26,4 +26,4 @@ interface JsonFormat {
   notes: string;
 }
 
-export type { Secret, SecretData, JsonFormat };
+export type { JsonFormat, Secret, SecretData };

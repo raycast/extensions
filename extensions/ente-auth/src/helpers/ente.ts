@@ -1,7 +1,7 @@
-import fse from "fs-extra";
-import { execSync } from "child_process";
 import { getPreferenceValues } from "@raycast/api";
-import { DEFAULT_EXPORT_PATH } from "../constants/ente";
+import { execSync } from "child_process";
+import fse from "fs-extra";
+import { EXPORT_FILE_PATH } from "../constants/ente";
 
 const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
 
