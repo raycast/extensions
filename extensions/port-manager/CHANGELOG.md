@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [New Preferences] - {PR_MERGE_DATE}
+## [New Preferences] - 2024-11-25
 
 - Added preferences to customize the primary action of the `Open Port` command
 
