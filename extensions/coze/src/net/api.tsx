@@ -1,4 +1,5 @@
 import {
+  ChatEventType,
   ChatV3Message,
   CozeAPI,
   getPKCEOAuthToken,
@@ -144,13 +145,14 @@ const useAPI = async () => {
     return new CozeAPI({ token: token?.access_token || "", baseURL, debug: true })
   }
 
-  const listWorkspaces = async ({
-                                  page_num = 1,
-                                  page_size = 10,
-                                }: {
-    page_num?: number,
-    page_size?: number,
-  }): Promise<PagedData<WorkSpace>> => {
+  const listWorkspaces = async (
+    {
+      page_num = 1,
+      page_size = 10,
+    }: {
+      page_num?: number,
+      page_size?: number,
+    }): Promise<PagedData<WorkSpace>> => {
     const coze = await getAPI();
     const workspaces = await coze.workspaces.list({
       page_num,
@@ -177,9 +179,8 @@ const useAPI = async () => {
 
   const listAllWorkspaces = async (): Promise<PagedData<WorkSpace>> => {
     console.log(`[api][listAllWorkspaces]`)
-    const coze = await getAPI();
     const page_size = 50;
-    let workspaces: WorkSpace[] = [];
+    const workspaces: WorkSpace[] = [];
     let page_num = 1;
     while (true) {
       console.log(`[api][listAllWorkspaces] page_num: ${page_num}, page_size: ${page_size}`)
@@ -199,14 +200,15 @@ const useAPI = async () => {
 
   const listBots = async (
     {
-                            space_id,
-                            page_num = 1,
-                            page_size = 10,
-                          }: {
-    space_id: string,
-    page_num?: number,
-    page_size?: number,
-  }): Promise<PagedData<SimpleBot>> => {
+      space_id,
+      page_num = 1,
+      page_size = 10,
+    }: {
+      space_id: string,
+      page_num?: number,
+      page_size?: number,
+    }
+  ): Promise<PagedData<SimpleBot>> => {
     console.log(`[api][listBots] space_id: ${space_id}, page_num: ${page_num}, page_size: ${page_size}`)
     const pkceClient = getPKCEClient(space_id);
     const token = await authorize(space_id);
@@ -234,17 +236,18 @@ const useAPI = async () => {
   }
 
 
-  const listAllBots = async ({
-                               space_id,
+  const listAllBots = async (
+    {
+      space_id,
 
-                             }: {
-    space_id: string,
-  }): Promise<PagedData<SimpleBot>> => {
+    }: {
+      space_id: string,
+    }
+  ): Promise<PagedData<SimpleBot>> => {
     console.log(`[api][listAllBots] space_id: ${space_id}`)
-    const coze = await getAPI();
     let page_num = 1;
     const page_size = 20;
-    let bots: SimpleBot[] = [];
+    const bots: SimpleBot[] = [];
     while (true) {
       console.log(`[api][listAllBots] space_id: ${space_id}, page_num: ${page_num}, page_size: ${page_size}`)
       const data = await listBots({
@@ -307,8 +310,27 @@ const useAPI = async () => {
       bot_id: string,
       user_id: string,
       query: string,
-      on_event: (event: StreamChatData) => void,
+      on_event: (event: StreamChatData) => Promise<void>,
     }): Promise<void> => {
+    for (const data of ['今天', '天', '气', '不', '错']) {
+      await on_event({
+        event: ChatEventType.CONVERSATION_MESSAGE_DELTA,
+        data: {
+          id: 'id',
+          bot_id,
+          role: RoleType.User,
+          content: data,
+          content_type: 'text',
+          type: 'question',
+          conversation_id: '',
+          chat_id: '',
+          meta_data: {},
+          created_at: 0,
+          updated_at: 0,
+        },
+      })
+    }
+    return;
     const coze = await getAPI(workspace_id)
 
     const stream = coze.chat.stream({
@@ -326,7 +348,7 @@ const useAPI = async () => {
       ]
     })
     for await (const event of stream) {
-      on_event(event);
+      await on_event(event);
     }
   }
 

@@ -15,15 +15,12 @@ export default function BotChatView(
   const searchBarPlaceholder = query ? `Chat with another query` : "Chat with your bot";
   return <List
     searchBarPlaceholder={searchBarPlaceholder}
+    onSearchTextChange={setQuery}
     actions={
       <ActionPanel title="#1 in raycast/extensions">
         <Action.Push
-          title="Push Pong"
-          target={<ChatForm isLoading={false} api={api}/>}
-        />
-        <Action.Push
-          title="sdaf"
-          target={<ChatForm isLoading={false} api={api}/>}
+          title="Detail Chat"
+          target={<ChatForm isLoading={false} api={api} query={query}/>}
         />
       </ActionPanel>
     }

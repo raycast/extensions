@@ -4,7 +4,7 @@ import useAPI, { PagedData } from "./net/api";
 import { SimpleBot, WorkSpace } from "@coze/api";
 import WorkspaceListView from "./views/WorkspaceListView";
 import BotListView from "./views/BotListView";
-import BotChat from "./views/BotChatView";
+import BotChatView from "./views/BotChatView";
 
 
 export default function CommandBotList() {
@@ -24,7 +24,7 @@ export default function CommandBotList() {
       onSelect={async (bot: SimpleBot) => {
         console.log(`select bot: ${bot.bot_id} ${bot.bot_name}`);
 
-        push(<BotChat api={api?.current}/>);
+        push(<BotChatView api={api?.current}/>);
       }}
     />);
   }

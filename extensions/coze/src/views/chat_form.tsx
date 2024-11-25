@@ -6,14 +6,16 @@ import { SimpleBot, StreamChatData, WorkSpace } from "@coze/api";
 export default function ChatForm(
   {
     isLoading,
-    api
+    query: defaultQuery,
+    api,
   }: {
     isLoading: boolean,
+    query?: string,
     api?: Awaited<ReturnType<typeof useAPI>>
   }) {
   const [workspaceId, setWorkspaceId] = useState<string>("");
   const [botId, setBotId] = useState<string>("");
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState<string>(defaultQuery || "");
   const [workspaces, setWorkspaces] = useState<WorkSpace[]>([]);
   const [bots, setBots] = useState<SimpleBot[]>([]);
 
@@ -54,7 +56,7 @@ export default function ChatForm(
       bot_id: botId,
       user_id: "raycast_user",
       query,
-      on_event: (event: StreamChatData) => {
+      on_event: async (event: StreamChatData) => {
         console.log(`[chat_form] on_event: ${JSON.stringify(event)}`);
       }
     })
@@ -103,6 +105,7 @@ export default function ChatForm(
         id="query"
         title="Query"
         placeholder="Enter your message"
+        value={query}
         onChange={setQuery}
       />
     </Form>
