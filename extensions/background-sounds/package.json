@@ -5,6 +5,9 @@
   "description": "Toggle macOS background sounds on and off.",
   "icon": "icon.png",
   "author": "SebDanielsson",
+  "contributors": [
+    "awerks"
+  ],
   "categories": [
     "Media",
     "Fun",
