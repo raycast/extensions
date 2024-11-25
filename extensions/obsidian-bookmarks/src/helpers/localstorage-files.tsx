@@ -1,15 +1,20 @@
 import { LocalStorage } from "@raycast/api";
 import { File, isFile, unique } from "../types";
 
-function safelyRun<F extends (...args: any[]) => any>(func: F, defaultValue: ReturnType<F>): F {
-  return ((...args: Parameters<F>) => {
+type SafelyRunFunc<Args extends unknown[], Return> = (...args: Args) => Return;
+
+function safelyRun<Args extends unknown[], Return>(
+  func: SafelyRunFunc<Args, Return>,
+  defaultValue: Return
+): SafelyRunFunc<Args, Return> {
+  return (...args: Args) => {
     try {
       return func(...args);
     } catch (err) {
       console.error(`Could not safely ${func.prototype.name ? `run ${func.prototype.name}` : "handle files"}`, err);
       return defaultValue;
     }
-  }) as F;
+  };
 }
 
 function isFileArray(v: unknown): v is File[] {
@@ -24,14 +29,13 @@ async function getLocalStorageFilesInternal(): Promise<File[]> {
   try {
     const json = JSON.parse(stored);
     if (isFileArray(json)) {
-      // Convert saved dates and ensure mtime is preserved as a number
       return json.map((file) => ({
         ...file,
         attributes: {
           ...file.attributes,
           saved: new Date(file.attributes.saved),
         },
-        mtime: Number(file.mtime), // Ensure mtime is a number
+        mtime: Number(file.mtime),
       }));
     } else {
       throw new Error(`Unexpected format for obsidian files in Local Storage: ${stored}`);
@@ -40,6 +44,22 @@ async function getLocalStorageFilesInternal(): Promise<File[]> {
     console.error("Error parsing stored files:", error);
     return [];
   }
+}
+
+interface SerializedFile {
+  attributes: {
+    source: string;
+    publisher: string | null;
+    title: string;
+    tags: string[];
+    saved: string;
+    read: boolean;
+  };
+  mtime: number;
+  frontmatter: string | null;
+  bodyBegin: number | null;
+  fileName: string;
+  fullPath: string;
 }
 
 async function replaceLocalStorageFilesInternal(files: File[]): Promise<void> {
@@ -54,17 +74,15 @@ async function replaceLocalStorageFilesInternal(files: File[]): Promise<void> {
       saved: file.attributes.saved.toISOString(),
       read: !!file.attributes.read,
     },
-    mtime: Number(file.mtime), // Ensure mtime is stored as a number
+    mtime: Number(file.mtime),
     frontmatter: file.frontmatter || null,
     bodyBegin: file.bodyBegin || null,
   }));
 
   try {
     const json = JSON.stringify(sanitizedFiles);
-    // Validate that we can parse it back
-    const parsed = JSON.parse(json);
-    // Verify mtime is preserved
-    if (!parsed.every((f: any) => typeof f.mtime === "number" && f.mtime > 0)) {
+    const parsed = JSON.parse(json) as SerializedFile[];
+    if (!parsed.every((f) => typeof f.mtime === "number" && f.mtime > 0)) {
       console.error("Validation failed: some files have invalid mtime");
     }
     await LocalStorage.setItem("obsidian-files", json);

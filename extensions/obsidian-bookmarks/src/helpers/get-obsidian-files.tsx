@@ -119,6 +119,9 @@ export default async function getObsidianFiles(cachedFiles: File[]): Promise<Arr
   // Create lookup map for cached files
   const cachedFilesMap = new Map(cachedFiles.map((file) => [file.fullPath, file]));
 
+  // Create set of current file paths for deletion check
+  const currentFilePaths = new Set(markdownFiles);
+
   // Process all files concurrently
   const results = await Promise.allSettled(markdownFiles.map((filePath) => processFile(filePath, cachedFilesMap)));
 
@@ -135,11 +138,12 @@ export default async function getObsidianFiles(cachedFiles: File[]): Promise<Arr
       ? files
       : files.filter((file) => file.attributes.tags.some((tag) => requiredTags.includes(tag)));
 
-  // Only update localStorage if we have new or updated files
-  const hasChanges = fileResults.some((file) => {
-    const cached = cachedFilesMap.get(file.fullPath);
-    return !cached || cached.mtime !== file.mtime;
-  });
+  // Check for changes: new/modified files OR deleted files
+  const hasChanges =
+    fileResults.some((file) => {
+      const cached = cachedFilesMap.get(file.fullPath);
+      return !cached || cached.mtime !== file.mtime;
+    }) || cachedFiles.some((file) => !currentFilePaths.has(file.fullPath));
 
   if (hasChanges) {
     await replaceLocalStorageFiles(fileResults);
