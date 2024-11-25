@@ -12,7 +12,8 @@
   "author": "lucaschultz",
   "contributors": [
     "Sheraff",
-    "ridemountainpig"
+    "ridemountainpig",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -81,7 +82,7 @@
               "value": "reload"
             }
           ],
-          "title": "Port primary action",
+          "title": "Primary Port Action",
           "description": "Choose which action to perform when selecting an port."
         }
       ]
