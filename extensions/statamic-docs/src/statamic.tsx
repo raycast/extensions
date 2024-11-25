@@ -13,6 +13,10 @@ type SearchResult = {
   url: string;
 };
 
+type SearchResultList = {
+  [key: string]: SearchResult[];
+}
+
 type FallbackResultListItem = {
   url: string;
   title: string;
@@ -76,25 +80,52 @@ export default function main() {
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
         const results = (await search(query)) as SearchResult[];
-        setSearchResults(results);
+
+        if (! results) {
+          return;
+        }
+
+        setSearchResults(
+          results.reduce((acc: SearchResultList, hit: SearchResult) => {
+            const key = hit.hierarchy_lvl0 || "Other";
+
+            if (!acc[key]) {
+              acc[key] = [];
+            }
+
+            acc[key].push(hit);
+
+            return acc;
+          }, {})
+        );
       }}
     >
-      {searchResults?.map((hit: SearchResult): React.ReactNode => {
-        return (
-          <List.Item
-            key={hit.id}
-            title={getTitle(hit)}
-            subtitle={getSubtitle(hit)}
-            icon="command-icon.png"
-            actions={
-              <ActionPanel title={`https://statamic.dev${hit.url}`}>
-                <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
-                <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
-              </ActionPanel>
-            }
-          />
-        );
-      }) ||
+      {
+        Object.entries(searchResults as SearchResultList).map(
+          ([section, items]: [string, SearchResult[]]) => {
+            return (
+              <List.Section title={section} key={section}>
+                {items.map((hit: SearchResult) => {
+                  return (
+                    <List.Item
+                      key={hit.id}
+                      title={getTitle(hit)}
+                      subtitle={getSubtitle(hit)}
+                      icon="command-icon.png"
+                      actions={
+                        <ActionPanel title={`https://statamic.dev${hit.url}`}>
+                          <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
+                          <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
+                        </ActionPanel>
+                      }
+                    />
+                  );
+                })}
+              </List.Section>
+            );
+          }
+        )
+    }) || {
         Object.entries(fallbackResults as FallbackResultList).map(
           ([section, items]: [string, FallbackResultListItem[]]) => {
             return (
