@@ -28,6 +28,12 @@
       "title": "Search Bookmarks",
       "description": "Save your Obsidian bookmarks",
       "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "description": "Clear the local Raycast cache for Obsidian bookmarks",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

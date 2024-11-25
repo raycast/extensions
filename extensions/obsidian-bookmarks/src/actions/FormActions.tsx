@@ -1,4 +1,4 @@
-import { Action, FileIcon, Icon, popToRoot, showHUD } from "@raycast/api";
+import { Action, Color, FileIcon, Icon, popToRoot, showHUD } from "@raycast/api";
 import { useMemo } from "react";
 import { asFile } from "../helpers/save-to-obsidian";
 import { useFileIcon } from "../hooks/use-applications";
@@ -7,6 +7,7 @@ import { usePreference } from "../hooks/use-preferences";
 import { FormActionPreference } from "../types";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
+import { clearCache } from "../helpers/clear-cache";
 
 const saveFile = (values: LinkFormState["values"]) => asFile(values).then((f) => methods.saveFile(f));
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
@@ -102,6 +103,25 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
   ]),
 });
 
+const createDestructiveActions = (): ActionGroup<FormActionPreference> => ({
+  key: "destructive",
+  useDivider: "always",
+  actions: new Map([
+    [
+      "clearCache",
+      {
+        title: "Clear Cache",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+        shortcut: { modifiers: ["cmd", "opt"], key: "delete" },
+        onAction: async () => {
+          await clearCache();
+          await popToRoot();
+        },
+      },
+    ],
+  ]),
+});
+
 export type FormActionsProps = { values: LinkFormState["values"] };
 export default function FormActions({ values }: FormActionsProps): JSX.Element {
   const { value: obsidianIcon } = useFileIcon("Obsidian");
@@ -109,6 +129,9 @@ export default function FormActions({ values }: FormActionsProps): JSX.Element {
 
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
+  const destructiveActions = useMemo(() => createDestructiveActions(), []);
 
-  return <OrderedActionPanel groups={[obsidianActions, browserActions]} defaultAction={defaultAction} />;
+  return (
+    <OrderedActionPanel groups={[obsidianActions, browserActions, destructiveActions]} defaultAction={defaultAction} />
+  );
 }

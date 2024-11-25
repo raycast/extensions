@@ -5,6 +5,7 @@ import { usePreference } from "../hooks/use-preferences";
 import { DetailActionPreference, File } from "../types";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
+import { clearCache } from "../helpers/clear-cache";
 
 const createDetailsActions = (
   file: File,
@@ -142,6 +143,15 @@ const createDestructiveActions = (file: File): ActionGroup<DetailActionPreferenc
             methods.deleteFile(file);
           }
         },
+      },
+    ],
+    [
+      "clearCache",
+      {
+        title: "Clear Cache",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+        shortcut: { modifiers: ["cmd", "opt"], key: "delete" },
+        onAction: clearCache,
       },
     ],
   ]),

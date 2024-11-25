@@ -4,9 +4,10 @@ export type FormActionPreference =
   | "copyObsidianUrlAsMarkdown"
   | "openUrl"
   | "copyUrl"
-  | "copyUrlAsMarkdown";
+  | "copyUrlAsMarkdown"
+  | "clearCache";
 
-export type DetailActionPreference = FormActionPreference | "showDetails" | "markAsRead" | "deleteFile";
+export type DetailActionPreference = FormActionPreference | "showDetails" | "markAsRead" | "deleteFile" | "clearCache";
 
 export interface Preferences {
   vaultPath: string;
