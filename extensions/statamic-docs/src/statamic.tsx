@@ -9,7 +9,7 @@ type SearchResult = {
   id: string;
   hierarchy_lvl0: string;
   hierarchy_lvl1: string;
-  search_content: string;
+  search_content: string | null;
   url: string;
 };
 
@@ -35,7 +35,7 @@ const index = client.index("default");
 
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResultList>({});
 
   const getTitle = (hit: SearchResult): string => {
     return hit.hierarchy_lvl1 || hit.hierarchy_lvl0 || "";
@@ -71,7 +71,7 @@ export default function main() {
       isLoading={isLoading}
       onSearchTextChange={async (query) => {
         if (!query) {
-          setSearchResults(fallbackResults as SearchResultList[]);
+          setSearchResults(fallbackResults);
           return;
         }
 
