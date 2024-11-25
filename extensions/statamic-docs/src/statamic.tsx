@@ -95,27 +95,29 @@ export default function main() {
           />
         );
       }) ||
-        Object.entries(fallbackResults as FallbackResultList).map(([section, items]: FallbackResultList) => {
-          return (
-            <List.Section title={section} key={section}>
-              {items.map((item: FallbackResultListItem) => {
-                return (
-                  <List.Item
-                    key={item.url}
-                    title={item.title}
-                    icon="command-icon.png"
-                    actions={
-                      <ActionPanel title={item.url}>
-                        <Action.OpenInBrowser url={item.url} title="Open in Browser" />
-                        <Action.CopyToClipboard content={item.url} title="Copy URL" />
-                      </ActionPanel>
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        })}
+        Object.entries(fallbackResults as FallbackResultList).map(
+          ([section, items]: [string, FallbackResultListItem[]]) => {
+            return (
+              <List.Section title={section} key={section}>
+                {items.map((item: FallbackResultListItem) => {
+                  return (
+                    <List.Item
+                      key={item.url}
+                      title={item.title}
+                      icon="command-icon.png"
+                      actions={
+                        <ActionPanel title={item.url}>
+                          <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                          <Action.CopyToClipboard content={item.url} title="Copy URL" />
+                        </ActionPanel>
+                      }
+                    />
+                  );
+                })}
+              </List.Section>
+            );
+          }
+        )}
     </List>
   );
 }
