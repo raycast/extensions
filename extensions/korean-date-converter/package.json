@@ -39,7 +39,7 @@
     }
   ],
   "dependencies": {
-    "@kky/ko-date-parse": "npm:@jsr/kky__ko-date-parse@^0.1.0",
+    "@kky/ko-date-parse": "npm:@jsr/kky__ko-date-parse@^0.0.2",
     "@raycast/api": "^1.84.3",
     "@raycast/utils": "^1.17.0",
     "date-fns": "^4.1.0"
