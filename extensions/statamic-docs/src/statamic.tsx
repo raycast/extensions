@@ -75,7 +75,6 @@ export default function main() {
           return;
         }
 
-
         const results = (await search(query)) as SearchResult[];
 
         if (! results) {
