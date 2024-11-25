@@ -12,9 +12,12 @@ function getLocalIPs() {
   const results = [];
 
   for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-      if (net.family === "IPv4" && !net.internal) {
-        results.push(net.address);
+    const net = nets[name];
+    if (net) {
+      for (const netInfo of net) {
+        if (netInfo.family === "IPv4" && !netInfo.internal) {
+          results.push(netInfo.address);
+        }
       }
     }
   }
