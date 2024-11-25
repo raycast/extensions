@@ -70,6 +70,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   const baseName = `${fileSlug}.md`;
   const fullPath = await getFileName(baseName);
   const fileName = path.basename(fullPath);
+  const mtime = 0;
 
   return {
     attributes,
@@ -77,6 +78,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
     body,
     fileName,
     fullPath,
+    mtime,
     bodyBegin: 4 + frontmatter.length,
   };
 }
