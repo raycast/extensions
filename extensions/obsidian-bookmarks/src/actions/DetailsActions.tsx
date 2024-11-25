@@ -19,7 +19,7 @@ const createDetailsActions = (
       {
         title: showDetail ? "Hide Details" : "Show Details",
         icon: showDetail ? Icon.EyeSlash : Icon.Eye,
-        shortcut: { modifiers: ["cmd"], key: "p" },
+        shortcut: { modifiers: ["cmd"], key: "i" },
         onAction: () => setShowDetail((detail) => !detail),
       },
     ],
