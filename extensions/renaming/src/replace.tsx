@@ -88,7 +88,7 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        {files.length > 1 && (
+        {files.length > 0 && (
           <>
             <Form.TextField
               id="replaceCharacter"
