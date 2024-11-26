@@ -139,7 +139,7 @@ export async function sendTranslateRequest({
 }
 
 export async function translate(target: TargetLanguage, text?: string, formality?: Formality) {
-  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality || "default" });
+  await sendTranslateRequest({ targetLanguage: target, text: text, formality: formality ?? "default" });
 }
 
 export const source_languages = {

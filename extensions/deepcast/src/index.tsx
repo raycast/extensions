@@ -71,7 +71,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
       onTranslateAction: "none",
-      formality: values.formality || "default",
+      formality: values.formality ?? "default",
     });
 
     setLoading(false);
