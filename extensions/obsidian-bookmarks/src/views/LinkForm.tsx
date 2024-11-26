@@ -1,14 +1,51 @@
 import { Form, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
+import { findDuplicateBookmark } from "../helpers/url-sanitizer";
+import useFiles from "../hooks/use-files";
 import useLinkForm from "../hooks/use-link-form";
 import useTags from "../hooks/use-tags";
+import * as methods from "../actions/methods";
 
 export default function LinkForm() {
   const { values, onChange, loading: linkLoading } = useLinkForm();
   const { tags, loading: tagsLoading } = useTags();
+  const { files, loading: filesLoading } = useFiles();
   const toastRef = useRef<Toast>();
   const [hasShownToast, setHasShownToast] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
+
+  // Handle URL validation and duplicate checking
+  const validateUrl = useCallback(
+    async (url: string) => {
+      if (!url || filesLoading) {
+        setIsDuplicate(false);
+        return;
+      }
+
+      const duplicate = findDuplicateBookmark(url, files);
+      if (duplicate) {
+        setIsDuplicate(true);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Duplicate bookmark found",
+          message: `This URL is already bookmarked as "${duplicate.attributes.title}"`,
+          primaryAction: {
+            title: "View Existing",
+            onAction: () => methods.openObsidianFile(duplicate),
+          },
+        });
+      } else {
+        setIsDuplicate(false);
+      }
+    },
+    [files, filesLoading]
+  );
+
+  // Check for duplicates whenever URL changes
+  useEffect(() => {
+    validateUrl(values.url);
+  }, [values.url, validateUrl]);
 
   // Handle loading toast
   useEffect(() => {
@@ -25,7 +62,6 @@ export default function LinkForm() {
       toastRef.current = undefined;
     }
 
-    // Cleanup on unmount
     return () => {
       toastRef.current?.hide();
     };
@@ -34,10 +70,16 @@ export default function LinkForm() {
   return (
     <Form
       navigationTitle="Save Bookmark"
-      isLoading={tagsLoading || linkLoading}
+      isLoading={tagsLoading || linkLoading || filesLoading}
       actions={<FormActions values={values} />}
     >
-      <Form.TextField id="url" title="URL" value={values.url} onChange={onChange("url")} />
+      <Form.TextField
+        id="url"
+        title="URL"
+        value={values.url}
+        onChange={onChange("url")}
+        error={isDuplicate ? "This URL is already bookmarked" : undefined}
+      />
       <Form.TextField id="title" title="Title" value={values.title} onChange={onChange("title")} />
       <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={onChange("tags")}>
         {tags.map((tag) => (
