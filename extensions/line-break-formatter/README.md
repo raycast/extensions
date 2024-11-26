@@ -16,5 +16,3 @@ Features:
 - Zero configuration needed - just install and use
 
 Simple, fast, and focused on doing one thing well - making your paragraphs look exactly how you want them.
-
-Get started [here](https://www.raycast.com/templates/line-break-formatter).
