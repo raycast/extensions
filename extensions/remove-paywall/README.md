@@ -4,7 +4,7 @@ Remove the paywall from the selected or clipboard URL. It can be taken from the 
 
 ## List of commands
 
-- `Remove Paywall` - Remove the paywall from the selected or clipboard URL.
+- `Remove Paywall` - Remove the paywall from the selected, clipboard URL or from the browser's current tab using Raycast Browser Extension.
 
 ## Available services
 
