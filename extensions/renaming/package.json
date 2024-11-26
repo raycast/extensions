@@ -32,6 +32,12 @@
       "title": "Rename File(s)",
       "description": "Rename file(s) in a batch.",
       "mode": "view"
+    },
+    {
+      "name": "replace",
+      "title": "Replace File(s) Characters",
+      "description": "Replace characters in file(s) names.",
+      "mode": "view"
     }
   ],
   "dependencies": {
