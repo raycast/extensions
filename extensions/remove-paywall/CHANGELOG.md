@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [Added Browser Extension Support] - 2024-11-28
+
+- Command now includes browser tab URLs as a source, improving functionality.
+
 ## [Added freedium] - 2024-02-28
 
 - Added support for Freedium
