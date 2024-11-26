@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "line-break-formatter",
+  "title": "Line Break Formatter",
+  "description": "Format your text to have single or double line breaks. Useful for pasting between Markdown and text e",
+  "icon": "icon.png",
+  "author": "brettpeary",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "line-break-formatter",
+      "title": "Format Line Breaks, Single or Double",
+      "description": "Add a single or double line break between paragraphs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "title-case": "^3.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
