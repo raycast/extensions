@@ -101,6 +101,7 @@ export default function main() {
           return (
             <List.Section title={section} key={index}>
               {items.map((hit: SearchResult) => {
+                const url = `https://statamic.dev${hit.url}`;
                 return (
                   <List.Item
                     key={hit.id}
@@ -108,9 +109,9 @@ export default function main() {
                     subtitle={getSubtitle(hit)}
                     icon="command-icon.png"
                     actions={
-                      <ActionPanel title={`https://statamic.dev${hit.url}`}>
-                        <Action.OpenInBrowser url={`https://statamic.dev${hit.url}`} title="Open in Browser" />
-                        <Action.CopyToClipboard content={`https://statamic.dev${hit.url}`} title="Copy URL" />
+                      <ActionPanel title={url}>
+                        <Action.OpenInBrowser url={url} title="Open in Browser" />
+                        <Action.CopyToClipboard content={url} title="Copy URL" />
                       </ActionPanel>
                     }
                   />
