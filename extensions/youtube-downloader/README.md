@@ -1,6 +1,5 @@
-# YouTube Downloader
 
-> Download YouTube videos with Raycast.
+> Download high-quality YouTube videos with Raycast.
 
 ![youtube-downloader-1.png](metadata%2Fyoutube-downloader-1.png)
 
@@ -26,3 +25,17 @@ Then, update the path in the extension preferences to match the output of the ab
 
 You'll also need `ffprobe`, which is usually installed with `ffmpeg`. Just run `which ffprobe` and update the path
 accordingly.
+
+## **FAQs**
+
+### **Is there a YouTube downloader that actually works?** 
+
+Yes, Raycast's YouTube Downloader is consistently updated to ensure reliable functionality.
+
+### **Can I download clips from YouTube?** 
+
+Absolutely\! Our extension supports downloading full videos, clips, and even YouTube Shorts.
+
+### **How do I download a YouTube video with a manipulated URL?**
+
+Our downloader handles various URL formats. Just paste the link, and we'll take care of the rest.

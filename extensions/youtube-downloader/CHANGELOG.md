@@ -1,5 +1,10 @@
 # YouTube Downloader Changelog
 
+
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Fixed bug #15306] - 2024-11-11
 
 - Fixed the highest quality bug
