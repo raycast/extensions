@@ -1,6 +1,6 @@
 # Laravel Shift Changelog
 
-## [Add Laravel 11.x and some other shifts] - {PR_MERGE_DATE}
+## [Add Laravel 11.x and some other shifts] - 2024-11-26
 - Add Laravel 11.x option and set it as default shift.
 - Add Laravel PreShift shift
 - Add Laravel Slimmer shift
