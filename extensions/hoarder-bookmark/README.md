@@ -19,7 +19,7 @@ This extension leverages Hoarder's API to provide a streamlined experience for m
 ### Option 2: Manual Installation
 
 ```bash
-git clone https://github.com/yourusername/raycast-hoarder.git
+git clone https://github.com/foru17/raycast-hoarder.git
 cd raycast-hoarder
 npm install && npm run dev
 # Enjoy it
@@ -36,7 +36,7 @@ npm install && npm run dev
 
 ### Additional Conveniences
 
-- **Intuitive Search**: Quickly locate any bookmark or content using the online search feature of Horarder and the powerful search capabilities of Raycast.
+- **Intuitive Search**: Quickly locate any bookmark or content using the online search feature of Hoarder and the powerful search capabilities of Raycast.
 - **One-Click Actions**:Open bookmarks in your browser, copy links, or delete instantly.
 - **Preview Support**: View bookmark details and screenshots without leaving Raycast
 - **Keyboard Navigation**: Fully keyboard-accessible for maximum efficiency
@@ -113,14 +113,3 @@ If you find this extension helpful, consider:
 - Contributing to the project's development
 
 Your support helps keep this project active and improving!
-
-## 🔒 Security Considerations
-
-When using Raycast Hoarder, please be aware of:
-
-- API credential security
-- Self-hosted instance security
-- SSO configuration best practices
-- Data privacy when using AI features
-
-For more details, refer to Hoarder's [security documentation](https://github.com/hoarder-app/hoarder#security-considerations).
