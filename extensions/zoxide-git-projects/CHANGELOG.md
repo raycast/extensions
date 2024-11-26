@@ -1,6 +1,6 @@
 # Zoxide Git Projects Changelog
 
-## [Improve Fuzzy Matching] - {PR_MERGE_DATE}
+## [Improve Fuzzy Matching] - 2024-11-26
 
 - Implemented fzf for fuzzy matching projects; much more accurate.
 
