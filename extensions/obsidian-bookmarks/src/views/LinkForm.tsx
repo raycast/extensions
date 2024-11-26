@@ -1,5 +1,5 @@
 import { Form, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
 import useLinkForm from "../hooks/use-link-form";
 import useTags from "../hooks/use-tags";
@@ -8,29 +8,28 @@ export default function LinkForm() {
   const { values, onChange, loading: linkLoading } = useLinkForm();
   const { tags, loading: tagsLoading } = useTags();
   const toastRef = useRef<Toast>();
-  const loadingRef = useRef(linkLoading);
+  const [hasShownToast, setHasShownToast] = useState(false);
 
+  // Handle loading toast
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loadingRef.current) {
-        showToast({
-          title: "Fetching link details",
-          style: Toast.Style.Animated,
-        }).then((toast) => {
-          toastRef.current = toast;
-        });
-      }
-    }, 150);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
-    loadingRef.current = linkLoading;
-    if (!linkLoading) {
-      toastRef.current?.hide();
+    if (linkLoading && !hasShownToast) {
+      showToast({
+        title: "Fetching link details",
+        style: Toast.Style.Animated,
+      }).then((toast) => {
+        toastRef.current = toast;
+        setHasShownToast(true);
+      });
+    } else if (!linkLoading && toastRef.current) {
+      toastRef.current.hide();
+      toastRef.current = undefined;
     }
-  }, [linkLoading]);
+
+    // Cleanup on unmount
+    return () => {
+      toastRef.current?.hide();
+    };
+  }, [linkLoading, hasShownToast]);
 
   return (
     <Form
