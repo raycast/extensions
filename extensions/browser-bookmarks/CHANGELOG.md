@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support Zen Browser] - {PR_MERGE_DATE}
+## [Support Zen Browser] - 2024-11-26
 
 - Added support for Zen Browser Desktop.
 
