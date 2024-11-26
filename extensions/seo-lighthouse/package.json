@@ -33,9 +33,6 @@
       "placeholder": "opt/homebrew/bin/lighthouse",
       "required": false
     }
-
-
-
   ],
   "commands": [
     {
