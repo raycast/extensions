@@ -536,6 +536,7 @@ export default function Command() {
         <ActionPanel title="Extension Preferences">
           <Action.SubmitForm
             title="Run Lighthouse Analysis"
+            icon={Icon.MagnifyingGlass}
             onSubmit={handleSubmit}
           />
           <Action
