@@ -140,7 +140,7 @@ function WatchDetails({ id }: { id: string }) {
               text={
                 data.processor === "restock_diff"
                   ? "Re-stock & Price detection for single product pages"
-                  : "Re-stock & Price detection for single product pages"
+                  : "Webpage Text/HTML, JSON and PDF changes"
               }
             />
             <Detail.Metadata.Label title="Sort Text Alphabetically" icon={data.paused ? Icon.Check : Icon.Xmark} />
