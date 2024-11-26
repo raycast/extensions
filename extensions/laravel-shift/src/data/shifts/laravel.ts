@@ -59,7 +59,6 @@ function getShifts(): Shift[] {
     { code: "NM", name: "Namespace Models", description: "Move models to app/Models" },
     { code: "VC", name: "Vite Converter", description: "Migrate from Laravel Mix to Vite" },
     { code: "NC", name: "Namespace Consolidator", description: "Consolidate custom namespaces" },
-    { code: "DU", name: "Dependency Upgrader", description: "Upgrade composer dependencies" },
   ];
 }
 
