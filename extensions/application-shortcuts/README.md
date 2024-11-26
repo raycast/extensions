@@ -1,6 +1,8 @@
 # Application Shortcuts
 
-> Application shortcuts from command-line applications
+This extension simplifies the process of opening command-line applications by integrating them with Raycast. Normally, to open a command-line app, you would need to open a terminal and type the corresponding command. With this tool, you can easily open these applications through Raycast, making it more efficient and seamless.
+
+For Android Emulator applications, the extension goes a step further. It automatically lists all available emulators, allowing you to select and launch the desired one with a few clicks, eliminating the need for manual command entry.
 
 ## Getting Started
 
