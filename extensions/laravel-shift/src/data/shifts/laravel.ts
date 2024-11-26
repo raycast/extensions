@@ -49,8 +49,10 @@ function parseCode(code: string): string {
 
 function getShifts(): Shift[] {
   return [
+    { code: "PS", name: "Laravel PreShift", description: "Your Laravel upgrade guide" },
     ...generateLaravelShifts(),
     { code: "UC", name: "Upgrade Checker", description: "Lint your Laravel application" },
+    { code: "LS", name: "Laravel Slimmer", description: "Slim your Laravel application" },
     { code: "LL", name: "Laravel Linter", description: 'Doing it the "Laravel Way"?' },
     { code: "LF", name: "Laravel Fixer", description: 'Make it the "Laravel Way"' },
     { code: "TG", name: "Tests Generator", description: "Create model factories and tests" },
