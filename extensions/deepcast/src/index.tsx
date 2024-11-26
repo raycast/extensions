@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPref
 import { useEffect, useState } from "react";
 import {
   Formality,
+  SUPPORTED_FORMALITY_LANGUAGES,
   SourceLanguage,
   TargetLanguage,
   getSelection,
@@ -180,7 +181,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           <Form.Dropdown.Item value={value} title={title} key={value} />
         ))}
       </Form.Dropdown>
-      {["DE", "FR", "IT", "JA", "PL", "PT-PT", "PT-BR", "RU", "ES"].includes(targetLanguage) && showFormalityConfig && (
+      {SUPPORTED_FORMALITY_LANGUAGES.includes(targetLanguage) && showFormalityConfig && (
         <>
           <Form.Separator />
           <Form.Dropdown

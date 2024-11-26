@@ -213,3 +213,5 @@ export const target_languages = {
 export type TargetLanguage = keyof typeof target_languages;
 
 export type Formality = "default" | "prefer_more" | "prefer_less";
+
+export const SUPPORTED_FORMALITY_LANGUAGES = ["DE", "FR", "IT", "JA", "PL", "PT-PT", "PT-BR", "RU", "ES"];
