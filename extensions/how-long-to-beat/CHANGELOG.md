@@ -1,6 +1,6 @@
 # Howlongtobeat Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-11-26
 
 - Howlongtobeat updated dynamic search hash code
 - Fix: 404 error code again when fetching games by search
