@@ -1,6 +1,6 @@
 # DevPod Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-26
 
 ### Added
 - List DevPod workspaces with their current status
