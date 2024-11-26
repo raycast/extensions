@@ -12,7 +12,8 @@ export type DetailActionPreference = FormActionPreference | "showDetails" | "mar
 export interface Preferences {
   vaultPath: string;
   bookmarksPath: string;
-  saveSubfolder: string; // New preference for save location
+  saveSubfolder: string;
+  ignoreSubfolders: string;
   defaultFormAction: FormActionPreference;
   defaultItemAction: DetailActionPreference;
   extraTags?: string;

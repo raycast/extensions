@@ -80,10 +80,18 @@
     {
       "name": "saveSubfolder",
       "title": "Save Subfolder",
-      "description": "The subfolder where all of your new bookmarks are stored. \nThis should be equal to or a subfolder of bookmarksPath if you want these to appear in search results. \nLeave blank to default to bookmarksPath",
+      "description": "The subfolder where all of your new bookmarks are stored.  These paths should be relative to your vault path. \nThis should be equal to or a subfolder of bookmarksPath if you want these to appear in search results. \nLeave blank to default to bookmarksPath",
       "type": "textfield",
       "required": false,
       "default": "Bookmarks"
+    },
+    {
+      "name": "ignoreSubfolders",
+      "title": "Ignore Subfolders",
+      "description": "A comma-separated list of subfolders to ignore during search. These paths should be relative to your vault path. Example: 'Archive,Private/Notes'",
+      "type": "textfield",
+      "placeholder": "Archive, Private/Notes",
+      "required": false
     },
     {
       "name": "defaultFormAction",

@@ -5,21 +5,44 @@ import path from "node:path";
 import frontMatter from "front-matter";
 import { File, FrontMatter, Preferences } from "../types";
 import { replaceLocalStorageFiles } from "./localstorage-files";
-import { getOrCreateBookmarksPath } from "./vault-path";
+import { getOrCreateBookmarksPath, getVaultPath } from "./vault-path";
 import tagify from "../helpers/tagify";
 
-async function getMarkdownFiles(dir: string): Promise<Array<string>> {
+function getIgnorePaths(): string[] {
+  const { ignoreSubfolders } = getPreferenceValues<Preferences>();
+  if (!ignoreSubfolders?.trim()) return [];
+
+  return ignoreSubfolders
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+}
+
+async function getMarkdownFiles(dir: string, ignorePaths: string[]): Promise<Array<string>> {
   const entries = await fs.readdir(dir, { withFileTypes: true });
+  const vaultPath = await getVaultPath();
+
+  // Create full ignore paths relative to vault
+  const fullIgnorePaths = ignorePaths.map((p) => path.resolve(path.join(vaultPath, p)));
+
+  // Check if current directory should be ignored
+  const currentPath = path.resolve(dir);
+  if (fullIgnorePaths.some((ignorePath) => currentPath.startsWith(ignorePath))) {
+    return [];
+  }
+
   const tasks = entries.map(async (entry) => {
     const fullPath = path.join(dir, entry.name);
+
     if (entry.isDirectory()) {
-      return getMarkdownFiles(fullPath);
+      return getMarkdownFiles(fullPath, ignorePaths);
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
       return [fullPath];
     } else {
       return [];
     }
   });
+
   const results = await Promise.all(tasks);
   return results.flat();
 }
@@ -110,13 +133,14 @@ type ProcessCallback = (file: File) => void;
 
 export default async function getObsidianFiles(cachedFiles: File[], onProcess?: ProcessCallback): Promise<Array<File>> {
   const bookmarksPath = await getOrCreateBookmarksPath();
+  const ignorePaths = getIgnorePaths();
 
   const cachedFilesMap = new Map(cachedFiles.map((file) => [file.fullPath, file]));
   const currentFilePaths = new Set<string>();
   const processedFiles: File[] = [];
   const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
 
-  const markdownFiles = await getMarkdownFiles(bookmarksPath);
+  const markdownFiles = await getMarkdownFiles(bookmarksPath, ignorePaths);
 
   // Process files concurrently but collect results as they complete
   const promises = markdownFiles.map(async (filePath) => {
