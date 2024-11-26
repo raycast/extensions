@@ -16,7 +16,7 @@ Manage your DevPod workspaces directly from Raycast. This extension allows you t
 
 Devpod will be set in one of 3 locations:
 
-![Screenshot of devpod installation locations](/devpod-path.png)
+![Screenshot of devpod installation locations](./media/devpod-path.png)
 
 ## Installation
 
