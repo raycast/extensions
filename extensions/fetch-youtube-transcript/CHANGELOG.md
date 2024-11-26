@@ -1,6 +1,6 @@
 # Fetch Youtube Transcript Changelog
 
-## [0.1.1] - {PR_MERGE_DATE}
+## [0.1.1] - 2024-11-26
 
 ### Added
 - Initial project setup
