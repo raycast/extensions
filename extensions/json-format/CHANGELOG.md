@@ -1,5 +1,9 @@
 # Changelog
 
+## [Adds formatSelectionAndShow] - 2024-11-26
+
+- Add a new command to format JSON selected in the foremost editor and show it in the viewer
+
 ## [Adds support for escaped JSON strings] - 2024-10-02
 
 - Correctly validate a JSON string that has been escaped
