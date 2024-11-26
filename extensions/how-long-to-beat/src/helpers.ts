@@ -37,13 +37,15 @@ export const fetchLatestHash = async () => {
   const jsFileUrl = await fetchLatestJSFileUrl();
   const response = await ApiService.getInstance().get(jsFileUrl);
 
-  const text = response.data;
+  const text = response.data as string;
 
-  const keyRegex = /concat\("([a-zA-Z0-9]+)"\)/;
-  const hashMatch = keyRegex.exec(text);
+  const keyRegex = /concat\("([a-zA-Z0-9]+)"\)/g;
+  const matches = [...text.matchAll(keyRegex)];
+  const hashParts = matches.map((match) => match[1]);
+  const hash = hashParts.join("");
 
-  if (hashMatch && hashMatch[1]) {
-    return hashMatch[1];
+  if (hash) {
+    return hash;
   }
 
   throw new Error("Hash not found");
