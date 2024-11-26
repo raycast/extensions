@@ -32,6 +32,7 @@ export interface Timezone {
   memo?: string;
   memoIcon?: Icon;
   tags?: string[];
+  avatar?: string[];
 }
 
 export interface IPGeolocation {

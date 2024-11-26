@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
+import { List, Clipboard, showToast, Toast, environment, AI, LaunchProps } from "@raycast/api";
 import { OpenAIModule } from "./utils/grammerUtil";
 import { CommandType, ToneType } from "./types";
 import { Chat } from "./types";
@@ -32,17 +32,24 @@ type State = {
   chat: Chat;
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GrammariX }>) {
   const { add } = useHistory();
+  const { text, grammarType } = props.arguments;
+
   const [state, setState] = useState<State>({
-    command: CommandType.Fix,
+    command: getEnumKeyByEnumValue(CommandType, grammarType) ?? CommandType.Fix,
     toneType: ToneType.Professional,
     isLoading: false,
-    chat: {} as Chat,
+    chat: { id: uuidv4(), question: text, answer: "", created_at: new Date().toISOString() } as Chat,
   });
 
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
+  useEffect(() => {
+    if (text) {
+      onExecute(state.command);
+    }
+  }, [text]);
   useEffect(() => {
     if (state.chat && state.chat.answer && !isHistoryPaused) {
       add(state.chat);
@@ -106,6 +113,11 @@ export default function Command() {
 
   function onToneTypeChange(toneType: ToneType) {
     setState((previous) => ({ ...previous, toneType }));
+  }
+
+  function getEnumKeyByEnumValue(myEnum: any, enumValue: string): CommandType | null {
+    const keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
+    return keys.length > 0 ? myEnum[keys[0]] : null;
   }
   if (isValidKey) {
     return (

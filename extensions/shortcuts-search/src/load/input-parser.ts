@@ -12,6 +12,7 @@ export class ShortcutsParser {
         return {
           name: inputApp.name,
           bundleId: inputApp.bundleId,
+          hostname: inputApp.hostname,
           slug: inputApp.slug,
           keymaps: inputApp.keymaps.map((inputKeymap) => {
             return {

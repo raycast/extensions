@@ -1,4 +1,4 @@
-import { ActionPanel, Grid } from "@raycast/api";
+import { ActionPanel, Grid, Icon } from "@raycast/api";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
 export function GridEmptyView(props: { title: string; command: boolean; extension: boolean }) {
@@ -6,7 +6,7 @@ export function GridEmptyView(props: { title: string; command: boolean; extensio
   return (
     <Grid.EmptyView
       title={title}
-      icon={{ source: { light: "timezone-empty-icon.svg", dark: "timezone-empty-icon@dark.svg" } }}
+      icon={Icon.Globe}
       actions={
         <ActionPanel>
           <ActionOpenCommandPreferences command={command} extension={extension} />

@@ -107,7 +107,7 @@ export default function RetrieveAllDomains() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={item.domain} />
+                  <Action.OpenInBrowser url={`https://${item.domain}`} />
                   <Action.Push
                     title="Get Name Servers"
                     icon={Icon.AppWindowGrid3x3}
@@ -227,6 +227,19 @@ export default function RetrieveAllDomains() {
                         title="Not Local"
                         icon={item.notLocal === "1" ? Icon.Check : Icon.Multiply}
                       />
+                      {"labels" in item ? (
+                        <List.Item.Detail.Metadata.TagList title="Labels">
+                          {item.labels?.map((label) => (
+                            <List.Item.Detail.Metadata.TagList.Item
+                              key={label.id}
+                              text={label.title}
+                              color={label.color}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : (
+                        <List.Item.Detail.Metadata.Label title="Labels" icon={Icon.Minus} />
+                      )}
                     </List.Item.Detail.Metadata>
                   }
                 />

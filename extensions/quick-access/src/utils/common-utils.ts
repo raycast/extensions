@@ -1,12 +1,38 @@
-import { getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, getSelectedFinderItems, Icon, LocalStorage } from "@raycast/api";
 import fse from "fs-extra";
-import { DirectoryInfo, FileType } from "../types/types";
+import { DirectoryInfo, FileType, FolderPageItem } from "../types/types";
 import { imgExt } from "./constants";
 import { parse } from "path";
 import { getFinderInsertLocation } from "./applescript-utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
+};
+
+export const fakeMutate = async () => {};
+
+export const alertDialog = async (
+  icon: Icon,
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction?: () => void,
+) => {
+  const options: Alert.Options = {
+    icon: icon,
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };
 
 export const getLocalStorage = async (key: string) => {
@@ -118,7 +144,7 @@ export const getDirectoryFiles = (directory: string) => {
 const getModifyTime = (path: string) => {
   try {
     const stat = fse.statSync(path);
-    return stat.ctimeMs;
+    return stat.mtimeMs;
   } catch (e) {
     console.error(e);
     return new Date().getTime();
@@ -145,21 +171,6 @@ export const getFilesInDirectory = (pathName: string) => {
   }
 };
 
-export const getFileShowNumber = (fileShowNumber: string) => {
-  switch (fileShowNumber) {
-    case "1":
-      return 1;
-    case "3":
-      return 3;
-    case "5":
-      return 5;
-    case "10":
-      return 10;
-    default:
-      return -1;
-  }
-};
-
 export function formatBytes(sizeInBytes: number) {
   const units = ["B", "KB", "MB", "GB", "TB"];
   let unitIndex = 0;
@@ -179,4 +190,30 @@ export function directory2File(directory: DirectoryInfo) {
     type: FileType.FILE,
     modifyTime: directory.date,
   };
+}
+
+export function getFolderByPath(folderPath: string) {
+  const files = fse.readdirSync(folderPath);
+  const _folders: FolderPageItem[] = [];
+  files.forEach((value) => {
+    if (!value.startsWith(".")) {
+      _folders.push({ name: value, isFolder: isDirectory(folderPath + "/" + value) });
+    }
+  });
+  return _folders;
+}
+
+export function moveElement(array: DirectoryInfo[], index: number, steps: number) {
+  if (index < 0 || index >= array.length || steps === 0) {
+    return array;
+  }
+  let newIndex = index + steps;
+  if (newIndex < 0) {
+    newIndex = 0;
+  } else if (newIndex >= array.length) {
+    newIndex = array.length - 1;
+  }
+  const [element] = array.splice(index, 1);
+  array.splice(newIndex, 0, element);
+  return array;
 }

@@ -112,9 +112,9 @@
     }
   ],
   "dependencies": {
-    "@getalby/lightning-tools": "^5.0.1",
-    "@getalby/sdk": "^3.2.3",
-    "@raycast/api": "^1.64.4",
+    "@getalby/lightning-tools": "^5.0.3",
+    "@getalby/sdk": "^3.5.1",
+    "@raycast/api": "^1.74.1",
     "cross-fetch": "^4.0.0",
     "qrcode": "^1.5.3",
     "websocket-polyfill": "^0.0.3"

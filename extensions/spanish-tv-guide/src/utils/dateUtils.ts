@@ -1,13 +1,19 @@
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
+import { isString } from "./stringUtils";
 
-const TIME_ZONE = "Europe/Madrid";
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z?$/;
 
-const oneDay = Duration.fromObject({ day: 1 });
-const currentDate = () => now().toISOString().substring(0, 11);
+const getTime = (date: Date) => {
+  return DateTime.fromJSDate(date, { zone: "system" }).toLocaleString(DateTime.TIME_24_SIMPLE);
+};
 
-const getTime = (date: Date) => DateTime.fromJSDate(date, { zone: TIME_ZONE }).toLocaleString(DateTime.TIME_24_SIMPLE);
-const now = () => DateTime.now().setZone(TIME_ZONE).toJSDate();
-const parseTime = (time: string) => DateTime.fromISO(`${currentDate()}${time}`, { zone: TIME_ZONE }).toJSDate();
-const plusOneDay = (date: Date) => DateTime.fromJSDate(date, { zone: TIME_ZONE }).plus(oneDay).toJSDate();
+const dateReviver = (_: string, value: unknown) => {
+  if (isSerializedISODate(value)) {
+    return DateTime.fromISO(value).toJSDate();
+  }
+  return value;
+};
 
-export { getTime, now, parseTime, plusOneDay };
+const isSerializedISODate = (value: unknown): value is string => isString(value) && ISO_DATE_PATTERN.test(value);
+
+export { dateReviver, getTime };

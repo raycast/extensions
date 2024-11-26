@@ -1,8 +1,11 @@
 import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import moment from "moment";
 import pluralize from "pluralize";
+import { SlackStatusPreset } from "./types";
 import { getEmojiForCode } from "./emojis";
+import { WebClient } from "@slack/web-api";
 
 function isTomorrowOrAlmostTomorrow(date: moment.Moment) {
   // Slack treats "tomorrow" as 1 minute before midnight, hence this little hack
@@ -124,4 +127,47 @@ export function getStatusSubtitle(profile: Profile | undefined) {
   }
 
   return getTextForExpiration(profile.status_expiration);
+}
+
+export function setStatusToPreset({
+  slack,
+  preset,
+  mutate,
+}: {
+  slack: WebClient;
+  preset: SlackStatusPreset;
+  mutate: MutatePromise<Profile | undefined>;
+}) {
+  return showToastWithPromise(
+    async () => {
+      let expiration = 0;
+      if (preset.defaultDuration > 0) {
+        const expirationDate = new Date();
+        expirationDate.setMinutes(expirationDate.getMinutes() + preset.defaultDuration);
+        expiration = Math.floor(expirationDate.getTime() / 1000);
+      }
+
+      const profile: Profile = {
+        status_emoji: preset.emojiCode,
+        status_text: preset.title,
+        status_expiration: expiration,
+      };
+
+      await mutate(
+        slack.users.profile.set({
+          profile: JSON.stringify(profile),
+        }),
+        {
+          optimisticUpdate() {
+            return profile;
+          },
+        },
+      );
+    },
+    {
+      loading: "Setting status…",
+      success: `Set status to ${preset.title}`,
+      error: "Failed setting status",
+    },
+  );
 }

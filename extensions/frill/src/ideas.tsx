@@ -113,8 +113,12 @@ export default function Ideas() {
                   <List.Item.Detail.Metadata.Label title="Description" text={idea.description} />
                   <List.Item.Detail.Metadata.Label title="Cover Image" icon={idea.cover_image || Icon.Minus} />
                   <List.Item.Detail.Metadata.Label title="Vote Count" text={idea.vote_count.toString()} />
-                  <List.Item.Detail.Metadata.Label title="Note Count" text={idea.comment_count.toString()} />
-                  <List.Item.Detail.Metadata.Label title="Comment Count" text={idea.note_count.toString()} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Note Count"
+                    text={idea.note_count?.toString()}
+                    icon={idea.note_count ? undefined : Icon.Minus}
+                  />
+                  <List.Item.Detail.Metadata.Label title="Comment Count" text={idea.comment_count.toString()} />
                   <List.Item.Detail.Metadata.Label
                     title="Is Private"
                     icon={idea.is_private ? Icon.Check : Icon.Multiply}

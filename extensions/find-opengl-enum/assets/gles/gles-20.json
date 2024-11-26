@@ -1,0 +1,891 @@
+{
+    "0": [
+        "GL_FALSE",
+        "GL_POINTS",
+        "GL_ZERO",
+        "GL_NO_ERROR",
+        "GL_NONE"
+    ],
+    "1": [
+        "GL_TRUE",
+        "GL_LINES",
+        "GL_ONE"
+    ],
+    "2": [
+        "GL_LINE_LOOP"
+    ],
+    "3": [
+        "GL_LINE_STRIP"
+    ],
+    "4": [
+        "GL_TRIANGLES"
+    ],
+    "5": [
+        "GL_TRIANGLE_STRIP"
+    ],
+    "6": [
+        "GL_TRIANGLE_FAN"
+    ],
+    "256": [
+        "GL_DEPTH_BUFFER_BIT"
+    ],
+    "512": [
+        "GL_NEVER"
+    ],
+    "513": [
+        "GL_LESS"
+    ],
+    "514": [
+        "GL_EQUAL"
+    ],
+    "515": [
+        "GL_LEQUAL"
+    ],
+    "516": [
+        "GL_GREATER"
+    ],
+    "517": [
+        "GL_NOTEQUAL"
+    ],
+    "518": [
+        "GL_GEQUAL"
+    ],
+    "519": [
+        "GL_ALWAYS"
+    ],
+    "768": [
+        "GL_SRC_COLOR"
+    ],
+    "769": [
+        "GL_ONE_MINUS_SRC_COLOR"
+    ],
+    "770": [
+        "GL_SRC_ALPHA"
+    ],
+    "771": [
+        "GL_ONE_MINUS_SRC_ALPHA"
+    ],
+    "772": [
+        "GL_DST_ALPHA"
+    ],
+    "773": [
+        "GL_ONE_MINUS_DST_ALPHA"
+    ],
+    "774": [
+        "GL_DST_COLOR"
+    ],
+    "775": [
+        "GL_ONE_MINUS_DST_COLOR"
+    ],
+    "776": [
+        "GL_SRC_ALPHA_SATURATE"
+    ],
+    "1024": [
+        "GL_STENCIL_BUFFER_BIT"
+    ],
+    "1028": [
+        "GL_FRONT"
+    ],
+    "1029": [
+        "GL_BACK"
+    ],
+    "1032": [
+        "GL_FRONT_AND_BACK"
+    ],
+    "1280": [
+        "GL_INVALID_ENUM"
+    ],
+    "1281": [
+        "GL_INVALID_VALUE"
+    ],
+    "1282": [
+        "GL_INVALID_OPERATION"
+    ],
+    "1285": [
+        "GL_OUT_OF_MEMORY"
+    ],
+    "1286": [
+        "GL_INVALID_FRAMEBUFFER_OPERATION"
+    ],
+    "2304": [
+        "GL_CW"
+    ],
+    "2305": [
+        "GL_CCW"
+    ],
+    "2849": [
+        "GL_LINE_WIDTH"
+    ],
+    "2884": [
+        "GL_CULL_FACE"
+    ],
+    "2885": [
+        "GL_CULL_FACE_MODE"
+    ],
+    "2886": [
+        "GL_FRONT_FACE"
+    ],
+    "2928": [
+        "GL_DEPTH_RANGE"
+    ],
+    "2929": [
+        "GL_DEPTH_TEST"
+    ],
+    "2930": [
+        "GL_DEPTH_WRITEMASK"
+    ],
+    "2931": [
+        "GL_DEPTH_CLEAR_VALUE"
+    ],
+    "2932": [
+        "GL_DEPTH_FUNC"
+    ],
+    "2960": [
+        "GL_STENCIL_TEST"
+    ],
+    "2961": [
+        "GL_STENCIL_CLEAR_VALUE"
+    ],
+    "2962": [
+        "GL_STENCIL_FUNC"
+    ],
+    "2963": [
+        "GL_STENCIL_VALUE_MASK"
+    ],
+    "2964": [
+        "GL_STENCIL_FAIL"
+    ],
+    "2965": [
+        "GL_STENCIL_PASS_DEPTH_FAIL"
+    ],
+    "2966": [
+        "GL_STENCIL_PASS_DEPTH_PASS"
+    ],
+    "2967": [
+        "GL_STENCIL_REF"
+    ],
+    "2968": [
+        "GL_STENCIL_WRITEMASK"
+    ],
+    "2978": [
+        "GL_VIEWPORT"
+    ],
+    "3024": [
+        "GL_DITHER"
+    ],
+    "3042": [
+        "GL_BLEND"
+    ],
+    "3088": [
+        "GL_SCISSOR_BOX"
+    ],
+    "3089": [
+        "GL_SCISSOR_TEST"
+    ],
+    "3106": [
+        "GL_COLOR_CLEAR_VALUE"
+    ],
+    "3107": [
+        "GL_COLOR_WRITEMASK"
+    ],
+    "3317": [
+        "GL_UNPACK_ALIGNMENT"
+    ],
+    "3333": [
+        "GL_PACK_ALIGNMENT"
+    ],
+    "3379": [
+        "GL_MAX_TEXTURE_SIZE"
+    ],
+    "3386": [
+        "GL_MAX_VIEWPORT_DIMS"
+    ],
+    "3408": [
+        "GL_SUBPIXEL_BITS"
+    ],
+    "3410": [
+        "GL_RED_BITS"
+    ],
+    "3411": [
+        "GL_GREEN_BITS"
+    ],
+    "3412": [
+        "GL_BLUE_BITS"
+    ],
+    "3413": [
+        "GL_ALPHA_BITS"
+    ],
+    "3414": [
+        "GL_DEPTH_BITS"
+    ],
+    "3415": [
+        "GL_STENCIL_BITS"
+    ],
+    "3553": [
+        "GL_TEXTURE_2D"
+    ],
+    "4352": [
+        "GL_DONT_CARE"
+    ],
+    "4353": [
+        "GL_FASTEST"
+    ],
+    "4354": [
+        "GL_NICEST"
+    ],
+    "5120": [
+        "GL_BYTE"
+    ],
+    "5121": [
+        "GL_UNSIGNED_BYTE"
+    ],
+    "5122": [
+        "GL_SHORT"
+    ],
+    "5123": [
+        "GL_UNSIGNED_SHORT"
+    ],
+    "5124": [
+        "GL_INT"
+    ],
+    "5125": [
+        "GL_UNSIGNED_INT"
+    ],
+    "5126": [
+        "GL_FLOAT"
+    ],
+    "5132": [
+        "GL_FIXED"
+    ],
+    "5386": [
+        "GL_INVERT"
+    ],
+    "5890": [
+        "GL_TEXTURE"
+    ],
+    "6402": [
+        "GL_DEPTH_COMPONENT"
+    ],
+    "6406": [
+        "GL_ALPHA"
+    ],
+    "6407": [
+        "GL_RGB"
+    ],
+    "6408": [
+        "GL_RGBA"
+    ],
+    "6409": [
+        "GL_LUMINANCE"
+    ],
+    "6410": [
+        "GL_LUMINANCE_ALPHA"
+    ],
+    "7680": [
+        "GL_KEEP"
+    ],
+    "7681": [
+        "GL_REPLACE"
+    ],
+    "7682": [
+        "GL_INCR"
+    ],
+    "7683": [
+        "GL_DECR"
+    ],
+    "7936": [
+        "GL_VENDOR"
+    ],
+    "7937": [
+        "GL_RENDERER"
+    ],
+    "7938": [
+        "GL_VERSION"
+    ],
+    "7939": [
+        "GL_EXTENSIONS"
+    ],
+    "9728": [
+        "GL_NEAREST"
+    ],
+    "9729": [
+        "GL_LINEAR"
+    ],
+    "9984": [
+        "GL_NEAREST_MIPMAP_NEAREST"
+    ],
+    "9985": [
+        "GL_LINEAR_MIPMAP_NEAREST"
+    ],
+    "9986": [
+        "GL_NEAREST_MIPMAP_LINEAR"
+    ],
+    "9987": [
+        "GL_LINEAR_MIPMAP_LINEAR"
+    ],
+    "10240": [
+        "GL_TEXTURE_MAG_FILTER"
+    ],
+    "10241": [
+        "GL_TEXTURE_MIN_FILTER"
+    ],
+    "10242": [
+        "GL_TEXTURE_WRAP_S"
+    ],
+    "10243": [
+        "GL_TEXTURE_WRAP_T"
+    ],
+    "10497": [
+        "GL_REPEAT"
+    ],
+    "10752": [
+        "GL_POLYGON_OFFSET_UNITS"
+    ],
+    "16384": [
+        "GL_COLOR_BUFFER_BIT"
+    ],
+    "32769": [
+        "GL_CONSTANT_COLOR"
+    ],
+    "32770": [
+        "GL_ONE_MINUS_CONSTANT_COLOR"
+    ],
+    "32771": [
+        "GL_CONSTANT_ALPHA"
+    ],
+    "32772": [
+        "GL_ONE_MINUS_CONSTANT_ALPHA"
+    ],
+    "32773": [
+        "GL_BLEND_COLOR"
+    ],
+    "32774": [
+        "GL_FUNC_ADD"
+    ],
+    "32777": [
+        "GL_BLEND_EQUATION",
+        "GL_BLEND_EQUATION_RGB"
+    ],
+    "32778": [
+        "GL_FUNC_SUBTRACT"
+    ],
+    "32779": [
+        "GL_FUNC_REVERSE_SUBTRACT"
+    ],
+    "32819": [
+        "GL_UNSIGNED_SHORT_4_4_4_4"
+    ],
+    "32820": [
+        "GL_UNSIGNED_SHORT_5_5_5_1"
+    ],
+    "32823": [
+        "GL_POLYGON_OFFSET_FILL"
+    ],
+    "32824": [
+        "GL_POLYGON_OFFSET_FACTOR"
+    ],
+    "32854": [
+        "GL_RGBA4"
+    ],
+    "32855": [
+        "GL_RGB5_A1"
+    ],
+    "32873": [
+        "GL_TEXTURE_BINDING_2D"
+    ],
+    "32926": [
+        "GL_SAMPLE_ALPHA_TO_COVERAGE"
+    ],
+    "32928": [
+        "GL_SAMPLE_COVERAGE"
+    ],
+    "32936": [
+        "GL_SAMPLE_BUFFERS"
+    ],
+    "32937": [
+        "GL_SAMPLES"
+    ],
+    "32938": [
+        "GL_SAMPLE_COVERAGE_VALUE"
+    ],
+    "32939": [
+        "GL_SAMPLE_COVERAGE_INVERT"
+    ],
+    "32968": [
+        "GL_BLEND_DST_RGB"
+    ],
+    "32969": [
+        "GL_BLEND_SRC_RGB"
+    ],
+    "32970": [
+        "GL_BLEND_DST_ALPHA"
+    ],
+    "32971": [
+        "GL_BLEND_SRC_ALPHA"
+    ],
+    "33071": [
+        "GL_CLAMP_TO_EDGE"
+    ],
+    "33170": [
+        "GL_GENERATE_MIPMAP_HINT"
+    ],
+    "33189": [
+        "GL_DEPTH_COMPONENT16"
+    ],
+    "33635": [
+        "GL_UNSIGNED_SHORT_5_6_5"
+    ],
+    "33648": [
+        "GL_MIRRORED_REPEAT"
+    ],
+    "33901": [
+        "GL_ALIASED_POINT_SIZE_RANGE"
+    ],
+    "33902": [
+        "GL_ALIASED_LINE_WIDTH_RANGE"
+    ],
+    "33984": [
+        "GL_TEXTURE0"
+    ],
+    "33985": [
+        "GL_TEXTURE1"
+    ],
+    "33986": [
+        "GL_TEXTURE2"
+    ],
+    "33987": [
+        "GL_TEXTURE3"
+    ],
+    "33988": [
+        "GL_TEXTURE4"
+    ],
+    "33989": [
+        "GL_TEXTURE5"
+    ],
+    "33990": [
+        "GL_TEXTURE6"
+    ],
+    "33991": [
+        "GL_TEXTURE7"
+    ],
+    "33992": [
+        "GL_TEXTURE8"
+    ],
+    "33993": [
+        "GL_TEXTURE9"
+    ],
+    "33994": [
+        "GL_TEXTURE10"
+    ],
+    "33995": [
+        "GL_TEXTURE11"
+    ],
+    "33996": [
+        "GL_TEXTURE12"
+    ],
+    "33997": [
+        "GL_TEXTURE13"
+    ],
+    "33998": [
+        "GL_TEXTURE14"
+    ],
+    "33999": [
+        "GL_TEXTURE15"
+    ],
+    "34000": [
+        "GL_TEXTURE16"
+    ],
+    "34001": [
+        "GL_TEXTURE17"
+    ],
+    "34002": [
+        "GL_TEXTURE18"
+    ],
+    "34003": [
+        "GL_TEXTURE19"
+    ],
+    "34004": [
+        "GL_TEXTURE20"
+    ],
+    "34005": [
+        "GL_TEXTURE21"
+    ],
+    "34006": [
+        "GL_TEXTURE22"
+    ],
+    "34007": [
+        "GL_TEXTURE23"
+    ],
+    "34008": [
+        "GL_TEXTURE24"
+    ],
+    "34009": [
+        "GL_TEXTURE25"
+    ],
+    "34010": [
+        "GL_TEXTURE26"
+    ],
+    "34011": [
+        "GL_TEXTURE27"
+    ],
+    "34012": [
+        "GL_TEXTURE28"
+    ],
+    "34013": [
+        "GL_TEXTURE29"
+    ],
+    "34014": [
+        "GL_TEXTURE30"
+    ],
+    "34015": [
+        "GL_TEXTURE31"
+    ],
+    "34016": [
+        "GL_ACTIVE_TEXTURE"
+    ],
+    "34024": [
+        "GL_MAX_RENDERBUFFER_SIZE"
+    ],
+    "34055": [
+        "GL_INCR_WRAP"
+    ],
+    "34056": [
+        "GL_DECR_WRAP"
+    ],
+    "34067": [
+        "GL_TEXTURE_CUBE_MAP"
+    ],
+    "34068": [
+        "GL_TEXTURE_BINDING_CUBE_MAP"
+    ],
+    "34069": [
+        "GL_TEXTURE_CUBE_MAP_POSITIVE_X"
+    ],
+    "34070": [
+        "GL_TEXTURE_CUBE_MAP_NEGATIVE_X"
+    ],
+    "34071": [
+        "GL_TEXTURE_CUBE_MAP_POSITIVE_Y"
+    ],
+    "34072": [
+        "GL_TEXTURE_CUBE_MAP_NEGATIVE_Y"
+    ],
+    "34073": [
+        "GL_TEXTURE_CUBE_MAP_POSITIVE_Z"
+    ],
+    "34074": [
+        "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z"
+    ],
+    "34076": [
+        "GL_MAX_CUBE_MAP_TEXTURE_SIZE"
+    ],
+    "34338": [
+        "GL_VERTEX_ATTRIB_ARRAY_ENABLED"
+    ],
+    "34339": [
+        "GL_VERTEX_ATTRIB_ARRAY_SIZE"
+    ],
+    "34340": [
+        "GL_VERTEX_ATTRIB_ARRAY_STRIDE"
+    ],
+    "34341": [
+        "GL_VERTEX_ATTRIB_ARRAY_TYPE"
+    ],
+    "34342": [
+        "GL_CURRENT_VERTEX_ATTRIB"
+    ],
+    "34373": [
+        "GL_VERTEX_ATTRIB_ARRAY_POINTER"
+    ],
+    "34466": [
+        "GL_NUM_COMPRESSED_TEXTURE_FORMATS"
+    ],
+    "34467": [
+        "GL_COMPRESSED_TEXTURE_FORMATS"
+    ],
+    "34660": [
+        "GL_BUFFER_SIZE"
+    ],
+    "34661": [
+        "GL_BUFFER_USAGE"
+    ],
+    "34816": [
+        "GL_STENCIL_BACK_FUNC"
+    ],
+    "34817": [
+        "GL_STENCIL_BACK_FAIL"
+    ],
+    "34818": [
+        "GL_STENCIL_BACK_PASS_DEPTH_FAIL"
+    ],
+    "34819": [
+        "GL_STENCIL_BACK_PASS_DEPTH_PASS"
+    ],
+    "34877": [
+        "GL_BLEND_EQUATION_ALPHA"
+    ],
+    "34921": [
+        "GL_MAX_VERTEX_ATTRIBS"
+    ],
+    "34922": [
+        "GL_VERTEX_ATTRIB_ARRAY_NORMALIZED"
+    ],
+    "34930": [
+        "GL_MAX_TEXTURE_IMAGE_UNITS"
+    ],
+    "34962": [
+        "GL_ARRAY_BUFFER"
+    ],
+    "34963": [
+        "GL_ELEMENT_ARRAY_BUFFER"
+    ],
+    "34964": [
+        "GL_ARRAY_BUFFER_BINDING"
+    ],
+    "34965": [
+        "GL_ELEMENT_ARRAY_BUFFER_BINDING"
+    ],
+    "34975": [
+        "GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING"
+    ],
+    "35040": [
+        "GL_STREAM_DRAW"
+    ],
+    "35044": [
+        "GL_STATIC_DRAW"
+    ],
+    "35048": [
+        "GL_DYNAMIC_DRAW"
+    ],
+    "35632": [
+        "GL_FRAGMENT_SHADER"
+    ],
+    "35633": [
+        "GL_VERTEX_SHADER"
+    ],
+    "35660": [
+        "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS"
+    ],
+    "35661": [
+        "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS"
+    ],
+    "35663": [
+        "GL_SHADER_TYPE"
+    ],
+    "35664": [
+        "GL_FLOAT_VEC2"
+    ],
+    "35665": [
+        "GL_FLOAT_VEC3"
+    ],
+    "35666": [
+        "GL_FLOAT_VEC4"
+    ],
+    "35667": [
+        "GL_INT_VEC2"
+    ],
+    "35668": [
+        "GL_INT_VEC3"
+    ],
+    "35669": [
+        "GL_INT_VEC4"
+    ],
+    "35670": [
+        "GL_BOOL"
+    ],
+    "35671": [
+        "GL_BOOL_VEC2"
+    ],
+    "35672": [
+        "GL_BOOL_VEC3"
+    ],
+    "35673": [
+        "GL_BOOL_VEC4"
+    ],
+    "35674": [
+        "GL_FLOAT_MAT2"
+    ],
+    "35675": [
+        "GL_FLOAT_MAT3"
+    ],
+    "35676": [
+        "GL_FLOAT_MAT4"
+    ],
+    "35678": [
+        "GL_SAMPLER_2D"
+    ],
+    "35680": [
+        "GL_SAMPLER_CUBE"
+    ],
+    "35712": [
+        "GL_DELETE_STATUS"
+    ],
+    "35713": [
+        "GL_COMPILE_STATUS"
+    ],
+    "35714": [
+        "GL_LINK_STATUS"
+    ],
+    "35715": [
+        "GL_VALIDATE_STATUS"
+    ],
+    "35716": [
+        "GL_INFO_LOG_LENGTH"
+    ],
+    "35717": [
+        "GL_ATTACHED_SHADERS"
+    ],
+    "35718": [
+        "GL_ACTIVE_UNIFORMS"
+    ],
+    "35719": [
+        "GL_ACTIVE_UNIFORM_MAX_LENGTH"
+    ],
+    "35720": [
+        "GL_SHADER_SOURCE_LENGTH"
+    ],
+    "35721": [
+        "GL_ACTIVE_ATTRIBUTES"
+    ],
+    "35722": [
+        "GL_ACTIVE_ATTRIBUTE_MAX_LENGTH"
+    ],
+    "35724": [
+        "GL_SHADING_LANGUAGE_VERSION"
+    ],
+    "35725": [
+        "GL_CURRENT_PROGRAM"
+    ],
+    "35738": [
+        "GL_IMPLEMENTATION_COLOR_READ_TYPE"
+    ],
+    "35739": [
+        "GL_IMPLEMENTATION_COLOR_READ_FORMAT"
+    ],
+    "36003": [
+        "GL_STENCIL_BACK_REF"
+    ],
+    "36004": [
+        "GL_STENCIL_BACK_VALUE_MASK"
+    ],
+    "36005": [
+        "GL_STENCIL_BACK_WRITEMASK"
+    ],
+    "36006": [
+        "GL_FRAMEBUFFER_BINDING"
+    ],
+    "36007": [
+        "GL_RENDERBUFFER_BINDING"
+    ],
+    "36048": [
+        "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE"
+    ],
+    "36049": [
+        "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME"
+    ],
+    "36050": [
+        "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL"
+    ],
+    "36051": [
+        "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE"
+    ],
+    "36053": [
+        "GL_FRAMEBUFFER_COMPLETE"
+    ],
+    "36054": [
+        "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"
+    ],
+    "36055": [
+        "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"
+    ],
+    "36057": [
+        "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS"
+    ],
+    "36061": [
+        "GL_FRAMEBUFFER_UNSUPPORTED"
+    ],
+    "36064": [
+        "GL_COLOR_ATTACHMENT0"
+    ],
+    "36096": [
+        "GL_DEPTH_ATTACHMENT"
+    ],
+    "36128": [
+        "GL_STENCIL_ATTACHMENT"
+    ],
+    "36160": [
+        "GL_FRAMEBUFFER"
+    ],
+    "36161": [
+        "GL_RENDERBUFFER"
+    ],
+    "36162": [
+        "GL_RENDERBUFFER_WIDTH"
+    ],
+    "36163": [
+        "GL_RENDERBUFFER_HEIGHT"
+    ],
+    "36164": [
+        "GL_RENDERBUFFER_INTERNAL_FORMAT"
+    ],
+    "36168": [
+        "GL_STENCIL_INDEX8"
+    ],
+    "36176": [
+        "GL_RENDERBUFFER_RED_SIZE"
+    ],
+    "36177": [
+        "GL_RENDERBUFFER_GREEN_SIZE"
+    ],
+    "36178": [
+        "GL_RENDERBUFFER_BLUE_SIZE"
+    ],
+    "36179": [
+        "GL_RENDERBUFFER_ALPHA_SIZE"
+    ],
+    "36180": [
+        "GL_RENDERBUFFER_DEPTH_SIZE"
+    ],
+    "36181": [
+        "GL_RENDERBUFFER_STENCIL_SIZE"
+    ],
+    "36194": [
+        "GL_RGB565"
+    ],
+    "36336": [
+        "GL_LOW_FLOAT"
+    ],
+    "36337": [
+        "GL_MEDIUM_FLOAT"
+    ],
+    "36338": [
+        "GL_HIGH_FLOAT"
+    ],
+    "36339": [
+        "GL_LOW_INT"
+    ],
+    "36340": [
+        "GL_MEDIUM_INT"
+    ],
+    "36341": [
+        "GL_HIGH_INT"
+    ],
+    "36344": [
+        "GL_SHADER_BINARY_FORMATS"
+    ],
+    "36345": [
+        "GL_NUM_SHADER_BINARY_FORMATS"
+    ],
+    "36346": [
+        "GL_SHADER_COMPILER"
+    ],
+    "36347": [
+        "GL_MAX_VERTEX_UNIFORM_VECTORS"
+    ],
+    "36348": [
+        "GL_MAX_VARYING_VECTORS"
+    ],
+    "36349": [
+        "GL_MAX_FRAGMENT_UNIFORM_VECTORS"
+    ]
+}

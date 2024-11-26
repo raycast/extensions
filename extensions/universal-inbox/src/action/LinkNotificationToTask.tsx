@@ -92,7 +92,6 @@ async function linkNotificationToTask(
           if (page) {
             page.content = page.content.filter((n) => n.id !== notification.id);
           }
-          console.log(`page(link): ${notification.id}`, page);
           return page;
         },
       },

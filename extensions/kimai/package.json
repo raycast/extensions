@@ -57,16 +57,23 @@
     {
       "name": "email",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Email",
       "description": "Your email that you use for login in Kimai"
     },
     {
       "name": "password",
+      "required": false,
       "type": "password",
-      "required": true,
       "title": "API Password",
       "description": "API password is different from your login password and needs to set in your profile settings"
+    },
+    {
+      "name": "token",
+      "type": "textfield",
+      "required": false,
+      "title": "API Token",
+      "description": "API token available in your profile settings"
     },
     {
       "name": "duration",
@@ -80,7 +87,8 @@
     "@raycast/api": "^1.66.2",
     "@raycast/utils": "^1.12.2",
     "dayjs": "^1.11.10",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

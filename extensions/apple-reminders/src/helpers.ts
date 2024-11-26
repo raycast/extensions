@@ -92,3 +92,9 @@ export function truncate(str: string, maxLength = 45): string {
 
   return str.substring(0, maxLength) + "…";
 }
+
+export function getIntervalValidationError(interval?: string): string | undefined {
+  if (!interval) return "Interval is required";
+  if (isNaN(Number(interval))) return "Interval must be a number";
+  if ((interval as unknown as number) < 1) return "Must be greater than 0";
+}

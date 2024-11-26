@@ -1,6 +1,10 @@
 # Word Count Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Moved contributor] - 2024-04-15
+
+- No changes were made in the code.
+
+## [Improvements] - 2023-01-21
 
 - Added passing the selected text to the form
 

@@ -1,13 +1,13 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
-import { searchVideos, getVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoItem } from "./video";
+import { getVideos, searchVideos, useRefresher, Video } from "../lib/youtubeapi";
+import { FilterDropdown } from "./dropdown";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedVideos, getRecentVideos } from "./recent_videos";
-import { Preferences } from "../lib/types";
-import { FilterDropdown } from "./dropdown";
-import { useCachedState } from "@raycast/utils";
+import { VideoItem } from "./video";
 
 export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
   const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
@@ -28,9 +28,9 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
 
   useEffect(() => {
     (async () => {
-      const pinnedVideos = await getVideos(getPinnedVideos());
+      const pinnedVideos = await getVideos(await getPinnedVideos());
       setPinnedVideos(pinnedVideos.filter((v) => !channelId || v.channelId === channelId));
-      const recentVideos = await getVideos(getRecentVideos());
+      const recentVideos = await getVideos(await getRecentVideos());
       setRecentVideos(recentVideos.filter((v) => !channelId || v.channelId === channelId));
       setLoading(false);
     })();

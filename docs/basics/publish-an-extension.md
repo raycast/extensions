@@ -11,7 +11,7 @@ Before you publish your extension, take a look at [how to prepare your extension
 Open your terminal, navigate to your extension directory, and run `npm run build` to verify your extension. The command should complete without any errors.
 
 {% hint style="info" %}
-`npm run build` validates your extension for distribution without publishing it to the store. Read more about it [here](../information/tools/cli.md#build).
+`npm run build` validates your extension for distribution without publishing it to the store. Read more about it [here](../information/developer-tools/cli.md#build).
 {% endhint %}
 
 ### Publish your extension
@@ -46,6 +46,6 @@ We're still figuring things out and updating our guidelines. If something is unc
 
 Once your extension is published in the Raycast Store, you can share it with our community. Open the Manage Extensions command, search for your extension and press `⌘` `⌥` `.` to copy the link.
 
-![Manage your extensions](../.gitbook/assets/basics-manage-extensions.png)
+![Manage your extensions](../.gitbook/assets/basics-manage-extensions.webp)
 
 🚀 Now it's time to share your work! Tweet about your extension, share it with our [Slack community](https://raycast.com/community) or send it to your teammates.

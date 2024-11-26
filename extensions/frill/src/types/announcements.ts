@@ -1,56 +1,14 @@
 import { AnnouncementCategory } from "./announcement-categories";
 import { Author, BaseSuccessResponse } from "./common";
 import { Idea } from "./ideas";
-import { Descendant } from "slate";
-
-// these are Custom Slate types
-type CustomHeading = {
-  type: "heading";
-  level: number;
-};
-type CustomAnnouncementTitle = {
-  type: "announcement-title";
-};
-type CustomIdea = {
-  type: "idea";
-  ideaIdx: string;
-};
-type CustomImage = {
-  type: "image";
-  align?: "left" | "right";
-  url: string;
-  alt: string;
-};
-type CustomLink = {
-  type: "link";
-  url: string;
-};
-type CustomListItem = { type: "list-item" };
-type CustomCode = { type: "code" };
-type CustomCodeBlock = { type: "code-block" };
-type CustomElement = {
-  children: Descendant[];
-} & (
-  | CustomHeading
-  | CustomAnnouncementTitle
-  | CustomIdea
-  | CustomImage
-  | CustomLink
-  | CustomListItem
-  | CustomCode
-  | CustomCodeBlock
-);
-type CustomText = {
-  text: string;
-};
-export type CustomNode = CustomElement | CustomText;
 
 export type Announcement = {
   idx: string;
   name: string;
   slug: string;
   excerpt: string;
-  content: CustomNode[];
+  content: string;
+  content_html: string;
   reaction_count: {
     [key: string]: number;
   };

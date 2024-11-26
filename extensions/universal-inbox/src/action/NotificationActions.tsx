@@ -35,7 +35,7 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
         onAction={() => deleteNotification(notification, mutate)}
       />
       <Action
-        title="Unsubscribe from Notification"
+        title="Unsubscribe From Notification"
         icon={Icon.BellDisabled}
         shortcut={{ modifiers: ["ctrl"], key: "u" }}
         onAction={() => unsubscribeFromNotification(notification, mutate)}

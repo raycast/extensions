@@ -1,0 +1,537 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "momentum",
+  "title": "Momentum",
+  "description": "Create a new project and open it in your favourite editor",
+  "icon": "icons/main.png",
+  "author": "leondaz",
+  "categories": [
+    "Developer Tools"
+  ],
+  "access": "public",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "project-empty",
+      "title": "Create Empty Project",
+      "description": "Create an Empty project",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "projectName",
+          "placeholder": "my_new_project",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        }
+      ]
+    },
+    {
+      "name": "project-node",
+      "icon": "icons/node.png",
+      "title": "Create Node Project",
+      "description": "Create a Node.js project",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "projectName",
+          "placeholder": "my_new_project",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        },
+        {
+          "name": "eslint",
+          "label": "Adds Eslint",
+          "title": "Linting",
+          "description": "Add Eslint @recommended to the newly created project",
+          "default": true,
+          "required": true,
+          "type": "checkbox"
+        },
+        {
+          "name": "typescript",
+          "type": "checkbox",
+          "title": "Use Typescript",
+          "description": "Use Typescript instead of Javascript",
+          "default": true,
+          "required": true,
+          "label": "Use Typescript"
+        }
+      ]
+    },
+    {
+      "name": "project-vite",
+      "icon": "icons/vite.png",
+      "title": "Create Vite Project",
+      "description": "Create a Vite project",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "projectName",
+          "placeholder": "my_new_project",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "template",
+          "placeholder": "Choose a vite template",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Vanilla (Javascript)",
+              "value": "vanilla"
+            },
+            {
+              "title": "Vanila (Typescript)",
+              "value": "vanilla-ts"
+            },
+            {
+              "title": "React (Javascript)",
+              "value": "react"
+            },
+            {
+              "title": "React (Typescript)",
+              "value": "react-ts"
+            },
+            {
+              "title": "React SWC (Javascript)",
+              "value": "react-swc"
+            },
+            {
+              "title": "React SWC (Typescript)",
+              "value": "react-swc-ts"
+            },
+            {
+              "title": "Vue (Javascript)",
+              "value": "vue"
+            },
+            {
+              "title": "Vue (Typescript)",
+              "value": "vue-ts"
+            },
+            {
+              "title": "Svelte (Javascript)",
+              "value": "svelte"
+            },
+            {
+              "title": "Svelte (Typescipt)",
+              "value": "svelte-ts"
+            },
+            {
+              "title": "Lit (Javascript)",
+              "value": "lit"
+            },
+            {
+              "title": "Lit (Typescript)",
+              "value": "lit-ts"
+            },
+            {
+              "title": "Preact (Typescript)",
+              "value": "preact-ts"
+            },
+            {
+              "title": "Solid (Javascript)",
+              "value": "solid"
+            },
+            {
+              "title": "Solid (Typescript)",
+              "value": "solid-ts"
+            },
+            {
+              "title": "Qwik (Javascript)",
+              "value": "qwik"
+            },
+            {
+              "title": "Qwik (Typescript)",
+              "value": "qwik-ts"
+            },
+            {
+              "title": "Last used",
+              "value": "last-used"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        }
+      ]
+    },
+    {
+      "name": "project-react",
+      "icon": "icons/react.png",
+      "title": "Create React Project in JS",
+      "description": "Create a project based on React & Javascript",
+      "mode": "no-view",
+      "keywords": [
+        "react",
+        "js",
+        "ts",
+        "javascript",
+        "typescript"
+      ],
+      "arguments": [
+        {
+          "name": "projectName",
+          "placeholder": "my_new_project",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "typescript",
+          "type": "checkbox",
+          "title": "Use Typescript",
+          "description": "Use Typescript instead of Javascript",
+          "default": true,
+          "required": true,
+          "label": "Use Typescript"
+        },
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        },
+        {
+          "name": "eslint",
+          "label": "Adds Eslint",
+          "title": "Linting",
+          "description": "Add Eslint @recommended to the newly created project",
+          "default": true,
+          "required": true,
+          "type": "checkbox"
+        },
+        {
+          "name": "bundler",
+          "type": "dropdown",
+          "title": "Bundler",
+          "description": "The bundler to use, if you specified no bundler, no bundler will be installed",
+          "default": "vite",
+          "required": false,
+          "data": [
+            {
+              "title": "Vite",
+              "value": "vite"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "project-vue",
+      "icon": "icons/vue.png",
+      "title": "Create Vue Project",
+      "description": "Create a project based on Vue",
+      "mode": "no-view",
+      "keywords": [
+        "vue",
+        "js",
+        "ts",
+        "javascript",
+        "typescript"
+      ],
+      "arguments": [
+        {
+          "name": "projectName",
+          "placeholder": "my_new_project",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "typescript",
+          "type": "checkbox",
+          "title": "Use Typescript",
+          "description": "Use Typescript instead of Javascript",
+          "default": true,
+          "required": true,
+          "label": "Use Typescript"
+        },
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        },
+        {
+          "name": "eslint",
+          "label": "Adds Eslint",
+          "title": "Linting",
+          "description": "Add Eslint @recommended to the newly created project",
+          "default": true,
+          "required": true,
+          "type": "checkbox"
+        },
+        {
+          "name": "bundler",
+          "type": "dropdown",
+          "title": "Bundler",
+          "description": "The bundler to use, if you specified no bundler, no bundler will be installed",
+          "default": "vite",
+          "required": false,
+          "data": [
+            {
+              "title": "Vite",
+              "value": "vite"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showEditorFirst",
+      "title": "Show editor before setup is finished",
+      "label": "Show editor first",
+      "description": "Opens the editor set for the command before the command finishes running",
+      "required": false,
+      "default": false,
+      "type": "checkbox"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "handlebars": "^4.7.8",
+    "zx": "^7.2.3"
+  },
+  "devDependencies": {
+    "@leondaz/eslint-config": "^1.0.12",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/eslint": "^8.56.2",
+    "@types/handlebars": "^4.1.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "husky": "^9.0.11",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "generate-templates": "node ./scripts/generateTypes.js",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "husky"
+  }
+}

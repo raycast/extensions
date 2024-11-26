@@ -4,7 +4,7 @@ import { SecretVersions } from './pages'
 import { getSecretUrl } from './urls'
 
 type SecretActionProps = {
-  secret: Secret.v1alpha1.Secret
+  secret: Secret.v1beta1.Secret
   toggleIsDetailOpen: () => void
 }
 

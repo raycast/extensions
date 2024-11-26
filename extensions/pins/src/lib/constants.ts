@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:31:40
- * Last modified  : 2023-11-01 00:44:17
+ * Last modified  : 2024-07-05 01:57:20
  */
 
 import { Keyboard } from "@raycast/api";
@@ -120,8 +120,8 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by date created, with the oldest items first.
    */
   OLDEST: (a, b) => {
-    const item1 = a as { dateCreated: string | undefined };
-    const item2 = b as { dateCreated: string | undefined };
+    const item1 = a as { dateCreated?: string };
+    const item2 = b as { dateCreated?: string };
     return (
       (item1.dateCreated ? new Date(item1.dateCreated) : new Date(0)).getTime() -
       (item2.dateCreated ? new Date(item2.dateCreated) : new Date(0)).getTime()
@@ -132,8 +132,8 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by date created, with the newest items first.
    */
   NEWEST: (a, b) => {
-    const item1 = a as { dateCreated: string | undefined };
-    const item2 = b as { dateCreated: string | undefined };
+    const item1 = a as { dateCreated?: string };
+    const item2 = b as { dateCreated?: string };
     return (
       (item2.dateCreated ? new Date(item2.dateCreated) : new Date(0)).getTime() -
       (item1.dateCreated ? new Date(item1.dateCreated) : new Date(0)).getTime()
@@ -144,26 +144,26 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by number of times opened, with the most frequently opened items first.
    */
   MOST_FREQUENT: (a, b) => {
-    const item1 = a as { timesOpened: number };
-    const item2 = b as { timesOpened: number };
-    return item2.timesOpened - item1.timesOpened;
+    const item1 = a as { timesOpened?: number };
+    const item2 = b as { timesOpened?: number };
+    return (item2.timesOpened || 0) - (item1.timesOpened || 0);
   },
 
   /**
    * Sorts by number of times opened, with the least frequently opened items first.
    */
   LEAST_FREQUENT: (a, b) => {
-    const item1 = a as { timesOpened: number };
-    const item2 = b as { timesOpened: number };
-    return item1.timesOpened - item2.timesOpened;
+    const item1 = a as { timesOpened?: number };
+    const item2 = b as { timesOpened?: number };
+    return (item1.timesOpened || 0) - (item2.timesOpened || 0);
   },
 
   /**
    * Sorts by first opened date, with the oldest items first.
    */
   FIRST_OPENED: (a, b) => {
-    const item1 = a as { firstOpened: string | undefined };
-    const item2 = b as { firstOpened: string | undefined };
+    const item1 = a as { firstOpened?: string };
+    const item2 = b as { firstOpened?: string };
     return (
       (item1.firstOpened ? new Date(item1.firstOpened) : new Date(0)).getTime() -
       (item2.firstOpened ? new Date(item2.firstOpened) : new Date(0)).getTime()
@@ -174,8 +174,8 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by last opened date, with the most recently opened items first.
    */
   LAST_OPENED: (a, b) => {
-    const item1 = a as { lastOpened: string | undefined };
-    const item2 = b as { lastOpened: string | undefined };
+    const item1 = a as { lastOpened?: string };
+    const item2 = b as { lastOpened?: string };
     return (
       (item2.lastOpened ? new Date(item2.lastOpened) : new Date(0)).getTime() -
       (item1.lastOpened ? new Date(item1.lastOpened) : new Date(0)).getTime()
@@ -186,8 +186,8 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by average execution time, with the fastest items first.
    */
   FASTEST: (a, b) => {
-    const item1 = a as { averageExecutionTime: number | undefined };
-    const item2 = b as { averageExecutionTime: number | undefined };
+    const item1 = a as { averageExecutionTime?: number };
+    const item2 = b as { averageExecutionTime?: number };
     return (item1.averageExecutionTime || 0) - (item2.averageExecutionTime || 0);
   },
 
@@ -195,8 +195,8 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
    * Sorts by average execution time, with the slowest items first.
    */
   SLOWEST: (a, b) => {
-    const item1 = a as { averageExecutionTime: number | undefined };
-    const item2 = b as { averageExecutionTime: number | undefined };
+    const item1 = a as { averageExecutionTime?: number };
+    const item2 = b as { averageExecutionTime?: number };
     return (item2.averageExecutionTime || 0) - (item1.averageExecutionTime || 0);
   },
 
@@ -225,4 +225,29 @@ export const SORT_FN: { [key: string]: (a: unknown, b: unknown) => number } = {
 export enum Direction {
   DOWN,
   UP,
+}
+
+/**
+ * Visibility options for pins and groups.
+ */
+export enum Visibility {
+  USE_PARENT = "use_parent",
+  VISIBLE = "visible",
+  MENUBAR_ONLY = "menubar_only",
+  VIEW_PINS_ONLY = "view_pins_only",
+  HIDDEN = "hidden",
+  DISABLED = "disabled",
+}
+
+/**
+ * Actions that can be taken on pins.
+ */
+export enum PinAction {
+  OPEN = "open",
+  COPY = "copy",
+  EDIT = "edit",
+  DELETE = "delete",
+  HIDE = "hide",
+  DISABLE = "disable",
+  MOVE = "move",
 }

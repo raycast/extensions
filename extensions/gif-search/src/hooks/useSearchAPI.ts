@@ -1,29 +1,19 @@
-import { AbortError, FetchError } from "node-fetch";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
 import tenor from "../models/tenor";
 import finergifs from "../models/finergifs";
-
 import dedupe from "../lib/dedupe";
 
-import type { IGif } from "../models/gif";
-
-interface FetchState {
-  term?: string;
-  items?: IGif[];
-  error?: Error;
-}
-
-export async function getAPIByServiceName(service: ServiceName, force?: boolean) {
+export async function getAPIByServiceName(service: ServiceName) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
-      return await giphy(force);
+      return await giphy();
     case GIF_SERVICE.GIPHY_CLIPS:
-      return await giphy(force, "videos");
+      return await giphy("videos");
     case GIF_SERVICE.TENOR:
-      return await tenor(force);
+      return await tenor();
     case GIF_SERVICE.FINER_GIFS:
       return finergifs();
     case GIF_SERVICE.FAVORITES:
@@ -34,80 +24,33 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   throw new Error(`Unable to find API for service "${service}"`);
 }
 
-export default function useSearchAPI({
-  term,
-  service,
-  limit = 10,
-}: {
+type UseSearchAPIParams = {
   term: string;
   service?: ServiceName;
   offset?: number;
   limit?: number;
-}) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [results, setResults] = useState<FetchState>();
-  const [offset, setOffset] = useState(0);
-  const prevServiceRef = useRef(service);
-  const prevTermRef = useRef(term);
-  const cancelRef = useRef<AbortController | null>(null);
+};
 
-  const search = useCallback(
-    async (searchTerm: string, searchService: ServiceName) => {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setIsLoading(true);
+export default function useSearchAPI({ term, service, limit = 10 }: UseSearchAPIParams) {
+  return useCachedPromise(
+    (term: string, service?: ServiceName) =>
+      async ({ cursor, page }) => {
+        if (!service) {
+          return { data: [], hasMore: false };
+        }
 
-      try {
-        const api = await getAPIByServiceName(searchService);
+        const api = await getAPIByServiceName(service);
         if (api === null) {
-          setResults({ items: [] });
-          setIsLoading(false);
-          return;
+          return { data: [], hasMore: false };
         }
 
-        const newItems = searchTerm
-          ? await api.search(searchTerm, { offset, limit })
-          : await api.trending({ offset, limit });
+        const { results, next } = term
+          ? await api.search(term, { limit, next: cursor, offset: page * limit })
+          : await api.trending({ limit, next: cursor, offset: page * limit });
 
-        if (searchService === prevServiceRef.current && searchTerm === prevTermRef.current) {
-          // If neither the service nor the term have changed, append the items
-          setResults({ items: dedupe([...(results?.items ?? []), ...newItems]), term: searchTerm });
-        } else {
-          // If either the service or the term have changed, replace the items
-          setResults({ items: dedupe(newItems), term: searchTerm });
-          prevServiceRef.current = searchService;
-          prevTermRef.current = searchTerm;
-        }
-      } catch (e) {
-        console.error(e);
-        const error = e as FetchError;
-        if (e instanceof AbortError) {
-          return;
-        } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
-          error.message = "Invalid credentials, please try again.";
-          await getAPIByServiceName(searchService, true);
-        }
-        setResults({ error });
-      } finally {
-        setIsLoading(false);
-      }
-
-      return () => {
-        cancelRef.current?.abort();
-      };
-    },
-    [cancelRef, setIsLoading, setResults, term, results, offset]
+        return { data: dedupe(results), hasMore: next !== "", cursor: next };
+      },
+    [term, service],
+    { keepPreviousData: true },
   );
-
-  const loadMore = () => setOffset(offset + limit);
-
-  useEffect(() => {
-    if (!service) {
-      return;
-    }
-
-    search(term, service);
-  }, [offset, term, service]);
-
-  return [results, isLoading, loadMore] as const;
 }

@@ -1,5 +1,13 @@
 # Datetime formatter Changelog
 
+## [Update] - 2024-05-21
+
+- Added customization for displayed date and time formats based on user preferences.
+
+## [Update] - 2024-05-21
+
+- Optimized the display and functionality of the extension
+
 ## [Update] - 2023-09-11
 
 - Fixed a bug where hours was shown wrongfully.

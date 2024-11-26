@@ -1,6 +1,6 @@
 # Contentful
 
-Browse and search Contentful content library
+Browse and search Contentful content and assets library.
 
 ## Setup
 
@@ -11,3 +11,7 @@ Browse and search Contentful content library
 
 3. Find your Contentful space id - https://www.contentful.com/help/find-space-id/
 4. Put token and space id in extension preferences
+
+## 🗒️ NOTE
+
+The extension uses the default locale as `en-US` so if you are using a different locale, the extension might not work properly. This might change in the future.

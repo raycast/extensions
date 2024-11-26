@@ -2,24 +2,52 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-access",
   "title": "Quick Access",
-  "description": "Quick copy, open, show the files pinned in Finder",
+  "description": "Quick access, drag and drop the files or folders pinned in Finder.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "drag",
+    "drop",
+    "access",
+    "pin",
+    "finder"
+  ],
   "commands": [
     {
       "name": "search-pins",
       "title": "Search Pins",
-      "icon": "search-pins.png",
       "subtitle": "Quick Access",
-      "description": "Quick copy, open, show the files pinned in Finder",
+      "description": "Quick access, drag and drop the files or folders pinned in Finder.",
       "mode": "view",
       "preferences": [
+        {
+          "name": "showOpenFolders",
+          "type": "checkbox",
+          "required": false,
+          "title": "Advanced",
+          "label": "Show Open Folders",
+          "description": "Show Open Folders in Finder.",
+          "default": false
+        },
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        },
         {
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the pins items.",
-          "required": true,
+          "required": false,
           "title": "Pins Layout",
           "default": "Grid",
           "data": [
@@ -38,7 +66,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the pins items. (Only works with Grid layout)",
           "required": false,
-          "title": "Pins Item Coloums",
+          "title": "Pins Item Columns",
           "default": "8",
           "data": [
             {
@@ -81,11 +109,11 @@
           "description": "Set the inset of the file items. (Only works with Grid layout)",
           "required": false,
           "title": "File Item Inset",
-          "default": "sm",
+          "default": "zero",
           "data": [
             {
               "title": "No Inset",
-              "value": ""
+              "value": "zero"
             },
             {
               "title": "Small",
@@ -102,45 +130,20 @@
           ]
         },
         {
-          "name": "showOpenFolders",
-          "type": "checkbox",
-          "required": true,
-          "title": "Advanced Preference",
-          "label": "Show Open Folders",
-          "description": "Show Open Folders in Finder.",
-          "default": false
-        },
-        {
-          "name": "autoCopyLatestFile",
-          "type": "checkbox",
-          "required": false,
-          "label": "Auto Copy Latest File",
-          "description": "Automatically copy the latest files in the topmost folder.",
-          "default": false
-        },
-        {
-          "name": "rememberTag",
-          "type": "checkbox",
-          "required": false,
-          "label": "Remember Filter Tag",
-          "description": "Remember filter tag.",
-          "default": true
-        },
-        {
           "name": "primaryAction",
           "type": "dropdown",
           "description": "Set the primary action in Search Pinned Folders command.",
           "required": false,
           "title": "Primary Action",
-          "default": "Copy",
+          "default": "Paste",
           "data": [
             {
-              "title": "Copy",
-              "value": "Copy"
+              "title": "Paste to Active App",
+              "value": "Paste"
             },
             {
-              "title": "Open",
-              "value": "Open"
+              "title": "Copy to Clipboard",
+              "value": "Copy"
             }
           ]
         },
@@ -148,21 +151,45 @@
           "name": "fileShowNumber",
           "type": "dropdown",
           "required": false,
-          "title": "Number of files shown",
+          "title": "Number of Files Shown",
           "description": "Number of files displayed per folder.",
-          "default": "All",
+          "default": "8",
           "data": [
             {
               "title": "1",
               "value": "1"
             },
             {
+              "title": "2",
+              "value": "2"
+            },
+            {
               "title": "3",
               "value": "3"
             },
             {
+              "title": "4",
+              "value": "4"
+            },
+            {
               "title": "5",
               "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
             },
             {
               "title": "10",
@@ -170,29 +197,7 @@
             },
             {
               "title": "All",
-              "value": "All"
-            }
-          ]
-        },
-        {
-          "name": "sortBy",
-          "type": "dropdown",
-          "required": false,
-          "title": "Folder Sort by",
-          "description": "Folder sorting method (default: Rank).",
-          "default": "Rank",
-          "data": [
-            {
-              "title": "Rank",
-              "value": "Rank"
-            },
-            {
-              "title": "Name ↑",
-              "value": "Name+"
-            },
-            {
-              "title": "Name ↓",
-              "value": "Name-"
+              "value": "-1"
             }
           ]
         }
@@ -200,10 +205,9 @@
     },
     {
       "name": "search-pins-menu-bar",
-      "title": "Search Pins",
-      "icon": "search-pins-menu-bar.png",
+      "title": "Menubar Pins",
       "subtitle": "Quick Access",
-      "description": "Quick copy, open, show the files pinned in Finder from menu bar",
+      "description": "Quick access the files or folders pinned in Finder from menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -213,23 +217,23 @@
           "title": "Advanced Preference",
           "label": "Show Open Folders",
           "description": "Show Open Folders in Finder.",
-          "default": true
+          "default": false
         },
         {
           "name": "primaryAction",
           "type": "dropdown",
           "description": "Set the primary action in Search Pinned Folders command.",
-          "required": true,
+          "required": false,
           "title": "Primary Action",
-          "default": "Copy",
+          "default": "Paste",
           "data": [
             {
-              "title": "Copy",
-              "value": "Copy"
+              "title": "Paste to Active App",
+              "value": "Paste"
             },
             {
-              "title": "Open",
-              "value": "Open"
+              "title": "Copy to Clipboard",
+              "value": "Copy"
             }
           ]
         }
@@ -238,27 +242,25 @@
     {
       "name": "pin",
       "title": "Pin",
-      "icon": "pin.png",
       "subtitle": "Quick Access",
-      "description": "Pin files or folders that can be accessed quickly. To use this command, you need to select files/folders or open a Finder window first.",
-      "mode": "no-view"
+      "description": "Pin files or folders that can be accessed quickly.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.0",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
     "file-url": "^4.0.0",
-    "fs-extra": "^10.1.0",
-    "run-applescript": "^6.0.0"
+    "fs-extra": "^11.2.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

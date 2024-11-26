@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, Grid, showHUD, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Grid, Icon, List, getPreferenceValues, showHUD } from "@raycast/api";
+import fs from "fs";
+import he from "he";
 import React from "react";
+import { Preferences, PrimaryAction, ViewLayout } from "../lib/types";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
 import { ChannelItemDetailFetched } from "./channel";
-import { addRecentVideo, PinnedVideoActions, PinVideo, RecentVideoActions } from "./recent_videos";
-import fs from "fs";
-import he from "he";
-import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
+import { PinVideo, PinnedVideoActions, RecentVideoActions, addRecentVideo } from "./recent_videos";
 
 export interface VideoActionProps {
   video: Video;
@@ -180,7 +180,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
           <OpenWithIINAAction {...props} />
         </ActionPanel.Section>
         {props.recent && <RecentVideoActions {...props} />}
-        {props.pinned ? <PinnedVideoActions {...props} /> : <PinVideo {...props} />}
+        {!props.recent && (!props.pinned ? <PinVideo {...props} /> : <PinnedVideoActions {...props} />)}
       </ActionPanel>
     );
   };
@@ -188,7 +188,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
   return view === ViewLayout.List ? (
     <List.Item
       key={video.id}
-      title={title}
+      title={{ value: title, tooltip: title }}
       accessories={[{ text: parts.join(" ") }]}
       icon={{ source: thumbnail }}
       actions={<Actions />}
@@ -198,7 +198,7 @@ export function VideoItem(props: VideoItemProps): JSX.Element {
       key={video.id}
       title={title}
       subtitle={parts.join(" ")}
-      content={{ source: thumbnail }}
+      content={{ value: thumbnail, tooltip: title }}
       actions={<Actions />}
     />
   );

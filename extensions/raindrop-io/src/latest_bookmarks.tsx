@@ -9,13 +9,9 @@ import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function LatestBookmarks() {
   const preferences: Preferences = getPreferenceValues();
-  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(
-    "last-used-collection",
-    "0"
-  );
+  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
 
-  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } =
-    useLastUsedCollection();
+  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } = useLastUsedCollection();
 
   useEffect(() => {
     const fetchLastUsedCollection = async () => {
@@ -26,10 +22,7 @@ export default function LatestBookmarks() {
   }, []);
 
   const defaultCollection = preferences.useLastCollection ? lastUsedCollection : "0";
-  const [collection, setCollection] = useCachedState<string>(
-    "selected-collection",
-    defaultCollection
-  );
+  const [collection, setCollection] = useCachedState<string>("selected-collection", defaultCollection);
 
   const { isLoading, bookmarks, collections, revalidate } = useRequest({ collection });
 

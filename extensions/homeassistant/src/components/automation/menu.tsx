@@ -1,4 +1,4 @@
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { getIcon, getStateValue } from "@components/state/utils";
 import { State } from "@lib/haapi";
@@ -29,7 +29,7 @@ function AutomationTurnOnMenubarItem(props: { state: State }) {
   return (
     <AutomationMenubarItemBase
       state={props.state}
-      icon="power-btn.png"
+      icon="power.svg"
       title="Turn On"
       actionFunction={callAutomationTurnOnService}
       hide={props.state.state === "on"}
@@ -41,7 +41,7 @@ function AutomationTurnOffMenubarItem(props: { state: State }) {
   return (
     <AutomationMenubarItemBase
       state={props.state}
-      icon="power-btn.png"
+      icon="power-on.svg"
       title="Turn Off"
       actionFunction={callAutomationTurnOffService}
       hide={props.state.state === "off"}
@@ -68,6 +68,7 @@ export function AutomationMenubarItem(props: { state: State }) {
       <AutomationTurnOnMenubarItem state={s} />
       <AutomationTurnOffMenubarItem state={s} />
       <AutomationTriggerMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

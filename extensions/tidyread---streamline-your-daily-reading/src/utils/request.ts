@@ -103,13 +103,13 @@ export async function isValidRSSLink(url: string): Promise<boolean> {
   if (!isURL(url)) return false;
 
   const response = await request(url, undefined, 20 * 1000);
-  const contentType = response.headers.get("content-type");
+  // const contentType = response.headers.get("content-type");
   const text = await response.text();
 
-  // 检查内容类型是否为 XML
-  if (!contentType || !contentType.includes("xml")) {
-    return false;
-  }
+  // 检查内容类型是否为 XML、text/plain
+  // if (!contentType || !contentType.includes("xml")) {
+  //   return false;
+  // }
 
   // 检查是否包含 RSS 特有的标签
   return text.includes("<rss") || text.includes("<channel") || text.includes("<feed");

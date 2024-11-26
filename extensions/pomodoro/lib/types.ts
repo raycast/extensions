@@ -23,6 +23,7 @@ export type Preferences = {
   focusIntervalDuration: string;
   shortBreakIntervalDuration: string;
   longBreakIntervalDuration: string;
+  enableFocusWhileFocused: boolean;
   completionImage: string;
   sound: string;
   enableTimeOnMenuBar: boolean;
@@ -36,9 +37,11 @@ export type IntervalType = "focus" | "short-break" | "long-break";
 type Part = {
   startedAt: number;
   pausedAt?: number;
+  endAt?: number;
 };
 
 export type Interval = {
+  id: number;
   parts: Part[];
   length: number;
   type: IntervalType;
@@ -50,10 +53,7 @@ export type IntervalExecutor = {
 };
 
 export type Quote = {
-  _id: string;
-  content: string;
-  author: string;
-  authorSlug: string;
-  length: number;
-  tags: string[];
+  q: string;
+  a: string;
+  h: string;
 };

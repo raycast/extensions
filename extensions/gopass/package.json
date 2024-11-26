@@ -9,6 +9,9 @@
   ],
   "icon": "icon.png",
   "author": "bake",
+  "contributors": [
+    "buchanan"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,7 +23,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0"
+    "@raycast/api": "^1.36.0",
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

@@ -1,5 +1,9 @@
 # shadcn/ui Changelog
 
+## [Update shadcn/ui add component command] - 2024-09-11
+
+- Updated Add Component command from `npx shadcn-ui@latest add {component}` to `npx shadcn@latest add {component}`
+
 ## [Update to shadcn/ui January 2024 version] - 2024-01-15
 
 - Added Remix Dark Mode to Search Documentation

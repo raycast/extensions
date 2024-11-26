@@ -1,8 +1,7 @@
-import _ from "lodash";
 import { useSQL } from "@raycast/utils";
+import _ from "lodash";
 import { homedir } from "os";
 import { resolve } from "path";
-
 import { HistoryItem } from "../types";
 import { safariAppIdentifier } from "../utils";
 

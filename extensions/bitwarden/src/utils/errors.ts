@@ -21,6 +21,14 @@ export class CLINotFoundError extends DisplayableError {
   }
 }
 
+export class InstalledCLINotFoundError extends DisplayableError {
+  constructor(message: string, stack?: string) {
+    super(message ?? "Bitwarden CLI not found", stack);
+    this.name = "InstalledCLINotFoundError";
+    this.stack = stack;
+  }
+}
+
 export class FailedToLoadVaultItemsError extends ManuallyThrownError {
   constructor(message?: string, stack?: string) {
     super(message ?? "Failed to load vault items", stack);
@@ -42,14 +50,34 @@ export class NotLoggedInError extends ManuallyThrownError {
   }
 }
 
-/* -- error utils below -- */
-
 export class EnsureCliBinError extends DisplayableError {
   constructor(message?: string, stack?: string) {
     super(message ?? "Failed do download Bitwarden CLI", stack);
     this.name = "EnsureCliBinError";
   }
 }
+
+export class PremiumFeatureError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "Premium status is required to use this feature", stack);
+    this.name = "PremiumFeatureError";
+  }
+}
+export class SendNeedsPasswordError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "This Send has a is protected by a password", stack);
+    this.name = "SendNeedsPasswordError";
+  }
+}
+
+export class SendInvalidPasswordError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "The password you entered is invalid", stack);
+    this.name = "SendInvalidPasswordError";
+  }
+}
+
+/* -- error utils below -- */
 
 export function tryExec<T>(fn: () => T): T extends void ? T : T | undefined;
 export function tryExec<T, F>(fn: () => T, fallbackValue: F): T | F;

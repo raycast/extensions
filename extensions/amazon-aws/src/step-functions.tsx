@@ -1,42 +1,41 @@
-import { StateMachineListItem, SFNClient, ListStateMachinesCommand } from "@aws-sdk/client-sfn"; // ES Modules import
+import { ListStateMachinesCommand, SFNClient, StateMachineListItem, StateMachineType } from "@aws-sdk/client-sfn"; // ES Modules import
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function StepFunctions() {
-  const { data: stateMachineListItems, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
+  const { data: stateMachineListItems, error, isLoading, revalidate } = useCachedPromise(fetchStateMachines);
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter functions by name..."
+      searchBarPlaceholder="Filter state machines by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
         stateMachineListItems?.map((stateMachineListItem) => (
-          <StepFunction key={stateMachineListItem.name} stateMachineListItem={stateMachineListItem} />
+          <StateMachine key={stateMachineListItem.name} item={stateMachineListItem} />
         ))
       )}
     </List>
   );
 }
 
-function StepFunction({ stateMachineListItem }: { stateMachineListItem: StateMachineListItem }) {
+function StateMachine({ item }: { item: StateMachineListItem }) {
   return (
     <List.Item
       icon={"aws-icons/states.png"}
-      title={stateMachineListItem.name || ""}
+      title={item.name || ""}
+      accessories={[{ tag: item.type || StateMachineType.STANDARD }]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(stateMachineListItem.stateMachineArn, "AWS::StepFunctions::StateMachine")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(item.stateMachineArn, "AWS::StepFunctions::StateMachine")} />
           <ActionPanel.Section title={"Copy"}>
-            <Action.CopyToClipboard title="Copy Function ARN" content={stateMachineListItem.stateMachineArn || ""} />
-            <Action.CopyToClipboard title="Copy Function Name" content={stateMachineListItem.name || ""} />
+            <Action.CopyToClipboard title="Copy State Machine ARN" content={item.stateMachineArn || ""} />
+            <Action.CopyToClipboard title="Copy State Machine Name" content={item.name || ""} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -44,16 +43,16 @@ function StepFunction({ stateMachineListItem }: { stateMachineListItem: StateMac
   );
 }
 
-async function fetchFunctions(
+async function fetchStateMachines(
   nextMarker?: string,
-  stateMachinesOfTotal?: StateMachineListItem[],
+  aggregatedStateMachines?: StateMachineListItem[],
 ): Promise<StateMachineListItem[]> {
   const client = new SFNClient({});
   const command = new ListStateMachinesCommand({ nextToken: nextMarker });
   const { nextToken, stateMachines } = await client.send(command);
-  const combinedFunctions = [...(stateMachinesOfTotal || []), ...(stateMachines || [])];
+  const combinedStateMachines = [...(aggregatedStateMachines || []), ...(stateMachines || [])];
   if (nextToken) {
-    return fetchFunctions(nextToken, combinedFunctions);
+    return fetchStateMachines(nextToken, combinedStateMachines);
   }
-  return combinedFunctions;
+  return combinedStateMachines;
 }

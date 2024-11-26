@@ -1,16 +1,7 @@
-import {
-  Action,
-  Clipboard,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  closeMainWindow,
-} from "@raycast/api";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
 import { execFileSync } from "child_process";
 
-import { CLI_PATH, titleCaseWord } from "../utils";
+import { CLI_PATH, ExtensionError, handleErrors, titleCaseWord } from "../utils";
 
 export function CopyToClipboard({
   id,
@@ -36,30 +27,50 @@ export function CopyToClipboard({
           title: `Copying ${field}...`,
         });
         try {
-          const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
-          const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
-          const stdout = execFileSync(CLI_PATH!, ["read", uri]);
+          let stdout;
+          if (attribute === "otp") {
+            // based on OTP-type not field name
+            stdout = execFileSync(CLI_PATH, ["item", "get", id, "--otp"]);
+          } else {
+            const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
+            const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+            stdout = execFileSync(CLI_PATH, ["read", uri]);
+          }
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;
           toast.title = "Copied to clipboard";
+          await showHUD(`Copied ${field} to clipboard`);
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to copy";
-          if (error instanceof Error) {
-            toast.message = error.message;
-            toast.primaryAction = {
-              title: "Copy logs",
-              onAction: async (toast) => {
-                await Clipboard.copy((error as Error).message);
-                toast.hide();
-              },
-            };
-          }
-        } finally {
-          const preferences = getPreferenceValues<Preferences>();
-          if (preferences.closeWindowAfterCopying) {
-            await closeMainWindow();
+          if (error instanceof Error || error instanceof ExtensionError) {
+            try {
+              handleErrors(error.message);
+            } catch (err) {
+              if (err instanceof ExtensionError) {
+                if (err.title != err.message) {
+                  toast.message = err.message;
+                }
+                toast.title = err.title;
+                toast.primaryAction = {
+                  title: "Copy logs",
+                  onAction: async (toast) => {
+                    await Clipboard.copy((err as Error).message);
+                    toast.hide();
+                  },
+                };
+              } else if (err instanceof Error) {
+                toast.title = err.message;
+                toast.primaryAction = {
+                  title: "Copy logs",
+                  onAction: async (toast) => {
+                    await Clipboard.copy((err as Error).message);
+                    toast.hide();
+                  },
+                };
+              }
+            }
           }
         }
       }}

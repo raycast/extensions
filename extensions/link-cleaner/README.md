@@ -2,6 +2,14 @@
 
 Quickly remove tracking parameters in URLs from clipboard.
 
+Supported:
+1. Google Search
+2. Baidu Search
+3. Bing Search
+4. Netease Music
+5. Youtube
+6. Instagram
+
 ## Example
 
 ```

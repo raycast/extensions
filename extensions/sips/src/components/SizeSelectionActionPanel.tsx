@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 16:46:33
- * Last modified  : 2023-07-06 16:46:49
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import os from "os";
@@ -16,6 +16,7 @@ import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from 
 import { generatePlaceholder } from "../utilities/generators";
 import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
 import ImagePatternGrid from "./ImagePatternGrid";
+import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
 /**
  * Action panel for the image size selection grid.
@@ -37,7 +38,7 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
         title={`Create ${width}x${height} Placeholder`}
         icon={Icon.Image}
         onAction={async () => {
-          const destinations = getDestinationPaths([path.join(os.tmpdir(), `${width}x${height}.png`)], true);
+          const destinations = await getDestinationPaths([path.join(os.tmpdir(), `${width}x${height}.png`)], true);
           const toast = await showToast({ title: "Creating Placeholder...", style: Toast.Style.Animated });
           try {
             await generatePlaceholder(width, height, destinations[0]);
@@ -51,6 +52,15 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
           }
         }}
       />
+      <Action.CreateQuicklink
+        title="Create QuickLink"
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        quicklink={{
+          name: `Create ${width}x${height} Image`,
+          link: `raycast://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(JSON.stringify({ imageWidth: width, imageHeight: height }))}`,
+        }}
+      />
+
       <ActionPanel.Section title="Clipboard Actions">
         <Action
           title="Paste Placeholder In Active App"
@@ -83,6 +93,7 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
           }}
         />
       </ActionPanel.Section>
+      <SettingsActionPanelSection />
     </ActionPanel>
   );
 }

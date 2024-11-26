@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
 ## [Use OAuth Utils] - 2024-02-01
 
 Use new OAuth utils

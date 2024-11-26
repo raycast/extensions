@@ -1,4 +1,4 @@
-import { Organization, Comment, User, IssueNotification } from "@linear/sdk";
+import { Organization, Comment, User, IssueNotification, ProjectUpdate, Project, ActorBot } from "@linear/sdk";
 import { IssueFragment, IssueResult } from "./getIssues";
 import { getLinearClient } from "../api/linearClient";
 
@@ -6,11 +6,17 @@ export type NotificationResult = Pick<
   IssueNotification,
   "id" | "type" | "createdAt" | "readAt" | "reactionEmoji" | "snoozedUntilAt"
 > & {
-  comment: Pick<Comment, "body">;
+  comment?: Pick<Comment, "body" | "url">;
 } & {
   issue?: IssueResult;
 } & {
   actor?: Pick<User, "displayName" | "avatarUrl">;
+} & {
+  projectUpdate?: Pick<ProjectUpdate, "url">;
+} & {
+  project?: Pick<Project, "url" | "name">;
+} & {
+  botActor?: Pick<ActorBot, "name">;
 };
 
 export type OrganizationResult = Pick<Organization, "urlKey">;
@@ -34,10 +40,26 @@ export async function getNotifications() {
               displayName
               avatarUrl
             }
+            botActor {
+              name
+            }
             ... on IssueNotification {
               reactionEmoji
+              comment {
+                body
+                url
+              }
               issue {
                 ${IssueFragment}
+              }
+            }
+            ... on ProjectNotification {
+              project {
+                url
+                name
+              }
+              projectUpdate {
+                url
               }
             }
           }

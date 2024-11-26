@@ -7,9 +7,20 @@
   "author": "klaa97",
   "contributors": [
     "edomora97",
-    "hisomura"
+    "hisomura",
+    "m-gentil"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "skipSysPrefixedProjects",
+      "description": "Enable this option to exclude Google Cloud projects that are automatically generated with a 'sys-' prefix whenever a new App Script project is created in Google Workspace.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Skip 'sys-' prefixed projects"
+    }
+  ],
   "commands": [
     {
       "name": "searchProjects",
@@ -27,7 +38,7 @@
     }
   ],
   "dependencies": {
-    "@google-cloud/resource-manager": "^5.1.0",
+    "@google-cloud/resource-manager": "^5.3.0",
     "@raycast/api": "^1.68.1",
     "node-fetch": "^3.3.2"
   },

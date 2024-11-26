@@ -26,35 +26,25 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.9.1";
-  buildNumber = 27;
-  versionDate = "2024-01-08";
+  version = "2.9.3";
+  buildNumber = 29;
+  versionDate = "2024-09-13";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 💎 优化
+### 🐞 修复
 
-- 支持自定义 OpenAI API URL，感谢 [liyaodong](https://github.com/liyaodong) 的 PR。
-- 优化了语种识别功能，添加百度语种识别为默认选项。
-
-#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
-
-## 推荐
-
-我另一个免费开源项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的词典翻译 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎 苹果系统词典，🍎 苹果系统翻译，ChatGPT，DeepL，Google，Bing，腾讯，百度，阿里，小牛，彩云和火山翻译。
-
-![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+- 修复了 Bing 语种识别 API 失败，导致查询过程卡住问题。https://github.com/raycast/extensions/issues/14357
 
 ---
 
-### ✨ New Features
+### 🐞 Fixed
 
-- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
+- Fixed Bing language detection API failed, which caused the query process to hang. https://github.com/raycast/extensions/issues/14357
 `;
-
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
   }

@@ -130,6 +130,15 @@
           "default": false
         },
         {
+          "name": "fuzzySearch",
+          "type": "checkbox",
+          "label": "Use Fuzzy Search",
+          "title": "Use Fuzzy Search",
+          "required": false,
+          "description": "If fuzzy search should be used",
+          "default": false
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -570,6 +579,7 @@
   "dependencies": {
     "@raycast/api": "^1.47.0",
     "@types/uuid": "^8.3.4",
+    "fuse.js": "^7.0.0",
     "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"

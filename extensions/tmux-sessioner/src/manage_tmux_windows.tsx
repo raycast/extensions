@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, launchCommand, LaunchType } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, launchCommand, LaunchType, Color } from "@raycast/api";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 import { getAllWindow, switchToWindow, TmuxWindow, deleteWindow } from "./utils/windowUtils";
 
@@ -8,6 +8,7 @@ export default function ManageTmuxWindows() {
   const [isLoading, setIsLoading] = useState(true);
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
+  // Init list of windows
   const setupListWindows = () => {
     getAllWindow((error, stdout) => {
       if (error) {
@@ -38,6 +39,7 @@ export default function ManageTmuxWindows() {
     });
   };
 
+  // Terminal Setup Check
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -79,9 +81,17 @@ export default function ManageTmuxWindows() {
       {windows.map((window, index) => (
         <List.Item
           key={index}
-          icon={Icon.Window}
-          title={window.windowName}
-          subtitle={window.sessionName}
+          icon={Icon.Gear}
+          keywords={[window.sessionName, window.windowName]}
+          title={{
+            value: window.windowName,
+            tooltip: `Session: ${window.sessionName} / Window No: ${window.windowIndex}`,
+          }}
+          accessories={[
+            {
+              text: { value: window.sessionName, color: Color.Green },
+            },
+          ]}
           actions={
             <ActionPanel>
               <Action title="Switch To Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />

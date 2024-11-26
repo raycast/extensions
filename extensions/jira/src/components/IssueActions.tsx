@@ -24,6 +24,7 @@ import { slugify } from "../helpers/string";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
+import IssueChildIssues from "./IssueChildIssues";
 import IssueCommentForm from "./IssueCommentForm";
 import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
@@ -33,6 +34,7 @@ type IssueActionsProps = {
   mutate?: MutatePromise<Issue[] | undefined>;
   mutateDetail?: MutatePromise<Issue | TIssueDetail | null>;
   showDetailsAction?: boolean;
+  showChildIssuesAction?: boolean;
   showAttachmentsAction?: boolean;
 };
 
@@ -46,10 +48,11 @@ export default function IssueActions({
   mutate,
   mutateDetail,
   showDetailsAction,
+  showChildIssuesAction,
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
-  const issueUrl = `${siteUrl}/browse/${issue.key}`;
+  const issueUrl = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
 
   async function mutateWithOptimisticUpdate({ asyncUpdate, optimisticUpdate }: MutateParams) {
     if (mutate) {
@@ -166,6 +169,14 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        {showChildIssuesAction && (
+          <Action.Push
+            target={<IssueChildIssues issue={issue} />}
+            title="Open Child Issues"
+            icon={Icon.Tree}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        )}
         <ChangePrioritySubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
@@ -238,6 +249,12 @@ export default function IssueActions({
           title="Copy Git Branch Name"
           content={`${issue.key}-${slugify(issue.fields.summary)}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${issue.key} - ${issue.fields.summary}](${issueUrl})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "," }}
         />
       </ActionPanel.Section>
 
@@ -455,6 +472,19 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
     }
   }
 
+  function formattedTitle(transition: Transition): string {
+    if (!transition.name) {
+      return "Unknown status name";
+    }
+    if (!transition.to.name) {
+      return transition.name;
+    }
+    if (transition.name === transition.to.name) {
+      return transition.name;
+    }
+    return `${transition.name} -> ${transition.to.name}`;
+  }
+
   return (
     <ActionPanel.Submenu
       title="Change Status"
@@ -473,7 +503,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={transition.id}
-              title={transition.name ?? "Unknown status name"}
+              title={formattedTitle(transition)}
               onAction={() => changeTransition(transition)}
             />
           );

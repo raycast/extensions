@@ -1,11 +1,10 @@
-export interface Preferences {
-  showBrowser: boolean;
-  showEmail: boolean;
-  showOther: boolean;
-  showAll: boolean;
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
   layout: string;
   columns: string;
   itemInset: string;
   surfEngine: string;
-  sortBy: string;
 }
+
+export const { layout, columns, itemInset, surfEngine } = getPreferenceValues<Preferences>();

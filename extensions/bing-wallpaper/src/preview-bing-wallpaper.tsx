@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { BingImage, DownloadedBingImage } from "./types/types";
 import fileUrl from "file-url";
 import { buildBingImageURL, getPictureName } from "./utils/bing-wallpaper-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
-import { downloadPicture, setDownloadedWallpaper, setWallpaper } from "./utils/common-utils";
-import { Preferences } from "./types/preferences";
+import { downloadPicture, setLocalWallpaper, setOnlineWallpaper } from "./utils/common-utils";
+import { downloadSize } from "./types/preferences";
 
 export default function PreviewBingWallpaper(props: {
   isOnline: boolean;
@@ -13,7 +13,6 @@ export default function PreviewBingWallpaper(props: {
   onlineImages: BingImage[];
   downloadedImage: DownloadedBingImage[];
 }) {
-  const { downloadSize } = getPreferenceValues<Preferences>();
   const { isOnline, index, onlineImages, downloadedImage } = props;
   const imagesLength = onlineImages.length + downloadedImage.length;
   const [pageIndex, setPageIndex] = useState<{ index: number; isOnline: boolean }>({
@@ -57,12 +56,12 @@ export default function PreviewBingWallpaper(props: {
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => {
                 if (pageIndex.isOnline) {
-                  setWallpaper(
+                  setOnlineWallpaper(
                     getPictureName(onlineImages[pageIndex.index].url),
                     buildBingImageURL(onlineImages[pageIndex.index].url, "raw"),
                   ).then(() => "");
                 } else {
-                  setDownloadedWallpaper(downloadedImage[pageIndex.index - onlineImages.length].path).then(() => "");
+                  setLocalWallpaper(downloadedImage[pageIndex.index - onlineImages.length].path).then(() => "");
                 }
               }}
             />

@@ -1,5 +1,10 @@
 # Summarize YouTube Video Changelog
 
+## [Fixes] - 2024-05-01
+
+- ⬆️ Upgraded dependencies
+- 🐛 Fixed an issue with fetching transcripts
+
 ## [Minor Improvements] - 2023-06-02
 
 - 📝 update readme for clarity

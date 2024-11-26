@@ -1,27 +1,31 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { parse } from "path";
+import { Alert, confirmAlert, Icon } from "@raycast/api";
+import ActionStyle = Alert.ActionStyle;
 import { GistItem } from "./gist-utils";
-import Values = LocalStorage.Values;
-
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    personalAccessTokens: preferencesMap.get("access-token"),
-    rememberTag: preferencesMap.get("remember-tag"),
-    detail: preferencesMap.get("detail"),
-    primaryAction: preferencesMap.get("primary-action"),
-    perPage: parseInt(preferencesMap.get("perPage")),
-  };
-};
-export const preference = commonPreferences();
+import { encodeURI } from "js-base64";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
+export const raySo = (title: string, content: string) =>
+  `https://ray.so/#colors=cnady&background=true&darkMode=false&padding=32&title=${title}&code=${encodeURI(content)}&language=auto`;
+
 export const imgExt = [".svg", ".gif", ".jpg", ".jpeg", ".png"];
 
-export const getGistDetailContent = (gistFile: GistItem, gistFileContent: string) => {
+export function formatBytes(bytes: number | undefined, decimals = 2) {
+  if (!bytes || bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+}
+
+export const formatGistContentDetail = (gistFile: GistItem, gistFileContent: string) => {
   const gistFileExt = parse(gistFile.filename).ext;
 
   if (gistFileExt == ".md") {
@@ -35,5 +39,27 @@ export const getGistDetailContent = (gistFile: GistItem, gistFileContent: string
   return "```" + gistFile.language + "\n" + gistFileContent + "\n```";
 };
 
-export const raySo = (title: string, content: string) =>
-  `https://ray.so/?colors=cnady&background=true&darkMode=false&padding=32&title=${title}&code=${content}&language=auto`;
+export const alertDialog = async (
+  icon: Icon,
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction?: () => void,
+) => {
+  const options: Alert.Options = {
+    icon: icon,
+    title: title,
+    message: message,
+    primaryAction: {
+      style: ActionStyle.Destructive,
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
+};

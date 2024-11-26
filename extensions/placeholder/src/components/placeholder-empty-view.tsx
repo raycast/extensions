@@ -1,6 +1,5 @@
 import { ActionPanel, Grid, List } from "@raycast/api";
-import React from "react";
-import { ActionOpenPreferences } from "./action-open-preferences";
+import { ActionOpenPreferences } from "@/components/action-open-preferences";
 
 export function PlaceholderEmptyView(props: { layout: string }) {
   const { layout } = props;

@@ -1,11 +1,7 @@
 {
   "root": true,
-  "plugins": [
-    "import"
-  ],
-  "extends": [
-    "@raycast"
-  ],
+  "plugins": ["import"],
+  "extends": ["@raycast"],
   "rules": {
     "import/order": [
       "error",

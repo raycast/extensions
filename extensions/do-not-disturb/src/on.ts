@@ -1,5 +1,6 @@
-import { turnOnDND } from "./utils";
+import { LaunchContext, turnOnDND } from "./utils";
 
-export default async () => {
-  await turnOnDND();
+export default async ({ launchContext = {} }: { launchContext?: LaunchContext }) => {
+  const { suppressHUD } = launchContext;
+  await turnOnDND(suppressHUD);
 };

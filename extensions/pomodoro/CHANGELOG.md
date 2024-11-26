@@ -1,5 +1,35 @@
 # Pomodoro Changelog
 
+## [Chore & Fixes] - 2024-11-21
+
+- Bump all dependencies to the latest
+- Fix confirm dialog not showing issue
+- Fix cross-extension prompt if `Enable Mac Do Not Disturb while Focused` is disabled
+
+## [Enhancement] - 2024-10-31
+
+Offers the option to enable Apple's default Do Not Disturb mode when Pomodoro timer is on "Focus" mode
+
+## [Fixed wording] - 2024-10-21
+
+Fixed wording in the Stats command
+
+## [Bugfix] - 2024-07-27
+
+Fixed issue ([#13417](https://github.com/raycast/extensions/issues/13417)) where quotes are not loaded from quotable.io. Moved to zenquotes.io
+
+## [Enhancement] - 2024-06-07
+
+Add option to restart current interval/timer from one click in the menu bar
+
+## [Enhancement] - 2024-04-23
+
+Add recap page to displays information about your prev pomodoro sessions like (total time, total sessions number, back to back sessions,..)
+
+## [Enhancement] - 2024-02-27
+
+Added support for slack to change status during interval, the two new commands are disabled by default
+
 ## [Enhancement] - 2024-02-16
 
 Added option to use a quote on timer completion, and added option to disable the image on timer completion.
@@ -38,6 +68,6 @@ Added preference textbox for a markdown image link to render after interval comp
 
 ## [Fix] - 2023-01-03
 
-Fixed so menubar icons works with both light and dark background 
+Fixed so menubar icons works with both light and dark background
 
 ## [Initial Version] - 2022-12-19

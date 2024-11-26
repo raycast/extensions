@@ -385,7 +385,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToXML: added XML to clipboard")
 			
-			return true
+			return newClip
 			
 		end clipboardConvertToXML
 		

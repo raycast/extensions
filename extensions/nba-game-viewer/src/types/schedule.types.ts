@@ -1,32 +1,30 @@
-type Day = {
-  date: string;
-  games: Array<Game>;
-};
-
-type Game = {
+export type Game = {
   id: string;
   name: string;
   shortName: string;
-  time: string;
+  date: string;
   competitors: Array<Competitor>;
   status: Status;
-  stream: string;
+  stream?: string;
 };
 
-type Competitor = {
+export type Competitor = {
   displayName: string;
   abbreviation: string;
   shortName: string;
-  score: string;
   logo: string;
   home: string;
+  score: string;
 };
 
-type Status = {
+export type Status = {
   period: number;
-  clock: number;
+  clock: string;
   completed: boolean;
   inProgress: boolean;
 };
 
-export type { Day, Game, Competitor, Status };
+export type Day = {
+  date: string;
+  games: Array<Game>;
+};

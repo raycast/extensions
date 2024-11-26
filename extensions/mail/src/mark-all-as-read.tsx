@@ -1,4 +1,4 @@
-import { Toast, showHUD, showToast } from "@raycast/api";
+import { Toast, showToast, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 async function script(): Promise<void> {
@@ -24,16 +24,19 @@ async function script(): Promise<void> {
 end tell
   `;
 
-  runAppleScript(script);
+  await runAppleScript(script);
 }
 
 export default async function MarkAllAsRead() {
+  await closeMainWindow();
   try {
+    await showToast(
+      Toast.Style.Animated,
+      "Closing the Mail window for better performance, The window will reappear when this is done.",
+    );
     await script();
-    showHUD("Closing the Mail window for better performance, The window will reappear when this is done.");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to mark all emails as read");
-    console.error(error);
     return;
   }
 

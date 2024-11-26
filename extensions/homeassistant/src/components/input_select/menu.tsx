@@ -1,10 +1,10 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
-import { MenuBarSubmenu } from "@components/menu";
-import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { Icon, MenuBarExtra } from "@raycast/api";
 import { callInputSelectSelectOptionService, getInputSelectSelectableOptions } from "./utils";
-import { getIcon } from "@components/state/utils";
 
 function InputSelectSetStateMenubarItem(props: { state: State }) {
   const options = getInputSelectSelectableOptions(props.state);
@@ -25,6 +25,7 @@ export function InputSelectMenubarItem(props: { state: State }) {
   return (
     <MenuBarSubmenu title={getFriendlyName(s)} subtitle={s.state} icon={getIcon(s)}>
       <InputSelectSetStateMenubarItem state={s} />
+      <LastUpdateChangeMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );

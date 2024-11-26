@@ -4,7 +4,7 @@ import * as path from "node:path";
 import dedent from "ts-dedent";
 
 import { LinkFormState } from "../hooks/use-link-form";
-import { File, FrontMatter } from "../types";
+import { File, FrontMatter, Preferences } from "../types";
 
 import { fileExists } from "./file-utils";
 import getPublisher from "./get-publisher";
@@ -13,6 +13,7 @@ import { addToLocalStorageTags } from "./localstorage-tags";
 import slugify from "./slugify";
 import tagify from "./tagify";
 import { getOrCreateBookmarksPath } from "./vault-path";
+import { getPreferenceValues } from "@raycast/api";
 
 function formatDate(date: Date): string {
   const year = String(date.getFullYear()).padStart(4, "0");
@@ -63,7 +64,9 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   tags: ${JSON.stringify(attributes.tags)}
   `;
 
-  const fileSlug = `${formatDate(midnight)}-${slugify(attributes.title)}`.slice(0, 150);
+  const { datePrefix } = getPreferenceValues<Preferences>();
+  const prefix = datePrefix ? formatDate(midnight) + "-" : "";
+  const fileSlug = `${prefix}${slugify(attributes.title)}`.slice(0, 150);
   const baseName = `${fileSlug}.md`;
   const fullPath = await getFileName(baseName);
   const fileName = path.basename(fullPath);

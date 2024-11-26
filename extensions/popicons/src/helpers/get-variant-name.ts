@@ -1,5 +1,5 @@
 import { PopiconVariant } from "../enums/popicon-variant";
-import { exhaustive } from "../utilities/exhaustive";
+import { exhaustive } from "./exhaustive";
 
 function getVariantName(variant: PopiconVariant): string {
   switch (variant) {

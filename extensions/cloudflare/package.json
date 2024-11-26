@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "contributors": [
-    "niklaswa"
+    "niklaswa",
+    "teziovsky"
   ],
   "commands": [
     {
@@ -52,9 +53,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.11.20",
-    "@types/react": "^18.2.58",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@types/node": "~20.11.22",
+    "@types/react": "^18.2.60",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",

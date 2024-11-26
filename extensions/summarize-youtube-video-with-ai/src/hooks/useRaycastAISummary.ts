@@ -58,7 +58,7 @@ const useRaycastAISummary = async ({ transcript, setSummaryIsLoading, setSummary
         index,
         splitTranscripts.length,
         summaryBlock,
-        RAYCASTAI_SUMMARY_MAX_CHARS
+        RAYCASTAI_SUMMARY_MAX_CHARS,
       );
 
       const result = await fetchAiAnswer(aiInstructions);

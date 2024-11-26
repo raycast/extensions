@@ -362,7 +362,10 @@
     "shaoye",
     "charlej",
     "emlez",
-    "hendrikbunnick"
+    "hendrikbunnick",
+    "stelo",
+    "romanschmid",
+    "jessedobbelaere"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

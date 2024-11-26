@@ -1,4 +1,4 @@
-import { List, Image, Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
@@ -79,19 +79,19 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.url}
                     title="Copy Commit URL"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   />
 
                   <Action.CopyToClipboard
-                    content={commit.message}
+                    content={commit.oid}
                     title="Copy Commit Hash"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
 
                   <Action.CopyToClipboard
-                    content={pullRequest.title}
+                    content={commit.treeUrl}
                     title="Copy Commit Tree URL"
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
                   />

@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
 
 export function QuickTranslateListItem(props: {
   debouncedText: string;
@@ -66,25 +67,9 @@ export function QuickTranslateListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy" content={result.translatedText} />
-            <Action
-              title="Toggle Full Text"
-              icon={Icon.Text}
-              onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
-            />
-            <Action.OpenInBrowser
-              title="Open in Google Translate"
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-              url={
-                "https://translate.google.com/?sl=" +
-                result.langFrom +
-                "&tl=" +
-                result.langTo +
-                "&text=" +
-                encodeURIComponent(props.debouncedText) +
-                "&op=translate"
-              }
-            />
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={result.translatedText} />
+            <ToggleFullTextAction onAction={() => props.setIsShowingDetail(!props.isShowingDetail)} />
+            <OpenOnGoogleTranslateWebsiteAction translationText={props.debouncedText} translation={result} />
           </ActionPanel.Section>
         </ActionPanel>
       }

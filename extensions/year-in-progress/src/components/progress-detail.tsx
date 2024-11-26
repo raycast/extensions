@@ -20,6 +20,10 @@ export default function ProgressDetail({ progress }: ProgressDetailProps) {
           <List.Item.Detail.Metadata.Label title="Progress" text={getSubtitle(progress.progressNum)} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Show in Menu Bar" text={`${progress.menubar.shown ? "Yes" : "No"}`} />
+          <List.Item.Detail.Metadata.Label
+            title="Show in Command Subtitle"
+            text={`${progress.showAsCommand ? "Yes" : "No"}`}
+          />
         </List.Item.Detail.Metadata>
       }
     />

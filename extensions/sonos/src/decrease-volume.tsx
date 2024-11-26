@@ -1,16 +1,25 @@
-import { LaunchType } from "@raycast/api";
+import { LaunchType, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { getActiveCoordinator } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
+interface Preferences {
+  volumeStep: string;
+}
+
 export default async function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+
   let coordinator: SonosDevice | undefined;
 
   try {
     coordinator = await getActiveCoordinator();
   } catch (error) {
-    await handleCommandError(error);
-    return;
+    const caught = await handleCommandError(error);
+
+    if (caught) {
+      return;
+    }
   }
 
   if (coordinator === undefined) {
@@ -20,6 +29,10 @@ export default async function Command() {
       failureMessage: `Failed to launch "Set Active Group" automatically`,
     });
   } else {
-    await coordinator.SetRelativeGroupVolume(-2);
+    const volume = await coordinator.SetRelativeGroupVolume(-Number(preferences.volumeStep));
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Decreased volume to ${volume}%.`,
+    });
   }
 }

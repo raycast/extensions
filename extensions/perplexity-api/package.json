@@ -5,6 +5,9 @@
   "description": "Use the powerful models via Perplexity API from the comfort of Raycast.",
   "icon": "perplexity.png",
   "author": "ilian",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -13,15 +16,53 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with Perplexity.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_chat",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
+            },
+            {
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
+            },
+            {
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
+            },
+            {
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Summarize selected text",
+      "description": "Summarize selected text.",
       "mode": "view",
       "preferences": [
         {
           "name": "prompt_summarize",
-          "title": "Summarize Prompt",
-          "description": "The prompt for the summarize command.",
+          "title": "Prompt",
+          "description": "Enter instructions for summarizing text.",
           "type": "textfield",
           "default": "Summarize all relevant aspects from the following text as concise as possible.",
           "required": false
@@ -35,40 +76,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -76,16 +101,16 @@
     },
     {
       "name": "grammar",
-      "title": "Fix Grammar",
+      "title": "Fix Spelling and Grammar",
       "description": "Fix spelling and grammar of selected text.",
       "mode": "view",
       "preferences": [
         {
           "name": "prompt_grammar",
           "title": "Prompt",
-          "description": "The prompt for the grammar command.",
+          "description": "Enter instructions for correcting spelling and grammar.",
           "type": "textfield",
-          "default": "Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
+          "default": "Fix spelling, grammar, and punctuation. It is important that you only correct the text and do not write any explanations.",
           "required": false
         },
         {
@@ -97,40 +122,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -144,8 +153,8 @@
       "preferences": [
         {
           "name": "prompt_shorter",
-          "title": "Make Shorter Prompt",
-          "description": "The prompt for the shorter command.",
+          "title": "Prompt",
+          "description": "Enter instructions for shortening text.",
           "type": "textfield",
           "default": "Make the following text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
           "required": false
@@ -159,40 +168,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -206,8 +199,8 @@
       "preferences": [
         {
           "name": "prompt_longer",
-          "title": "Make Longer Prompt",
-          "description": "The prompt for the longer command.",
+          "title": "Prompt",
+          "description": "Enter instructions for expanding text.",
           "type": "textfield",
           "default": "Act as a world class content writer. Expand the text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided text.",
           "required": false
@@ -221,40 +214,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -262,14 +239,14 @@
     },
     {
       "name": "improve",
-      "title": "Improve Text",
+      "title": "Improve Writing",
       "description": "Improve selected text.",
       "mode": "view",
       "preferences": [
         {
           "name": "prompt_improve",
-          "title": "Make Longer Prompt",
-          "description": "The prompt for the improve command.",
+          "title": "Prompt",
+          "description": "Enter instructions for enhancing text quality.",
           "type": "textfield",
           "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
           "required": false
@@ -283,40 +260,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -339,7 +300,7 @@
         {
           "name": "ask_sys_prompt",
           "title": "System Prompt",
-          "description": "Online LLMs use current date instead!",
+          "description": "System prompt for asking AI.",
           "type": "textfield",
           "default": "You are a helpful assistant.",
           "required": false
@@ -349,7 +310,7 @@
           "title": "Default Question",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Explain this as concise and simple as possible.",
+          "default": "Explain as concise and simple as possible.",
           "required": false
         },
         {
@@ -361,52 +322,32 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "sonar-small-online",
-              "title": "Sonar small 7B Online"
+              "value": "llama-3.1-sonar-small-128k-online",
+              "title": "Sonar Small 8B Online"
             },
             {
-              "value": "sonar-medium-online",
-              "title": "Sonar medium 8x7B Online"
+              "value": "llama-3.1-sonar-large-128k-online",
+              "title": "Sonar Large 70B Online"
             },
             {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
-            },
-            {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -437,7 +378,7 @@
         },
         {
           "name": "coding_default_question",
-          "title": "Default Question",
+          "title": "User Prompt",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
           "default": "Explain the following code in detail. Start with a high-level overview.",
@@ -449,43 +390,27 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "default": "codellama-70b-instruct",
+          "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
-            },
-            {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -500,8 +425,8 @@
       "preferences": [
         {
           "name": "prompt_casual",
-          "title": "Change Tone Prompt",
-          "description": "The prompt for the casual command.",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a casual tone.",
           "type": "textfield",
           "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
           "required": false
@@ -515,40 +440,118 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "description": "Change tone of selected text to friendly.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_friendly",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a friendly tone.",
+          "type": "textfield",
+          "default": "Rewrite the text using an everyday, friendly tone, correct spelling and grammar, keep meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_friendly",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "description": "Change tone of selected text to professional.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_professional",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a professional tone.",
+          "type": "textfield",
+          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_professional",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
+            },
+            {
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
+            },
+            {
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
+            },
+            {
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -563,8 +566,8 @@
       "preferences": [
         {
           "name": "prompt_synonyms",
-          "title": "Synonyms Prompt",
-          "description": "The prompt for the synonyms command.",
+          "title": "Prompt",
+          "description": "Enter instructions for listing synonyms of the specified word.",
           "type": "textfield",
           "default": "Find synonyms for the given word and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
           "required": false
@@ -578,103 +581,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "professional",
-      "title": "Change Tone to Professional.",
-      "description": "Change tone of selected text to professional.",
-      "mode": "view",
-      "disabledByDefault": true,
-      "preferences": [
-        {
-          "name": "prompt_professional",
-          "title": "Change Tone Prompt",
-          "description": "The prompt for the professional command.",
-          "type": "textfield",
-          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
-          "required": false
-        },
-        {
-          "name": "model_professional",
-          "description": "Override the global preferred model for this command.",
-          "type": "dropdown",
-          "required": false,
-          "title": "Model Override",
-          "default": "global",
-          "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
-            },
-            {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
-            },
-            {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -689,8 +613,8 @@
       "preferences": [
         {
           "name": "prompt_custom",
-          "title": "Custom Prompt",
-          "description": "The prompt for the custom action command.",
+          "title": "Prompt",
+          "description": "Enter instructions for performing a custom action with the text.",
           "type": "textfield",
           "default": "Write a custom prompt here.",
           "required": false
@@ -704,40 +628,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -745,15 +653,15 @@
     },
     {
       "name": "translate",
-      "title": "Translate Text",
-      "description": "Translate selected text",
+      "title": "Translate to Language",
+      "description": "Translate selected text.",
       "mode": "view",
       "disabledByDefault": true,
       "preferences": [
         {
           "name": "prompt_translate",
-          "title": "Language-defining Translation Prompt.",
-          "description": "The prompt for the translate command.",
+          "title": "Prompt",
+          "description": "Enter instructions for translating the text.",
           "type": "textfield",
           "default": "Act as translator. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
           "required": false
@@ -767,40 +675,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -815,10 +707,10 @@
       "preferences": [
         {
           "name": "prompt_task",
-          "title": "Generator Prompt",
-          "description": "The prompt for generating tasks.",
+          "title": "Prompt",
+          "description": "Enter instructions for breaking down a project description into a list of tasks.",
           "type": "textfield",
-          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
+          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Pick up parcel'",
           "required": false
         },
         {
@@ -830,40 +722,24 @@
           "default": "global",
           "data": [
             {
-              "title": "Follow global model",
-              "value": "global"
+              "value": "global",
+              "title": "Follow global model"
             },
             {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct"
+              "value": "llama-3.1-sonar-small-128k-chat",
+              "title": "Sonar Small 8B 132k"
             },
             {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
+              "value": "llama-3.1-sonar-large-128k-chat",
+              "title": "Sonar Large 70B 132k"
             },
             {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2 70B Chat"
+              "value": "llama-3.1-8b-instruct",
+              "title": "Llama3.1 8B 132k"
             },
             {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar small 7B Chat"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar medium 8x7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
+              "value": "llama-3.1-70b-instruct",
+              "title": "Llama3.1 70B 132k"
             }
           ]
         }
@@ -881,43 +757,27 @@
     },
     {
       "name": "model",
-      "title": "Select a global model",
+      "title": "Global Model",
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "sonar-medium-chat",
+      "default": "llama-3.1-sonar-small-128k-chat",
       "data": [
         {
-          "value": "mixtral-8x7b-instruct",
-          "title": "Mixtral 8x7b Instruct"
+          "value": "llama-3.1-sonar-small-128k-chat",
+          "title": "Sonar Small 8B 132k"
         },
         {
-          "value": "mistral-7b-instruct",
-          "title": "Mistral 7B Instruct"
+          "value": "llama-3.1-sonar-large-128k-chat",
+          "title": "Sonar Large 70B 132k"
         },
         {
-          "value": "llama-2-70b-chat",
-          "title": "Llama2 70B Chat"
+          "value": "llama-3.1-8b-instruct",
+          "title": "Llama3.1 8B 132k"
         },
         {
-          "value": "codellama-34b-instruct",
-          "title": "CodeLlama 34B Instruct"
-        },
-        {
-          "value": "codellama-70b-instruct",
-          "title": "CodeLlama 70B Instruct"
-        },
-        {
-          "value": "sonar-small-chat",
-          "title": "Sonar small 7B Chat"
-        },
-        {
-          "value": "sonar-medium-chat",
-          "title": "Sonar medium 8x7B Chat"
-        },
-        {
-          "value": "pplx-70b-chat",
-          "title": "Perplexity 70B Chat"
+          "value": "llama-3.1-70b-instruct",
+          "title": "Llama3.1 70B 132k"
         }
       ]
     },
@@ -932,17 +792,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "openai": "^4.27.0",
-    "@nem035/gpt-3-encoder": "^1.1.7"
+    "@raycast/api": "^1.68.1",
+    "openai": "^4.28.4",
+    "gpt-tokenizer": "^2.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.2.2"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -21,14 +21,14 @@ export function Copy({ project }: CopyProps) {
                 content={project.displayPath}
             />
             {project.config.urls &&
-                Object.entries(project.config.urls).map(([key, value]) => {
+                Object.entries(project.config.urls).map(([key, value], i) => {
                     if (!value) {
                         return null
                     }
 
                     return (
                         <Action.CopyToClipboard
-                            key={key}
+                            key={key + i}
                             title={`Copy ${key} URL`}
                             content={value}
                         />

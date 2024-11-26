@@ -19,7 +19,7 @@ const FormSprintDropdown = forwardRef((props: FormSprintDropdownProps, ref: Forw
   );
 
   return (
-    <Form.Dropdown ref={ref} {...props} isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+    <Form.Dropdown ref={ref} {...props} isLoading={isLoading} onSearchTextChange={setQuery} throttle filtering>
       <Form.Dropdown.Item title="No Sprint" value="" />
 
       {sprints?.map((sprint) => {

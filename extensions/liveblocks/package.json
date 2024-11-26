@@ -12,24 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "init-room-storage",
-      "title": "Initialize Room Storage",
+      "name": "search-rooms",
+      "title": "Search Rooms",
       "subtitle": "Liveblocks",
-      "description": "Initialize a room storage, optionally passing new storage data as a JSON.",
-      "mode": "view"
-    },
-    {
-      "name": "get-room-storage",
-      "title": "Get Room Storage",
-      "subtitle": "Liveblocks",
-      "description": "Get the room storage data as a JSON.",
-      "mode": "view"
-    },
-    {
-      "name": "delete-room-storage",
-      "title": "Delete Room Storage",
-      "subtitle": "Liveblocks",
-      "description": "Delete all elements of the room storage.",
+      "description": "Search for rooms related to the provided secret key.",
       "mode": "view"
     }
   ],
@@ -43,26 +29,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
-    "axios": "^0.26.1",
-    "sha.js": "^2.4.11"
+    "@liveblocks/node": "^2.0.4",
+    "@raycast/api": "^1.77.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sha.js": "^2.4.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

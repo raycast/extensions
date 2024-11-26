@@ -1,5 +1,5 @@
-import type { ToggleItem } from "./types";
-import { get, post, put, remove } from "./togglClient";
+import { get, post, put, remove } from "@/api/togglClient";
+import type { ToggleItem } from "@/api/types";
 
 export function getMyClients() {
   return get<Client[]>("/me/clients");

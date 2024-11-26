@@ -13,24 +13,26 @@ async function logoutVaultCommand() {
       primaryAction: { title: "Confirm", style: Alert.ActionStyle.Destructive },
     });
 
-    if (hasConfirmed) {
-      const toast = await showToast(Toast.Style.Animated, "Logging out...");
-      const bitwarden = await new Bitwarden(toast).initialize();
-      const { error } = await bitwarden.logout();
+    if (!hasConfirmed) return;
 
-      if (error instanceof NotLoggedInError) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "No session found";
-        toast.message = "You are not logged in";
-        return;
-      }
+    const toast = await showToast(Toast.Style.Animated, "Logging out...");
+    const bitwarden = await new Bitwarden(toast).initialize();
+    const { error } = await bitwarden.logout();
 
-      await SessionStorage.logoutClearSession();
-      Cache.clear();
-
-      toast.title = "Successfully logged out";
-      toast.style = Toast.Style.Success;
+    if (error instanceof NotLoggedInError) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "No session found";
+      toast.message = "You are not logged in";
+      return;
     }
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Failed to logout from vault");
+  }
+
+  try {
+    await SessionStorage.logoutClearSession();
+    Cache.clear();
+    await showToast(Toast.Style.Success, "Successfully logged out");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to logout from vault");
   }

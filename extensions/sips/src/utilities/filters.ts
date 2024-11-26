@@ -4,12 +4,11 @@
  * @summary Helper functions and resources for applying filters to images and PDFs using Core Image and ASObjC.
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
- * Created at     : 2023-07-dd 00:44:28
- * Last modified  : 2023-07-dd 00:44:28
+ * Created at     : 2023-07-06 00:44:28
+ * Last modified  : 2024-06-26 21:37:46
  */
 
-import { runAppleScript, runAppleScriptSync } from "run-applescript";
-
+import { runAppleScript } from "@raycast/utils";
 import { Filter } from "./types";
 
 /**
@@ -86,8 +85,8 @@ const saveImageScript = `on saveImage(imageToSave, sourcePath, destinationPath, 
     end if
 end saveImage`;
 
-export const getFilterThumbnail = (filter: Filter, source: string) => {
-  return runAppleScriptSync(`${initializeFilterScript(source, "", filter.CIFilterName)}
+export const getFilterThumbnail = async (filter: Filter, source: string) => {
+  return runAppleScript(`${initializeFilterScript(source, "", filter.CIFilterName)}
     set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
     theFilter's setValue:theCIImage forKey:"inputImage"
     ${baseFilterResultScript}

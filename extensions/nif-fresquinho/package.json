@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nif-fresquinho",
+  "title": "Portuguese Tax Number",
+  "description": "Copy a new Portuguese Tax Number to the clipboard",
+  "icon": "nif-icon.png",
+  "author": "poor666",
+  "categories": [
+    "Data",
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Copy Portuguese Tax Number",
+      "subtitle": "Nif Fresquinho",
+      "description": "Get a new Portuguese Tax Number",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

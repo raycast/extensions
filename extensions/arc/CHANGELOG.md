@@ -1,5 +1,49 @@
 # Arc Changelog
 
+## [Improvements] - 2024-10-25
+
+- `Search Tabs` now can search with url and search title with chinese pinyin.
+- `Search Tabs` now can do fuzzy matching.
+
+## [Improvements] - 2024-09-10
+
+- `Search History` now searches across all Arc profiles. Results from the search display which profile they are from.
+
+## [Improvements] - 2024-09-02
+
+- Added `Search Downloads` command to search for downloads in Arc.
+
+## [Improvements] - 2024-08-26
+
+- Replaced HUD error messages with toast messages.
+- Added a list section to the `Search History` command.
+
+## [Fixes] - 2024-07-22
+
+- Fixed an issue where the `Search Arc`, `Search Spaces`, `Search Tabs`, and `Access Spaces and Favorites` commands would fail if Arc was not open.
+
+## [Update] - 2024-07-06
+
+- Removed the `New Note` command.
+
+## [Improvements] - 2024-03-15
+
+- Added search suggestions to Kagi search engine.
+
+## [Improvements] - 2024-03-05
+
+- Added the ability to filter by tab type in the 'Search Tabs' command.
+- Lets you toggle between All Tabs, Favorites, Pinned, and Unpinned tabs via a dropdown.
+
+## [Fixes] - 2024-03-04
+
+- Fixed an issue in `Open New Little Arc Window` command where input in the URL field is not handled.
+
+## [Improvements] - 2024-02-15
+
+- Added an argument `space` to the `Open New Window` and `Open New Tab` commands to open a new window or tab in a specific space.
+- Edited the AppleScript commands to open a new window or tab to use the `space` argument.
+
 ## [Fixes] - 2024-02-26
 
 - Fixed an issue in the `Search History` command where quotation marks in the search text were causing a syntax error.

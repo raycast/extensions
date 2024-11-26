@@ -1,5 +1,10 @@
 # Search npm Changelog
 
+## [Updates] - 2024-10-07
+
+- Hide history list when `historyCount` is zero
+- Bump all dependencies to the latest
+
 ## [Refactoring] - 2024-02-03
 
 - Bump dependecies

@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
-import fetch from "node-fetch-polyfill";
+import fetch from "node-fetch";
 import { LocalStorage } from "@raycast/api";
 
 export default function Chat({ launchContext }) {
@@ -24,8 +24,21 @@ export default function Chat({ launchContext }) {
     });
   };
 
-  const { apiKey } = getPreferenceValues();
+  const { apiKey, defaultModel } = getPreferenceValues();
   const gemini = new Gemini(apiKey, { fetch });
+
+  let createNewChatName = (prefix = "New Chat ") => {
+    const existingChatNames = chatData.chats.map((x) => x.name);
+    const newChatNumbers = existingChatNames
+      .filter((x) => x.match(/^New Chat \d+$/))
+      .map((x) => parseInt(x.replace(prefix, "")));
+    console.log(newChatNumbers);
+    let lowestAvailableNumber = 1;
+    while (newChatNumbers.includes(lowestAvailableNumber)) {
+      lowestAvailableNumber++;
+    }
+    return prefix + lowestAvailableNumber;
+  };
 
   let CreateChat = () => {
     const { pop } = useNavigation();
@@ -37,20 +50,20 @@ export default function Chat({ launchContext }) {
             <Action.SubmitForm
               title="Create Chat"
               onSubmit={(values) => {
-                if (values.chatName === "") {
-                  toast(Toast.Style.Failure, "Chat must have a name.");
-                } else if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
+                if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
                   toast(Toast.Style.Failure, "Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
+                    let newName = createNewChatName();
                     let newChatData = structuredClone(oldData);
                     newChatData.chats.push({
-                      name: values.chatName,
+                      name: newName,
                       creationDate: new Date(),
                       messages: [],
+                      model: values.model === "default" ? defaultModel : values.model,
                     });
-                    newChatData.currentChat = values.chatName;
+                    newChatData.currentChat = newName;
 
                     return newChatData;
                   });
@@ -65,6 +78,15 @@ export default function Chat({ launchContext }) {
           text="In each chat, Gemini will remember the previous messages you send in it."
         />
         <Form.TextField id="chatName" />
+        <Form.Description
+          title="Chat Model"
+          text="The model used for this chat. Setting this to Default will use the model you set as Default for the extension in Preferences."
+        />
+        <Form.Dropdown id="model" defaultValue="default">
+          <Form.Dropdown.Item title="Default" value="default" />
+          <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
+          <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
+        </Form.Dropdown>
       </Form>
     );
   };
@@ -103,6 +125,7 @@ export default function Chat({ launchContext }) {
                   try {
                     let currentChat = getChat(chatData.currentChat);
                     let aiChat = gemini.createChat({
+                      model: currentChat.model ?? "gemini-1.5-flash-latest",
                       messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
                     });
 
@@ -123,13 +146,17 @@ export default function Chat({ launchContext }) {
                     });
 
                     toast(Toast.Style.Success, "Response Loaded");
-                  } catch {
+                  } catch (e) {
                     setChatData((oldData) => {
                       let newChatData = structuredClone(oldData);
                       getChat(chatData.currentChat, newChatData.chats).messages.shift();
                       return newChatData;
                     });
-                    toast(Toast.Style.Failure, "Gemini cannot process this message.");
+                    if (e.message.includes("429")) {
+                      toast(Toast.Style.Failure, "You have been rate-limited.", "Please slow down.");
+                    } else {
+                      toast(Toast.Style.Failure, "Gemini cannot process this message.");
+                    }
                   }
                 })();
                 return newChatData;
@@ -260,6 +287,7 @@ export default function Chat({ launchContext }) {
           let currentChat = getChat(newData.currentChat, newData.chats);
           console.log(currentChat);
           let aiChat = gemini.createChat({
+            model: "gemini-1.5-pro-latest",
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
           });
           currentChat.messages[0].answer = "";
@@ -298,12 +326,13 @@ export default function Chat({ launchContext }) {
         setChatData(structuredClone(newData));
       } else {
         const newChatData = {
-          currentChat: "New Chat",
+          currentChat: "New Chat 1",
           chats: [
             {
-              name: "New Chat",
+              name: "New Chat 1",
               creationDate: new Date(),
               messages: [],
+              model: defaultModel,
             },
           ],
         };
@@ -315,7 +344,7 @@ export default function Chat({ launchContext }) {
         setChatData((oldData) => {
           let newChatData = structuredClone(oldData);
           newChatData.chats.push({
-            name: `From Quick AI at ${new Date().toLocaleString("en-US", {
+            name: `Quick AI at ${new Date().toLocaleString("en-US", {
               month: "2-digit",
               day: "2-digit",
               hour: "2-digit",
@@ -332,7 +361,7 @@ export default function Chat({ launchContext }) {
               },
             ],
           });
-          newChatData.currentChat = `From Quick AI at ${new Date().toLocaleString("en-US", {
+          newChatData.currentChat = `Quick AI at ${new Date().toLocaleString("en-US", {
             month: "2-digit",
             day: "2-digit",
             hour: "2-digit",

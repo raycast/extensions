@@ -1,5 +1,6 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
 import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import {
   callVacuumLocateService,
   callVacuumPauseService,
@@ -10,7 +11,6 @@ import {
   callVacuumTurnOnService,
   isVacuumEditable,
 } from "./utils";
-import { EntityStandardActionSections } from "@components/entity";
 
 export function VacuumLocateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -36,7 +36,7 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
       title="Start"
       onAction={() => callVacuumStartService(s)}
       shortcut={{ modifiers: ["cmd"], key: "p" }}
-      icon={{ source: "play.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -51,7 +51,7 @@ export function VacuumPauseAction(props: { state: State }): JSX.Element | null {
       title="Pause"
       onAction={() => callVacuumPauseService(s)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-      icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "pause.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -81,7 +81,7 @@ export function VacuumTurnOnAction(props: { state: State }): JSX.Element | null 
       title="Turn On"
       onAction={() => callVacuumTurnOnService(s)}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+      icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -96,7 +96,7 @@ export function VacuumTurnOffAction(props: { state: State }): JSX.Element | null
       title="Turn Off"
       onAction={() => callVacuumTurnOffService(s)}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
-      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+      icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
     />
   );
 }

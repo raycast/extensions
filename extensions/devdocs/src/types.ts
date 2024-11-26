@@ -30,3 +30,7 @@ export interface Type {
   count: number;
   slug: string;
 }
+
+export interface Preferences {
+  primaryOpenInAction: string;
+}

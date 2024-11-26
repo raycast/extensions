@@ -11,6 +11,22 @@
   ],
   "version": "1.5.0",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": false,
+      "title": "Personal Access Token",
+      "description": "You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+    },
+    {
+      "name": "TEAM_ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Team ID/s",
+      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -28,29 +44,13 @@
       "interval": "2h"
     }
   ],
-  "preferences": [
-    {
-      "name": "PERSONAL_ACCESS_TOKEN",
-      "type": "password",
-      "required": true,
-      "title": "Personal Access Token",
-      "description": "Log in to Figma and click settings to setup a token"
-    },
-    {
-      "name": "TEAM_ID",
-      "type": "textfield",
-      "required": true,
-      "title": "Team ID/s",
-      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.11.1",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-  "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

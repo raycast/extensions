@@ -1,5 +1,17 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2024-11-17
+
+- Adds support for Windsurf as an option in the extension settings.
+
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
+## [Update] - 2024-05-31
+
+- Add keywords for VSCodium and Cursor
+
 ## [Fix] - 2023-12-27
 
 - Fix crash when there is no `metadata` in an extension manifest

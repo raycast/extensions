@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
-import ytdl, { videoFormat } from "ytdl-core";
-import { useEffect, useMemo, useState } from "react";
+import ytdl, { videoFormat } from "@distube/ytdl-core";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
 import {
@@ -71,8 +71,20 @@ export default function DownloadVideo() {
       ytdl
         .getInfo(values.url)
         .then((info) => {
+          const videoDuration = parseInt(info.videoDetails.lengthSeconds);
+          const isLiveStream = info.videoDetails.isLiveContent && videoDuration === 0;
+          const isLivePremiere = info.videoDetails.liveBroadcastDetails?.isLiveNow;
+          if (isLiveStream || isLivePremiere) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: isLiveStream
+                ? "Live streams are not supported"
+                : "Live premieres are not supported. Please download the video after the live premiere.",
+            });
+            return;
+          }
           setLoading(false);
-          setDuration(parseInt(info.videoDetails.lengthSeconds));
+          setDuration(videoDuration);
           setTitle(info.videoDetails.title);
           setFormats(info.formats);
         })
@@ -105,12 +117,32 @@ export default function DownloadVideo() {
   }
 
   const currentFormat = JSON.parse(values.format || "{}");
-  const audioFormats = ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4");
+  const audioFormats = deduplicateByKey(
+    ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4"),
+    (x) => {
+      return serializeFormatOptions({
+        itag: x.itag.toString(),
+        container: x.container,
+      });
+    }
+  );
   const isSelectedAudio = currentFormat.itag === audioFormats[0]?.itag.toString();
   const audioContentLength = audioFormats[0]?.contentLength ?? "0";
-  const videoFormats = ytdl
-    .filterFormats(formats, "videoonly")
-    .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm");
+  const videoFormats = deduplicateByKey(
+    ytdl
+      .filterFormats(formats, "videoonly")
+      .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm"),
+    (x) => {
+      return serializeFormatOptions({
+        itag: x.itag.toString(),
+        container: x.container,
+      });
+    }
+  );
+
+  function serializeFormatOptions(options: FormatOptions) {
+    return JSON.stringify(options);
+  }
 
   return (
     <Form
@@ -146,10 +178,14 @@ export default function DownloadVideo() {
           <Form.Dropdown.Section key={container} title={`Video (${container})`}>
             {videoFormats
               .filter((format) => format.container == container)
-              .map((format) => (
+              .map((format, index) => (
                 <Form.Dropdown.Item
-                  key={format.itag}
-                  value={JSON.stringify({ itag: format.itag.toString(), container: container } as FormatOptions)}
+                  key={`${format.itag}-${format.quality}-${container}-${index}`}
+                  value={serializeFormatOptions({
+                    itag: format.itag.toString(),
+                    container: container,
+                  })}
+                  keywords={[container, "video"]}
                   title={`${format.qualityLabel} (${
                     format.contentLength
                       ? prettyBytes(parseInt(format.contentLength) + parseInt(audioContentLength))
@@ -161,13 +197,23 @@ export default function DownloadVideo() {
           </Form.Dropdown.Section>
         ))}
         <Form.Dropdown.Section title="Audio">
-          {audioFormats.map((format) => (
-            <Form.Dropdown.Item
-              key={format.itag}
-              value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
-              title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
-              icon={Icon.Music}
-            />
+          {audioFormats.map((format, index) => (
+            <Fragment key={`${format.itag}-${format.audioBitrate}-${index}`}>
+              <Form.Dropdown.Item
+                key={`${format.itag}-${format.audioBitrate}-${index}-mp3`}
+                keywords={["mp3", "audio"]}
+                value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
+                title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
+                icon={Icon.Music}
+              />
+              <Form.Dropdown.Item
+                key={`${format.itag}-${format.audioBitrate}-${index}-wav`}
+                keywords={["wav", "audio"]}
+                value={JSON.stringify({ itag: format.itag.toString(), wav: true } as FormatOptions)}
+                title={`${format.audioBitrate}kps (WAV)`}
+                icon={Icon.Music}
+              />
+            </Fragment>
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
@@ -203,6 +249,18 @@ To install homebrew, visit [this link](https://brew.sh)
   `}
     />
   );
+}
+
+function deduplicateByKey<T>(array: T[], key: (x: T) => string): T[] {
+  const seen = new Set();
+  return array.filter((item) => {
+    const itemKey = key(item);
+    if (seen.has(itemKey)) {
+      return false;
+    }
+    seen.add(itemKey);
+    return true;
+  });
 }
 
 function AutoInstall({ onRefresh }: { onRefresh: () => void }) {

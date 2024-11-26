@@ -1,5 +1,5 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
-import { ISaleResponse, Item, Sale } from "envato";
+import { Detail } from "@raycast/api";
+import { ISaleResponse, Item } from "envato";
 
 export default function PurchaseDetails(props: { data: ISaleResponse }) {
   function saleToMarkdown(sale: ISaleResponse): string {

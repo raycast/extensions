@@ -1,7 +1,10 @@
+import { getPreferenceValues } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
-import { jira } from "../api/jiraCredentials";
+import { jira, jiraWithApiToken } from "../api/jiraCredentials";
 
 export function withJiraCredentials<T>(Component: React.ComponentType<T>) {
-  return withAccessToken<T>(jira)(Component);
+  const { token, email, siteUrl } = getPreferenceValues<Preferences>();
+
+  return withAccessToken<T>(token && email && siteUrl ? jiraWithApiToken : jira)(Component);
 }

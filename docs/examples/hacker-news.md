@@ -10,7 +10,7 @@ The source code of the example can be found [here](https://github.com/raycast/ex
 
 Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.
 
-![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.png)
+![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.webp)
 
 ## Load top stories
 

@@ -1,5 +1,9 @@
 # Year in Progress Changelog
 
+## [Improvement] - 2024-04-25
+
+- Added feature (Show|Hide) in Command Subtitle
+
 ## [Improvement] - 2023-10-18
 
 - Added Copy to Clipboard action in the listview

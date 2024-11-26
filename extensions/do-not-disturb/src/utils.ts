@@ -1,5 +1,11 @@
 import { exec } from "child_process";
 import { open, showHUD, closeMainWindow } from "@raycast/api";
+import { LaunchOptions } from "raycast-cross-extension";
+
+export type LaunchContext = {
+  suppressHUD?: boolean;
+  callbackLaunchOptions?: LaunchOptions;
+};
 
 const DNDshortcutName = `DND Raycast`;
 
@@ -29,45 +35,47 @@ async function checkAndInstallDNDShortcuts(): Promise<boolean> {
   return true;
 }
 
-export async function turnOnDND() {
+export async function getDNDStatus() {
+  const { stdout } = await executeCommand(`echo "status" | shortcuts run "${DNDshortcutName}" | cat`);
+  return stdout !== "";
+}
+
+export async function turnOnDND(suppressHUD?: boolean) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   await executeCommand(`echo "on" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (isOn) {
+  if (isOn && !suppressHUD) {
     await showHUD(`Do Not Disturb is on`);
   }
 }
 
-export async function turnOffDND() {
+export async function turnOffDND(suppressHUD?: boolean) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   await executeCommand(`echo "off" | shortcuts run "${DNDshortcutName}"`);
   const isOn = await getDNDStatus();
-  if (!isOn) {
+  if (!isOn && !suppressHUD) {
     await showHUD(`Do Not Disturb is off`);
   }
 }
 
-export async function statusDND() {
+export async function statusDND(suppressHUD?: boolean) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   const isOn = await getDNDStatus();
-  await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
+  if (!suppressHUD) {
+    await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
+  }
 }
 
-export async function toggleDND() {
+export async function toggleDND(suppressHUD?: boolean) {
   const isInstalled = await checkAndInstallDNDShortcuts();
   if (!isInstalled) return;
   const isOn = await getDNDStatus();
   if (isOn) {
-    await turnOffDND();
+    await turnOffDND(suppressHUD);
   } else {
-    await turnOnDND();
+    await turnOnDND(suppressHUD);
   }
-}
-
-export async function getDNDStatus() {
-  const { stdout } = await executeCommand(`echo "status" | shortcuts run "${DNDshortcutName}" | cat`);
-  return stdout !== "";
 }

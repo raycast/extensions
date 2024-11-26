@@ -1,3 +1,12 @@
+import {
+  SlackChannelDetails,
+  SlackFileCommentDetails,
+  SlackFileDetails,
+  SlackGroupDetails,
+  SlackImDetails,
+  SlackMessageDetails,
+  SlackPushEventCallback,
+} from "./integrations/slack/types";
 import { GithubDiscussion, GithubPullRequest } from "./integrations/github/types";
 import { GoogleMailThread } from "./integrations/google-mail/types";
 import { LinearNotification } from "./integrations/linear/types";
@@ -27,11 +36,18 @@ export type NotificationMetadata =
       content: any;
     }
   | { type: "Linear"; content: LinearNotification }
-  | { type: "GoogleMail"; content: GoogleMailThread };
+  | { type: "GoogleMail"; content: GoogleMailThread }
+  | { type: "Slack"; content: SlackPushEventCallback };
 
 export type NotificationDetails =
   | { type: "GithubPullRequest"; content: GithubPullRequest }
-  | { type: "GithubDiscussion"; content: GithubDiscussion };
+  | { type: "GithubDiscussion"; content: GithubDiscussion }
+  | { type: "SlackMessage"; content: SlackMessageDetails }
+  | { type: "SlackFile"; content: SlackFileDetails }
+  | { type: "SlackFileComment"; content: SlackFileCommentDetails }
+  | { type: "SlackChannel"; content: SlackChannelDetails }
+  | { type: "SlackIm"; content: SlackImDetails }
+  | { type: "SlackGroup"; content: SlackGroupDetails };
 
 export enum NotificationStatus {
   Unread = "Unread",
@@ -47,6 +63,17 @@ export type NotificationListItemProps = {
 
 export function getNotificationHtmlUrl(notification: Notification) {
   return match(notification)
+    .with({ details: { type: "SlackMessage", content: P.select() } }, (notificationDetails) => notificationDetails.url)
+    .with(
+      {
+        details: {
+          type: P.union("SlackChannel", "SlackFile", "SlackFileComment", "SlackGroup", "SlackIm"),
+          content: P.select(),
+        },
+      },
+      (notificationDetails) =>
+        `https://app.slack.com/client/${notificationDetails.team.id}/${notificationDetails.channel.id}`,
+    )
     .with(
       { details: { type: P.union("GithubPullRequest", "GithubDiscussion"), content: P.select() } },
       (notificationDetails) => notificationDetails.url,
@@ -66,6 +93,7 @@ export function getNotificationHtmlUrl(notification: Notification) {
     )
     .with({ metadata: { type: "Todoist" } }, () => `https://todoist.com/showTask?id=${notification.source_id}`)
     .with({ metadata: { type: "Github" } }, () => "https://github.com")
+    .with({ metadata: { type: "Slack" } }, () => "https://app.slack.com")
     .exhaustive();
 }
 

@@ -38,17 +38,17 @@ export default function Command() {
 
 #### Enumeration members
 
-| Name          | Dark Theme                                               | Light Theme                                         |
-| :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
-| Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
-| Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
-| Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
-| Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |
-| Purple        | ![](../../.gitbook/assets/color-dark-purple.png)         | ![](../../.gitbook/assets/color-purple.png)         |
-| Red           | ![](../../.gitbook/assets/color-dark-red.png)            | ![](../../.gitbook/assets/color-red.png)            |
-| Yellow        | ![](../../.gitbook/assets/color-dark-yellow.png)         | ![](../../.gitbook/assets/color-yellow.png)         |
-| PrimaryText   | ![](../../.gitbook/assets/color-dark-primary-text.png)   | ![](../../.gitbook/assets/color-primary-text.png)   |
-| SecondaryText | ![](../../.gitbook/assets/color-dark-secondary-text.png) | ![](../../.gitbook/assets/color-secondary-text.png) |
+| Name          | Dark Theme                                                | Light Theme                                          |
+| :------------ | :-------------------------------------------------------- | :--------------------------------------------------- |
+| Blue          | ![](../../.gitbook/assets/color-dark-blue.webp)           | ![](../../.gitbook/assets/color-blue.webp)           |
+| Green         | ![](../../.gitbook/assets/color-dark-green.webp)          | ![](../../.gitbook/assets/color-green.webp)          |
+| Magenta       | ![](../../.gitbook/assets/color-dark-magenta.webp)        | ![](../../.gitbook/assets/color-magenta.webp)        |
+| Orange        | ![](../../.gitbook/assets/color-dark-orange.webp)         | ![](../../.gitbook/assets/color-orange.webp)         |
+| Purple        | ![](../../.gitbook/assets/color-dark-purple.webp)         | ![](../../.gitbook/assets/color-purple.webp)         |
+| Red           | ![](../../.gitbook/assets/color-dark-red.webp)            | ![](../../.gitbook/assets/color-red.webp)            |
+| Yellow        | ![](../../.gitbook/assets/color-dark-yellow.webp)         | ![](../../.gitbook/assets/color-yellow.webp)         |
+| PrimaryText   | ![](../../.gitbook/assets/color-dark-primary-text.webp)   | ![](../../.gitbook/assets/color-primary-text.webp)   |
+| SecondaryText | ![](../../.gitbook/assets/color-dark-secondary-text.webp) | ![](../../.gitbook/assets/color-secondary-text.webp) |
 
 ## Types
 

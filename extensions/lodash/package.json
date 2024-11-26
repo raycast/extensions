@@ -5,6 +5,9 @@
   "description": "Search Lodash documentation",
   "icon": "command-icon.png",
   "author": "vimtor",
+  "contributors": [
+    "rushi"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation"

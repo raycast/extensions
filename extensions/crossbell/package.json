@@ -5,11 +5,28 @@
   "description": "Searching and browsing Crossbell",
   "icon": "logo.png",
   "author": "Songkeys",
+  "contributors": [
+    "hyoban"
+  ],
   "categories": [
     "Web"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "upload-file-from-clipboard",
+      "title": "Upload File from Clipboard",
+      "subtitle": "Crossbell",
+      "description": "Upload file from clipboard to IPFS",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-file-from-finder",
+      "title": "Upload File from Finder",
+      "subtitle": "Crossbell",
+      "description": "Upload selected file items from Finder to IPFS",
+      "mode": "no-view"
+    },
     {
       "name": "search",
       "title": "Search",
@@ -42,18 +59,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.7",
-    "dayjs": "^1.11.5"
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.13.3",
+    "crossbell": "^1.11.9",
+    "dayjs": "^1.11.10",
+    "node-fetch-native": "^1.6.2",
+    "p-limit": "^5.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "crossbell.js": "^0.10.30",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "build": "ray build -e dist",
