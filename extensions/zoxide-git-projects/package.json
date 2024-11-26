@@ -22,6 +22,7 @@
     "@raycast/api": "^1.85.1",
     "@raycast/utils": "^1.17.0",
     "execa": "^5.1.1",
+    "fzf": "^0.5.2",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
