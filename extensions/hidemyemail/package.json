@@ -12,7 +12,16 @@
       "name": "list-emails",
       "title": "List Emails",
       "description": "Lists all the Hide My Email addresses associated with iCloud account.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [{
+        "name": "sortByCreationDate",
+        "title": "Sort list by creation date",
+        "label": "Sort list on most recently created address",
+        "description": "If enabled, the email list is sorted on most recently created.",
+        "type": "checkbox",
+        "required": false,
+        "default": false
+      }]
     },
     {
       "name": "create-new-email",

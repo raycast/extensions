@@ -255,7 +255,6 @@ export class iCloudService {
     }
 
     this.webservices = this.data?.webservices;
-    console.log(this.webservices);
   }
 
   async srpAuthenticate(password: string) {

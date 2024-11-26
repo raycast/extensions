@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Clipboard, getPreferenceValues } from "@raycast/api";
 import { iCloudService } from "./api/connect";
 import { HideMyEmail, MetaData } from "./api/hide-my-email";
 import { formatTimestamp } from "./utils";
@@ -35,13 +35,11 @@ export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
   const [emails, setEmails] = useState<Array<HideMyEmail> | null>(null);
   const [status, setStatus] = useState<Status>(Status.ANY);
+  const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
 
   useEffect(() => {
     (async () => {
-      if (service) {
-        const data = await service.hideMyEmail.getAllAdresses();
-        setEmails(data?.["hmeEmails"]);
-      }
+      await updateAddressList();
     })();
   }, [service]);
 
@@ -53,13 +51,25 @@ export default function Command() {
     return <List isLoading={true} />;
   }
 
+  async function updateAddressList() {
+    if (service) {
+      const data = await service.hideMyEmail.getAllAdresses();
+      const hmeEmails = data?.["hmeEmails"];
+      if (hmeEmails) {
+        if (sortByCreationDate)
+          hmeEmails.sort((hme1: HideMyEmail, hme2: HideMyEmail) => hme2.createTimestamp - hme1.createTimestamp);
+
+        setEmails(hmeEmails);
+      }
+    }
+  }
+
   async function toggleActive(email: HideMyEmail) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
 
     try {
       await service?.hideMyEmail.toggleActive(email.anonymousId, email.isActive ? "deactivate" : "reactivate");
-      const data = await service?.hideMyEmail.getAllAdresses();
-      setEmails(data?.["hmeEmails"]);
+      await updateAddressList();
       toast.style = Toast.Style.Success;
       toast.title = "Updated";
     } catch (error) {
@@ -73,8 +83,7 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
     try {
       await service?.hideMyEmail.updateMetaData(email.anonymousId, newMetaData);
-      const data = await service?.hideMyEmail.getAllAdresses();
-      setEmails(data?.["hmeEmails"]);
+      await updateAddressList();
       toast.style = Toast.Style.Success;
       toast.title = "Label updated";
     } catch (error) {
@@ -91,8 +100,7 @@ export default function Command() {
         await service?.hideMyEmail.toggleActive(email.anonymousId, "deactivate");
       }
       await service?.hideMyEmail.deleteAddress(email.anonymousId);
-      const data = await service?.hideMyEmail.getAllAdresses();
-      setEmails(data?.["hmeEmails"]);
+      await updateAddressList();
       toast.style = Toast.Style.Success;
       toast.title = "Address deleted";
     } catch (error) {
@@ -107,8 +115,7 @@ export default function Command() {
     try {
       await service?.hideMyEmail.addAddress(address, metaData);
       Clipboard.copy(address);
-      const data = await service?.hideMyEmail.getAllAdresses();
-      setEmails(data?.["hmeEmails"]);
+      await updateAddressList();
       toast.style = Toast.Style.Success;
       toast.title = "Email added & copied";
     } catch (error) {
