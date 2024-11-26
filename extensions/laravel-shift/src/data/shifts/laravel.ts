@@ -20,6 +20,7 @@ export const laravelVersions: Version[] = [
   { newVersion: "8.x", oldVersion: "7.x" },
   { newVersion: "9.x", oldVersion: "8.x" },
   { newVersion: "10.x", oldVersion: "9.x" },
+  { newVersion: "11.x", oldVersion: "10.x" },
 ];
 
 function generateLaravelShifts(): Shift[] {
