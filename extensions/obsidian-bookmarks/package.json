@@ -72,9 +72,17 @@
     {
       "name": "bookmarksPath",
       "title": "Bookmarks Subfolder",
-      "description": "The subfolder where all of your bookmarks should be stored.",
+      "description": "The subfolder where all of your bookmarks should be stored. This will be the root for bookmark search.",
       "type": "textfield",
       "required": true,
+      "default": "Bookmarks"
+    },
+    {
+      "name": "saveSubfolder",
+      "title": "Save Subfolder",
+      "description": "The subfolder where all of your new bookmarks are stored. \nThis should be equal to or a subfolder of bookmarksPath if you want these to appear in search results. \nLeave blank to default to bookmarksPath",
+      "type": "textfield",
+      "required": false,
       "default": "Bookmarks"
     },
     {
