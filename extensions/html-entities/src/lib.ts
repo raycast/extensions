@@ -1,18 +1,24 @@
 import { EntitiesResponse } from "./types";
 
-export function filterEntities(entity: [string, EntitiesResponse[string]], searchText: string) {
-  const [name, details] = entity;
+export function filterEntities(entities: EntitiesResponse, searchText: string) {
+  const filtered = Object.entries(entities).filter((entity) => {
+    const [name, details] = entity;
 
-  if (!name.endsWith(";")) return false;
+    if (!name.endsWith(";")) return false;
 
-  return searchText
-    ? name.toLowerCase().includes(searchText.toLowerCase()) ||
-        details.characters.toLowerCase().includes(searchText.toLowerCase()) ||
-        details.codepoints.includes(parseInt(searchText))
-    : true;
+    return searchText
+      ? name.toLowerCase().includes(searchText.toLowerCase()) ||
+          details.characters.toLowerCase().includes(searchText.toLowerCase()) ||
+          details.codepoints.includes(parseInt(searchText))
+      : true;
+  });
+
+  filtered.sort((a, b) => sortEntities(a, b, searchText));
+
+  return filtered;
 }
 
-export function sortEntities(
+function sortEntities(
   a: [string, EntitiesResponse[string]],
   b: [string, EntitiesResponse[string]],
   searchText: string,

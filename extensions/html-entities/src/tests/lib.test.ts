@@ -1,4 +1,4 @@
-import { filterEntities, sortEntities } from "../lib";
+import { filterEntities } from "../lib";
 import { EntitiesResponse } from "../types";
 
 describe("lib", () => {
@@ -10,7 +10,7 @@ describe("lib", () => {
         "&gt": { codepoints: [100], characters: "gt" },
       };
 
-      const filtered = Object.entries(entities).filter((entity) => filterEntities(entity, ""));
+      const filtered = filterEntities(entities, "");
 
       expect(filtered.length).toBe(2);
     });
@@ -26,7 +26,7 @@ describe("lib", () => {
         "&gt": { codepoints: [100], characters: "gt" }, // Invalid, doesn't match search
       };
 
-      const filtered = Object.entries(entities).filter((entity) => filterEntities(entity, search));
+      const filtered = filterEntities(entities, search);
 
       expect(filtered.length).toBe(2);
     });
@@ -39,7 +39,7 @@ describe("lib", () => {
         "&crarr;": { codepoints: [100], characters: "crarr" },
       };
 
-      const filtered = Object.entries(entities).filter((entity) => filterEntities(entity, search));
+      const filtered = filterEntities(entities, search);
 
       expect(filtered.length).toBe(0);
     });
@@ -56,16 +56,14 @@ describe("lib", () => {
         "&curarr;": { codepoints: [400], characters: "↷" },
       };
 
-      const filtered = Object.entries(entities).filter((entity) => filterEntities(entity, search));
+      const filtered = filterEntities(entities, search);
 
-      const sorted = filtered.sort((a, b) => sortEntities(a, b, search)).map(([name]) => name);
-
-      const first = sorted[0];
-      const last = sorted[sorted.length - 1];
+      const [firstName] = filtered[0];
+      const [lastName] = filtered[filtered.length - 1];
 
       expect(filtered.length).toBe(4);
-      expect(first).toBe("&rarr;"); // Exact case-sensitive matches come first
-      expect(last).toBe("&curarr;"); // Fuzzy matches come last
+      expect(firstName).toBe("&rarr;"); // Exact case-sensitive matches come first
+      expect(lastName).toBe("&curarr;"); // Fuzzy matches come last
     });
   });
 });

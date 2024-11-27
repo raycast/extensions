@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Cache, getPreferenceValues } from "@raycast/
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { EntitiesResponse } from "./types";
-import { filterEntities, sortEntities } from "./lib";
+import { filterEntities } from "./lib";
 
 interface Preferences {
   defaultPasteMode: "code" | "character";
@@ -36,46 +36,43 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail filtering={false} onSearchTextChange={setSearchText}>
-      {Object.entries(entities)
-        .filter((entity) => filterEntities(entity, searchText))
-        .sort((a, b) => sortEntities(a, b, searchText))
-        .map(([name, details]) => (
-          <List.Item
-            detail={
-              <List.Item.Detail
-                markdown={`# ${details.characters}\n\n\`\`\`${name}\`\`\`\n\n\`\`\`&#${details.codepoints[0]};\`\`\``}
-              />
-            }
-            key={name}
-            title={details.characters}
-            keywords={[
-              name,
-              name.replace(/&/, ""),
-              name.replace(/;/, ""),
-              ...details.codepoints.map((cp) => cp.toString()),
-            ]}
-            subtitle={name}
-            actions={
-              <ActionPanel>
-                {preferences.defaultPasteMode === "code" && (
-                  <>
-                    <Action.Paste title="Paste Entity Code" content={name} />
-                    <Action.Paste title="Paste Entity" content={details.characters} />
-                  </>
-                )}
+      {filterEntities(entities, searchText).map(([name, details]) => (
+        <List.Item
+          detail={
+            <List.Item.Detail
+              markdown={`# ${details.characters}\n\n\`\`\`${name}\`\`\`\n\n\`\`\`&#${details.codepoints[0]};\`\`\``}
+            />
+          }
+          key={name}
+          title={details.characters}
+          keywords={[
+            name,
+            name.replace(/&/, ""),
+            name.replace(/;/, ""),
+            ...details.codepoints.map((cp) => cp.toString()),
+          ]}
+          subtitle={name}
+          actions={
+            <ActionPanel>
+              {preferences.defaultPasteMode === "code" && (
+                <>
+                  <Action.Paste title="Paste Entity Code" content={name} />
+                  <Action.Paste title="Paste Entity" content={details.characters} />
+                </>
+              )}
 
-                {preferences.defaultPasteMode === "character" && (
-                  <>
-                    <Action.Paste title="Paste Entity" content={details.characters} />
-                    <Action.Paste title="Paste Entity Code" content={name} />
-                  </>
-                )}
+              {preferences.defaultPasteMode === "character" && (
+                <>
+                  <Action.Paste title="Paste Entity" content={details.characters} />
+                  <Action.Paste title="Paste Entity Code" content={name} />
+                </>
+              )}
 
-                <Action.Paste title="Paste Entity Number" content={details.codepoints[0]} />
-              </ActionPanel>
-            }
-          />
-        ))}
+              <Action.Paste title="Paste Entity Number" content={details.codepoints[0]} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
