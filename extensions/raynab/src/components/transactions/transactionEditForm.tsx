@@ -10,7 +10,10 @@ import { SaveSubTransaction, SaveTransaction } from 'ynab';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { usePayees } from '@hooks/usePayees';
-import { useDebounce } from '@hooks/useDebounce';
+
+interface SaveSubTransactionWithReadableAmounts extends Omit<SaveSubTransaction, 'amount'> {
+  amount: string;
+}
 
 interface FormValues {
   date: Date | null;
@@ -19,7 +22,7 @@ interface FormValues {
   memo?: string;
   category?: string[];
   flag_color?: string;
-  subtransactions?: SaveSubTransaction[];
+  subtransactions?: SaveSubTransactionWithReadableAmounts[];
 }
 
 export function TransactionEditForm({ transaction }: { transaction: TransactionDetail }) {
@@ -30,13 +33,18 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
 
   const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
-  const [subtransactions, setSubtransactions] = useState<SaveSubTransaction[]>(transaction.subtransactions);
+  const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
+    return transaction.subtransactions.map((s) => ({
+      ...s,
+      amount: formatToReadablePrice({ amount: s.amount, locale: false }),
+    }));
+  });
   const [category, setCategory] = useState(() => {
-    if (isSplitTransaction(transaction) || !transaction.category_id) {
-      return [''];
+    if (isSplitTransaction(transaction)) {
+      return subtransactions.map((s) => s.category_id ?? '');
     }
 
-    return [transaction.category_id];
+    return [transaction.category_id ?? ''];
   });
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
@@ -47,7 +55,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       payee_id: transaction.payee_id ?? undefined,
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
-      category: category.length > 0 && !!category[0] ? category : subtransactions.map((s) => s.category_id!),
+      category: category.length > 0 && !!category[0] ? category : subtransactions.map((s) => s.category_id ?? ''),
     },
     onSubmit: async (values) => {
       // Make sure to match the subtransactions amounts if they exist against the total amount
@@ -63,7 +71,10 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         amount: formatToYnabAmount(values.amount),
         memo: values.memo || null,
         category: values.category?.[0] || undefined,
-        subtransactions: values.category?.length === 0 ? subtransactions : undefined,
+        subtransactions:
+          values.category?.length === 0
+            ? subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }))
+            : undefined,
       };
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
@@ -92,25 +103,25 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
     },
   });
 
-  const onSubcategoryAmountChange = (sub: SaveSubTransaction): ((newValue: string) => void) | undefined => {
-    return (newAmount) => {
+  const onSubcategoryAmountChange = (
+    sub: SaveSubTransactionWithReadableAmounts
+  ): ((newValue: string) => void) | undefined => {
+    const eventHandler = (newAmount: string) => {
       const oldList = [...subtransactions];
       const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
 
       if (previousSubtransactionIdx === -1) return;
 
-      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: +newAmount };
+      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
       const newList = [...oldList];
       newList[previousSubtransactionIdx] = newSubtransaction;
 
       setSubtransactions(newList);
     };
+
+    return eventHandler;
   };
 
-  const debouncedSubcategoryAmountChange = useDebounce(onSubcategoryAmountChange, 300);
-
-  const categoriesPseudoValue =
-    category.length > 0 && !!category[0] ? category : subtransactions.map((s) => s.category_id ?? '');
   return (
     <Form
       navigationTitle="Edit Transaction"
@@ -146,14 +157,16 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       <Form.TagPicker
         {...itemProps.category}
         title="Category"
-        value={categoriesPseudoValue}
+        value={category}
         /* At the moment the API doesn't support updating existing split transactions' subtransactions */
         onChange={
           !isSplitTransaction(transaction)
             ? (newCategories) => {
                 if (newCategories.length > 1) {
-                  const distributedAmounts = autoDistribute(+amount, newCategories.length);
-                  setCategory(['']);
+                  const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
+                    amount.toString()
+                  );
+                  setCategory(newCategories);
                   setSubtransactions(
                     newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
                   );
@@ -185,13 +198,13 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       {subtransactions.length > 0 && !isSplitTransaction(transaction) ? (
         <>
           <Form.Separator />
-          {subtransactions.map((sub, idx) => (
+          {subtransactions.map((transaction, idx) => (
             <Form.TextField
               id={`subtransaction-${idx}`}
-              key={sub.category_id}
-              title={getSubtransacionCategoryname(categoryGroups || [], sub)}
-              value={isNaN(+sub.amount) ? '0' : sub.amount.toString()}
-              onChange={debouncedSubcategoryAmountChange(sub)}
+              key={transaction.category_id}
+              title={getSubtransacionCategoryname(categoryGroups || [], transaction)}
+              value={transaction.amount}
+              onChange={onSubcategoryAmountChange(transaction)}
             />
           ))}
         </>
@@ -248,7 +261,7 @@ function isSplitTransaction(transaction: TransactionDetail): boolean {
 
 function getSubtransacionCategoryname(
   categoryGroups: CategoryGroupWithCategories[],
-  subtransaction: SaveSubTransaction
+  subtransaction: SaveSubTransactionWithReadableAmounts
 ): string {
   return categoryGroups?.flatMap((g) => g.categories).find((c) => c.id === subtransaction.category_id)?.name ?? '';
 }
