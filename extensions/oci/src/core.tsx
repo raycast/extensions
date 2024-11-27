@@ -1,6 +1,6 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import common = require("oci-common");
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
@@ -8,6 +8,12 @@ import { useState } from "react";
 
 const provider: common.ConfigFileAuthenticationDetailsProvider = new common.ConfigFileAuthenticationDetailsProvider();
 const computeClient = new core.ComputeClient({  authenticationDetailsProvider: provider });
+const onError = (error: Error) => {
+  const err = error.message as string | common.OciError;
+  const title = "ERROR";
+  const message = (err instanceof common.OciError) ? err.message : err;
+  showFailureToast(message, {title});
+}
 export default function Core() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
@@ -15,7 +21,7 @@ export default function Core() {
     async () => {
       const instances = await computeClient.listInstances({ compartmentId: provider.getTenantId() });
       return instances.items;
-    }, [], { initialData: [] }
+    }, [], { initialData: [], onError }
   )
 
   function getInstanceColor(state: Instance.LifecycleState) {
@@ -62,7 +68,7 @@ function ListInstanceVnicAttachments({instanceId}: {instanceId: string}) {
   const { isLoading, data: VNICs } = useCachedPromise(async () => {
     const VNICs = await computeClient.listVnicAttachments({ compartmentId: provider.getTenantId(), instanceId });
     return VNICs.items;
-  }, [], {initialData: []})
+  }, [], {initialData: [], onError})
 
   return <List navigationTitle="Core > Instances > VNIC" isLoading={isLoading}>
     {VNICs.map(vnic => <List.Item key={vnic.id} title={vnic.displayName ?? ""} subtitle={vnic.availabilityDomain} accessories={[{date: new Date(vnic.timeCreated)}]} actions={<ActionPanel>
@@ -76,7 +82,7 @@ function ViewVnic({vnicId}: {vnicId: string}) {
     const vnicClient = new core.VirtualNetworkClient({ authenticationDetailsProvider: provider });
     const res = await vnicClient.getVnic({ vnicId });
     return res.vnic;
-  })
+  }, [], {onError})
 
   const vnicMarkdown = `
 | - | - |

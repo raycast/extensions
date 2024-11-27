@@ -15,12 +15,6 @@
       "title": "Manage Core Services",
       "description": "Manage Instances and more",
       "mode": "view"
-    },
-    {
-      "name": "cloudguard",
-      "title": "Manage Cloudguard",
-      "description": "Manage Resources and more",
-      "mode": "view"
     }
   ],
   "dependencies": {
