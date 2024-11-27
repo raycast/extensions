@@ -16,7 +16,7 @@ const popAndShowHUD = (message: string) => popToRoot().then(() => showHUD(messag
 async function fetchPageContent(): Promise<string> {
   try {
     const content = await BrowserExtension.getContent({ format: "markdown" });
-    return `\n\n## Page Content\n\n${content}`;
+    return `\n\n# Page Content\n\n${content}`;
   } catch (error) {
     console.error("Error fetching page content:", error);
     throw error;
