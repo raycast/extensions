@@ -1,9 +1,17 @@
 # Obsidian Bookmarks Changelog
 
-## [1.0.5] - 2024-11-16
+## [1.0.5] - 2024-11-26
 
-- Find bookmarks in subdirectories of the specificed Bookmarks subfolder
-- Allow search filtering by bookmark subdirectory
+- Search for bookmarks in subfolders below the configured Bookmarks subfolder
+- Allow search bookmarks filtering by subfolder (similar to the existing tags filtering)
+- Allow required tags: required tags are automatically added to all saved bookmarks. Only notes with any required tag are shown during search.
+- Speed up search by caching mtime in local storage, and using cached files if the file on disk hasn't changed.
+- Speed up search by streaming in results from the disk read as they become available
+- Fix a bug with the save bookmark form where "Fetching link details" never disappears
+- Show notifications on the LinkForm when the user attempts to save a duplicate bookmark.
+- Add an action to clear cache files created by this extension
+- Allow the user to specify a save subfolder. Search executes from the existing bookmarksPath. Save executes from saveSubfolder if it is specified, and bookmarksPath if it is not specified.
+- Allow the user to specify subfolders to ignore during search
 
 ## [1.0.4] - 2024-07-30
 
