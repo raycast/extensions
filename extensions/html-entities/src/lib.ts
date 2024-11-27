@@ -1,6 +1,8 @@
 import { EntitiesResponse } from "./types";
 
 export function filterEntities(entities: EntitiesResponse, searchText: string) {
+  searchText = searchText.trim();
+
   const filtered = Object.entries(entities).filter((entity) => {
     const [name, details] = entity;
 

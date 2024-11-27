@@ -43,9 +43,20 @@ describe("lib", () => {
 
       expect(filtered.length).toBe(0);
     });
-  });
 
-  describe("sortEntities", () => {
+    it("should trim extra whitespace", () => {
+      const search = "  rarr  ";
+
+      const entities: EntitiesResponse = {
+        "&rarr;": { codepoints: [100], characters: "crarr" },
+        "&crarr;": { codepoints: [100], characters: "crarr" },
+      };
+
+      const filtered = filterEntities(entities, search);
+
+      expect(filtered.length).toBe(2);
+    });
+
     it("should sort entities by name", () => {
       const search = "rarr";
 
