@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "freedns",
-  "title": "Free DNS",
-  "description": "",
+  "title": "FreeDNS",
+  "description": "View and Change your DNS",
   "icon": "extension-icon.png",
   "author": "xmok",
   "categories": [
