@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { Cache, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
 import { setDND } from "./doNotDisturb";
@@ -106,7 +106,6 @@ export function continueInterval(): Interval | undefined {
 }
 
 export function resetInterval() {
-  if (getCurrentInterval()?.type === "focus") setDND(false);
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
@@ -128,14 +127,14 @@ export function getCurrentInterval(): Interval | undefined {
 
 export function endOfInterval(currentInterval: Interval) {
   try {
-    if (currentInterval.type === "focus") setDND(false);
     currentInterval.parts[currentInterval.parts.length - 1].endAt = currentTimestamp();
     saveIntervalHistory(currentInterval).then();
-    launchCommand({
-      name: "pomodoro-control-timer",
-      type: LaunchType.UserInitiated,
-      context: { currentInterval },
-    });
+    if (currentInterval.type === "focus") {
+      setDND(false, {
+        name: "pomodoro-control-timer",
+        context: { currentInterval },
+      });
+    }
   } catch (error) {
     console.error(error);
   }

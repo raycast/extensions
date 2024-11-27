@@ -4,6 +4,9 @@
   "title": "Pomodoro",
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
@@ -20,9 +23,6 @@
   "keywords": [
     "pomodoro",
     "timer"
-  ],
-  "crossExtensions": [
-    "yakitrak/do-not-disturb"
   ],
   "categories": [
     "Productivity"
@@ -405,7 +405,7 @@
       "name": "enableConfetti",
       "type": "checkbox",
       "required": false,
-      "title": "Show Confetti",
+      "title": "Show Confetti (Deprecated)",
       "description": "Shows confetti when interval finishes",
       "default": false,
       "label": "Shows confetti when interval finishes"

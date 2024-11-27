@@ -1,5 +1,12 @@
 # Pomodoro Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix command launch sequence
+- Regenerate `package-lock.json` file
+- Move `crossExtensions` field to upper place
+- Mark Confetti feature as deprecated
+
 ## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest

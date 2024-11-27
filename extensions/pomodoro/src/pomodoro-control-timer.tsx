@@ -1,7 +1,7 @@
+import { exec } from "node:child_process";
 import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
 import { ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { exec } from "child_process";
 import {
   continueInterval,
   createInterval,
