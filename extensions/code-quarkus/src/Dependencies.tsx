@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import path from "path";
 import { writeFileSync } from "fs";
@@ -111,6 +111,7 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
         title: "Project Downloaded",
         message: `Saved to Downloads folder as ${configuration.artifact}.zip`,
       });
+      await popToRoot();
     } catch (error) {
       console.error("Error generating project:", error);
       await showToast({
