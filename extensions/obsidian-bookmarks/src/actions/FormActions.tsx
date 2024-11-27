@@ -1,4 +1,4 @@
-import { Action, Color, FileIcon, Icon, popToRoot, showHUD } from "@raycast/api";
+import { Action, Color, FileIcon, Icon, popToRoot, showHUD, BrowserExtension, showToast, Toast } from "@raycast/api";
 import { useMemo } from "react";
 import { asFile } from "../helpers/save-to-obsidian";
 import { useFileIcon } from "../hooks/use-applications";
@@ -12,6 +12,54 @@ import { clearCache } from "../helpers/clear-cache";
 const saveFile = (values: LinkFormState["values"]) => asFile(values).then((f) => methods.saveFile(f));
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 const popAndShowHUD = (message: string) => popToRoot().then(() => showHUD(message));
+
+async function fetchPageContent(url: string): Promise<string> {
+  try {
+    const content = await BrowserExtension.getContent({ format: "markdown" });
+    return `\n\n## Page Content\n\n${content}`;
+  } catch (error) {
+    console.error("Error fetching page content:", error);
+    throw error;
+  }
+}
+
+const createContentActions = (
+  values: LinkFormState["values"],
+  setValues: (values: LinkFormState["values"]) => void
+): ActionGroup<FormActionPreference> => ({
+  key: "content",
+  useDivider: "unless-first",
+  title: "Content Actions",
+  actions: new Map<FormActionPreference, Action.Props>([
+    [
+      "fetchContent" as FormActionPreference,
+      {
+        title: "Fetch Page Content",
+        icon: Icon.Document,
+        shortcut: { modifiers: ["cmd"], key: "g" },
+        onAction: async () => {
+          try {
+            const content = await fetchPageContent(values.url);
+            setValues({
+              ...values,
+              description: values.description + content,
+            });
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Page content added to notes",
+            });
+          } catch (error) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to fetch page content",
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+        },
+      },
+    ],
+  ]),
+});
 
 const createObsidianActions = (
   values: LinkFormState["values"],
@@ -29,7 +77,7 @@ const createObsidianActions = (
         shortcut: { modifiers: ["cmd", "shift"], key: "o" },
         onAction: async () => {
           const file = await saveFile(values);
-          await delay(250); // Kinda gross, but Obsidian doesn't seem to immediately recognize the file.
+          await delay(250);
           return Promise.allSettled([methods.openObsidianFile(file), popAndShowHUD("Opening Obsidian…")]);
         },
       },
@@ -122,16 +170,24 @@ const createDestructiveActions = (): ActionGroup<FormActionPreference> => ({
   ]),
 });
 
-export type FormActionsProps = { values: LinkFormState["values"] };
-export default function FormActions({ values }: FormActionsProps): JSX.Element {
+export type FormActionsProps = {
+  values: LinkFormState["values"];
+  setValues: (values: LinkFormState["values"]) => void;
+};
+
+export default function FormActions({ values, setValues }: FormActionsProps): JSX.Element {
   const { value: obsidianIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultFormAction");
 
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
+  const contentActions = useMemo(() => createContentActions(values, setValues), [values, setValues]);
   const destructiveActions = useMemo(() => createDestructiveActions(), []);
 
   return (
-    <OrderedActionPanel groups={[obsidianActions, browserActions, destructiveActions]} defaultAction={defaultAction} />
+    <OrderedActionPanel
+      groups={[obsidianActions, browserActions, contentActions, destructiveActions]}
+      defaultAction={defaultAction}
+    />
   );
 }

@@ -19,6 +19,7 @@ function getIgnorePaths(): string[] {
 }
 
 async function getMarkdownFiles(dir: string, ignorePaths: string[]): Promise<Array<string>> {
+  const { searchRecursively } = getPreferenceValues<Preferences>();
   const entries = await fs.readdir(dir, { withFileTypes: true });
   const vaultPath = await getVaultPath();
 
@@ -34,7 +35,7 @@ async function getMarkdownFiles(dir: string, ignorePaths: string[]): Promise<Arr
   const tasks = entries.map(async (entry) => {
     const fullPath = path.join(dir, entry.name);
 
-    if (entry.isDirectory()) {
+    if (entry.isDirectory() && searchRecursively) {
       return getMarkdownFiles(fullPath, ignorePaths);
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
       return [fullPath];

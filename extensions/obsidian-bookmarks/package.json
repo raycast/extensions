@@ -124,6 +124,10 @@
         {
           "title": "Copy Link as Markdown",
           "value": "copyUrlAsMarkdown"
+        },
+        {
+          "title": "Fetch Page Content",
+          "value": "fetchContent"
         }
       ]
     },
@@ -187,8 +191,35 @@
       "title": "Date Prefix",
       "description": "The prefix to use for the date in the filename of your bookmarks.",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false
+    },
+    {
+      "name": "useBrowserExtension",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Use Browser Extension",
+      "description": "Use the Raycast Browser Extension to get the active browser tab when available. Falls back to JXA if disabled or if extension access fails.",
+      "label": "Use Browser Extension"
+    },
+    {
+      "name": "searchRecursively",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Search Subdirectories",
+      "description": "Search recursively in subdirectories when looking for bookmarks. If disabled, only searches in the root bookmarks directory.",
+      "label": "Search Subdirectories"
+    },
+    {
+      "name": "checkDuplicates",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Check for Duplicates",
+      "description": "Check for duplicate bookmarks when saving a new bookmark. If enabled, shows a warning when attempting to save a URL that already exists.",
+      "label": "Check for Duplicates"
     }
   ]
 }

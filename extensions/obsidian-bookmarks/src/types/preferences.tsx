@@ -5,9 +5,10 @@ export type FormActionPreference =
   | "openUrl"
   | "copyUrl"
   | "copyUrlAsMarkdown"
-  | "clearCache";
+  | "clearCache"
+  | "fetchContent";
 
-export type DetailActionPreference = FormActionPreference | "showDetails" | "markAsRead" | "deleteFile" | "clearCache";
+export type DetailActionPreference = FormActionPreference | "showDetails" | "markAsRead" | "deleteFile";
 
 export interface Preferences {
   vaultPath: string;
@@ -19,4 +20,7 @@ export interface Preferences {
   extraTags?: string;
   requiredTags?: string;
   datePrefix: boolean;
+  useBrowserExtension: boolean;
+  searchRecursively: boolean;
+  checkDuplicates: boolean;
 }

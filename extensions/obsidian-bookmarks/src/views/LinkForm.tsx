@@ -1,4 +1,4 @@
-import { Form, showToast, Toast } from "@raycast/api";
+import { Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
 import { findDuplicateBookmark } from "../helpers/url-sanitizer";
@@ -6,9 +6,10 @@ import useFiles from "../hooks/use-files";
 import useLinkForm from "../hooks/use-link-form";
 import useTags from "../hooks/use-tags";
 import * as methods from "../actions/methods";
+import { Preferences } from "../types";
 
 export default function LinkForm() {
-  const { values, onChange, loading: linkLoading } = useLinkForm();
+  const { values, onChange, setValues, loading: linkLoading } = useLinkForm();
   const { tags, loading: tagsLoading } = useTags();
   const { files, loading: filesLoading } = useFiles();
   const toastRef = useRef<Toast>();
@@ -18,7 +19,9 @@ export default function LinkForm() {
   // Handle URL validation and duplicate checking
   const validateUrl = useCallback(
     async (url: string) => {
-      if (!url || filesLoading) {
+      const { checkDuplicates } = getPreferenceValues<Preferences>();
+
+      if (!url || filesLoading || !checkDuplicates) {
         setIsDuplicate(false);
         return;
       }
@@ -71,7 +74,7 @@ export default function LinkForm() {
     <Form
       navigationTitle="Save Bookmark"
       isLoading={tagsLoading || linkLoading || filesLoading}
-      actions={<FormActions values={values} />}
+      actions={<FormActions values={values} setValues={setValues} />}
     >
       <Form.TextField
         id="url"
