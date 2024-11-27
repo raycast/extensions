@@ -42,11 +42,13 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
       accessories={[
         transaction.transfer_account_id ? { icon: Icon.Switch, tooltip: 'Transfer' } : {},
+        transaction.subtransactions.length > 0 ? { icon: Icon.Coins, tooltip: 'Split Transaction' } : {},
         {
-          icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined
+          icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined,
         },
         {
-          text: dayjs(transaction.date).fromNow()
+          text: dayjs(transaction.date).fromNow(),
+          tooltip: transaction.date
         }
       ]}
       actions={

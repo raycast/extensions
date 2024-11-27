@@ -57,7 +57,7 @@
     "node-localstorage": "^2.2.1",
     "random-hex-color-generator": "^1.0.12",
     "swr": "^2.0.4",
-    "ynab": "^1.32.0"
+    "ynab": "^1.55.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
