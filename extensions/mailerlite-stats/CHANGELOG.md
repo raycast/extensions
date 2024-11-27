@@ -1,6 +1,6 @@
 # MailerLite Stats Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-11-27
 
 - `Cache` Responses through `useFetch`
 - Show `EmptyView` when no "Campaigns"
