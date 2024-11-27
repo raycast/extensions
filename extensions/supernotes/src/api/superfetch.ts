@@ -92,8 +92,8 @@ export const superfetch = async <P extends keyof paths, M extends keyof paths[P]
     for (const [key, val] of Object.entries(query)) {
       if (val === undefined) delete query[key];
     }
+    processedUrl += `?${new URLSearchParams(query).toString()}`;
   }
-  processedUrl += `?${new URLSearchParams(query).toString()}`;
   try {
     const response = await fetch(`${SUPERNOTES_API_ROOT}${processedUrl}`, {
       redirect: "follow",
