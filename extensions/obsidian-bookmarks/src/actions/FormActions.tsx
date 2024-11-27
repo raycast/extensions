@@ -13,7 +13,7 @@ const saveFile = (values: LinkFormState["values"]) => asFile(values).then((f) =>
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 const popAndShowHUD = (message: string) => popToRoot().then(() => showHUD(message));
 
-async function fetchPageContent(url: string): Promise<string> {
+async function fetchPageContent(): Promise<string> {
   try {
     const content = await BrowserExtension.getContent({ format: "markdown" });
     return `\n\n## Page Content\n\n${content}`;
@@ -39,7 +39,7 @@ const createContentActions = (
         shortcut: { modifiers: ["cmd"], key: "g" },
         onAction: async () => {
           try {
-            const content = await fetchPageContent(values.url);
+            const content = await fetchPageContent();
             setValues({
               ...values,
               description: values.description + content,
