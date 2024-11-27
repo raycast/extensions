@@ -1,6 +1,26 @@
-# GIF Search
+Elevat your Mac workflow with the GIF Search extension. This extension searches for animated GIFs from the internet using [Giphy](https://giphy.com), [Tenor](https://tenor.com), or [The Finer Gifs Club](https://thefinergifs.club). Switch between the various services using the search bar dropdown.
 
-This extension searches for animated GIFs from the internet using [giphy.com](https://giphy.com), [tenor.com](https://tenor.com), or [thefinergifs.club](https://thefinergifs.club). Switch between the various services using the search bar dropdown.
+## **Discover the Perfect GIF in Seconds**
+
+* **Multi-Source Search**: Effortlessly switch between Giphy.com, Tenor.com, and TheFinerGifs.club using the search bar dropdown.  
+* **Smart Keyword Recognition**: Find the ideal GIF for any situation, whether you're looking for a reaction, meme, or emoji\-style animation.  
+* **Mac\-Optimized Performance**: Lightning-fast results, perfect for power users who demand speed and efficiency.
+
+## **Customizable Actions for Every Workflow**
+
+Tailor the GIF Search to your needs with customizable default actions:
+
+1. Copy GIF
+2. Copy GIF Link
+3. Copy GIF Markdown
+4. Paste GIF Markdown
+5. Manage Favorites
+6. View GIF Details
+7. Copy Page Link
+8. Open in Browser
+9. Download GIF
+
+Set your preferred action as the default for seamless integration into your workflow.
 
 ## Issues or Feature Requests
 
@@ -25,3 +45,17 @@ You can change the default action on a GIF to customize what happens when you pr
 9. Download GIF: Downloads the GIF in your Downloads folder
 
 Whichever setting is chosen will be moved to the top of the list, making it the default action when you hit ⏎ on the GIF list item.
+
+## **FAQs**
+
+### **How can I find a specific GIF?**
+
+Use descriptive keywords in the search bar. Combine terms like emotions, actions, or popular references for best results.
+
+### **How do I find out what a GIF is from?** 
+
+Select "View GIF Details" to access metadata, including source information when available.
+
+### **Can I use Google to search for GIFs?** 
+
+While Google offers GIF search, Raycast's GIF Search provides a more streamlined experience directly within your Mac workflow.

@@ -1,16 +1,23 @@
-import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { ActionPanel, Action, Icon, List, Keyboard, confirmAlert, LocalStorage, Alert, Color } from "@raycast/api";
 
 import InstanceForm from "./InstanceForm";
 
 import useInstances from "../hooks/useInstances";
-import { useEffect } from "react";
-import { Instance } from "../types";
+import { useEffect, useState } from "react";
 
 export default function InstancesList() {
-  const { instances, addInstance, editInstance, deleteInstance } = useInstances();
+  const [selectedId, setSelectedId] = useState("");
 
-  const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const {
+    instances,
+    isLoading,
+    addInstance,
+    editInstance,
+    deleteInstance,
+    selectedInstance,
+    setSelectedInstance,
+    mutate,
+  } = useInstances();
 
   useEffect(() => {
     if (!selectedInstance && instances.length > 0) {
@@ -18,14 +25,20 @@ export default function InstancesList() {
     }
   }, [instances, selectedInstance]);
 
+  useEffect(() => {
+    if (!selectedInstance || isLoading || selectedId) return;
+    setSelectedId(selectedInstance.id);
+  }, [selectedInstance, isLoading]);
+
   return (
-    <List searchBarPlaceholder="Filter by name, alias, username..." isLoading={!instances}>
+    <List searchBarPlaceholder="Filter by name, alias, username..." isLoading={isLoading} selectedItemId={selectedId}>
       {instances.map((instance) => {
         const { id: instanceId, alias, name: instanceName, username, password, color } = instance;
         const aliasOrName = alias ? alias : instanceName;
         return (
           <List.Item
             key={instanceId}
+            id={instanceId}
             icon={{
               source: selectedInstance?.id == instanceId ? Icon.CheckCircle : Icon.Circle,
               tintColor: color,
@@ -37,43 +50,42 @@ export default function InstancesList() {
               <ActionPanel>
                 <List.Dropdown.Section title={aliasOrName}>
                   <Action.Push
-                    icon={Icon.Plus}
-                    title="Add Instance Profile"
-                    target={<InstanceForm onSubmit={addInstance} />}
-                    shortcut={Keyboard.Shortcut.Common.New}
-                  />
-                  <Action.Push
                     icon={Icon.Pencil}
-                    title="Edit Instance Profile"
+                    title="Edit"
                     target={<InstanceForm onSubmit={editInstance} instance={instance} />}
                     shortcut={Keyboard.Shortcut.Common.Edit}
+                    onPop={mutate}
+                    onPush={() => setSelectedId(instance.id)}
                   />
                   <Action
-                    title="Delete Instance Profile"
+                    icon={Icon.Checkmark}
+                    title="Select"
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    onAction={() => {
+                      setSelectedInstance(instance);
+                      LocalStorage.setItem("selected-instance", JSON.stringify(instance));
+                    }}
+                  ></Action>
+                  <Action
+                    title="Delete"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={async () => {
-                      if (
-                        await confirmAlert({
-                          title: "Remove Instance",
-                          message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
-                        })
-                      ) {
-                        await deleteInstance(instanceId);
-                      }
-                    }}
+                    onAction={() =>
+                      confirmAlert({
+                        title: "Delete Instance Profile",
+                        message: `Are you sure you want to delete "${alias ? alias + " (" + instanceName + ")" : instanceName}"?`,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                          onAction: () => {
+                            deleteInstance(instanceId);
+                          },
+                        },
+                      })
+                    }
                   />
                 </List.Dropdown.Section>
-                <Action
-                  icon={Icon.Checkmark}
-                  title="Select Instance Profile"
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  onAction={() => {
-                    setSelectedInstance(instance);
-                    LocalStorage.setItem("selected-instance", JSON.stringify(instance));
-                  }}
-                ></Action>
                 <List.Dropdown.Section>
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
@@ -88,9 +100,23 @@ export default function InstancesList() {
                     url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
                   />
                 </List.Dropdown.Section>
+                <List.Dropdown.Section title="Instance Profiles">
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Add"
+                    target={<InstanceForm onSubmit={addInstance} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                    onPush={() => setSelectedId(instance.id)}
+                  />
+                </List.Dropdown.Section>
               </ActionPanel>
             }
-            accessories={[{ text: username, icon: Icon.Person }]}
+            accessories={[
+              { text: username, icon: Icon.Person },
+              instance.full == "true"
+                ? { icon: { source: Icon.LockDisabled, tintColor: Color.Green }, tooltip: "Full Access" }
+                : { icon: { source: Icon.Lock, tintColor: Color.Orange }, tooltip: "Limited Access" },
+            ]}
           />
         );
       })}

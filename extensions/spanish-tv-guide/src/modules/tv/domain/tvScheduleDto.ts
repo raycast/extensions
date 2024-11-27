@@ -5,17 +5,15 @@ export type ChannelScheduleDto = {
 };
 
 export type ProgramDto = {
-  title: string;
+  url: string;
+  name: string;
   startTime: Date;
   isCurrentlyLive: boolean;
-  isLive: boolean;
-  url: string;
 };
 
 export type ProgramDetailsDto = {
-  title: string;
-  startTime: Date;
-  image: string;
+  imageUrl: string;
+  headline: string;
   description: string;
 };
 

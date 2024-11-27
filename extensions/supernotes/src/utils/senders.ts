@@ -4,13 +4,15 @@ import { superfetch } from "~/api/superfetch";
 import { getSupernotesPrefs, textToSimpleCard } from "~/utils/helpers";
 import type { ICard } from "~/utils/types";
 
-export async function sendToDaily(text: string) {
+export async function sendToDaily(text: string, headless?: boolean) {
   const { apiKey } = getSupernotesPrefs();
-  await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
+  if (headless) {
+    await showHUD("↗️ Sending to Daily Card");
+  } else {
+    await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
+  }
   const fetched = await superfetch("/v1/cards/daily", "put", { apiKey, body: { markup: text } });
-  await showHUD(fetched.ok ? `✅ Added to Daily Card` : `🚫 Error: ${fetched.body.detail}`, {
-    popToRootType: PopToRootType.Immediate,
-  });
+  await showHUD(fetched.ok ? `✅ Added to Daily Card` : `🚫 Error: ${fetched.body.detail}`);
   popToRoot({ clearSearchBar: true });
 }
 

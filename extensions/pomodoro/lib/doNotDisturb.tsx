@@ -1,5 +1,7 @@
-import { confirmAlert, LaunchType, open } from "@raycast/api";
+import { confirmAlert, LaunchType, open, getPreferenceValues } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
+
+const { enableFocusWhileFocused } = getPreferenceValues<ExtensionPreferences>();
 
 export const dndLaunchOptions = {
   type: LaunchType.Background,
@@ -8,19 +10,21 @@ export const dndLaunchOptions = {
 };
 
 export async function setDND(enabled: boolean) {
+  if (!enableFocusWhileFocused) return;
   return crossLaunchCommand(
     {
       ...dndLaunchOptions,
       name: enabled ? "on" : "off",
       context: { supressHUD: !enabled },
     },
-    false
+    false,
   ).catch(() => {
     // Do nothing here because we're going to check when mounting the extension
   });
 }
 
 export async function checkDNDExtensionInstall() {
+  if (!enableFocusWhileFocused) return;
   await crossLaunchCommand({
     ...dndLaunchOptions,
     name: "status",

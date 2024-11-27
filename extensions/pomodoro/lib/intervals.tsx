@@ -72,13 +72,13 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean): Inte
   };
   cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   saveIntervalHistory(interval).then();
-  if (type === "focus") setDND(true)
+  if (type === "focus") setDND(true);
   return interval;
 }
 
 export function pauseInterval(): Interval | undefined {
   let interval = getCurrentInterval();
-  if (interval?.type === "focus") setDND(false)
+  if (interval?.type === "focus") setDND(false);
   if (interval) {
     const parts = [...interval.parts];
     parts[parts.length - 1].pausedAt = currentTimestamp();
@@ -100,13 +100,13 @@ export function continueInterval(): Interval | undefined {
       parts,
     };
     cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
-    if (interval.type === "focus") setDND(true)
+    if (interval.type === "focus") setDND(true);
   }
   return interval;
 }
 
 export function resetInterval() {
-  if (getCurrentInterval()?.type === "focus") setDND(false)
+  if (getCurrentInterval()?.type === "focus") setDND(false);
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 

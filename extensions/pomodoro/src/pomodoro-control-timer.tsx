@@ -35,9 +35,7 @@ const createAction = (action: () => void) => () => {
 
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
-  if (preferences.enableFocusWhileFocused) {
-    checkDNDExtensionInstall();
-  }
+  checkDNDExtensionInstall();
 
   return (
     <List navigationTitle="Control Pomodoro Timers">
@@ -164,7 +162,7 @@ const EndOfInterval = () => {
         `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
         {
           keepPreviousData: true,
-        }
+        },
       );
       if (!isLoading && data) {
         const giphyResponse = data as GiphyResponse;

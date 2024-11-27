@@ -1,6 +1,10 @@
 # CompressX Changelog
 
-## [Update Overview and screenshots] - 2024-11-12
+## [Update screenshots and overview] - 2024-11-12
+
+- Add new screenshots and update command description
+
+## [Add new commands] - 2024-11-12
 
 - Add custom options when compressing files with CompressX
 - Add new command to import files into CompressX

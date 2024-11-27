@@ -5,7 +5,9 @@
   "description": "Search and open tabs from bookmarks and history in Zen Browser.",
   "icon": "zen-logo.png",
   "author": "Keyruu",
-  "contributors": [],
+  "contributors": [
+    "theherk"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",

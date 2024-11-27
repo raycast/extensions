@@ -52,6 +52,15 @@
       "default": "5k7C1Mj9QpoT9DKSDOvdJt8pwC0DkWZR"
     },
     {
+      "name": "oauthAudience",
+      "description": "Dust api oauth audience (advanced)",
+      "type": "textfield",
+      "required": false,
+      "title": "OAuth audience (advanced)",
+      "placeholder": "https://dust.tt/api/v1",
+      "default": "https://dust.tt/api/v1"
+    },
+    {
       "name": "oauthDomain",
       "description": "Dust oauth domain (advanced)",
       "type": "textfield",
