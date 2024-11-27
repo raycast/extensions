@@ -12,10 +12,10 @@ const noop = () => {};
 const execAsync = promisify(execFile);
 const unlinkSilent = (p: string) => unlink(p).catch(noop);
 
-const JQ_VERSION = "jq-1.7.1";
-const jqUrl = `https://github.com/jqlang/jq/releases/download/${JQ_VERSION}/jq-macos-amd64`;
-
-export const JQ_EXEC = path.join(environment.supportPath, "jq");
+const jqVersion = "jq-1.7.1";
+const jqArch = process.arch === "arm64" ? "arm64" : "amd64";
+const jqUrl = `https://github.com/jqlang/jq/releases/download/${jqVersion}/jq-macos-${jqArch}`;
+const jqExec = path.join(environment.supportPath, "jq");
 
 async function downloadJq(jqPath: string): Promise<void> {
   await unlinkSilent(jqPath);
@@ -56,12 +56,12 @@ export function useJq(): AsyncState<string> {
     });
 
     try {
-      const version = await ensureJq(JQ_EXEC);
+      const version = await ensureJq(jqExec);
       toast.style = Toast.Style.Success;
       toast.title = "Found";
       toast.message = version;
       setTimeout(() => toast.hide(), 1000);
-      return JQ_EXEC;
+      return jqExec;
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.message = String(err);
