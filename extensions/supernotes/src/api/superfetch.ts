@@ -1,4 +1,3 @@
-import { size } from "lodash";
 import fetch, { Headers, Response } from "node-fetch";
 
 import { SUPERNOTES_API_ROOT } from "~/utils/defines";
@@ -88,13 +87,13 @@ export const superfetch = async <P extends keyof paths, M extends keyof paths[P]
   if (!isHttpMethod(method)) throw new TypeError(`[COURIER] Invalid fetch method: ${method}`);
   const { path, query, body } = options;
   let processedUrl = injectPath(url, method, path);
-  if (size(query) > 0) {
-    // remove any undefined query params
+  // remove any undefined query params
+  if (query instanceof Object) {
     for (const [key, val] of Object.entries(query)) {
       if (val === undefined) delete query[key];
     }
-    processedUrl += `?${new URLSearchParams(query).toString()}`;
   }
+  processedUrl += `?${new URLSearchParams(query).toString()}`;
   try {
     const response = await fetch(`${SUPERNOTES_API_ROOT}${processedUrl}`, {
       redirect: "follow",
