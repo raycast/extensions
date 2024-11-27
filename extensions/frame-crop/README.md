@@ -1,3 +1,3 @@
-# Public Domain Art Inspiration
+# Frame Crop - Discover Art for your TV
 
-Displays a random artwork derived from the Frame Crop api.
+Discover & download amazing artwork curated by the Frame Crop team.
