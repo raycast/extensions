@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: transparent;
+        font-family: Arial, sans-serif;
+      }
+      #rive-canvas {
+        width: 100%;
+        height: 100%;
+        max-width: 500px;
+        max-height: 500px;
+      }
+      #state-machine-container {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+      }
+      #state-machine-label {
+        margin-right: 10px;
+        font-size: 16px;
+      }
+      #state-machine-select {
+        padding: 5px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="rive-canvas"></canvas>
+    <div id="state-machine-container">
+      <label id="state-machine-label" for="state-machine-select">State Machine:</label>
+      <select id="state-machine-select"></select>
+    </div>
+    <script type="module">
+      import rive from "https://cdn.jsdelivr.net/npm/@rive-app/canvas@2.19.4/+esm";
+
+      const layout = new rive.Layout({
+        fit: rive.Fit.FitWidth,
+        alignment: rive.Alignment.Center,
+      });
+
+      const riveCanvas = document.getElementById("rive-canvas");
+      const stateMachineSelect = document.getElementById("state-machine-select");
+
+      // Decode the base64 data
+      const base64Data = "{{BASE64_DATA}}";
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      let riveInstance;
+      let currentStateMachine;
+
+      function initRive() {
+        riveInstance = new rive.Rive({
+          buffer: bytes.buffer,
+          canvas: riveCanvas,
+          layout,
+          autoplay: true,
+          onLoad: () => {
+            riveInstance.resizeDrawingSurfaceToCanvas();
+            updateStateMachinesList();
+          },
+        });
+      }
+
+      function updateStateMachinesList() {
+        const stateMachines = riveInstance.stateMachineNames;
+        console.log("Available state machines:", stateMachines);
+
+        // Clear existing options
+        stateMachineSelect.innerHTML = "";
+
+        // Add new options
+        stateMachines.forEach((stateMachine) => {
+          const option = document.createElement("option");
+          option.value = stateMachine;
+          option.textContent = stateMachine;
+          stateMachineSelect.appendChild(option);
+        });
+
+        // Select the first state machine by default
+        if (stateMachines.length > 0) {
+          currentStateMachine = stateMachines[0];
+          stateMachineSelect.value = currentStateMachine;
+          updateStateMachine();
+        }
+      }
+
+      function updateStateMachine() {
+        if (riveInstance && riveInstance.stateMachineNames.includes(currentStateMachine)) {
+          riveInstance.stop(riveInstance.stateMachineNames);
+          riveInstance.play(currentStateMachine);
+        } else {
+          console.error("State machine not found:", currentStateMachine);
+        }
+      }
+
+      stateMachineSelect.addEventListener("change", (event) => {
+        currentStateMachine = event.target.value;
+        updateStateMachine();
+      });
+
+      initRive();
+    </script>
+  </body>
+</html>

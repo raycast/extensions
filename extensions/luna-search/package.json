@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "luna-search",
+  "title": "Luna Search",
+  "description": "Quickly find and open Luna Games",
+  "icon": "command-icon.png",
+  "author": "relevantsam",
+  "categories": [
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Luna Search",
+      "subtitle": "Quickly find and open Luna Games",
+      "description": "Search Luna's rich catalogue of content to directly find and open games",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search Term",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "luna-quick-access",
+      "title": "Luna Quick Access",
+      "subtitle": "Quickly access Luna Games",
+      "description": "See recently accessed and trending games in your menu bar.",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.1",
+    "@raycast/utils": "^1.16.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

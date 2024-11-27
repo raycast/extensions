@@ -1,0 +1,227 @@
+fragment ShortRepositoryFields on Repository {
+  id
+  defaultBranchRef {
+    target {
+      oid
+    }
+  }
+  nameWithOwner
+  name
+  owner {
+    login
+    avatarUrl(size: 64)
+  }
+  url
+  mergeCommitAllowed
+  squashMergeAllowed
+  rebaseMergeAllowed
+}
+
+fragment ExtendedRepositoryFields on Repository {
+  id
+  nameWithOwner
+  name
+  owner {
+    login
+    avatarUrl(size: 64)
+  }
+  url
+  mergeCommitAllowed
+  squashMergeAllowed
+  rebaseMergeAllowed
+  updatedAt
+  pushedAt
+  stargazerCount
+  isArchived
+  isFork
+  isPrivate
+  viewerHasStarred
+  primaryLanguage {
+    id
+    name
+    color
+  }
+  hasIssuesEnabled
+  hasWikiEnabled
+  hasProjectsEnabled
+  hasDiscussionsEnabled
+  releases {
+    totalCount
+  }
+}
+
+query searchRepositories($query: String!, $numberOfItems: Int!) {
+  search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+    nodes {
+      ...ExtendedRepositoryFields
+    }
+  }
+}
+
+query myLatestRepositories(
+  $numberOfItems: Int!
+  $orderByField: RepositoryOrderField!
+  $orderByDirection: OrderDirection!
+) {
+  viewer {
+    repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
+    }
+  }
+}
+
+query milestonesForRepository($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    milestones(first: 25, orderBy: { field: DUE_DATE, direction: ASC }) {
+      totalCount
+      nodes {
+        id
+        title
+        number
+      }
+    }
+  }
+}
+
+query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+        }
+      }
+    }
+  }
+}
+
+query dataForRepository($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    defaultBranchRef {
+      id
+      name
+      target {
+        ...CommitFields
+      }
+    }
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
+      totalCount
+      nodes {
+        id
+        name
+        target {
+          ...CommitFields
+        }
+      }
+    }
+    collaborators(first: 50) {
+      totalCount
+      nodes {
+        ...UserFields
+      }
+    }
+    labels(first: 50) {
+      totalCount
+      nodes {
+        id
+        name
+        color
+        isDefault
+      }
+    }
+    projectsV2(first: 50) {
+      totalCount
+      nodes {
+        id
+        title
+      }
+    }
+    milestones(first: 50, states: OPEN, orderBy: { field: DUE_DATE, direction: ASC }) {
+      totalCount
+      nodes {
+        id
+        title
+      }
+    }
+    pullRequestTemplates {
+      body
+    }
+    issueTemplates {
+      name
+      about
+      title
+      body
+    }
+  }
+}
+
+query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+  repository(owner: $owner, name: $name) {
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+      nodes {
+        id
+        name
+        target {
+          ...CommitFields
+        }
+      }
+    }
+  }
+}
+
+query repositoryIssues($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    url
+    defaultBranchRef {
+      id
+      name
+      target {
+        oid
+      }
+    }
+    issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+      nodes {
+        ...IssueFields
+      }
+    }
+  }
+}
+
+fragment ReleaseFields on Release {
+  id
+  description
+  name
+  publishedAt
+  createdAt
+  tagName
+  url
+}
+
+query repositoryReleases($name: String!, $owner: String!) {
+  repository(name: $name, owner: $owner) {
+    ... on Repository {
+      releases(first: 30, orderBy: { field: CREATED_AT, direction: DESC }) {
+        nodes {
+          ...ReleaseFields
+        }
+      }
+    }
+  }
+}
+
+mutation addStar($repositoryId: ID!) {
+  addStar(input: { starrableId: $repositoryId }) {
+    clientMutationId # Placeholder
+  }
+}
+
+mutation removeStar($repositoryId: ID!) {
+  removeStar(input: { starrableId: $repositoryId }) {
+    clientMutationId # Placeholder
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lunatask",
+  "title": "Lunatask",
+  "description": "Unofficial extension for Lunatask. Create tasks from Raycast.",
+  "icon": "lunatask-icon.png",
+  "author": "posthardcode",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-task",
+      "title": "Add New Task",
+      "subtitle": "Lunatask",
+      "description": "Create a new task in Lunatask",
+      "mode": "view"
+    },
+    {
+      "name": "add-area",
+      "title": "Add New Area",
+      "subtitle": "Lunatask",
+      "description": "Configure additional areas in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "list-areas",
+      "title": "List Areas",
+      "subtitle": "Lunatask",
+      "description": "View and delete Lunatask areas",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Refer to Lunatask documentation for instructions on how to get your Access Token.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultAreaId",
+      "title": "Default Area ID",
+      "description": "Refer to Lunatask documentation for instructions on how to get an Area ID.",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.0",
+    "cross-fetch": "^3.1.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

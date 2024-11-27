@@ -7,95 +7,178 @@ import {
   Action,
   showHUD,
   showToast,
-  useNavigation,
   Image,
-  Detail,
   closeMainWindow,
-  popToRoot,
   getSelectedText,
+  environment,
+  confirmAlert,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  open,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
-import { chmodSync } from "fs";
-import { dirname } from "path";
-import { useEffect, useState } from "react";
-import { ScriptCommand } from "./types";
-import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
+import { chmodSync, existsSync } from "fs";
+import path from "path";
+import React, { useEffect, useState } from "react";
+import untildify from "untildify";
+import { ScriptCommand, InputType } from "./types";
+import { getActiveTabUrl, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "selection" | "clipboard";
+export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
+  const [state, setState] = useState<{ commands: ScriptCommand[]; invalid: InvalidCommand[] }>();
 
-export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
-  const { inputFrom } = props;
-  const [parsed, setParsed] = useState<{ commands: ScriptCommand[] }>();
+  const refreshCommands = async () => {
+    const { commands, invalid } = await parseScriptCommands();
 
-  const loadCommands = async () => {
-    const { commands } = await parseScriptCommands();
-    setParsed({ commands: await sortByAccessTime(commands) });
+    // treat clipboard commands the same as text, just different source
+    const transformedInputType = props.inputType === "clipboard" ? "text" : props.inputType;
+
+    const filteredCommands = commands.filter((command) => {
+      switch (command.metadatas.mode) {
+        case "pipe":
+          // If the input is not defined, we assume it's a text input
+          if (!command.metadatas.inputType?.type) {
+            return transformedInputType === "text";
+          }
+          return command.metadatas.inputType.type === transformedInputType;
+        default:
+          return command.metadatas.argument1.type === transformedInputType;
+      }
+    });
+
+    setState({ commands: await sortByAccessTime(filteredCommands), invalid });
   };
 
   useEffect(() => {
-    loadCommands();
+    refreshCommands();
   }, []);
 
+  function generatePlaceholder(inputType: string | undefined) {
+    switch (inputType) {
+      case "text":
+        return "Pipe selected text or clipboard contents to";
+      case "url":
+        return "Pipe active browser tab URL to";
+      default:
+        return `Pipe ${inputType} to`;
+    }
+  }
+
   return (
-    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
-      {parsed?.commands.map((command) => (
-        <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
-      ))}
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={generatePlaceholder(props.inputType)}>
+      <List.Section title="Commands">
+        {state?.commands.map((command) => (
+          <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
+        ))}
+      </List.Section>
+      <List.Section title="Invalid Commands">
+        {state?.invalid.map((command) => (
+          <List.Item
+            key={command.path}
+            title={path.basename(command.path)}
+            subtitle={path.dirname(command.path)}
+            accessories={[{ text: `${command.errors.length} errors`, tooltip: command.errors.join("\n") }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Path" content={command.path} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Image.ImageLike): Image.ImageLike {
-  const icon = Icon[scriptIcon as keyof typeof Icon];
-  return icon ? icon : defaultIcon;
+export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
+  const buildIcon = (icon: string) => {
+    if (icon.startsWith("http") || icon.startsWith("https")) {
+      return { source: icon };
+    }
+    const iconPath = path.resolve(path.dirname(script.path), icon);
+    if (existsSync(iconPath)) {
+      return { source: iconPath };
+    }
+    return icon;
+  };
+  if (environment.theme === "dark" && script.metadatas.iconDark) {
+    return buildIcon(script.metadatas.iconDark);
+  }
+  if (script.metadatas.icon) {
+    return buildIcon(script.metadatas.icon);
+  }
+  return script.metadatas.mode === "pipe" ? "pipe-icon.png" : "script-icon.png";
 }
 
-async function getInput(inputType: string) {
-  if (inputType == "clipboard") {
-    const clipboard = await Clipboard.readText();
-    if (!clipboard) {
-      throw new Error("No text in clipboard");
+async function getInput(inputType: InputType) {
+  switch (inputType) {
+    case "clipboard": {
+      const clipboard = await Clipboard.readText();
+      if (!clipboard) {
+        throw new Error("No text in clipboard");
+      }
+      return clipboard;
     }
-    return clipboard;
-  } else {
-    return getSelectedText();
+
+    case "text": {
+      const selection = await getSelectedText();
+
+      if (selection) {
+        return selection;
+      } else {
+        throw new Error("No text selected");
+      }
+    }
+    case "file": {
+      const selection = await getSelectedFinderItems();
+      if (selection.length == 0) {
+        throw new Error("No file selected");
+      }
+
+      return selection[0].path;
+    }
+    case "url": {
+      return getActiveTabUrl();
+    }
   }
 }
 
-export function PipeCommand(props: {
-  command: ScriptCommand;
-  inputFrom?: InputType;
-  onTrash: () => void;
-  showContent?: boolean;
-}): JSX.Element {
-  const { command, inputFrom, onTrash, showContent } = props;
+const { primaryAction } = getPreferenceValues<{ primaryAction: "copy" | "paste" }>();
+
+function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onTrash: () => void }): JSX.Element {
+  const { command, inputFrom, onTrash } = props;
 
   return (
     <List.Item
       key={command.path}
-      icon={getRaycastIcon(command.metadatas.icon, Icon.Text)}
-      accessoryIcon={command.user ? Icon.Person : undefined}
+      icon={getRaycastIcon(command)}
+      accessories={[
+        { text: command.metadatas.mode, tooltip: "Mode" },
+        ...(command.user ? [{ icon: Icon.Person }] : []),
+      ]}
       title={command.metadatas.title}
-      subtitle={showContent ? undefined : command.metadatas.packageName}
-      detail={
-        showContent ? <List.Item.Detail markdown={["## Content", codeblock(command.content)].join("\n")} /> : undefined
-      }
+      subtitle={command.metadatas.packageName}
       actions={
         <ActionPanel>
           {typeof inputFrom != "undefined" ? (
             <ActionPanel.Section>
-              <CommandAction command={command} inputFrom={inputFrom} />
-            </ActionPanel.Section>
-          ) : null}
-          {command.user ? (
-            <ActionPanel.Section>
-              <Action.Open title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-              <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
-              <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
-              <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+              <CommandActions command={command} inputFrom={inputFrom} />
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
+            {command.user ? (
+              <React.Fragment>
+                <Action.Open
+                  icon={Icon.BlankDocument}
+                  title="Open Command"
+                  target={command.path}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
+                <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
+                <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+              </React.Fragment>
+            ) : null}
             <Action.CopyToClipboard
               title="Copy Script Contents"
               shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
@@ -110,13 +193,25 @@ export function PipeCommand(props: {
 async function runCommand(command: ScriptCommand, inputType: InputType) {
   const toast = await showToast(Toast.Style.Animated, "Running...");
   const input = await getInput(inputType);
-  const argument1 = command.metadatas.argument1.percentEncoded ? encodeURIComponent(input) : input;
+
+  let args: string[];
+
+  if (command.metadatas.mode === "silent") {
+    args = command.metadatas.argument1.percentEncoded ? [encodeURIComponent(input)] : [input];
+  } else {
+    args = [];
+  }
+
   chmodSync(command.path, "755");
-  // Pass the input both to the command stdin and as command fist argument
-  const { stdout, stderr, status } = spawnSync(command.path, [argument1], {
+
+  const { stdout, stderr, status } = spawnSync(command.path, args, {
     encoding: "utf-8",
-    cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
+    cwd: command.metadatas.currentDirectoryPath
+      ? untildify(command.metadatas.currentDirectoryPath)
+      : path.dirname(command.path),
+    input: command.metadatas.mode === "pipe" ? input : undefined,
     env: {
+      // TODO this is a lttle scary and doesn't seem like best practice?
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },
     maxBuffer: 10 * 1024 * 1024,
@@ -129,19 +224,26 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
   return stdout;
 }
 
-function CommandAction(props: { command: ScriptCommand; inputFrom: "clipboard" | "selection" }) {
+function CommandActions(props: { command: ScriptCommand; inputFrom: InputType }) {
   const { command, inputFrom } = props;
-  const navigation = useNavigation();
 
-  function outputHandler(onSuccess: (output: string) => void, exitOnSuccess?: boolean) {
+  function outputHandler(onSuccess: (output: string) => void) {
     return async () => {
+      if (
+        command.metadatas.needsConfirmation &&
+        !(await confirmAlert({
+          title: command.metadatas.title,
+          message: "Are you sure you want to run this script ?",
+          primaryAction: { title: "Run Script" },
+          icon: getRaycastIcon(command),
+        }))
+      ) {
+        return;
+      }
       try {
         const output = await runCommand(command, inputFrom);
         if (output) await onSuccess(output);
-        if (exitOnSuccess) {
-          await closeMainWindow();
-          await popToRoot();
-        }
+        await closeMainWindow();
       } catch (e) {
         const toast = await showToast({
           title: "An error occured",
@@ -159,38 +261,40 @@ function CommandAction(props: { command: ScriptCommand; inputFrom: "clipboard" |
     };
   }
 
-  const copyAction = (
-    <Action title="Copy Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.copy, true)} />
-  );
   switch (command.metadatas.mode) {
     case "silent":
-      return <Action icon={Icon.Terminal} title="Run Script" onAction={outputHandler(showHUD, true)} />;
-    case "fullOutput":
-      return (
+      return <Action title="Run Script" icon={Icon.Terminal} onAction={outputHandler(showHUD)} />;
+    case "pipe": {
+      const copyAction = (
         <Action
-          icon={Icon.Text}
-          title="Show Script Output"
+          key="copy"
+          icon={Icon.Terminal}
+          title="Copy Script Output"
           onAction={outputHandler(async (output) => {
-            await navigation.push(
-              <Detail
-                markdown={codeblock(output)}
-                actions={
-                  <ActionPanel>
-                    <Action.CopyToClipboard content={output} />
-                  </ActionPanel>
-                }
-              />
-            );
+            await Clipboard.copy(output);
+            await showHUD("Copied to clipboard!");
           })}
         />
       );
-    case "copy":
-      return copyAction;
-    case "replace":
-      return inputFrom == "clipboard" ? (
-        copyAction
-      ) : (
-        <Action title="Paste Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.paste, true)} />
+      const pasteAction = (
+        <Action
+          key="paste"
+          icon={Icon.Terminal}
+          title="Paste Script Output"
+          onAction={outputHandler(Clipboard.paste)}
+        />
       );
+
+      const openInBrowser = (
+        <Action key="open-url" icon={Icon.Globe} title="Open in Browser" onAction={outputHandler(open)} />
+      );
+
+      return (
+        <>
+          {command.metadatas.outputType == "url" ? openInBrowser : null}
+          {primaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
+        </>
+      );
+    }
   }
 }

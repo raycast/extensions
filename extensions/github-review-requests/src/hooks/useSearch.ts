@@ -3,7 +3,6 @@ import { GraphQLClient } from "graphql-request";
 import { useEffect, useState } from "react";
 import { StatusState } from "../schema.generated";
 import { formatDate } from "../util";
-
 import { getSdk } from "./SearchReviewRequest.generated";
 
 const api = getSdk(
@@ -34,14 +33,14 @@ export const useSearch = (searchText: string | undefined) => {
     async function fetch() {
       setLoading(true);
 
-      const baseQuery = "is:open is:pr review-requested:@me";
+      const baseQuery = "is:open is:pr draft:false review-requested:@me";
       const query = searchText ? `${baseQuery} ${searchText}` : baseQuery;
       try {
         const result = await api.SearchReviewRequest({ query });
 
         const mapped: PullRequest[] =
           result.search.edges
-            ?.map((item) => {
+            ?.map(item => {
               if (item === null) {
                 return null;
               }

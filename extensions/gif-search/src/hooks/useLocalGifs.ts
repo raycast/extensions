@@ -1,68 +1,75 @@
-import { useCallback, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { LocalType, get, getAll } from "../lib/localGifs";
+import { GRID_COLUMNS, ServiceName } from "../preferences";
+import { getAPIByServiceName } from "./useSearchAPI";
+import dedupe from "../lib/dedupe";
 
-import { ServiceName } from "../preferences";
+type ItemSize = "small" | "medium" | "large";
 
-import { clearAll, clear, getAll, get, LocalType } from "../lib/localGifs";
+export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize) {
+  const isAllFavsOrRecents = service === "favorites" || service === "recents";
 
-import type { StoredGifIds } from "./useGifPopulator";
-export interface LocalIdsState {
-  ids?: StoredGifIds;
-  error?: Error;
-}
+  const {
+    data: localGifs,
+    isLoading: isLoadingLocalGifs,
+    mutate: mutateLocalGifs,
+  } = useCachedPromise(
+    async (service) => {
+      if (!service) return [];
 
-export interface LoadFavOpt {
-  offset?: number;
-}
+      const favs = await get(service, "favs");
+      const recent = (await get(service, "recent")).filter((id) => !favs.includes(id));
 
-export default function useLocalGifs(type: LocalType) {
-  const [isLoadingIds, setIsLoadingIds] = useState(true);
-  const [localIds, setLocalIds] = useState<LocalIdsState>();
+      // Display the first 2 rows only
+      const favIds = Array.from(favs).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
+      const recentIds = Array.from(recent).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
 
-  const loadRecents = useCallback(
-    async function loadFavs(service?: ServiceName, opt?: LoadFavOpt) {
-      const { offset = 0 } = opt || {};
-      if (!service) {
-        return;
-      }
+      const api = await getAPIByServiceName(service);
+      if (api === null) return [];
 
-      setIsLoadingIds(true);
-
-      try {
-        const localIds = await get(service, type);
-        setLocalIds({ ids: new Map([[service, localIds]]) });
-      } catch (e) {
-        console.error(e);
-        const error = e as Error;
-
-        await clear(service, type);
-        setLocalIds({ error });
-      } finally {
-        setIsLoadingIds(false);
-      }
+      const [favoriteGifs, recentGifs] = await Promise.all([api.gifs(favIds), api.gifs(recentIds)]);
+      return { recentGifs: dedupe(recentGifs), favoriteGifs: dedupe(favoriteGifs) };
     },
-    [setLocalIds, setIsLoadingIds]
+    [service],
+    { execute: !isAllFavsOrRecents },
   );
 
-  const loadAllRecents = useCallback(
-    async function loadAllFavs(opt?: LoadFavOpt) {
-      const { offset = 0 } = opt || {};
-      setIsLoadingIds(true);
+  const {
+    data: allGifs,
+    isLoading: isLoadingAllGifs,
+    mutate: mutateAllGifs,
+  } = useCachedPromise(
+    async (service?: ServiceName) => {
+      let type: LocalType;
+      if (service === "favorites") type = "favs";
+      else if (service === "recents") type = "recent";
+      else return [];
 
-      try {
-        const allFavs = await getAll(type);
-        setLocalIds({ ids: allFavs });
-      } catch (e) {
-        console.error(e);
-        const error = e as Error;
+      const all = await getAll(type);
+      // Populate all gifs using the API
+      const promises = all.map(async ([service, ids]) => {
+        const api = await getAPIByServiceName(service);
+        if (api === null) return [];
+        const gifs = await api.gifs(ids);
+        return [service, dedupe(gifs)] as const;
+      });
 
-        await clearAll(type);
-        setLocalIds({ error });
-      } finally {
-        setIsLoadingIds(false);
-      }
+      const results = await Promise.all(promises);
+      return results;
     },
-    [setLocalIds]
+    [service],
+    { execute: isAllFavsOrRecents },
   );
 
-  return [localIds, isLoadingIds, loadRecents, loadAllRecents] as const;
+  async function mutate() {
+    isAllFavsOrRecents ? mutateAllGifs() : mutateLocalGifs();
+  }
+
+  return {
+    favoriteGifs: localGifs && "favoriteGifs" in localGifs ? localGifs.favoriteGifs : [],
+    recentGifs: localGifs && "recentGifs" in localGifs ? localGifs.recentGifs : [],
+    isLoading: isLoadingLocalGifs || isLoadingAllGifs,
+    allGifs,
+    mutate,
+  };
 }

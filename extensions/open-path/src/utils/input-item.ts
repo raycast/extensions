@@ -1,5 +1,5 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
-import { isEmpty } from "./common-utils";
+import { isEmpty } from "validator";
 
 export const fetchItemInputSelectedFirst = async () => {
   return getSelectedText()

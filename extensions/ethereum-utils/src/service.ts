@@ -34,10 +34,25 @@ export interface Chain {
   };
 }
 
+interface EnsDataResponse {
+  address: string | null;
+  avatar_url: string | null;
+  contentHash: string | null;
+  url: string | null;
+  github: string | null;
+  twitter: string | null;
+}
+
+export interface NamingServiceRecord {
+  type: string;
+  value: string;
+}
+
 export default class Service {
   private fourByteClient: AxiosInstance;
   private topic0Client: AxiosInstance;
   private chainIdClient: AxiosInstance;
+  private ensDataClient: AxiosInstance;
 
   constructor() {
     this.fourByteClient = axios.create({
@@ -48,6 +63,9 @@ export default class Service {
     });
     this.chainIdClient = axios.create({
       baseURL: 'https://chainid.network',
+    });
+    this.ensDataClient = axios.create({
+      baseURL: 'https://ensdata.net',
     });
   }
 
@@ -74,5 +92,59 @@ export default class Service {
   async getChains(): Promise<Chain[]> {
     const event = await this.chainIdClient.get<Chain[]>('/chains.json');
     return event.data;
+  }
+
+  async lookupEns(name: string): Promise<NamingServiceRecord[]> {
+    try {
+      const response = await this.ensDataClient.get<EnsDataResponse>(
+        `/${name}`,
+      );
+      const records: NamingServiceRecord[] = [];
+      const address = response.data.address;
+      if (address) {
+        records.push({
+          type: 'address',
+          value: address,
+        });
+      }
+      const avatarUrl = response.data.avatar_url;
+      if (avatarUrl) {
+        records.push({
+          type: 'avatar',
+          value: avatarUrl,
+        });
+      }
+      const contentHash = response.data.contentHash;
+      if (contentHash) {
+        records.push({
+          type: 'contentHash',
+          value: contentHash,
+        });
+      }
+      const url = response.data.url;
+      if (url) {
+        records.push({
+          type: 'url',
+          value: url,
+        });
+      }
+      const github = response.data.github;
+      if (github) {
+        records.push({
+          type: 'github',
+          value: github,
+        });
+      }
+      const twitter = response.data.twitter;
+      if (twitter) {
+        records.push({
+          type: 'twitter',
+          value: twitter,
+        });
+      }
+      return records;
+    } catch (e) {
+      return [];
+    }
   }
 }

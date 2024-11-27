@@ -1,5 +1,5 @@
-import { StatesList } from "./components/states";
+import { MotionsList } from "@components/motion/list";
 
-export default function main(): JSX.Element {
-  return <StatesList domain="binary_sensor" deviceClass="motion" />;
+export default function main() {
+  return <MotionsList />;
 }

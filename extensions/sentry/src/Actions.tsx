@@ -1,33 +1,41 @@
-import { Action, ActionPanel, environment, Icon, showToast, Toast } from "@raycast/api";
-import { clearCache } from "./cache";
-import { Issue } from "./types";
+import { Action, ActionPanel, Icon, Toast } from "@raycast/api";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
+import { IssueDetails } from "./IssueDetails";
+import { updateIssue, useUsers } from "./sentry";
+import { Issue, Organization, User } from "./types";
 
-function DevelopmentActions() {
-  async function handleClearCache() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Clearing cache" });
-    try {
-      await clearCache();
-      toast.style = Toast.Style.Success;
-      toast.title = "Cleared cache";
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed clearing cache";
-      toast.message = e instanceof Error ? e.message : undefined;
-    }
-  }
+export type ActionsProps = {
+  issue: Issue;
+  organization?: Organization;
+  mutateList?: MutatePromise<Issue[]>;
+  mutateDetail?: MutatePromise<Issue | undefined>;
+  isDetail?: boolean;
+};
 
-  return environment.isDevelopment ? (
-    <ActionPanel.Section>
-      <Action icon={Icon.Trash} title="Clear Cache" onAction={handleClearCache} />
-    </ActionPanel.Section>
-  ) : null;
-}
-
-export function Actions(props: { issue: Issue }) {
+export function Actions(props: ActionsProps) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        {!props.isDetail && (
+          <Action.Push
+            icon={Icon.Sidebar}
+            title="Show Details"
+            target={
+              <IssueDetails issue={props.issue} organization={props.organization} mutateList={props.mutateList} />
+            }
+          />
+        )}
         <Action.OpenInBrowser url={props.issue.permalink} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        {props.organization ? (
+          <AssignToAction
+            issue={props.issue}
+            organization={props.organization}
+            mutateList={props.mutateList}
+            mutateDetail={props.mutateDetail}
+          />
+        ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -41,7 +49,67 @@ export function Actions(props: { issue: Issue }) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
-      <DevelopmentActions />
     </ActionPanel>
+  );
+}
+
+function AssignToAction(props: {
+  issue: Issue;
+  organization: Organization;
+  mutateList?: MutatePromise<Issue[]>;
+  mutateDetail?: MutatePromise<Issue | undefined>;
+}) {
+  const { data } = useUsers(props.organization.slug, props.issue.project.id);
+
+  async function assignTo(user: User) {
+    const toast = new Toast({ style: Toast.Style.Animated, title: "Assigning issue" });
+    await toast.show();
+
+    try {
+      if (props.mutateList) {
+        await props.mutateList(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return [];
+            }
+
+            return data.map((x) => (x.id === props.issue.id ? { ...x, assignedTo: user } : x));
+          },
+        });
+      }
+
+      if (props.mutateDetail) {
+        await props.mutateDetail(updateIssue(props.issue.id, { assignedTo: user.user?.id }), {
+          optimisticUpdate(data) {
+            if (!data) {
+              return;
+            }
+
+            return { ...data, assignedTo: user };
+          },
+        });
+      }
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Assigned issue";
+      toast.message = `Assigned ${props.issue.shortId} to ${user.name}`;
+    } catch (e) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed assigning issue";
+      toast.message = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu icon={Icon.AddPerson} title="Assign To" shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}>
+      {data?.map((user) => (
+        <Action
+          key={user.id}
+          icon={getAvatarIcon(user.name) ?? Icon.PersonCircle}
+          title={`${user.name} (${user.email})`}
+          onAction={() => assignTo(user)}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }

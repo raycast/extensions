@@ -31,7 +31,8 @@
     "@raycast/api": "^1.31.0",
     "nanoid": "^3.3.1",
     "fromnow": "^3.0.1",
-    "phone": "^3.1.10"
+    "phone": "^3.1.10",
+    "osascript-tag": "^0.1.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

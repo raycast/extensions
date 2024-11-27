@@ -1,12 +1,14 @@
-export type BasicTitle = {
+import { Dispatch, SetStateAction } from 'react';
+
+export interface ItemBase {
   Title: string; // "Casino Royale"
   Year: string; // "2006"
   imdbID: string; // "tt0381061"
   Type: string; //  'movie'
   Poster: string; // "https://m.media-amazon.com/images/M/MV5BMDI5ZWJhOWItYTlhOC00YWNhLTlkNzctNDU5YTI1M2E1MWZhXkEyXkFqcGdeQXVyNTIzOTk5ODM@._V1_SX300.jpg"
-};
+}
 
-type Film = BasicTitle & {
+type Item = ItemBase & {
   Rated: string; // "PG-13"
   Released: string; // "17 Nov 2006"
   Runtime: string; // "144 min"
@@ -26,24 +28,45 @@ type Film = BasicTitle & {
   imdbRating: string; // "8.0"
   imdbVotes: string; // " 616,745"
   DVD: string; // "13 Mar 2007"
-  BoxOffice: string; // "$167,445,960"
-  Production: string; // "N/A"
-  Website: string; // "N/A"
+  BoxOffice?: string; // "$167,445,960"
+  Production?: string; // "N/A"
+  Website?: string; // "N/A"
+  totalSeasons?: string; // "6"
 };
 
-type TVShow = Film & {
-  totalSeasons: string; // "6"
-};
-
-export type EnrichedTitle = Film & TVShow;
-
-type APIResponse = {
-  Response: "True" | "False";
+interface ResponseBase {
+  Response: 'True' | 'False';
   Error?: string;
-};
+}
 
-export type SearchAPIResponse = {
-  Search?: BasicTitle[];
-} & APIResponse;
+export type ItemResponse = Item & ResponseBase;
 
-export type TitleAPIResponse = Partial<EnrichedTitle> & APIResponse;
+export interface ListProps {
+  data: ItemBase[] | null | undefined;
+  isLoading: boolean;
+  onSearch: Dispatch<SetStateAction<string>>;
+  search: string;
+}
+export interface ListItemProps {
+  item: ItemBase;
+}
+
+export interface ItemDetailProps {
+  item: ItemResponse;
+}
+
+export interface Preferences {
+  token: string;
+}
+
+interface SearchSuccess {
+  Search: ItemBase[];
+  Response: 'True';
+}
+
+interface SearchError {
+  Error: string;
+  Response: 'False';
+}
+
+export type SearchResponse = SearchSuccess | SearchError;

@@ -1,32 +1,58 @@
 import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
 import React from "react";
-import { DownloadedBingImage } from "../types/types";
+import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
-import { setDownloadedWallpaper } from "../utils/common-utils";
+import { setLocalWallpaper } from "../utils/common-utils";
+import PreviewBingWallpaper from "../preview-bing-wallpaper";
+import { downloadDirectory } from "../types/preferences";
 
 export function ActionsDownloadedBingWallpaper(props: {
+  index: number;
   bingImage: DownloadedBingImage;
-  bingImages: DownloadedBingImage[];
+  onlineImages: BingImage[];
+  downloadedImages: DownloadedBingImage[];
 }) {
-  const { bingImage, bingImages } = props;
+  const { index, bingImage, onlineImages, downloadedImages } = props;
   return (
     <ActionPanel>
       <Action
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setDownloadedWallpaper(bingImage.path).then(() => "");
+          setLocalWallpaper(bingImage.path).then(() => "");
         }}
       />
       <Action.ShowInFinder path={bingImage.path} />
+
+      <Action.Push
+        icon={Icon.Sidebar}
+        title={"Preview Wallpaper"}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        target={
+          <PreviewBingWallpaper
+            isOnline={false}
+            index={index}
+            onlineImages={onlineImages}
+            downloadedImage={downloadedImages}
+          />
+        }
+      />
+      <Action
+        icon={Icon.Finder}
+        title={"Open Wallpaper Folder"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+        onAction={async () => {
+          await open(downloadDirectory);
+        }}
+      />
       <ActionPanel.Section>
         <Action
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.ArrowClockwise}
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            const randomImage = bingImages[Math.floor(Math.random() * bingImages.length)];
-            setDownloadedWallpaper(randomImage.path).then(() => "");
+            const randomImage = downloadedImages[Math.floor(Math.random() * downloadedImages.length)];
+            setLocalWallpaper(randomImage.path).then(() => "");
           }}
         />
         <Action

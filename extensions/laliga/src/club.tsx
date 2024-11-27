@@ -1,51 +1,36 @@
-import { useEffect, useState } from "react";
-import { Team } from "./types";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { getTeams } from "./api";
-import CompetitionDropdown, {
-  competitions,
-} from "./components/competition_dropdown";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import ClubDetails from "./components/club";
+import ClubProfile from "./components/club";
+import CompetitionDropdown from "./components/competition_dropdown";
 
 export default function Club() {
-  const [clubs, setClubs] = useState<Team[]>();
-  const [competition, setCompetition] = useState<string>(competitions[0].value);
+  const [competition, setCompetition] = useState<string>("");
 
-  useEffect(() => {
-    setClubs(undefined);
-    getTeams(competition).then((data) => {
-      setClubs(data);
-    });
-  }, [competition]);
+  const { data: clubs, isLoading } = usePromise(getTeams, [competition]);
 
   return (
-    <List
+    <Grid
       throttle
-      isLoading={!clubs}
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      isLoading={isLoading}
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
       {clubs?.map((club) => {
         return (
-          <List.Item
+          <Grid.Item
             key={club.id}
             title={club.nickname}
-            subtitle={club.shortname}
-            icon={club.shield.url}
-            accessories={[{ text: club.venue.name }, { icon: "stadium.svg" }]}
+            subtitle={club.venue.name}
+            content={club.shield.url}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Club Profile"
-                  icon={Icon.Sidebar}
-                  target={<ClubDetails {...club} />}
-                />
+                <Action.Push title="Club Profile" icon={Icon.Sidebar} target={<ClubProfile {...club} />} />
               </ActionPanel>
             }
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

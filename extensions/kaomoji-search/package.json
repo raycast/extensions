@@ -14,9 +14,49 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "required": false,
+      "description": "Choose how to display the results.",
+      "default": "list",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary action",
+      "required": false,
+      "description": "Choose the primary action for the results.",
+      "default": "paste-to-active-app",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy-to-clipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste-to-active-app"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
-    "asciilib": "^0.7.0",
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
+    "asciilib": "^1.0.0",
+    "nanoid": "^4.0.0",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {

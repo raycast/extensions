@@ -1,51 +1,75 @@
 import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
-import { downloadPicture, setWallpaper } from "../utils/common-utils";
+import { downloadPicture, setOnlineWallpaper } from "../utils/common-utils";
 import { buildBingImageURL, buildCopyrightURL, getPictureName } from "../utils/bing-wallpaper-utils";
 import React from "react";
-import { BingImage } from "../types/types";
+import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
+import PreviewBingWallpaper from "../preview-bing-wallpaper";
+import { downloadDirectory, downloadSize } from "../types/preferences";
 
 export function ActionsOnlineBingWallpaper(props: {
+  index: number;
   bingImage: BingImage;
-  bingImages: BingImage[];
-  downloadSize: string;
+  onlineImages: BingImage[];
+  downloadedImages: DownloadedBingImage[];
 }) {
-  const { bingImage, downloadSize, bingImages } = props;
+  const { index, bingImage, onlineImages, downloadedImages } = props;
   return (
     <ActionPanel>
       <Action
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(
+          setOnlineWallpaper(
             getPictureName(bingImage.url) + "-" + bingImage.startdate,
-            buildBingImageURL(bingImage.url, "raw")
+            buildBingImageURL(bingImage.url, "raw"),
           ).then(() => "");
         }}
       />
       <Action
         icon={Icon.Download}
-        title={"Download Picture"}
+        title={"Download Wallpaper"}
         onAction={async () => {
           await downloadPicture(downloadSize, bingImage);
         }}
       />
+      <Action.Push
+        icon={Icon.Eye}
+        title={"Preview Wallpaper"}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        target={
+          <PreviewBingWallpaper
+            isOnline={true}
+            index={index}
+            onlineImages={onlineImages}
+            downloadedImage={downloadedImages}
+          />
+        }
+      />
+      <Action
+        icon={Icon.Finder}
+        title={"Open Wallpaper Folder"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+        onAction={async () => {
+          await open(downloadDirectory);
+        }}
+      />
       <ActionPanel.Section>
         <Action
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.Repeat}
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            const randomImage = bingImages[Math.floor(Math.random() * bingImages.length)];
-            setWallpaper(
+            const randomImage = onlineImages[Math.floor(Math.random() * onlineImages.length)];
+            setOnlineWallpaper(
               getPictureName(randomImage.url) + "-" + randomImage.startdate,
-              buildBingImageURL(randomImage.url, "raw")
+              buildBingImageURL(randomImage.url, "raw"),
             ).then(() => "");
           }}
         />
         <Action
           icon={Icon.MagnifyingGlass}
-          title={"Search Picture"}
+          title={"Search Wallpaper"}
           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
           onAction={async () => {
             await open(buildCopyrightURL(bingImage.copyrightlink));

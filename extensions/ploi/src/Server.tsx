@@ -1,25 +1,15 @@
-import {
-  ActionPanel,
-  allLocalStorageItems,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  LocalStorageValues,
-  OpenInBrowserAction,
-  preferences,
-  PushAction,
-  setLocalStorageItem,
-} from "@raycast/api";
+import { ActionPanel, LocalStorage, Action, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Server } from "./api/Server";
 import { Site } from "./api/Site";
 import { ISite, SitesList } from "./Site";
 import { useIsMounted } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
+import { usePromise } from "@raycast/utils";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
-  const [siteData, setSiteData] = useState<LocalStorageValues>({});
+  const [siteData, setSiteData] = useState<LocalStorage.Values>({});
   const isMounted = useIsMounted();
 
   const fetchAndCacheSites = async (serverId: string) => {
@@ -30,57 +20,65 @@ export const ServersList = () => {
     if (!server) return;
     if (!Object.keys(server).length) return;
     const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
-    thisSiteData &&
-      (await setLocalStorageItem(
-        `ploi-sites-${serverId}`,
-        JSON.stringify(thisSiteData)
-      ));
+    thisSiteData && (await LocalStorage.setItem(`ploi-sites-${serverId}`, JSON.stringify(thisSiteData)));
   };
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingLocal, setIsLoading] = useState(true);
+  const [execute, setExecute] = useState(false);
 
   useEffect(() => {
-    allLocalStorageItems()
+    LocalStorage.allItems()
       .then((data) => {
         setIsLoading(false);
         if (!isMounted.current) return;
         const servers = data["ploi-servers"];
         delete data["ploi-servers"];
-        const serverList = JSON.parse(
-          servers?.toString() ?? "[]"
-        ) as Array<IServer>;
+        const serverList = JSON.parse(servers?.toString() ?? "[]") as Array<IServer>;
         setServers(serverList?.length ? serverList : []);
         setSiteData(data ?? {});
       })
       .finally(() => {
         setIsLoading(false);
         if (!isMounted.current) return;
-        Server.getAll().then(async (servers: Array<IServer> | undefined) => {
-          if (!isMounted.current) return;
-          // Add the server list to storage to avoid content flash
-          servers && setServers(servers);
-          await setLocalStorageItem("ploi-servers", JSON.stringify(servers));
-        });
+        setExecute(true);
       });
   }, []);
 
-  if (!servers?.length && !isLoading) {
-    return (
-      <List>
-        <List.Item
-          title="There are no results to display."
-          accessoryTitle="If you create your first server in ploi.io, it will show up here."
-        />
-      </List>
-    );
-  }
+  const { isLoading: isLoadingPromise, pagination } = usePromise(
+    () => async (options: { page: number }) => {
+      const result = await Server.getAll(options.page + 1);
+      return {
+        data: result.data,
+        hasMore: Boolean(result.links?.next),
+      };
+    },
+    [],
+    {
+      execute,
+      async onData(servers) {
+        if (!isMounted.current) return;
+        // Add the server list to storage to avoid content flash
+        servers && setServers(servers);
+        await LocalStorage.setItem("ploi-servers", JSON.stringify(servers));
+      },
+    },
+  );
+
+  const isLoading = isLoadingLocal || isLoadingPromise;
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search Servers..."
       onSelectionChange={(serverId) => serverId && fetchAndCacheSites(serverId)}
+      pagination={pagination}
     >
+      {!servers?.length && !isLoading && (
+        <List.EmptyView
+          title="There are no results to display."
+          description="If you create your first server in ploi.io, it will show up here."
+        />
+      )}
       {servers.map((server: IServer) => {
         const key = `ploi-sites-${server.id.toString()}`;
         const sites = JSON.parse(siteData[key] ?? "[]") as ISite[];
@@ -90,29 +88,30 @@ export const ServersList = () => {
   );
 };
 
-const ServerListItem = ({
-  server,
-  sites,
-}: {
-  server: IServer;
-  sites: ISite[];
-}) => {
+const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   return (
     <List.Item
       id={server.id.toString()}
       key={server.id}
       title={server.name}
+      subtitle={server.status}
       icon={{
         source: {
           light: "server.png",
           dark: "server-dark.png",
         },
       }}
-      accessoryTitle={server.ipAddress}
+      accessories={[
+        { tag: server.type },
+        { text: `PHP ${server.phpVersion}` },
+        { text: `MySQL ${server.mysqlVersion}` },
+        { text: server.ipAddress },
+        { date: new Date(server.createdAt) },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Open Server Info"
               icon={{
                 source: {
@@ -132,19 +131,18 @@ const ServerListItem = ({
   );
 };
 
-const SingleServerView = ({
-  server,
-  sites,
-}: {
-  server: IServer;
-  sites: ISite[];
-}) => {
-  const sshUser = preferences?.ploi_ssh_user?.value ?? "ploi";
+const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
+  interface Preferences {
+    ploi_api_key: string;
+    ploi_ssh_user: string;
+  }
+
+  const preferences = getPreferenceValues<Preferences>();
+
+  const sshUser = preferences.ploi_ssh_user ?? "ploi";
   return (
     <List searchBarPlaceholder="Search Sites...">
-      <List.Section
-        title={`Sites on server ${server.name} · ${sites.length} site(s)`}
-      >
+      <List.Section title={`Sites on server ${server.name} · ${sites.length} site(s)`}>
         <SitesList server={server} sites={sites} />
       </List.Section>
       <List.Section title="Server Information">
@@ -153,13 +151,22 @@ const SingleServerView = ({
           key="open-in-ssh"
           title={`Open SSH Connection (${sshUser})`}
           icon={Icon.Terminal}
-          accessoryTitle={`ssh://${sshUser}@${server.ipAddress}`}
+          accessories={[{ text: `ssh://${sshUser}@${server.ipAddress}` }]}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction
-                title={`SSH In As User ${sshUser}`}
-                url={`ssh://${sshUser}@${server.ipAddress}`}
-              />
+              <Action.OpenInBrowser title={`SSH In As User ${sshUser}`} url={`ssh://${sshUser}@${server.ipAddress}`} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          id="open-in-sftp"
+          key="open-in-sftp"
+          title={`Open SFTP Connection (${sshUser})`}
+          icon={Icon.Terminal}
+          accessories={[{ text: `sftp://${sshUser}@${server.ipAddress}` }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title={`SFTP As User ${sshUser}`} url={`sftp://${sshUser}@${server.ipAddress}`} />
             </ActionPanel>
           }
         />
@@ -168,12 +175,10 @@ const SingleServerView = ({
           key="open-in-ploi"
           title="Open in ploi.io"
           icon={Icon.Globe}
-          accessoryTitle="ploi.io"
+          accessories={[{ text: "ploi.io" }]}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction
-                url={`${PLOI_PANEL_URL}/servers/${server.id}`}
-              />
+              <Action.OpenInBrowser url={`${PLOI_PANEL_URL}/servers/${server.id}`} />
             </ActionPanel>
           }
         />
@@ -182,13 +187,10 @@ const SingleServerView = ({
           key="copy-ip"
           title="Copy IP Address"
           icon={Icon.Clipboard}
-          accessoryTitle={server.ipAddress}
+          accessories={[{ text: server.ipAddress }]}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction
-                title="Copy IP Address"
-                content={server.ipAddress}
-              />
+              <Action.CopyToClipboard title="Copy IP Address" content={server.ipAddress} />
             </ActionPanel>
           }
         />
@@ -197,10 +199,10 @@ const SingleServerView = ({
           key="server-id"
           title="Server ID"
           icon={Icon.Document}
-          accessoryTitle={`${server.id}`}
+          accessories={[{ text: server.id.toString() }]}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={server.id ?? ""} />
+              <Action.CopyToClipboard content={server.id ?? ""} />
             </ActionPanel>
           }
         />
@@ -279,10 +281,10 @@ const SingleServerView = ({
 };
 
 export const ServerCommands = ({ server }: { server: IServer }) => {
-  const sshUser = preferences?.ploi_ssh_user?.value ?? "ploi";
+  const sshUser = getPreferenceValues()?.ploi_ssh_user?.value ?? "ploi";
   return (
     <>
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         icon={Icon.Terminal}
         title={`SSH As User ${sshUser}`}
         url={`ssh://${sshUser}@${server.ipAddress}:${server.sshPort}`}
@@ -292,14 +294,8 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         title="Reboot Server"
         onAction={() => Server.reboot({ serverId: server.id })}
       />
-      <CopyToClipboardAction
-        title="Copy IP Address"
-        content={server.ipAddress}
-      />
-      <OpenInBrowserAction
-        title="Open in ploi.io"
-        url={`${PLOI_PANEL_URL}/servers/${server.id}`}
-      />
+      <Action.CopyToClipboard title="Copy IP Address" content={server.ipAddress} />
+      <Action.OpenInBrowser title="Open in ploi.io" url={`${PLOI_PANEL_URL}/servers/${server.id}`} />
     </>
   );
 };

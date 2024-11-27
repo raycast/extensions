@@ -8,6 +8,7 @@ import Binance from "node-binance-api";
 const binance = new Binance().options({
   APIKEY: preferences.binance_api_key.value as string,
   APISECRET: preferences.binance_api_secret.value as string,
+  family: 4,
 });
 
 export interface PortfolioState {

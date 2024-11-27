@@ -4,6 +4,7 @@ import EntryForm from "../views/entry-form"
 import useEntries from "../hooks/use-entries"
 import Entry from "../models/entry"
 import { useNavigationStore } from "../store"
+import EntryPreview from "../views/entry-preview"
 
 type EntryListItemProps = {
   entry: Entry
@@ -53,6 +54,11 @@ const EntryListItem: FC<EntryListItemProps> = ({ entry }) => {
             title="Copy to Clipboard"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={() => copyEntryCommand(entry)}
+          />
+          <Action.Push
+            title="Preview"
+            target={<EntryPreview entry={entry} />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
           <Action
             title={entry.pinned ? "Unpin" : "Pin"}

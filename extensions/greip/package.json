@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "greip",
+  "title": "Greip",
+  "description": "Use endpoint from greip.io directly from Raycast",
+  "icon": "greip.png",
+  "author": "ghadeer",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Security",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show IP Info",
+      "subtitle": "Greip",
+      "description": "Shows the current IP Address",
+      "mode": "view"
+    },
+    {
+      "name": "badWord",
+      "title": "Detect Bad-words",
+      "subtitle": "Greip",
+      "description": "Detect bad-words in a text.",
+      "mode": "view"
+    },
+    {
+      "name": "country",
+      "title": "Country Info",
+      "subtitle": "Greip",
+      "description": "Show the full information of a specific country.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "required": true,
+      "title": "Greip API Key",
+      "description": "Authorization is required for Greip.io. Anyone with a Greip.io account has an API Key.",
+      "default": ""
+    },
+    {
+      "name": "lang",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "description": "Choose the preferred language.",
+      "default": "EN",
+      "data": [
+        {
+          "title": "Arabic",
+          "value": "AR"
+        },
+        {
+          "title": "English",
+          "value": "EN"
+        },
+        {
+          "title": "Danish",
+          "value": "DE"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2",
+    "@raycast/utils": "^1.4.11",
+    "axios": "^1.2.0",
+    "gre-geoip": "^1.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

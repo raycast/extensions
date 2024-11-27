@@ -3,12 +3,12 @@ import { Action, ActionPanel, List } from "@raycast/api";
 
 import LeaderBoard from "./leaderboard";
 
-export default function Command() {
-  const { data, isLoading } = usePrivateLeaderBoards();
+export default function PrivateLeaderBoardsCommand() {
+  const { data: { data } = {}, isLoading } = usePrivateLeaderBoards();
 
   return (
     <List isLoading={isLoading}>
-      {data?.data.map((i) => (
+      {data?.map((i) => (
         <List.Item
           key={i.id}
           title={i.name}

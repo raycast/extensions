@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "playback-duration-calculator",
+  "title": "Playback Duration Calculator",
+  "description": "Find out how long your video or audio will take to finish based on your playback speed.",
+  "icon": "icon.png",
+  "author": "nathanwijaya",
+  "categories": [
+    "Media",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calculate-playback-duration",
+      "title": "Calculate Playback Duration",
+      "description": "Calculate the playback duration, time saved, and completion time of your video or audio based on your playback speed.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-calculate-duration",
+      "title": "Quick Calculate Duration",
+      "description": "Quickly check the new duration of your video or audio based on your playback speed directly from your command bar.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "duration",
+          "placeholder": "00:00:00",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "playbackSpeed",
+          "placeholder": "Playback Speed",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "0.25x",
+              "value": "0.25"
+            },
+            {
+              "title": "0.5x",
+              "value": "0.5"
+            },
+            {
+              "title": "0.75x",
+              "value": "0.75"
+            },
+            {
+              "title": "1x",
+              "value": "1"
+            },
+            {
+              "title": "1.25x",
+              "value": "1.25"
+            },
+            {
+              "title": "1.5x",
+              "value": "1.5"
+            },
+            {
+              "title": "1.75x",
+              "value": "1.75"
+            },
+            {
+              "title": "2x",
+              "value": "2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultPlaybackSpeed",
+      "title": "Default Playback Speed",
+      "type": "dropdown",
+      "required": false,
+      "description": "If you typically use the same playback speed, you can set it as the default here.",
+      "data": [
+        {
+          "title": "0.25x",
+          "value": "0.25"
+        },
+        {
+          "title": "0.5x",
+          "value": "0.5"
+        },
+        {
+          "title": "0.75x",
+          "value": "0.75"
+        },
+        {
+          "title": "1x",
+          "value": "1"
+        },
+        {
+          "title": "1.25x",
+          "value": "1.25"
+        },
+        {
+          "title": "1.5x",
+          "value": "1.5"
+        },
+        {
+          "title": "1.75x",
+          "value": "1.75"
+        },
+        {
+          "title": "2x",
+          "value": "2"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "name": "useCustomPlaybackSpeed",
+      "title": "Custom Playback Speed",
+      "type": "checkbox",
+      "required": false,
+      "description": "When checked, you'll be able to enter a custom playback speed instead of selecting from the dropdown.",
+      "label": "Enable Custom Playback Speed",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,94 +1,76 @@
-import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
-import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./utils/input-item";
-import { checkIsFile, isEmail, isEmpty, isUrl, Preference, searchUrlBuilder, urlBuilder } from "./utils/common-utils";
+import {
+  getArgument,
+  getPathFromSelectionOrClipboard,
+  isStartWithFileOrFolderStr,
+  showHud,
+} from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { URL } from "url";
-import { isIPv4 } from "net";
+import { filePathAction, openPathInTerminal, urlPathAction } from "./utils/path-utils";
+import { closeMainWindow, getFrontmostApplication, LaunchProps, open, updateCommandMetadata } from "@raycast/api";
+import validator, { isEmpty } from "validator";
+import { fileAction, OpenIn, OpenInArguments, priorityDetection, trimText } from "./types/preference";
+import { getFinderPath } from "./utils/applescript-utils";
 
-export default async () => {
-  const { trimText, isShowHud, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
+export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
+  await closeMainWindow();
+  const openIn_ = getArgument(props.arguments.openIn, `OpenIn`);
+  const openIn = isEmpty(openIn_) ? OpenIn.FINDER : openIn_;
 
-  const _getText = await getPath(priorityDetection);
-  const path = trimText ? _getText.trim() : _getText;
+  // Update metadata
+  await updateCommandMetadata({ subtitle: validator.isEmpty(openIn) ? OpenIn.FINDER : openIn });
 
-  if (isEmpty(path)) {
-    await showHud(isShowHud, "No path detected");
-    return "";
-  }
-  if (fse.pathExistsSync(path)) {
-    await open(path);
-    console.info("open: directory path");
-    await showHud(isShowHud, "Open Path: " + path);
+  const frontmostApp = await getFrontmostApplication();
+  if (openIn === OpenIn.TERMINAL && frontmostApp.name === "Finder") {
+    const finderPath = await getFinderPath();
+    await openPathInTerminal(finderPath);
     return;
   }
 
-  if (isIPv4(path)) {
-    if (path == "127.0.0.1") {
+  const _getText = await getPathFromSelectionOrClipboard(priorityDetection);
+  const path = trimText ? _getText.trim() : _getText;
+
+  if (validator.isEmpty(path)) {
+    await showHud("⭕️", "Nothing detected");
+    return;
+  }
+
+  // Open file, folder
+  const filePath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
+  if (fse.pathExistsSync(filePath)) {
+    if (validator.isEmpty(openIn) || openIn === OpenIn.FINDER) {
+      await filePathAction(path, fileAction);
+    } else if (openIn === OpenIn.TERMINAL) {
+      await openPathInTerminal(filePath);
+    }
+    return;
+  } else if (isStartWithFileOrFolderStr(path)) {
+    await showHud("🚨", "Error Path: " + path);
+    return;
+  }
+
+  //Open IP
+  if (validator.isIP(path)) {
+    if (path.startsWith("127.0.0.1")) {
       await open("http://www." + path);
     } else {
       await open("http://" + path);
     }
-    console.info("open: IP address");
-    await showHud(isShowHud, "Open IP: " + path);
+    await showHud("🅿️", "Open IP: " + path);
     return;
   }
 
-  if (isEmail(path)) {
-    await open("mailto:" + path);
-    console.info("open: email");
-    await showHud(isShowHud, "Send Email: " + path);
+  // Open Email
+  if (validator.isEmail(path) || validator.isMailtoURI(path)) {
+    let email = path;
+    if (path.startsWith("mailto:")) {
+      email = path.replace("mailto:", "");
+    }
+    await showHud("📧", "Send Email: " + email);
+    await open("mailto:" + email);
     return;
   }
 
-  try {
-    await open(new URL(path).toString());
-    console.info("open: URL");
-    await showHud(isShowHud, "Open URL: " + path);
-  } catch (e) {
-    await reOpenURL(isShowHud, path, searchEngine);
-    console.error(String(e));
-  }
-};
-
-const showHud = async (showHud: boolean, content: string) => {
-  if (showHud) {
-    await showHUD(content);
-  }
-};
-
-const getPath = async (priorityDetection: string) => {
-  if (priorityDetection === "selected") {
-    return await fetchItemInputSelectedFirst();
-  } else {
-    return await fetchItemInputClipboardFirst();
-  }
-};
-
-const reOpenURL = async (isShowHud: boolean, rawPath: string, searchEngine: string) => {
-  let finalPath = rawPath;
-  if (rawPath.startsWith("~/")) {
-    finalPath = rawPath.replace("~", homedir());
-  }
-  if (!fse.pathExistsSync(finalPath)) {
-    if (isUrl(rawPath)) {
-      await open(urlBuilder("https://", rawPath));
-      console.info('open(urlBuilder("https://", rawPath))');
-      await showHud(isShowHud, "Open URL: " + rawPath);
-    } else {
-      await open(searchUrlBuilder(searchEngine, rawPath));
-      console.info("open(searchUrlBuilder(searchEngine, rawPath))");
-      await showHud(isShowHud, "Search: " + rawPath);
-    }
-  } else {
-    if (checkIsFile(finalPath)) {
-      await showInFinder(finalPath);
-      console.info("showInFinder(finalPath)");
-      await showHud(isShowHud, "Show in Finder: " + finalPath);
-    } else {
-      await open(finalPath);
-      console.info("open(finalPath)");
-      await showHud(isShowHud, "Open Path: " + finalPath);
-    }
-  }
+  // Open Url or Search Text
+  await urlPathAction(path);
 };

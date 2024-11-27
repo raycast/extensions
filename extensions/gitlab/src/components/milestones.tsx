@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlabgql } from "../common";
+import { getGitLabGQL } from "../common";
 import { Group, Project } from "../gitlabapi";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId } from "../utils";
+import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -62,7 +62,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
       id={milestone.id}
       title={milestone.title}
       subtitle={subtitle}
-      accessories={ensureCleanAccessories([{ text: issueCounter }])}
+      accessories={[{ text: issueCounter }]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={milestone.webUrl} />
@@ -72,21 +72,23 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
   );
 }
 
-export function MilestoneList(props: { project?: Project; group?: Group }): JSX.Element {
-  const isGroup = props.group ? true : false;
+export function MilestoneList(props: { project?: Project; group?: Group; navigationTitle?: string }): JSX.Element {
+  const isGroup = !!props.group;
   let fullPath = props.project ? props.project.fullPath : "";
   if (fullPath.length <= 0) {
     fullPath = props.group ? props.group.full_path : "";
   }
   const { milestones, error, isLoading } = useSearch("", fullPath, isGroup);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Milestones", error);
+    showErrorToast(error, "Cannot search Milestones");
   }
   return (
-    <List isLoading={isLoading} navigationTitle="Milestones">
-      {milestones?.map((milestone) => (
-        <MilestoneListItem key={milestone.id} milestone={milestone} />
-      ))}
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Milestones"}>
+      <List.Section title="Milestones">
+        {milestones?.map((milestone) => (
+          <MilestoneListItem key={milestone.id} milestone={milestone} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -102,7 +104,7 @@ export function useSearch(
 } {
   const [milestones, setMilestones] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -119,7 +121,7 @@ export function useSearch(
 
       try {
         const query = isGroup ? GET_GROUP_MILESTONES : GET_MILESTONES;
-        const data = await gitlabgql.client.query({ query: query, variables: { fullPath: projectFullPath } });
+        const data = await getGitLabGQL().client.query({ query: query, variables: { fullPath: projectFullPath } });
         let milestoneRoot;
         if (isGroup) {
           milestoneRoot = data.data.group;
@@ -132,7 +134,7 @@ export function useSearch(
           dueDate: p.dueDate,
           state: p.state,
           expired: p.expired,
-          webUrl: `${gitlabgql.url}/${p.webPath}`,
+          webUrl: `${getGitLabGQL().url}/${p.webPath}`,
           closedIssuesCount: p.stats.closedIssuesCount,
           totalIssuesCount: p.stats.totalIssuesCount,
         }));

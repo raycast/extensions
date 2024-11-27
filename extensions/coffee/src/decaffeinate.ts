@@ -1,14 +1,9 @@
-import { showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { stopCaffeinate, getSchedule } from "./utils";
+import { showToast, Toast } from "@raycast/api";
 
-const Decaffeinate = async () => {
-  try {
-    await runAppleScript(`do shell script "pgrep caffeinate"`);
-    await runAppleScript('do shell script "killall caffeinate"');
-    await showHUD("Your Mac is decaffeinated");
-  } catch (_) {
-    await showHUD("Your Mac is already decaffeinated");
-  }
+export default async () => {
+  const schedule = await getSchedule();
+  if (schedule != undefined && schedule.IsRunning == true)
+    await showToast(Toast.Style.Failure, "Caffeination schedule running, pause to decaffeinate");
+  else await stopCaffeinate({ menubar: true, status: true }, "Your Mac is now decaffeinated");
 };
-
-export default Decaffeinate;

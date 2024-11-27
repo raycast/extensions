@@ -5,10 +5,14 @@
   "description": "Search and view your Cloudflare sites, pages, domains, and more",
   "icon": "icon.png",
   "author": "destiner",
-  "categories": ["Developer Tools", "Web"],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "license": "MIT",
   "contributors": [
-    "niklaswa"
+    "niklaswa",
+    "teziovsky"
   ],
   "commands": [
     {
@@ -35,41 +39,35 @@
   ],
   "preferences": [
     {
-      "name": "email",
-      "type": "textfield",
-      "required": true,
-      "title": "Email",
-      "description": "Cloudflare account email",
-      "placeholder": "Your email"
-    },
-    {
-      "name": "key",
+      "name": "token",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "description": "Global API Key",
-      "placeholder": "Your key"
+      "title": "API Token",
+      "description": "API token",
+      "placeholder": "Your token"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "axios": "^0.25.0"
+    "@raycast/api": "^1.68.1",
+    "axios": "^1.6.7"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.11.22",
+    "@types/react": "^18.2.60",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit"
   }
 }

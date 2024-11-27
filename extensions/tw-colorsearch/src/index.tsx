@@ -322,7 +322,7 @@ export default function Command() {
             source: "white_square.png",
             fallback: Icon.Bubble,
             mask: Image.Mask.RoundedRectangle,
-            tintColor: item.hex,
+            tintColor: { light: item.hex, dark: item.hex, adjustContrast: false },
           }}
           title={item.title}
           accessories={[{ icon: Icon.Text, text: item.hex.toUpperCase() }]}

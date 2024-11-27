@@ -1,5 +1,45 @@
 # Search npm Changelog
 
+## [Updates] - 2024-10-07
+
+- Hide history list when `historyCount` is zero
+- Bump all dependencies to the latest
+
+## [Refactoring] - 2024-02-03
+
+- Bump dependecies
+- Refactored readme to hook
+- Cleanup code, removed library
+- Add link to esm.sh
+
+## [Added a link to npm search results page] - 2023-11-23
+
+- Added a link to npm search results page when searching for a package & add a preference to show or hide this link
+- Make `tag` accessory optional & move it to 1st position
+- Bump dependencies
+
+## [Added a shortcut] - 2023-08-20
+
+- Added a shortcut to open the package's npm page
+
+## [Favorites and history] - 2023-03-29
+
+- Added ability to favorite packages and display them in a new view
+- Added search history and display them in a new view
+
+## [Added open changelog] - 2023-03-15
+
+- Added action to open the package's changelog (only for github)
+
+## [Fixed Yarn install command] - 2022-11-11
+
+- Fixed yarn install command since it's different than npm/pnpm
+
+## [Added a bunch of new feedback] - 2022-09-05
+
+- Added a cache for faster results
+- Switch back to the result of npm instead of npms.io which provided some outdated results
+
 ## [Added a bunch of new feedback] - 2022-05-04
 
 - updated to the latest `@raycast/api` package version and refactored based on any new APIs and deprecations

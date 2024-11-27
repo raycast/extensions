@@ -1,30 +1,25 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue, Project } from "../gitlabapi";
-import { daysInSeconds } from "../utils";
-import { IssueListItem, IssueScope, IssueState } from "./issues";
+import { daysInSeconds, showErrorToast } from "../utils";
+import { IssueListEmptyView, IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 function MyIssueList(props: {
   issues: Issue[] | undefined;
-  isLoading?: boolean | undefined;
+  isLoading: boolean;
   title?: string;
   performRefetch: () => void;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
 }): JSX.Element {
   const issues = props.issues;
-
-  if (props.isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
 
   const refresh = () => {
     props.performRefetch();
@@ -35,12 +30,14 @@ function MyIssueList(props: {
       searchBarPlaceholder="Search issues by name..."
       isLoading={props.isLoading}
       searchBarAccessory={props.searchBarAccessory}
+      throttle
     >
       <List.Section title={props.title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
@@ -51,7 +48,7 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   const [project, setProject] = useState<Project>();
   const { issues: raw, isLoading, error, performRefetch } = useMyIssues(scope, state, project);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot load issues", error);
+    showErrorToast(error, "Cannot load Issues");
   }
   const issues: Issue[] | undefined = project ? raw?.filter((i) => i.project_id === project.id) : raw;
   const title = scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Recently Created Issues";
@@ -66,13 +63,13 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
   );
 }
 
-function useMyIssues(
+export function useMyIssues(
   scope: IssueScope,
   state: IssueState,
   project: Project | undefined
 ): {
   issues: Issue[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {

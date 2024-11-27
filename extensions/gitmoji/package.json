@@ -5,6 +5,9 @@
   "description": "Gitmoji is an emoji guide for your commit messages",
   "icon": "icon.png",
   "author": "ricoberger",
+  "contributors": [
+    "danny_seidel"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -28,28 +31,58 @@
         {
           "title": "Code :sparkles:",
           "value": "code"
+        },
+        {
+          "title": "Description + Emoji ✨",
+          "value": "description-emoji"
+        },
+        {
+          "title": "Description + Code :sparkles:",
+          "value": "description-code"
         }
       ],
-      "description": "Copy the emoji or copy the code",
+      "description": "Copy the emoji, copy the code or copy description",
       "default": "emoji"
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "description": "Primary action of the extension",
+      "default": "paste"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "gitmojis": "^3.9.0"
+    "@raycast/api": "^1.42.0",
+    "@raycast/utils": "^1.5.2",
+    "gitmojis": "^3.13.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.30",
-    "@typescript-eslint/eslint-plugin": "^5.1.0",
-    "@typescript-eslint/parser": "^5.1.0",
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.20.0",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

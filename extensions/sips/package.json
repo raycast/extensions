@@ -1,0 +1,539 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sips",
+  "title": "Image Modification",
+  "description": "Apply filters and transformations to various image formats, and convert between them.",
+  "keywords": [
+    "convert",
+    "edit",
+    "file",
+    "filter",
+    "flip",
+    "image",
+    "optimize",
+    "pad",
+    "placeholder",
+    "resize",
+    "rotate",
+    "sips"
+  ],
+  "version": "1.8.2",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "contributors": [
+    "arronhunt",
+    "nakaakist",
+    "JUSTIVE",
+    "patomos"
+  ],
+  "categories": [
+    "Media",
+    "Productivity",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Image Input",
+      "name": "inputMethod",
+      "description": "Where to obtain the image to modify.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Selection In Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Selection In Path Finder",
+          "value": "Path Finder"
+        },
+        {
+          "title": "Selection in NeoFinder",
+          "value": "NeoFinder"
+        },
+        {
+          "title": "Selection in HoudahSpot",
+          "value": "HoudahSpot"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        }
+      ],
+      "default": "Finder",
+      "required": false
+    },
+    {
+      "title": "Image Output",
+      "name": "imageResultHandling",
+      "description": "How to handle the result of the image modification, i.e. where to save the modified image, or whether to copy it to the clipboard.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Replace Original",
+          "value": "replaceOriginal"
+        },
+        {
+          "title": "Save In Containing Folder",
+          "value": "saveInContainingFolder"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "Open in Preview",
+          "value": "openInPreview"
+        },
+        {
+          "title": "Save To Downloads",
+          "value": "saveToDownloads"
+        },
+        {
+          "title": "Save to Desktop",
+          "value": "saveToDesktop"
+        }
+      ],
+      "default": "replaceOriginal",
+      "required": false
+    },
+    {
+      "title": "Image Operation Settings",
+      "name": "useLosslessConversion",
+      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
+      "label": "Lossless Conversions",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "flip-horizontally",
+      "title": "Flip Images Horizontally",
+      "description": "Flip the selected images horizontally",
+      "mode": "no-view",
+      "keywords": [
+        "reverse",
+        "mirror"
+      ]
+    },
+    {
+      "name": "flip-vertically",
+      "title": "Flip Images Vertically",
+      "description": "Flip the selected images vertically",
+      "mode": "no-view",
+      "keywords": [
+        "mirror"
+      ]
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate Images",
+      "description": "Rotate the selected images by the specified amount of degrees",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "angle",
+          "placeholder": "Angle",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "rotationUnit",
+          "title": "Rotation Unit",
+          "description": "The unit of the angle to rotate selected images by",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Degrees",
+              "value": "degrees"
+            },
+            {
+              "title": "Radians",
+              "value": "radians"
+            }
+          ],
+          "default": "degrees",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "turn",
+        "revolve",
+        "pivot",
+        "spin"
+      ]
+    },
+    {
+      "name": "convert",
+      "title": "Convert Images",
+      "description": "Convert the selected images to the specified format",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Enabled Formats",
+          "label": "ASTC",
+          "name": "showASTC",
+          "description": "Whether to show ASTC as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "AVIF",
+          "name": "showAVIF",
+          "description": "Whether to show AVIF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "BMP",
+          "name": "showBMP",
+          "description": "Whether to show BMP as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "DDS",
+          "name": "showDDS",
+          "description": "Whether to show DDS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "EXR",
+          "name": "showEXR",
+          "description": "Whether to show EXR as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "GIF",
+          "name": "showGIF",
+          "description": "Whether to show GIF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "HEIC",
+          "name": "showHEIC",
+          "description": "Whether to show HEIC as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "HEICS",
+          "name": "showHEICS",
+          "description": "Whether to show HEICS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "ICNS",
+          "name": "showICNS",
+          "description": "Whether to show ICNS as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "ICO",
+          "name": "showICO",
+          "description": "Whether to show ICO as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "JPEG",
+          "name": "showJPEG",
+          "description": "Whether to show JPEG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "JP2",
+          "name": "showJP2",
+          "description": "Whether to show JP2 as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "KTX",
+          "name": "showKTX",
+          "description": "Whether to show KTX as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PBM",
+          "name": "showPBM",
+          "description": "Whether to show PBM as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PDF",
+          "name": "showPDF",
+          "description": "Whether to show PDF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PNG",
+          "name": "showPNG",
+          "description": "Whether to show PNG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PSD",
+          "name": "showPSD",
+          "description": "Whether to show PSD as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "PVR",
+          "name": "showPVR",
+          "description": "Whether to show PVR as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "TGA",
+          "name": "showTGA",
+          "description": "Whether to show TGA as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "TIFF",
+          "name": "showTIFF",
+          "description": "Whether to show TIFF as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "WEBP",
+          "name": "showWEBP",
+          "description": "Whether to show WEBP as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "SVG",
+          "name": "showSVG",
+          "description": "Whether to show SVG as a conversion option",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "title": "JPEG Extension",
+          "name": "jpegExtension",
+          "description": "The extension to use when converting to JPEG",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "jpg",
+              "value": "jpg"
+            },
+            {
+              "title": "jpeg",
+              "value": "jpeg"
+            }
+          ],
+          "default": "jpeg",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "change",
+        "transform"
+      ]
+    },
+    {
+      "name": "resize",
+      "title": "Resize Images",
+      "description": "Resize the selected images to the specified width and/or height",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "width",
+          "placeholder": "Width",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "scale",
+      "title": "Scale Images",
+      "description": "Scale the selected images by the provided factor",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "scaleFactor",
+          "placeholder": "Scale Factor",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "rescale",
+        "enlarge",
+        "shrink",
+        "size"
+      ]
+    },
+    {
+      "name": "pad",
+      "title": "Pad Images",
+      "description": "Pad images to the specified size using the provided color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "hexcolor",
+          "placeholder": "Color",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultPadColor",
+          "title": "Default Pad Color",
+          "description": "The default color to use when padding images",
+          "type": "textfield",
+          "default": "#FFFFFF",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "border",
+        "outline"
+      ]
+    },
+    {
+      "name": "apply-filter",
+      "title": "Apply Image Filter",
+      "description": "Apply filters to images using Apple's CIFilters",
+      "mode": "view",
+      "keywords": [
+        "effect",
+        "style"
+      ]
+    },
+    {
+      "name": "optimize",
+      "title": "Optimize Images",
+      "description": "Optimize images by compressing them",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "optimizationFactor",
+          "placeholder": "Amount (0 to 100)",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "keywords": [
+        "compress",
+        "improve",
+        "reduce",
+        "shrink"
+      ]
+    },
+    {
+      "name": "create-image",
+      "title": "Create New Image",
+      "description": "Create a new image by specifying its dimensions, color, and pattern.",
+      "mode": "view",
+      "preferences": [
+        {
+          "label": "Generate Image Previews",
+          "name": "generatePreviews",
+          "description": "Whether to generate previews of images upon every use of the command. If disable, the command will run faster, but you'll only see static previews that won't match the color of the generated image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ],
+      "keywords": [
+        "generate",
+        "make",
+        "build",
+        "construct"
+      ]
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip EXIF Data",
+      "description": "Remove EXIF data from images",
+      "keywords": [
+        "exif",
+        "metadata",
+        "remove"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.1",
+    "@raycast/utils": "^1.17.0",
+    "mathjs": "^11.8.2",
+    "svgo": "^3.0.2",
+    "tar": "^6.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/tar": "^6.1.11",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

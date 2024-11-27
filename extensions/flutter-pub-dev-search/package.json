@@ -5,6 +5,9 @@
   "description": "Search pub.dev for Dart and Flutter packages and copy the install commands",
   "icon": "command-icon.png",
   "author": "prasadsunny1",
+  "contributors": [
+    "K9i"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,9 +18,30 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary action",
+      "required": false,
+      "description": "Choose the primary action for the results.",
+      "default": "copy-install-command",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "open-in-browser"
+        },
+        {
+          "title": "Copy Install Command",
+          "value": "copy-install-command"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.48.9",
+    "node-fetch": "^3.0.0",
+    "nanoid": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

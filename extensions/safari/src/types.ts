@@ -1,13 +1,14 @@
 // Bookmarks
 
-interface Bookmark {
+export interface Bookmark {
   URIDictionary: {
     title: string;
   };
   ReadingListNonSync: {
-    Title: string;
+    Title?: string;
   };
   WebBookmarkUUID: string;
+  WebBookmarkType: string;
   URLString: string;
   ReadingList: {
     DateAdded: string;
@@ -22,9 +23,17 @@ export interface BookmarkPListResult {
   Children: [
     {
       Title: string;
-      Children: Bookmark[];
-    }
+      Children: Bookmark[] | BookmarkPListResult;
+    },
   ];
+}
+
+export interface GeneralBookmark {
+  uuid: string;
+  url: string;
+  domain?: string;
+  title: string;
+  folder: string;
 }
 
 export interface ReadingListBookmark {
@@ -70,3 +79,7 @@ export interface HistoryItem {
   url: string;
   lastVisited: string;
 }
+
+// Preferences
+
+export type FallbackSearchType = "search" | "searchHistory";

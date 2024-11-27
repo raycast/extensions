@@ -1,63 +1,103 @@
-import { ActionPanel, getPreferenceValues, Icon, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, getPreferenceValues, Icon, List, Action, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import fetch from "node-fetch";
 
-import { Preferences } from "./preferences";
+import { MutatePromise, useFetch } from "@raycast/utils";
+import { Alert, ErrorResult, PaginatedResult, Result } from "./types";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 
-export default function AlertList() {
-  const [state, setState] = useState<{ alerts: Alert[] }>({ alerts: [] });
+const AlertList = () => {
+  const [query, setQuery] = useState(preferences.alertsQuery);
 
-  async function fetch(query: string) {
-    const alerts = await fetchAlerts(query);
+  const setSearchText = (text: string) => {
+    setQuery(text);
+  };
 
-    setState((oldState) => ({
-      ...oldState,
-      alerts: alerts,
-    }));
-  }
-
-  useEffect(() => {
-    fetch("");
-  }, []);
+  const {
+    isLoading,
+    data: alerts,
+    mutate,
+  } = useFetch(
+    `${preferences.apiUrl}/v2/alerts?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`,
+    {
+      headers: {
+        Authorization: `GenieKey ${preferences.apiKey}`,
+      },
+      async parseResponse(response) {
+        const result = (await response.json()) as ErrorResult | PaginatedResult<Alert>;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
+        return result.data;
+      },
+      initialData: [],
+      failureToastOptions: {
+        title: "Could not load alerts",
+      },
+    },
+  );
 
   return (
     <List
-      isLoading={state.alerts.length === 0}
-      searchBarPlaceholder="Filter alerts..."
-      throttle={true}
-      onSearchTextChange={(text: string) => fetch(text)}
+      searchText={query}
+      onSearchTextChange={setSearchText}
+      filtering={false}
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter alerts"
+      throttle
     >
-      {state.alerts.map((alert) => (
-        <AlertListItem key={alert.id} alert={alert} />
+      {!isLoading && !alerts.length && (
+        <>
+          {query ? (
+            <List.EmptyView
+              icon="1628..svg"
+              title="We couldn't find any matching alerts for this search."
+              actions={
+                <ActionPanel>
+                  <Action title="View All Alerts" onAction={() => setQuery("")} />
+                </ActionPanel>
+              }
+            />
+          ) : (
+            <List.EmptyView
+              icon="6917..svg"
+              title="You don't have any alerts yet"
+              description="Alerts can be created manually, or triggered by integrations, emails, heartbeats, and more."
+            />
+          )}
+        </>
+      )}
+      {alerts.map((alert) => (
+        <AlertListItem key={alert.id} alert={alert} mutate={mutate} isLoading={isLoading} />
       ))}
     </List>
   );
-}
+};
 
-export function AlertListItem(props: { alert: Alert; goBackToSavedSearches?: () => Promise<void> }) {
-  const goBackToSavedSearches = props.goBackToSavedSearches;
+export default AlertList;
+
+const AlertListItem = (props: { alert: Alert; mutate: MutatePromise<Alert[]>; isLoading: boolean }) => {
   const alert = props.alert;
+  const { mutate, isLoading } = props;
 
   const createdAt = new Date(alert.createdAt);
   const subtitle = alert.acknowledged
     ? "Acknowledged"
     : alert.snoozed
-    ? "Snoozed"
-    : alert.status === "closed"
-    ? "Closed"
-    : "Open";
+      ? "Snoozed"
+      : alert.status === "closed"
+        ? "Closed"
+        : "Open";
   const icon =
     alert.priority === "P1"
       ? "icon-p1.png"
       : alert.priority === "P2"
-      ? "icon-p2.png"
-      : alert.priority === "P3"
-      ? "icon-p3.png"
-      : alert.priority === "P4"
-      ? "icon-p4.png"
-      : "icon-p5.png";
+        ? "icon-p2.png"
+        : alert.priority === "P3"
+          ? "icon-p3.png"
+          : alert.priority === "P4"
+            ? "icon-p4.png"
+            : "icon-p5.png";
 
   return (
     <List.Item
@@ -67,165 +107,198 @@ export function AlertListItem(props: { alert: Alert; goBackToSavedSearches?: () 
       subtitle={`${subtitle}${alert.tags && alert.tags.length > 0 ? ` [${alert.tags.join(", ")}]` : ""}`}
       icon={icon}
       keywords={[alert.status, alert.priority, ...alert.tags]}
-      accessoryTitle={`${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}`}
+      accessories={[{ text: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}` }]}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${preferences.url}/alert/detail/${alert.id}/details`} />
-          <ActionPanel.Item title="Acknowledge" icon={Icon.Checkmark} onAction={() => acknowledgedAlert(alert.id)} />
-          <ActionPanel.Item title="Close" icon={Icon.XmarkCircle} onAction={() => closeAlert(alert.id)} />
-          <ActionPanel.Item
-            title="Snooze for 1 Hour"
-            icon={Icon.SpeakerSlash}
-            onAction={() => snoozeAlert(alert.id, 1)}
-          />
-          <ActionPanel.Item
-            title="Snooze for 1 Day"
-            icon={Icon.SpeakerSlash}
-            onAction={() => snoozeAlert(alert.id, 24)}
-          />
-          <ActionPanel.Item
-            title="Snooze for 1 Week"
-            icon={Icon.SpeakerSlash}
-            onAction={() => snoozeAlert(alert.id, 168)}
-          />
-          {goBackToSavedSearches && (
-            <ActionPanel.Item title="Show Saved Searches" icon={Icon.List} onAction={() => goBackToSavedSearches()} />
+          <Action.OpenInBrowser url={`${preferences.url}/alert/detail/${alert.id}/details`} />
+          {!isLoading && (
+            <>
+              {alert.acknowledged ? (
+                <Action
+                  title="Unacknowledge"
+                  icon={Icon.XMarkCircle}
+                  onAction={() => unAcknowledgeAlert(alert.id, mutate)}
+                />
+              ) : (
+                <Action
+                  title="Acknowledge"
+                  icon={Icon.CheckCircle}
+                  onAction={() => acknowledgeAlert(alert.id, mutate)}
+                />
+              )}
+              {alert.status !== "closed" && (
+                <Action title="Close" icon={Icon.XMarkCircle} onAction={() => closeAlert(alert.id, mutate)} />
+              )}
+              <Action
+                title="Snooze for 1 Hour"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 1, mutate)}
+              />
+              <Action
+                title="Snooze for 1 Day"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 24, mutate)}
+              />
+              <Action
+                title="Snooze for 1 Week"
+                icon={Icon.BellDisabled}
+                onAction={() => snoozeAlert(alert.id, 168, mutate)}
+              />
+            </>
           )}
         </ActionPanel>
       }
     />
   );
-}
+};
 
-export async function fetchAlerts(query: string): Promise<Alert[]> {
+const acknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<void> => {
+  const toast = await showToast(Toast.Style.Animated, "Acknowledging alert");
   try {
-    const response = await fetch(
-      `${preferences.apiUrl}/v2/alerts?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`,
-      {
+    await mutate(
+      fetch(`${preferences.apiUrl}/v2/alerts/${id}/acknowledge`, {
+        method: "post",
         headers: {
           Authorization: `GenieKey ${preferences.apiKey}`,
+          "Content-Type": "application/json",
         },
-      }
+        body: JSON.stringify({
+          user: preferences.username,
+        }),
+      }).then(async (response) => {
+        const result = (await response.json()) as ErrorResult | Result;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
+      }),
+      {
+        optimisticUpdate(data) {
+          const index = data.findIndex((alert) => alert.id);
+          data[index].acknowledged = true;
+          return data;
+        },
+        shouldRevalidateAfter: false,
+      },
     );
 
-    const json = await response.json();
-
-    if (response.status >= 200 && response.status < 300) {
-      if ((json as Record<string, unknown>).data) {
-        return (json as Record<string, unknown>).data as Alert[];
-      }
-
-      return [];
-    } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
-      throw new Error("An unknown error occurred");
-    }
+    toast.style = Toast.Style.Success;
+    toast.title = "Alert was acknowledged";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not load alerts: ${error.message}`);
-    return Promise.resolve([]);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not acknowledge alert";
+    toast.message = (error as Error).message;
   }
-}
-
-async function acknowledgedAlert(id: string): Promise<void> {
+};
+const unAcknowledgeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<void> => {
+  const toast = await showToast(Toast.Style.Animated, "UnAcknowledging alert");
   try {
-    const response = await fetch(`${preferences.apiUrl}/v2/alerts/${id}/acknowledge`, {
-      method: "post",
-      headers: {
-        Authorization: `GenieKey ${preferences.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user: preferences.username,
+    await mutate(
+      fetch(`${preferences.apiUrl}/v2/alerts/${id}/unacknowledge`, {
+        method: "post",
+        headers: {
+          Authorization: `GenieKey ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: preferences.username,
+        }),
+      }).then(async (response) => {
+        const result = (await response.json()) as ErrorResult | Result;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
       }),
-    });
+      {
+        optimisticUpdate(data) {
+          const index = data.findIndex((alert) => alert.id);
+          data[index].acknowledged = false;
+          return data;
+        },
+        shouldRevalidateAfter: false,
+      },
+    );
 
-    const json = await response.json();
-
-    if (response.status >= 200 && response.status < 300) {
-      showToast(ToastStyle.Success, "Alert was acknowledged");
-      return;
-    } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
-      throw new Error("An unknown error occurred");
-    }
+    toast.style = Toast.Style.Success;
+    toast.title = "Alert was unacknowledged";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not acknowledge alert: ${error.message}`);
-    return;
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not unacknowledge alert";
+    toast.message = (error as Error).message;
   }
-}
+};
 
-async function closeAlert(id: string): Promise<void> {
+const closeAlert = async (id: string, mutate: MutatePromise<Alert[]>): Promise<void> => {
+  const toast = await showToast(Toast.Style.Animated, "Closing alert");
   try {
-    const response = await fetch(`${preferences.apiUrl}/v2/alerts/${id}/close`, {
-      method: "post",
-      headers: {
-        Authorization: `GenieKey ${preferences.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user: preferences.username,
+    await mutate(
+      fetch(`${preferences.apiUrl}/v2/alerts/${id}/close`, {
+        method: "post",
+        headers: {
+          Authorization: `GenieKey ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: preferences.username,
+        }),
+      }).then(async (response) => {
+        const result = (await response.json()) as ErrorResult | Result;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
       }),
-    });
-
-    const json = await response.json();
-
-    if (response.status >= 200 && response.status < 300) {
-      showToast(ToastStyle.Success, "Alert was closed");
-      return;
-    } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
-      throw new Error("An unknown error occurred");
-    }
+      {
+        optimisticUpdate(data) {
+          const index = data.findIndex((alert) => alert.id);
+          data[index].status = "closed";
+          return data;
+        },
+        shouldRevalidateAfter: false,
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Alert was closed";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not close alert: ${error.message}`);
-    return;
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not close alert";
+    toast.message = (error as Error).message;
   }
-}
+};
 
-async function snoozeAlert(id: string, hours: number): Promise<void> {
+const snoozeAlert = async (id: string, hours: number, mutate: MutatePromise<Alert[]>): Promise<void> => {
+  const toast = await showToast(Toast.Style.Animated, "Snoozing alert");
   try {
     const now = new Date();
     const endTime = new Date();
     endTime.setHours(now.getHours() + hours);
 
-    const response = await fetch(`${preferences.apiUrl}/v2/alerts/${id}/snooze`, {
-      method: "post",
-      headers: {
-        Authorization: `GenieKey ${preferences.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        endTime: endTime,
-        user: preferences.username,
+    await mutate(
+      fetch(`${preferences.apiUrl}/v2/alerts/${id}/snooze`, {
+        method: "post",
+        headers: {
+          Authorization: `GenieKey ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          endTime: endTime,
+          user: preferences.username,
+        }),
+      }).then(async (response) => {
+        const result = (await response.json()) as ErrorResult | Result;
+        if ("message" in result) throw new Error(result.message);
+        if (!response.ok) throw new Error("An unknown error occurred");
       }),
-    });
+      {
+        optimisticUpdate(data) {
+          const index = data.findIndex((alert) => alert.id);
+          data[index].snoozed = true;
+          return data;
+        },
+        shouldRevalidateAfter: false,
+      },
+    );
 
-    const json = await response.json();
-
-    if (response.status >= 200 && response.status < 300) {
-      showToast(ToastStyle.Success, "Alert was snoozed");
-      return;
-    } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
-      throw new Error("An unknown error occurred");
-    }
+    toast.style = Toast.Style.Success;
+    toast.title = "Alert was snoozed";
   } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not snooze alert: ${error.message}`);
-    return;
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not snooze alert";
+    toast.message = (error as Error).message;
   }
-}
-
-export type Alert = {
-  id: string;
-  message: string;
-  status: string;
-  acknowledged: boolean;
-  snoozed: boolean;
-  tags: string[];
-  createdAt: string;
-  priority: string;
 };

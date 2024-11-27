@@ -1,0 +1,19 @@
+overwrite: true
+schema: "https://sourcegraph.com/.api/graphql"
+documents:
+  - "src/sourcegraph/gql/queries/**.graphql"
+  - "src/sourcegraph/gql/mutations/**.graphql"
+generates:
+  src/sourcegraph/gql/operations.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+      - "fragment-matcher"
+    config:
+      # Options for trying to reduce generated file size. See:
+      # https://github.com/dotansimha/graphql-code-generator/issues/4562
+      onlyOperationTypes: true
+  src/sourcegraph/gql/schema.json:
+    plugins:
+      - "introspection"

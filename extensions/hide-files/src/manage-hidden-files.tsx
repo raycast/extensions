@@ -1,7 +1,7 @@
 import {
   Action,
   ActionPanel,
-  getPreferenceValues,
+  Clipboard,
   Icon,
   List,
   LocalStorage,
@@ -11,17 +11,19 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
-import { isImage } from "./utils/common-utils";
+import React, { useState } from "react";
+import { isImage, timeStampToDateTime } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
-import { copyFileByPath } from "./utils/applescript-utils";
+import { ListEmptyView } from "./components/list-empty-view";
+import { rememberTag } from "./types/preferences";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function Command() {
-  const [tag, setTag] = useState<string>("All");
+  const [tag, setTag] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
 
   const { localHiddenDirectory, loading } = getHiddenFiles(refresh);
@@ -32,7 +34,7 @@ export default function Command() {
       searchBarPlaceholder="Search hidden files"
       searchBarAccessory={
         localHiddenDirectory.length !== 0 ? (
-          <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
+          <List.Dropdown onChange={setTag} tooltip={"Filter Tag"} storeValue={rememberTag}>
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             {
               <List.Dropdown.Section title={"Type"}>
@@ -52,12 +54,8 @@ export default function Command() {
         ) : null
       }
     >
-      <List.EmptyView
-        key={`empty-localDirectory`}
-        title={"No Hidden Files"}
-        icon={{ source: { light: "empty-list.png", dark: "empty-list@dark.png" } }}
-        description={`You can hide files via the "Hide Files" command`}
-      />
+      <ListEmptyView />
+
       {localHiddenDirectory.map(
         (value, index) =>
           (tag === "All" || value.type === tag || value.path.includes(tag)) && (
@@ -67,14 +65,17 @@ export default function Command() {
               title={{
                 value: value.name,
                 tooltip: `Type: ${value.type === DirectoryType.FILE ? "File" : "Folder"}, hidden at ${new Date(
-                  value.date
+                  value.date,
                 ).toLocaleString()}`,
               }}
-              accessories={[{ text: parse(value.path).dir, tooltip: value.path }]}
+              accessories={[
+                { date: new Date(value.date), tooltip: `Hidden at ${timeStampToDateTime(value.date)}` },
+                { icon: Icon.Folder, tooltip: `${parse(value.path).dir}` },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Open
-                    title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
+                    title={value.type === DirectoryType.FILE ? `Open ${value.name}` : "Open in Finder"}
                     target={value.path}
                   />
                   <Action.ShowInFinder path={value.path} />
@@ -88,7 +89,7 @@ export default function Command() {
                         _localDirectory.splice(index, 1);
                         await LocalStorage.setItem(
                           LocalStorageKey.LOCAL_HIDE_DIRECTORY,
-                          JSON.stringify(_localDirectory)
+                          JSON.stringify(_localDirectory),
                         );
                         setRefresh(refreshNumber());
                         showHiddenFiles(value.path.replaceAll(" ", `" "`));
@@ -130,8 +131,8 @@ export default function Command() {
                             showHiddenFiles(filePaths.join(" "));
                             await LocalStorage.clear();
                             setRefresh(refreshNumber());
-                            await showToast(Toast.Style.Success, "Success!", "All Files have been unhidden.");
-                          }
+                            await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
+                          },
                         );
                       }}
                     />
@@ -143,25 +144,27 @@ export default function Command() {
                       title={"Copy File"}
                       shortcut={{ modifiers: ["cmd"], key: "." }}
                       onAction={async () => {
-                        await showHUD(`${value.name} is copied to clipboard`);
-                        await copyFileByPath(value.path);
+                        await showHUD(`📑 ${value.name} is copied to clipboard`);
+                        await Clipboard.copy({ file: value.path });
                       }}
                     />
                     <Action.CopyToClipboard
                       title={"Copy File Name"}
                       content={value.name}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
                     />
                     <Action.CopyToClipboard
                       title={"Copy File Path"}
                       content={value.path}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
                     />
                   </ActionPanel.Section>
+
+                  <ActionOpenCommandPreferences />
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
     </List>
   );

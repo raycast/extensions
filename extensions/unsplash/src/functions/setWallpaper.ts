@@ -1,19 +1,37 @@
-import { showToast, ToastStyle, environment, getPreferenceValues, showHUD } from "@raycast/api";
+import { showToast, Toast, environment, getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { existsSync } from "fs";
+import { resolveHome } from "./utils";
 
 interface SetWallpaperProps {
   url: string;
   id: string;
+  every?: boolean;
   useHud?: boolean;
+  isBackground?: boolean;
 }
 
-export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProps) => {
-  let toast;
-  if (!useHud) toast = await showToast(ToastStyle.Animated, "Downloading and setting wallpaper...");
+const displayMessage = async (msg: string, type: "hud" | "toast") => {
+  if (type === "hud") await showHUD(msg);
+  else return await showToast(Toast.Style.Animated, msg);
+};
 
-  const { downloadSize, applyTo } = getPreferenceValues<UnsplashPreferences>();
-  const selectedPath = environment.supportPath;
+export const setWallpaper = async ({ url, id, every, useHud = false, isBackground = false }: SetWallpaperProps) => {
+  const { downloadSize, wallpaperPath } = getPreferenceValues<UnsplashPreferences>();
+  const selectedPath = resolveHome(wallpaperPath || environment.supportPath);
+
+  let toast;
+
+  if (!isBackground) {
+    if (existsSync(selectedPath)) {
+      toast = await displayMessage("Downloading and setting wallpaper...", useHud ? "hud" : "toast");
+    } else {
+      toast = await displayMessage(
+        "The selected path does not exist. Please select a valid path.",
+        useHud ? "hud" : "toast"
+      );
+    }
+  }
 
   const fixedPathName = selectedPath.endsWith("/")
     ? `${selectedPath}${id}-${downloadSize}.jpg`
@@ -37,7 +55,7 @@ export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProp
 
       try
         tell application "System Events"
-          tell ${applyTo} desktop
+          tell ${every ? "every" : "current"} desktop
             set picture to (x as text)
             return "ok"
           end tell
@@ -57,19 +75,21 @@ export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProp
 
     if (result !== "ok") throw new Error("Error setting wallpaper.");
     else if (useHud) {
-      await showHUD("Wallpaper set!");
+      !isBackground && (await showHUD("Wallpaper set!"));
     } else if (toast) {
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";
     }
+    return true;
   } catch (err) {
     console.error(err);
 
     if (toast) {
-      toast.style = ToastStyle.Failure;
+      toast.style = Toast.Style.Failure;
       toast.title = "Something went wrong.";
       toast.message = "Try with another image or check your internet connection.";
     }
+    return false;
   }
 };
 

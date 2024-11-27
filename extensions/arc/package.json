@@ -1,0 +1,392 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "arc",
+  "title": "Arc",
+  "description": "Search and quickly navigate Arc's history and open tabs",
+  "icon": "icon.png",
+  "author": "thomas",
+  "owner": "the-browser-company",
+  "access": "public",
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "browser",
+    "arc",
+    "history",
+    "search",
+    "tabs",
+    "open",
+    "windows",
+    "web"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "zach",
+    "ankitchouhan1020",
+    "pernielsentikaer",
+    "danpalmer",
+    "rgrunberg",
+    "tleo19",
+    "loris",
+    "bdsqqq",
+    "xilopaint",
+    "jayeshbhole",
+    "hinzed1127",
+    "osalama",
+    "geb",
+    "ridemountainpig",
+    "nebbles",
+    "alanxmay"
+  ],
+  "pastContributors": [
+    "pomdtr",
+    "danulqua"
+  ],
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Arc",
+      "description": "Search your browsing history",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "description": "Create and open a new window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "space",
+          "title": "Space",
+          "description": "The Space to open the new tab in",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-little-arc",
+      "title": "Open New Little Arc Window",
+      "description": "Create and open a new little arc window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "Default URL",
+          "description": "The URL to open in the new tab if no argument is provided",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening mini arc with a non-url argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "subtitle": "Arc",
+      "description": "Search and select your spaces",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Arc",
+      "description": "Search and select your tabs",
+      "mode": "view"
+    },
+    {
+      "name": "search-downloads",
+      "title": "Search Downloads",
+      "subtitle": "Arc",
+      "description": "Search your downloads",
+      "mode": "view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Open New Incognito Window",
+      "subtitle": "Arc",
+      "description": "Create and open a new incognito window",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new window",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-tab",
+      "title": "Open New Tab",
+      "subtitle": "Arc",
+      "description": "Create and open a new tab in the current window",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "space",
+          "title": "Space",
+          "description": "The Space to open the new tab in",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Access Spaces and Favorites",
+      "description": "Access your spaces and favorites from the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "search",
+      "title": "Search Arc",
+      "description": "Search tabs, history and search suggestions",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used for suggestions",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
+        },
+        {
+          "name": "sorting",
+          "title": "Sorting",
+          "description": "Sorting of sections in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "asc",
+          "data": [
+            {
+              "title": "Tabs → History → Suggestions",
+              "value": "tabsHistorySuggestions"
+            },
+            {
+              "title": "History → Tabs → Suggestions",
+              "value": "historyTabsSuggestions"
+            }
+          ]
+        },
+        {
+          "name": "showFavorites",
+          "title": "Sections",
+          "label": "Show Favorites",
+          "description": "Show favorites in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showPinnedTabs",
+          "label": "Show Pinned Tabs",
+          "description": "Show pinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showUnpinnedTabs",
+          "label": "Show Unpinned Tabs",
+          "description": "Show unpinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showHistory",
+          "label": "Show History",
+          "description": "Show history in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSuggestions",
+          "label": "Show Suggestions",
+          "description": "Show suggestions in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Arc Release Notes",
+      "subtitle": "Arc",
+      "description": "Open the Arc release notes",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Arc Boost Gallery",
+      "subtitle": "Arc",
+      "description": "Open the Arc Boost Gallery",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "new-easel",
+      "title": "Open New Easel",
+      "subtitle": "Arc",
+      "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.5",
+    "cross-fetch": "^3.1.6",
+    "fuse.js": "^7.0.0",
+    "iconv-lite": "^0.6.3",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
+    "pinyin-pro": "^3.25.0",
+    "semver": "^7.3.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/is-url": "^1.2.30",
+    "@types/lodash": "^4.14.191",
+    "@types/nanoid": "^3.0.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.4",
+    "@types/semver": "^7.3.13",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

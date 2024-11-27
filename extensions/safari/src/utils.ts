@@ -1,27 +1,30 @@
-import { commandSync } from "execa";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-
-import { Icon, showToast, Toast } from "@raycast/api";
-
 import { HistoryItem, Tab } from "./types";
+
+type Preferences = {
+  safariAppIdentifier: string;
+};
+
+export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
-    const result = await osascript.jxa({ parse: true })`${script}`;
-    return result;
+    return await osascript.jxa({ parse: true })`${script}`;
   } catch (err: unknown) {
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Application not found",
           message: "Things must be running",
         });
       } else {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Something went wrong",
           message: message,
@@ -57,17 +60,6 @@ export const getUrlDomain = (url: string) => {
   }
 };
 
-export const getFaviconUrl = (domain: string | undefined) => {
-  if (!domain) {
-    return Icon.Globe;
-  }
-
-  return {
-    source: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`,
-    fallback: Icon.Globe,
-  };
-};
-
 export const formatDate = (date: string) =>
   new Date(date).toLocaleDateString(undefined, {
     year: "numeric",
@@ -79,24 +71,12 @@ export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-const normalizeText = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
-export const search = (collection: object[], keys: string[], searchText: string) =>
-  _.filter(collection, (item) =>
-    _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)))
-  );
-
-export const getCurrentDeviceName = (): string => {
-  try {
-    return commandSync("/usr/sbin/scutil --get ComputerName").stdout;
-  } catch (err) {
-    console.error(err);
-    return "";
+export const search = function (collection: object[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+  if (!searchText) {
+    return collection;
   }
+
+  return new Fuse(collection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
 };
 
 const dtf = new Intl.DateTimeFormat(undefined, {
@@ -116,15 +96,4 @@ export const groupHistoryByDay = (groups: Map<string, HistoryItem[]>, entry: His
   group.push(entry);
   groups.set(date, group);
   return groups;
-};
-
-export class PermissionError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PermissionError";
-  }
-}
-
-export const isPermissionError = (error: unknown) => {
-  return error instanceof Error && error.name === "PermissionError";
 };

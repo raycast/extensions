@@ -1,8 +1,8 @@
-import open from "open";
-import { closeMainWindow } from "@raycast/api";
+import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 
-export default async () => {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.CaptureArea }>) {
   const url = "cleanshot://capture-area";
-  open(url);
   await closeMainWindow();
-};
+  if (props.arguments?.action) open(url + "?action=" + props.arguments.action);
+  else open(url);
+}

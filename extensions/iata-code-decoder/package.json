@@ -30,20 +30,20 @@
     "Data"
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
+    "@raycast/api": "^1.48.9",
     "country-code-emoji": "^2.3.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "~18.15.5",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.7",
+    "react-devtools": "^4.27.4",
+    "typescript": "^5.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",

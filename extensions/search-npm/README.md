@@ -8,7 +8,7 @@
     Search npm
   </h1>
 
-Raycast extension to search for npm packages using [npms.io](https://npms.io)
+Raycast extension to search and favorite npm packages
 
   <p>
     <a href="https://www.raycast.com/mrmartineau/search-npm">
@@ -48,9 +48,9 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 
 - open the package's repository (if it is known)
 - open the package's homepage (if it is known)
+- open the package's changelog (if it is known)
 - open the package's npm page
 - open the package's Skypack.dev page
-- open a npms.io search results page based on the search term
 
 #### Info
 
@@ -58,6 +58,10 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 - view the package's bundle cost on [bundlephobia.com](https://bundlephobia.com). hit <kbd>cmd + shift + enter</kbd>
 - view the package's [Snyk](https://snyk.io) vulnerability report
 - view the package source code on [GitHub.dev](https://github.dev) & [CodeSandbox](https://codesandbox.io)
+
+#### Actions
+
+- add/remove package to/from favorites
 
 #### Copy
 
@@ -71,13 +75,12 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 - choose your default package manager. `yarn`, `npm` or `pnpm`
 - choose your secondary package manager. `yarn`, `npm` or `pnpm`
 - choose the default "open" action for a package: "open repository", "open homepage" or "open npm package page" or "open Skypack package page"
+- choose how many history items to show
 
 ### Screencast
 
-https://user-images.githubusercontent.com/64883/166630703-962ac4de-5da5-40f6-8895-25aeb92bcfb6.mp4
-
-![package list item](https://user-images.githubusercontent.com/64883/166632417-89e2e5dd-b01e-43af-984c-e4b29740f53f.gif)
+https://github.com/raycast/extensions/assets/64883/e94be63a-50c9-4fa5-9f7c-788ebbb4ca72
 
 ### Options
 
-<img width="310" alt="image" src="https://user-images.githubusercontent.com/64883/166630716-8d9eb232-4278-42a0-9237-96da2242e2af.png">
+<img width="311" alt="image" src="https://github.com/raycast/extensions/assets/64883/a4953656-6678-4f72-ac50-2e6b54a21172">

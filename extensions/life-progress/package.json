@@ -2,35 +2,68 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "life-progress",
   "title": "Life Progress",
-  "description": "View your life progress, get the word of the day",
+  "description": "View life progress and custom Countdown Date. See how much time is left.",
   "icon": "life-progress-icon.png",
   "author": "koinzhang",
   "categories": [
     "Fun"
   ],
   "license": "MIT",
+  "commands": [
+    {
+      "name": "life-progress",
+      "title": "Life Progress",
+      "description": "View life progress and custom Countdown Date. See how much time is left.",
+      "mode": "view"
+    }
+  ],
   "preferences": [
     {
-      "name": "showDailyWord",
+      "name": "showProgressBar",
       "type": "checkbox",
-      "required": true,
-      "title": "UI Preference",
-      "label": "Show Quote of the Day",
-      "description": "Show quote of the day.",
+      "required": false,
+      "label": "Show Progress Bar",
+      "description": "Show life progress bar.",
       "default": true
     },
     {
-      "name": "timeLeftFirst",
+      "name": "countdownDateFirst",
       "type": "checkbox",
-      "required": true,
-      "label": "Time Left First",
-      "description": "Show Time Left first.",
+      "required": false,
+      "label": "Countdown Date First",
+      "description": "Show Countdown Date first.",
       "default": true
+    },
+    {
+      "name": "commandMetadata",
+      "title": "Command Metadata",
+      "description": "Information displayed by the Life Progress command subtitle in the main Raycast interface.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Day Progress",
+          "value": "Day"
+        },
+        {
+          "title": "Week Progress",
+          "value": "Week"
+        },
+        {
+          "title": "Month Progress",
+          "value": "Month"
+        },
+        {
+          "title": "Year Progress",
+          "value": "Year"
+        }
+      ],
+      "required": false,
+      "default": "Year"
     },
     {
       "name": "birthday",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Birthday",
       "description": "For calculating life progress, the birthday's format is 1995-01-01.",
       "placeholder": "1995-01-01",
@@ -43,70 +76,83 @@
       "type": "dropdown",
       "data": [
         {
+          "title": "Sunday",
+          "value": "Sunday"
+        },
+        {
           "title": "Monday",
           "value": "Monday"
         },
         {
-          "title": "Sunday",
-          "value": "Sunday"
+          "title": "Tuesday",
+          "value": "Tuesday"
+        },
+        {
+          "title": "Wednesday",
+          "value": "Wednesday"
+        },
+        {
+          "title": "Thursday",
+          "value": "Thursday"
+        },
+        {
+          "title": "Friday",
+          "value": "Friday"
+        },
+        {
+          "title": "Saturday",
+          "value": "Saturday"
         }
       ],
-      "required": true,
-      "default": "Monday"
+      "required": false,
+      "default": "Sunday"
     },
     {
-      "name": "iconTheme",
-      "title": "Icon Theme",
-      "description": "Themes of date icons.",
+      "name": "progressSymbol",
+      "title": "Progress Bar Symbol",
+      "description": "Symbols for the composition of the progress bar.",
       "type": "dropdown",
       "data": [
         {
-          "title": "Random",
-          "value": "random"
+          "title": "■",
+          "value": "■"
         },
         {
-          "title": "Bird",
-          "value": "bird"
+          "title": "●",
+          "value": "●"
         },
         {
-          "title": "Pixel",
-          "value": "pixel"
+          "title": "♥︎",
+          "value": "♥︎"
         },
         {
-          "title": "Simple",
-          "value": "simple"
+          "title": "✿",
+          "value": "✿"
         },
         {
-          "title": "Rainbow",
-          "value": "rainbow"
+          "title": "★",
+          "value": "★"
+        },
+        {
+          "title": "✪",
+          "value": "✪"
         }
       ],
-      "required": true,
-      "default": "random"
-    }
-  ],
-  "commands": [
-    {
-      "name": "life-progress",
-      "title": "Life Progress",
-      "description": "View your life progress.",
-      "mode": "view"
+      "required": false,
+      "default": "■"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
-    "node-fetch": "^3.2.3"
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

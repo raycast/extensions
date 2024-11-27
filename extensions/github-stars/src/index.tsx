@@ -1,11 +1,4 @@
-import {
-  getLocalStorageItem,
-  getPreferenceValues,
-  List,
-  setLocalStorageItem,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { getPreferenceValues, List, showToast, LocalStorage, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { Response } from "./response.model";
@@ -30,7 +23,7 @@ export default function PackageList() {
 
   useEffect(() => {
     const fetchPackages = async (): Promise<void> => {
-      const storedItems = await getLocalStorageItem<string>("github-star-items");
+      const storedItems = await LocalStorage.getItem<string>("github-star-items");
 
       if (storedItems) {
         setState({ items: JSON.parse(storedItems) as Response });
@@ -41,16 +34,19 @@ export default function PackageList() {
         const json = await response.json();
         if (response.ok) {
           setState({ items: json as Response });
-          await setLocalStorageItem("github-star-items", JSON.stringify(json));
+          await LocalStorage.setItem("github-star-items", JSON.stringify(json));
         } else {
-          await setLocalStorageItem("github-star-items", "");
+          await LocalStorage.setItem("github-star-items", "");
           setState({
             error: new Error("This GitHub user does not exist. Check your preferences"),
           });
         }
         setLoading(false);
       } catch (error) {
-        showToast(ToastStyle.Failure, "Could not fetch stars");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not fetch stars",
+        });
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
         });
@@ -67,7 +63,11 @@ export default function PackageList() {
   }, []);
 
   if (state?.error) {
-    showToast(ToastStyle.Failure, "Failed loading stars", state.error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed loading stars",
+      message: state.error.message,
+    });
   }
 
   return (

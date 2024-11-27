@@ -1,11 +1,15 @@
-import { Action, ActionPanel, Detail, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
-import { useClubs, useSeasons } from "./hooks";
-import Player from "./player";
-import { TeamTeam } from "./types";
+import { getClubs } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import ClubSquad from "./components/squad";
+import { Team } from "./types";
+import { getClubLogo } from "./utils";
 
-function ClubProfile(props: TeamTeam) {
+function ClubProfile(props: Team) {
+  const { metadata } = props;
   return (
     <Detail
       navigationTitle={`${props.name} | Club`}
@@ -13,8 +17,7 @@ function ClubProfile(props: TeamTeam) {
         { h1: props.name },
         {
           img: {
-            // source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.svg`,
-            source: `https://resources.premierleague.com/premierleague/badges/100/${props.altIds.opta}@x2.png`,
+            source: getClubLogo(props.altIds.opta),
           },
         },
       ])}
@@ -25,14 +28,44 @@ function ClubProfile(props: TeamTeam) {
             title="Capacity"
             text={props.grounds[0].capacity?.toString()}
           />
+
+          <Detail.Metadata.Separator />
+          {metadata.communities_twitter && (
+            <Detail.Metadata.Link
+              title="Twitter"
+              text={metadata.communities_twitter}
+              target={metadata.communities_twitter}
+            />
+          )}
+          {metadata.communities_facebook && (
+            <Detail.Metadata.Link
+              title="Facebook"
+              text={metadata.communities_facebook}
+              target={metadata.communities_facebook}
+            />
+          )}
+          {metadata.communities_instagram && (
+            <Detail.Metadata.Link
+              title="Instagram"
+              text={metadata.communities_instagram}
+              target={metadata.communities_instagram}
+            />
+          )}
+          {metadata.communities_youtube && (
+            <Detail.Metadata.Link
+              title="YouTube"
+              text={metadata.communities_youtube}
+              target={metadata.communities_youtube}
+            />
+          )}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <Action.Push
             title="Squad"
-            icon={Icon.Person}
-            target={<Player club={props.club} />}
+            icon={Icon.TwoPeople}
+            target={<ClubSquad {...props.club} />}
           />
           <Action.OpenInBrowser
             url={`https://www.premierleague.com/clubs/${
@@ -45,51 +78,33 @@ function ClubProfile(props: TeamTeam) {
   );
 }
 
-export default function Club() {
-  const seasons = useSeasons();
-  const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString()
+export default function EPLClub() {
+  const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: clubs, isLoading } = usePromise(
+    async (season) => (season ? await getClubs(season) : undefined),
+    [seasonId],
   );
-  const clubs = useClubs(selectedSeason);
 
   return (
-    <List
+    <Grid
       throttle
-      isLoading={!clubs}
+      isLoading={isLoading}
+      inset={Grid.Inset.Small}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Season"
-          value={selectedSeason}
-          onChange={setSeason}
-        >
-          <List.Dropdown.Section>
-            {seasons.map((season) => {
-              return (
-                <List.Dropdown.Item
-                  key={season.id}
-                  value={season.id.toString()}
-                  title={season.label}
-                />
-              );
-            })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
       }
     >
       {clubs?.map((team) => {
         return (
-          <List.Item
+          <Grid.Item
             key={team.id}
             title={team.name}
-            subtitle={team.shortName}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.svg`,
+            subtitle={team.grounds[0].name}
+            content={{
+              source: getClubLogo(team.altIds.opta),
               fallback: "default.png",
             }}
-            accessories={[
-              { text: team.grounds[0].name },
-              { icon: "stadium.svg" },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -102,6 +117,6 @@ export default function Club() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

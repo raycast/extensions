@@ -1,7 +1,6 @@
+import { LaunchProps } from "@raycast/api";
 import { translate } from "./utils";
 
-const Slovak = async () => {
-  await translate("SK");
-  return null;
-};
-export default Slovak;
+export default async function Slovak(props: LaunchProps<{ arguments?: Arguments.Slovak }>) {
+  await translate("SK", props.arguments?.text ?? props.fallbackText);
+}

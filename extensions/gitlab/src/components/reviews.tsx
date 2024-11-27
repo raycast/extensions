@@ -1,74 +1,56 @@
-import { ActionPanel, List, showToast, Color, Toast, Image } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
-import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { daysInSeconds, ensureCleanAccessories, toDateString } from "../utils";
-import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
-import { ShowReviewMRAction } from "./review_actions";
-import { getCIJobStatusEmoji } from "./jobs";
+import { getListDetailsPreference, gitlab } from "../common";
+import { daysInSeconds, showErrorToast } from "../utils";
 import { useCache } from "../cache";
 import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
-import { useMRPipelines } from "./mr";
+import { MRListItem } from "./mr";
+import { useCachedState } from "@raycast/utils";
+import { GitLabIcons } from "../icons";
+
+function ReviewListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
+}
 
 export function ReviewList(): JSX.Element {
   const [project, setProject] = useState<Project>();
-  const { mrs, error, isLoading } = useMyReviews(project);
+  const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Reviews", error);
+    showErrorToast(error, "Cannot search Reviews");
   }
 
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
     <List
       searchBarPlaceholder="Filter Reviews by name..."
       isLoading={isLoading}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+      isShowingDetail={getListDetailsPreference()}
     >
       {mrs?.map((mr) => (
-        <ReviewListItem key={mr.id} mr={mr} />
+        <MRListItem
+          key={mr.id}
+          mr={mr}
+          refreshData={performRefetch}
+          expandDetails={expandDetails}
+          onToggleDetails={() => setExpandDetails(!expandDetails)}
+        />
       ))}
+      <ReviewListEmptyView />
     </List>
   );
 }
 
-function ReviewListItem(props: { mr: MergeRequest }) {
-  const mr = props.mr;
-  const subtitle: string[] = [`!${mr.iid}`];
-  const { mrpipelines } = useMRPipelines(mr);
-  if (mrpipelines && mrpipelines.length > 0) {
-    const ciStatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
-    if (ciStatusEmoji) {
-      subtitle.push(ciStatusEmoji);
-    }
-  }
-  const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
-  return (
-    <List.Item
-      id={mr.id.toString()}
-      title={mr.title}
-      subtitle={subtitle.join("    ")}
-      icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
-      accessories={ensureCleanAccessories([{ text: toDateString(mr.updated_at) }, { icon: accessoryIcon }])}
-      actions={
-        <ActionPanel>
-          <DefaultActions
-            action={<ShowReviewMRAction mr={mr} />}
-            webAction={<GitLabOpenInBrowserAction url={mr.web_url} />}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function useMyReviews(project?: Project | undefined): {
+export function useMyReviews(project?: Project | undefined): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {

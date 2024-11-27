@@ -13,7 +13,7 @@ const punctuationMarks = [
   { name: "(", symbol: "（", description: "Brackets" },
   { name: ")", symbol: "）", description: "Brackets" },
   { name: "?", symbol: "？", description: "Question mark" },
-  { name: "!", symbol: "！", description: "Excamation mark" },
+  { name: "!", symbol: "！", description: "Exclamation mark" },
   { name: "-", symbol: "─", description: "Dash" },
   { name: "~", symbol: "～", description: "Swung Dash" },
   { name: ".", symbol: "…", description: "Elipsis" },
@@ -57,7 +57,7 @@ const PunctuationMarksListItem = (props: { mark: Mark }) => {
 };
 
 export default () => (
-  <List searchBarPlaceholder="Search chinese punctuation marks...">
+  <List searchBarPlaceholder="Search chinese punctuation marks…">
     {punctuationMarks.map((mark) => (
       <PunctuationMarksListItem key={mark.symbol} mark={mark} />
     ))}

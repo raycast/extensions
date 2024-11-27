@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "let-me-google-that",
+  "title": "LetMeGoogleThat",
+  "description": "LetMeGoogleThat is a Raycast extension that generates links to the popular 'Let Me Google That For You' website. With just a few clicks, you can create a custom link that takes your friends or colleagues directly to a Google search page for the term you specify. Perfect for those times when someone asks you a question that they could easily look up themselves! Simply enter the search term, generate the link, and share it with others. LetMeGoogleThat saves you time and makes it easy to share information with others.",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "contributors": [
+    "prince_yadav"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Link",
+"subtitle": "Generate a `Let Me Google That` link!",
+      "description": "LetMeGoogleThat is a Raycast extension that generates links to the popular 'Let Me Google That For You' website. With just a few clicks, you can create a custom link that takes your friends or colleagues directly to a Google search page for the term you specify. Perfect for those times when someone asks you a question that they could easily look up themselves! Simply enter the search term, generate the link, and share it with others. LetMeGoogleThat saves you time and makes it easy to share information with others.",
+      "mode": "view",
+      "arguments": [
+              {
+                "type": "text",
+                "placeholder": "How to tie a 👔?",
+                "name": "generate"
+              }
+            ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

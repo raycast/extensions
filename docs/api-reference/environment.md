@@ -13,18 +13,54 @@ Contains environment values such as the Raycast version, extension info, and pat
 ```typescript
 import { environment } from "@raycast/api";
 
-console.log(`Raycast version: ${environment.raycastVersion}`);
-console.log(`Extension name: ${environment.extensionName}`);
-console.log(`Command name: ${environment.commandName}`);
-console.log(`Assets path: ${environment.assetsPath}`);
-console.log(`Support path: ${environment.supportPath}`);
-console.log(`Is development mode: ${environment.isDevelopment}`);
-console.log(`Theme: ${environment.theme}`);
+export default async function Command() {
+  console.log(`Raycast version: ${environment.raycastVersion}`);
+  console.log(`Owner or Author name: ${environment.ownerOrAuthorName}`);
+  console.log(`Extension name: ${environment.extensionName}`);
+  console.log(`Command name: ${environment.commandName}`);
+  console.log(`Command mode: ${environment.commandMode}`);
+  console.log(`Assets path: ${environment.assetsPath}`);
+  console.log(`Support path: ${environment.supportPath}`);
+  console.log(`Is development mode: ${environment.isDevelopment}`);
+  console.log(`Appearance: ${environment.appearance}`);
+  console.log(`Text size: ${environment.textSize}`);
+  console.log(`LaunchType: ${environment.launchType}`);
+}
 ```
 
 #### Properties
 
 <InterfaceTableFromJSDoc name="Environment" />
+
+### environment.canAccess
+
+Checks whether the user can access a specific API or not.
+
+#### Signature
+
+```typescript
+function canAccess(api: any): bool;
+```
+
+#### Example
+
+```typescript
+import { AI, showHUD, environment } from "@raycast/api";
+import fs from "fs";
+
+export default async function main() {
+  if (environment.canAccess(AI)) {
+    const answer = await AI.ask("Suggest 5 jazz songs");
+    await Clipboard.copy(answer);
+  } else {
+    await showHUD("You don't have access :(");
+  }
+}
+```
+
+#### Return
+
+A Boolean indicating whether the user running the command has access to the API.
 
 ### getSelectedFinderItems
 
@@ -39,14 +75,12 @@ async function getSelectedFinderItems(): Promise<FileSystemItem[]>;
 #### Example
 
 ```typescript
-import { getSelectedFinderItems, Clipboard, showToast, Toast } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   try {
     const selectedItems = await getSelectedFinderItems();
-    if (selectedItems.length) {
-      await Clipboard.paste(selectedItems[0].path);
-    }
+    console.log(selectedItems);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -54,12 +88,12 @@ export default async () => {
       message: String(error),
     });
   }
-};
+}
 ```
 
 #### Return
 
-A Promise that resolves with the [selected file system items](#filesystemitem).
+A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
 ### getSelectedText
 
@@ -76,7 +110,7 @@ async function getSelectedText(): Promise<string>;
 ```typescript
 import { getSelectedText, Clipboard, showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   try {
     const selectedText = await getSelectedText();
     const transformedText = selectedText.toUpperCase();
@@ -88,12 +122,12 @@ export default async () => {
       message: String(error),
     });
   }
-};
+}
 ```
 
 #### Return
 
-A Promise that resolves with the selected text.
+A Promise that resolves with the selected text. If no text is selected in the frontmost application, the promise will be rejected.
 
 ## Types
 
@@ -104,3 +138,14 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 #### Properties
 
 <InterfaceTableFromJSDoc name="FileSystemItem" />
+
+### LaunchType
+
+Indicates the type of command launch. Use this to detect whether the command has been launched from the background.
+
+#### Enumeration members
+
+| Name          | Description                                                |
+| :------------ | :--------------------------------------------------------- |
+| UserInitiated | A regular launch through user interaction                  |
+| Background    | Scheduled through an interval and launched from background |

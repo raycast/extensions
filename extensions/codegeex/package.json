@@ -1,0 +1,210 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codegeex",
+  "title": "CodeGeex",
+  "description": "CodeGeex AI code tools",
+  "icon": "command-icon.png",
+  "author": "MBearo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Generate",
+      "description": "Generate code based on description",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate the selected code",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "targetLanguage",
+          "type": "dropdown",
+          "description": "Select the target language you want to use",
+          "required": true,
+          "title": "Target Language",
+          "default": "Go",
+          "data": [
+            {
+              "title": "Python",
+              "value": "Python"
+            },
+            {
+              "title": "Go",
+              "value": "GO"
+            },
+            {
+              "title": "Java",
+              "value": "Java"
+            },
+            {
+              "title": "JavaScript",
+              "value": "JavaScript"
+            },
+            {
+              "title": "C++",
+              "value": "C++"
+            },
+            {
+              "title": "C#",
+              "value": "C#"
+            },
+            {
+              "title": "PHP",
+              "value": "PHP"
+            },
+            {
+              "title": "TypeScript",
+              "value": "TypeScript"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translateform",
+      "title": "Translate Form",
+      "description": "Translate the enter code",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Add comments to the selected code",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "comment",
+          "type": "dropdown",
+          "description": "Select the comment language you want to use",
+          "required": true,
+          "title": "Comment Language",
+          "default": "Chinese",
+          "data": [
+            {
+              "title": "🇨🇳 Chinese",
+              "value": "zh-CN"
+            },
+            {
+              "title": "🇺🇸 English",
+              "value": "en-US"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "explainform",
+      "title": "Explain Form",
+      "description": "Add comments to the enter code",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "description": "Input your apikey",
+      "required": true,
+      "title": "ApiKey"
+    },
+    {
+      "name": "apisecret",
+      "type": "password",
+      "description": "Input your apisecret",
+      "required": true,
+      "title": "ApiSecret"
+    },
+    {
+      "name": "language",
+      "type": "dropdown",
+      "description": "Select the language you want to use",
+      "required": true,
+      "title": "Main Language",
+      "default": "Python",
+      "data": [
+        {
+          "value": "C++",
+          "title": "C++"
+        },
+        {
+          "value": "C",
+          "title": "C"
+        },
+        {
+          "value": "C#",
+          "title": "C#"
+        },
+        {
+          "value": "Java",
+          "title": "Java"
+        },
+        {
+          "title": "Python",
+          "value": "Python"
+        },
+        {
+          "title": "HTML",
+          "value": "HTML"
+        },
+        {
+          "title": "PHP",
+          "value": "PHP"
+        },
+        {
+          "title": "JavaScript",
+          "value": "Javascript"
+        },
+        {
+          "title": "TypeScript",
+          "value": "TypeScript"
+        },
+        {
+          "title": "Go",
+          "value": "Go"
+        },
+        {
+          "title": "Rust",
+          "value": "Rust"
+        },
+        {
+          "title": "SQL",
+          "value": "SQL"
+        },
+        {
+          "title": "Kotlin",
+          "value": "Kotlin"
+        },
+        {
+          "title": "Fortran",
+          "value": "Fortran"
+        },
+        {
+          "title": "R",
+          "value": "R"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "axios": "^1.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

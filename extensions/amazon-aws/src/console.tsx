@@ -1,42 +1,38 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { readFileSync } from "fs";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
+import { readFile } from "fs/promises";
+import { AwsAction } from "./components/common/action";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
-export default function Command() {
-  const [state, setState] = useState<{ services: AWSService[]; loaded: boolean }>({
-    services: [],
-    loaded: false,
+export default function Console() {
+  const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
+  const {
+    data: sortedServices,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(services, {
+    namespace: "aws-console",
+    sortUnvisited: (a, b) => a.title.localeCompare(b.title),
   });
 
-  useEffect(() => {
-    async function loadJSON() {
-      const services = JSON.parse(readFileSync(`${__dirname}/assets/aws-services.json`, "utf8"))
-        .items.filter((service: AWSService) => {
-          return !!service.title; // Only include services that have a title
-        })
-        .sort((a: AWSService, b: AWSService) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
-
-      setState({
-        loaded: true,
-        services,
-      });
-    }
-
-    loadJSON();
-  }, []);
-
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter services by name...">
-      {state.services.map((service) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter services by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {sortedServices?.map((service) => (
         <List.Item
-          id={service.uid}
-          key={service.uid}
+          key={service.id}
           title={service.title}
           subtitle={service.subtitle}
-          icon={service.icon.path}
+          icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
+          keywords={service.match.split(" ")}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://console.aws.amazon.com${service.arg}`} />
+              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} onAction={() => visitItem(service)} />
+              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(service)} />
             </ActionPanel>
           }
         />
@@ -46,13 +42,19 @@ export default function Command() {
 }
 
 type AWSService = {
-  uid: string;
+  id: string;
   title: string;
   subtitle: string;
   arg: string;
   icon: AWSIcon;
+  match: string;
 };
 
 type AWSIcon = {
   path: string;
 };
+
+async function loadJSON() {
+  const file = await readFile(`${__dirname}/assets/aws-services.json`, "utf8");
+  return (JSON.parse(file).items as AWSService[]).filter((service) => !!service.title && !!service.id);
+}

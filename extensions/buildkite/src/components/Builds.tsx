@@ -1,9 +1,11 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { Pager } from "../utils/types";
-import { useQuery } from "../utils/useQuery";
-import { Build, BuildListItem } from "./BuildListItem";
+import { useCachedPromise } from "@raycast/utils";
+import { getBuildkiteClient } from "../api/withBuildkiteClient";
+import { BuildFragment } from "../generated/graphql";
+import { truthy } from "../utils/truthy";
+import { BuildListItem } from "./BuildListItem";
 
-function groupBranches(acc: Record<string, Build[]>, { node }: Pager<Build>["edges"][number]) {
+function groupBranches(acc: Record<string, BuildFragment[]>, node: BuildFragment) {
   acc[node.branch] = [...(acc[node.branch] ?? []), node];
   return acc;
 }
@@ -11,37 +13,11 @@ function groupBranches(acc: Record<string, Build[]>, { node }: Pager<Build>["edg
 const preferences = getPreferenceValues<{ favoriteBranches: string }>();
 const favoriteBranches = new Set(preferences.favoriteBranches.split(",").map((branch) => branch.trim()));
 
-function sortBranches(a: [string, Build[]], b: [string, Build[]]) {
+function sortBranches(a: [string, BuildFragment[]], b: [string, BuildFragment[]]) {
   const hasA = favoriteBranches.has(a[0]);
   const hasB = favoriteBranches.has(b[0]);
 
   return hasA && !hasB ? -1 : hasB && !hasA ? 1 : 0;
-}
-
-const QUERY = `
-query ListBuildsQuery($pipeline: ID!) {
-  pipeline(slug: $pipeline) {
-    builds(first: 20) {
-      edges {
-        node {
-          id
-          branch
-          createdAt
-          message
-          number
-          state
-          url
-        }
-      }
-    }
-  }
-}
-`;
-
-interface QueryResponse {
-  pipeline: {
-    builds: Pager<Build>;
-  };
 }
 
 interface BuildsProps {
@@ -49,17 +25,20 @@ interface BuildsProps {
 }
 
 export function Builds({ pipeline }: BuildsProps) {
-  const state = useQuery<QueryResponse>([pipeline], {
-    query: QUERY,
-    errorMessage: "Could not load builds",
-    variables: { pipeline },
-  });
+  const buildkite = getBuildkiteClient();
+  const { data, isLoading } = useCachedPromise(
+    async (pipeline: string) => {
+      const result = await buildkite.listBuilds({ pipeline });
+      return result.pipeline?.builds?.edges?.map((edge) => edge?.node).filter(truthy);
+    },
+    [pipeline],
+    { keepPreviousData: true },
+  );
 
-  const builds = state?.pipeline.builds.edges ?? [];
-  const branches = Object.entries(builds.reduce(groupBranches, {})).sort(sortBranches);
+  const branches = Object.entries((data ?? []).reduce(groupBranches, {})).sort(sortBranches);
 
   return (
-    <List isLoading={branches.length === 0} searchBarPlaceholder="Filter builds by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter builds by name...">
       {branches.map(([name, builds]) => (
         <List.Section key={name} title={name}>
           {builds.map((build) => (

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zerion",
+  "title": "Zerion",
+  "description": "Browse Zerion from Raycast",
+  "icon": "icon.png",
+  "author": "qdqd",
+  "categories": [
+    "Web",
+    "Productivity",
+    "Data",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "overview",
+      "title": "View Overview",
+      "subtitle": "Zerion",
+      "description": "Overview a portofolio using an address or an ENS name",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "account",
+          "placeholder": "Address or ENS",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "collection",
+      "title": "View Collection",
+      "subtitle": "Zerion",
+      "description": "See all NFTs from a collection",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "collection",
+          "placeholder": "Collection name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "favorites",
+      "subtitle": "Zerion",
+      "title": "View Favorites",
+      "description": "Check your favorite assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-gainers",
+      "subtitle": "Zerion",
+      "title": "View Top Gainers",
+      "description": "Daily top-performing assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "top-losers",
+      "subtitle": "Zerion",
+      "title": "View Top Losers",
+      "description": "Daily least-performing assets",
+      "mode": "no-view"
+    },
+    {
+      "name": "market",
+      "subtitle": "Zerion",
+      "title": "View Market",
+      "description": "Real-time market performance",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

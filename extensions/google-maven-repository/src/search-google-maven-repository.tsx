@@ -4,14 +4,19 @@ import { searchArtifacts } from "./hooks/hooks";
 import { ArtifactList, MavenEmptyView } from "./utils/ui-component";
 import { isEmpty } from "./utils/common-utils";
 
-export default function SearchGoogleMavenRepository() {
-  const [searchContent, setSearchContent] = useState<string>("");
+interface RepositoryArgument {
+  repository: string;
+}
+
+export default function SearchGoogleMavenRepository(props: { arguments: RepositoryArgument }) {
+  const { repository } = props.arguments;
+  const [searchContent, setSearchContent] = useState<string>(repository ? repository.trim() : "");
   const [filter, setFilter] = useState<string>("All");
   const { artifactInfo, loading } = searchArtifacts(searchContent.trim());
 
   const emptyViewTitle = () => {
     if (searchContent.length < 4) {
-      return "Welcome to Google's Maven Repository";
+      return "Google Maven Repository";
     }
     if (loading) {
       return "Loading...";
@@ -19,13 +24,14 @@ export default function SearchGoogleMavenRepository() {
     if (artifactInfo.artifactInfo.length === 0 && !isEmpty(searchContent)) {
       return "No Artifacts";
     }
-    return "Welcome to Google's Maven Repository";
+    return "Google Maven Repository";
   };
 
   return (
     <List
       isLoading={loading}
       searchBarPlaceholder={'Search artifacts, like "androidx:viewpager2"'}
+      searchText={searchContent}
       onSearchTextChange={setSearchContent}
       throttle={true}
       searchBarAccessory={
@@ -43,7 +49,7 @@ export default function SearchGoogleMavenRepository() {
         description={
           searchContent.length < 4 && !isEmpty(searchContent)
             ? "You must enter at least 4 characters when searching..."
-            : " "
+            : "Welcome to Google Maven Repository"
         }
       />
       {artifactInfo.artifactInfo.map((artifacts, artifactsIndex) => {

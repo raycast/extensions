@@ -1,17 +1,8 @@
+import { Cache, showHUD } from "@raycast/api";
+import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./input-item";
+import { homedir } from "os";
 import fse from "fs-extra";
-import { LocalStorage } from "@raycast/api";
-import Values = LocalStorage.Values;
-
-export interface Preference extends Values {
-  trimText: boolean;
-  isShowHud: boolean;
-  priorityDetection: string;
-  searchEngine: string;
-}
-
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
-};
+import { isShowHud } from "../types/preference";
 
 export const checkIsFile = (path: string) => {
   try {
@@ -22,20 +13,21 @@ export const checkIsFile = (path: string) => {
   }
 };
 
-export function isEmail(text: string): boolean {
-  const regex = /^[\da-zA-Z_.-]+@[\da-zA-Z_.-]+([.][a-zA-Z]+){1,2}$/;
-  return regex.test(text);
-}
+export const isStartWithFileOrFolderStr = (path: string) => {
+  return path.startsWith("file:///") || path.startsWith("~/") || path.startsWith(homedir());
+};
 
-export function isUrl(text: string): boolean {
-  const regex = /^((http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z\d]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
-  return regex.test(text) || isIP(text);
-}
+export const getPathFromSelectionOrClipboard = async (priorityDetection: string) => {
+  if (priorityDetection === "selected") {
+    return await fetchItemInputSelectedFirst();
+  } else {
+    return await fetchItemInputClipboardFirst();
+  }
+};
 
-export function isIP(text: string): boolean {
-  return /^(http:\/\/)?(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(
-    text
-  );
+export function isDeeplink(text: string): boolean {
+  const deepLinkRegex = /^[a-zA-Z0-9-]+:\/\//;
+  return deepLinkRegex.test(text) && !text.includes(" ");
 }
 
 export const urlBuilder = (prefix: string, text: string) => {
@@ -77,6 +69,29 @@ export const searchUrlBuilder = (searchEngine: string, text: string) => {
     }
     default: {
       return `${searchEngines[0].value}${encodeURIComponent(text)}`;
+    }
+  }
+};
+
+export const showHud = async (icon: string, content: string) => {
+  if (isShowHud) {
+    await showHUD(icon + " " + content);
+  }
+};
+
+export const getArgument = (arg: string, argKey: string) => {
+  const cache = new Cache({ namespace: "Args" });
+  if (typeof arg !== "undefined") {
+    // call from main window
+    cache.set(argKey, arg);
+    return arg;
+  } else {
+    // call from hotkey
+    const cacheStr = cache.get(argKey);
+    if (typeof cacheStr !== "undefined") {
+      return cacheStr;
+    } else {
+      return "";
     }
   }
 };

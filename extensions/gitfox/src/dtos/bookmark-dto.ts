@@ -2,37 +2,39 @@ import tildify from "tildify";
 import { getCurrentBranchName } from "../utils";
 
 export default class Bookmark {
-  Folder: string;
-  Name: string;
-  RepositoryIdentifier: string;
-  Type: number;
-  Children: Bookmark[];
+  folder: string;
+  name: string;
+  id: string;
+  type: number;
+  children: Bookmark[];
 
-  constructor(Folder = "", Name = "", RepositoryIdentifier = "", Type = 1, Children: Bookmark[] = []) {
-    this.Name = Name;
-    this.RepositoryIdentifier = RepositoryIdentifier;
-    this.Folder = Folder;
-    this.Type = Type;
-    this.Children = Children;
+  constructor(folder = "", name = "", id = "", type = 1, children: Bookmark[] = []) {
+    this.name = name;
+    this.id = id;
+    this.folder = folder;
+    this.type = type;
+    this.children = children;
   }
 
   get getFolder() {
-    return this.Folder
-      ? tildify(this.Folder.replace("file:/", "").replaceAll("&", "\\&").replaceAll("%20", "\\ "))
+    return this.folder
+      ? tildify(this.folder.replace("file:/", "").replaceAll("&", "\\&").replaceAll("%20", "\\ "))
       : "";
   }
 
   get getPath() {
-    return this.Folder ? this.Folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
+    return this.folder ? this.folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
   }
 
-  get isComplete() {
-    return this.RepositoryIdentifier !== "";
-  }
-
-  get getBranch() {
-    const branch = getCurrentBranchName(this.getPath);
-
-    return branch.length > 50 ? `${branch.slice(0, 50)}...` : branch;
+  get getBranch(): { name: string; unknowBranch: boolean } {
+    try {
+      const branch = getCurrentBranchName(this.getPath);
+      return {
+        name: branch.length > 32 ? `${branch.slice(0, 32)}...` : branch,
+        unknowBranch: false,
+      };
+    } catch {
+      return { name: "Unknow branch", unknowBranch: true };
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { API, FileInfo, Transform } from "jscodeshift";
+import { API, FileInfo, Transform, ObjectProperty } from "jscodeshift";
 
 const tryGetAccessoryTitle = (attribute) => {
   if (attribute?.name?.name === "accessoryTitle") {
@@ -30,7 +30,7 @@ const transform: Transform = (file: FileInfo, api: API) => {
         return;
       }
 
-      const objectExpressionProperties = [];
+      const objectExpressionProperties: ObjectProperty[] = [];
       for (let i = 0; i < p.parent.node.attributes.length; i++) {
         let shouldDeleteNode = false;
         const textValue = tryGetAccessoryTitle(p.parent.node.attributes[i]);

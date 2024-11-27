@@ -1,85 +1,71 @@
-import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
 import { execAsync } from "../shared/exec-async";
-import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
-import { readDirectoryAsync } from "../shared/fs-async";
-import { joinPathComponents } from "../shared/join-path-components";
-import { LocalStorage } from "@raycast/api";
+import { existsAsync, readDirectoryAsync } from "../shared/fs-async";
+import { XcodeSimulator } from "../models/xcode-simulator/xcode-simulator.model";
+import { XcodeSimulatorApplication } from "../models/xcode-simulator/xcode-simulator-application.model";
+import * as Path from "path";
+import { XcodeSimulatorApplicationGroup } from "../models/xcode-simulator/xcode-simulator-application-group.model";
+import { groupBy } from "../shared/group-by";
+import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
+
+interface XcodeSimulatorApplicationPath {
+  /**
+   * The bundle identifier
+   */
+  bundleIdentifier: string;
+  /**
+   * The path (AppGroup | Sandbox)
+   */
+  path: string;
+}
 
 /**
  * XcodeSimulatorApplicationService
  */
 export class XcodeSimulatorApplicationService {
   /**
-   * The XcodeSimulatorService
+   * The Simulator SandBox Paths Map Cache
    */
-  private xcodeSimulatorService = new XcodeSimulatorService();
+  private static simulatorSandBoxPathsCache = new Map<XcodeSimulator, Promise<XcodeSimulatorApplicationPath[]>>();
 
   /**
-   * The XcodeSimulatorApplications JSON LocalStorage Key
+   * The Simulator AppGroup Paths Map Cache
    */
-  private xcodeSimulatorApplicationsJSONLocalStorageKey = "xcode-simulator-applications";
+  private static simulatorAppGroupPathsCache = new Map<XcodeSimulator, Promise<XcodeSimulatorApplicationPath[]>>();
 
   /**
-   * Retrieve the cached XcodeSimulatorApplications, if available
+   * Retrieve all XcodeSimulatorApplicationGroups
    */
-  async cachedXcodeSimulatorApplications(): Promise<XcodeSimulatorApplication[] | undefined> {
-    // Retrieve XcodeSimulatorApplications JSON from LocalStorage
-    const xcodeSimulatorApplications = await LocalStorage.getItem<string>(
-      this.xcodeSimulatorApplicationsJSONLocalStorageKey
-    );
-    // Check if XcodeSimulatorApplications JSON is not available
-    if (!xcodeSimulatorApplications) {
-      // Return undefined
-      return undefined;
-    }
-    // Return parsed XcodeSimulatorApplications
-    return JSON.parse(xcodeSimulatorApplications);
+  static async xcodeSimulatorApplicationGroups(): Promise<XcodeSimulatorApplicationGroup[]> {
+    const xcodeSimulatorApplications = await XcodeSimulatorApplicationService.xcodeSimulatorApplications();
+    return groupBy(xcodeSimulatorApplications, (application) => application.simulator).map((group) => {
+      return { simulator: group.key, applications: group.values.sort((lhs, rhs) => lhs.name.localeCompare(rhs.name)) };
+    });
   }
 
   /**
-   * Cache XcodeSimulatorApplications
-   * @param xcodeSimulatorApplications The XcodeSimulatorApplications that should be cached
+   * Retrieve all XcodeSimulatorApplications
    */
-  private cacheXcodeSimulatorApplication(xcodeSimulatorApplications: XcodeSimulatorApplication[]): Promise<void> {
-    // Store XcodeSimulatorApplications JSON in LocalStorage
-    return LocalStorage.setItem(
-      this.xcodeSimulatorApplicationsJSONLocalStorageKey,
-      JSON.stringify(xcodeSimulatorApplications)
-    );
-  }
-
-  /**
-   * Retrieve all installed XcodeSimulatorApplication
-   */
-  async xcodeSimulatorApplications(): Promise<XcodeSimulatorApplication[]> {
+  static async xcodeSimulatorApplications(): Promise<XcodeSimulatorApplication[]> {
     // Retrieve all Simulators
-    const simulators = await this.xcodeSimulatorService.getXcodeSimulators();
-    // Find all Applications installed in each XcodeSimulator in parallel
-    const allApplications = await Promise.all(simulators.map(this.findXcodeSimulatorApplications));
-    // Flat map 2D Array to 1D
-    const applications = ([] as XcodeSimulatorApplication[]).concat(...allApplications);
-    // Cache Applications
-    this.cacheXcodeSimulatorApplication(applications).then();
-    // Return Applications
-    return applications;
+    const simulators = await XcodeSimulatorService.xcodeSimulators();
+    // Find all Applications installed in each XcodeSimulator
+    return ([] as XcodeSimulatorApplication[]).concat(
+      ...(
+        await Promise.allSettled(simulators.map(XcodeSimulatorApplicationService.findXcodeSimulatorApplications))
+      ).map((result) => (result.status === "fulfilled" ? result.value : []))
+    );
   }
 
   /**
-   * Find all installed applications of the given XcodeSimulator
+   * Find all XcodeSimulatorApplications of a given XcodeSimulator
    * @param simulator The XcodeSimulator
    */
-  private async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
+  static async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
     // The container application directory path
-    const containerApplicationDirectoryPath = joinPathComponents(simulator.dataPath, "Containers/Bundle/Application");
-    /// The container sandbox directory path
-    const containerSandboxDirectoryPath = joinPathComponents(simulator.dataPath, "Containers/Data/Application");
+    const containerApplicationDirectoryPath = Path.join(simulator.dataPath, "Containers/Bundle/Application");
     // Declare Application Directory Paths
     let applicationDirectoryPaths: string[];
-    // Declare SandBox Directory Paths
-    let sandBoxDirectoryPaths: string[];
-    // Declare SandBox Directory Bundle identifiers
-    let sandBoxDirectoryBundleIds: string[];
     try {
       // Read application child directories paths
       applicationDirectoryPaths = await readDirectoryAsync(containerApplicationDirectoryPath, {
@@ -87,76 +73,32 @@ export class XcodeSimulatorApplicationService {
       }).then((entries) => {
         return entries
           .filter((entry) => entry.isDirectory())
-          .map((entry) => joinPathComponents(containerApplicationDirectoryPath, entry.name));
+          .map((entry) => Path.join(containerApplicationDirectoryPath, entry.name));
       });
-      // Read SandBox child directory paths
-      sandBoxDirectoryPaths = await readDirectoryAsync(containerSandboxDirectoryPath, {
-        withFileTypes: true,
-      }).then((entries) => {
-        return entries
-          .filter((entry) => entry.isDirectory())
-          .map((entry) => joinPathComponents(containerSandboxDirectoryPath, entry.name));
-      });
-      // Read SandBox Bundle identifiers for each SandBox directory path
-      sandBoxDirectoryBundleIds = (
-        await execAsync(
-          sandBoxDirectoryPaths
-            .map((sandBoxDirectoryPath) => {
-              return [
-                "defaults",
-                "read",
-                joinPathComponents(sandBoxDirectoryPath, ".com.apple.mobile_container_manager.metadata.plist"),
-                "MCMMetadataIdentifier",
-              ].join(" ");
-            })
-            .join(" && ")
-        )
-      ).stdout
-        .split("\n")
-        .map((bundleId) => bundleId.trim());
     } catch {
       // On error return empty applications
       return [];
     }
-    // Initialize a Map which holds a bundle identifier as a key
-    // and the corresponding SandBox directory path as a value
-    const sandBoxBundleIdDirectoryPathMap = new Map<string, string>();
-    // For each SandBox directory bundle identifier entries
-    for (const [index, bundleId] of sandBoxDirectoryBundleIds.entries()) {
-      // Retrieve SandBox directory path at the same index as the bundle identifier
-      const sandBoxDirectoryPath = sandBoxDirectoryPaths.at(index);
-      // Check if SandBox directory path is not available
-      if (!sandBoxDirectoryPath) {
-        // Continue with next bundle identifier
-        continue;
-      }
-      // Set bundle identifier and the corresponding SandBox directory path
-      sandBoxBundleIdDirectoryPathMap.set(bundleId, sandBoxDirectoryPath);
-    }
     // Retrieve all Applications in parallel
-    const applications = await Promise.all(
-      applicationDirectoryPaths.map((applicationDirectoryPath) => {
-        return XcodeSimulatorApplicationService.findXcodeSimulatorApplication(
-          simulator,
-          applicationDirectoryPath,
-          sandBoxBundleIdDirectoryPathMap
-        );
-      })
-    );
+    const applications = (
+      await Promise.allSettled(
+        applicationDirectoryPaths.map((applicationDirectoryPath) =>
+          XcodeSimulatorApplicationService.findXcodeSimulatorApplication(simulator, applicationDirectoryPath)
+        )
+      )
+    ).map((result) => (result.status === "fulfilled" ? result.value : undefined));
     // Filter out falsy values and return Applications
-    return applications.filter((application) => !!application) as XcodeSimulatorApplication[];
+    return applications.filter(Boolean) as XcodeSimulatorApplication[];
   }
 
   /**
-   * Find an Application that is installed on the XcodeSimulator
+   * Find a XcodeSimulatorApplication on the XcodeSimulator for a given application directory path
    * @param simulator The XcodeSimulator
-   * @param applicationDirectoryPath The Application directory path
-   * @param sandBoxBundleIdDirectoryPathMap The SandBox bundle identifier directory path map
+   * @param applicationDirectoryPath The application directory path
    */
   private static async findXcodeSimulatorApplication(
     simulator: XcodeSimulator,
-    applicationDirectoryPath: string,
-    sandBoxBundleIdDirectoryPathMap: Map<string, string>
+    applicationDirectoryPath: string
   ): Promise<XcodeSimulatorApplication | undefined> {
     // Declare application file name
     let applicationFileName: string;
@@ -188,7 +130,7 @@ export class XcodeSimulatorApplicationService {
               "plutil",
               "-convert",
               "json",
-              joinPathComponents(
+              Path.join(
                 applicationDirectoryPath,
                 applicationFileName
                   // Escape whitespaces
@@ -196,11 +138,8 @@ export class XcodeSimulatorApplicationService {
                 "Info.plist"
               ),
               "-o",
-              /* Important note:
-                 By using a dash ("-") for the -o parameter value
-                 the output will be printed in the stdout instead into a local file
-                 Read more: https://www.manpagez.com/man/1/plutil/
-              */
+              // By using a dash ("-") for the -o parameter value the output
+              // will be printed in the stdout instead into a local file
               "-",
             ].join(" ")
           )
@@ -211,19 +150,24 @@ export class XcodeSimulatorApplicationService {
       return undefined;
     }
     // Declare bundle identifier
-    const bundleIdentifier = infoPlistJSON["CFBundleIdentifier"];
+    const bundleIdentifier = infoPlistJSON["CFBundleIdentifier"]?.trim();
     // Check if bundle identifier is not available
     if (!bundleIdentifier) {
       // Return no application
       return undefined;
     }
-    // Retrieve possible SandBox directory path for bundle identifier
-    const sandBoxDirectoryPath = sandBoxBundleIdDirectoryPathMap.get(bundleIdentifier);
+    // Find sandbox directory path
+    const sandBoxDirectoryPath = await XcodeSimulatorApplicationService.findSandboxDirectoryPath(
+      simulator,
+      bundleIdentifier
+    );
     // Check if SandBox directory path is not available
     if (!sandBoxDirectoryPath) {
       // Return no application
       return undefined;
     }
+    // Find appGroup directory path
+    const appGroupPath = await XcodeSimulatorApplicationService.findAppGroupDirectoryPath(simulator, bundleIdentifier);
     // Retrieve version from Info.plist
     const version = infoPlistJSON["CFBundleShortVersionString"];
     // Retrieve build number from Info.plist
@@ -241,9 +185,7 @@ export class XcodeSimulatorApplicationService {
     if (primaryAppIconName) {
       try {
         // Read file names in application
-        const applicationFileNames = await readDirectoryAsync(
-          joinPathComponents(applicationDirectoryPath, applicationFileName)
-        );
+        const applicationFileNames = await readDirectoryAsync(Path.join(applicationDirectoryPath, applicationFileName));
         // Find matching application file name that starts with the primary app icon name
         const matchingApplicationFileName = applicationFileNames.find((fileName) =>
           fileName.startsWith(primaryAppIconName)
@@ -251,25 +193,186 @@ export class XcodeSimulatorApplicationService {
         // Check if a matching application file name is available
         if (matchingApplicationFileName) {
           // Initialize app icon path
-          appIconPath = joinPathComponents(applicationDirectoryPath, applicationFileName, matchingApplicationFileName);
+          appIconPath = Path.join(applicationDirectoryPath, applicationFileName, matchingApplicationFileName);
         }
       } catch {
         // Simply ignore this error
         // as we treat the appIconPath as an optional value
       }
     }
+    // Initialize user defaults plist path
+    let userDefaultsPlistPath: string | undefined = Path.join(
+      sandBoxDirectoryPath,
+      "Library",
+      "Preferences",
+      `${bundleIdentifier}.plist`
+    );
+    // Check if user defaults plist does not exists
+    if (!(await existsAsync(userDefaultsPlistPath))) {
+      // Clear user defaults plist path
+      userDefaultsPlistPath = undefined;
+    }
     // Return Application
     return {
+      id: [simulator.udid, bundleIdentifier].join("/"),
       name: applicationName,
-      bundleIdentifier: bundleIdentifier.trim(),
+      bundleIdentifier: bundleIdentifier,
       version: version,
       buildNumber: buildNumber,
       appIconPath: appIconPath,
       simulator: simulator,
       bundlePath: applicationDirectoryPath,
       sandBoxPath: sandBoxDirectoryPath,
-      sandBoxDocumentsPath: joinPathComponents(sandBoxDirectoryPath, "Documents"),
-      sandBoxCachesPath: joinPathComponents(sandBoxDirectoryPath, "Library", "Caches"),
+      sandBoxDocumentsPath: Path.join(sandBoxDirectoryPath, "Documents"),
+      sandBoxCachesPath: Path.join(sandBoxDirectoryPath, "Library", "Caches"),
+      appGroupPath: appGroupPath,
+      userDefaultsPlistPath: userDefaultsPlistPath,
     };
+  }
+
+  /**
+   * Find Sandbox directory path for a given XcodeSimulator and bundle identifier
+   * @param simulator The XcodeSimulator
+   * @param bundleIdentifier The bundle identifier
+   * @private
+   */
+  private static async findSandboxDirectoryPath(
+    simulator: XcodeSimulator,
+    bundleIdentifier: string
+  ): Promise<string | undefined> {
+    // Check if simulator is booted
+    if (simulator.state === XcodeSimulatorState.booted) {
+      try {
+        // Try to retrieve sandbox directory path via the simctl cli
+        // which is much quicker than the following fallback mechanism
+        return (
+          await execAsync(`xcrun simctl get_app_container ${simulator.udid} ${bundleIdentifier} data`)
+        ).stdout.trim();
+        // eslint-disable-next-line no-empty
+      } catch {
+        // Ignore error as we continue with the fallback mechanism
+      }
+    }
+    // Initialize simulator sandbox paths promise by using the cache
+    let simulatorSandBoxPathsPromise = XcodeSimulatorApplicationService.simulatorSandBoxPathsCache.get(simulator);
+    // Check if simulator sandbox paths promise is unavailable / no cache entry is available
+    if (!simulatorSandBoxPathsPromise) {
+      // Initialize simulator data application directory path
+      const dataApplicationDirectoryPath = Path.join(simulator.dataPath, "Containers/Data/Application");
+      //get sandbox paths from a directory
+      simulatorSandBoxPathsPromise = this.getApplicationPathFromDirectory(dataApplicationDirectoryPath);
+      // Set simulator sandbox paths promise so that the sandbox paths are only read once per simulator
+      XcodeSimulatorApplicationService.simulatorSandBoxPathsCache.set(simulator, simulatorSandBoxPathsPromise);
+    }
+    // Return sandbox path where the bundle identifier matches
+    return (await simulatorSandBoxPathsPromise)?.find(
+      (simulatorSandBoxPath) => simulatorSandBoxPath.bundleIdentifier === bundleIdentifier
+    )?.path;
+  }
+
+  /**
+   * Find AppGroup directory path for a given XcodeSimulator and bundle identifier
+   * @param simulator The XcodeSimulator
+   * @param bundleIdentifier The bundle identifier
+   * @private
+   */
+  private static async findAppGroupDirectoryPath(
+    simulator: XcodeSimulator,
+    bundleIdentifier: string
+  ): Promise<string | undefined> {
+    // Check if simulator is booted
+    if (simulator.state === XcodeSimulatorState.booted) {
+      try {
+        // Try to retrieve AppGroup directory path via the simctl cli
+        // which is much quicker than the following fallback mechanism
+        const xcrunResult = (
+          await execAsync(`xcrun simctl get_app_container ${simulator.udid} ${bundleIdentifier} groups`)
+        ).stdout.trim();
+        if (xcrunResult.length > 0) {
+          const groupPathSplit = xcrunResult.split("\t");
+          if (groupPathSplit.length === 2) {
+            return groupPathSplit[1].replaceAll("\n", "");
+          }
+        }
+        // eslint-disable-next-line no-empty
+      } catch {
+        // Ignore error as we continue with the fallback mechanism
+      }
+    }
+    // Initialize simulator AppGroup paths promise by using the cache
+    let simulatorAppGroupPathsPromise = XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.get(simulator);
+    // Check if simulator AppGroup paths promise is unavailable / no cache entry is available
+    if (!simulatorAppGroupPathsPromise) {
+      // Initialize simulator data application directory path
+      const appGroupDirectoryPath = Path.join(simulator.dataPath, "Containers/Shared/AppGroup");
+      //get AppGroup paths from a directory
+      simulatorAppGroupPathsPromise =
+        XcodeSimulatorApplicationService.getApplicationPathFromDirectory(appGroupDirectoryPath);
+      // Set simulator AppGroup paths promise so that the AppGroup paths are only read once per simulator
+      XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.set(simulator, simulatorAppGroupPathsPromise);
+    }
+    // Return AppGroup path where the bundle identifier matches
+    return (await simulatorAppGroupPathsPromise)?.find(
+      (simulatorAppGroupxPath) => simulatorAppGroupxPath.bundleIdentifier === `group.${bundleIdentifier}`
+    )?.path;
+  }
+
+  /**
+   * Get Application Path from a Directory
+   * @param applicationPath The Application path Inside a Container
+   * @private
+   */
+  private static async getApplicationPathFromDirectory(
+    applicationPath: string
+  ): Promise<XcodeSimulatorApplicationPath[]> {
+    // 1. Reading the data application directory path child directories
+    // 2. Retrieve all bundle identifiers alongside with the directory path (Sandbox | AppGroup)
+    return execAsync(
+      [
+        // List all child directories in data application directory
+        `ls -l ${applicationPath}`,
+        // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
+        `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
+        // Remove duplicates by first component (separated by whitespace)
+        `awk '!seen[$1]++'`,
+        // Drop first component (separated by whitespace)
+        `awk '{$1=""; print $0}'`,
+      ].join(" | ")
+    )
+      .then((output) =>
+        output.stdout
+          .trim()
+          .split("\n")
+          .map((path) => Path.join(applicationPath, path.trim()))
+      )
+      .then((paths) =>
+        Promise.allSettled(
+          paths.map((path) =>
+            execAsync(
+              [
+                "defaults",
+                "read",
+                Path.join(path, ".com.apple.mobile_container_manager.metadata.plist"),
+                "MCMMetadataIdentifier",
+              ].join(" ")
+            ).then((output) => {
+              const bundleIdentifier = output.stdout.trim();
+              if (bundleIdentifier) {
+                return {
+                  bundleIdentifier: bundleIdentifier,
+                  path: path,
+                };
+              } else {
+                return undefined;
+              }
+            })
+          )
+        ).then(
+          (results) =>
+            results
+              .map((result) => (result.status == "fulfilled" ? result.value : undefined))
+              .filter(Boolean) as XcodeSimulatorApplicationPath[]
+        )
+      );
   }
 }

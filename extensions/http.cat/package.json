@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "http-dot-cat",
+  "title": "HTTP.cat Status Codes",
+  "description": "Quickly look up HTTP.cat 🐈‍⬛🐈 status codes with funny cats",
+  "icon": "icon512.png",
+  "author": "lucasmezencio",
+  "contributors": [
+    "Alex_"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search HTTP.cat 🐈‍⬛🐈 Status Codes",
+      "description": "Search all available HTTP.cat 🐈‍⬛🐈 status codes by code or description",
+      "mode": "view"
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.5",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.7.5",
+    "@typescript-eslint/parser": "^6.7.5",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  }
+}

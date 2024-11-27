@@ -1,0 +1,454 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro",
+  "title": "Pomodoro",
+  "description": "Pomodoro extension with menu-bar timer",
+  "icon": "icon.png",
+  "author": "asubbotin",
+  "contributors": [
+    "pernielsentikaer",
+    "brodelp",
+    "susan_thapa",
+    "mikikiv",
+    "MartinGonzalez",
+    "nathanjms",
+    "cchalop1",
+    "hayden_barnes",
+    "j3lte",
+    "litomore"
+  ],
+  "keywords": [
+    "pomodoro",
+    "timer"
+  ],
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pomodoro-menu-bar",
+      "title": "Show Pomodoro in Menu Bar",
+      "subtitle": "Control timers from menu-bar",
+      "description": "Start, pause, stop or continue pomodoro intervals",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "pomodoro-control-timer",
+      "title": "Control Pomodoro Timer",
+      "subtitle": "Start / Stop Pomodoro Timer",
+      "description": "Start, pause, stop or continue pomodoro intervals",
+      "mode": "view"
+    },
+    {
+      "name": "stats-pomodoro-timer",
+      "title": "View Pomodoro Stats",
+      "mode": "view",
+      "description": "Shows the stats of the Pomodoro timer"
+    },
+    {
+      "name": "slack-pomodoro-menu-bar",
+      "title": "Slack Pomodoro in Menu Bar",
+      "subtitle": "Control timers from menu-bar and updates Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "disabledByDefault": true
+    },
+    {
+      "name": "slack-pomodoro-control-timer",
+      "title": "Slack Control Pomodoro Timer",
+      "subtitle": "Start / Stop Pomodoro Timer and update Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "focusIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Focus Interval Duration",
+      "description": "Interval duration, minutes",
+      "default": "25",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        },
+        {
+          "value": "90",
+          "title": "90:00"
+        }
+      ]
+    },
+    {
+      "name": "shortBreakIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Short Break Duration",
+      "description": "Interval duration, minutes",
+      "default": "5",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        }
+      ]
+    },
+    {
+      "name": "longBreakIntervalDuration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Long Break Duration",
+      "description": "Interval duration, minutes",
+      "default": "20",
+      "data": [
+        {
+          "value": "1",
+          "title": "1:00"
+        },
+        {
+          "value": "3",
+          "title": "3:00"
+        },
+        {
+          "value": "5",
+          "title": "5:00"
+        },
+        {
+          "value": "10",
+          "title": "10:00"
+        },
+        {
+          "value": "15",
+          "title": "15:00"
+        },
+        {
+          "value": "20",
+          "title": "20:00"
+        },
+        {
+          "value": "25",
+          "title": "25:00"
+        },
+        {
+          "value": "30",
+          "title": "30:00"
+        },
+        {
+          "value": "35",
+          "title": "35:00"
+        },
+        {
+          "value": "40",
+          "title": "40:00"
+        },
+        {
+          "value": "45",
+          "title": "45:00"
+        },
+        {
+          "value": "50",
+          "title": "50:00"
+        },
+        {
+          "value": "55",
+          "title": "55:00"
+        },
+        {
+          "value": "60",
+          "title": "60:00"
+        }
+      ]
+    },
+    {
+      "name": "longBreakStartThreshold",
+      "type": "dropdown",
+      "required": false,
+      "title": "Long Break Start Threshold",
+      "description": "Pomodoro cycles after which you want to take a long break",
+      "default": "4",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
+    {
+      "name": "completionImage",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Image Link",
+      "description": "Image on interval completion, URL",
+      "default": "https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif"
+    },
+    {
+      "name": "giphyAPIKey",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy API Key",
+      "description": "Use an API key from Giphy to get random images on interval completion. Get your API key here: https://developers.giphy.com/docs/api#quick-start-guide"
+    },
+    {
+      "name": "giphyTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy Tag",
+      "description": "Tag to use for Giphy API. Default is 'success'.",
+      "default": "success"
+    },
+    {
+      "name": "giphyRating",
+      "type": "dropdown",
+      "required": false,
+      "title": "Giphy Rating",
+      "description": "Rating to use for Giphy API. Default is 'g'.",
+      "default": "g",
+      "data": [
+        {
+          "value": "g",
+          "title": "G"
+        },
+        {
+          "value": "pg",
+          "title": "PG"
+        },
+        {
+          "value": "pg-13",
+          "title": "PG-13"
+        },
+        {
+          "value": "r",
+          "title": "R"
+        }
+      ]
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
+    },
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "enableConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Confetti",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured above when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.9.1",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -8,7 +8,7 @@ export interface IVendor {
 }
 
 export const logistics = [
-  { code: "04", name: "CJ대한통운" },
+  { code: "001", name: "CJ대한통운" },
   { code: "01", name: "우체국택배" },
   { code: "05", name: "한진택배" },
   { code: "08", name: "롯데택배" },

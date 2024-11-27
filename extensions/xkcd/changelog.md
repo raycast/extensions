@@ -1,5 +1,7 @@
 # XKCD Changelog
 
+## [Added screenshots] - 2022-11-17
+
 ## [Link to Explain xkcd] - 2022-03-27
 
 Added an action to open the comic in the explainxkcd.com wiki.

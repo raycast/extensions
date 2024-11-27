@@ -1,15 +1,8 @@
-import { getPasswordDetails } from "./passwordDetails";
-import { Utils } from "./interface";
+import { PasswordOptions, PasswordItem } from "./interface";
+import { randomInt } from "node:crypto";
 
 let characters = "";
 let passwordLength = 0;
-
-interface PasswordProps {
-  isUpperCase: boolean;
-  isLowerCase: boolean;
-  isSymbol: boolean;
-  isNumeric: boolean;
-}
 
 const setUpperCase = (isUpperCase: boolean) => {
   if (isUpperCase) {
@@ -39,16 +32,12 @@ const setNumber = (isNumeric: boolean) => {
   return "";
 };
 
-const getRandomInteger = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
 const passwordCharacters = (): string => {
   const characterList = characters;
   let password = "";
   if (characterList.length > 0) {
     for (let i = 0; i < passwordLength; i++) {
-      password += characterList[getRandomInteger(0, characterList.length - 1)];
+      password += characterList[randomInt(characterList.length)];
     }
     characters = "";
     passwordLength = 0;
@@ -61,31 +50,14 @@ const setPasswordLength = (length: number) => {
   return passwordLength;
 };
 
-const setOptions = ({ isUpperCase, isLowerCase, isSymbol, isNumeric }: PasswordProps) => {
+const setOptions = ({ isUpperCase, isLowerCase, isSymbol, isNumeric }: PasswordOptions) => {
   if (isUpperCase !== undefined) setUpperCase(isUpperCase);
   if (isLowerCase !== undefined) setLowerCase(isLowerCase);
   if (isSymbol !== undefined) setSymbols(isSymbol);
   if (isNumeric !== undefined) setNumber(isNumeric);
 };
 
-const getSectionTitle = (strength: number): string => {
-  switch (strength) {
-    case 0:
-      return "Don't use this password";
-    case 1:
-      return "Very weak password";
-    case 2:
-      return "Weak password";
-    case 3:
-      return "Strong password";
-    case 4:
-      return "Very strong password";
-    default:
-      return "Don't use this password";
-  }
-};
-
-const getIcon = (strength: number): string => {
+export const getIcon = (strength?: number): string => {
   switch (strength) {
     case 0:
       return "🟣";
@@ -98,16 +70,15 @@ const getIcon = (strength: number): string => {
     case 4:
       return "🟢";
     default:
-      return "🟣";
+      return "⚪️";
   }
 };
 
-const generateSegmentedPassword = (pwdLength = 12) => {
-  const options = { isUpperCase: true, isLowerCase: true, isSymbol: false, isNumeric: true };
-
+// generates password with - in-between the characters
+const generateSegmentedPassword = (pwdLength = 12, options: PasswordOptions): string => {
   const segments = Math.floor(pwdLength / 4);
 
-  const password = Array(segments)
+  return Array(segments)
     .fill(0)
     .map((_, index) => {
       setOptions(options);
@@ -116,23 +87,16 @@ const generateSegmentedPassword = (pwdLength = 12) => {
       return passwordCharacters();
     })
     .join("-");
-
-  const details = getPasswordDetails(password);
-
-  return {
-    password,
-    options,
-    icon: getIcon(details.score),
-    strength: details.score,
-    accessoryTitle: `guessed in ${details.crackTime}`,
-    subtitle: details.warning,
-    sectionTitle: getSectionTitle(details.score),
-    sequence: details.sequence,
-  };
 };
 
-const generatePassword = (pwdLength = 12, passwordProps?: PasswordProps) => {
-  const defaultPasswordOptions = { isUpperCase: true, isLowerCase: true, isSymbol: true, isNumeric: true };
+const generatePassword = (pwdLength = 12, passwordProps?: PasswordOptions): PasswordItem => {
+  const defaultPasswordOptions: PasswordOptions = {
+    name: "Alphabets, Numbers and Symbols",
+    isUpperCase: true,
+    isLowerCase: true,
+    isSymbol: true,
+    isNumeric: true,
+  };
 
   setPasswordLength(pwdLength);
 
@@ -140,69 +104,97 @@ const generatePassword = (pwdLength = 12, passwordProps?: PasswordProps) => {
 
   setOptions(options);
 
-  const password = passwordCharacters();
-
-  const details = getPasswordDetails(password);
+  const password: string = options.isSegmented ? generateSegmentedPassword(pwdLength, options) : passwordCharacters();
 
   return {
     password,
     options,
-    icon: getIcon(details.score),
-    strength: details.score,
-    accessoryTitle: `guessed in ${details.crackTime}`,
-    subtitle: details.warning,
-    sectionTitle: getSectionTitle(details.score),
-    sequence: details.sequence,
   };
 };
 
-export const generatePasswords = (passwordLength: number): Utils[] => {
-  const options = [
+export const generatePasswords = (passwordLength: number): PasswordItem[] => {
+  const options: PasswordOptions[] = [
     {
+      name: "Alphabets, Numbers and Symbols",
+      isUpperCase: true,
+      isLowerCase: true,
+      isNumeric: true,
+      isSymbol: true,
+    },
+    {
+      name: "Alphabets & Numbers",
+      isUpperCase: true,
+      isLowerCase: true,
+      isSymbol: false,
+      isNumeric: true,
+      isSegmented: true,
+    },
+    {
+      name: "Alphabets & Numbers",
+      isLowerCase: true,
+      isUpperCase: true,
+      isNumeric: true,
+      isSymbol: false,
+    },
+    {
+      name: "Alphabets & Symbols",
+      isLowerCase: true,
+      isUpperCase: false,
+      isNumeric: false,
+      isSymbol: true,
+    },
+    // {
+    //   name: "Numbers & Symbols",
+    //   isLowerCase: false,
+    //   isUpperCase: false,
+    //   isNumeric: true,
+    //   isSymbol: true,
+    // },
+    {
+      name: "Symbols",
+      isLowerCase: false,
+      isUpperCase: false,
+      isNumeric: false,
+      isSymbol: true,
+    },
+    {
+      name: "Alphabets",
+      isLowerCase: true,
+      isUpperCase: false,
+      isNumeric: false,
+      isSymbol: false,
+    },
+    {
+      name: "Alphabets",
+      isLowerCase: true,
+      isUpperCase: true,
+      isNumeric: false,
+      isSymbol: false,
+    },
+    {
+      name: "Alphabets",
+      isLowerCase: true,
+      isUpperCase: true,
+      isNumeric: false,
+      isSymbol: false,
+      isSegmented: true,
+    },
+    {
+      name: "Numbers",
       isLowerCase: false,
       isUpperCase: false,
       isNumeric: true,
       isSymbol: false,
     },
     {
+      name: "Numbers",
+      isUpperCase: false,
       isLowerCase: false,
-      isUpperCase: false,
-      isNumeric: true,
-      isSymbol: true,
-    },
-    {
-      isLowerCase: true,
-      isUpperCase: false,
-      isNumeric: false,
       isSymbol: false,
-    },
-    {
-      isLowerCase: true,
-      isUpperCase: true,
-      isNumeric: false,
-      isSymbol: false,
-    },
-    {
-      isLowerCase: true,
-      isUpperCase: true,
       isNumeric: true,
-      isSymbol: false,
-    },
-    {
-      isLowerCase: true,
-      isUpperCase: false,
-      isNumeric: false,
-      isSymbol: true,
-    },
-    {
-      isUpperCase: true,
-      isLowerCase: true,
-      isNumeric: true,
-      isSymbol: true,
+      isSegmented: true,
     },
   ];
 
-  const segmentedPassword = generateSegmentedPassword(passwordLength);
-
-  return options.map((option) => generatePassword(passwordLength, option)).concat(segmentedPassword);
+  return options.map((option) => generatePassword(passwordLength, option));
 };

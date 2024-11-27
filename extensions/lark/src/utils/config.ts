@@ -1,22 +1,31 @@
 import { getPreferenceValues } from '@raycast/api';
 
-export interface Preference {
-  type: 'feishu' | 'lark';
-  subdomain: string;
-  spaceSession: string;
-  recentListCount: number;
-}
+export type Preference = Override<
+  ExtensionPreferences,
+  {
+    recentListCount: number;
+  }
+>;
 
-export function getPreference(): Preference {
-  const preference = getPreferenceValues<Preference>();
-  preference.recentListCount = Number(preference.recentListCount) || 15;
-  return preference;
+function getPreference(): Preference {
+  const preference = getPreferenceValues<ExtensionPreferences>();
+  return {
+    ...preference,
+    recentListCount: Number(preference.recentListCount) || 15,
+  };
 }
 
 export const preference = getPreference();
 
-export const TYPE_TLD = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
+const builtinDomainMap: Partial<Record<Preference['type'], string>> = {
+  feishu: 'feishu.cn',
+  lark: 'larksuite.com',
+};
+export const DOMAIN = preference.selfHostedDomain?.trim() || builtinDomainMap[preference.type];
 
-export const API_DOMAIN = `https://${preference.subdomain}.${TYPE_TLD}`;
+export function getDomain(sub?: string): string {
+  return `https://${sub ? `${sub}.` : ''}${DOMAIN}`;
+}
 
-export const INTERNAL_API_DOMAIN = `https://internal-api-space.${TYPE_TLD}`;
+export const GENERAL_DOMAIN = getDomain('www');
+export const TENANT_DOMAIN = getDomain('tenant');

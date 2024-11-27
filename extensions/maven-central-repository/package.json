@@ -16,22 +16,31 @@
       "name": "search-maven-central-repository",
       "title": "Search Maven Central Repository",
       "description": "Official search by the maintainers of Maven Central Repository.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "repository",
+          "placeholder": "Repository",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
-    "axios": "^0.27.2"
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
+    "axios": "1.6.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "~20.12.12",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

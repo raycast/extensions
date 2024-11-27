@@ -1,14 +1,9 @@
 import { LocalStorage, Toast, showToast } from '@raycast/api';
-import axios, { AxiosResponse } from 'axios';
-import { stringify } from 'querystring';
-import { API_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
+import { getDefaultStore } from 'jotai';
+import { isAuthenticatedAtom } from '../hooks/atoms';
+import { GENERAL_DOMAIN } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-
-interface LarkSpaceResponse<D = unknown> {
-  code: number;
-  msg: string;
-  data: D;
-}
+import { client, isAbortError } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -77,6 +72,7 @@ export interface NodeEntity {
   my_edit_time: number;
   activity_time: number;
   path_count: number;
+  icon_info?: string;
 }
 
 export interface ObjEntity {
@@ -110,7 +106,7 @@ export interface WikiEntity {
   wiki_version: string;
 }
 
-export interface RecentListResponse {
+export interface RecentDocsListResponse {
   node_list: NodeID[];
   has_more: boolean;
   total: number;
@@ -130,53 +126,57 @@ export interface SearchDocsResponse {
   };
 }
 
-const instance = axios.create({
-  baseURL: `${API_DOMAIN}/space/api/`,
-  headers: {
-    Cookie: `session=${preference.spaceSession}`,
+const docsClient = client.extend({
+  prefixUrl: `${GENERAL_DOMAIN}/space/api/`,
+  hooks: {
+    beforeRequest: [
+      (options) => {
+        options.headers.referer = GENERAL_DOMAIN;
+        // remove `_csrf_token`
+        options.headers.cookie = String(options.headers.cookie)
+          .split('; ')
+          .filter((item) => !item.startsWith('_csrf_token='))
+          .join('; ');
+      },
+    ],
+    afterResponse: [
+      (response) => {
+        const data = response.body as Record<string, unknown>;
+        if (data.code !== 0) {
+          if (data.code === 5) {
+            // Login Required
+            LocalStorage.clear();
+            getDefaultStore().set(isAuthenticatedAtom, false);
+            setTimeout(() => {
+              showToast(Toast.Style.Failure, 'Session expired, please login again');
+            });
+          }
+          throw Error();
+        }
+        response.body = data.data;
+        return response;
+      },
+    ],
   },
-  validateStatus: () => true,
-});
-
-instance.interceptors.request.use((config) => {
-  config.headers = {
-    ...config.headers,
-    Referer: API_DOMAIN,
-  };
-
-  return config;
-});
-
-instance.interceptors.response.use((response) => {
-  const { data } = response as AxiosResponse<LarkSpaceResponse<unknown>>;
-
-  if (data?.code !== 0) {
-    throw Error(data?.msg || 'Unknown error');
-  }
-  response.data = data.data;
-
-  return response;
 });
 
 export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEntity {
   return 'obj_token' in entity;
 }
 
-export async function fetchRecentList(length = preference.recentListCount): Promise<RecentListResponse> {
+export async function fetchRecentDocsList(length: number, signal?: AbortSignal): Promise<RecentDocsListResponse> {
   try {
-    const { data } = await instance.get<RecentListResponse>('explorer/recent/list', {
-      params: { length },
+    const { body } = await docsClient.get<RecentDocsListResponse>('explorer/recent/list/', {
+      searchParams: { length },
+      signal,
     });
-    return data;
+    return body;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not load recent documents';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
-
-    showToast(Toast.Style.Failure, errorMessage);
+    if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -195,14 +195,15 @@ export interface SearchDocsParams {
   count?: number;
 }
 
-export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsResponse> {
+export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal): Promise<SearchDocsResponse> {
   try {
-    const { data } = await instance.get<SearchDocsResponse>('search/refine_search', {
-      params: { offset: 0, count: 15, ...params },
+    const { body } = await docsClient.get<SearchDocsResponse>('search/refine_search/', {
+      searchParams: { offset: 0, count: 15, ...params },
+      signal,
     });
-    Object.keys(data.entities.objs).forEach((key) => {
-      const objEntity = data.entities.objs[key];
-      data.entities.objs[key] = {
+    Object.keys(body.entities.objs).forEach((key) => {
+      const objEntity = body.entities.objs[key];
+      body.entities.objs[key] = {
         ...objEntity,
         title: trimTagsAndDecodeEntities(objEntity.title),
         preview: trimTagsAndDecodeEntities(objEntity.preview),
@@ -210,16 +211,13 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
         type: computeType(objEntity),
       };
     });
-    return data;
+    return body;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not search documents';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
-
-    showToast(Toast.Style.Failure, errorMessage);
+    if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -257,36 +255,19 @@ const computeType = (objEntity: ObjEntity) => {
   return objEntity.type;
 };
 
-const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
-
-export function setRecentListCache(recentList: RecentListResponse): Promise<void> {
-  return LocalStorage.setItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
-}
-
-export async function getRecentListCache(): Promise<RecentListResponse | null> {
-  const cache = await LocalStorage.getItem(CACHE_DOCS_RECENT_LIST);
-  if (typeof cache === 'string') {
-    return JSON.parse(cache) as RecentListResponse;
-  }
-  return null;
-}
-
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {
-    await instance.post(
-      `${INTERNAL_API_DOMAIN}/space/api/explorer/recent/delete/`,
-      stringify({
+    await docsClient.post('explorer/recent/delete/', {
+      form: {
         obj_token: objToken,
-      })
-    );
+      },
+    });
 
     return true;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not remove the document from recent list';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

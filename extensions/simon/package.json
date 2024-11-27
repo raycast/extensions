@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simon",
+  "title": "Simon",
+  "description": "Play a game of Simon.",
+  "icon": "command-icon.png",
+  "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [{
+    "name": "index",
+    "title": "Play Simon",
+    "description": "Play a game of Simon.",
+    "mode": "view"
+  }],
+  "preferences": [{
+    "name": "enableSounds",
+    "type": "checkbox",
+    "description": "Whether or not sounds should play during gameplay.",
+    "required": false,
+    "title": "Sounds",
+    "placeholder": "Enable Sounds",
+    "label": "Play sounds during gameplay",
+    "default": true
+  }],
+  "dependencies": {
+    "@raycast/api": "^1.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.45",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

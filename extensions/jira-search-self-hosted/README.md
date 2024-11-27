@@ -3,13 +3,15 @@
 This [Raycast](https://raycast.com) extension lets you quickly find Jira issues, projects, and boards. This version is forked from the JIRA
 search extension built by sven to work with JIRA server instances.
 
-![screencast](assets/screencast.gif)
+![screencast](media/screencast.gif)
 
 ## Features
 
 - Find issues by text and project and type, where the text search is much more tolerant than the one built in to Raycast.
   - Filter issues by project using `@project` syntax.
   - Filter issue by type using `#issueType` syntax.
+  - Filter issue by status using `!status` or `!"my fancy status"` (use double quotes if status contains spaces) syntax.
+  - Filter issue by assignee using `%email` or `%"full name"` (use double quotes if assignee contains spaces) syntax.
   - For example enter `pdf export @dev @it #bug #story` to find all issues which contain words starting with "pdf" and "export" and which are in the "DEV" or "IT" project and which are of type "Bug" or "Story."
   - Find issue directly by issue key (for example `DEV-1234`).
 - Find projects by title.
@@ -24,7 +26,7 @@ search extension built by sven to work with JIRA server instances.
 
 ## Setup
 
-To connect the extension to your Jira instance you need to fill the following prefernces:
+To connect the extension to your Jira instance you need to fill the following preferences:
 
 - **Jira Domain:** The domain of your Jira instance like `mycompany.atlassian.net` or with a base URL like `mycompany.atlassian.net/baseUrl/jira`.
 - **Personal Access Token:** A personal access token created as described in [Using Personal Access Tokens](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html).

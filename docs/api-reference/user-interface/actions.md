@@ -24,14 +24,8 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <Action.OpenInBrowser url="https://github.com/raycast/extensions/pull/1" />
-            <Action.CopyToClipboard
-              title="Copy Pull Request Number"
-              content="#1"
-            />
-            <Action
-              title="Close Pull Request"
-              onAction={() => console.log("Close PR #1")}
-            />
+            <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
+            <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
           </ActionPanel>
         }
       />
@@ -61,10 +55,7 @@ export default function Command() {
       markdown="Press `⌘ + .` and share some love."
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            content="I ❤️ Raycast"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
+          <Action.CopyToClipboard content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
         </ActionPanel>
       }
     />
@@ -137,10 +128,10 @@ export default function Command() {
 
 ### Action.OpenWith
 
-Action that opens a file or folder with a specific application.
+Action that opens a file or URL with a specific application.
 
-The action opens a sub-menu with all applications that can open the file or folder.
-The main window is closed after the file is opened in the specified application.
+The action opens a sub-menu with all applications that can open the file or URL.
+The main window is closed after the item is opened in the specified application.
 
 #### Example
 
@@ -278,10 +269,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -367,9 +355,7 @@ export default function Command() {
       markdown="Test out quicklink creation"
       actions={
         <ActionPanel>
-          <Action.CreateQuicklink
-            quicklink={{ link: "https://duckduckgo.com/?q={Query}" }}
-          />
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
         </ActionPanel>
       }
     />
@@ -380,6 +366,65 @@ export default function Command() {
 #### Props
 
 <PropsTableFromJSDoc component="Action.CreateQuicklink" />
+
+### Action.ToggleQuickLook
+
+Action that toggles the Quick Look to preview a file.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Preview me"
+        quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
+        actions={
+          <ActionPanel>
+            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.ToggleQuickLook" />
+
+### Action.PickDate
+
+Action to pick a date.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate title="Set Due Date…" />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.PickDate" />
 
 ## Types
 
@@ -394,3 +439,54 @@ export default function Command() {
 #### Properties
 
 <InterfaceTableFromJSDoc name="Quicklink" />
+
+### Action.Style
+
+Defines the visual style of the Action.
+
+Use [Action.Style.Regular](#action.style) for displaying a regular actions.
+Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
+Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.
+
+### Action.PickDate.Type
+
+The types of date components the user can pick with an `Action.PickDate`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |
+
+### Action.PickDate.isFullDay
+
+A method that determines if a given date represents a full day or a specific time.
+
+```tsx
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate
+              title="Set Due Date…"
+              onChange={(date) => {
+                if (Action.PickDate.isFullDay(values.reminderDate)) {
+                  // the event is for a full day
+                } else {
+                  // the event is at a specific time
+                }
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```

@@ -27,6 +27,16 @@ export const makeDirectoryAsync = fs.promises.mkdir;
 export const removeDirectoryAsync = fs.promises.rm;
 
 /**
+ * Read file
+ */
+export const readFileAsync = fs.promises.readFile;
+
+/**
  * Write file
  */
 export const writeFileAsync = fs.promises.writeFile;
+
+/**
+ * Delete file
+ */
+export const deleteFileAsync = fs.promises.rm;

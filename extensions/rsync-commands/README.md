@@ -1,13 +1,13 @@
 # Rsync Commands
 
-Save your commonly used rsync commands in one place and run them with ease. Supports SSH endpoint configuration together with all the options supported by rsync.
+Save your frequently used rsync commands and run them with ease.
 
 #### Features:
 
-1. Create, update, delete and duplicate pre-configured rsync commands.
-2. Select rsync options and configure SSH connection details if needed.
-3. Add custom commands to run before and after the rsync command itself.
-5. Run one of your commands directly from Raycast, or copy a command to the clipboard to run it manually.
+1. Create and manage a list of frequently used rsync commands.
+2. Supports all rsync options and SSH configuration details.
+3. Add custom shell commands to run before and after the rsync command itself.
+5. Run one of your commands directly from Raycast or copy it to the clipboard.
 
 #### Requirements:
 
@@ -16,4 +16,4 @@ Save your commonly used rsync commands in one place and run them with ease. Supp
 
 #### Limitations:
 
-- To use SSH sync, you need to have the relevant public key configured in the remote machine's "authorized_keys" file. Also, Keys that requires a password cannot be used, since there is no good way of providing the password automatically for the rsync command. You can still use the extension to build and save your commands, and then enter the password when running the command manually in the terminal after copying it to your clipboard.
+- To use SSH sync, you need to have the relevant public key configured in the remote machine's "authorized_keys" file. Also, keys that requires a password cannot be used, since there is no good way of providing the password automatically for the rsync command. You can still use the extension to build and save your commands, and then enter the password when running the command manually in the terminal after copying it to your clipboard.

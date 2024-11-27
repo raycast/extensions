@@ -4,13 +4,20 @@ import { parse } from "node-html-parser";
 export type Shot = {
   title: string;
   icon: string | undefined;
-  image: string | undefined;
+  image: string;
   link: string;
+
+  likes?: string;
+  views?: string;
+
+  author?: {
+    title?: string;
+    link?: string;
+  };
 };
 
-export const fetchShots = async (filter: string) => {
-  const data = await got(`https://dribbble.com/shots/${filter}`).text();
-
+export const fetchShots = async (filter: string, page: number) => {
+  const data = await got(`https://dribbble.com/shots/${filter}?page=${page}`).text();
   const document = parse(data);
   const items = document.querySelectorAll("li.shot-thumbnail");
   return items.map((item) => {
@@ -24,11 +31,22 @@ export const fetchShots = async (filter: string) => {
       .map((s) => s.split(" ")?.[0])
       .filter((s) => s);
 
-    return {
+    const authorElement = item.querySelector('a[rel="contact"]');
+    const image = imageSources?.[Math.min(2, imageSources.length - 1)];
+
+    const result: Shot = {
       title: title,
       icon: imageSources?.[0],
-      image: imageSources?.[Math.min(2, imageSources.length - 1)],
+      image: image || "",
       link: "https://dribbble.com" + link,
+      likes: item.querySelector(".js-shot-likes-count")?.textContent.trim(),
+      views: item.querySelector(".js-shot-views-count")?.textContent.trim(),
+      author: {
+        title: authorElement?.querySelector("span")?.textContent,
+        link: "https://dribbble.com" + authorElement?.getAttribute("href"),
+      },
     };
+
+    return result;
   });
 };

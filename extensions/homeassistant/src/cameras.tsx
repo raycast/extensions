@@ -1,5 +1,5 @@
-import { StatesList } from "./components/states";
+import { CameraGrid } from "@components/camera/grid";
 
-export default function main(): JSX.Element {
-  return <StatesList domain="camera" />;
+export default function main() {
+  return <CameraGrid />;
 }

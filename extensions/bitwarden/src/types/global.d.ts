@@ -1,6 +1,4 @@
-import { ObjectEntries } from "types";
-
-export type ObjectEntries<Obj> = { [Key in keyof Obj]: [Key, Obj[Key]] }[keyof Obj][];
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 declare global {
   interface ObjectConstructor {
@@ -13,9 +11,23 @@ declare global {
      * Object.keys(obj).map((key: string) => ...)
      */
     keys<T extends object>(obj: T): (keyof T)[];
-    /** `Object.entries` that preserves the type of the keys */
-    typedEntries<T extends object>(obj: T): ObjectEntries<T>;
   }
+
+  interface JSON {
+    /**
+     * Converts a JavaScript Object Notation (JSON) string into an object.
+     * @param text A valid JSON string.
+     * @param reviver A function that transforms the results. This function is called for each member of the object.
+     * If a member contains nested objects, the nested objects are transformed before the parent object is.
+     */
+    parse<T = unknown>(text: string, reviver?: (this: any, key: string, value: any) => any): T;
+  }
+  type RecordOfAny = Record<string, any>;
+  type RecordOfStrings = Record<string, string>;
+  type RecursiveNonOptional<T> = { [K in keyof T]-?: RecursiveNonOptional<T[K]> };
+  type MaybePromise<T> = T | Promise<T>;
+  type Nullable<T> = T | null | undefined;
+  type Falsy = false | "" | 0 | null | undefined;
 }
 
 export {};

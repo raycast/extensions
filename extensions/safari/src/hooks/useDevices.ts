@@ -1,53 +1,15 @@
+import { getPreferenceValues } from "@raycast/api";
+import { useCachedPromise, useExec, useSQL } from "@raycast/utils";
 import _ from "lodash";
 import { homedir } from "os";
-import { useCallback, useEffect, useState } from "react";
-import initSqlJs, { Database } from "sql.js";
-
-import { environment, getPreferenceValues } from "@raycast/api";
-
+import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
-import { executeJxa, getCurrentDeviceName } from "../utils";
-import { join } from "path";
-import { readFile } from "fs/promises";
+import { executeJxa, safariAppIdentifier } from "../utils";
 
-const DATABASE_PATH = `${homedir()}/Library/Safari/CloudTabs.db`;
+const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
 
-type Preferences = {
-  safariAppIdentifier: string;
-};
-
-const { safariAppIdentifier }: Preferences = getPreferenceValues();
-
-let loadedDb: Database;
-const loadDb = async (): Promise<Database> => {
-  if (loadedDb) {
-    return loadedDb;
-  }
-
-  const fileBuffer = await readFile(DATABASE_PATH);
-  const SQL = await initSqlJs({
-    locateFile: () => join(environment.assetsPath, "sql-wasm.wasm"),
-  });
-
-  const db = new SQL.Database(fileBuffer);
-  loadedDb = db;
-
-  return db;
-};
-
-const executeQuery = async (db: Database, query: string): Promise<unknown> => {
-  const results = [];
-  const stmt = db.prepare(query);
-  while (stmt.step()) {
-    results.push(stmt.getAsObject());
-  }
-
-  stmt.free();
-  return results;
-};
-
-const fetchLocalTabs = (): Promise<LocalTab[]> =>
-  executeJxa(`
+function fetchLocalTabs(): Promise<LocalTab[]> {
+  return executeJxa(`
     const safari = Application("${safariAppIdentifier}");
     const tabs = [];
     safari.windows().map(window => {
@@ -67,70 +29,58 @@ const fetchLocalTabs = (): Promise<LocalTab[]> =>
     });
 
     return tabs;
-`);
+  `);
+}
 
-const fetchRemoteTabs = async (): Promise<RemoteTab[]> => {
-  const currentDeviceName = getCurrentDeviceName();
-
-  try {
-    const db = await loadDb();
-    const tabs = (await executeQuery(
-      db,
-      `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
+function useRemoteTabs() {
+  return useSQL<RemoteTab>(
+    DATABASE_PATH,
+    `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
-         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid
-         WHERE device_name != "${currentDeviceName}"`
-    )) as RemoteTab[];
+         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`,
+  );
+}
 
-    return tabs;
-  } catch (err) {
-    console.log(err);
-    return [];
+function useDeviceName() {
+  return useExec("/usr/sbin/scutil", ["--get", "ComputerName"], {
+    initialData: "Loading…",
+    keepPreviousData: true,
+  });
+}
+
+function useLocalTabs() {
+  return useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
+}
+
+export default function useDevices() {
+  const preferences = getPreferenceValues();
+  const { data: deviceName } = useDeviceName();
+  const localTabs = useLocalTabs();
+  const localDevice: Device = {
+    uuid: "local",
+    name: `${deviceName} ★`,
+    tabs: localTabs.data || [],
+  };
+  const devices: Device[] = [localDevice];
+  let permissionView;
+
+  if (preferences.areRemoteTabsUsed) {
+    const remoteTabs = useRemoteTabs();
+    const remoteDevices = _.chain(remoteTabs.data)
+      .groupBy("device_uuid")
+      .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
+        accumulator.push({
+          uuid: device_uuid,
+          name: tabs[0].device_name,
+          tabs,
+        });
+      }, [])
+      .reject(["name", deviceName])
+      .value();
+
+    devices.push(...remoteDevices);
+    permissionView = remoteTabs.permissionView;
   }
-};
 
-const useDevices = () => {
-  const [hasPermission, setHasPermission] = useState(true);
-  const [devices, setDevices] = useState<Device[]>();
-
-  const fetchDevices = useCallback(async () => {
-    const currentDeviceName = getCurrentDeviceName();
-
-    try {
-      const [localTabs, remoteTabs] = await Promise.all([fetchLocalTabs(), fetchRemoteTabs()]);
-      const localDevice = {
-        uuid: "local",
-        name: `${currentDeviceName} ★`,
-        tabs: localTabs,
-      };
-
-      const removeDevices = _.transform(
-        _.groupBy(remoteTabs, "device_uuid"),
-        (devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
-          devices.push({
-            uuid: device_uuid,
-            name: tabs[0].device_name,
-            tabs,
-          });
-        },
-        []
-      );
-
-      setDevices([localDevice, ...removeDevices]);
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("operation not permitted")) {
-        return setHasPermission(false);
-      }
-
-      throw err;
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDevices();
-  }, [fetchDevices]);
-
-  return { devices, hasPermission, refreshDevices: fetchDevices };
-};
-
-export default useDevices;
+  return { devices, permissionView, refreshDevices: localTabs.revalidate };
+}

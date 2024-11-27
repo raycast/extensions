@@ -1,6 +1,6 @@
 import { Color, List, ActionPanel, Image } from "@raycast/api";
 import { GitLabIcons } from "../../icons";
-import { ensureCleanAccessories, toDateString } from "../../utils";
+import { capitalizeFirstLetter, toDateString } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { getCIJobStatusIcon } from "../jobs";
 import { Commit } from "./list";
@@ -13,13 +13,18 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
   const icon: Image.ImageLike = status?.author?.avatar_url
     ? { source: status.author.avatar_url, mask: Image.Mask.Circle }
     : { source: GitLabIcons.commit, tintColor: Color.Green };
-  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const statusIcon: Image.ImageLike | undefined = status?.status
+    ? getCIJobStatusIcon(status.status, status.allow_failure)
+    : undefined;
   return (
     <List.Item
       key={commit.id}
       title={commit.title}
-      icon={icon}
-      accessories={ensureCleanAccessories([{ text: toDateString(commit.created_at) }, { icon: statusIcon }])}
+      icon={{ value: icon, tooltip: `Author: ${commit.author_name}` }}
+      accessories={[
+        { date: new Date(commit.created_at), tooltip: `Created: ${new Date(commit.created_at).toLocaleString()}` },
+        { icon: statusIcon, tooltip: status?.status ? `Status: ${capitalizeFirstLetter(status.status)}` : undefined },
+      ]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={commit.web_url} />

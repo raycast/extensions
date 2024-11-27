@@ -1,122 +1,92 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import urljoin from "url-join";
+import { useState } from "react";
 
-const { locale } = getPreferenceValues<{ locale: string }>();
+import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
+
+import { Details } from "@/components/Details";
+import { useSearch } from "@/hooks/use-search";
+
+const locales = [
+  {
+    value: "en-US",
+    title: "English (US)",
+  },
+  {
+    value: "es",
+    title: "Español",
+  },
+  {
+    value: "fr",
+    title: "Français",
+  },
+  {
+    value: "ja",
+    title: "日本語",
+  },
+  {
+    value: "ko",
+    title: "한국어",
+  },
+  {
+    value: "pt-BR",
+    title: "Português (do Brasil)",
+  },
+  {
+    value: "ru",
+    title: "Русский",
+  },
+  {
+    value: "zh-CN",
+    title: "中文 (简体)",
+  },
+  {
+    value: "zh-TW",
+    title: "正體中文 (繁體)",
+  },
+];
 
 export default function MDNSearchResultsList() {
-  const [query, setQuery] = useState<null | string>(null);
-  const [state, setState] = useState<Result[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { push } = useNavigation();
+  const [query, setQuery] = useState<string>("");
+  const [locale, setLocale] = useState<string>("en-us");
+  const { data, isLoading } = useSearch(query, locale);
 
-  useEffect(() => {
-    async function fetch() {
-      if (!query) {
-        setState([]);
-        return;
-      }
-      setIsLoading(true);
-      const results = await searchMDNByQuery(query);
-      setState(results);
-      setIsLoading(false);
-    }
-    fetch();
-  }, [query]);
+  const { preferredAction } = getPreferenceValues<Preferences.Index>();
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Type to search MDN..."
-      onSearchTextChange={(text) => setQuery(text)}
+      onSearchTextChange={setQuery}
       throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select Locale" storeValue={true} onChange={setLocale}>
+          {locales.map((loc) => (
+            <List.Dropdown.Item key={loc.value} title={loc.title} value={loc.value} keywords={[loc.title, loc.value]} />
+          ))}
+        </List.Dropdown>
+      }
     >
-      {state.map((result, idx) => (
+      {(data || []).map((result, idx) => (
         <List.Item
-          id={idx.toString()}
           key={idx}
           title={result.title}
-          icon="icon.png"
+          icon={{ source: "icon.png", mask: Image.Mask.RoundedRectangle }}
           subtitle={result.summary}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Show Details"
-                icon={Icon.Sidebar}
-                onAction={() => push(<Details {...result} />)}
-              />
-              <OpenInBrowserAction url={result.url} />
-              <CopyToClipboardAction
-                title="Copy URL"
-                content={result.url}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
-              />
+              {[
+                <Action.Push
+                  key="read"
+                  icon={Icon.Document}
+                  title="Read Document"
+                  target={<Details result={result} locale={locale} />}
+                />,
+                <Action.OpenInBrowser key="open" url={result.url} />,
+                <Action.CopyToClipboard key="copy" content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />,
+              ].sort((a) => (a.key === preferredAction ? -1 : 1))}
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
-}
-
-function Details(props: Result) {
-  const { title, summary, url } = props;
-
-  return (
-    <Detail
-      markdown={`# ${title}\n## Summary\n${summary}`}
-      actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={url} />
-          <CopyToClipboardAction title="Copy URL" content={url} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-type MDNResponse = {
-  documents: Array<{
-    title: string;
-    mdn_url: string;
-    summary: string;
-  }>;
-};
-
-type Result = {
-  title: string;
-  url: string;
-  summary: string;
-};
-
-async function searchMDNByQuery(query: string): Promise<Result[]> {
-  try {
-    const response = await axios.get<MDNResponse>(`https://developer.mozilla.org/api/v1/search/${locale}`, {
-      params: {
-        q: query,
-        sort: "best",
-      },
-    });
-    return response.data.documents.map((document) => ({
-      title: document.title,
-      summary: document.summary,
-      url: urljoin("https://developer.mozilla.org", document.mdn_url),
-    }));
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not load MDN results. ${error}`);
-    return Promise.resolve([]);
-  }
 }

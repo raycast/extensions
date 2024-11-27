@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "betterzip",
+  "title": "BetterZip",
+  "description": "Compress and extract selected items in Finder with BetterZip via Raycast.",
+  "icon": "betterzip-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compress-with-betterzip",
+      "title": "Compress Files",
+      "subtitle": "BetterZip",
+      "description": "Compress selected files with BetterZip.",
+      "mode": "no-view"
+    },
+    {
+      "name": "extract-with-betterzip",
+      "title": "Extract Files",
+      "subtitle": "BetterZip",
+      "description": "Extract selected archives with BetterZip.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-with-betterzip",
+      "title": "Open Files",
+      "subtitle": "BetterZip",
+      "description": "Open selected items with BetterZip.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

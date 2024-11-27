@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from '@raycast/api';
+import { showToast, Toast } from '@raycast/api';
 
 export const withToast =
   ({
@@ -14,12 +14,12 @@ export const withToast =
     try {
       await action();
       if (onSuccess !== undefined) {
-        await showToast(ToastStyle.Success, ...toastMsg(onSuccess()));
+        await showToast(Toast.Style.Success, ...toastMsg(onSuccess()));
       }
     } catch (error) {
       if (error instanceof Error) {
         if (onFailure !== undefined) {
-          await showToast(ToastStyle.Failure, ...toastMsg(onFailure(error)));
+          await showToast(Toast.Style.Failure, ...toastMsg(onFailure(error)));
         }
       }
     }

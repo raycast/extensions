@@ -1,14 +1,7 @@
-import { showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { startCaffeinate, getSchedule, changeScheduleState } from "./utils";
 
-const Caffeinate = async (args?: string) => {
-  try {
-    await runAppleScript(`do shell script "pgrep caffeinate"`);
-    await showHUD("Your Mac is already caffeinated");
-  } catch (_) {
-    runAppleScript(`do shell script "caffeinate -di${args ? ` ${args}` : ""}"`);
-    await showHUD("Your Mac is caffeinated");
-  }
+export default async () => {
+  const schedule = await getSchedule();
+  if (schedule != undefined) await changeScheduleState("decaffeinate", schedule);
+  await startCaffeinate({ menubar: true, status: true }, "Your Mac is now caffeinated");
 };
-
-export default Caffeinate;

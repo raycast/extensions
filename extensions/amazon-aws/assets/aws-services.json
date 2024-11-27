@@ -1,2221 +1,2221 @@
 {
   "items": [
     {
-      "uid": "a2i",
+      "id": "a2i",
       "title": "Amazon Augmented AI",
       "subtitle": "Easily implement human review of machine learning predictions",
       "match": "a2i Amazon Augmented AI",
       "arg": "/a2i/home",
       "autocomplete": "Amazon Augmented AI",
       "icon": {
-        "path": "./icons/a2i.png"
+        "path": "./aws-icons/a2i.png"
       }
     },
     {
-      "uid": "a4b",
+      "id": "a4b",
       "title": "Alexa for Business",
       "subtitle": "Alexa for Business Provides Tools to Manage Alexa in Your Organization",
       "match": "a4b Alexa for Business",
       "arg": "/a4b/home",
       "autocomplete": "Alexa for Business",
       "icon": {
-        "path": "./icons/a4b.png"
+        "path": "./aws-icons/a4b.png"
       }
     },
     {
-      "uid": "access-analyzer",
+      "id": "access-analyzer",
       "title": "Access Analyzer",
       "match": "access-analyzer Access Analyzer",
       "arg": "/access-analyzer/home",
       "autocomplete": "Access Analyzer",
       "icon": {
-        "path": "./icons/access-analyzer.png"
+        "path": "./aws-icons/access-analyzer.png"
       }
     },
     {
-      "uid": "acm-pca",
+      "id": "acm-pca",
       "title": "ACM Private CA",
       "match": "acm-pca ACM Private CA",
       "arg": "/acm-pca/home",
       "autocomplete": "ACM Private CA",
       "icon": {
-        "path": "./icons/acm-pca.png"
+        "path": "./aws-icons/acm-pca.png"
       }
     },
     {
-      "uid": "acm",
+      "id": "acm",
       "title": "Certificate Manager",
       "subtitle": "Provision, Manage, and Deploy SSL/TLS Certificates",
       "match": "acm Certificate Manager",
       "arg": "/acm/home",
       "autocomplete": "Certificate Manager",
       "icon": {
-        "path": "./icons/acm.png"
+        "path": "./aws-icons/acm.png"
       }
     },
     {
-      "uid": "activate",
+      "id": "activate",
       "title": "Activate for Startups",
       "subtitle": "AWS Activate provides resources to help startups build and grow on AWS. ",
       "match": "activate Activate for Startups",
       "arg": "/activate/home",
       "autocomplete": "Activate for Startups",
       "icon": {
-        "path": "./icons/activate.png"
+        "path": "./aws-icons/activate.png"
       }
     },
     {
-      "uid": "aesop",
+      "id": "aesop",
       "title": "Elemental Appliances & Software",
       "subtitle": "On-premises solutions for video processing and delivery",
       "match": "aesop Elemental Appliances & Software",
       "arg": "/elemental-appliances-software/home",
       "autocomplete": "Elemental Appliances & Software",
       "icon": {
-        "path": "./icons/aesop.png"
+        "path": "./aws-icons/aesop.png"
       }
     },
     {
-      "uid": "amplify",
+      "id": "amplify",
       "title": "AWS Amplify",
       "subtitle": "AWS Amplify is a complete platform—frameworks & tools and app services—for developing, building, testing, and running mobile and web apps",
       "match": "amplify AWS Amplify",
       "arg": "/amplify/home",
       "autocomplete": "AWS Amplify",
       "icon": {
-        "path": "./icons/amplify.png"
+        "path": "./aws-icons/amplify.png"
       }
     },
     {
-      "uid": "ag",
+      "id": "ag",
       "title": "API Gateway",
       "subtitle": "Build, Deploy and Manage APIs",
       "match": "ag API Gateway",
       "arg": "/apigateway/home",
       "autocomplete": "API Gateway",
       "icon": {
-        "path": "./icons/ag.png"
+        "path": "./aws-icons/ag.png"
       }
     },
     {
-      "uid": "appconfig",
+      "id": "appconfig",
       "title": "AWS AppConfig",
       "subtitle": "With AWS AppConfig, make updates to application configurations at runtime.",
       "match": "appconfig AWS AppConfig",
       "arg": "/systems-manager/appconfig/home",
       "autocomplete": "AWS AppConfig",
       "icon": {
-        "path": "./icons/appconfig.png"
+        "path": "./aws-icons/appconfig.png"
       }
     },
     {
-      "uid": "appflow",
+      "id": "appflow",
       "title": "Amazon AppFlow",
       "subtitle": "Amazon AppFlow integrates apps and automates data flows without code.",
       "match": "appflow Amazon AppFlow",
       "arg": "/appflow/home",
       "autocomplete": "Amazon AppFlow",
       "icon": {
-        "path": "./icons/appflow.png"
+        "path": "./aws-icons/appflow.png"
       }
     },
     {
-      "uid": "appmesh",
+      "id": "appmesh",
       "title": "AWS App Mesh",
       "subtitle": "Easily monitor and control microservices",
       "match": "appmesh AWS App Mesh",
       "arg": "/appmesh/home",
       "autocomplete": "AWS App Mesh",
       "icon": {
-        "path": "./icons/appmesh.png"
+        "path": "./aws-icons/appmesh.png"
       }
     },
     {
-      "uid": "appstream2",
+      "id": "appstream2",
       "title": "AppStream 2.0",
       "subtitle": "Stream desktop applications securely to any web browser",
       "match": "appstream2 AppStream 2.0",
       "arg": "/appstream2/home",
       "autocomplete": "AppStream 2.0",
       "icon": {
-        "path": "./icons/appstream2.png"
+        "path": "./aws-icons/appstream2.png"
       }
     },
     {
-      "uid": "appsync",
+      "id": "appsync",
       "title": "AWS AppSync",
       "subtitle": "Real-Time Data Sync Using GraphQL for Mobile & Web Apps, Online or Offline",
       "match": "appsync AWS AppSync",
       "arg": "/appsync/home",
       "autocomplete": "AWS AppSync",
       "icon": {
-        "path": "./icons/appsync.png"
+        "path": "./aws-icons/appsync.png"
       }
     },
     {
-      "uid": "artifact",
+      "id": "artifact",
       "title": "Artifact",
       "subtitle": "AWS Compliance Reports and Agreements",
       "match": "artifact Artifact",
       "arg": "/artifact/home",
       "autocomplete": "Artifact",
       "icon": {
-        "path": "./icons/artifact.png"
+        "path": "./aws-icons/artifact.png"
       }
     },
     {
-      "uid": "athena",
+      "id": "athena",
       "title": "Athena",
       "subtitle": "Query Data in S3 using SQL",
       "match": "athena Athena",
       "arg": "/athena/home",
       "autocomplete": "Athena",
       "icon": {
-        "path": "./icons/athena.png"
+        "path": "./aws-icons/athena.png"
       }
     },
     {
-      "uid": "backup",
+      "id": "backup",
       "title": "AWS Backup",
       "subtitle": "AWS Backup centrally manages and automates backups across AWS services",
       "match": "backup AWS Backup",
       "arg": "/backup/home",
       "autocomplete": "AWS Backup",
       "icon": {
-        "path": "./icons/backup.png"
+        "path": "./aws-icons/backup.png"
       }
     },
     {
-      "uid": "batch",
+      "id": "batch",
       "title": "Batch",
       "subtitle": "Fully managed batch processing at any scale",
       "match": "batch Batch",
       "arg": "/batch/home",
       "autocomplete": "Batch",
       "icon": {
-        "path": "./icons/batch.png"
+        "path": "./aws-icons/batch.png"
       }
     },
     {
-      "uid": "b",
+      "id": "b",
       "title": "Billing",
       "subtitle": "Access, analyze, and control your AWS costs and usage.",
       "match": "b Billing",
       "arg": "/billing/home",
       "autocomplete": "Billing",
       "icon": {
-        "path": "./icons/b.png"
+        "path": "./aws-icons/b.png"
       }
     },
     {
-      "uid": "braket",
+      "id": "braket",
       "title": "Amazon Braket",
       "subtitle": "Service for exploring, evaluating, and experimenting with quantum computing.",
       "match": "braket Amazon Braket",
       "arg": "/braket/home",
       "autocomplete": "Amazon Braket",
       "icon": {
-        "path": "./icons/braket.png"
+        "path": "./aws-icons/braket.png"
       }
     },
     {
-      "uid": "budgets",
+      "id": "budgets",
       "title": "AWS Budgets",
       "subtitle": "Set Custom Budgets and Receive Alerts",
       "match": "budgets AWS Budgets",
       "arg": "/billing/home#/budgets#/home",
       "autocomplete": "AWS Budgets",
       "icon": {
-        "path": "./icons/budgets.png"
+        "path": "./aws-icons/budgets.png"
       }
     },
     {
-      "uid": "chatbot",
+      "id": "chatbot",
       "title": "AWS Chatbot",
       "subtitle": "ChatOps for AWS",
       "match": "chatbot AWS Chatbot",
       "arg": "/chatbot/home",
       "autocomplete": "AWS Chatbot",
       "icon": {
-        "path": "./icons/chatbot.png"
+        "path": "./aws-icons/chatbot.png"
       }
     },
     {
-      "uid": "chime",
+      "id": "chime",
       "title": "Amazon Chime",
       "subtitle": "Amazon Chime is a communications service that transforms online meetings",
       "match": "chime Amazon Chime",
       "arg": "https://chime.aws.amazon.com",
       "autocomplete": "Amazon Chime",
       "icon": {
-        "path": "./icons/chime.png"
+        "path": "./aws-icons/chime.png"
       }
     },
     {
-      "uid": "cloud9",
+      "id": "cloud9",
       "title": "Cloud9",
       "subtitle": "A Cloud IDE for Writing, Running, and Debugging Code",
       "match": "cloud9 Cloud9",
       "arg": "/cloud9/home",
       "autocomplete": "Cloud9",
       "icon": {
-        "path": "./icons/cloud9.png"
+        "path": "./aws-icons/cloud9.png"
       }
     },
     {
-      "uid": "cfo",
+      "id": "cfo",
       "title": "CloudFormation",
       "subtitle": "Create and Manage Resources with Templates",
       "match": "cfo CloudFormation",
       "arg": "/cloudformation/home",
       "autocomplete": "CloudFormation",
       "icon": {
-        "path": "./icons/cfo.png"
+        "path": "./aws-icons/cfn.png"
       }
     },
     {
-      "uid": "cfr",
+      "id": "cfr",
       "title": "CloudFront",
       "subtitle": "Global Content Delivery Network",
       "match": "cfr CloudFront",
       "arg": "/cloudfront/home",
       "autocomplete": "CloudFront",
       "icon": {
-        "path": "./icons/cfr.png"
+        "path": "./aws-icons/cfr.png"
       }
     },
     {
-      "uid": "cloudhsm",
+      "id": "cloudhsm",
       "title": "CloudHSM",
       "subtitle": "Managed Hardware Security Modules in the Cloud",
       "match": "cloudhsm CloudHSM",
       "arg": "/cloudhsm/home",
       "autocomplete": "CloudHSM",
       "icon": {
-        "path": "./icons/cloudhsm.png"
+        "path": "./aws-icons/cloudhsm.png"
       }
     },
     {
-      "uid": "cloudmap",
+      "id": "cloudmap",
       "title": "AWS Cloud Map",
       "subtitle": "Build a dynamic map of your cloud",
       "match": "cloudmap AWS Cloud Map",
       "arg": "/cloudmap/home",
       "autocomplete": "AWS Cloud Map",
       "icon": {
-        "path": "./icons/cloudmap.png"
+        "path": "./aws-icons/cloudmap.png"
       }
     },
     {
-      "uid": "cs",
+      "id": "cs",
       "title": "CloudSearch",
       "subtitle": "Managed Search Service",
       "match": "cs CloudSearch",
       "arg": "/cloudsearch/home",
       "autocomplete": "CloudSearch",
       "icon": {
-        "path": "./icons/cs.png"
+        "path": "./aws-icons/cs.png"
       }
     },
     {
-      "uid": "ctr",
+      "id": "ctr",
       "title": "CloudTrail",
       "subtitle": "Track User Activity and API Usage",
       "match": "ctr CloudTrail",
       "arg": "/cloudtrail/home",
       "autocomplete": "CloudTrail",
       "icon": {
-        "path": "./icons/ctr.png"
+        "path": "./aws-icons/ctr.png"
       }
     },
     {
-      "uid": "cw",
+      "id": "cw",
       "title": "CloudWatch",
       "subtitle": "Monitor Resources and Applications",
       "match": "cw CloudWatch",
       "arg": "/cloudwatch/home",
       "autocomplete": "CloudWatch",
       "icon": {
-        "path": "./icons/cw.png"
+        "path": "./aws-icons/cw.png"
       }
     },
     {
-      "uid": "codeartifact",
+      "id": "codeartifact",
       "title": "CodeArtifact",
       "subtitle": "Secure, scalable, and cost-effective artifact management for software development",
       "match": "codeartifact CodeArtifact",
       "arg": "/codesuite/codeartifact/home",
       "autocomplete": "CodeArtifact",
       "icon": {
-        "path": "./icons/codeartifact.png"
+        "path": "./aws-icons/codeartifact.png"
       }
     },
     {
-      "uid": "codebuild",
+      "id": "codebuild",
       "title": "CodeBuild",
       "subtitle": "Build and Test Code",
       "match": "codebuild CodeBuild",
       "arg": "/codesuite/codebuild/home",
       "autocomplete": "CodeBuild",
       "icon": {
-        "path": "./icons/codebuild.png"
+        "path": "./aws-icons/codebuild.png"
       }
     },
     {
-      "uid": "cc",
+      "id": "cc",
       "title": "CodeCommit",
       "subtitle": "Store Code in Private Git Repositories",
       "match": "cc CodeCommit",
       "arg": "/codesuite/codecommit/home",
       "autocomplete": "CodeCommit",
       "icon": {
-        "path": "./icons/cc.png"
+        "path": "./aws-icons/cc.png"
       }
     },
     {
-      "uid": "cd",
+      "id": "cd",
       "title": "CodeDeploy",
       "subtitle": "Automate Code Deployments",
       "match": "cd CodeDeploy",
       "arg": "/codesuite/codedeploy/home",
       "autocomplete": "CodeDeploy",
       "icon": {
-        "path": "./icons/cd.png"
+        "path": "./aws-icons/cd.png"
       }
     },
     {
-      "uid": "cp",
+      "id": "cp",
       "title": "CodePipeline",
       "subtitle": "Release Software using Continuous Delivery",
       "match": "cp CodePipeline",
       "arg": "/codesuite/codepipeline/home",
       "autocomplete": "CodePipeline",
       "icon": {
-        "path": "./icons/cp.png"
+        "path": "./aws-icons/cp.png"
       }
     },
     {
-      "uid": "codestar",
+      "id": "codestar",
       "title": "CodeStar",
       "subtitle": "Quickly develop, build, and deploy applications",
       "match": "codestar CodeStar",
       "arg": "/codesuite/codestar/home",
       "autocomplete": "CodeStar",
       "icon": {
-        "path": "./icons/codestar.png"
+        "path": "./aws-icons/codestar.png"
       }
     },
     {
-      "uid": "comprehend",
+      "id": "comprehend",
       "title": "Amazon Comprehend",
       "subtitle": "Analyze Unstructured Text",
       "match": "comprehend Amazon Comprehend",
       "arg": "/comprehend/v2/home",
       "autocomplete": "Amazon Comprehend",
       "icon": {
-        "path": "./icons/comprehend.png"
+        "path": "./aws-icons/comprehend.png"
       }
     },
     {
-      "uid": "compute-optimizer",
+      "id": "compute-optimizer",
       "title": "AWS Compute Optimizer",
       "subtitle": "Recommend optimal AWS Compute resources for your workloads",
       "match": "compute-optimizer AWS Compute Optimizer",
       "arg": "/compute-optimizer/home",
       "autocomplete": "AWS Compute Optimizer",
       "icon": {
-        "path": "./icons/compute-optimizer.png"
+        "path": "./aws-icons/compute-optimizer.png"
       }
     },
     {
-      "uid": "cfg",
+      "id": "cfg",
       "title": "Config",
       "subtitle": "Track Resource Inventory and Changes",
       "match": "cfg Config",
       "arg": "/config/home",
       "autocomplete": "Config",
       "icon": {
-        "path": "./icons/cfg.png"
+        "path": "./aws-icons/cfg.png"
       }
     },
     {
-      "uid": "cfgr",
+      "id": "cfgr",
       "title": "Config Rules",
       "match": "cfgr Config Rules",
       "arg": "/configrules/home",
       "autocomplete": "Config Rules",
       "icon": {
-        "path": "./icons/cfgr.png"
+        "path": "./aws-icons/cfgr.png"
       }
     },
     {
-      "uid": "home",
+      "id": "home",
       "title": "Console Home",
       "match": "home Console Home",
       "arg": "/console/home",
       "autocomplete": "Console Home",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
-      "uid": "controltower",
+      "id": "controltower",
       "title": "Control Tower",
       "subtitle": "The easiest way to set up and govern a secure, compliant multi-account environment",
       "match": "controltower Control Tower",
       "arg": "/controltower/home",
       "autocomplete": "Control Tower",
       "icon": {
-        "path": "./icons/controltower.png"
+        "path": "./aws-icons/controltower.png"
       }
     },
     {
-      "uid": "cost-management",
+      "id": "cost-management",
       "title": "AWS Cost Explorer",
       "subtitle": "Visualize and Explore Your AWS Costs and Usage",
       "match": "cost-management AWS Cost Explorer",
       "arg": "/cost-management/home",
       "autocomplete": "AWS Cost Explorer",
       "icon": {
-        "path": "./icons/cost-management.png"
+        "path": "./aws-icons/cost-management.png"
       }
     },
     {
-      "uid": "dataexchange",
+      "id": "dataexchange",
       "title": "AWS Data Exchange",
       "subtitle": "Easily exchange data in the cloud",
       "match": "dataexchange AWS Data Exchange",
       "arg": "/dataexchange/home",
       "autocomplete": "AWS Data Exchange",
       "icon": {
-        "path": "./icons/dataexchange.png"
+        "path": "./aws-icons/dataexchange.png"
       }
     },
     {
-      "uid": "dp",
+      "id": "dp",
       "title": "Data Pipeline",
       "subtitle": "Orchestration for Data-Driven Workflows",
       "match": "dp Data Pipeline",
       "arg": "/datapipeline/home",
       "autocomplete": "Data Pipeline",
       "icon": {
-        "path": "./icons/dp.png"
+        "path": "./aws-icons/dp.png"
       }
     },
     {
-      "uid": "datasync",
+      "id": "datasync",
       "title": "DataSync",
       "subtitle": "DataSync simplifies, automates, and accelerates moving data",
       "match": "datasync DataSync",
       "arg": "/datasync/home",
       "autocomplete": "DataSync",
       "icon": {
-        "path": "./icons/datasync.png"
+        "path": "./aws-icons/datasync.png"
       }
     },
     {
-      "uid": "deepcomposer",
+      "id": "deepcomposer",
       "title": "AWS DeepComposer",
       "subtitle": "AWS DeepComposer allows developers of all skill levels to get started with Generative AI.",
       "match": "deepcomposer AWS DeepComposer",
       "arg": "/deepcomposer/home",
       "autocomplete": "AWS DeepComposer",
       "icon": {
-        "path": "./icons/deepcomposer.png"
+        "path": "./aws-icons/deepcomposer.png"
       }
     },
     {
-      "uid": "deeplens",
+      "id": "deeplens",
       "title": "AWS DeepLens",
       "subtitle": "Deep Learning Enabled Video Camera",
       "match": "deeplens AWS DeepLens",
       "arg": "/deeplens/home",
       "autocomplete": "AWS DeepLens",
       "icon": {
-        "path": "./icons/deeplens.png"
+        "path": "./aws-icons/deeplens.png"
       }
     },
     {
-      "uid": "deepracer",
+      "id": "deepracer",
       "title": "AWS DeepRacer",
       "subtitle": "Fully autonomous 1/18th scale race car, driven by machine learning",
       "match": "deepracer AWS DeepRacer",
       "arg": "/deepracer/home",
       "autocomplete": "AWS DeepRacer",
       "icon": {
-        "path": "./icons/deepracer.png"
+        "path": "./aws-icons/deepracer.png"
       }
     },
     {
-      "uid": "detective",
+      "id": "detective",
       "title": "Detective",
       "subtitle": "Investigate and analyze potential security issues",
       "match": "detective Detective",
       "arg": "/detective/home",
       "autocomplete": "Detective",
       "icon": {
-        "path": "./icons/detective.png"
+        "path": "./aws-icons/detective.png"
       }
     },
     {
-      "uid": "devicedefender",
+      "id": "devicedefender",
       "title": "IoT Device Defender",
       "subtitle": "Secure your fleet of connected IoT devices",
       "match": "devicedefender IoT Device Defender",
       "arg": "/devicedefender/home",
       "autocomplete": "IoT Device Defender",
       "icon": {
-        "path": "./icons/devicedefender.png"
+        "path": "./aws-icons/devicedefender.png"
       }
     },
     {
-      "uid": "df",
+      "id": "df",
       "title": "Device Farm",
       "subtitle": "Test Android, iOS, and Web Apps on Real Devices in the Cloud",
       "match": "df Device Farm",
       "arg": "/devicefarm/home",
       "autocomplete": "Device Farm",
       "icon": {
-        "path": "./icons/df.png"
+        "path": "./aws-icons/df.png"
       }
     },
     {
-      "uid": "dc",
+      "id": "dc",
       "title": "Direct Connect",
       "subtitle": "Dedicated Network Connection to AWS",
       "match": "dc Direct Connect",
       "arg": "/directconnect/home",
       "autocomplete": "Direct Connect",
       "icon": {
-        "path": "./icons/dc.png"
+        "path": "./aws-icons/dc.png"
       }
     },
     {
-      "uid": "ds",
+      "id": "ds",
       "title": "Directory Service",
       "subtitle": "Host and Manage Active Directory",
       "match": "ds Directory Service",
       "arg": "/directoryservicev2/home",
       "autocomplete": "Directory Service",
       "icon": {
-        "path": "./icons/ds.png"
+        "path": "./aws-icons/ds.png"
       }
     },
     {
-      "uid": "discovery",
+      "id": "discovery",
       "title": "Application Discovery Service",
       "subtitle": "Discover on-premises application inventory and dependencies",
       "match": "discovery Application Discovery Service",
       "arg": "/discovery/home",
       "autocomplete": "Application Discovery Service",
       "icon": {
-        "path": "./icons/discovery.png"
+        "path": "./aws-icons/discovery.png"
       }
     },
     {
-      "uid": "dms",
+      "id": "dms",
       "title": "Database Migration Service",
       "subtitle": "Managed Database Migration Service",
       "match": "dms Database Migration Service",
       "arg": "/dms/v2/home",
       "autocomplete": "Database Migration Service",
       "icon": {
-        "path": "./icons/dms.png"
+        "path": "./aws-icons/dms.png"
       }
     },
     {
-      "uid": "docdb",
+      "id": "docdb",
       "title": "Amazon DocumentDB",
       "subtitle": "Fully-managed MongoDB-compatible database service",
       "match": "docdb Amazon DocumentDB",
       "arg": "/docdb/home",
       "autocomplete": "Amazon DocumentDB",
       "icon": {
-        "path": "./icons/docdb.png"
+        "path": "./aws-icons/docdb.png"
       }
     },
     {
-      "uid": "ddb",
+      "id": "ddb",
       "title": "DynamoDB",
       "subtitle": "Managed NoSQL Database",
       "match": "ddb DynamoDB",
       "arg": "/dynamodb/home",
       "autocomplete": "DynamoDB",
       "icon": {
-        "path": "./icons/ddb.png"
+        "path": "./aws-icons/ddb.png"
       }
     },
     {
-      "uid": "ec2",
+      "id": "ec2",
       "title": "EC2",
       "subtitle": "Virtual Servers in the Cloud",
       "match": "ec2 EC2",
       "arg": "/ec2/v2/home",
       "autocomplete": "EC2",
       "icon": {
-        "path": "./icons/ec2.png"
+        "path": "./aws-icons/ec2.png"
       }
     },
     {
-      "uid": "spt",
+      "id": "spt",
       "title": "EC2 Spot",
       "match": "spt EC2 Spot",
       "arg": "/ec2spot/home",
       "autocomplete": "EC2 Spot",
       "icon": {
-        "path": "./icons/spt.png"
+        "path": "./aws-icons/spt.png"
       }
     },
     {
-      "uid": "ecs",
+      "id": "ecs",
       "title": "Elastic Container Service",
       "subtitle": "Highly secure, reliable, and scalable way to run containers",
       "match": "ecs Elastic Container Service",
       "arg": "/ecs/home",
       "autocomplete": "Elastic Container Service",
       "icon": {
-        "path": "./icons/ecs.png"
+        "path": "./aws-icons/ecs.png"
       }
     },
     {
-      "uid": "efs",
+      "id": "efs",
       "title": "EFS",
       "subtitle": "Managed File Storage for EC2",
       "match": "efs EFS",
       "arg": "/efs/home",
       "autocomplete": "EFS",
       "icon": {
-        "path": "./icons/efs.png"
+        "path": "./aws-icons/efs.png"
       }
     },
     {
-      "uid": "eks",
+      "id": "eks",
       "title": "Elastic Kubernetes Service",
       "subtitle": "The most trusted way to run Kubernetes",
       "match": "eks Elastic Kubernetes Service",
       "arg": "/eks/home",
       "autocomplete": "Elastic Kubernetes Service",
       "icon": {
-        "path": "./icons/eks.png"
+        "path": "./aws-icons/eks.png"
       }
     },
     {
-      "uid": "elc",
+      "id": "elc",
       "title": "ElastiCache",
       "subtitle": "In-Memory Cache",
       "match": "elc ElastiCache",
       "arg": "/elasticache/home",
       "autocomplete": "ElastiCache",
       "icon": {
-        "path": "./icons/elc.png"
+        "path": "./aws-icons/elc.png"
       }
     },
     {
-      "uid": "eb",
+      "id": "eb",
       "title": "Elastic Beanstalk",
       "subtitle": "Run and Manage Web Apps",
       "match": "eb Elastic Beanstalk",
       "arg": "/elasticbeanstalk/home",
       "autocomplete": "Elastic Beanstalk",
       "icon": {
-        "path": "./icons/eb.png"
+        "path": "./aws-icons/eb.png"
       }
     },
     {
-      "uid": "emr",
+      "id": "emr",
       "title": "EMR",
       "subtitle": "Managed Hadoop Framework",
       "match": "emr EMR",
       "arg": "/elasticmapreduce/home",
       "autocomplete": "EMR",
       "icon": {
-        "path": "./icons/emr.png"
+        "path": "./aws-icons/emr.png"
       }
     },
     {
-      "uid": "ets",
+      "id": "ets",
       "title": "Elastic Transcoder",
       "subtitle": "Easy-to-Use Scalable Media Transcoding",
       "match": "ets Elastic Transcoder",
       "arg": "/elastictranscoder/home",
       "autocomplete": "Elastic Transcoder",
       "icon": {
-        "path": "./icons/ets.png"
+        "path": "./aws-icons/ets.png"
       }
     },
     {
-      "uid": "events",
+      "id": "events",
       "title": "Amazon EventBridge",
       "subtitle": "Serverless event bus that connects application data from your own apps, SaaS, and AWS services",
       "match": "events Amazon EventBridge",
       "arg": "/events/home",
       "autocomplete": "Amazon EventBridge",
       "icon": {
-        "path": "./icons/events.png"
+        "path": "./aws-icons/events.png"
       }
     },
     {
-      "uid": "fh",
+      "id": "fh",
       "title": "Kinesis Firehose",
       "match": "fh Kinesis Firehose",
       "arg": "/firehose/home",
       "autocomplete": "Kinesis Firehose",
       "icon": {
-        "path": "./icons/fh.png"
+        "path": "./aws-icons/fh.png"
       }
     },
     {
-      "uid": "firewall-manager",
+      "id": "firewall-manager",
       "title": "AWS Firewall Manager",
       "subtitle": "Central management of firewall rules",
       "match": "firewall-manager AWS Firewall Manager",
       "arg": "/wafv2/home",
       "autocomplete": "AWS Firewall Manager",
       "icon": {
-        "path": "./icons/firewall-manager.png"
+        "path": "./aws-icons/firewall-manager.png"
       }
     },
     {
-      "uid": "forecast",
+      "id": "forecast",
       "title": "Amazon Forecast",
       "subtitle": "Amazon Forecast is a fully-managed service for accurate time-series forecasting",
       "match": "forecast Amazon Forecast",
       "arg": "/forecast/home",
       "autocomplete": "Amazon Forecast",
       "icon": {
-        "path": "./icons/forecast.png"
+        "path": "./aws-icons/forecast.png"
       }
     },
     {
-      "uid": "frauddetector",
+      "id": "frauddetector",
       "title": "Amazon Fraud Detector",
       "subtitle": "Detect more online fraud faster using machine learning",
       "match": "frauddetector Amazon Fraud Detector",
       "arg": "/frauddetector/home",
       "autocomplete": "Amazon Fraud Detector",
       "icon": {
-        "path": "./icons/frauddetector.png"
+        "path": "./aws-icons/frauddetector.png"
       }
     },
     {
-      "uid": "freertos",
+      "id": "freertos",
       "title": "FreeRTOS",
       "subtitle": "FreeRTOS is an IoT Operating System for Microcontrollers",
       "match": "freertos FreeRTOS",
       "arg": "/freertos/home",
       "autocomplete": "FreeRTOS",
       "icon": {
-        "path": "./icons/freertos.png"
+        "path": "./aws-icons/freertos.png"
       }
     },
     {
-      "uid": "fsx",
+      "id": "fsx",
       "title": "FSx",
       "subtitle": "Fully managed third-party file systems optimized for a variety of workloads",
       "match": "fsx FSx",
       "arg": "/fsx/home",
       "autocomplete": "FSx",
       "icon": {
-        "path": "./icons/fsx.png"
+        "path": "./aws-icons/fsx.png"
       }
     },
     {
-      "uid": "gal",
+      "id": "gal",
       "title": "Amazon GameLift",
       "subtitle": "Deploy and Scale Session-based Multiplayer Games",
       "match": "gal Amazon GameLift",
       "arg": "/gamelift/home",
       "autocomplete": "Amazon GameLift",
       "icon": {
-        "path": "./icons/gal.png"
+        "path": "./aws-icons/gal.png"
       }
     },
     {
-      "uid": "gl",
+      "id": "gl",
       "title": "S3 Glacier",
       "subtitle": "Archive Storage in the Cloud",
       "match": "gl S3 Glacier",
       "arg": "/glacier/home",
       "autocomplete": "S3 Glacier",
       "icon": {
-        "path": "./icons/gl.png"
+        "path": "./aws-icons/gl.png"
       }
     },
     {
-      "uid": "globalaccelerator",
+      "id": "globalaccelerator",
       "title": "Global Accelerator",
       "subtitle": "Improve your application’s availability and performance using the AWS Global Network",
       "match": "globalaccelerator Global Accelerator",
       "arg": "https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#GlobalAccelerator",
       "autocomplete": "Global Accelerator",
       "icon": {
-        "path": "./icons/globalaccelerator.png"
+        "path": "./aws-icons/globalaccelerator.png"
       }
     },
     {
-      "uid": "glue",
+      "id": "glue",
       "title": "AWS Glue",
       "subtitle": "AWS Glue is a fully managed ETL (extract, transform, and load) service",
       "match": "glue AWS Glue",
       "arg": "/glue/home",
       "autocomplete": "AWS Glue",
       "icon": {
-        "path": "./icons/glue.png"
+        "path": "./aws-icons/glue.png"
       }
     },
     {
-      "uid": "greengrass",
+      "id": "greengrass",
       "title": "IoT Greengrass",
       "subtitle": "Deploy and run code on your devices",
       "match": "greengrass IoT Greengrass",
       "arg": "/greengrass/home",
       "autocomplete": "IoT Greengrass",
       "icon": {
-        "path": "./icons/greengrass.png"
+        "path": "./aws-icons/greengrass.png"
       }
     },
     {
-      "uid": "groundstation",
+      "id": "groundstation",
       "title": "Ground Station",
       "subtitle": "Communicate with satellites",
       "match": "groundstation Ground Station",
       "arg": "/groundstation/home",
       "autocomplete": "Ground Station",
       "icon": {
-        "path": "./icons/groundstation.png"
+        "path": "./aws-icons/groundstation.png"
       }
     },
     {
-      "uid": "guardduty",
+      "id": "guardduty",
       "title": "GuardDuty",
       "subtitle": "Intelligent Threat Detection to Protect Your AWS Accounts and Workloads",
       "match": "guardduty GuardDuty",
       "arg": "/guardduty/home",
       "autocomplete": "GuardDuty",
       "icon": {
-        "path": "./icons/guardduty.png"
+        "path": "./aws-icons/guardduty.png"
       }
     },
     {
-      "uid": "honeycode",
+      "id": "honeycode",
       "title": "Amazon Honeycode",
       "subtitle": "Build mobile and web apps without programming",
       "match": "honeycode Amazon Honeycode",
       "arg": "/honeycode/home",
       "autocomplete": "Amazon Honeycode",
       "icon": {
-        "path": "./icons/honeycode.png"
+        "path": "./aws-icons/honeycode.png"
       }
     },
     {
-      "uid": "iam",
+      "id": "iam",
       "title": "IAM",
       "subtitle": "Manage access to AWS resources",
       "match": "iam IAM",
       "arg": "/iam/home",
       "autocomplete": "IAM",
       "icon": {
-        "path": "./icons/iam.png"
+        "path": "./aws-icons/iam.png"
       }
     },
     {
-      "uid": "imagebuilder",
+      "id": "imagebuilder",
       "title": "EC2 Image Builder",
       "subtitle": "A managed service to automate build, customize and deploy OS images",
       "match": "imagebuilder EC2 Image Builder",
       "arg": "/imagebuilder/home",
       "autocomplete": "EC2 Image Builder",
       "icon": {
-        "path": "./icons/imagebuilder.png"
+        "path": "./aws-icons/imagebuilder.png"
       }
     },
     {
-      "uid": "imex",
+      "id": "imex",
       "title": "AWS Snow Family",
       "subtitle": "Large Scale Data Transport",
       "match": "imex AWS Snow Family",
       "arg": "/importexport/home",
       "autocomplete": "AWS Snow Family",
       "icon": {
-        "path": "./icons/imex.png"
+        "path": "./aws-icons/imex.png"
       }
     },
     {
-      "uid": "ins",
+      "id": "ins",
       "title": "Inspector",
       "subtitle": "Analyze Application Security",
       "match": "ins Inspector",
       "arg": "/inspector/home",
       "autocomplete": "Inspector",
       "icon": {
-        "path": "./icons/ins.png"
+        "path": "./aws-icons/ins.png"
       }
     },
     {
-      "uid": "iot",
+      "id": "iot",
       "title": "IoT Core",
       "subtitle": "Connect Devices to the Cloud",
       "match": "iot IoT Core",
       "arg": "/iot/home",
       "autocomplete": "IoT Core",
       "icon": {
-        "path": "./icons/iot.png"
+        "path": "./aws-icons/iot.png"
       }
     },
     {
-      "uid": "iot1click",
+      "id": "iot1click",
       "title": "IoT 1-Click",
       "subtitle": "Trigger AWS Lambda functions from simple devices",
       "match": "iot1click IoT 1-Click",
       "arg": "/iot1click/home",
       "autocomplete": "IoT 1-Click",
       "icon": {
-        "path": "./icons/iot1click.png"
+        "path": "./aws-icons/iot1click.png"
       }
     },
     {
-      "uid": "iotanalytics",
+      "id": "iotanalytics",
       "title": "IoT Analytics",
       "subtitle": "Collect, preprocess, store, analyze and visualize data of IoT devices",
       "match": "iotanalytics IoT Analytics",
       "arg": "/iotanalytics/home",
       "autocomplete": "IoT Analytics",
       "icon": {
-        "path": "./icons/iotanalytics.png"
+        "path": "./aws-icons/iotanalytics.png"
       }
     },
     {
-      "uid": "iotdm",
+      "id": "iotdm",
       "title": "IoT Device Management",
       "subtitle": "Securely Manage Fleets as Small as One Device, or as Broad as Millions of Devices",
       "match": "iotdm IoT Device Management",
       "arg": "/iotdm/home",
       "autocomplete": "IoT Device Management",
       "icon": {
-        "path": "./icons/iotdm.png"
+        "path": "./aws-icons/iotdm.png"
       }
     },
     {
-      "uid": "iotevents",
+      "id": "iotevents",
       "title": "IoT Events",
       "subtitle": "Monitor device fleets for changes and trigger alerts to respond",
       "match": "iotevents IoT Events",
       "arg": "/iotevents/home",
       "autocomplete": "IoT Events",
       "icon": {
-        "path": "./icons/iotevents.png"
+        "path": "./aws-icons/iotevents.png"
       }
     },
     {
-      "uid": "iotsitewise",
+      "id": "iotsitewise",
       "title": "IoT SiteWise",
       "subtitle": "Data driven decisions in Industrial operations",
       "match": "iotsitewise IoT SiteWise",
       "arg": "/iotsitewise/home",
       "autocomplete": "IoT SiteWise",
       "icon": {
-        "path": "./icons/iotsitewise.png"
+        "path": "./aws-icons/iotsitewise.png"
       }
     },
     {
-      "uid": "iq",
+      "id": "iq",
       "title": "AWS IQ",
       "subtitle": "Complete projects faster with help from third-party AWS Certified experts",
       "match": "iq AWS IQ",
       "arg": "https://iq.aws.amazon.com/?utm=csl",
       "autocomplete": "AWS IQ",
       "icon": {
-        "path": "./icons/iq.png"
+        "path": "./aws-icons/iq.png"
       }
     },
     {
-      "uid": "keyspaces",
+      "id": "keyspaces",
       "title": "Amazon Keyspaces",
       "subtitle": "Serverless Cassandra-compatible database",
       "match": "keyspaces Amazon Keyspaces",
       "arg": "/keyspaces/home",
       "autocomplete": "Amazon Keyspaces",
       "icon": {
-        "path": "./icons/keyspaces.png"
+        "path": "./aws-icons/keyspaces.png"
       }
     },
     {
-      "uid": "ki",
+      "id": "ki",
       "title": "Kinesis",
       "subtitle": "Work with Real-Time Streaming Data",
       "match": "ki Kinesis",
       "arg": "/kinesis/home",
       "autocomplete": "Kinesis",
       "icon": {
-        "path": "./icons/ki.png"
+        "path": "./aws-icons/ki.png"
       }
     },
     {
-      "uid": "kia",
+      "id": "kia",
       "title": "Kinesis Analytics",
       "match": "kia Kinesis Analytics",
       "arg": "/kinesisanalytics/home",
       "autocomplete": "Kinesis Analytics",
       "icon": {
-        "path": "./icons/kia.png"
+        "path": "./aws-icons/kia.png"
       }
     },
     {
-      "uid": "kinesisvideo",
+      "id": "kinesisvideo",
       "title": "Kinesis Video Streams",
       "subtitle": "Capture, Process, and Store Video Streams for Analytics and Machine Learning",
       "match": "kinesisvideo Kinesis Video Streams",
       "arg": "/kinesisvideo/home",
       "autocomplete": "Kinesis Video Streams",
       "icon": {
-        "path": "./icons/kinesisvideo.png"
+        "path": "./aws-icons/kinesisvideo.png"
       }
     },
     {
-      "uid": "kms",
+      "id": "kms",
       "title": "Key Management Service",
       "subtitle": "Securely Generate and Manage AWS Encryption Keys",
       "match": "kms Key Management Service",
       "arg": "/kms/home",
       "autocomplete": "Key Management Service",
       "icon": {
-        "path": "./icons/kms.png"
+        "path": "./aws-icons/kms.png"
       }
     },
     {
-      "uid": "lakeformation",
+      "id": "lakeformation",
       "title": "AWS Lake Formation",
       "subtitle": "AWS Lake Formation makes it easy to set up a secure data lake",
       "match": "lakeformation AWS Lake Formation",
       "arg": "/lakeformation/home",
       "autocomplete": "AWS Lake Formation",
       "icon": {
-        "path": "./icons/lakeformation.png"
+        "path": "./aws-icons/lakeformation.png"
       }
     },
     {
-      "uid": "lam",
+      "id": "lam",
       "title": "Lambda",
       "subtitle": "Run Code without Thinking about Servers",
       "match": "lam Lambda",
       "arg": "/lambda/home",
       "autocomplete": "Lambda",
       "icon": {
-        "path": "./icons/lam.png"
+        "path": "./aws-icons/lam.png"
       }
     },
     {
-      "uid": "lex",
+      "id": "lex",
       "title": "Amazon Lex",
       "subtitle": "Build Voice and Text Chatbots",
       "match": "lex Amazon Lex",
       "arg": "/lex/home",
       "autocomplete": "Amazon Lex",
       "icon": {
-        "path": "./icons/lex.png"
+        "path": "./aws-icons/lex.png"
       }
     },
     {
-      "uid": "license-manager",
+      "id": "license-manager",
       "title": "AWS License Manager",
       "subtitle": "Set rules to manage, discover, and report third-party license usage proactively",
       "match": "license-manager AWS License Manager",
       "arg": "/license-manager/home",
       "autocomplete": "AWS License Manager",
       "icon": {
-        "path": "./icons/license-manager.png"
+        "path": "./aws-icons/license-manager.png"
       }
     },
     {
-      "uid": "lightsail",
+      "id": "lightsail",
       "title": "Lightsail",
       "subtitle": "Launch and Manage Virtual Private Servers",
       "match": "lightsail Lightsail",
       "arg": "https://lightsail.aws.amazon.com/ls/webapp/home",
       "autocomplete": "Lightsail",
       "icon": {
-        "path": "./icons/lightsail.png"
+        "path": "./aws-icons/lightsail.png"
       }
     },
     {
-      "uid": "ml",
+      "id": "ml",
       "title": "Amazon Machine Learning",
       "subtitle": "Build Smart Applications Quickly and Easily",
       "match": "ml Amazon Machine Learning",
       "arg": "/machinelearning/home",
       "autocomplete": "Amazon Machine Learning",
       "icon": {
-        "path": "./icons/ml.png"
+        "path": "./aws-icons/ml.png"
       }
     },
     {
-      "uid": "managedservices",
+      "id": "managedservices",
       "title": "Managed Services",
       "subtitle": "IT operations management for AWS",
       "match": "managedservices Managed Services",
       "arg": "/managedservices/home",
       "autocomplete": "Managed Services",
       "icon": {
-        "path": "./icons/managedservices.png"
+        "path": "./aws-icons/managedservices.png"
       }
     },
     {
-      "uid": "marketplace",
+      "id": "marketplace",
       "title": "AWS Marketplace Subscriptions",
       "subtitle": "Digital catalog where you can find, buy, and deploy software",
       "match": "marketplace AWS Marketplace Subscriptions",
       "arg": "/marketplace/home",
       "autocomplete": "AWS Marketplace Subscriptions",
       "icon": {
-        "path": "./icons/marketplace.png"
+        "path": "./aws-icons/marketplace.png"
       }
     },
     {
-      "uid": "mediaconnect",
+      "id": "mediaconnect",
       "title": "MediaConnect",
       "subtitle": "Reliable, secure, and flexible transport for live video",
       "match": "mediaconnect MediaConnect",
       "arg": "/mediaconnect/home",
       "autocomplete": "MediaConnect",
       "icon": {
-        "path": "./icons/mediaconnect.png"
+        "path": "./aws-icons/mediaconnect.png"
       }
     },
     {
-      "uid": "mediaconvert",
+      "id": "mediaconvert",
       "title": "MediaConvert",
       "subtitle": "Convert file-based content for broadcast and multiscreen delivery",
       "match": "mediaconvert MediaConvert",
       "arg": "/mediaconvert/home",
       "autocomplete": "MediaConvert",
       "icon": {
-        "path": "./icons/mediaconvert.png"
+        "path": "./aws-icons/mediaconvert.png"
       }
     },
     {
-      "uid": "medialive",
+      "id": "medialive",
       "title": "MediaLive",
       "subtitle": "Convert video inputs into live outputs for broadcast and streaming delivery",
       "match": "medialive MediaLive",
       "arg": "/medialive/home",
       "autocomplete": "MediaLive",
       "icon": {
-        "path": "./icons/medialive.png"
+        "path": "./aws-icons/medialive.png"
       }
     },
     {
-      "uid": "mediapackage",
+      "id": "mediapackage",
       "title": "MediaPackage",
       "subtitle": "Deliver video to many devices using just-in-time format conversion",
       "match": "mediapackage MediaPackage",
       "arg": "/mediapackage/home",
       "autocomplete": "MediaPackage",
       "icon": {
-        "path": "./icons/mediapackage.png"
+        "path": "./aws-icons/mediapackage.png"
       }
     },
     {
-      "uid": "mediastore",
+      "id": "mediastore",
       "title": "MediaStore",
       "subtitle": "Store and deliver video assets for live or on-demand media workflows",
       "match": "mediastore MediaStore",
       "arg": "/mediastore/home",
       "autocomplete": "MediaStore",
       "icon": {
-        "path": "./icons/mediastore.png"
+        "path": "./aws-icons/mediastore.png"
       }
     },
     {
-      "uid": "mediatailor",
+      "id": "mediatailor",
       "title": "MediaTailor",
       "subtitle": "Personalize and monetize multiscreen content with server-side ad insertion",
       "match": "mediatailor MediaTailor",
       "arg": "/mediatailor/home",
       "autocomplete": "MediaTailor",
       "icon": {
-        "path": "./icons/mediatailor.png"
+        "path": "./aws-icons/mediatailor.png"
       }
     },
     {
-      "uid": "migrationhub",
+      "id": "migrationhub",
       "title": "AWS Migration Hub",
       "subtitle": "Simplify and accelerate the migration of your data centers to AWS",
       "match": "migrationhub AWS Migration Hub",
       "arg": "/migrationhub/home",
       "autocomplete": "AWS Migration Hub",
       "icon": {
-        "path": "./icons/migrationhub.png"
+        "path": "./aws-icons/migrationhub.png"
       }
     },
     {
-      "uid": "mh",
+      "id": "mh",
       "title": "Mobile Hub",
       "subtitle": "Build, Test, and Monitor Mobile Apps",
       "match": "mh Mobile Hub",
       "arg": "/mobilehub/home",
       "autocomplete": "Mobile Hub",
       "icon": {
-        "path": "./icons/mh.png"
+        "path": "./aws-icons/mh.png"
       }
     },
     {
-      "uid": "msk",
+      "id": "msk",
       "title": "MSK",
       "subtitle": "Fully managed, highly available, and secure service for Apache Kafka",
       "match": "msk MSK",
       "arg": "/msk/home",
       "autocomplete": "MSK",
       "icon": {
-        "path": "./icons/msk.png"
+        "path": "./aws-icons/msk.png"
       }
     },
     {
-      "uid": "neptune",
+      "id": "neptune",
       "title": "Neptune",
       "subtitle": "Fast, reliable graph database built for the cloud",
       "match": "neptune Neptune",
       "arg": "/neptune/home",
       "autocomplete": "Neptune",
       "icon": {
-        "path": "./icons/neptune.png"
+        "path": "./aws-icons/neptune.png"
       }
     },
     {
-      "uid": "organizations",
+      "id": "organizations",
       "title": "AWS Organizations",
       "subtitle": "Central governance and management across AWS accounts.",
       "match": "organizations AWS Organizations",
       "arg": "/organizations/home",
       "autocomplete": "AWS Organizations",
       "icon": {
-        "path": "./icons/organizations.png"
+        "path": "./aws-icons/organizations.png"
       }
     },
     {
-      "uid": "outposts",
+      "id": "outposts",
       "title": "AWS Outposts",
       "subtitle": "Run AWS Services On Premises",
       "match": "outposts AWS Outposts",
       "arg": "/outposts/home",
       "autocomplete": "AWS Outposts",
       "icon": {
-        "path": "./icons/outposts.png"
+        "path": "./aws-icons/outposts.png"
       }
     },
     {
-      "uid": "personalize",
+      "id": "personalize",
       "title": "Amazon Personalize",
       "subtitle": "Amazon Personalize helps you easily add real-time recommendations to your apps",
       "match": "personalize Amazon Personalize",
       "arg": "/personalize/home",
       "autocomplete": "Amazon Personalize",
       "icon": {
-        "path": "./icons/personalize.png"
+        "path": "./aws-icons/personalize.png"
       }
     },
     {
-      "uid": "phd",
+      "id": "phd",
       "title": "Personal Health Dashboard",
       "subtitle": "Personalized view of AWS service health.",
       "match": "phd Personal Health Dashboard",
       "arg": "https://phd.aws.amazon.com/phd/home",
       "autocomplete": "Personal Health Dashboard",
       "icon": {
-        "path": "./icons/phd.png"
+        "path": "./aws-icons/phd.png"
       }
     },
     {
-      "uid": "polly",
+      "id": "polly",
       "title": "Amazon Polly",
       "subtitle": "Turn Text into Lifelike Speech",
       "match": "polly Amazon Polly",
       "arg": "/polly/home",
       "autocomplete": "Amazon Polly",
       "icon": {
-        "path": "./icons/polly.png"
+        "path": "./aws-icons/polly.png"
       }
     },
     {
-      "uid": "qldb",
+      "id": "qldb",
       "title": "Amazon QLDB",
       "subtitle": "Fully managed ledger database",
       "match": "qldb Amazon QLDB",
       "arg": "/qldb/home",
       "autocomplete": "Amazon QLDB",
       "icon": {
-        "path": "./icons/qldb.png"
+        "path": "./aws-icons/qldb.png"
       }
     },
     {
-      "uid": "qs",
+      "id": "qs",
       "title": "QuickSight",
       "subtitle": "Fast, easy to use business analytics",
       "match": "qs QuickSight",
       "arg": "https://quicksight.aws.amazon.com",
       "autocomplete": "QuickSight",
       "icon": {
-        "path": "./icons/qs.png"
+        "path": "./aws-icons/qs.png"
       }
     },
     {
-      "uid": "ram",
+      "id": "ram",
       "title": "Resource Access Manager",
       "subtitle": "Share AWS resources with other accounts or AWS Organizations",
       "match": "ram Resource Access Manager",
       "arg": "/ram/home",
       "autocomplete": "Resource Access Manager",
       "icon": {
-        "path": "./icons/ram.png"
+        "path": "./aws-icons/ram.png"
       }
     },
     {
-      "uid": "rds",
+      "id": "rds",
       "title": "RDS",
       "subtitle": "Managed Relational Database Service",
       "match": "rds RDS",
       "arg": "/rds/home",
       "autocomplete": "RDS",
       "icon": {
-        "path": "./icons/rds.png"
+        "path": "./aws-icons/rds.png"
       }
     },
     {
-      "uid": "rs",
+      "id": "rs",
       "title": "Amazon Redshift",
       "subtitle": "Fast, Simple, Cost-Effective Data Warehousing",
       "match": "rs Amazon Redshift",
       "arg": "/redshift/home",
       "autocomplete": "Amazon Redshift",
       "icon": {
-        "path": "./icons/rs.png"
+        "path": "./aws-icons/rs.png"
       }
     },
     {
-      "uid": "rekognition",
+      "id": "rekognition",
       "title": "Amazon Rekognition",
       "subtitle": "Search and Analyze Images",
       "match": "rekognition Amazon Rekognition",
       "arg": "/rekognition/home",
       "autocomplete": "Amazon Rekognition",
       "icon": {
-        "path": "./icons/rekognition.png"
+        "path": "./aws-icons/rekognition.png"
       }
     },
     {
-      "uid": "resource-groups",
+      "id": "resource-groups",
       "title": "Resource Groups &amp; Tag Editor",
       "subtitle": "AWS Resource Groups Lets You Search and Group AWS Resources",
       "match": "resource-groups Resource Groups &amp; Tag Editor",
       "arg": "/resource-groups/home",
       "autocomplete": "Resource Groups &amp; Tag Editor",
       "icon": {
-        "path": "./icons/resource-groups.png"
+        "path": "./aws-icons/resource-groups.png"
       }
     },
     {
-      "uid": "robomaker",
+      "id": "robomaker",
       "title": "AWS RoboMaker",
       "subtitle": "Develop, test, and deploy intelligent robotics applications",
       "match": "robomaker AWS RoboMaker",
       "arg": "/robomaker/home",
       "autocomplete": "AWS RoboMaker",
       "icon": {
-        "path": "./icons/robomaker.png"
+        "path": "./aws-icons/robomaker.png"
       }
     },
     {
-      "uid": "r53",
+      "id": "r53",
       "title": "Route 53",
       "subtitle": "Scalable DNS and Domain Name Registration",
       "match": "r53 Route 53",
       "arg": "/route53/home",
       "autocomplete": "Route 53",
       "icon": {
-        "path": "./icons/r53.png"
+        "path": "./aws-icons/r53.png"
       }
     },
     {
-      "uid": "route53resolver",
+      "id": "route53resolver",
       "title": "Route 53 Resolver",
       "subtitle": "Resolve DNS queries in your Amazon VPC and on-premises network.",
       "match": "route53resolver Route 53 Resolver",
       "arg": "/route53resolver/home",
       "autocomplete": "Route 53 Resolver",
       "icon": {
-        "path": "./icons/r53.png"
+        "path": "./aws-icons/r53.png"
       }
     },
     {
-      "uid": "s3",
+      "id": "s3",
       "title": "S3",
       "subtitle": "Scalable Storage in the Cloud",
       "match": "s3 S3",
       "arg": "/s3/home",
       "autocomplete": "S3",
       "icon": {
-        "path": "./icons/s3.png"
+        "path": "./aws-icons/s3.png"
       }
     },
     {
-      "uid": "sagemaker",
+      "id": "sagemaker",
       "title": "Amazon SageMaker",
       "subtitle": "Build, Train, and Deploy Machine Learning Models",
       "match": "sagemaker Amazon SageMaker",
       "arg": "/sagemaker/home",
       "autocomplete": "Amazon SageMaker",
       "icon": {
-        "path": "./icons/sagemaker.png"
+        "path": "./aws-icons/sagemaker.png"
       }
     },
     {
-      "uid": "secretsmanager",
+      "id": "secretsmanager",
       "title": "Secrets Manager",
       "subtitle": "Easily rotate, manage, and retrieve secrets throughout their lifecycle",
       "match": "secretsmanager Secrets Manager",
       "arg": "/secretsmanager/home",
       "autocomplete": "Secrets Manager",
       "icon": {
-        "path": "./icons/secretsmanager.png"
+        "path": "./aws-icons/secretsmanager.png"
       }
     },
     {
-      "uid": "securityhub",
+      "id": "securityhub",
       "title": "Security Hub",
       "subtitle": "AWS Security Hub is AWS’s security and compliance center",
       "match": "securityhub Security Hub",
       "arg": "/securityhub/home",
       "autocomplete": "Security Hub",
       "icon": {
-        "path": "./icons/securityhub.png"
+        "path": "./aws-icons/securityhub.png"
       }
     },
     {
-      "uid": "serverlessrepo",
+      "id": "serverlessrepo",
       "title": "Serverless Application Repository",
       "subtitle": "Assemble, deploy, and share serverless applications within teams or publicly",
       "match": "serverlessrepo Serverless Application Repository",
       "arg": "/serverlessrepo/home",
       "autocomplete": "Serverless Application Repository",
       "icon": {
-        "path": "./icons/serverlessrepo.png"
+        "path": "./aws-icons/serverlessrepo.png"
       }
     },
     {
-      "uid": "servermigration",
+      "id": "servermigration",
       "title": "Server Migration Service",
       "subtitle": "Migrate on-premises servers to AWS",
       "match": "servermigration Server Migration Service",
       "arg": "/servermigration/home",
       "autocomplete": "Server Migration Service",
       "icon": {
-        "path": "./icons/servermigration.png"
+        "path": "./aws-icons/servermigration.png"
       }
     },
     {
-      "uid": "sc",
+      "id": "sc",
       "title": "Service Catalog",
       "subtitle": "Create and Use Standardized Products",
       "match": "sc Service Catalog",
       "arg": "/servicecatalog/home",
       "autocomplete": "Service Catalog",
       "icon": {
-        "path": "./icons/sc.png"
+        "path": "./aws-icons/sc.png"
       }
     },
     {
-      "uid": "servicequotas",
+      "id": "servicequotas",
       "title": "Service Quotas",
       "subtitle": "View and manage your AWS service quotas from a central location",
       "match": "servicequotas Service Quotas",
       "arg": "/servicequotas/home",
       "autocomplete": "Service Quotas",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
-      "uid": "ses",
+      "id": "ses",
       "title": "Simple Email Service",
       "subtitle": "Email Sending and Receiving Service",
       "match": "ses Simple Email Service",
       "arg": "/ses/home",
       "autocomplete": "Simple Email Service",
       "icon": {
-        "path": "./icons/ses.png"
+        "path": "./aws-icons/ses.png"
       }
     },
     {
-      "uid": "sns",
+      "id": "sns",
       "title": "Simple Notification Service",
       "subtitle": "SNS managed message topics for Pub/Sub",
       "match": "sns Simple Notification Service",
       "arg": "/sns/home",
       "autocomplete": "Simple Notification Service",
       "icon": {
-        "path": "./icons/sns.png"
+        "path": "./aws-icons/sns.png"
       }
     },
     {
-      "uid": "sqs",
+      "id": "sqs",
       "title": "Simple Queue Service",
       "subtitle": "SQS Managed Message Queues",
       "match": "sqs Simple Queue Service",
       "arg": "/sqs/home",
       "autocomplete": "Simple Queue Service",
       "icon": {
-        "path": "./icons/sqs.png"
+        "path": "./aws-icons/sqs.png"
       }
     },
     {
-      "uid": "sso",
+      "id": "sso",
       "title": "AWS Single Sign-On",
       "subtitle": "Manage Single Sign-On (SSO) Access to AWS Accounts and Business Applications",
       "match": "sso AWS Single Sign-On",
       "arg": "/singlesignon/home",
       "autocomplete": "AWS Single Sign-On",
       "icon": {
-        "path": "./icons/sso.png"
+        "path": "./aws-icons/sso.png"
       }
     },
     {
-      "uid": "sg",
+      "id": "sg",
       "title": "Storage Gateway",
       "subtitle": "Hybrid Storage Integration",
       "match": "sg Storage Gateway",
       "arg": "/storagegateway/home",
       "autocomplete": "Storage Gateway",
       "icon": {
-        "path": "./icons/sg.png"
+        "path": "./aws-icons/sg.png"
       }
     },
     {
-      "uid": "s",
+      "id": "s",
       "title": "Support",
       "subtitle": "Contact AWS for technical and account support.",
       "match": "s Support",
       "arg": "/support",
       "autocomplete": "Support",
       "icon": {
-        "path": "./icons/s.png"
+        "path": "./aws-icons/s.png"
       }
     },
     {
-      "uid": "swf",
+      "id": "swf",
       "title": "SWF",
       "subtitle": "Workflow Service for Coordinating Application Components",
       "match": "swf SWF",
       "arg": "/swf/home",
       "autocomplete": "SWF",
       "icon": {
-        "path": "./icons/swf.png"
+        "path": "./aws-icons/swf.png"
       }
     },
     {
-      "uid": "synthetics",
+      "id": "synthetics",
       "title": "Synthetics",
       "match": "synthetics Synthetics",
       "arg": "/synthetics/home",
       "autocomplete": "Synthetics",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
-      "uid": "systems-manager",
+      "id": "systems-manager",
       "title": "Systems Manager",
       "subtitle": "AWS Systems Manager is a Central Place to View and Manage AWS Resources",
       "match": "systems-manager Systems Manager",
       "arg": "/systems-manager/home",
       "autocomplete": "Systems Manager",
       "icon": {
-        "path": "./icons/systems-manager.png"
+        "path": "./aws-icons/systems-manager.png"
       }
     },
     {
-      "uid": "textract",
+      "id": "textract",
       "title": "Amazon Textract",
       "subtitle": "Easily extract text and data from virtually any document",
       "match": "textract Amazon Textract",
       "arg": "/textract/home",
       "autocomplete": "Amazon Textract",
       "icon": {
-        "path": "./icons/textract.png"
+        "path": "./aws-icons/textract.png"
       }
     },
     {
-      "uid": "thingsgraph",
+      "id": "thingsgraph",
       "title": "IoT Things Graph",
       "subtitle": "Easily connect devices and web services to build IoT applications",
       "match": "thingsgraph IoT Things Graph",
       "arg": "/thingsgraph/home",
       "autocomplete": "IoT Things Graph",
       "icon": {
-        "path": "./icons/thingsgraph.png"
+        "path": "./aws-icons/thingsgraph.png"
       }
     },
     {
-      "uid": "timestream",
+      "id": "timestream",
       "title": "Amazon Timestream",
       "subtitle": "Amazon Timestream is a fast, scalable, and serverless time series database for IoT and operational applications.",
       "match": "timestream Amazon Timestream",
       "arg": "/timestream/home",
       "autocomplete": "Amazon Timestream",
       "icon": {
-        "path": "./icons/timestream.png"
+        "path": "./aws-icons/timestream.png"
       }
     },
     {
-      "uid": "transcribe",
+      "id": "transcribe",
       "title": "Amazon Transcribe",
       "subtitle": "Powerful Speech Recognition",
       "match": "transcribe Amazon Transcribe",
       "arg": "/transcribe/home",
       "autocomplete": "Amazon Transcribe",
       "icon": {
-        "path": "./icons/transcribe.png"
+        "path": "./aws-icons/transcribe.png"
       }
     },
     {
-      "uid": "transfer",
+      "id": "transfer",
       "title": "AWS Transfer Family",
       "subtitle": "Fully managed support for SFTP, FTPS and FTP",
       "match": "transfer AWS Transfer Family",
       "arg": "/transfer/home",
       "autocomplete": "AWS Transfer Family",
       "icon": {
-        "path": "./icons/transfer.png"
+        "path": "./aws-icons/transfer.png"
       }
     },
     {
-      "uid": "translate",
+      "id": "translate",
       "title": "Amazon Translate",
       "subtitle": "Powerful Neural Machine Translation",
       "match": "translate Amazon Translate",
       "arg": "/translate/home",
       "autocomplete": "Amazon Translate",
       "icon": {
-        "path": "./icons/translate.png"
+        "path": "./aws-icons/translate.png"
       }
     },
     {
-      "uid": "ta",
+      "id": "ta",
       "title": "Trusted Advisor",
       "subtitle": "Optimize Performance and Security",
       "match": "ta Trusted Advisor",
       "arg": "/trustedadvisor/home",
       "autocomplete": "Trusted Advisor",
       "icon": {
-        "path": "./icons/ta.png"
+        "path": "./aws-icons/ta.png"
       }
     },
     {
-      "uid": "vpc",
+      "id": "vpc",
       "title": "VPC",
       "subtitle": "Isolated Cloud Resources",
       "match": "vpc VPC",
       "arg": "/vpc/home",
       "autocomplete": "VPC",
       "icon": {
-        "path": "./icons/vpc.png"
+        "path": "./aws-icons/vpc.png"
       }
     },
     {
-      "uid": "waf",
+      "id": "waf",
       "title": "WAF & Shield",
       "subtitle": "Protects Against DDoS Attacks and Malicious Web Traffic",
       "match": "waf WAF & Shield",
       "arg": "/wafv2/home",
       "autocomplete": "WAF & Shield",
       "icon": {
-        "path": "./icons/waf.png"
+        "path": "./aws-icons/waf.png"
       }
     },
     {
-      "uid": "wellarchitected",
+      "id": "wellarchitected",
       "title": "AWS Well-Architected Tool",
       "subtitle": "Use AWS Well-Architected Tool to learn best practices, measure, and improve your workloads",
       "match": "wellarchitected AWS Well-Architected Tool",
       "arg": "/wellarchitected/home",
       "autocomplete": "AWS Well-Architected Tool",
       "icon": {
-        "path": "./icons/wellarchitected.png"
+        "path": "./aws-icons/wellarchitected.png"
       }
     },
     {
-      "uid": "worklink",
+      "id": "worklink",
       "title": "WorkLink",
       "subtitle": "Enable secure mobile access to internal websites and web apps",
       "match": "worklink WorkLink",
       "arg": "/worklink/home",
       "autocomplete": "WorkLink",
       "icon": {
-        "path": "./icons/worklink.png"
+        "path": "./aws-icons/worklink.png"
       }
     },
     {
-      "uid": "wkm",
+      "id": "wkm",
       "title": "WorkMail",
       "subtitle": "Secure Email and Calendaring Service",
       "match": "wkm WorkMail",
       "arg": "/workmail/v2/home",
       "autocomplete": "WorkMail",
       "icon": {
-        "path": "./icons/wkm.png"
+        "path": "./aws-icons/wkm.png"
       }
     },
     {
-      "uid": "wks",
+      "id": "wks",
       "title": "WorkSpaces",
       "subtitle": "Desktops in the Cloud",
       "match": "wks WorkSpaces",
       "arg": "/workspaces/home",
       "autocomplete": "WorkSpaces",
       "icon": {
-        "path": "./icons/wks.png"
+        "path": "./aws-icons/wks.png"
       }
     },
     {
-      "uid": "xray",
+      "id": "xray",
       "title": "X-Ray",
       "subtitle": "Analyze and Debug Your Applications",
       "match": "xray X-Ray",
       "arg": "/xray/home",
       "autocomplete": "X-Ray",
       "icon": {
-        "path": "./icons/xray.png"
+        "path": "./aws-icons/xray.png"
       }
     },
     {
-      "uid": "z",
+      "id": "z",
       "title": "WorkDocs",
       "subtitle": "Secure Enterprise Storage and Sharing Service",
       "match": "z WorkDocs",
       "arg": "/zocalo/home",
       "autocomplete": "WorkDocs",
       "icon": {
-        "path": "./icons/z.png"
+        "path": "./aws-icons/z.png"
       }
     },
     {
-      "uid": "glue-studio",
+      "id": "glue-studio",
       "title": null,
       "match": "glue-studio null",
       "arg": "/gluestudio/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/glue-studio.png"
+        "path": "./aws-icons/glue-studio.png"
       }
     },
     {
-      "uid": "scallop",
+      "id": "scallop",
       "title": "CloudShell",
       "subtitle": "A browser-based shell with AWS CLI access from the AWS Management Console",
       "match": "scallop CloudShell",
       "arg": "/cloudshell/home",
       "autocomplete": "CloudShell",
       "icon": {
-        "path": "./icons/cloudshell.png"
+        "path": "./aws-icons/cloudshell.png"
       }
     },
     {
-      "uid": "maui",
+      "id": "maui",
       "title": null,
       "match": "maui null",
       "arg": "/systems-manager/change-manager/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/maui.png"
+        "path": "./aws-icons/maui.png"
       }
     },
     {
-      "uid": "pinpoint",
+      "id": "pinpoint",
       "title": "Pinpoint",
       "subtitle": "Engage Users via Email, SMS, Push & Analytics",
       "match": "pinpoint Pinpoint",
       "arg": "/pinpoint/home",
       "autocomplete": "Pinpoint",
       "icon": {
-        "path": "./icons/pinpoint.png"
+        "path": "./aws-icons/pinpoint.png"
       }
     },
     {
-      "uid": "signer",
+      "id": "signer",
       "title": "AWS Signer",
       "subtitle": "Ensuring trust and integrity of your code",
       "match": "signer AWS Signer",
       "arg": "/signer/home",
       "autocomplete": "AWS Signer",
       "icon": {
-        "path": "./icons/signer.png"
+        "path": "./aws-icons/signer.png"
       }
     },
     {
-      "uid": "c",
+      "id": "c",
       "title": "Cognito",
       "subtitle": "AWS Credentials for Federated Identities",
       "match": "c Cognito",
       "arg": "/cognito/home",
       "autocomplete": "Cognito",
       "icon": {
-        "path": "./icons/c.png"
+        "path": "./aws-icons/c.png"
       }
     },
     {
-      "uid": "poirot",
+      "id": "poirot",
       "title": "Amazon Lookout for Metrics",
       "subtitle": "Accurately detect anomalies in your business metrics and quickly understand why",
       "match": "poirot Amazon Lookout for Metrics",
       "arg": "/lookoutmetrics/home",
       "autocomplete": "Amazon Lookout for Metrics",
       "icon": {
-        "path": "./icons/lookoutformetrics.png"
+        "path": "./aws-icons/lookoutformetrics.png"
       }
     },
     {
-      "uid": "omni",
+      "id": "omni",
       "title": "AWS Panorama",
       "subtitle": "Enabling computer vision applications at the edge",
       "match": "omni AWS Panorama",
       "arg": "/panorama/home",
       "autocomplete": "AWS Panorama",
       "icon": {
-        "path": "./icons/panorama.png"
+        "path": "./aws-icons/panorama.png"
       }
     },
     {
-      "uid": "hogun",
+      "id": "hogun",
       "title": "Amazon Lookout for Equipment",
       "subtitle": "Detect abnormal equipment behavior by analyzing sensor data",
       "match": "hogun Amazon Lookout for Equipment",
       "arg": "/lookoutequipment/home",
       "autocomplete": "Amazon Lookout for Equipment",
       "icon": {
-        "path": "./icons/lookoutforequipment.png"
+        "path": "./aws-icons/lookoutforequipment.png"
       }
     },
     {
-      "uid": "grafana",
+      "id": "grafana",
       "title": "Amazon Grafana",
       "subtitle": "Fully managed Grafana service for interactive data visualizations and dashboarding",
       "match": "grafana Amazon Grafana",
       "arg": "/grafana/home",
       "autocomplete": "Amazon Grafana",
       "icon": {
-        "path": "./icons/grafana.png"
+        "path": "./aws-icons/grafana.png"
       }
     },
     {
-      "uid": "sumerian",
+      "id": "sumerian",
       "title": "Amazon Sumerian",
       "subtitle": "Build VR, AR, and 3D applications",
       "match": "sumerian Amazon Sumerian",
       "arg": "/sumerianv2/home",
       "autocomplete": "Amazon Sumerian",
       "icon": {
-        "path": "./icons/sumerian.png"
+        "path": "./aws-icons/sumerian.png"
       }
     },
     {
-      "uid": "stealfire",
+      "id": "stealfire",
       "title": "Amazon Prometheus",
       "subtitle": "A fully managed Prometheus-compatible monitoring service.",
       "match": "stealfire Amazon Prometheus",
       "arg": "/prometheus/home",
       "autocomplete": "Amazon Prometheus",
       "icon": {
-        "path": "./icons/prometheus.png"
+        "path": "./aws-icons/prometheus.png"
       }
     },
     {
-      "uid": "ops",
+      "id": "ops",
       "title": "OpsWorks",
       "subtitle": "Configuration Management with Chef and Puppet",
       "match": "ops OpsWorks",
       "arg": "/opsworks/landing/home",
       "autocomplete": "OpsWorks",
       "icon": {
-        "path": "./icons/ops.png"
+        "path": "./aws-icons/ops.png"
       }
     },
     {
-      "uid": "lyra",
+      "id": "lyra",
       "title": "Amazon Lookout for Vision",
       "subtitle": "Identify defects using computer vision to automate quality inspection.",
       "match": "lyra Amazon Lookout for Vision",
       "arg": "/lookoutvision/home",
       "autocomplete": "Amazon Lookout for Vision",
       "icon": {
-        "path": "./icons/lookoutforvision.png"
+        "path": "./aws-icons/lookoutforvision.png"
       }
     },
     {
-      "uid": "codeguru",
+      "id": "codeguru",
       "title": "Amazon CodeGuru",
       "subtitle": "Intelligent recommendations for building and running modern applications",
       "match": "codeguru Amazon CodeGuru",
       "arg": "/codeguru/home",
       "autocomplete": "Amazon CodeGuru",
       "icon": {
-        "path": "./icons/codeguru.png"
+        "path": "./aws-icons/codeguru.png"
       }
     },
     {
-      "uid": "bedrock",
+      "id": "bedrock",
       "title": "AWS Audit Manager",
       "subtitle": "Continuously assess controls for risk and compliance",
       "match": "bedrock AWS Audit Manager",
       "arg": "/auditmanager/home",
       "autocomplete": "AWS Audit Manager",
       "icon": {
-        "path": "./icons/auditmanager.png"
+        "path": "./aws-icons/auditmanager.png"
       }
     },
     {
-      "uid": "awsautoscaling",
+      "id": "awsautoscaling",
       "title": "AWS Auto Scaling",
       "subtitle": "AWS Auto Scaling enables you to quickly scale your entire application on AWS",
       "match": "awsautoscaling AWS Auto Scaling",
       "arg": "/awsautoscaling/home",
       "autocomplete": "AWS Auto Scaling",
       "icon": {
-        "path": "./icons/awsautoscaling.png"
+        "path": "./aws-icons/awsautoscaling.png"
       }
     },
     {
-      "uid": "connect",
+      "id": "connect",
       "title": "Amazon Connect",
       "subtitle": "Amazon Connect is a contact center that enables engagement at any scale.",
       "match": "connect Amazon Connect",
       "arg": "/connect/home",
       "autocomplete": "Amazon Connect",
       "icon": {
-        "path": "./icons/connect.png"
+        "path": "./aws-icons/connect.png"
       }
     },
     {
-      "uid": "thor",
+      "id": "thor",
       "title": "Amazon Monitron",
       "subtitle": "End-to-end system for equipment monitoring",
       "match": "thor Amazon Monitron",
       "arg": "/monitron/home",
       "autocomplete": "Amazon Monitron",
       "icon": {
-        "path": "./icons/monitron.png"
+        "path": "./aws-icons/monitron.png"
       }
     },
     {
-      "uid": "amazonmq",
+      "id": "amazonmq",
       "title": "Amazon MQ",
       "subtitle": "Managed message broker service for Apache ActiveMQ and RabbitMQ",
       "match": "amazonmq Amazon MQ",
       "arg": "/amazon-mq/home",
       "autocomplete": "Amazon MQ",
       "icon": {
-        "path": "./icons/amazonmq.png"
+        "path": "./aws-icons/amazonmq.png"
       }
     },
     {
-      "uid": "dynamodbv2",
+      "id": "dynamodbv2",
       "title": null,
       "match": "dynamodbv2 null",
       "arg": "/dynamodbv2/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/dynamodbv2.png"
+        "path": "./aws-icons/dynamodbv2.png"
       }
     },
     {
-      "uid": "pinwheel",
+      "id": "pinwheel",
       "title": "Managed Apache Airflow",
       "subtitle": "Run Apache Airflow without provisioning or managing servers.",
       "match": "pinwheel Managed Apache Airflow",
       "arg": "/mwaa/home",
       "autocomplete": "Managed Apache Airflow",
       "icon": {
-        "path": "./icons/airflow.png"
+        "path": "./aws-icons/airflow.png"
       }
     },
     {
-      "uid": "arrow",
+      "id": "arrow",
       "title": "AWS Proton",
       "subtitle": "Manage your infrastructure so developers can focus on coding. ",
       "match": "arrow AWS Proton",
       "arg": "/proton/home",
       "autocomplete": "AWS Proton",
       "icon": {
-        "path": "./icons/proton.png"
+        "path": "./aws-icons/proton.png"
       }
     },
     {
-      "uid": "macie",
+      "id": "macie",
       "title": "Amazon Macie",
       "subtitle": "Amazon Macie classifies and secures your business-critical content.",
       "match": "macie Amazon Macie",
       "arg": "/macie/home",
       "autocomplete": "Amazon Macie",
       "icon": {
-        "path": "./icons/macie.png"
+        "path": "./aws-icons/macie.png"
       }
     },
     {
-      "uid": "ecr",
+      "id": "ecr",
       "title": "Elastic Container Registry",
       "subtitle": "Fully-managed Docker container registry : Share and deploy container software, publicly or privately",
       "match": "ecr Elastic Container Registry",
       "arg": "/ecr/home",
       "autocomplete": "Elastic Container Registry",
       "icon": {
-        "path": "./icons/ecr.png"
+        "path": "./aws-icons/ecr.png"
       }
     },
     {
-      "uid": "iotwireless",
+      "id": "iotwireless",
       "title": "AWS IoT Core for LoRaWAN",
       "subtitle": "Connect, manage, and secure LoRaWAN devices at scale",
       "match": "iotwireless AWS IoT Core for LoRaWAN",
       "arg": "/iotwireless/home",
       "autocomplete": "AWS IoT Core for LoRaWAN",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
-      "uid": "storagegatewayv3",
+      "id": "storagegatewayv3",
       "title": null,
       "match": "storagegatewayv3 null",
       "arg": "/storagegatewayv3/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/storagegatewayv3.png"
+        "path": "./aws-icons/storagegatewayv3.png"
       }
     },
     {
-      "uid": "es",
-      "title": "Elasticsearch Service",
-      "subtitle": "Run and Scale Elasticsearch Clusters",
-      "match": "es Elasticsearch Service",
-      "arg": "/es/home",
-      "autocomplete": "Elasticsearch Service",
+      "id": "aos",
+      "title": "OpenSearch Service",
+      "subtitle": "Run and Scale OpenSearch Clusters",
+      "match": "aos OpenSearch Service",
+      "arg": "/aos/home",
+      "autocomplete": "OpenSearch Service",
       "icon": {
-        "path": "./icons/es.png"
+        "path": "./aws-icons/aos.png"
       }
     },
     {
-      "uid": "harrier",
+      "id": "harrier",
       "title": null,
       "match": "harrier null",
       "arg": "/elasticviews/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/harrier.png"
+        "path": "./aws-icons/harrier.png"
       }
     },
     {
-      "uid": "waypoint",
+      "id": "waypoint",
       "title": "Amazon Location Service",
       "subtitle": "Securely and easily add location data to applications.",
       "match": "waypoint Amazon Location Service",
       "arg": "/location/home",
       "autocomplete": "Amazon Location Service",
       "icon": {
-        "path": "./icons/locationservice.png"
+        "path": "./aws-icons/locationservice.png"
       }
     },
     {
-      "uid": "s3-outposts",
+      "id": "s3-outposts",
       "title": null,
       "match": "s3-outposts null",
       "arg": "/s3-outposts/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/s3-outposts.png"
+        "path": "./aws-icons/s3-outposts.png"
       }
     },
     {
-      "uid": "elixir",
+      "id": "elixir",
       "title": "AWS Glue DataBrew",
       "subtitle": "Visual data preparation tool to clean and normalize data for analytics and machine learning",
       "match": "elixir AWS Glue DataBrew",
       "arg": "/databrew/home",
       "autocomplete": "AWS Glue DataBrew",
       "icon": {
-        "path": "./icons/gluedatabrew.png"
+        "path": "./aws-icons/gluedatabrew.png"
       }
     },
     {
-      "uid": "states",
+      "id": "states",
       "title": "Step Functions",
       "subtitle": "Coordinate Distributed Applications",
       "match": "states Step Functions",
       "arg": "/states/home",
       "autocomplete": "Step Functions",
       "icon": {
-        "path": "./icons/states.png"
+        "path": "./aws-icons/states.png"
       }
     },
     {
-      "uid": "managedblockchain",
+      "id": "managedblockchain",
       "title": "Amazon Managed Blockchain",
       "subtitle": "Easily create and manage scalable blockchain networks",
       "match": "managedblockchain Amazon Managed Blockchain",
       "arg": "/managedblockchain/home",
       "autocomplete": "Amazon Managed Blockchain",
       "icon": {
-        "path": "./icons/managedblockchain.png"
+        "path": "./aws-icons/managedblockchain.png"
       }
     },
     {
-      "uid": "launchwizard",
+      "id": "launchwizard",
       "title": "Launch Wizard",
       "subtitle": "guided deployment of enterprise applications",
       "match": "launchwizard Launch Wizard",
       "arg": "/launchwizard/home",
       "autocomplete": "Launch Wizard",
       "icon": {
-        "path": "./icons/launchwizard.png"
+        "path": "./aws-icons/launchwizard.png"
       }
     },
     {
-      "uid": "wam",
+      "id": "wam",
       "title": null,
       "match": "wam null",
       "arg": "/wam/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/wam.png"
+        "path": "./aws-icons/wam.png"
       }
     },
     {
-      "uid": "kendra",
+      "id": "kendra",
       "title": "Amazon Kendra",
       "subtitle": "Highly accurate enterprise search service powered by machine learning",
       "match": "kendra Amazon Kendra",
       "arg": "/kendra/home",
       "autocomplete": "Amazon Kendra",
       "icon": {
-        "path": "./icons/kendra.png"
+        "path": "./aws-icons/kendra.png"
       }
     },
     {
-      "uid": "ivs",
+      "id": "ivs",
       "title": "Amazon Interactive Video Service",
       "subtitle": "Managed live video streaming service from ingest to playback",
       "match": "ivs Amazon Interactive Video Service",
       "arg": "/ivs/home",
       "autocomplete": "Amazon Interactive Video Service",
       "icon": {
-        "path": "./icons/ivs.png"
+        "path": "./aws-icons/ivs.png"
       }
     },
     {
-      "uid": "colossus",
+      "id": "colossus",
       "title": "Amazon HealthLake",
       "subtitle": "Making sense of health data",
       "match": "colossus Amazon HealthLake",
       "arg": "/healthlake/home",
       "autocomplete": "Amazon HealthLake",
       "icon": {
-        "path": "./icons/healthlake.png"
+        "path": "./aws-icons/healthlake.png"
       }
     }
   ]

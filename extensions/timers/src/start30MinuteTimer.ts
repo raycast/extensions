@@ -1,8 +1,6 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
-import { startTimer } from "./timerUtils";
+import { checkForOverlyLoudAlert, startTimer } from "./backend/timerBackend";
 
 export default async () => {
-  await closeMainWindow();
-  await startTimer(60 * 30);
-  await showHUD("Timer started for 30 minutes! 🎉");
+  if (!checkForOverlyLoudAlert()) return;
+  await startTimer({ timeInSeconds: 60 * 30, timerName: "30 Minute Timer" });
 };

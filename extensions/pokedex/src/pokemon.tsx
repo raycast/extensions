@@ -1,162 +1,108 @@
 import {
   Action,
   ActionPanel,
-  List,
+  Grid,
   Icon,
   getPreferenceValues,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
 import groupBy from "lodash.groupby";
-import json2md from "json2md";
-import PokemonDetail from "./components/detail";
+import orderBy from "lodash.orderby";
+import shuffle from "lodash.shuffle";
+import { useEffect, useState } from "react";
+import PokeProfile from "./components/profile";
 import TypeDropdown from "./components/type_dropdown";
+import pokedex from "./statics/pokedex.json";
+import { getContentImg, localeName, nationalDexNumber } from "./utils";
 
-import pokemons from "./statics/pokemons.json";
+const { language } = getPreferenceValues();
 
-const preference = getPreferenceValues();
-
-export default function SearchPokemon() {
-  const [nameOrId, setNameOrId] = useState<string>("");
+export default function NationalPokedex() {
   const [type, setType] = useState<string>("all");
-  const [showPreview, setShowPreview] = useState<boolean>(
-    preference.showPreview
-  );
+  const [sort, setSort] = useState<string>("lowest");
+  const [randomization, setRandomization] = useState<boolean>(false);
+  const [pokemons, setPokemons] = useState(pokedex);
 
-  const generations = useMemo(() => {
-    let listing = nameOrId
-      ? pokemons.filter(
-          (p) =>
-            p.name.toLowerCase().includes(nameOrId.toLowerCase()) ||
-            p.id === Number(nameOrId)
-        )
-      : pokemons;
+  useEffect(() => {
+    const shuffled = shuffle(pokemons);
+    setPokemons(shuffled);
+  }, [randomization]);
 
-    if (type != "all") {
-      listing = listing.filter((p) => p.types.includes(type));
-    }
+  useEffect(() => {
+    const sorted = orderBy(pokedex, ...sort.split("|"));
+    const filtered =
+      type != "all" ? sorted.filter((p) => p.types.includes(type)) : sorted;
 
-    return groupBy(listing, "generation");
-  }, [nameOrId, type]);
+    setPokemons(filtered);
+  }, [type, sort]);
 
   return (
-    <List
+    <Grid
       throttle
-      onSearchTextChange={(text) => setNameOrId(text)}
-      searchBarPlaceholder="Search Pokémon by name or number..."
+      columns={6}
+      searchBarPlaceholder="Search for Pokémon by name or Pokédex number"
       searchBarAccessory={
-        <TypeDropdown command="Pokémon" onSelectType={setType} />
+        <TypeDropdown type="grid" command="Pokémon" onSelectType={setType} />
       }
-      isShowingDetail={showPreview}
     >
-      {!nameOrId && type === "all" && (
-        <List.Section>
-          <List.Item
-            key="surprise"
-            title="Surprise Me!"
-            accessories={
-              showPreview ? undefined : [{ text: "Random Pokémon selector" }]
-            }
-            icon="icon_sort.svg"
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Surprise Me!"
-                  icon="icon_sort.svg"
-                  target={<PokemonDetail />}
-                />
-                <Action
-                  title={showPreview ? "Hide Preview" : "Show Preview"}
-                  icon={Icon.Sidebar}
-                  onAction={() => setShowPreview(!showPreview)}
-                />
-              </ActionPanel>
-            }
-            detail={
-              showPreview ? (
-                <List.Item.Detail
-                  markdown={json2md([
-                    {
-                      h1: "Surprise Me!",
-                    },
-                    {
-                      p: `Show a random Pokémon details between the inclusive **${
-                        pokemons[0].name
-                      }** and **${pokemons.reverse()[0].name}** bounds`,
-                    },
-                  ])}
-                />
-              ) : undefined
-            }
-          />
-        </List.Section>
+      {Object.entries(groupBy(pokemons, "generation")).map(
+        ([generation, pokemonList]) => {
+          return (
+            <Grid.Section title={generation} key={generation}>
+              {pokemonList.map((pokemon) => {
+                return (
+                  <Grid.Item
+                    key={pokemon.id}
+                    content={getContentImg(pokemon.id)}
+                    title={localeName(pokemon, language)}
+                    subtitle={nationalDexNumber(pokemon.id)}
+                    keywords={[pokemon.id.toString(), pokemon.name]}
+                    actions={
+                      <ActionPanel>
+                        <ActionPanel.Section title="Information">
+                          <Action.Push
+                            title="Pokémon Profile"
+                            icon={Icon.Sidebar}
+                            target={<PokeProfile id={pokemon.id} />}
+                          />
+                        </ActionPanel.Section>
+                        <ActionPanel.Section title="Randomize">
+                          <Action
+                            title="Surprise Me!"
+                            icon={Icon.Shuffle}
+                            onAction={() => setRandomization(!randomization)}
+                          />
+                        </ActionPanel.Section>
+                        <ActionPanel.Section title="Sort By">
+                          <Action
+                            title="Number (Lowest First)"
+                            icon={Icon.ArrowUp}
+                            onAction={() => setSort("id|asc")}
+                          />
+                          <Action
+                            title="Number (Highest First)"
+                            icon={Icon.ArrowDown}
+                            onAction={() => setSort("id|desc")}
+                          />
+                          <Action
+                            title="Name (A-Z)"
+                            icon={Icon.Text}
+                            onAction={() => setSort("name|asc")}
+                          />
+                          <Action
+                            title="Name (Z-A)"
+                            icon={Icon.Text}
+                            onAction={() => setSort("name|desc")}
+                          />
+                        </ActionPanel.Section>
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </Grid.Section>
+          );
+        },
       )}
-      {Object.entries(generations).map(([generation, pokemonList]) => {
-        return (
-          <List.Section
-            key={generation}
-            title={generation}
-            subtitle={pokemonList.length.toString()}
-          >
-            {pokemonList.map((pokemon) => {
-              const props: Partial<List.Item.Props> = showPreview
-                ? {
-                    accessories: pokemon.types.map((type) => ({
-                      icon: `types/${type.toLowerCase()}.svg`,
-                    })),
-                    detail: (
-                      <List.Item.Detail
-                        markdown={json2md([
-                          {
-                            h1: pokemon.name,
-                          },
-                          { p: pokemon.types.join(", ") },
-                          {
-                            img: {
-                              title: pokemon.name,
-                              source: pokemon.artwork,
-                            },
-                          },
-                        ])}
-                      />
-                    ),
-                  }
-                : {
-                    accessories: pokemon.types.map((type) => ({
-                      text: type,
-                      icon: `types/${type.toLowerCase()}.svg`,
-                    })),
-                    icon: {
-                      source: pokemon.artwork,
-                      fallback: "icon.png",
-                    },
-                  };
-
-              return (
-                <List.Item
-                  key={pokemon.id}
-                  title={`#${pokemon.id.toString().padStart(3, "0")}`}
-                  subtitle={pokemon.name}
-                  {...props}
-                  actions={
-                    <ActionPanel>
-                      <Action.Push
-                        title="Show Details"
-                        icon="icon_sort.svg"
-                        target={<PokemonDetail id={pokemon.id} />}
-                      />
-                      <Action
-                        title={showPreview ? "Hide Preview" : "Show Preview"}
-                        icon={Icon.Sidebar}
-                        onAction={() => setShowPreview(!showPreview)}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        );
-      })}
-    </List>
+    </Grid>
   );
 }

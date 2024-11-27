@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contentful",
+  "title": "Contentful",
+  "description": "Browse and search Contentful content and assets library",
+  "icon": "icon.png",
+  "author": "ewgenius",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Content",
+      "subtitle": "Contentful",
+      "description": "Search Contentful content library",
+      "mode": "view"
+    },
+    {
+      "name": "search-assets",
+      "title": "Search Assets",
+      "subtitle": "Contentful",
+      "description": "Search Contentful media library",
+      "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users or Roles",
+      "subtitle": "Contentful",
+      "description": "Search Contentful users or roles",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "type",
+          "type": "dropdown",
+          "required": true,
+          "placeholder": "Users or Roles",
+          "data": [
+            {
+              "title": "Users",
+              "value": "user"
+            },
+            {
+              "title": "Roles",
+              "value": "role"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "space",
+      "title": "Contentful Space ID",
+      "description": "Contentful Space ID",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "xxxxxxxxxxxx"
+    },
+    {
+      "name": "token",
+      "title": "Contentful Management Token",
+      "description": "Contentful Management Token",
+      "type": "password",
+      "required": true,
+      "placeholder": "CFPAT-Xxx...XXx"
+    },
+    {
+      "name": "environment",
+      "title": "Contentful Environment",
+      "description": "If not set, will be used 'master'",
+      "type": "textfield",
+      "required": false,
+      "default": "master",
+      "placeholder": "master"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "contentful-management": "^11.38.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

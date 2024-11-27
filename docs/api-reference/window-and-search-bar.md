@@ -1,4 +1,4 @@
-# Window & Search Bar
+# Raycast Window & Search Bar
 
 ## API Reference
 
@@ -9,16 +9,12 @@ Clear the text in the search bar.
 #### Signature
 
 ```typescript
-async function clearSearchBar(options: {
-  forceScrollToTop: boolean;
-}): Promise<void>;
+async function clearSearchBar(options?: { forceScrollToTop?: boolean }): Promise<void>;
 ```
 
 #### Parameters
 
-| Name    | Type                                       | Required | Description                                                                                                   |
-| :------ | :----------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------ |
-| options | <code>{ forceScrollToTop: boolean }</code> | No       | Can be used to force scrolling to the top. Defaults to scrolling to the top after the search bar was cleared. |
+<FunctionParametersTableFromJSDoc name="clearSearchBar" />
 
 #### Return
 
@@ -31,9 +27,7 @@ Closes the main Raycast window.
 #### Signature
 
 ```typescript
-async function closeMainWindow(options: {
-  clearRootSearch: boolean;
-}): Promise<void>;
+async function closeMainWindow(options?: { clearRootSearch?: boolean; popToRootType?: PopToRootType }): Promise<void>;
 ```
 
 #### Example
@@ -42,93 +36,29 @@ async function closeMainWindow(options: {
 import { closeMainWindow } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
-export default async () => {
+export default async function Command() {
   await setTimeout(1000);
   await closeMainWindow({ clearRootSearch: true });
+}
+```
+
+You can use the `popToRootType` parameter to temporarily prevent Raycast from applying the user's "Pop to Root Search" preference in Raycast; for example, when you need to interact with an external system utility and then allow the user to return back to the view command:
+
+```typescript
+import { closeMainWindow, PopToRootType } from "@raycast/api";
+
+export default async () => {
+  await closeMainWindow({ popToRootType: PopToRootType.Suspended });
 };
 ```
 
 #### Parameters
 
-| Name    | Type                                      | Required | Description                                                                                                 |
-| :------ | :---------------------------------------- | :------- | :---------------------------------------------------------------------------------------------------------- |
-| options | <code>{ clearRootSearch: boolean }</code> | No       | Can be used to clear the root search. Defaults to not clearing the root search after the window was closed. |
+<FunctionParametersTableFromJSDoc name="closeMainWindow" />
 
 #### Return
 
 A Promise that resolves when the main window is closed.
-
-### openExtensionPreferences
-
-Opens the extension's preferences screen.
-
-#### Signature
-
-```typescript
-export declare function openExtensionPreferences(): Promise<void>;
-```
-
-#### Example
-
-```typescript
-import { ActionPanel, Action, Detail, openExtensionPreferences } from "@raycast/api";
-
-export default function Command() {
-  const markdown = `
-API key incorrect. Please update it in extension preferences and try again.
-  `;
-  return (
-    <Detail
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-```
-
-#### Return
-
-A Promise that resolves when the extensions preferences screen is opened.
-
-### openCommandPreferences
-
-Opens the command's preferences screen.
-
-#### Signature
-
-```typescript
-export declare function openCommandPreferences(): Promise<void>;
-```
-
-#### Example
-
-```typescript
-import { ActionPanel, Action, Detail, openCommandPreferences } from "@raycast/api";
-
-export default function Command() {
-  const markdown = `
-API key incorrect. Please update it in command preferences and try again.
-  `;
-  return (
-    <Detail
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-```
-
-#### Return
-
-A Promise that resolves when the command's preferences screen is opened.
 
 ### popToRoot
 
@@ -137,7 +67,7 @@ Pops the navigation stack back to root search.
 #### Signature
 
 ```typescript
-async function popToRoot(options: { clearSearchBar: boolean }): Promise<void>;
+async function popToRoot(options?: { clearSearchBar?: boolean }): Promise<void>;
 ```
 
 #### Example
@@ -160,10 +90,22 @@ export default function Command() {
 
 #### Parameters
 
-| Name    | Type                                     | Required | Description                                                                                    |
-| :------ | :--------------------------------------- | :------- | :--------------------------------------------------------------------------------------------- |
-| options | <code>{ clearSearchBar: boolean }</code> | No       | Can be used to clear the search bar. Defaults to clearing the search bar after popped to root. |
+<FunctionParametersTableFromJSDoc name="popToRoot" />
 
 #### Return
 
 A Promise that resolves when Raycast popped to root.
+
+## Types
+
+### PopToRootType
+
+Defines the pop to root behavior when the main window is closed.
+
+#### Enumeration members
+
+| Name      | Description                                                    |
+| :-------- | :------------------------------------------------------------- |
+| Default   | Respects the user's "Pop to Root Search" preference in Raycast |
+| Immediate | Immediately pops back to root                                  |
+| Suspended | Prevents Raycast from popping back to root                     |

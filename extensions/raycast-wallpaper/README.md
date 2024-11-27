@@ -2,11 +2,6 @@
 
 Set Raycast official wallpapers as desktop wallpaper.
 
-**Preferences**
+**Tips:**
 
-- _Apply Wallpaper To_
-  - Current Desktop
-  - Every Desktop
-
-I would like to thank [EGGSY](https://www.raycast.com/eggsy).
-Part of the code borrowed from his extension [Unsplash](https://www.raycast.com/eggsy/unsplash).
+- If you don't like the automatic wallpaper switching feature, turn it off by turning off the Background Refresh function in the command's preferences

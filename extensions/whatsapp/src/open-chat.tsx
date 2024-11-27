@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
@@ -7,41 +7,41 @@ import WhatsAppGroupChatForm from "./add-existing-group";
 import formatTimeDistance from "fromnow";
 
 export default function ChatList() {
-  const { chats, isLoading, updateChats } = useWhatsAppChats();
+  const [chats, setChats] = useWhatsAppChats();
   const [selectedItemId, setSelectedItemId] = useState<string>();
 
   const pinnedChats = chats.filter((chat) => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
   const unpinnedChats = chats.filter((chat) => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
 
-  async function handlePin(chat: WhatsAppChat) {
+  function handlePin(chat: WhatsAppChat) {
     const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, pinned: !c.pinned };
       }
       return c;
     });
-    await updateChats(newChats);
+    setChats(newChats);
     setSelectedItemId(chat.id);
   }
 
-  async function handleDelete(chat: WhatsAppChat) {
+  function handleDelete(chat: WhatsAppChat) {
     const newChats = chats.filter((c) => c.id !== chat.id);
-    await updateChats(newChats);
+    setChats(newChats);
   }
 
-  async function handleOpen(chat: WhatsAppChat) {
+  function handleOpen(chat: WhatsAppChat) {
     const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, lastOpened: Date.now() };
       }
       return c;
     });
-    await updateChats(newChats);
+    setChats(newChats);
   }
 
   return (
-    <List isLoading={isLoading} selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
-      {!isLoading && chats.length === 0 ? (
+    <List selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
+      {chats.length === 0 ? (
         <List.EmptyView
           icon={Icon.Person}
           title="Add a chat to get started"
@@ -123,7 +123,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
-      icon: Icon.Circle,
+      icon: Icon.TwoPeople,
       keywords: [chat.groupCode, "group"],
       form: <WhatsAppGroupChatForm defaultValue={chat} />,
     };
@@ -139,13 +139,13 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       title={title}
       subtitle={subtitle}
       icon={icon}
-      accessoryTitle={accessoryTitle}
+      accessories={[{ text: accessoryTitle, tooltip: "Last opened" }]}
       keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in WhatsApp"
+              title="Open in Whatsapp"
               icon="whatsapp-outline.png"
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
@@ -160,17 +160,33 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} />
-            <ActionPanel.Item
+            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} shortcut={Keyboard.Shortcut.Common.Edit} />
+            <Action
               title="Delete Chat"
-              icon={{ source: Icon.Trash, tintColor: Color.Red }}
-              onAction={() => onDeleteChat(chat)}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={async () => {
+                if (
+                  await confirmAlert({
+                    title: `Delete "${chat.name}"`,
+                    message: `Are you sure you want to delete this chat?`,
+                    icon: Icon.Trash,
+                    primaryAction: {
+                      title: "Delete",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  })
+                ) {
+                  onDeleteChat(chat);
+                }
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -183,6 +199,10 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             ) : (
               <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push icon={Icon.Person} title="Add Chat" target={<WhatsAppPhoneChatForm />} />
+            <Action.Push icon={Icon.TwoPeople} title="Add Existing Group" target={<WhatsAppGroupChatForm />} />
           </ActionPanel.Section>
         </ActionPanel>
       }

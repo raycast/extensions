@@ -1,4 +1,4 @@
-import { ActionPanel, Application, Detail, getApplications, OpenAction } from '@raycast/api';
+import { Action, ActionPanel, Application, Detail, getApplications } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { isConnrefusedError } from './docker/error';
 
@@ -21,7 +21,7 @@ export default function ErrorDetail({ error }: { error: Error }) {
       actions={
         isConnrefusedError(error) && dockerInstallation !== undefined ? (
           <ActionPanel>
-            <OpenAction title="Launch Docker" target={dockerInstallation.path} />
+            <Action.Open title="Launch Docker" target={dockerInstallation.path} />
           </ActionPanel>
         ) : null
       }

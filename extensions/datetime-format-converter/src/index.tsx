@@ -1,44 +1,100 @@
-import { Form, List, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import dayjs from "dayjs";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Clipboard,
+  Icon,
+  Color,
+  getPreferenceValues,
+  openCommandPreferences,
+} from "@raycast/api";
+import React, { useState } from "react";
+import dayjs, { Dayjs } from "dayjs";
+
+import advancedFormat from "dayjs/plugin/advancedFormat";
+dayjs.extend(advancedFormat);
+
+import localizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(localizedFormat);
+
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 export default function main() {
-  const { push } = useNavigation();
+  const [clipboardText, setClipboardText] = useState("");
+  const [input, setInput] = useState<string>(clipboardText);
+  const [resultList, setResultList] = useState([] as string[]);
+  const [validFormat, setValidFormat] = useState<boolean>(false);
+
+  const dateTimeFormats = {
+    isoDate: "YYYY-MM-DD",
+    isoDateTime: "YYYY-MM-DD HH:mm:ss",
+    formatWithMillis: "YYYY-MM-DD HH:mm:ss.SSS",
+    formatWithTimezone: "YYYY-MM-DD HH:mm:ssZ",
+    isoFormat: "YYYY-MM-DDTHH:mm:ssZ",
+    utcIsoFormat: "YYYY-MM-DDTHH:mm:ss[Z]",
+    unixTimestamp: "X",
+    unixMillis: "x",
+    localizedShortDate: "L",
+    localizedShortDateTime: "L LT",
+    localizedFullDateTime: "LLL",
+    localizedLongDateTime: "LLLL",
+    localizedTime: "LT",
+    localizedSecondsTime: "LTS",
+  };
+
+  const preferences = getPreferenceValues();
+
+  React.useEffect(() => {
+    Clipboard.readText().then((text) => {
+      setClipboardText(text?.toString() || "");
+    });
+  });
+
+  React.useEffect(() => {
+    const _input = input || clipboardText;
+    console.log("input: " + _input);
+    setInput(_input);
+    if (_input) {
+      timeConverter(_input);
+    }
+  }, [clipboardText]);
 
   function timeConverter(time: string) {
+    setInput(time);
+    setValidFormat(true);
     if (!time || time === "now") {
-      push(ResultList(formatTime(new Date().toString())));
+      setResultList(formatTime(new Date().toString()));
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
-        push(ResultList(formatTime(time)));
+        setResultList(formatTime(time));
       } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "An error occurred",
-          message: "This is not a time format.",
-        });
+        setValidFormat(false);
+        setResultList([]);
       }
     }
   }
 
   function formatTime(time: string) {
-    const dTime = dayjs(time);
-    return [
-      dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
-      dTime.format().toString(),
-      dTime.valueOf().toString(),
-      dTime.unix().toString(),
-    ];
-  }
+    let dTime: Dayjs;
+    if (!isNaN(Number(time))) {
+      if (time.length == 10) {
+        // is unix timestamp seconds
+        dTime = dayjs.unix(Number(time));
+      } else if (time.length == 13) {
+        // is unix timestamp milliseconds
+        dTime = dayjs(Number(time));
+      } else {
+        return [];
+      }
+    } else {
+      dTime = dayjs(time);
+    }
 
-  function ResultList(times: string[]) {
-    return (
-      <List>
-        {times.map((time, index) => (
-          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
-        ))}
-      </List>
-    );
+    return Object.entries(dateTimeFormats)
+      .filter(([key]) => preferences[key])
+      .map(([_, value]) => dTime.format(value).toString());
   }
 
   type ActionItem = {
@@ -57,14 +113,33 @@ export default function main() {
   }
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values.time)} />
-        </ActionPanel>
-      }
+    <List
+      onSearchTextChange={(text) => timeConverter(text)}
+      searchText={input}
+      searchBarPlaceholder="Enter a time or date"
     >
-      <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
-    </Form>
+      {resultList && resultList.length > 0 ? (
+        resultList.map((time, index) => (
+          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
+        ))
+      ) : !validFormat ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="An error occurred"
+          description="This is not a time format."
+        />
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="No Date Time Format is selected in preferences"
+          description="press ↵ to Open Extension Preferences"
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+    </List>
   );
 }

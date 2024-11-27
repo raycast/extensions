@@ -56,16 +56,26 @@ export default class Entry {
     }
   }
 
-  validate() {
-    if (!this.name.trim()) throw "Entry is missing a name."
-    this.source.validate("source", this.sshSelection === "source")
-    this.destination.validate("destination", this.sshSelection === "destination")
+  getErrors(skipName = false) {
+    const errors: string[] = []
+
+    if (!skipName && !this.name.trim()) errors.push("Name is missing.")
+
+    for (const option of Object.values(this.options)) {
+      const { name, param, value } = option
+      if (param && !value) errors.push(`Option "${name}" does not have a value.`)
+    }
+
+    errors.push(...this.source.getErrors("source", this.sshSelection === "source"))
+    errors.push(...this.destination.getErrors("destination", this.sshSelection === "destination"))
+
+    return errors
   }
 
   getCommand(): string {
     const sshLocation: EntryLocation | undefined = this.sshSelection !== "none" ? this[this.sshSelection] : undefined
     const { port, identityFile: sshIdentityFile } = sshLocation ?? {}
-    const sshPort = port === "22" ? undefined : port
+    const sshPort = !port || port.trim() === "22" ? undefined : port.trim()
     const rsyncCommand = ["rsync"]
 
     for (const [, option] of Object.entries(this.options)) {
@@ -79,7 +89,6 @@ export default class Entry {
     }
 
     if (sshLocation) {
-      if (sshPort && isNaN(Number(sshPort))) throw `Port entered for ${this.sshSelection} has to be a number.`
       const eOption = ["-e"]
       if (sshPort || sshIdentityFile) {
         const portOption = sshPort ? ` -p ${sshPort}` : ""
@@ -99,7 +108,8 @@ export default class Entry {
     )
 
     const commands = [this.preCommand, rsyncCommand.join(" "), this.postCommand].filter(Boolean)
-    return commands.join("\n")
+    return commands.join(`
+    `)
   }
 
   toRawData(): EntryDTO {

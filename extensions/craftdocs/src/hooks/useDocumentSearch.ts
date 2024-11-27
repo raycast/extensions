@@ -3,14 +3,12 @@ import { UseDB } from "./useDB";
 import { Block } from "./useSearch";
 import {
   buildMatchQuery,
+  documentize,
   limit,
   searchBlocks,
   searchQuery,
   searchQueryDocumentsOnEmptyParams,
-  sqlValueArr2Block,
-  uniqueDocumentIDsFromBlocks,
 } from "./common";
-import { Database } from "../../assets/sql-wasm-fts5";
 
 type UseDocumentSearch = {
   resultsLoading: boolean;
@@ -43,34 +41,3 @@ export default function useDocumentSearch({ databasesLoading, databases }: UseDB
 
   return state;
 }
-
-const documentize = (database: Database, spaceID: string, blocks: Block[]) => {
-  const documentIDs = uniqueDocumentIDsFromBlocks(blocks);
-  const placeholders = new Array(documentIDs.length).fill("?").join(", ");
-  const sql = `SELECT id, content, type, entityType, documentId FROM BlockSearch WHERE documentId in (${placeholders})`;
-
-  return database
-    .exec(sql, documentIDs)
-    .map((res) => res.values)
-    .flat()
-    .reduce((acc, val) => {
-      const block = sqlValueArr2Block(spaceID)(val);
-      let obj = acc.find((item) => item.block.documentID === block.documentID);
-      if (!obj) {
-        obj =
-          block.entityType === "document"
-            ? ({ block, blocks: [] } as DocBlock)
-            : ({ block: { documentID: block.documentID }, blocks: [block] } as DocBlock);
-
-        acc.push(obj);
-      } else {
-        if (block.entityType === "document") {
-          obj.block = block;
-        } else {
-          obj.blocks.push(block);
-        }
-      }
-
-      return acc;
-    }, [] as DocBlock[]);
-};

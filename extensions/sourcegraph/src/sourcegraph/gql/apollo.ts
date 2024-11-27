@@ -1,11 +1,14 @@
 import { createHttpLink, ApolloClient, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "cross-fetch";
-import { changesetFieldsPossibleTypes } from "./queries";
+import operations from "./operations";
 
 export function newApolloClient(connect: { instance: string; token?: string }) {
   const httpLink = createHttpLink({
     uri: `${connect.instance}/.api/graphql`,
+    headers: {
+      "X-Requested-With": "Raycast-Sourcegraph",
+    },
     fetch,
   });
 
@@ -21,9 +24,7 @@ export function newApolloClient(connect: { instance: string; token?: string }) {
   return new ApolloClient({
     link: authLink.concat(httpLink),
     cache: new InMemoryCache({
-      possibleTypes: {
-        ...changesetFieldsPossibleTypes,
-      },
+      possibleTypes: operations.possibleTypes,
     }),
   });
 }

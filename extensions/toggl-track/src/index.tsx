@@ -1,124 +1,137 @@
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { AppContextProvider, useAppContext } from "./context";
-import RunningTimeEntry from "./components/RunningTimeEntry";
-import {
-  ActionPanel,
-  clearSearchBar,
-  Icon,
-  List,
-  PushAction,
-  showToast,
-  SubmitFormAction,
-  ToastStyle,
-} from "@raycast/api";
-import { TimeEntry } from "./toggl/types";
-import toggl from "./toggl";
-import { storage } from "./storage";
-import ProjectListItem from "./components/ProjectListItem";
-import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
+
+import { removeTimeEntry } from "@/api/timeEntries";
+import TimeEntryForm from "@/components/CreateTimeEntryForm";
+import RunningTimeEntry from "@/components/RunningTimeEntry";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { formatSeconds } from "@/helpers/formatSeconds";
+import { Verb, withToast } from "@/helpers/withToast";
+import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
+import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
+import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const {
+    isLoading,
+    mutateTimeEntries,
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+    runningTimeEntry,
+    timeEntries,
+    timeEntriesWithUniqueProjectAndDescription,
+  } = useProcessedTimeEntries();
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce((acc, timeEntry) => {
-    const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
-    if (!existing) {
-      acc.push(timeEntry);
-    }
-    return acc;
-  }, [] as TimeEntry[]);
-
-  async function resumeTimeEntry(timeEntry: TimeEntry) {
-    await showToast(ToastStyle.Animated, "Starting timer...");
-    try {
-      await toggl.createTimeEntry({
-        projectId: timeEntry.pid,
-        description: timeEntry.description,
-        tags: timeEntry.tags,
-        billable: timeEntry.billable,
-      });
-      await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, "Time entry resumed");
-      await clearSearchBar({ forceScrollToTop: true });
-    } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to resume time entry");
-    }
-  }
+  const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
+  const { resumeTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
   return (
-    <List isLoading={isLoading} throttle>
-      {isValidToken ? (
-        !isLoading && (
-          <>
-            {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
-            <List.Section title="Actions">
-              <List.Item
-                title="Create a new time entry"
-                icon={"command-icon.png"}
-                actions={
-                  <ActionPanel>
-                    <PushAction
-                      title="Create Time Entry"
-                      icon={{ source: Icon.Clock }}
-                      target={
-                        <AppContextProvider>
-                          <CreateTimeEntryForm />
-                        </AppContextProvider>
-                      }
+    <List
+      isLoading={isLoading}
+      throttle
+      navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
+    >
+      {runningTimeEntry && (
+        <RunningTimeEntry
+          runningTimeEntry={runningTimeEntry}
+          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+          revalidateTimeEntries={revalidateTimeEntries}
+        />
+      )}
+      <List.Section title="Actions">
+        <List.Item
+          title="Create a new time entry"
+          icon={"command-icon.png"}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create Time Entry"
+                icon={{ source: Icon.Clock }}
+                target={
+                  <ExtensionContextProvider>
+                    <TimeEntryForm
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
                     />
-                  </ActionPanel>
+                  </ExtensionContextProvider>
                 }
               />
-            </List.Section>
-            {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-              <List.Section title="Resume recent time entry">
-                {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
-                  <List.Item
-                    key={timeEntry.id}
-                    keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
-                    title={timeEntry.description || "No description"}
-                    subtitle={timeEntry.billable ? "$" : ""}
-                    accessoryTitle={getProjectById(timeEntry?.pid)?.name}
-                    accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                    icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                    actions={
-                      <ActionPanel>
-                        <SubmitFormAction
-                          title="Resume Time Entry"
-                          onSubmit={() => resumeTimeEntry(timeEntry)}
-                          icon={{ source: Icon.Clock }}
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
+        <List.Section title="Recent time entries">
+          {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
+            <List.Item
+              key={timeEntry.id}
+              keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
+              title={timeEntry.description || "No description"}
+              subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
+              accessories={[
+                ...timeEntry.tags.map((tag) => ({ tag })),
+                timeEntry.billable ? { tag: { value: "$" } } : {},
+              ]}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
+              actions={
+                <ActionPanel>
+                  <Action.SubmitForm
+                    title="Resume Time Entry"
+                    onSubmit={() => resumeTimeEntry(timeEntry)}
+                    icon={{ source: Icon.Clock }}
+                  />
+                  <Action.Push
+                    title="Create Similar Time Entry"
+                    icon={{ source: Icon.Plus }}
+                    target={
+                      <ExtensionContextProvider>
+                        <TimeEntryForm
+                          initialValues={timeEntry}
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
                         />
-                      </ActionPanel>
+                      </ExtensionContextProvider>
                     }
                   />
-                ))}
-              </List.Section>
-            )}
-            <List.Section title="Projects">
-              {projectGroups &&
-                projectGroups.map((group) =>
-                  group.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      subtitle={group.client?.name}
-                      accessoryTitle={group.workspace.name}
+                  <ActionPanel.Section>
+                    <Action
+                      title="Delete Time Entry"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      onAction={async () => {
+                        await confirmAlert({
+                          title: "Delete Time Entry",
+                          message: "Are you sure you want to delete this time entry?",
+                          icon: {
+                            source: Icon.Trash,
+                            tintColor: Color.Red,
+                          },
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                            onAction: () => {
+                              withToast({
+                                noun: "Time Entry",
+                                verb: Verb.Delete,
+                                action: async () => {
+                                  await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
+                                },
+                              });
+                            },
+                          },
+                        });
+                      }}
                     />
-                  ))
-                )}
-            </List.Section>
-          </>
-        )
-      ) : (
-        <List.Item
-          icon={Icon.ExclamationMark}
-          title="Invalid API Key Detected"
-          accessoryTitle={`Go to Extensions → Toggl Track`}
-        />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );
@@ -126,8 +139,8 @@ function ListView() {
 
 export default function Command() {
   return (
-    <AppContextProvider>
+    <ExtensionContextProvider>
       <ListView />
-    </AppContextProvider>
+    </ExtensionContextProvider>
   );
 }

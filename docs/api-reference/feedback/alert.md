@@ -2,7 +2,7 @@
 
 When the user takes an important action (for example when irreversibly deleting something), you can ask for confirmation by using `confirmAlert`.
 
-![](../../.gitbook/assets/alert.png)
+![](../../.gitbook/assets/alert.webp)
 
 ## API Reference
 
@@ -21,18 +21,19 @@ async function confirmAlert(options: Alert.Options): Promise<boolean>;
 ```typescript
 import { confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   if (await confirmAlert({ title: "Are you sure?" })) {
+    console.log("confirmed");
     // do something
+  } else {
+    console.log("canceled");
   }
-};
+}
 ```
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Alert.Options](#alert.options)</code> | Yes      | The options used to create the Alert. |
+<FunctionParametersTableFromJSDoc name="confirmAlert" />
 
 #### Return
 
@@ -48,9 +49,9 @@ The options to create an Alert.
 #### Example
 
 ```typescript
-import { Alert } from "@raycast/api";
+import { Alert, confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const options: Alert.Options = {
     title: "Finished cooking",
     message: "Delicious pasta for lunch",
@@ -64,7 +65,7 @@ export default async () => {
     },
   };
   await confirmAlert(options);
-};
+}
 ```
 
 #### Properties
@@ -88,8 +89,8 @@ Use [Alert.ActionStyle.Destructive](#alert.actionstyle) for confirmations of a d
 
 #### Enumeration members
 
-| Name        | Value                                                   |
-| :---------- | :------------------------------------------------------ |
-| Default     | ![](../../.gitbook/assets/alert-action-default.png)     |
-| Destructive | ![](../../.gitbook/assets/alert-action-destructive.png) |
-| Cancel      | ![](../../.gitbook/assets/alert-action-cancel.png)      |
+| Name        | Value                                                    |
+| :---------- | :------------------------------------------------------- |
+| Default     | ![](../../.gitbook/assets/alert-action-default.webp)     |
+| Destructive | ![](../../.gitbook/assets/alert-action-destructive.webp) |
+| Cancel      | ![](../../.gitbook/assets/alert-action-cancel.webp)      |

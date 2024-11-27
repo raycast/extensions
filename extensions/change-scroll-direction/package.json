@@ -5,6 +5,9 @@
   "description": "Changes between the two scroll directions „natural“ and „mouse-friendly“. Useful when switching between trackpad and mouse.",
   "icon": "command-icon.png",
   "author": "gregoralbrecht",
+  "contributors": [
+    "emilsharier"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,21 +18,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.42.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "jest": "^29.4.3",
     "react-devtools": "^4.19.2",
+    "ts-jest": "^29.0.5",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "lint": "ray lint"
   }
 }

@@ -1,4 +1,4 @@
-export interface Topic {
+export interface TopicType {
   name: string;
   sha: string;
   type: string;
@@ -7,7 +7,7 @@ export interface Topic {
   title: string;
 }
 
-export interface Tree {
+export interface TreeType {
   path: string;
   type: string;
   sha: string;

@@ -127,7 +127,7 @@ async function performSearch(signal: AbortSignal, query?: string): Promise<Searc
 
   const response = (await fetch("https://holodex.net/api/v2/search/autocomplete?" + params.toString(), {
     headers: {
-      "X-API-KEY": apiKey,
+      "X-APIKEY": apiKey,
     },
     signal,
   }).then((res) => res.json())) as { type: string; value: string; text: string }[];

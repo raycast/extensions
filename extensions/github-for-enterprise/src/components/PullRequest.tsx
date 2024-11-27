@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  copyTextToClipboard,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-} from "@raycast/api";
-import React from "react";
+import { ActionPanel, Color, List, Action, Clipboard, Image } from "@raycast/api";
 import { format } from "timeago.js";
 import AddPRReview from "./AddPRReview";
 import ClosePR from "./ClosePR";
@@ -46,15 +37,10 @@ export default function PullRequest(props: PullRequestOwnProps) {
         source: state === "MERGED" ? "pull-request-merge.png" : "pull-request.png",
         tintColor: state === "OPEN" ? Color.Green : state === "CLOSED" ? Color.Red : Color.Purple,
       }}
-      accessoryTitle={format(createdAt)}
-      accessoryIcon={{
-        source: author.avatarUrl,
-        mask: ImageMask.Circle,
-      }}
       actions={
         <ActionPanel title={`#${number} in ${repository.nameWithOwner}`}>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Details"
               target={<PullRequestDetail {...props} />}
               icon={{
@@ -62,9 +48,9 @@ export default function PullRequest(props: PullRequestOwnProps) {
                 tintColor: Color.PrimaryText,
               }}
             />
-            <OpenInBrowserAction url={url} />
+            <Action.OpenInBrowser url={url} />
             {state === "OPEN" && (
-              <PushAction
+              <Action.Push
                 title="Add Review"
                 target={<AddPRReview id={id} title={title} />}
                 icon={{
@@ -99,21 +85,21 @@ export default function PullRequest(props: PullRequestOwnProps) {
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title="Copy Pull Request Number"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(`${number}`)}
+              onAction={() => Clipboard.copy(`${number}`)}
             />
-            <ActionPanel.Item
+            <Action
               title="Copy Pull Request URL"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(url)}
+              onAction={() => Clipboard.copy(url)}
             />
           </ActionPanel.Section>
           {state !== "MERGED" && (
@@ -124,6 +110,16 @@ export default function PullRequest(props: PullRequestOwnProps) {
           )}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: format(createdAt),
+
+          icon: {
+            source: author.avatarUrl,
+            mask: Image.Mask.Circle,
+          },
+        },
+      ]}
     />
   );
 }

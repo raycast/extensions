@@ -8,5 +8,3 @@ export enum LsofPrefix {
   PORTS = "n",
   INTERNET_PROTOCOLL = "t",
 }
-
-export const readmeURL = "https://github.com/raycast/extensions/tree/main/extensions/port-manager#readme";

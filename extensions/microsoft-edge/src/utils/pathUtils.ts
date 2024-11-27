@@ -1,19 +1,37 @@
 import path from "path";
+import { DEFAULT_PROFILE_ID } from "../constants";
+import { getApplicationName } from "./appUtils";
 
-export const userDataDirectoryPath = () => {
+const PATH_PREFIX = "Application Support";
+
+export const getDefaultEdgeProfilePath = () => [PATH_PREFIX, getApplicationName()];
+
+export const getDefaultEdgeStatePath = () => [PATH_PREFIX, getApplicationName(), "Local State"];
+
+const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
   }
 
-  // * NOTE: You can find this under "Profile path" by visiting edge://version in Edge.
-  return path.join(process.env.HOME, "Library", "Application Support", "Microsoft Edge");
+  return path.join(process.env.HOME, "Library");
 };
 
-export const historyDbPath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "History");
+export const getHistoryDbPath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...getDefaultEdgeProfilePath(), profile ?? DEFAULT_PROFILE_ID, "History");
 
-export const collectionsDbPath = (profileName: string) =>
-  path.join(userDataDirectoryPath(), profileName, "Collections", "collectionsSQLite");
+/**
+ * @returns Path to the Local State file which contains all the profile information
+ */
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...getDefaultEdgeStatePath());
 
-export const bookmarksFilePath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "Bookmarks");
+export const getBookmarksFilePath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...getDefaultEdgeProfilePath(), profile ?? DEFAULT_PROFILE_ID, "Bookmarks");
 
-export const getProfileName = () => "Default";
+export const getCollectionsDbPath = (profile?: string) =>
+  path.join(
+    userLibraryDirectoryPath(),
+    ...getDefaultEdgeProfilePath(),
+    profile ?? DEFAULT_PROFILE_ID,
+    "Collections",
+    "collectionsSQLite"
+  );

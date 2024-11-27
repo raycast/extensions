@@ -55,13 +55,8 @@ $ npm run dev
 Making sure production building works and compiles with Raycast:
 
 ```
-$ prettier --write .
-$ prettier --check .
+$ npm run lint
 $ npm run build
-
-// Or
-
-$ prettier --write . && prettier --check . && npm run build
 ```
 
 ## Links
@@ -72,5 +67,6 @@ $ prettier --write . && prettier --check . && npm run build
 ## Contributors
 
 - [Dennis Smink](https://github.com/Cannonb4ll)
-- Robin Rosier (Initial creator)
+- [Robin Rosiers](https://github.com/RosiersRobin) (Initial creator)
 - [Kevin Batdorf](https://github.com/KevinBatdorf) (Inspiration 💙)
+- [xmok](https://github.com/xmok)

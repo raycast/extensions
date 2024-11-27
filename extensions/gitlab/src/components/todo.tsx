@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@raycast/api";
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
@@ -6,7 +6,8 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { ensureCleanAccessories } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
   let result = "";
@@ -54,9 +55,25 @@ function getTargetTypeSource(tt: string): string {
   return result;
 }
 
-function getIcon(todo: Todo): Image.ImageLike {
+export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
   const tt = todo.target_type;
-  return { source: getTargetTypeSource(tt), tintColor: getActionColor(todo.action_name) };
+  return {
+    source: getTargetTypeSource(tt),
+    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+  };
+}
+
+function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+  if (props.searchMode) {
+    return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
+  }
+  return (
+    <List.EmptyView
+      icon="✨"
+      title="Isn't an empty Todo list beautiful?"
+      description="Are you looking for things to do? Take a look at open issues or contribute to a Merge Request."
+    />
+  );
 }
 
 export function TodoList(): JSX.Element {
@@ -64,37 +81,58 @@ export function TodoList(): JSX.Element {
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
+  const refreshAll = async () => {
+    refresh();
+    try {
+      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
+    }
+  };
+
   return (
     <List
-      searchBarPlaceholder="Filter Todos by name..."
+      searchBarPlaceholder="Filter Todos by Name..."
       isLoading={isLoading}
       throttle={true}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
-      {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
-      ))}
+      <List.Section title="Todos" subtitle={`${todos?.length}`}>
+        {todos?.map((todo) => (
+          <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
+        ))}
+      </List.Section>
+      <TodoListEmptyView searchMode={todos && todos.length > 0} />
     </List>
   );
+}
+
+export function getPrettyTodoActionName(todo: Todo): string {
+  return capitalizeFirstLetter(todo.action_name.replaceAll("_", " "));
 }
 
 export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
+  const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;
   return (
     <List.Item
       id={todo.id.toString()}
-      title={todo.title}
+      title={todo.title ? todo.title : "?"}
       subtitle={subtitle}
-      accessories={ensureCleanAccessories([{ text: todo.action_name }, { icon: userToIcon(todo.author) }])}
-      icon={getIcon(todo)}
+      accessories={[
+        { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
+        { date: updatedAt, tooltip: updatedAt ? `Updated: ${updatedAt.toLocaleString()}` : undefined },
+        { icon: userToIcon(todo.author), tooltip: todo.author?.name },
+      ]}
+      icon={{ value: getTodoIcon(todo), tooltip: todo.target_type }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -105,6 +143,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
             <CloseTodoAction todo={todo} finished={props.refreshData} />
             <CloseAllTodoAction finished={props.refreshData} />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

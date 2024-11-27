@@ -1,20 +1,9 @@
-import { LocalStorage } from "@raycast/api";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
-import { createColor } from "../typeUtilities";
 
-import asyncEffect from "../utilities";
-
-export interface SerializedColor {
-  value: string;
-  savedAt: number;
-}
-
-export interface SavedColor {
-  instance: AvailableColor;
-  savedAt: number;
-}
+import { asyncEffect } from "../utilities";
+import { list, update, SavedColor } from "./colorSaver";
 
 export interface Storage {
   isLoading: boolean;
@@ -50,35 +39,6 @@ export const storageInitialState = {
   collection: [],
 };
 
-const queue = new Set<Promise<void>>();
-
-function queueAdd(callback: () => Promise<void>) {
-  const engine = async () => {
-    await Promise.all(queue);
-    await callback();
-  };
-  queue.add(engine());
-}
-
-async function rawList(key: string): Promise<SerializedColor[]> {
-  return JSON.parse((await LocalStorage.getItem(key)) || "[]");
-}
-
-async function items(key: string): Promise<SavedColor[]> {
-  const items = await rawList(key);
-
-  return items.map((color: SerializedColor) => ({ instance: createColor(color.value), savedAt: color.savedAt }));
-}
-
-async function update(key: string, items: SavedColor[]) {
-  queueAdd(async () => {
-    const newLocal = JSON.stringify(
-      items.map((color) => ({ value: color.instance.stringValue(), savedAt: color.savedAt }))
-    );
-    await LocalStorage.setItem(key, newLocal);
-  });
-}
-
 function storageReducer(state: InitialState, action: StorageAction) {
   let newState = state;
 
@@ -113,8 +73,6 @@ function storageReducer(state: InitialState, action: StorageAction) {
       throw Error("Unknown action");
   }
 
-  update(action.key, newState.collection);
-
   return newState;
 }
 
@@ -122,7 +80,11 @@ export function useColorStorage(key: StorageKeys, initialCallback?: (state: Save
   const [state, dispatch] = useReducer(storageReducer, storageInitialState);
   const [isLoading, setIsLoading] = useState(true);
 
-  asyncEffect(items(key), (state) => {
+  useEffect(() => {
+    update(key, state.collection);
+  }, [state.collection]);
+
+  asyncEffect(list(key), (state) => {
     dispatch({ type: StorageActions.Update, key, items: state });
     setIsLoading(false);
 

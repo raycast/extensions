@@ -102,8 +102,16 @@ export default function SearchDocumentation() {
                   title={"Copy Composer Require Dev Command"}
                 />
                 <CopyToClipboardAction content={hit.name} title={"Copy Package Name"} />
-                <OpenInBrowserAction url={hit.repository} title="Open Repository URL in Browser" />
-                <OpenInBrowserAction url={getPackagistPageURL(hit)} title="Open Packagist Page in Browser" />
+                <OpenInBrowserAction
+                  url={hit.repository}
+                  title="Open Repository URL in Browser"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                />
+                <OpenInBrowserAction
+                  url={getPackagistPageURL(hit)}
+                  title="Open Packagist Page in Browser"
+                  shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "return" }}
+                />
               </ActionPanel>
             }
           />

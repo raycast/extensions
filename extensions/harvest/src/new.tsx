@@ -10,41 +10,40 @@ import {
   confirmAlert,
   Icon,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
-import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
-import _ from "lodash";
+import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { HarvestProjectAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
+import { Dictionary, find, groupBy, isDate, isEmpty, omitBy, reduce } from "lodash";
 dayjs.extend(isToday);
 
 export default function Command({
   onSave = async () => {
     return;
   },
-  viewDate = new Date(),
+  viewDate,
   entry,
 }: {
   onSave: () => Promise<void>;
   entry?: HarvestTimeEntry;
-  viewDate?: Date;
+  viewDate: Date | null;
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
-  const [projectId, setProjectId] = useState<string | undefined>(entry?.project.id.toString());
-  const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
-  const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
-  const [notes, setNotes] = useState<string | undefined>(entry?.notes);
-  const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
-  const [spentDate, setSpentDate] = useState<Date>(viewDate);
-
-  // console.log(projectId);
+  const [projectId, setProjectId] = useState<string | null>(entry?.project.id.toString() ?? null);
+  const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
+  const [notes, setNotes] = useState<string>(entry?.notes ?? "");
+  const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
+  const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
+  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {
     if (error) {
-      if (error.isAxiosError && error.response?.status === 401) {
+      if (isAxiosError(error) && error.response?.status === 401) {
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Token",
@@ -62,11 +61,11 @@ export default function Command({
 
   const groupedProjects = useMemo(() => {
     // return an array of arrays thats grouped by client to easily group them via a map function
-    return _.reduce<
-      _.Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
+    return reduce<
+      Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
       Array<Array<HarvestProjectAssignment>>
     >(
-      _.groupBy(projects, (o) => o.client.id),
+      groupBy(projects, (o) => o.client.id),
       (result, value) => {
         result.push(value);
         return result;
@@ -84,7 +83,7 @@ export default function Command({
           const { projectId, taskId } = JSON.parse(value.toString());
           setProjectId(projectId);
           setTaskId(taskId);
-          setTaskAssignments(projectId);
+          // setTaskAssignments(projectId);
         }
       });
     } else {
@@ -92,26 +91,28 @@ export default function Command({
     }
 
     return () => {
-      setProjectId(undefined);
+      setProjectId(null);
     };
   }, [entry]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Project Selected",
       });
+      return;
     }
     if (values.task_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Task Selected",
       });
+      return;
     }
 
     setTimeFormat(hours);
-    const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
+    const spentDate = isDate(values.spent_date) ? values.spent_date : viewDate;
 
     if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
       if (
@@ -129,7 +130,7 @@ export default function Command({
     const toast = await showToast({ style: Toast.Style.Animated, title: "Loading..." });
     await toast.show();
 
-    const data = _.omitBy(values, _.isEmpty);
+    const data = omitBy(values, isEmpty);
     const timeEntry = await newTimeEntry(
       {
         ...data,
@@ -157,31 +158,23 @@ export default function Command({
     }
   }
 
-  function setTaskAssignments(projectId: string) {
-    const project = _.find(projects, (o) => {
-      return o.project.id === parseInt(projectId);
+  const tasks = useMemo(() => {
+    const project = find(projects, (o) => {
+      return o.project.id === parseInt(projectId ?? "0");
     });
-    if (typeof project === "object") {
-      setTasks(project.task_assignments);
+    return project ? project.task_assignments : [];
+  }, [projects, projectId]);
 
-      let defaultAssignment = project.task_assignments[0].task.id.toString();
-      if (taskId) {
-        // if there is already a taskId set, and it's a valid task for the selected project, leave it be
-        const assignment = _.find(project.task_assignments, (o) => o.task.id.toString() === taskId);
-        if (assignment) {
-          defaultAssignment = assignment.task.id.toString();
-        }
-      }
-      setTaskId(defaultAssignment);
-    } else {
-      // no projects found
-      setTasks([]);
-    }
-    console.log("finished setTaskAssignments. taskId:", taskId);
-  }
+  useEffect(() => {
+    if (tasks.length === 0) setTaskId(null);
+    if (tasks.some((o) => o.task.id.toString() === taskId)) return;
+    const defaultTask = tasks[0];
+
+    setTaskId(defaultTask ? defaultTask.task.id.toString() : null);
+  }, [tasks, taskId]);
 
   function setTimeFormat(value?: string) {
-    // This function can be called direclty from the onBlur event to better match the Harvest app behavior when it exists
+    // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
     if (!value) return;
 
     if (company?.time_format === "decimal") {
@@ -225,13 +218,20 @@ export default function Command({
         </ActionPanel>
       }
     >
+      {showClient && (
+        <Form.Description
+          text={projects.find((o) => o.project.id === parseInt(projectId ?? "0"))?.client.name ?? ""}
+          title="Client"
+        />
+      )}
       <Form.Dropdown
         id="project_id"
         title="Project"
-        value={projectId}
+        key={`project-${entry?.id}`}
+        value={projectId ?? ""}
         onChange={(newValue) => {
           setProjectId(newValue);
-          setTaskAssignments(newValue);
+          // setTaskAssignments(newValue);
         }}
       >
         {groupedProjects?.map((groupedProject) => {
@@ -242,6 +242,7 @@ export default function Command({
                 const code = project.project.code;
                 return (
                   <Form.Dropdown.Item
+                    keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
@@ -252,7 +253,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId} onChange={setTaskId}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId ?? ""} onChange={setTaskId}>
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
@@ -281,7 +282,7 @@ export default function Command({
         title="Date"
         type={Form.DatePicker.Type.Date}
         value={spentDate}
-        onChange={setSpentDate}
+        onChange={(newValue) => newValue && setSpentDate(newValue)}
       />
     </Form>
   );

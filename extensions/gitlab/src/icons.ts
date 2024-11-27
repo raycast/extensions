@@ -4,13 +4,14 @@ import { gitlab } from "./common";
 import { daysInSeconds, hashString } from "./utils";
 import path from "path/posix";
 import * as fs from "fs/promises";
+import { Image } from "@raycast/api";
 
 export enum GitLabIcons {
   merge_request = "mropen.png",
-  todo = "todo.png",
-  review = "list-icon.png",
+  todo = "todo-done.svg",
+  review = "review-list.svg",
   issue = "exclamation.png",
-  project = "main-list-view-16",
+  project = "project.svg",
   merged = "merged.png",
   mropen = "mropen.png",
   mraccepted = "todo.png",
@@ -21,12 +22,13 @@ export enum GitLabIcons {
   settings = "gear.png",
   security = "lock.png",
   labels = "dash.png",
-  epic = "epic.png",
+  epic = "epic.svg",
   comment = "book.png",
   wiki = "list.png",
-  show_details = "sidebar-right-16",
+  show_details = "app-window-sidebar-right-16",
   tag = "tag.png",
-  commit = "commit.png",
+  commit = "commit.svg",
+  activity = "history.svg",
   status_success = "status_success.png",
   status_failed = "status_failed.png",
   status_running = "status_running.png",
@@ -102,4 +104,32 @@ export function useImage(
   }, [data]);
 
   return { localFilepath, error, isLoading };
+}
+
+export function getSVGText(text: string): string | undefined {
+  if (!text || text.length <= 0) {
+    return undefined;
+  }
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <rect x="0" y="0" width="40" height="40" fill="#FA6E34" rx="10"></rect>
+  <text
+  font-size="22"
+  fill="white"
+  font-family="Verdana"
+  text-anchor="middle"
+  alignment-baseline="baseline"
+  x="20.5"
+  y="32.5">${text}</text>
+</svg>
+  `.replaceAll("\n", "");
+
+  return `data:image/svg+xml,${svg}`;
+}
+
+export function getTextIcon(text: string): Image.ImageLike | undefined {
+  if (!text || text.length <= 0) {
+    return undefined;
+  }
+  return getSVGText(text);
 }

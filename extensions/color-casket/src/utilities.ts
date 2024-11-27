@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export default function asyncEffect<T>(action: Promise<T>, callback: (state: T) => void) {
+export function asyncEffect<T>(action: Promise<T>, callback: (state: T) => void) {
   useEffect(() => {
     let cancel = false;
     action.then((state) => {

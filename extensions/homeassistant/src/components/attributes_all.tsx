@@ -1,10 +1,9 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { State } from "../haapi";
-import { useHAStates } from "../hooks";
-import { ensureCleanAccessories } from "../utils";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { useHAStates } from "./hooks";
 
-export function StatesAttributesList(): JSX.Element {
+export function StatesAttributesList() {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, allStates);
@@ -37,11 +36,11 @@ export function StatesAttributesList(): JSX.Element {
           <List.Item
             key={`${state.entity_id}_state`}
             title="state"
-            accessories={ensureCleanAccessories([
+            accessories={[
               {
                 text: `${state.state}`,
               },
-            ])}
+            ]}
           />
           {Object.entries(state.attributes).map(([k, v]) => (
             <List.Item
@@ -54,11 +53,11 @@ export function StatesAttributesList(): JSX.Element {
                   <Action.CopyToClipboard title="Copy Entity ID" content={`${state.entity_id}`} />
                 </ActionPanel>
               }
-              accessories={ensureCleanAccessories([
+              accessories={[
                 {
                   text: `${v}`,
                 },
-              ])}
+              ]}
             />
           ))}
         </List.Section>
@@ -69,9 +68,9 @@ export function StatesAttributesList(): JSX.Element {
 
 function useSearch(
   query: string | undefined,
-  allStates?: State[]
+  allStates?: State[],
 ): {
-  states?: State[];
+  states?: State[] | undefined;
 } {
   const [states, setStates] = useState<State[]>();
   const lquery = query ? query.toLocaleLowerCase().trim() : query;
@@ -106,7 +105,7 @@ function useSearch(
       });
       setStates(filteredStates.slice(0, 100));
     } else {
-      setStates([]);
+      setStates(undefined);
     }
   }, [query, allStates]);
   return { states };

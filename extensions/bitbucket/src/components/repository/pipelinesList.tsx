@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { preferences } from "../../helpers/preferences";
@@ -28,7 +28,9 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
           name: (pipeline.name as string) || "",
           uuid: pipeline.uuid as string,
           buildNumber: pipeline.build_number.toString() as string,
-          state: (pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
+          state: (pipeline.state?.name == "IN_PROGRESS"
+            ? "IN_PROGRESS"
+            : null || pipeline.state?.result?.name || pipeline.state?.stage?.name || "") as string,
           avatarCreatorUrl: (pipeline.creator?.links?.avatar?.href as string) || "",
           triggerName: (pipeline.trigger?.name as string) || "",
           commitMessage: (pipeline.target?.commit?.message).split("\n")[0] || "",
@@ -44,7 +46,11 @@ export function PipelinesList(props: { repo: Repository; pageNumber: number }): 
   }, [pageNumber]);
 
   if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", state.error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed loading repositories",
+      message: state.error.message,
+    });
   }
 
   return (
@@ -84,33 +90,31 @@ function SearchListItem({
     pipeline.state == "SUCCESSFUL"
       ? pipeIcon.success
       : pipeline.state == "HALTED" || pipeline.state == "PAUSED"
-      ? pipeIcon.paused
-      : pipeline.state == "IN_PROGRESS"
-      ? pipeIcon.progress
-      : pipeline.state == "STOPPED"
-      ? pipeIcon.stopped
-      : pipeline.state == "FAILED"
-      ? pipeIcon.failed
-      : "";
+        ? pipeIcon.paused
+        : pipeline.state == "IN_PROGRESS"
+          ? pipeIcon.progress
+          : pipeline.state == "STOPPED"
+            ? pipeIcon.stopped
+            : pipeline.state == "FAILED"
+              ? pipeIcon.failed
+              : "";
 
   const pipelineImg = pipeline.avatarCreatorUrl
     ? pipeline.avatarCreatorUrl
     : pipeline.triggerName == "SCHEDULE"
-    ? icon.calendar
-    : icon.user;
+      ? icon.calendar
+      : icon.user;
 
   return (
     <List.Item
       title={pipeline.commitMessage || pipeline.uuid}
       subtitle={"#" + pipeline.buildNumber}
-      accessoryTitle={pipeline.state}
-      accessoryIcon={{ source: statusIconUrl }}
       // accessoryTitle={pipeline .name}
-      icon={{ source: pipelineImg, mask: ImageMask.Circle }}
+      icon={{ source: pipelineImg, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Pipeline in Browser"
               url={`https://bitbucket.org/${preferences.workspace}/${repoSlug}/addon/pipelines/home#!/results/${pipeline.buildNumber}`}
               icon={{ source: icon.code, tintColor: Color.PrimaryText }}
@@ -131,6 +135,12 @@ function SearchListItem({
           {/* <DeleteAnnotationAction annotation={searchResult} /> */}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: pipeline.state,
+          icon: { source: statusIconUrl },
+        },
+      ]}
     />
   );
 }

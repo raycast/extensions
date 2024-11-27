@@ -1,92 +1,46 @@
-import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
+import { Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import json2md from "json2md";
-import { Entry } from "./types";
-import { useSeasons, useTables } from "./hooks";
-import { convertToLocalTime } from "./utils";
+import { getTables } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import { convertToLocalTime, getClubLogo } from "./utils";
 
-export default function GetTables() {
-  const seasons = useSeasons();
+const qualificationMap: Record<string, string> = {
+  EU_CL: "UEFA Champions League",
+  EU_EL: "UEFA Europa League",
+  EU_ECL: "UEFA Conference League",
+  EN_CH: "EFL Championship",
+};
 
-  const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString()
+const qualificationColor: Record<string, string> = {
+  EU_CL: Color.Blue,
+  EU_EL: Color.Orange,
+  EU_ECL: Color.Green,
+  EN_CH: Color.Red,
+};
+
+export default function EPLTables() {
+  const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: tables, isLoading } = usePromise(
+    async (season) => {
+      return season ? await getTables(season) : [];
+    },
+    [seasonId],
   );
-  const [showStats, setShowStats] = useState<boolean>(false);
-
-  const tables = useTables(selectedSeason);
-
-  const club = (entry: Entry): json2md.DataObject => {
-    const { overall, team, ground, form, next, startingPosition } = entry;
-
-    const dataObject = [
-      { h1: team.name },
-      { p: ground.name ? `Stadium: ${ground.name}, **${ground.city}**` : "" },
-      { p: ground.capacity ? `Capacity: ${ground.capacity}` : "" },
-      { h2: "Stats" },
-      {
-        p: [
-          `Previous Position: ${startingPosition}`,
-          `Played: ${overall.played}`,
-          `Won: ${overall.won}`,
-          `Drawn: ${overall.drawn}`,
-          `Lost: ${overall.lost}`,
-          `Goals For: ${overall.goalsFor}`,
-          `Goals Against: ${overall.goalsAgainst}`,
-          `Goal Difference: ${overall.goalsDifference}`,
-        ],
-      },
-      { h2: "Recent Results" },
-      {
-        ul: form.reverse().map((m) => {
-          return `${m.teams[0].team.name} ${m.teams[0].score} - ${m.teams[1].score} ${m.teams[1].team.name}`;
-        }),
-      },
-    ];
-
-    if (next) {
-      const time = convertToLocalTime(next.kickoff.label);
-
-      dataObject.push(
-        { h2: "Next Fixture" },
-        {
-          p: [
-            `**${next.teams[0].team.name} - ${next.teams[1].team.name}**`,
-            `Time: ${time}`,
-            `Stadium: ${next.ground.name}, **${next.ground.city}**`,
-          ],
-        }
-      );
-    }
-
-    return dataObject;
-  };
 
   return (
     <List
       throttle
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Season"
-          value={selectedSeason}
-          onChange={setSeason}
-        >
-          <List.Dropdown.Section>
-            {seasons.map((season) => {
-              return (
-                <List.Dropdown.Item
-                  key={season.id}
-                  value={season.id.toString()}
-                  title={season.label}
-                />
-              );
-            })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
       }
-      isLoading={!tables}
-      isShowingDetail={showStats}
+      isLoading={isLoading}
+      isShowingDetail={true}
     >
       {tables?.map((table) => {
+        const isEnded = table.entries.every((e) => e.overall.played === 38);
+
         return (
           <List.Section key={table.gameWeek}>
             {table.entries.map((entry) => {
@@ -94,76 +48,183 @@ export default function GetTables() {
                 overall,
                 team,
                 position,
-                ground,
+                form,
                 next,
                 startingPosition,
+                annotations,
               } = entry;
 
-              let icon: Image.ImageLike = {
-                source: Icon.Dot,
-                tintColor: Color.SecondaryText,
-              };
+              let icon: Image.ImageLike | undefined;
 
-              if (position < startingPosition) {
-                icon = {
-                  source: Icon.ChevronUp,
-                  tintColor: Color.Green,
-                };
-              } else if (position > startingPosition) {
-                icon = {
-                  source: Icon.ChevronDown,
-                  tintColor: Color.Red,
-                };
-              }
-
-              const props: Partial<List.Item.Props> = showStats
-                ? {
-                    accessories: [
-                      { text: overall.points.toString() },
-                      { icon },
-                    ],
-                    detail: (
-                      <List.Item.Detail markdown={json2md(club(entry))} />
-                    ),
-                  }
-                : {
-                    subtitle: team.club.abbr,
-                    accessories: [
-                      { text: `Played: ${overall.played}` },
-                      { text: `Points: ${overall.points}` },
-                    ],
+              let accessories: List.Item.Accessory[];
+              if (isEnded) {
+                if (position === 1) {
+                  icon = {
+                    source: Icon.Trophy,
+                    tintColor: Color.Green,
                   };
+                }
 
-              if (!showStats && next) {
-                const nextTeam =
-                  ground.id === next.ground.id ? next.teams[1] : next.teams[0];
-
-                props.accessories?.push({
-                  icon: {
-                    source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
-                    fallback: "default.png",
+                accessories = [
+                  {
+                    text: {
+                      color: Color.PrimaryText,
+                      value: overall.points.toString(),
+                    },
+                    icon,
                   },
-                  tooltip: `${next.teams[0].team.shortName} - ${next.teams[1].team.shortName}`,
-                });
+                ];
+              } else {
+                if (position < startingPosition) {
+                  icon = {
+                    source: Icon.ChevronUpSmall,
+                    tintColor: Color.Green,
+                  };
+                } else if (position > startingPosition) {
+                  icon = {
+                    source: Icon.ChevronDownSmall,
+                    tintColor: Color.Red,
+                  };
+                } else {
+                  icon = {
+                    source: Icon.Dot,
+                  };
+                }
+
+                accessories = [
+                  {
+                    text: {
+                      color: Color.PrimaryText,
+                      value: overall.points.toString(),
+                    },
+                  },
+                  {
+                    icon,
+                    tooltip: `Previous Position: ${startingPosition}`,
+                  },
+                ];
               }
 
               return (
                 <List.Item
                   key={position}
-                  title={`${position}. ${team.name}`}
+                  title={position.toString()}
+                  subtitle={team.name}
+                  keywords={[team.name, team.shortName, team.club.abbr]}
                   icon={{
-                    source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.svg`,
+                    source: getClubLogo(team.altIds.opta),
                     fallback: "default.png",
                   }}
-                  {...props}
-                  actions={
-                    <ActionPanel>
-                      <Action
-                        title={showStats ? "Hide Stats" : "Show Stats"}
-                        icon={Icon.Sidebar}
-                        onAction={() => setShowStats(!showStats)}
-                      />
-                    </ActionPanel>
+                  accessories={accessories}
+                  detail={
+                    <List.Item.Detail
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          {Array.isArray(annotations) && annotations.length && (
+                            <List.Item.Detail.Metadata.TagList
+                              title={
+                                annotations[0].type === "Q"
+                                  ? "Qualification"
+                                  : "Relegation"
+                              }
+                            >
+                              {annotations.map((annotation, idx) => {
+                                return (
+                                  <List.Item.Detail.Metadata.TagList.Item
+                                    key={idx}
+                                    text={
+                                      qualificationMap[annotation.destination]
+                                    }
+                                    color={
+                                      qualificationColor[annotation.destination]
+                                    }
+                                  />
+                                );
+                              })}
+                            </List.Item.Detail.Metadata.TagList>
+                          )}
+                          <List.Item.Detail.Metadata.Label
+                            title="Played"
+                            text={overall.played.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Won"
+                            text={overall.won.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Drawn"
+                            text={overall.drawn.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Lost"
+                            text={overall.lost.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goals For"
+                            text={overall.goalsFor.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goals Against"
+                            text={overall.goalsAgainst.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goal Difference"
+                            text={overall.goalsDifference.toString()}
+                          />
+
+                          <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.TagList title="Form">
+                            {form?.map((m) => {
+                              const isHome =
+                                m.teams[0].team.shortName === team.shortName;
+
+                              let isWinner;
+                              if (isHome) {
+                                isWinner = m.teams[0].score > m.teams[1].score;
+                              } else {
+                                isWinner = m.teams[0].score < m.teams[1].score;
+                              }
+
+                              let color;
+                              let text;
+                              if (m.outcome !== "D") {
+                                color = isWinner ? Color.Green : Color.Red;
+                                text = isWinner ? "W" : "L";
+                              } else {
+                                color = Color.SecondaryText;
+                                text = "D";
+                              }
+
+                              return (
+                                <List.Item.Detail.Metadata.TagList.Item
+                                  key={m.id}
+                                  text={text}
+                                  color={color}
+                                />
+                              );
+                            })}
+                          </List.Item.Detail.Metadata.TagList>
+                          {next && (
+                            <>
+                              <List.Item.Detail.Metadata.Separator />
+                              <List.Item.Detail.Metadata.Label
+                                title="Next Fixture"
+                                text={`${next.teams[0].team.name} - ${next.teams[1].team.name}`}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Kick Off"
+                                text={convertToLocalTime(next.kickoff.label)}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Stadium"
+                                text={`${next.ground.name}, ${next.ground.city}`}
+                              />
+                            </>
+                          )}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
                   }
                 />
               );

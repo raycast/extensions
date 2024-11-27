@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, Toast } from "@raycast/api";
+import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import {
   brewName,
   brewInstall,
@@ -8,6 +8,7 @@ import {
   brewUpgrade,
   brewUpgradeAll,
 } from "../brew";
+import { preferences } from "../preferences";
 import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
@@ -36,7 +37,8 @@ export function FormulaUninstallAction(props: {
     <Action
       title="Uninstall"
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      style={Action.Style.Destructive}
       onAction={async () => {
         const result = await uninstall(props.formula);
         props.onAction(result);
@@ -84,7 +86,7 @@ export function FormulaPinAction(props: {
     <Action
       title={isPinned ? "Unpin" : "Pin"}
       icon={Icon.Pin}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
         if (isPinned) {
           props.onAction(await unpin(props.formula));
@@ -137,7 +139,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
 async function upgradeAll(): Promise<boolean> {
   const abort = showActionToast({ title: "Upgrading all formula", cancelable: true });
   try {
-    await brewUpgradeAll(abort);
+    await brewUpgradeAll(preferences.greedyUpgrades, abort);
     showToast(Toast.Style.Success, "Upgrade formula succeeded");
     return true;
   } catch (err) {

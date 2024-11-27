@@ -4,7 +4,7 @@ import { getCommandForCurrentSettings } from "../utils/getCommandForCurrentSetti
 import { useFavorites } from "../utils/use-favorites";
 
 export function Favorite({ fav }: { fav?: Favorite }) {
-  const { favorites, actions, isLoading } = useFavorites();
+  const { favorites, isLoading, updateAndSaveFavs } = useFavorites();
   const { pop } = useNavigation();
 
   return (
@@ -21,21 +21,23 @@ export function Favorite({ fav }: { fav?: Favorite }) {
               if (!command) return;
 
               const i = favorites.findIndex((f) => f.id === fav?.id);
+              const newFavorites: Favorite[] = [...favorites];
               if (i >= 0) {
-                actions.updateAt(i, {
+                newFavorites[i] = {
                   ...favorites[i],
                   name: values.name,
                   subtitle: values.subtitle ?? "",
                   command: values.overwrite ? command : favorites[i].command,
-                });
+                };
               } else {
-                actions.push({
+                newFavorites.push({
                   id: nanoid(),
                   name: values.name,
                   subtitle: values.subtitle ?? "",
                   command,
                 });
               }
+              await updateAndSaveFavs(newFavorites);
 
               pop();
             }}

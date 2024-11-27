@@ -1,20 +1,10 @@
-import fs from "fs";
-import fetch from "node-fetch";
-import path from "path";
-import differenceInDays from "date-fns/differenceInDays";
+import { getPreferenceValues } from "@raycast/api";
 
-import { getPreferenceValues, environment } from "@raycast/api";
+export type ServiceName = "giphy" | "giphy-clips" | "tenor" | "finergifs" | "favorites" | "recents";
 
-export const API_KEY = "apiKey";
-export const SHOW_PREVIEW = "showGifPreview";
-export const MAX_RESULTS = "maxResults";
-export const DEFAULT_ACTION = "defaultAction";
-
-export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
-
-export type ServiceName = "giphy" | "tenor" | "finergifs" | "favorites" | "recents";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
+  GIPHY_CLIPS: "giphy-clips",
   TENOR: "tenor",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
@@ -30,7 +20,9 @@ export function getServices() {
 export function getServiceTitle(service?: ServiceName) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
-      return "Giphy";
+      return "GIPHY GIFs";
+    case GIF_SERVICE.GIPHY_CLIPS:
+      return "GIPHY Clips";
     case GIF_SERVICE.TENOR:
       return "Tenor";
     case GIF_SERVICE.FINER_GIFS:
@@ -40,67 +32,30 @@ export function getServiceTitle(service?: ServiceName) {
   return "";
 }
 
-export type Preference = { [preferenceName: string]: any };
-
-let prefs: Preference;
-
-export function getPrefs() {
-  if (!prefs) {
-    prefs = getPreferenceValues<Preference>();
-  }
-
-  return prefs;
-}
-
-export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean) {
-  let apiKey = getPrefs()[`${serviceName}-${API_KEY}`];
-  if (!apiKey) {
-    const config = await fetchConfig(forceRefresh);
-    apiKey = config.apiKeys[serviceName];
-  }
-
-  return apiKey;
-}
-
-export function getShowPreview(): boolean {
-  return getPrefs()[SHOW_PREVIEW];
-}
+const preferences = getPreferenceValues<Preferences>();
 
 export function getDefaultAction(): string {
-  return getPrefs()[DEFAULT_ACTION];
+  return preferences.defaultAction;
 }
 
 export function getMaxResults(): number {
-  return parseInt(getPrefs()[MAX_RESULTS], 10) ?? 10;
+  return parseInt(preferences.maxResults, 10) ?? 20;
 }
 
-export type Config = {
-  apiKeys: {
-    [service in ServiceName]: string;
-  };
+export const GRID_COLUMNS: { [key: string]: number } = {
+  small: 8,
+  medium: 5,
+  large: 3,
 };
 
-const configPath = path.resolve(environment.supportPath, "config.json");
-export async function fetchConfig(forceRefresh?: boolean) {
-  let config: Config;
-  try {
-    if (forceRefresh) {
-      throw new Error("Forcibly fetching config from server");
-    }
+export function getGridItemSize() {
+  return preferences.gridItemSize;
+}
 
-    config = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Config;
+export function getGridTrendingItemSize() {
+  return preferences.gridTrendingItemSize;
+}
 
-    const { mtime } = fs.statSync(configPath);
-    const diff = differenceInDays(new Date(), new Date(mtime));
-    if (diff > 7) {
-      // Re-download config if over a week old
-      throw new Error(`Config out of date, ${diff} days old`);
-    }
-  } catch (e) {
-    const response = await fetch(CONFIG_URL);
-    config = (await response.json()) as Config;
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
-  }
-
-  return config;
+export function getHideFilename(): boolean {
+  return preferences.hideFilename;
 }

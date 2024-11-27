@@ -60,11 +60,24 @@ const hasMatch = (search: string[], words: string[]) => {
   return false;
 };
 
+/**
+ * Uses `URL` API.
+ * @param urlString
+ * @returns `true` if the `URL` constructor succeeds to create the URL. Note that `raycast.com` returns `false` because the protocol ("http" / "https") is missing).
+ */
 export const isValidUrl = (urlString: string) => {
   try {
     new URL(urlString);
     return true;
   } catch (err) {
     return false;
+  }
+};
+
+export const formatAsUrl = (str: string) => {
+  if (str.startsWith("http://") || str.startsWith("https://")) {
+    return str;
+  } else {
+    return `https://${str}`;
   }
 };

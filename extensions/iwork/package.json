@@ -1,0 +1,201 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iwork",
+  "title": "iWork",
+  "description": "Control Pages, Numbers, and Keynote",
+  "icon": "iwork-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pages-minimize",
+      "title": "Minimize Pages",
+      "description": "Minimizes all Pages windows.",
+      "mode": "no-view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "pages-new",
+      "title": "New Pages Document",
+      "description": "Creates a new blank document in Pages.",
+      "mode": "no-view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "pages-new-from-template",
+      "title": "New Pages Document From Template",
+      "description": "Creates a new Pages document with the selected template.",
+      "mode": "view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "pages-export",
+      "title": "Export Pages Document",
+      "description": "Exports the current Pages document in the selected format.",
+      "mode": "view",
+      "icon": "pages-icon.png",
+      "arguments": [
+        {
+          "name": "filename",
+          "placeholder": "file name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "pages-new-from-clipboard",
+      "title": "New Pages Document From Clipboard",
+      "description": "Creates a new Pages document from the clipboard text content.",
+      "mode": "no-view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "pages-open-in-pages",
+      "title": "Open Selection In Pages",
+      "description": "Opens the selected file(s) in Pages.",
+      "mode": "no-view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "numbers-minimize",
+      "title": "Minimize Numbers",
+      "description": "Minimizes all Numbers windows.",
+      "mode": "no-view",
+      "icon": "numbers-icon.png"
+    },
+    {
+      "name": "numbers-new",
+      "title": "New Numbers Spreadsheet",
+      "description": "Creates a new blank spreadsheet in Numbers.",
+      "mode": "no-view",
+      "icon": "numbers-icon.png"
+    },
+    {
+      "name": "numbers-new-from-template",
+      "title": "New Numbers Spreadsheet From Template",
+      "description": "Creates a new Numbers spreadsheet with the selected template.",
+      "mode": "view",
+      "icon": "numbers-icon.png"
+    },
+    {
+      "name": "numbers-export",
+      "title": "Export Numbers Spreadsheet",
+      "description": "Exports the current Numbers spreadsheet in the selected format.",
+      "mode": "view",
+      "icon": "numbers-icon.png",
+      "arguments": [
+        {
+          "name": "filename",
+          "placeholder": "file name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "numbers-open-in-numbers",
+      "title": "Open Selection In Numbers",
+      "description": "Opens the selected file(s) in Numbers.",
+      "mode": "no-view",
+      "icon": "numbers-icon.png"
+    },
+    {
+      "name": "keynote-minimize",
+      "title": "Minimize Keynote",
+      "description": "Minimizes all Keynote windows.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-new",
+      "title": "New Keynote Slideshow",
+      "description": "Creates a new Keynote slideshow with the default theme.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-new-with-theme",
+      "title": "New Keynote Slideshow With Theme",
+      "description": "Creates a new Keynote slideshow with the selected theme.",
+      "mode": "view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-start-slideshow",
+      "title": "Start Keynote Slideshow",
+      "description": "Starts the current Keynote slideshow.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-stop-slideshow",
+      "title": "Stop Keynote Slideshow",
+      "description": "Stops the current Keynote slideshow.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-export",
+      "title": "Export Keynote Slideshow",
+      "description": "Exports the current slideshow in the selected format.",
+      "mode": "view",
+      "icon": "keynote-icon.png",
+      "arguments": [
+        {
+          "name": "filename",
+          "placeholder": "file name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "keynote-new-from-selection",
+      "title": "New Keynote Slideshow From Selected Images",
+      "description": "Creates a new slideshow from the selected image files.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-open-in-keynote",
+      "title": "Open Selection In Keynote",
+      "description": "Opens the selected file(s) in Keynote.",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exportDir",
+      "type": "textfield",
+      "title": "iWork Export Location",
+      "description": "The directory that exported iWork documents will appear in.",
+      "default": "~/Documents",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

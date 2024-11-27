@@ -6,6 +6,16 @@
   "icon": "main-command.png",
   "author": "johndturn",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "ignoredVolumes",
+      "title": "Ignored Volumes",
+      "description": "Comma-separated list of volumes to hide from the available list of options to eject.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Macintosh HD,My Other Important Drive,USB Drive"
+    }
+  ],
   "commands": [
     {
       "name": "index",

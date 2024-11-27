@@ -7,5 +7,6 @@ export interface ILayout {
 
 export interface ILayoutManager {
   getAll: () => Promise<ILayout[]>;
+  setNextInput: () => Promise<ILayout>;
   activeInput?: string;
 }

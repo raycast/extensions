@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "mattisssa"
+    "mattisssa",
+    "NoorBayari",
+    "xmorse"
   ],
   "license": "MIT",
   "commands": [
@@ -20,28 +22,37 @@
   ],
   "preferences": [
     {
-      "name": "token",
-      "title": "Auth Token",
-      "type": "textfield",
       "description": "Auth Token to communicate with Sentry",
-      "required": true
+      "name": "token",
+      "required": true,
+      "title": "Auth Token",
+      "type": "password"
+    },
+    {
+      "description": "URL of the Sentry instance to connect with",
+      "name": "url",
+      "placeholder": "https://sentry.io",
+      "required": false,
+      "default": "https://sentry.io",
+      "title": "Sentry URL",
+      "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "javascript-time-ago": "^2.3.13",
-    "node-fetch": "^3.2.1",
-    "swr": "^1.2.2"
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.5",
+    "http-link-header": "^1.1.3",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-beta.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/http-link-header": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

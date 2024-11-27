@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "covert-color",
+  "title": "Convert Color",
+  "description": "hsl, rgb, hexadecimal, convert to each other",
+  "icon": "command-icon.png",
+  "author": "yf_zhang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Color",
+      "description": "hsl, rgb, hexadecimal, convert to each other",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "tinycolor2": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/tinycolor2": "^1.4.6",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

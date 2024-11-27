@@ -5,6 +5,9 @@
   "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
   "icon": "keepassxc.png",
   "author": "zkytech",
+  "contributors": [
+    "Sulfyderz"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,15 +19,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "keepassxcRootPath",
-      "type": "textfield",
-      "required": true,
-      "title": "Path of KeepassXC.app",
-      "description": "Path of KeepassXC.app",
-      "placeholder": "Set the Path of KeepassXC.app",
-      "default": "/Applications/KeePassXC.app"
-    },
     {
       "name": "database",
       "type": "textfield",
@@ -39,24 +33,42 @@
       "required": true,
       "title": "Password",
       "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
-      "placeholder": "Please input password of Keepass database."
+      "placeholder": "Please input password of Keepass database"
+    },
+    {
+      "name": "keyFile",
+      "type": "textfield",
+      "required": false,
+      "title": "Path of Key File",
+      "description": "Set the Path of Key File",
+      "placeholder": "Set the Path of Key File"
+    },
+    {
+      "name": "keepassxcRootPath",
+      "type": "appPicker",
+      "required": true,
+      "title": "KeepassXC.app",
+      "description": "KeepassXC.app",
+      "placeholder": "Select KeepassXC.app",
+      "default": "/Applications/KeePassXC.app"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
-    "@types/crypto-js": "^4.1.0",
-    "crypto-js": "^4.1.1"
+    "@raycast/api": "^1.60.0",
+    "@types/crypto-js": "^4.1.2",
+    "crypto-js": "^4.1.1",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "~18.18.2",
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8",
+    "react-devtools": "^4.28.0",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",

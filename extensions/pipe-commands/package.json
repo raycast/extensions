@@ -3,10 +3,11 @@
   "name": "pipe-commands",
   "title": "Pipe Commands",
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
-  "icon": "command-icon.png",
+  "icon": "pipe-icon.png",
   "author": "pomdtr",
-    "contributors": [
-    "gasolin"
+  "contributors": [
+    "gasolin",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "categories": [
@@ -15,50 +16,78 @@
   ],
   "commands": [
     {
-      "name": "pipe-selection-to-command",
-      "title": "Pipe Selection to Command",
-      "subtitle": "Pipe Commands",
-      "description": "Apply a script on your selection.",
-      "mode": "view"
-    },
-    {
       "name": "pipe-clipboard-to-command",
       "title": "Pipe Clipboard to Command",
       "subtitle": "Pipe Commands",
-      "description": "Apply a script on your clipboard.",
+      "description": "Apply a script to clipboard contents.",
       "mode": "view"
     },
     {
-      "name": "create-pipe-command",
-      "title": "Create Pipe Command",
+      "name": "pipe-text-to-command",
+      "title": "Pipe Text to Command",
       "subtitle": "Pipe Commands",
-      "description": "Generate a new Pipe Command using built-in templates.",
+      "description": "Apply a script to selected text.",
       "mode": "view"
     },
     {
-      "name": "manage-pipe-commands",
-      "title": "Manage Pipe Commands",
+      "name": "pipe-file-to-command",
+      "title": "Pipe File to Command",
       "subtitle": "Pipe Commands",
-      "description": "Edit your Pipe Commands.",
+      "description": "Apply a script on a file.",
+      "mode": "view"
+    },
+    {
+      "name": "pipe-tab-to-command",
+      "title": "Pipe Tab to Command",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on a tab.",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "commandFolder",
+      "title": "Commands Folder",
+      "required": false,
+      "type": "textfield",
+      "description": "The folder where your Pipe Commands are stored."
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "description": "The primary action for Pipe Commands.",
+      "required": false,
+      "title": "Primary Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Paste Script Output",
+          "value": "paste"
+        },
+        {
+          "title": "Copy Script Ouput",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
-    "globby": "^13.1.1",
-    "jsonschema": "^1.4.0"
+    "@raycast/api": "^1.69.3",
+    "globby": "^14.0.1",
+    "jsonschema": "^1.4.1",
+    "run-applescript": "^7.0.0",
+    "untildify": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^4.28.4",
     "typescript": "^4.4.3",
-    "typescript-json-schema": "^0.53.0"
+    "typescript-json-schema": "^0.62.0"
   },
   "scripts": {
     "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",

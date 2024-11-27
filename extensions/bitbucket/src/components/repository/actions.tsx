@@ -1,21 +1,21 @@
-import { ActionPanel, PushAction, Color, Icon } from "@raycast/api";
+import { ActionPanel, Color, Icon, Action } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
 import { PullRequestsList } from "./pullRequestsList";
 
 export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       title="Show pipelines"
       target={<PipelinesList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     />
   );
 }
 
 export function ShowPullRequestsActions(props: { repo: any }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       title="Show pull requests"
       target={<PullRequestsList repo={props.repo} pageNumber={1} />}
       icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
@@ -32,7 +32,7 @@ export function GoesToNextPipelinePage({
   pageNumber: number;
 }): JSX.Element {
   return (
-    <ActionPanel.Item
+    <Action
       title="Goes to next page"
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       onAction={() => setPageNumber(pageNumber + 1)}
@@ -48,7 +48,7 @@ export function GoesToPreviousPipelinePage({
   pageNumber: number;
 }): JSX.Element {
   return (
-    <ActionPanel.Item
+    <Action
       title="Goes to previous page"
       shortcut={{ modifiers: ["cmd"], key: "p" }}
       onAction={() => setPageNumber(pageNumber - 1)}

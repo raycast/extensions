@@ -1,10 +1,13 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useManagers, useSeasons } from "./hooks";
-import { PlayerContent } from "./types";
-import { getFlagEmoji } from "./utils";
+import { useState } from "react";
+import { getManagers } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import { Player } from "./types";
+import { getProfileImg } from "./utils";
 
-function PlayerProfile(props: PlayerContent) {
+function PlayerProfile(props: Player) {
   return (
     <Detail
       navigationTitle={`${props.name.display} | Profile`}
@@ -12,7 +15,7 @@ function PlayerProfile(props: PlayerContent) {
         { h1: props.name.display },
         {
           img: {
-            source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${props.altIds.opta}.png`,
+            source: getProfileImg(props.altIds.opta),
           },
         },
       ])}
@@ -37,26 +40,32 @@ function PlayerProfile(props: PlayerContent) {
   );
 }
 
-export default function Manager() {
-  const seasons = useSeasons();
-  const managers = useManagers(seasons[0]?.id.toString());
+export default function EPLManager() {
+  const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: managers, isLoading } = usePromise(
+    async (season) => (season ? await getManagers(season) : undefined),
+    [seasonId],
+  );
 
   return (
-    <List throttle isLoading={!managers}>
+    <Grid
+      throttle
+      isLoading={isLoading}
+      searchBarAccessory={
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+      }
+    >
       {managers?.map((p) => {
         return (
-          <List.Item
+          <Grid.Item
             key={p.id}
             title={p.name.display}
             subtitle={p.currentTeam?.name}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
+            content={{
+              source: getProfileImg(p.altIds.opta),
               fallback: "player-missing.png",
             }}
-            accessories={[
-              { text: p.birth.country.country },
-              { icon: getFlagEmoji(p.birth.country.isoCode) },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -69,6 +78,6 @@ export default function Manager() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

@@ -1,7 +1,7 @@
 import { isEmpty } from "./common-utils";
 import fetch, { AbortError } from "node-fetch";
 import { queryPackagesURL } from "./constans";
-import { artifactMapModel, artifactModel, PackageResponseModel } from "../model/packages-model";
+import { artifactMapModel, artifactModel, PackageResponseModel } from "../types/packages-model";
 import { showToast, Toast } from "@raycast/api";
 
 export type ArtifactTag = {
@@ -36,14 +36,17 @@ export const fetchArtifacts = async (searchContent: string) => {
         });
       });
     }
-    tempTagList.sort((a, b) => {
+    const finalList = tempTagList.slice(0, 5);
+    const __artifactInfo = _artifactInfo.slice(0, 5);
+    const __artifactName = _artifactName.slice(0, 5);
+    finalList.sort((a, b) => {
       return a.title.localeCompare(b.title);
     });
-    _tagList.push({ title: `Artifacts(${tempTagList.length})`, value: "Artifacts" });
+    _tagList.push({ title: `Artifacts(${finalList.length})`, value: "Artifacts" });
     return {
-      tagList: _tagList.concat(tempTagList),
-      artifactName: _artifactName.sort(),
-      artifactInfo: _artifactInfo.sort((a, b) => a[0].artifact.localeCompare(b[0].artifact)),
+      tagList: _tagList.concat(finalList),
+      artifactName: __artifactName.sort(),
+      artifactInfo: __artifactInfo.sort((a, b) => a[0].artifact.localeCompare(b[0].artifact)),
     };
   } catch (e) {
     if (e instanceof AbortError) {

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
 import fetch from "node-fetch";
 import { preferences } from "../../../helpers/preferences";
 import { Annotation, Patch } from "./../interface";
 
-export async function annotationGetQuery(signal: AbortSignal): Promise<any> {
+export async function annotationGetQuery(signal: AbortSignal | any): Promise<any> {
   return await fetch(`${preferences.rootApiUrl}/api/annotations?from=1506676478816&to=${Date.now()}&limit=10`, {
     method: "get",
     signal: signal,

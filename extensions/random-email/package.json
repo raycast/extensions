@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-email",
-  "title": "Random email",
+  "title": "Random Email",
   "description": "A quick way to create and copy a random email address",
   "icon": "command-icon.png",
   "author": "rkjaer",
@@ -40,14 +40,24 @@
     "build": "ray build -e dist",
     "dev": "ray develop"
   },
-  "preferences": [{
-    "name": "domain",
-    "title": "Email domain",
-    "description": "Specifices the domain name for the generated email address",
-    "default": "mailinator.com",
-    "value": "mailinator.com",
-    "placeholder": "example.com",
-    "type": "textfield",
-    "required": true
-  }]
+  "preferences": [
+    {
+      "name": "domain",
+      "title": "Email domain",
+      "description": "Specifices the domain name for the generated email address",
+      "default": "mailinator.com",
+      "value": "mailinator.com",
+      "placeholder": "example.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "prefix",
+      "title": "Email prefix",
+      "description": "Specifices the prefix for the generated email address",
+      "placeholder": "myprefix+",
+      "type": "textfield",
+      "required": false
+    }
+  ]
 }

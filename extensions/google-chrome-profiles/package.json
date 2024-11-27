@@ -5,6 +5,10 @@
   "description": "Search, open, manage your Google Chrome profiles / workspaces",
   "icon": "command-icon.png",
   "author": "frouo",
+  "contributors": [
+    "erics118",
+    "jschmidtcordeiro"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,39 +21,41 @@
   ],
   "preferences": [
     {
-      "title": "New Tab",
-      "name": "newTabURL",
-      "default": "https://google.com/search?q=%query%",
+      "title": "New Tab (blank)",
+      "name": "newBlankTabURL",
+      "default": "about:blank",
       "required": false,
-      "description": "The URL to launch when opening a profile. Any %query% will be replaced with the search text.",
+      "description": "The URL to launch when opening a profile, or a blank tab.",
       "type": "textfield",
       "placeholder": "cannot be empty"
     },
     {
-      "name": "shouldShowNewTabInBookmarks",
-      "default": true,
+      "title": "New Tab (search)",
+      "name": "newTabURL",
+      "default": "https://google.com/search?q=%query%",
       "required": false,
-      "type": "checkbox",
-      "label": "Show on top of bookmarks",
-      "description": "Indicates if the new tab URL should be displayed on top of the bookmarks"
+      "description": "The URL to launch when opening a profile with a search. The text \"%query%\" will be replaced with the search text.",
+      "type": "textfield",
+      "placeholder": "cannot be empty"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.28.0",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@types/node": "~17.0.17",
-    "@types/react": "^17.0.39",
-    "@typescript-eslint/eslint-plugin": "^5.11.0",
-    "@typescript-eslint/parser": "^5.11.0",
-    "eslint": "^8.8.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.23.0",
-    "typescript": "^4.5.5"
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.2",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

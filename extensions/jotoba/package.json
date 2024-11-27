@@ -1,0 +1,224 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jotoba",
+  "title": "Jotoba — Japanese Dictionary",
+  "keywords": [
+    "Japanese",
+    "日本語",
+    "辞書",
+    "jisho",
+    "Jotoba",
+    "dictionary",
+    "電子辞書",
+    "denshijisho",
+    "kanji",
+    "hiragana",
+    "katakana",
+    "clnhs"
+  ],
+  "description": "Search Jotoba.de from the comfort of Raycast.",
+  "icon": "command-icon.png",
+  "author": "clnhs",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Jotoba",
+      "subtitle": "Search Jotoba",
+      "description": "Search Jotoba.de for words and kanji.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "word or kanji",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "commonWordsFirst",
+          "type": "checkbox",
+          "label": "Display common words first.",
+          "required": true,
+          "default": true,
+          "description": "Enable to always display common words at the beginning of search results."
+        },
+        {
+          "type": "dropdown",
+          "name": "showDetailsInList",
+          "title": "Display result details...",
+          "required": false,
+          "description": "Choose how to display result details.",
+          "default": "list",
+          "label": "Display results details...",
+          "data": [
+            {
+              "title": "alongside results list",
+              "value": "list"
+            },
+            {
+              "title": "in a separate view",
+              "value": "details"
+            }
+          ]
+        },
+        {
+          "name": "userLanguage",
+          "type": "dropdown",
+          "required": false,
+          "title": "Display results in...",
+          "description": "In which language do you wish to see to see results?",
+          "default": "English",
+          "data": [
+            {
+              "title": "English",
+              "value": "English"
+            },
+            {
+              "title": "German (deutsch)",
+              "value": "German"
+            },
+            {
+              "title": "Spanish (español)",
+              "value": "Spanish"
+            },
+            {
+              "title": "French (français)",
+              "value": "French"
+            },
+            {
+              "title": "Dutch (nederlands)",
+              "value": "Dutch"
+            },
+            {
+              "title": "Swedish (svenska)",
+              "value": "Swedish"
+            },
+            {
+              "title": "Russian (русский язык)",
+              "value": "Russian"
+            },
+            {
+              "title": "Hungarian (magyar nyelv)",
+              "value": "Hungarian"
+            },
+            {
+              "title": "Slovenian (slovenski jezik)",
+              "value": "Slovenian"
+            }
+          ]
+        },
+        {
+          "name": "useEnglishFallback",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Enable if results insufficient in your selected language.",
+          "default": true,
+          "label": "Keep English search results."
+        },
+        {
+          "name": "posDisplayType",
+          "type": "dropdown",
+          "required": false,
+          "title": "In search results, display parts of speech in...",
+          "description": "Choose a language in which to display parts of speech (e.g. \"Adverb\", \"Noun\", etc...",
+          "default": "short",
+          "data": [
+            {
+              "title": "short form (e.g. \"ku adj.\")",
+              "value": "short"
+            },
+            {
+              "title": "long form (e.g. \"ku adjective\")",
+              "value": "long"
+            },
+            {
+              "title": "kana long form (e.g. \"く adjective\")",
+              "value": "klong"
+            },
+            {
+              "title": "kana short form (e.g. \"く adj.\")",
+              "value": "kshort"
+            }
+          ]
+        },
+        {
+          "name": "detailsPosDisplayType",
+          "type": "dropdown",
+          "required": false,
+          "title": "In definitions, display parts of speech in...",
+          "description": "Choose a language in which to display parts of speech (e.g. \"Adverb\", \"Noun\", etc...",
+          "default": "long",
+          "data": [
+            {
+              "title": "short form (e.g. \"ku adj.\")",
+              "value": "short"
+            },
+            {
+              "title": "long form (e.g. \"ku adjective\")",
+              "value": "long"
+            },
+            {
+              "title": "kana long form (e.g. \"く adjective\")",
+              "value": "klong"
+            },
+            {
+              "title": "kana short form (e.g. \"く adj.\")",
+              "value": "kshort"
+            }
+          ]
+        },
+        {
+          "name": "kanjiDetailsTitleDisplayType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Show \"On\"/\"Kun\" titles as...",
+          "description": "Show \"On\"/\"Kun\" titles as...",
+          "default": "long",
+          "data": [
+            {
+              "title": "long form (e.g. \"on reading\")",
+              "value": "long"
+            },
+            {
+              "title": "short form (e.g. \"on\")",
+              "value": "short"
+            },
+            {
+              "title": "romaji",
+              "value": "romaji"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "@types/react": "^18.0.26",
+    "nanoid": "^4.0.0",
+    "node-fetch": "^3.2.10",
+    "react": "^18.2.0",
+    "react-reconciler": "^0.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "~18.11.17",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.25.0",
+    "typescript": "^4.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

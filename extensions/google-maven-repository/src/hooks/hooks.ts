@@ -1,17 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArtifactTag, fetchArtifacts } from "../utils/google-maven-utils";
-import { artifactModel } from "../model/packages-model";
-import { showToast, Toast } from "@raycast/api";
+import { artifactModel } from "../types/packages-model";
+import { Cache, showToast, Toast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
-import { allPackagesURL } from "../utils/constans";
-import { MavenModel } from "../model/maven-model";
+import { allPackagesURL, CacheKey } from "../utils/constans";
+import { MavenModel } from "../types/maven-model";
 import Style = Toast.Style;
 import { isEmpty } from "../utils/common-utils";
-
-//for refresh useState
-export const refreshNumber = () => {
-  return new Date().getTime();
-};
 
 export const searchArtifacts = (searchContent: string) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,12 +47,18 @@ export const getGoogleMavenRepositories = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    const cache = new Cache();
     try {
+      const allPackagesCache = cache.get(CacheKey.REPOSITORY);
+      if (typeof allPackagesCache === "string") {
+        setAllPackages(JSON.parse(allPackagesCache));
+      }
       fetch(allPackagesURL)
         .then((response) => response.json() as Promise<MavenModel>)
         .then((data) => {
           setAllPackages(data.data);
           setLoading(false);
+          cache.set(CacheKey.REPOSITORY, JSON.stringify(data.data));
         })
         .catch((reason) => {
           setAllPackages([]);

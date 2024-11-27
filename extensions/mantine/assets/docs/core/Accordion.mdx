@@ -1,0 +1,102 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Accordion
+order: 1
+slug: /core/accordion/
+category: "data-display"
+description: "Divide content into collapsible sections"
+props: ["Accordion"]
+import: "import { Accordion } from '@mantine/core';"
+source: "mantine-core/src/components/Accordion/Accordion.tsx"
+docs: "core/Accordion.mdx"
+styles: ["Accordion"]
+---
+
+import { AccordionDemos } from "@mantine/demos";
+
+## Usage
+
+<Demo data={AccordionDemos.configurator} />
+
+## Change labels
+
+<Demo data={AccordionDemos.label} />
+
+## Change icons
+
+To change icon for all items set `icon` prop on Accordion component:
+
+<Demo data={AccordionDemos.icon} />
+
+To change icon individually for each item, set `icon` prop on `Accordion.Item` component:
+
+<Demo data={AccordionDemos.icons} />
+
+## Change transition
+
+To change transition duration, set `transitionDuration` prop:
+
+<Demo data={AccordionDemos.customTransitions} />
+
+To disable transitions, set `transitionDuration` to 0:
+
+<Demo data={AccordionDemos.disableTransitions} />
+
+## Customize styles
+
+By default, Accordion has bare minimum styles to make customization simple,
+add additional styles with [Styles API](/theming/styles-api/):
+
+<Demo data={AccordionDemos.stylesApi} demoProps={{ toggle: true }} />
+
+## Control state
+
+In most cases, Accordion can be uncontrolled, to change initial opened item use `initialItem` prop:
+
+```tsx
+// -> Third element will be opened initially
+<Accordion initialItem={2} />;
+
+// -> No element will be opened initially (default)
+<Accordion initialItem={-1} />;
+```
+
+In more advanced cases, Accordion state can be controlled with `useAccordionState` hook:
+
+<Demo data={AccordionDemos.form} demoProps={{ toggle: true }} />
+
+## Get control ref
+
+Use `controlRef` prop on Accordion.Item component to get control button ref:
+
+```tsx
+import { useRef } from "react";
+
+function Demo() {
+  const ref = useRef<HTMLButtonElement>();
+  return (
+    <Accordion>
+      <Accordion.Item label="First item" controlRef={ref} />
+    </Accordion>
+  );
+}
+```
+
+## Accessibility
+
+Accordion component is accessible by default, it follows [WAI ARIA guidelines](https://www.w3.org/TR/wai-aria-practices-1.1/examples/accordion/accordion.html):
+
+- All controls are included in `Tab` sequence
+- `Up` and `Down` arrows move focus to previous/next control
+- Item body has `role="region"` attribute
+- Item control has `aria-expanded`, `aria-controls`, `aria-labelledby` attributes
+- When user prefers to reduce motion, `transitionDuration` is automatically set to 0
+
+To make the component visible for screen reader, include descriptive in `Accordion.Item` label:
+
+```tsx
+<Accordion.Item label={<div />}>Content</Accordion.Item> // -> not ok
+<Accordion.Item label="First item">Content</Accordion.Item> // -> ok
+<Accordion.Item label={<div>First item</div>}>Content</Accordion.Item> // -> ok
+```

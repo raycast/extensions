@@ -10,12 +10,12 @@ export default async () => {
 
   interface Preferences {
     APIkey: string;
-    duration: string;
+    defaultFocusDuration: string;
   }
 
   const preferences = getPreferenceValues<Preferences>();
 
-  if (isNaN(parseInt(preferences.duration, 10))) {
+  if (isNaN(parseInt(preferences.defaultFocusDuration, 10))) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to start Focus Session",
@@ -29,7 +29,7 @@ export default async () => {
       .post("https://www.rescuetime.com/anapi/start_focustime", {
         searchParams: {
           key: preferences.APIkey,
-          duration: preferences.duration,
+          duration: preferences.defaultFocusDuration || "25",
         },
       })
       .json();

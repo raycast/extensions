@@ -1,11 +1,12 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { fetchAppleScript } from "./scripts";
 
 export default async function main() {
   try {
-    await runAppleScriptSilently(script);
+    await runAppleScriptSilently();
     await showHUD("Scroll direction changed");
-  } catch {
+  } catch (err) {
     await showHUD("Couldn't change scroll direction...");
   }
 }
@@ -20,20 +21,8 @@ export default async function main() {
  * @throws An error when the AppleScript fails to run
  * @returns A promise that is resolved when the AppleScript finished running
  */
-async function runAppleScriptSilently(appleScript: string) {
+async function runAppleScriptSilently() {
   await closeMainWindow();
+  const appleScript = fetchAppleScript();
   await runAppleScript(appleScript);
 }
-
-const script = `
-tell application "System Preferences"
-	reveal anchor "trackpadTab" of pane id "com.apple.preference.trackpad"
-end tell
-
-tell application "System Events" to tell process "System Preferences"
-	click checkbox 1 of tab group 1 of window 0
-end tell
-
-quit application "System Preferences"
-
-return 1`;

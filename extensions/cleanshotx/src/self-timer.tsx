@@ -1,8 +1,8 @@
-import open from "open";
-import { closeMainWindow } from "@raycast/api";
+import { LaunchProps, closeMainWindow, open } from "@raycast/api";
 
-export default async () => {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.SelfTimer }>) {
   const url = "cleanshot://self-timer";
-  open(url);
   await closeMainWindow();
-};
+  if (props.arguments?.action) open(url + "?action=" + props.arguments.action);
+  else open(url);
+}

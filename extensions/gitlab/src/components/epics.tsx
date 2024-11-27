@@ -1,35 +1,87 @@
-import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { ensureCleanAccessories } from "../utils";
+import { capitalizeFirstLetter, showErrorToast, toLongDateString } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 function getIcon(state: string): Image {
   if (state == "opened") {
-    return { source: GitLabIcons.mropen, tintColor: Color.Green };
+    return { source: GitLabIcons.epic, tintColor: Color.Green };
   } else {
-    return { source: GitLabIcons.merged, tintColor: Color.Purple };
+    return { source: GitLabIcons.epic, tintColor: Color.Purple };
   }
 }
 
-export function EpicListItem(props: { epic: any }) {
+export function includeGroupAncestorPreference(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.includeEpicAncestor as boolean) || false;
+}
+
+function getEpicGroupName(epic: any): string | undefined {
+  const f: string | undefined = epic?.references?.full;
+  if (!f) {
+    return;
+  }
+  const i = f.lastIndexOf("&");
+  if (i > 0) {
+    return f.substring(0, i);
+  }
+}
+
+function ActionToggleGroupName(props: { show?: boolean; callback?: (newValue: boolean) => void }): JSX.Element | null {
+  if (!props.callback) {
+    return null;
+  }
+  return (
+    <Action
+      title={"Toggle Group Name"}
+      icon={props.show === true ? Icon.EyeDisabled : Icon.Eye}
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={() => {
+        if (props.callback) {
+          props.callback(!props.show);
+        }
+      }}
+    />
+  );
+}
+
+export function EpicListItem(props: {
+  epic: any;
+  displayGroup?: boolean;
+  onChangeDisplayGroup?: (newValue?: boolean) => void;
+}) {
   const epic = props.epic;
   const icon = getIcon(epic.state as string);
+  const groupName = getEpicGroupName(epic);
   return (
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessories={ensureCleanAccessories([
-        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle } },
-      ])}
-      icon={icon}
+      subtitle={`&${epic.iid}`}
+      accessories={[
+        { text: props.displayGroup === true ? groupName : undefined },
+        {
+          text: epic.upvotes ? `${epic.upvotes}` : undefined,
+          icon: epic.upvotes ? "👍" : undefined,
+          tooltip: epic.upvotes ? `Upvotes: ${epic.upvotes}` : undefined,
+        },
+        {
+          text: epic.downvotes ? `${epic.downvotes}` : undefined,
+          icon: epic.downvotes ? "👎" : undefined,
+          tooltip: epic.downvotes ? `Downvotes: ${epic.downvotes}` : undefined,
+        },
+        { date: new Date(epic.updated_at), tooltip: `Updated: ${toLongDateString(epic.updated_at)}` },
+        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
+      ]}
+      icon={{ value: icon, tooltip: epic.state ? `Status: ${capitalizeFirstLetter(epic.state)}` : "" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -38,10 +90,9 @@ export function EpicListItem(props: { epic: any }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
+            <ActionToggleGroupName show={props.displayGroup} callback={props.onChangeDisplayGroup} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -73,11 +124,10 @@ export function EpicList(props: { group: Group }) {
   );
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search epics", error);
+    showErrorToast(error, "Cannot search Epics");
   }
 
   const navTitle = `Epics ${props.group.full_path}`;
-
   return (
     <List
       searchBarPlaceholder="Filter Epics by name..."
@@ -86,9 +136,14 @@ export function EpicList(props: { group: Group }) {
       throttle={true}
       navigationTitle={navTitle}
     >
-      {data?.map((epic) => (
-        <EpicListItem key={epic.id} epic={epic} />
-      ))}
+      <List.Section
+        title={data ? `Recent Epics ${data.length}` : undefined}
+        subtitle={data ? `${data.length}` : undefined}
+      >
+        {data?.map((epic) => (
+          <EpicListItem key={epic.id} epic={epic} />
+        ))}
+      </List.Section>
     </List>
   );
 }

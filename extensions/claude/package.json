@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude",
+  "title": "Claude",
+  "description": "Interact with Anthropic's Claude API directly from Raycast",
+  "icon": "icon.png",
+  "author": "florisdobber",
+  "contributors": [
+    "alextlopez11",
+    "FelixII",
+    "midnite"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "anthropic",
+    "claude",
+    "chat",
+    "ai"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "Claude",
+      "description": "Ask Claude via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answers",
+      "subtitle": "Claude",
+      "description": "Collection of your saved answers",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Claude",
+      "description": "Collection of your recent answers",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "Claude",
+      "description": "Collection of your recent conversations",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "subtitle": "Claude",
+      "description": "Collection of your custom and default models",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "Anthropic API Key",
+      "description": "Enter your personal Anthropic API Key",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming of responses",
+      "description": "Stream responses from Claude in real-time",
+      "type": "checkbox",
+      "title": "Stream Responses",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isAutoLoad",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your front most application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoFullInput",
+      "label": "Enable full text input initially",
+      "description": "Use full text input form when asking question for the first time",
+      "type": "checkbox",
+      "title": "Use Full Text Input",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.14.1",
+    "@types/uuid": "^9.0.0",
+    "cross-fetch": "^4.0.0",
+    "csv-parse": "^5.5.3",
+    "raycast": "^1.0.8",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

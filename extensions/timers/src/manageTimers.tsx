@@ -1,98 +1,45 @@
-import { Action, ActionPanel, Color, environment, Icon, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
-import RenameView from "./RenameView";
+import { Action, ActionPanel, Icon, LaunchProps, List, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
+import { useEffect } from "react";
+import useTimers from "./hooks/useTimers";
 import CustomTimerView from "./startCustomTimer";
-import {
-  createCustomTimer,
-  deleteCustomTimer,
-  ensureCTFileExists,
-  getTimers,
-  readCustomTimers,
-  startTimer,
-  stopTimer,
-} from "./timerUtils";
-import { CustomTimer, Timer } from "./types";
+import { CommandLinkParams } from "./backend/types";
+import { readCustomTimers, startTimer } from "./backend/timerBackend";
+import RunningTimerListItem from "./components/RunningTimerListItem";
+import CustomTimerListItem from "./components/CustomTimerListItem";
 
-export default function Command() {
-  const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
-  const [customTimers, setCustomTimers] = useState<Record<string, CustomTimer>>({});
+export default function Command(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
+  if (props.launchContext?.timerID) {
+    const customTimers = readCustomTimers();
+    const ct = customTimers[props.launchContext.timerID];
+    if (ct == undefined) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "This custom timer no longer exists!",
+      });
+    } else {
+      startTimer({
+        timeInSeconds: ct.timeInSeconds,
+        timerName: ct.name,
+        selectedSound: ct.selectedSound,
+      }).then(() => popToRoot());
+      return;
+    }
+  }
+
+  const { timers, customTimers, isLoading, refreshTimers } = useTimers();
   const { push } = useNavigation();
 
   useEffect(() => {
-    setInterval(async () => {
-      await refreshTimers();
+    refreshTimers();
+    setInterval(() => {
+      refreshTimers();
     }, 1000);
   }, []);
 
-  const refreshTimers = async () => {
-    await ensureCTFileExists();
-    const setOfTimers: Timer[] = await getTimers();
-    setTimers(setOfTimers);
-    const setOfCustomTimers: Record<string, CustomTimer> = await readCustomTimers();
-    setCustomTimers(setOfCustomTimers);
-  };
-
-  const handleTimerStop = async (timer: Timer) => {
-    await stopTimer(environment.supportPath + "/" + timer.originalFile);
-    await refreshTimers();
-  };
-
-  const handleTimerStart = async (customTimer: CustomTimer) => {
-    await startTimer(customTimer.timeInSeconds, customTimer.name);
-    await refreshTimers();
-  };
-
-  const handleCreateCustom = async (timer: Timer) => {
-    const customTimer: CustomTimer = {
-      name: timer.name,
-      timeInSeconds: timer.secondsSet,
-    };
-    await createCustomTimer(customTimer);
-    await refreshTimers();
-  };
-
-  const handleDeleteCustom = async (ctID: string) => {
-    await deleteCustomTimer(ctID);
-    await refreshTimers();
-  };
-
-  const formatTime = (timeInSeconds: number | string) => {
-    const time = new Date(timeInSeconds);
-    time.setSeconds(Number(timeInSeconds));
-    return time.toISOString().substring(11, 19);
-  };
-
   return (
-    <List isLoading={timers === undefined || customTimers === undefined}>
+    <List isLoading={isLoading}>
       <List.Section title={timers?.length !== 0 && timers != null ? "Currently Running" : "No Timers Running"}>
-        {timers?.map((timer, index) => (
-          <List.Item
-            key={index}
-            icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
-            title={timer.name}
-            subtitle={formatTime(timer.timeLeft) + " left"}
-            accessoryTitle={formatTime(timer.secondsSet) + " originally"}
-            actions={
-              <ActionPanel>
-                <Action title="Stop Timer" onAction={() => handleTimerStop(timer)} />
-                <Action
-                  title="Rename Timer"
-                  onAction={() =>
-                    push(<RenameView currentName={timer.name} timerFile={timer.originalFile} ctID={null} />)
-                  }
-                />
-                <Action
-                  title="Save Timer as Preset"
-                  shortcut={{
-                    modifiers: ["cmd", "shift"],
-                    key: "enter",
-                  }}
-                  onAction={() => handleCreateCustom(timer)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {timers?.map((timer) => <RunningTimerListItem key={timer.originalFile} timer={timer} />)}
         <List.Item
           key={0}
           icon={Icon.Clock}
@@ -100,7 +47,11 @@ export default function Command() {
           subtitle={"Press Enter to start a timer"}
           actions={
             <ActionPanel>
-              <Action title="Start Timer" onAction={() => push(<CustomTimerView />)} />
+              <Action
+                title="Start Timer"
+                icon={Icon.Hourglass}
+                onAction={() => push(<CustomTimerView arguments={{ hours: "", minutes: "", seconds: "" }} />)}
+              />
             </ActionPanel>
           }
         />
@@ -110,33 +61,7 @@ export default function Command() {
           ?.sort((a, b) => {
             return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
           })
-          .map((ctID) => (
-            <List.Item
-              key={ctID}
-              icon={Icon.Clock}
-              title={customTimers[ctID].name}
-              subtitle={formatTime(customTimers[ctID].timeInSeconds)}
-              actions={
-                <ActionPanel>
-                  <Action title="Start Timer" onAction={() => handleTimerStart(customTimers[ctID])} />
-                  <Action
-                    title="Rename Timer"
-                    onAction={() =>
-                      push(<RenameView currentName={customTimers[ctID].name} timerFile={"customTimer"} ctID={ctID} />)
-                    }
-                  />
-                  <Action
-                    title="Delete Custom Timer"
-                    shortcut={{
-                      modifiers: ["ctrl"],
-                      key: "x",
-                    }}
-                    onAction={() => handleDeleteCustom(ctID)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+          .map((ctID) => <CustomTimerListItem key={ctID} customTimer={customTimers[ctID]} id={ctID} />)}
       </List.Section>
     </List>
   );

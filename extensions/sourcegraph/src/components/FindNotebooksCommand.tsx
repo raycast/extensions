@@ -2,20 +2,18 @@ import { ActionPanel, List, Action, Icon, Detail, useNavigation } from "@raycast
 import { useState, Fragment, useMemo } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
-import { useQuery } from "@apollo/client";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
+import {
+  useGetNotebooksQuery,
+  NotebooksOrderBy,
+  SearchNotebookFragment as SearchNotebook,
+} from "../sourcegraph/gql/operations";
+import { bold, codeBlock, inlineCode, italic, quoteBlock } from "../markdown";
+
 import { copyShortcut } from "./shortcuts";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
-import ExpandableErrorToast from "./ExpandableErrorToast";
-import { GET_NOTEBOOKS } from "../sourcegraph/gql/queries";
-import {
-  GetNotebooksVariables,
-  GetNotebooks,
-  SearchNotebookFields as SearchNotebook,
-  NotebooksOrderBy,
-} from "../sourcegraph/gql/schema";
-import { bold, codeBlock, inlineCode, italic, quoteBlock } from "../markdown";
+import ExpandableToast from "./ExpandableToast";
 
 const link = new LinkBuilder("notebooks");
 
@@ -24,18 +22,18 @@ const link = new LinkBuilder("notebooks");
  */
 export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
   const [searchText, setSearchText] = useState("");
-  const { loading, error, data } = useQuery<GetNotebooks, GetNotebooksVariables>(GET_NOTEBOOKS, {
+  const { loading, error, data } = useGetNotebooksQuery({
     client: src.client,
     variables: {
       query: searchText,
-      orderBy: searchText ? NotebooksOrderBy.NOTEBOOK_STAR_COUNT : NotebooksOrderBy.NOTEBOOK_UPDATED_AT,
+      orderBy: searchText ? NotebooksOrderBy.NotebookStarCount : NotebooksOrderBy.NotebookUpdatedAt,
     },
   });
   const notebooks = useMemo(() => data?.notebooks.nodes, [data]);
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Find notebooks failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Find notebooks failed", error.message).show();
   }
 
   const srcName = instanceName(src);
@@ -53,7 +51,7 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
         <List.Section title={"Suggestions"}>
           <List.Item
             title="Create a search notebook"
-            icon={{ source: Icon.Plus }}
+            icon={{ source: Icon.NewDocument }}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Create in Browser" url={link.new(src, `/notebooks/new`)} />
@@ -113,8 +111,10 @@ function NotebookResultItem({
       subtitle={updated ? `by ${author}, updated ${updated}` : author}
       accessories={accessories}
       icon={{
-        source: Icon.Document,
-        tintColor: notebook.public ? ColorDefault : ColorPrivate,
+        value: {
+          source: Icon.CodeBlock,
+          tintColor: notebook.public ? ColorDefault : ColorPrivate,
+        },
         tooltip: notebook.public ? "Public notebook" : "Private notebook",
       }}
       actions={
@@ -122,7 +122,7 @@ function NotebookResultItem({
           <Action.Push
             key={nanoid()}
             title="Preview Notebook"
-            icon={{ source: Icon.MagnifyingGlass }}
+            icon={{ source: Icon.Maximize }}
             target={<NotebookPreviewView notebook={notebook} src={src} />}
           />
           <Action.OpenInBrowser key={nanoid()} url={url} />

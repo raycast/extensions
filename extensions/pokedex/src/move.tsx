@@ -1,94 +1,124 @@
-import { useMemo, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
+import debounce from "lodash.debounce";
 import groupBy from "lodash.groupby";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { fetchMoveWithCaching } from "./api";
+import Descriptions from "./components/description";
+import MoveMetadata from "./components/metadata/move";
+import MoveLearnset from "./components/move_learnset";
 import TypeDropdown from "./components/type_dropdown";
-
 import moves from "./statics/moves.json";
 
-const preference = getPreferenceValues();
-
-export default function Move() {
-  const [searchText, setSearchText] = useState<string>("");
+export default function PokeMoves(props: { id?: number }) {
   const [type, setType] = useState<string>("all");
-  const [showPreview, setShowPreview] = useState<boolean>(
-    preference.showPreview
+  const [selectedMoveId, setSelectedMoveId] = useState<number>(71);
+
+  useEffect(() => {
+    if (props.id) {
+      setSelectedMoveId(props.id);
+    }
+  }, [props.id]);
+
+  const { data: move, isLoading } = usePromise(fetchMoveWithCaching, [
+    selectedMoveId,
+  ]);
+
+  const debouncedSelectionChange = useCallback(
+    debounce((index: string | null) => {
+      if (index) {
+        setSelectedMoveId(parseInt(index));
+      }
+    }, 300),
+    [],
   );
 
-  const generations = useMemo(() => {
-    let listing = searchText
-      ? moves.filter(
-          (move) =>
-            move.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            move.short_effect.toLowerCase().includes(searchText.toLowerCase())
-        )
-      : moves;
+  const onSelectionChange = (index: string | null) => {
+    debouncedSelectionChange(index);
+  };
 
-    if (type != "all") {
-      listing = listing.filter((p) => p.type === type);
-    }
+  const generations = useMemo(() => {
+    const listing =
+      type === "all" ? moves : moves.filter((m) => m.type === type);
 
     return groupBy(listing, "generation");
-  }, [searchText, type]);
+  }, [type]);
 
   return (
     <List
       throttle
-      onSearchTextChange={setSearchText}
-      isShowingDetail={showPreview}
+      navigationTitle="Moves"
+      isShowingDetail={true}
       searchBarAccessory={
         <TypeDropdown command="Move" onSelectType={setType} />
       }
+      selectedItemId={String(selectedMoveId)}
+      onSelectionChange={onSelectionChange}
+      isLoading={isLoading}
     >
       {Object.entries(generations).map(([generation, moves]) => {
         return (
           <List.Section key={generation} title={generation}>
-            {moves.map((move, idx) => {
+            {moves.map((m) => {
               return (
                 <List.Item
-                  key={idx}
-                  title={move.name}
-                  subtitle={showPreview ? undefined : move.short_effect}
-                  icon={`moves/${move.damage_class || "status"}.svg`}
-                  accessories={[
-                    {
-                      text: move.type,
-                      icon: `types/${move.type.toLowerCase()}.svg`,
-                    },
-                  ]}
+                  key={m.id}
+                  id={m.id.toString()}
+                  title={m.name}
+                  icon={`moves/${m.damage_class || "status"}.svg`}
+                  keywords={[m.name]}
                   detail={
-                    showPreview ? (
+                    !isLoading && (
                       <List.Item.Detail
-                        markdown={json2md([
-                          {
-                            h1: move.name,
-                          },
-                          { p: move.short_effect },
-                          { p: `**Power**: ${move.power || "-"}` },
-                          {
-                            p: `**Accuracy**: ${
-                              move.accuracy ? move.accuracy + "%" : "-"
-                            }`,
-                          },
-                          { p: `**PP**: ${move.pp || "-"}` },
-                        ])}
+                        markdown={
+                          move &&
+                          move.pokemon_v2_moveeffect
+                            ?.pokemon_v2_moveeffecteffecttexts.length
+                            ? json2md([
+                                {
+                                  h1: m.name,
+                                },
+                                {
+                                  p: move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
+                                    "$effect_chance",
+                                    String(move.move_effect_chance),
+                                  ),
+                                },
+                              ])
+                            : undefined
+                        }
+                        metadata={move && <MoveMetadata move={move} />}
                       />
-                    ) : undefined
+                    )
                   }
                   actions={
-                    <ActionPanel>
-                      <Action
-                        title={showPreview ? "Hide Preview" : "Show Preview"}
-                        icon={Icon.Sidebar}
-                        onAction={() => setShowPreview(!showPreview)}
-                      />
-                    </ActionPanel>
+                    move && (
+                      <ActionPanel>
+                        <ActionPanel.Section title="Information">
+                          <Action.Push
+                            title="Descriptions"
+                            icon={Icon.List}
+                            target={
+                              <Descriptions
+                                name={m.name}
+                                entries={move.pokemon_v2_moveflavortexts}
+                              />
+                            }
+                          />
+                          <Action.Push
+                            title="Learnset"
+                            icon={Icon.List}
+                            target={
+                              <MoveLearnset
+                                name={move.pokemon_v2_movenames[0].name}
+                                moves={move.pokemon_v2_pokemonmoves}
+                              />
+                            }
+                          />
+                        </ActionPanel.Section>
+                      </ActionPanel>
+                    )
                   }
                 />
               );

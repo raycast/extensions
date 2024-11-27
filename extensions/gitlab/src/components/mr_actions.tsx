@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, Color, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
 import { Label, MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { ProjectCommitList } from "./commits/list";
 import { LabelList } from "./label";
 
@@ -23,10 +23,10 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to close merge request", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to close Merge Request");
     }
   }
-  return <Action title="Close MR" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
+  return <Action title="Close MR" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
 }
 
 export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
@@ -39,7 +39,7 @@ export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void 
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to reopen merge request", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to reopen Merge Request");
     }
   }
   return <Action title="Reopen MR" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
@@ -52,7 +52,7 @@ export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: Keyboard.Sh
       await createNote(mr, "/rebase");
       showToast(Toast.Style.Success, "Rebased");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to rebase merge request", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to rebase Merge Request");
     }
   }
   return (
@@ -74,7 +74,7 @@ export function MergeMRAction(props: {
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to merge", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to Merge");
     }
   }
   if (mr.state === "opened") {
@@ -98,13 +98,13 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
       await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/todo`);
       showToast(Toast.Style.Success, "To do created");
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to add to do", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to add to do");
     }
   }
   if (mr.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a To Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

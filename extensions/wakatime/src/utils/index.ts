@@ -1,17 +1,23 @@
 export * from "./api";
 
-export function getDuration(seconds: number) {
+export function getDuration(seconds?: number | null) {
   const getAmount = (rate: number, unit: string) => {
+    if (seconds == null) return "";
+
     const num = Math.floor(seconds / rate);
     seconds = Math.floor(seconds - num * rate);
     return num === 0 ? "" : `${num} ${unit}`;
   };
 
-  const hours = getAmount(60 * 60, "hr");
-  const minutes = getAmount(60, "min");
-  const sec = getAmount(1, "sec");
+  let duration = "0 sec";
 
-  const duration = [hours, minutes, sec].filter(Boolean).join(" ");
+  if (seconds != null) {
+    const hours = getAmount(60 * 60, "hr");
+    const minutes = getAmount(60, "min");
+    const sec = getAmount(1, "sec");
+
+    duration = [hours, minutes, sec].filter(Boolean).join(" ");
+  }
 
   return duration || "0 sec";
 }
@@ -24,7 +30,7 @@ export function getDuration(seconds: number) {
  */
 export function cumulateSummaryDuration(
   { data }: WakaTime.Summary,
-  key: keyof Omit<typeof data[0], "grand_total" | "range">
+  key: keyof Omit<(typeof data)[0], "grand_total" | "range">
 ) {
   const obj = Object.entries(
     data

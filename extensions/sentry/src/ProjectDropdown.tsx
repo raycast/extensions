@@ -1,29 +1,21 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect } from "react";
-import { useProjects } from "./hooks";
+import { List } from "@raycast/api";
+import { useProjects } from "./sentry";
 import { Project } from "./types";
 
 function ProjectDropdownItem(props: { project: Project }) {
-  return (
-    <List.Dropdown.Item
-      value={props.project.slug}
-      title={props.project.slug}
-      icon={{ source: Icon.Circle, tintColor: props.project.color }}
-    />
-  );
+  const slug = `${props.project.organization.slug}/${props.project.slug}`;
+  return <List.Dropdown.Item value={slug} title={slug} />;
 }
 
-export function ProjectDropdown(props: { onProjectChange: (project: Project) => void }) {
-  const { data: projects, error } = useProjects();
+export function ProjectDropdown(props: {
+  onProjectChange: (project?: Project) => void;
+  onError: (error: Error) => void;
+}) {
+  const { data, error } = useProjects();
 
-  useEffect(() => {
-    if (error) {
-      showToast({ style: Toast.Style.Failure, title: "Failed retrieving projects", message: error.message });
-    }
-  }, [error]);
-
-  function handleProjectChange(projectSlug: string) {
-    const project = projects?.find((p) => p.slug === projectSlug);
+  function handleProjectChange(slug: string) {
+    const [orgSlug, projectSlug] = slug.split("/");
+    const project = data?.find((p) => p.organization.slug === orgSlug && p.slug === projectSlug);
     if (project) {
       props.onProjectChange(project);
     } else {
@@ -31,9 +23,13 @@ export function ProjectDropdown(props: { onProjectChange: (project: Project) => 
     }
   }
 
+  if (error) {
+    props.onError(error);
+  }
+
   return (
     <List.Dropdown tooltip="Change Project" onChange={handleProjectChange} storeValue>
-      {projects?.map((project) => (
+      {data?.map((project) => (
         <ProjectDropdownItem key={project.id} project={project} />
       ))}
     </List.Dropdown>

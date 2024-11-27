@@ -10,7 +10,7 @@ The source code of the example can be found [here](https://github.com/raycast/ex
 
 This example shows how to build commands that don't show a UI in Raycast. This type of command is useful for interactions with other apps such as skipping songs in Spotify or just simply running some scripts that don't need visual confirmation.
 
-![Example: Control the Spotify macOS app from Raycast](../.gitbook/assets/example-spotify-controls.png)
+![Example: Control the Spotify macOS app from Raycast](../.gitbook/assets/example-spotify-controls.webp)
 
 ## Control Spotify macOS app
 
@@ -19,9 +19,9 @@ Spotify's macOS app supports AppleScript. This is great to control the app witho
 ```typescript
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
 ## Close Raycast main window
@@ -34,10 +34,10 @@ Here is how you can close the main window:
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await closeMainWindow();
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
 Notice that we call the `closeMainWindow` function before running the AppleScript. This makes the command feel snappier.

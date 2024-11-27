@@ -18,6 +18,8 @@ import { ActionCopyFile } from "./components/action-copy-file";
 import { Preferences } from "./types/preferences";
 import { FileContentInfo } from "./types/file-content-info";
 import { DirectoryDetailMetadata } from "./components/directory-detail-metadata";
+import { ListEmptyView } from "./components/list-empty-view";
+import { FolderPage } from "./components/folder-page";
 
 export default function OpenCommonDirectory() {
   const { sortBy, showOpenDirectory } = getPreferenceValues<Preferences>();
@@ -50,80 +52,53 @@ export default function OpenCommonDirectory() {
         if (typeof id === "string") {
           const idContent = JSON.parse(id);
           setDirectoryPath(idContent.path);
-        } else {
-          setDirectoryPath("");
         }
       }}
     >
-      {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
-      (commonDirectory.length === 0 && !showOpenDirectory) ? (
-        <List.EmptyView
-          title={"No directories found"}
-          description={"You can always add directories directly from the Action Panel"}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title={"Add Directory"}
-                icon={Icon.Plus}
-                target={<AddCommonDirectory setRefresh={setRefresh} />}
-              />
-              <Action
-                title={"Toggle Details"}
-                icon={Icon.Sidebar}
-                shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
-                onAction={() => {
-                  setRefreshDetail(refreshNumber());
-                  setShowDetailLocalStorage(ShowDetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <>
-          <List.Section title={"Common Directories"}>
-            {!loading &&
-              commonDirectory.map((directory, index) => {
-                if (
-                  directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
-                  directory.name.toLowerCase().includes(searchValue.toLowerCase())
-                )
-                  return (
-                    <DirectoryItem
-                      key={directory.id}
-                      directory={directory}
-                      index={index}
-                      commonDirectory={commonDirectory}
-                      directoryInfo={directoryInfo}
-                      isDetailLoading={isDetailLoading}
-                      showDetail={showDetail}
-                      setRefresh={setRefresh}
-                      setRefreshDetail={setRefreshDetail}
-                    />
-                  );
-              })}
-          </List.Section>
-          <List.Section title={"Open Directories"}>
-            {!loading &&
-              openDirectory.map((directory, index) => {
-                if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
-                  return (
-                    <DirectoryItem
-                      key={directory.id}
-                      directory={directory}
-                      index={index}
-                      commonDirectory={openDirectory}
-                      directoryInfo={directoryInfo}
-                      isDetailLoading={isDetailLoading}
-                      showDetail={showDetail}
-                      setRefresh={setRefresh}
-                      setRefreshDetail={setRefreshDetail}
-                    />
-                  );
-              })}
-          </List.Section>
-        </>
-      )}
+      <ListEmptyView setRefresh={setRefresh} />
+
+      <List.Section title={"Common Directories"}>
+        {!loading &&
+          commonDirectory.map((directory, index) => {
+            if (
+              directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+              directory.name.toLowerCase().includes(searchValue.toLowerCase())
+            )
+              return (
+                <DirectoryItem
+                  key={directory.id}
+                  directory={directory}
+                  index={index}
+                  commonDirectory={commonDirectory}
+                  directoryInfo={directoryInfo}
+                  isDetailLoading={isDetailLoading}
+                  showDetail={showDetail}
+                  setRefresh={setRefresh}
+                  setRefreshDetail={setRefreshDetail}
+                />
+              );
+          })}
+      </List.Section>
+
+      <List.Section title={"Open Directories"}>
+        {!loading &&
+          openDirectory.map((directory, index) => {
+            if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
+              return (
+                <DirectoryItem
+                  key={directory.id}
+                  directory={directory}
+                  index={index}
+                  commonDirectory={openDirectory}
+                  directoryInfo={directoryInfo}
+                  isDetailLoading={isDetailLoading}
+                  showDetail={showDetail}
+                  setRefresh={setRefresh}
+                  setRefreshDetail={setRefreshDetail}
+                />
+              );
+          })}
+      </List.Section>
     </List>
   );
 }
@@ -177,10 +152,16 @@ function DirectoryItem(props: {
             path={directory.path}
             onShow={() => openAndUpRank(directory, index, commonDirectory, setRefresh)}
           />
+          <Action.Push
+            icon={Icon.ChevronDown}
+            title={"Enter Folder"}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            target={<FolderPage folderName={directory.name} folderPath={directory.path} isOpenDirectory={true} />}
+          />
 
-          <ActionCopyFile directory={directory} />
+          <ActionCopyFile name={directory.name} path={directory.path} />
 
-          <ActionPanel.Section title={"Directory Actions"}>
+          <ActionPanel.Section>
             <Action.Push
               title={"Add Directory"}
               icon={Icon.Plus}
@@ -191,7 +172,7 @@ function DirectoryItem(props: {
               <>
                 <Action
                   title={"Remove Directory"}
-                  icon={Icon.Trash}
+                  icon={Icon.StarDisabled}
                   shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                   onAction={async () => {
                     await alertDialog(
@@ -264,7 +245,7 @@ function DirectoryItem(props: {
             )}
           </ActionPanel.Section>
 
-          <ActionPanel.Section title={"Detail Action"}>
+          <ActionPanel.Section>
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}

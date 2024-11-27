@@ -1,23 +1,39 @@
-export interface ScriptCommand {
+export type ScriptCommand = {
   path: string;
   content: string;
   user: boolean;
   metadatas: ScriptMetadatas;
-}
+};
 
-export interface ScriptMetadatas {
+export type ScriptMetadatas = {
+  schemaVersion: 1;
   title: string;
+  description?: string;
   icon?: string;
-  argument1: ScriptArgument;
-  mode: ScriptMode;
+  iconDark?: string;
   packageName?: string;
   currentDirectoryPath?: string;
-}
+  needsConfirmation?: boolean;
+} & (
+  | {
+      mode: "silent";
+      argument1: ScriptArgument;
+    }
+  | {
+      mode: "pipe";
+      inputType?: ScriptInput;
+      outputType?: ScriptOutput;
+    }
+);
 
-export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
-export type ScriptMode = typeof scriptModes[number];
+export type ScriptInput = {
+  type: InputType;
+};
 
-export interface ScriptArgument {
-  type: "text";
+export type ScriptArgument = {
+  type: InputType;
   percentEncoded?: boolean;
-}
+};
+
+export type InputType = "text" | "file" | "url" | "clipboard";
+export type ScriptOutput = "text" | "url";

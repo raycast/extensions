@@ -16,21 +16,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.3.1",
     "axios": "^0.23.0",
-    "lodash": "^4.17.21",
     "moment": "^2.29.1"
   },
   "preferences": [
-    {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Personal Access Token",
-      "description": "Calendly Personal Access token",
-      "link": "https://calendly.com/integrations/api_webhooks",
-      "placeholder": "Calendly Personal Access token"
-    },
     {
       "name": "defaultAction",
       "type": "dropdown",
@@ -53,8 +44,6 @@
   ],
   "devDependencies": {
     "@types/lodash": "^4.14.175",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

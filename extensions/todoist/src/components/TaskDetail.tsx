@@ -1,110 +1,146 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { Task, colors } from "@doist/todoist-api-typescript";
-import useSWR from "swr";
+import { ActionPanel, Detail, Icon, Color } from "@raycast/api";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers";
-import { priorities } from "../constants";
-import { SWRKeys } from "../types";
-import { todoist, handleError } from "../api";
-import TaskComments from "./TaskComments";
-import TaskCommentForm from "./TaskCommentForm";
 
-interface TaskDetailProps {
-  task: Task;
-}
+import { Task } from "../api";
+import { getCollaboratorIcon } from "../helpers/collaborators";
+import { displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { getTaskLabels } from "../helpers/labels";
+import { priorities } from "../helpers/priorities";
+import { getProjectIcon } from "../helpers/projects";
+import { displayReminderName } from "../helpers/reminders";
+import useCachedData from "../hooks/useCachedData";
 
-export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
-  const { data: comments, error: getCommentsError } = useSWR(SWRKeys.comments, () =>
-    todoist.getComments({ taskId: task.id })
-  );
+import TaskActions from "./TaskActions";
 
-  if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get tasks" });
-  }
+type TaskDetailProps = {
+  taskId: Task["id"];
+};
 
-  if (getLabelsError) {
-    handleError({ error: getLabelsError, title: "Unable to get labels" });
-  }
+export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
+  const [data, setData] = useCachedData();
 
-  if (getCommentsError) {
-    handleError({ error: getCommentsError, title: "Unable to get comments" });
-  }
+  const task = data?.items.find((task) => task.id === taskId);
+  const comments = data?.notes.filter((comment) => comment.item_id === taskId);
+  const commentsWithFiles = comments?.filter((comment) => !!comment.file_attachment);
+  const assignee = data?.collaborators.find((collaborator) => task?.responsible_uid === collaborator.id);
+  const assignedBy = data?.collaborators.find((collaborator) => task?.assigned_by_uid === collaborator.id);
 
-  const priority = priorities.find((priority) => priority.value === task.priority);
-  const project = projects?.find((project) => project.id === task.projectId);
-  const taskLabels = task.labelIds.map((labelId) => {
-    const associatedLabel = labels?.find((label) => label.id === labelId);
-    return {
-      ...associatedLabel,
-      color: colors.find((color) => color.id === associatedLabel?.color),
-    };
-  });
+  const priority = priorities.find((priority) => priority.value === task?.priority);
+  const project = data?.projects.find((project) => project.id === task?.project_id);
+  const section = data?.sections.find((section) => section.id === task?.section_id);
+  const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const hasComments = comments && comments.length > 0;
+  const subTasks = data?.items.filter((item) => item.parent_id === taskId);
 
   let displayedDate = "No due date";
-  if (task.due) {
+
+  if (task?.due) {
     const dueDate = displayDueDate(task.due.date);
 
-    displayedDate = task.due.datetime ? `${dueDate} ${format(new Date(task.due.datetime), "HH:mm")}` : dueDate;
+    displayedDate = isExactTimeTask(task) ? `${dueDate} ${format(new Date(task.due.date), "HH:mm")}` : dueDate;
   }
+
+  const reminders =
+    data?.reminders.filter((r) => {
+      if (r.is_deleted === 1) return false;
+
+      return r.item_id === taskId;
+    }) ?? [];
 
   return (
     <Detail
-      markdown={`# ${task.content}\n\n${task.description}`}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Project"
-            text={project?.name}
-            icon={project?.inboxProject ? Icon.Envelope : Icon.List}
-          />
+      navigationTitle={task?.content}
+      {...(task
+        ? {
+            markdown: `# ${task?.content}\n\n${task?.description}`,
+            metadata: (
+              <Detail.Metadata>
+                {project ? (
+                  <Detail.Metadata.Label
+                    title="Project"
+                    text={`${project.name}${section ? ` / ${section.name}` : ""}`}
+                    icon={getProjectIcon(project)}
+                  />
+                ) : null}
 
-          <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
+                {assignee ? (
+                  <Detail.Metadata.Label
+                    title="Assignee"
+                    text={assignee.full_name}
+                    icon={getCollaboratorIcon(assignee)}
+                  />
+                ) : null}
 
-          <Detail.Metadata.Label
-            title="Priority"
-            text={priority?.name}
-            icon={{ source: Icon.LevelMeter, tintColor: priority?.color }}
-          />
-          {taskLabels && taskLabels.length > 0 ? (
-            <Detail.Metadata.TagList title="Labels">
-              {taskLabels.map((taskLabel, index) => (
-                <Detail.Metadata.TagList.Item
-                  key={taskLabel?.id || index}
-                  text={taskLabel?.name || ""}
-                  color={taskLabel.color?.value}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          ) : null}
+                <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
 
-          {hasComments ? (
-            <Detail.Metadata.Label
-              title="Comments"
-              text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}`}
-              icon={Icon.Bubble}
-            />
-          ) : null}
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={task.url} />
+                {subTasks && subTasks?.length > 0 ? (
+                  <Detail.Metadata.Label
+                    title={"Sub-tasks"}
+                    text={`${subTasks.length} subtask${subTasks.length > 1 ? "s" : ""}`}
+                    icon={{ source: "sub-task.svg", tintColor: Color.PrimaryText }}
+                  />
+                ) : null}
 
-          <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
+                {priority ? (
+                  <Detail.Metadata.Label
+                    title="Priority"
+                    text={priority.name}
+                    icon={{ source: priority.icon, tintColor: priority?.color }}
+                  />
+                ) : null}
 
-          {hasComments ? (
-            <Action.Push
-              title="Show Comments"
-              icon={Icon.Bubble}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              target={<TaskComments task={task} />}
-            />
-          ) : null}
-        </ActionPanel>
-      }
+                {taskLabels && taskLabels.length > 0 ? (
+                  <Detail.Metadata.TagList title="Labels">
+                    {taskLabels.map((taskLabel) => {
+                      return (
+                        <Detail.Metadata.TagList.Item
+                          key={taskLabel.id}
+                          text={taskLabel.name}
+                          color={taskLabel.color}
+                        />
+                      );
+                    })}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {reminders.length > 0 ? (
+                  <Detail.Metadata.TagList title="Reminders">
+                    {reminders.map((reminder) => (
+                      <Detail.Metadata.TagList.Item key={reminder.id} text={displayReminderName(reminder)} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {hasComments || assignedBy ? <Detail.Metadata.Separator /> : null}
+
+                {hasComments ? (
+                  <Detail.Metadata.Label
+                    title="Comments"
+                    text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}${
+                      commentsWithFiles && commentsWithFiles.length > 0
+                        ? ` (${commentsWithFiles.length} with file)`
+                        : ""
+                    }`}
+                    icon={Icon.Bubble}
+                  />
+                ) : null}
+
+                {assignedBy ? (
+                  <Detail.Metadata.Label
+                    title="Assigned by"
+                    text={assignedBy.full_name}
+                    icon={getCollaboratorIcon(assignedBy)}
+                  />
+                ) : null}
+              </Detail.Metadata>
+            ),
+            actions: (
+              <ActionPanel>
+                <TaskActions task={task} fromDetail={true} data={data} setData={setData} />
+              </ActionPanel>
+            ),
+          }
+        : {})}
     />
   );
 }

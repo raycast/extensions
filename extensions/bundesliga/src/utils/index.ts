@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export const getFlagEmoji = (isoCode: string) => {
   if (isoCode === "GB-ENG") {
     return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
@@ -24,3 +26,7 @@ export const positionMap = new Map<string, string>([
   ["MIDFIELD", "Midfielder"],
   ["ATTACK", "Striker"],
 ]);
+
+export const convertToLocalTime = (time: string, outputFormat?: string) => {
+  return format(new Date(time), outputFormat || "EEEE dd-MMM-yyyy, HH:mm");
+};

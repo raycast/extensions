@@ -1,34 +1,33 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import Values = LocalStorage.Values;
+import { Icon } from "@raycast/api";
+import fetch from "node-fetch";
+import { SocialTrend, TenHotRes, Trend } from "../types/types";
+import { showTrendsTitle, trendsNumber } from "../types/preferences";
 
-export const commonPreferences = () => {
-  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
-  return {
-    rememberTag: preferencesMap.get("rememberTag") as boolean,
-  };
+export const getNumberIcon = (index: number) => {
+  const numberStr = index < 10 ? "0" + index : index.toString();
+  return `number-${numberStr}-16` as Icon;
 };
 
-export const listIcon = [
-  "list-icon/1.png",
-  "list-icon/2.png",
-  "list-icon/3.png",
-  "list-icon/4.png",
-  "list-icon/5.png",
-  "list-icon/6.png",
-  "list-icon/7.png",
-  "list-icon/8.png",
-  "list-icon/9.png",
-  "list-icon/10.png",
-];
-export const listIconDark = [
-  "list-icon/1@dark.png",
-  "list-icon/2@dark.png",
-  "list-icon/3@dark.png",
-  "list-icon/4@dark.png",
-  "list-icon/5@dark.png",
-  "list-icon/6@dark.png",
-  "list-icon/7@dark.png",
-  "list-icon/8@dark.png",
-  "list-icon/9@dark.png",
-  "list-icon/10@dark.png",
-];
+export const isEmpty = (str: string | undefined): boolean => {
+  return typeof str === "undefined" || str === "";
+};
+
+export async function fetchTrend(api: string) {
+  return await fetch(api)
+    .then((response) => response.json())
+    .then((res) => {
+      return (res as TenHotRes).data;
+    });
+}
+
+export function getMenubarTitle(socialTrend: SocialTrend[]) {
+  if (showTrendsTitle && socialTrend.length > 0 && socialTrend[0].data.length > 0) {
+    return socialTrend[0].data[0].name;
+  } else {
+    return undefined;
+  }
+}
+
+export function spliceTrends(socialTrend: Trend[], count: number = parseInt(trendsNumber)) {
+  return [...socialTrend].splice(0, count);
+}

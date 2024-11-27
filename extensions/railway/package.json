@@ -3,8 +3,16 @@
   "name": "railway",
   "title": "Railway Project Search",
   "description": "Search and navigate to your Railway projects",
-  "icon": "command-icon@light.png",
+  "icon": "command-icon.png",
   "author": "coffee-cup",
+  "categories": [
+    "Developer Tools"
+  ],
+  "contributors": [
+    "nagauta",
+    "xmok",
+    "danieldeichfuss"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,25 +23,37 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "railwayApiKey",
+      "type": "password",
+      "title": "Railway API Key",
+      "required": true,
+      "description": "type your Railway api key for auth",
+      "placeholder": "xxxxxxxxxx"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
     "mkdirp": "^1.0.4",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/mkdirp": "^1.0.2",
-    "@types/node": "~16.10.0",
+    "@types/node": "^20.8.10",
     "@types/node-fetch": "^3.0.3",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

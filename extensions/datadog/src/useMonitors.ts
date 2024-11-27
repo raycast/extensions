@@ -1,29 +1,24 @@
 import { useEffect, useState } from "react";
-import { Monitor } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/Monitor";
+import { MonitorSearchResponse } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorSearchResponse";
 import { monitorsApi } from "./datadog-api";
 import { showError } from "./util";
-import { getPreferenceValues } from "@raycast/api";
 
 type State = {
   monitorsAreLoading: boolean;
-  monitors: Monitor[];
+  monitorResponse?: MonitorSearchResponse;
 };
 
-const tags: string = getPreferenceValues()["tags"];
-
-export const useMonitors = () => {
-  const [{ monitorsAreLoading, monitors }, setState] = useState<State>({
-    monitors: [],
-    monitorsAreLoading: true,
-  });
+export const useMonitors = (query: string) => {
+  const [state, setState] = useState<State>({ monitorsAreLoading: true });
 
   useEffect(() => {
-    monitorsApi
-      .listMonitors({ monitorTags: tags })
-      .then(monitors => setState(prev => ({ ...prev, monitors })))
-      .catch(showError)
-      .finally(() => setState(prev => ({ ...prev, monitorsAreLoading: false })));
-  }, []);
+    setState(prev => ({ ...prev, monitorsAreLoading: true }));
 
-  return { monitors, monitorsAreLoading };
+    monitorsApi
+      .searchMonitors({ query, page: 0, perPage: 50 })
+      .then(monitorResponse => setState(prev => ({ ...prev, monitorResponse, monitorsAreLoading: false })))
+      .catch(showError);
+  }, [query]);
+
+  return state;
 };

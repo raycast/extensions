@@ -1,33 +1,42 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
-import OpenBookMarkAction from "./open-bookmark-action";
+import OpenBookmarkAction from "./open-bookmark-action";
 
 export default function BookmarkListItem(props: { bookmark: Bookmark }) {
   const bookmark: Bookmark = props.bookmark;
 
   return (
     <List.Item
-      id={bookmark.RepositoryIdentifier}
-      title={bookmark.Name}
-      icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
-      accessoryTitle={bookmark.getBranch}
-      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
+      id={bookmark.id}
+      title={bookmark.name}
+      icon={{ source: "repository-30.png", tintColor: Color.Yellow }}
+      accessories={[
+        {
+          text: bookmark.getBranch.name,
+          icon: { source: "merge-git-30.png", tintColor: Color.SecondaryText },
+        },
+      ]}
+      keywords={[
+        ...bookmark.getBranch.name.replaceAll("_", "-").replaceAll("\\", "-").split("-"),
+        ...bookmark.getPath.split("\\"),
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenBookMarkAction bookmark={bookmark} />
+            <OpenBookmarkAction bookmark={bookmark} />
             <Action.ShowInFinder path={bookmark.getPath} />
             <Action.OpenWith path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
             <Action.Open
-              title="Open in Code"
-              icon="icon-vscode.png"
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Open in VScode"
+              icon="visual-studio-code-30.png"
               target={bookmark.getPath}
               application="Visual Studio Code"
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
             <Action.Open
               title="Open in iTerm"
-              icon="icon-iterm.png"
+              icon={Icon.Terminal}
               target={bookmark.getPath}
               application="iTerm"
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
@@ -36,7 +45,7 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Name"
-              content={bookmark.Name}
+              content={bookmark.name}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard

@@ -1,44 +1,72 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
-import { useState } from "react";
-import { getErrorMessage, getUuid } from "../lib/utils";
-import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";
-import { ChannelListItem } from "./channel";
-import { RecentSearchesList, useRecentSearch } from "./search";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { Preferences } from "../lib/types";
+import { getErrorMessage } from "../lib/utils";
+import { Channel, getChannels, searchChannels, useRefresher } from "../lib/youtubeapi";
+import { ChannelItem } from "./channel";
+import { FilterDropdown } from "./dropdown";
+import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
+import { getPinnedChannels, getRecentChannels } from "./recent_channels";
 
-export function SearchChannelList() {
-  const [searchText, setSearchText] = useState<string>();
-  const [uuid] = useState<string>(getUuid());
-  const {
-    data: rc,
-    appendRecentSearches,
-    clearAllRecentSearches,
-  } = useRecentSearch("recent_channel_searches", uuid, setSearchText);
+export function SearchChannelList({ searchQuery }: { searchQuery?: string | undefined }) {
+  const { griditemsize, showRecentChannels } = getPreferenceValues<Preferences>();
+  const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const [order, setOrder] = useCachedState<string>("search-channel-order", "relevance");
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {
-      return await searchChannels(searchText);
+      return await searchChannels(searchText, { order });
     }
     return undefined;
-  }, [searchText]);
+  }, [searchText, order]);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search channels", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could not search channels", getErrorMessage(error));
   }
-  if (data) {
-    return (
-      <List isLoading={isLoading} onSearchTextChange={appendRecentSearches} throttle={true}>
-        {data?.map((c) => (
-          <ChannelListItem key={c.id} channel={c} />
+  const [loading, setLoading] = useState<boolean>(true);
+  const [pinnedChannels, setPinnedChannels] = useState<Channel[]>([]);
+  const [recentChannels, setRecentChannels] = useState<Channel[]>([]);
+  const [state, setState] = useState<boolean>(false);
+  const refresh = () => setState(!state);
+
+  useEffect(() => {
+    (async () => {
+      setPinnedChannels(await getChannels(await getPinnedChannels()));
+      setRecentChannels(await getChannels(await getRecentChannels()));
+      setLoading(false);
+    })();
+  }, [state]);
+
+  return data ? (
+    <ListOrGrid
+      isLoading={isLoading}
+      columns={griditemsize}
+      onSearchTextChange={setSearchText}
+      throttle={true}
+      searchBarAccessory={<FilterDropdown onChange={setOrder} defaultValue={order} />}
+    >
+      {data.map((c) => (
+        <ChannelItem key={c.id} channel={c} refresh={refresh} />
+      ))}
+    </ListOrGrid>
+  ) : !loading ? (
+    <ListOrGrid isLoading={isLoading} columns={griditemsize} onSearchTextChange={setSearchText} throttle={true}>
+      {recentChannels.length === 0 && pinnedChannels.length === 0 && (
+        <ListOrGridEmptyView title="Search Channels" icon="../assets/youtube.svg" />
+      )}
+      <ListOrGridSection title="Pinned Channels">
+        {pinnedChannels.map((c: Channel) => (
+          <ChannelItem key={c.id} channel={c} refresh={refresh} pinned />
         ))}
-      </List>
-    );
-  } else {
-    const isLoadingTotal = !searchText ? rc === undefined : true;
-    return (
-      <RecentSearchesList
-        recentSearches={rc}
-        isLoading={isLoadingTotal}
-        setRootSearchText={appendRecentSearches}
-        clearAll={clearAllRecentSearches}
-      />
-    );
-  }
+      </ListOrGridSection>
+      {showRecentChannels && (
+        <ListOrGridSection title="Recent Channels">
+          {recentChannels.map((c: Channel) => (
+            <ChannelItem key={c.id} channel={c} refresh={refresh} recent />
+          ))}
+        </ListOrGridSection>
+      )}
+    </ListOrGrid>
+  ) : (
+    <ListOrGrid isLoading={true} />
+  );
 }

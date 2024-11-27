@@ -1,6 +1,5 @@
 export const RAYCAST_WINDOW_WIDTH = 750;
 export const RAYCAST_WINDOW_HEIGHT = 474;
-
 export const METADATA_WIDTH_PX = 2000;
 export const METADATA_HEIGHT_PX = 1250;
 export const METADATA_PADDING_X_PX = 250;

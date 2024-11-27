@@ -1,103 +1,67 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import CompetitionDropdown, {
-  competitions,
-} from "./components/competition_dropdown";
-import { Match } from "./types";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { formatDate } from "date-fns";
+import groupBy from "lodash.groupby";
+import { useState } from "react";
 import { getCurrentGameWeek, getMatches } from "./api";
-
-interface Matchday {
-  [key: string]: Match[];
-}
+import CompetitionDropdown from "./components/competition_dropdown";
+import Matchday from "./components/matchday";
+import { Gameweek } from "./types";
 
 export default function Fixture() {
-  const [matches, setMatches] = useState<Matchday>();
-  const [competition, setCompetition] = useState<string>(competitions[0].value);
+  const [competition, setCompetition] = useState<string>("");
   const [matchday, setMatchday] = useState<number>(0);
 
-  useEffect(() => {
-    setMatchday(0);
-    setMatches(undefined);
+  usePromise(
+    async (competition) => {
+      return competition ? await getCurrentGameWeek(competition) : undefined;
+    },
+    [competition],
+    {
+      onData: (gameweek: Gameweek | undefined) => {
+        setMatchday(gameweek?.week ?? 0);
+      },
+    },
+  );
 
-    getCurrentGameWeek(competition).then((gameweek) => {
-      setMatchday(gameweek.week);
-    });
-  }, [competition]);
+  const { data: fixtures, isLoading } = usePromise((week) => getMatches(competition, week), [matchday]);
 
-  useEffect(() => {
-    if (matchday) {
-      showToast({
-        title: `Getting Matchday ${matchday}`,
-        style: Toast.Style.Animated,
-      });
-      getMatches(competition, matchday).then((data) => {
-        setMatches({
-          ...matches,
-          [`Matchday ${matchday}`]: data,
-        });
-        showToast({
-          title: `Matchday ${matchday} Added`,
-          style: Toast.Style.Success,
-        });
-      });
-    }
-  }, [matchday]);
+  const days = groupBy(fixtures, (m) => {
+    return m.date ? formatDate(m.date, "eee dd.MM.yyyy") : "Postponed";
+  });
+
+  const action = (
+    <ActionPanel.Section title="Matchday">
+      {matchday > 1 && (
+        <Action
+          title={`Matchday ${matchday - 1}`}
+          icon={Icon.ArrowLeftCircle}
+          onAction={() => {
+            setMatchday(matchday - 1);
+          }}
+        />
+      )}
+      {matchday < 38 && (
+        <Action
+          title={`Matchday ${matchday + 1}`}
+          icon={Icon.ArrowRightCircle}
+          onAction={() => {
+            setMatchday(matchday + 1);
+          }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
 
   return (
     <List
       throttle
-      isLoading={!matches}
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      isLoading={isLoading}
+      navigationTitle={!isLoading ? `Matchday ${matchday} | Fixtures & Results` : "Fixtures & Results"}
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
-      {Object.entries(matches || {}).map(([label, results]) => {
-        return (
-          <List.Section key={label} title={label}>
-            {results.map((match) => {
-              return (
-                <List.Item
-                  key={match.id}
-                  title={format(new Date(match.date), "eee dd.MM.yyyy HH:mm")}
-                  subtitle={
-                    match.status === "PreMatch"
-                      ? `${match.home_team.nickname} - ${match.away_team.nickname}`
-                      : `${match.home_team.nickname} ${match.home_score} - ${match.away_score} ${match.away_team.nickname}`
-                  }
-                  icon={Icon.Clock}
-                  accessories={[
-                    { text: `${match.venue.name}, ${match.venue.city}` },
-                    { icon: "stadium.svg" },
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser
-                        url={`https://www.laliga.com/en-GB/match/${match.slug}`}
-                      />
-                      {matchday > 1 && (
-                        <Action
-                          title="Load Previous Matchday"
-                          icon={Icon.MagnifyingGlass}
-                          onAction={() => {
-                            setMatchday(matchday - 1);
-                          }}
-                        />
-                      )}
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        );
+      {Object.entries(days).map(([day, matches]) => {
+        return <Matchday key={day} name={day} matches={matches} format="HH:mm" action={action} />;
       })}
     </List>
   );

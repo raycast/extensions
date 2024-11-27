@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { TrelloResultModel } from "./trelloResponse.model";
 
 interface TodoListItemProps {
@@ -22,7 +22,12 @@ export const TodoListItem = ({ result }: TodoListItemProps): JSX.Element => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
-            <OpenInBrowserAction url={todo.url} title="Open on Trello" icon={Icon.Link} />
+            <Action.OpenInBrowser
+              url={todo.url.replace("https", "trello")}
+              title="Open in Trello Desktop"
+              icon={Icon.Link}
+            />
+            <Action.OpenInBrowser url={todo.url} title="Open on Trello Web" icon={Icon.Link} />
           </ActionPanel.Section>
         </ActionPanel>
       }

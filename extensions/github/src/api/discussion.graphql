@@ -1,0 +1,50 @@
+fragment DiscussionFields on Discussion {
+  id
+  title
+  bodyText
+  publishedAt
+  repository {
+    ...ShortRepositoryFields
+  }
+  url
+  upvoteCount
+  category {
+    name
+    emoji
+    emojiHTML
+  }
+  comments {
+    totalCount
+  }
+  answer {
+    bodyText
+  }
+  author {
+    login
+    avatarUrl
+  }
+}
+
+query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
+  openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+    nodes {
+      ...DiscussionFields
+    }
+  }
+  searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+    nodes {
+      ...DiscussionFields
+    }
+  }
+}
+
+query getGitHubDiscussionNumber($filter: String!) {
+  search(query: $filter, type: DISCUSSION, first: 1) {
+    nodes {
+      ... on Discussion {
+        number
+        url
+      }
+    }
+  }
+}

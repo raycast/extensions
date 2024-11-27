@@ -10,7 +10,7 @@ export interface ReferenceType {
 
 interface Example {
   markdown: string;
-  html: string;
+  html?: string;
 }
 
 interface AdditionalExample extends Example {

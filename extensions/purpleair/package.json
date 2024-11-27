@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "purpleair",
+  "title": "PurpleAir",
+  "description": "Reads Air Quality Data from a PurpleAir Sensor",
+  "icon": "command-icon.png",
+  "author": "omarshahine",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "PurpleAir",
+      "subtitle": "Check the Air Quality",
+      "description": "Check the Air Quality with PurpleAir Sensor",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sensor_index",
+          "title": "Purple Sensor Index",
+          "description": "You can learn how to access a Sensor Index at https://community.purpleair.com/t/making-api-calls-with-the-purpleair-api/180#the-sensor-index-3",
+          "type": "textfield",
+          "required": true
+        },
+        {
+          "name": "api_key",
+          "title": "PurpleAir API Key",
+          "description": "API Key is used to authenticate with PurpleAir APIs",
+          "type": "password",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
+    "node-fetch": "^3.3.2",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

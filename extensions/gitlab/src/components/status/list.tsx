@@ -1,8 +1,8 @@
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Status } from "../../gitlabapi";
-import { formatDate, getErrorMessage } from "../../utils";
+import { formatDate, getErrorMessage, showErrorToast } from "../../utils";
 import { useEffect, useState } from "react";
 import { clearDurationText, emojiSymbol } from "./utils";
 import { usePresets } from "./presets";
@@ -32,7 +32,7 @@ export default function StatusList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Status", getErrorMessage(error));
+    showErrorToast(getErrorMessage(error), "Could not fetch Status");
   }
   const [currentStatus, setCurrentStatus] = useState<Status | undefined>(data);
   useEffect(() => {

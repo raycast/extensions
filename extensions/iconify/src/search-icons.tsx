@@ -1,8 +1,24 @@
-import { Action, ActionPanel, Color, List } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Grid,
+  getPreferenceValues,
+  Icon as RaycastIcon,
+  showToast,
+  Toast,
+} from '@raycast/api';
 import { useState } from 'react';
 
 import Service, { Icon } from './service';
-import { toBase64, toSvg } from './utils';
+import { toDataURI, toSvg, toURL, copyToClipboard } from './utils';
+import { primaryActionEnum, iconColorEnum } from './types/perferenceValues';
+
+const { primaryAction } = getPreferenceValues<{
+  primaryAction: primaryActionEnum;
+}>();
+
+const { iconColor } = getPreferenceValues<{ iconColor: iconColorEnum }>();
 
 const service = new Service();
 
@@ -19,43 +35,113 @@ function Command() {
     setLoading(false);
   }
 
-  function getEmptyViewDescription(query: string) {
-    if (query.length === 0) {
+  function getEmptyViewDescription(query: string, isLoading: boolean) {
+    if (query.length === 0 || isLoading) {
       return 'Type something to get started';
     }
     return 'Try another query';
   }
 
   return (
-    <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
-      <List.EmptyView
+    <Grid
+      throttle
+      columns={8}
+      inset={Grid.Inset.Medium}
+      isLoading={isLoading}
+      onSearchTextChange={queryIcons}
+    >
+      <Grid.EmptyView
         title="No results"
-        description={getEmptyViewDescription(query)}
+        description={getEmptyViewDescription(query, isLoading)}
       />
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
-        const svgIcon = toSvg(body, width, height);
-        const base64Icon = toBase64(svgIcon);
+        const svgIcon = toSvg(body, width, height, iconColor);
+        const dataURIIcon = toDataURI(svgIcon);
+
+        const paste = (
+          <Action.Paste title="Paste SVG String" content={svgIcon} />
+        );
+        const copy = (
+          <Action.CopyToClipboard title="Copy SVG String" content={svgIcon} />
+        );
+        const copyFile = (
+          <Action
+            title="Copy SVG File"
+            icon={RaycastIcon.Clipboard}
+            onAction={async () => {
+              await copyToClipboard(svgIcon, id);
+              await showToast({
+                title: 'Copied to clipboard',
+                message: 'The SVG file has been copied to the clipboard.',
+                style: Toast.Style.Success,
+              });
+            }}
+          />
+        );
+        const pasteName = setId && (
+          <Action.Paste title="Paste Name" content={`${setId}:${id}`} />
+        );
         return (
-          <List.Item
-            icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
+          <Grid.Item
+            content={{
+              source: dataURIIcon,
+              tintColor: body.includes('currentColor')
+                ? Color.PrimaryText // Monochrome icon
+                : null,
+            }}
             key={`${setId}:${id}`}
             title={id}
-            accessories={[
-              {
-                text: setName,
-              },
-            ]}
+            subtitle={setName}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={svgIcon} />
+                {primaryAction === primaryActionEnum.paste && (
+                  <>
+                    {paste}
+                    {copy}
+                    {copyFile}
+                    {pasteName}
+                  </>
+                )}
+                {primaryAction === primaryActionEnum.copy && (
+                  <>
+                    {copy}
+                    {paste}
+                    {copyFile}
+                    {pasteName}
+                  </>
+                )}
+                {primaryAction === primaryActionEnum.pasteName && (
+                  <>
+                    {pasteName}
+                    {paste}
+                    {copy}
+                    {copyFile}
+                  </>
+                )}
+                {primaryAction === primaryActionEnum.copyFile && (
+                  <>
+                    {copyFile}
+                    {copy}
+                    {paste}
+                    {pasteName}
+                  </>
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={`${setId}:${id}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={toURL(setId, id)}
+                />
               </ActionPanel>
             }
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 

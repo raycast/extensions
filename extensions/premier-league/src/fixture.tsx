@@ -1,91 +1,71 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { getPreferenceValues, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import groupBy from "lodash.groupby";
-import { useFixtures, useSeasons, useTeams } from "./hooks";
+import { useMemo, useState } from "react";
+import { getFixtures, getSeasons, getTeams } from "./api";
+import Matchday from "./components/matchday";
+import SearchBarCompetition, {
+  competitions,
+} from "./components/searchbar_competition";
 import { convertToLocalTime } from "./utils";
 
-export default function Fixture() {
-  const seasons = useSeasons();
-  const clubs = useTeams(seasons[0]?.id.toString());
+const { filter } = getPreferenceValues();
 
-  const [page, setPage] = useState<number>(0);
+export default function EPLFixture() {
+  const [comps, setCompetition] = useState<string>(competitions[0].value);
   const [teams, setTeams] = useState<string>("-1");
 
-  const { fixtures, lastPage } = useFixtures({
-    teams,
-    page,
-    sort: "asc",
-    statuses: "U,L",
-  });
+  const { data: seasons = [] } = usePromise(
+    (comp) => getSeasons(comp),
+    [comps],
+  );
 
-  const categories = groupBy(fixtures, (f) =>
-    convertToLocalTime(f.kickoff.label, "EEE d MMM yyyy")
+  const compSeasons = useMemo(() => seasons[0]?.id.toString(), [seasons]);
+
+  const { data: clubs } = usePromise(
+    async (season) => {
+      return season ? await getTeams(season) : [];
+    },
+    [compSeasons],
+  );
+
+  const { isLoading, data, pagination } = usePromise(
+    (comps, teams, compSeasons) =>
+      async ({ page = 0 }) => {
+        return await getFixtures({
+          teams,
+          page,
+          sort: "asc",
+          statuses: "U,L",
+          comps,
+          compSeasons,
+        });
+      },
+    [comps, teams, compSeasons],
+  );
+
+  const matchday = groupBy(data, (f) =>
+    f.kickoff.label
+      ? convertToLocalTime(f.kickoff.label, "EEE d MMM yyyy")
+      : "Date To Be Confirmed",
   );
 
   return (
     <List
       throttle
-      isLoading={!fixtures}
+      isLoading={isLoading}
+      pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Club"
-          value={teams}
-          onChange={setTeams}
-        >
-          <List.Dropdown.Section>
-            {clubs?.map((club) => {
-              return (
-                <List.Dropdown.Item
-                  key={club.value}
-                  value={club.value}
-                  title={club.title}
-                />
-              );
-            })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <SearchBarCompetition
+          type={filter}
+          selected={teams}
+          onSelect={filter === "competition" ? setCompetition : setTeams}
+          data={filter === "competition" ? competitions : clubs || []}
+        />
       }
     >
-      {Object.entries(categories).map(([label, matches]) => {
-        return (
-          <List.Section
-            key={label}
-            title={label === "undefined" ? "Date To Be Confirmed" : label}
-          >
-            {matches.map((match) => {
-              const time = convertToLocalTime(match.kickoff.label, "HH:mm");
-
-              return (
-                <List.Item
-                  key={match.id}
-                  title={time || "TBC"}
-                  subtitle={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
-                  icon={Icon.Clock}
-                  accessories={[
-                    { text: `${match.ground.name}, ${match.ground.city}` },
-                    { icon: "stadium.svg" },
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser
-                        url={`https://www.premierleague.com/match/${match.id}`}
-                      />
-                      {!lastPage && (
-                        <Action
-                          title="Load More"
-                          icon={Icon.MagnifyingGlass}
-                          onAction={() => {
-                            setPage(page + 1);
-                          }}
-                        />
-                      )}
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        );
+      {Object.entries(matchday).map(([day, matches]) => {
+        return <Matchday key={day} matchday={day} matches={matches} />;
       })}
     </List>
   );

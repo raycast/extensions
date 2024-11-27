@@ -1,47 +1,37 @@
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle, popToRoot } from "@raycast/api";
-import Caffeinate from "./caffeinate";
+import { showToast, Toast } from "@raycast/api";
+import { startCaffeinate } from "./utils";
 
-const durationUnitMultiplierMap = {
-  seconds: 1,
-  minutes: 60,
-  hours: 60 * 60,
-};
-
-interface FormValues {
-  time: string;
-  unit: keyof typeof durationUnitMultiplierMap;
+interface Arguments {
+  hours: string;
+  minutes: string;
+  seconds: string;
 }
 
-const CaffeinateFor = () => {
-  const onSubmit = async ({ time, unit }: FormValues) => {
-    const timeAsNumber = Number.parseFloat(time);
-    if (Number.isNaN(timeAsNumber)) {
-      await showToast(ToastStyle.Failure, "Invalid time");
-      return;
-    }
+export default async function Command(props: { arguments: Arguments }) {
+  const { hours, minutes, seconds } = props.arguments;
+  const hasValue = hours || minutes || seconds;
 
-    const multiplier = durationUnitMultiplierMap[unit] ?? 1;
+  if (!hasValue) {
+    await showToast(Toast.Style.Failure, "No values set for caffeinate length");
+    return;
+  }
 
-    await Caffeinate(`-t ${timeAsNumber * multiplier}`);
-    popToRoot();
-  };
+  const validInput =
+    (!hours || (Number.isInteger(Number(hours)) && Number(hours) >= 0)) &&
+    (!minutes || (Number.isInteger(Number(minutes)) && Number(minutes) >= 0)) &&
+    (!seconds || (Number.isInteger(Number(seconds)) && Number(seconds) >= 0));
 
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction title="Caffeinate" onSubmit={onSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="time" title="Duration" />
-      <Form.Dropdown id="unit" title="Duration Unit" defaultValue="minutes">
-        <Form.Dropdown.Item value="seconds" title="Seconds" />
-        <Form.Dropdown.Item value="minutes" title="Minutes" />
-        <Form.Dropdown.Item value="hours" title="Hours" />
-      </Form.Dropdown>
-    </Form>
+  if (!validInput) {
+    await showToast(Toast.Style.Failure, "Please ensure all arguments are whole numbers");
+    return;
+  }
+
+  const totalSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
+
+  await startCaffeinate(
+    { menubar: true, status: true },
+    `Caffeinating your Mac for ${formattedTime}`,
+    `-t ${totalSeconds}`,
   );
-};
-
-export default CaffeinateFor;
+}

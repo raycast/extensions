@@ -5,6 +5,9 @@
   "description": "Manage Opsgenie alerts and incidents.",
   "icon": "icon.png",
   "author": "ricoberger",
+  "contributors": [
+    "xmok"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,32 +23,28 @@
       "subtitle": "Opsgenie",
       "description": "Show a list of Opsgenie incidents",
       "mode": "view"
-    },
-    {
-      "name": "savedSearches",
-      "title": "Saved Searches",
-      "subtitle": "Opsgenie",
-      "description": "Show a list of saved searches from Opsgenie",
-      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   },
   "preferences": [
     {
@@ -71,21 +70,40 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Opsgenie API Key"
+      "description": "Opsgenie API Key",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     },
     {
       "name": "username",
       "type": "textfield",
       "required": true,
       "title": "Username",
-      "description": "Username, which should be used for alert actions"
+      "description": "Username, which should be used for alert actions",
+      "placeholder": "user"
     },
     {
       "name": "url",
       "type": "textfield",
       "required": true,
       "title": "URL",
-      "description": "The URL of your Opsgenie account"
+      "description": "The URL of your Opsgenie account",
+      "placeholder": "https://<NAME>.app.opsgenie.com"
+    },
+    {
+      "name": "alertsQuery",
+      "type": "textfield",
+      "default": "status: open",
+      "required": false,
+      "title": "Alerts Query",
+      "description": "The default query which is used for the alerts command"
+    },
+    {
+      "name": "incidentsQuery",
+      "type": "textfield",
+      "default": "status: open",
+      "required": false,
+      "title": "Incidents Query",
+      "description": "The default query which is used for the incidents command"
     }
   ]
 }

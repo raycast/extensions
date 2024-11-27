@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "one-thing",
+  "title": "One Thing",
+  "description": "Put a thing in your Menu Bar.",
+  "icon": "command-icon.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "mathieudutour",
+    "thomaslombart"
+  ],
+  "keywords": [
+    "menubar message",
+    "menubar",
+    "menu bar todo",
+    "menu bar"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-one-thing",
+      "title": "One Thing",
+      "description": "Put a thing in your Menu Bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "set-one-thing",
+      "title": "Set One Thing",
+      "description": "Set a thing to display in your Menu Bar.",
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "placeholder": "Title",
+          "name": "oneThing"
+        }
+      ]
+    },
+    {
+      "name": "remove-one-thing",
+      "title": "Remove One Thing",
+      "description": "Remove the thing displayed in your Menu Bar.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

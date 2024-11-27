@@ -1,32 +1,39 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
+import { getClubs } from "./api";
 import ClubPersons from "./components/clubpersons";
-import { useClubs } from "./hooks";
 import { Club } from "./types";
 
-function ClubDetails(props: { team: Club; competition: string }) {
+function ClubProfile(props: { team: Club; competition: string }) {
   const { team, competition } = props;
   return (
     <Detail
       navigationTitle={`${team.name.full} | Club`}
-      markdown={json2md([
-        { h1: team.name.withFormOfCompany },
-        {
-          p: [
-            `Street: ${team.contact.street}`,
-            `City: ${team.contact.city}`,
-            `Directions: [Open with maps](${team.stadium.mapsUrl})`,
-            `Phone: ${team.contact.phone}`,
-            `Fax: ${team.contact.fax}`,
-          ],
-        },
-        { img: { source: team.logos[0].uri } },
-      ])}
+      markdown={json2md([{ img: { source: team.logos[0].uri } }])}
       metadata={
         team && (
           <Detail.Metadata>
+            <Detail.Metadata.Label
+              title="Full Name"
+              text={team.name.withFormOfCompany}
+            />
             <Detail.Metadata.Label title="Founded" text={team.founded} />
+            <Detail.Metadata.Label
+              title="Stadium"
+              text={team.stadium.name}
+              icon={{
+                source: {
+                  dark: team.stadium.stadiumIconUrlWhite,
+                  light: team.stadium.stadiumIconUrlBlack,
+                },
+              }}
+            />
+            <Detail.Metadata.Label
+              title="Capacity"
+              text={team.stadium.capacity}
+            />
             <Detail.Metadata.TagList title="Club Colors">
               <Detail.Metadata.TagList.Item
                 color={team.colors.club.primary.hex}
@@ -37,15 +44,26 @@ function ClubDetails(props: { team: Club; competition: string }) {
                 text={team.colors.club.secondary.hex}
               />
             </Detail.Metadata.TagList>
-            <Detail.Metadata.Label title="Stadium" text={team.stadium.name} />
-            <Detail.Metadata.Label
-              title="Capacity"
-              text={team.stadium.capacity}
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Street" text={team.contact.street} />
+            <Detail.Metadata.Label title="City" text={team.contact.city} />
+            <Detail.Metadata.Link
+              title="Directions"
+              text="Open with maps"
+              target={team.stadium.mapsUrl}
             />
+            <Detail.Metadata.Label title="Phone" text={team.contact.phone} />
+            <Detail.Metadata.Label title="Fax" text={team.contact.fax} />
+
             <Detail.Metadata.Link
               title="Website"
               text={team.contact.homepage}
               target={team.contact.homepage}
+            />
+            <Detail.Metadata.Link
+              title="Email"
+              text={team.contact.email}
+              target={`mailto:${team.contact.email}`}
             />
             <Detail.Metadata.Separator />
             {team.contact.twitter && (
@@ -77,7 +95,7 @@ function ClubDetails(props: { team: Club; competition: string }) {
           <ActionPanel>
             <Action.Push
               title="Squad"
-              icon={Icon.Person}
+              icon={Icon.TwoPeople}
               target={
                 <ClubPersons
                   navigationTitle={`Squad | ${team.name.full} | Club`}
@@ -95,61 +113,57 @@ function ClubDetails(props: { team: Club; competition: string }) {
   );
 }
 
-export default function Club() {
+export default function Clubs() {
   const [competition, setCompetition] = useState<string>("bundesliga");
-  const clubs = useClubs();
+
+  const { data: clubs, isLoading } = usePromise(getClubs, []);
 
   return (
-    <List
+    <Grid
       throttle
-      isLoading={!clubs}
+      isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip="Filter by Competition"
           value={competition}
           onChange={setCompetition}
         >
-          <List.Dropdown.Item title="Bundesliga" value="bundesliga" />
-          <List.Dropdown.Item title="2. Bundesliga" value="2bundesliga" />
-        </List.Dropdown>
+          <Grid.Dropdown.Item
+            title="Bundesliga"
+            value="bundesliga"
+            icon="bundesliga.svg"
+          />
+          <Grid.Dropdown.Item
+            title="2. Bundesliga"
+            value="2bundesliga"
+            icon="2bundesliga.svg"
+          />
+        </Grid.Dropdown>
       }
     >
       {((clubs && clubs[competition]) || []).map((team) => {
         return (
-          <List.Item
+          <Grid.Item
             key={team.id}
             title={team.name.full}
-            subtitle={team.threeLetterCode}
-            icon={{
+            subtitle={team.stadium.name}
+            content={{
               source: `https://www.bundesliga.com/assets/clublogo/${team.id}.svg`,
               // source: team.logos[0].uri,
               fallback: "default_clublogo.svg",
             }}
-            accessories={[
-              {
-                text: team.stadium.name,
-              },
-              {
-                icon: {
-                  source: {
-                    dark: team.stadium.stadiumIconUrlWhite,
-                    light: team.stadium.stadiumIconUrlBlack,
-                  },
-                },
-              },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
                   title="Show Details"
                   icon={Icon.Sidebar}
-                  target={<ClubDetails team={team} competition={competition} />}
+                  target={<ClubProfile team={team} competition={competition} />}
                 />
               </ActionPanel>
             }
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

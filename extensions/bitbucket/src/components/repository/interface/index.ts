@@ -6,6 +6,10 @@ export interface Repository {
   avatarUrl: string;
   fullName: string;
   url: string;
+  clone: {
+    ssh?: string;
+    https?: string;
+  };
 }
 
 export interface Patch {

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wireguard",
+  "title": "Wireguard",
+  "description": "Control Wireguard connections.",
+  "icon": "wireguard.png",
+  "author": "sbugzhu",
+  "categories": [
+    "Applications",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Wireguard",
+      "subtitle": "Control Wireguard",
+      "description": "Control Wireguard connections.",
+      "mode": "view"
+    },
+    {
+      "name": "disconnectAllWireguardConnections",
+      "title": "Disconnect All Connections",
+      "subtitle": "Wireguard",
+      "description": "Disconnect all Wireguard connections.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFlag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Options",
+      "label": "Show national flag.",
+      "description": "If checked, raycast will show the national flag. The country code needs to be included at the beginning of the Wireguard configuration name, eg: us-xxx, gb09-xxx, etc. Ignore the number after the country code.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.2",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

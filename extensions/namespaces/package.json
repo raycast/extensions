@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "namespaces",
+  "title": "NameSpaces",
+  "description": "Create named aliases for your macOS Spaces and easily switch between them from within Raycast",
+  "icon": "namespaces.png",
+  "author": "GastroGeek",
+  "contributors": [
+    "xmok"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "macos",
+    "spaces"
+  ],
+  "commands": [
+    {
+      "name": "namespaces",
+      "title": "Spaces",
+      "description": "Create named aliases for your macOS Spaces and easily switch between them from within Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^8.3.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

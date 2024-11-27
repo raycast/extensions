@@ -1,10 +1,12 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
+
 import { readFile, stat } from "fs/promises";
 import { resolve } from "path";
 import { Validator } from "jsonschema";
 import { globbySync } from "globby";
-import { environment } from "@raycast/api";
-import { readFileSync } from "fs";
+import { environment, getPreferenceValues } from "@raycast/api";
+import untildify from "untildify";
+import { runAppleScript } from "run-applescript";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
 
@@ -13,7 +15,9 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    metadatas[metadataTitle] = metadataTitle == "argument1" ? JSON.parse(match[2]) : match[2];
+    metadatas[metadataTitle] = ["argument1", "needsConfirmation", "schemaVersion"].includes(metadataTitle)
+      ? JSON.parse(match[2])
+      : match[2];
   }
 
   return metadatas as unknown as ScriptMetadatas;
@@ -29,19 +33,24 @@ export async function parseScriptCommands(): Promise<{
   commands: ScriptCommand[];
   invalid: InvalidCommand[];
 }> {
-  const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
-  const userPaths = globbySync(`${environment.supportPath}/**/*`);
-  const scriptPaths = [...userPaths, ...defaultPaths].filter((path) => !path.startsWith("."));
+  const { commandFolder } = getPreferenceValues<{ commandFolder: string }>();
 
-  const commands = await Promise.all(
+  const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
+  const userPaths = commandFolder ? globbySync(`${untildify(commandFolder)}/**/*`) : [];
+  const scriptPaths = [...userPaths, ...defaultPaths].filter(
+    (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
+  );
+
+  let commands = await Promise.all(
     scriptPaths.map(async (scriptPath) => {
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, content: script, metadatas };
     })
   );
+  commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
 
-  const schema = JSON.parse(readFileSync(resolve(environment.assetsPath, "schema.json"), "utf-8"));
+  const schema = JSON.parse(await readFile(resolve(environment.assetsPath, "schema.json"), "utf-8"));
   const validator = new Validator();
 
   const valids = [] as ScriptCommand[];
@@ -49,7 +58,7 @@ export async function parseScriptCommands(): Promise<{
   for (const command of commands) {
     const res = validator.validate(command.metadatas, schema);
     if (res.valid) {
-      valids.push({ ...command, user: command.path.startsWith(environment.supportPath) });
+      valids.push({ ...command, user: command.path.startsWith(commandFolder) });
     } else {
       invalid.push({ path: command.path, content: command.content, errors: res.errors.map((err) => err.stack) });
     }
@@ -68,6 +77,10 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
   return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
 }
 
-export function codeblock(code: string) {
-  return ["```", code, "```"].join("\n");
+export async function getActiveTabUrl(): Promise<string> {
+  const getActiveTabURLScript = await readFile(
+    resolve(environment.assetsPath, "get-active-tab-url.applescript"),
+    "utf8"
+  );
+  return runAppleScript(getActiveTabURLScript, { humanReadableOutput: true });
 }

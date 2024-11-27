@@ -19,8 +19,7 @@ export const getDirectoryContent = (directoryPath: string) => {
       const fileStat = fse.statSync(directoryPath);
       const files = fse.readdirSync(directoryPath);
       const isNormalFile = files.filter((value) => !value.startsWith("."));
-      fileContent = 'fileUrl(assetPath + "/folder-icon.png")';
-      fileContent = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${parsePath.name}" height="156" />`;
+      fileContent = `<img src="${fileUrl(assetPath + "/folder-icon.png")}" alt="${parsePath.name}" height="190" />`;
       sizeTitle = "Sub-files";
       size = isNormalFile.length + "";
       created = new Date(fileStat.birthtime).toLocaleString();

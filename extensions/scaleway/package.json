@@ -1,0 +1,235 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scaleway",
+  "title": "Scaleway",
+  "description": "Quick access to your Scaleway services",
+  "icon": "scaleway.png",
+  "author": "philibea",
+  "contributors": [
+    "flozdra"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "license": "MIT",
+  "packageManager": "npm@10.2.4",
+  "dependencies": {
+    "@raycast/api": "1.70.3",
+    "@scaleway/configuration-loader": "1.0.3",
+    "@scaleway/sdk": "2.23.0",
+    "@scaleway/use-dataloader": "5.0.0",
+    "base64-js": "1.5.1",
+    "cross-fetch": "4.0.0",
+    "react": "18.2.0"
+  },
+  "devDependencies": {
+    "@scaleway/eslint-config-react": "3.18.0",
+    "@scaleway/tsconfig": "1.1.1",
+    "@types/node": "20.12.5",
+    "@types/react": "18.2.74",
+    "@typescript-eslint/eslint-plugin": "7.6.0",
+    "@typescript-eslint/parser": "7.6.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.4"
+  },
+  "commands": [
+    {
+      "name": "appleSilicon",
+      "title": "Apple Silicon",
+      "icon": "appleSilicon.webp",
+      "description": "Apple Silicon",
+      "mode": "view"
+    },
+    {
+      "name": "blockStorage",
+      "title": "Block Storage",
+      "icon": "blockStorage.webp",
+      "description": "Block Storage",
+      "mode": "view"
+    },
+    {
+      "name": "containers",
+      "title": "Containers",
+      "description": "Get information about containers",
+      "mode": "view",
+      "icon": "containers.webp"
+    },
+    {
+      "name": "instances",
+      "title": "Instances",
+      "description": "Get information about instances",
+      "mode": "view",
+      "icon": "instances.webp"
+    },
+    {
+      "name": "iam",
+      "title": "IAM",
+      "description": "Get information about iam",
+      "mode": "view",
+      "icon": "iam.webp"
+    },
+    {
+      "name": "ipam",
+      "title": "IPAM",
+      "description": "Get information about ipam",
+      "mode": "view",
+      "icon": "ipam.webp"
+    },
+    {
+      "name": "databases",
+      "title": "Databases",
+      "description": "Get information about databases",
+      "mode": "view",
+      "icon": "database.webp"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "description": "Get information about domains",
+      "mode": "view",
+      "icon": "domains.webp"
+    },
+    {
+      "name": "elasticMetal",
+      "title": "Elastic Metal",
+      "icon": "elasticMetal.webp",
+      "description": "Elastic Metal Servers",
+      "mode": "view"
+    },
+    {
+      "name": "iot",
+      "title": "IoT",
+      "icon": "iot.webp",
+      "description": "IOT hub management",
+      "mode": "view"
+    },
+    {
+      "name": "loadBalancer",
+      "title": "Load Balancer",
+      "icon": "loadBalancer.webp",
+      "description": "Load Balancer management",
+      "mode": "view"
+    },
+    {
+      "name": "redis",
+      "title": "Redis",
+      "description": "Get information about redis clusters",
+      "mode": "view",
+      "icon": "redis.webp"
+    },
+    {
+      "name": "publicGateways",
+      "title": "Public Gateways",
+      "description": "Get information about Public Gateways",
+      "mode": "view",
+      "icon": "publicGateways.webp"
+    },
+    {
+      "name": "k8s",
+      "title": "Kubernetes",
+      "description": "Get information about Kubernetes",
+      "mode": "view",
+      "icon": "k8s.webp"
+    },
+    {
+      "name": "functions",
+      "title": "Serverless Functions",
+      "description": "Get information about Serverless Functions",
+      "mode": "view",
+      "icon": "functions.webp"
+    },
+    {
+      "name": "registry",
+      "title": "Registry",
+      "description": "Get information about Registry",
+      "mode": "view",
+      "icon": "registry.webp"
+    },
+    {
+      "name": "transactionalEmail",
+      "title": "Transactional Email",
+      "description": "Get information about transactionalEmail domains",
+      "mode": "view",
+      "icon": "transactionalEmail.webp"
+    },
+    {
+      "name": "vpc",
+      "title": "Virtual Private Netwoks",
+      "description": "Get information about Private Networks",
+      "mode": "view",
+      "icon": "privateNetworks.webp"
+    },
+    {
+      "name": "webhosting",
+      "title": "Web Hosting",
+      "description": "Get information about webhosting",
+      "mode": "view",
+      "icon": "webhosting.webp"
+    },
+    {
+      "name": "secretManager",
+      "title": "Secret Manager",
+      "description": "Get information about your Secret Manager secrets",
+      "mode": "view",
+      "icon": "secretManager.webp"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessKey",
+      "title": "Access Key",
+      "description": "You need an access key and a secret key to connect to Scaleway API. \nGenerate your token at the following address: \nhttps://console.scaleway.com/project/credentials",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "The secret key is the value that can be used to authenticate against the API (the value used in X-Auth-Token HTTP-header). \nThe secret key MUST remain secret and not given to anyone or published online.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultOrganizationId",
+      "title": "Organization ID",
+      "description": "The organization ID that will be used by default",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "defaultRegion",
+      "title": "Default region",
+      "description": "A region is represented as a geographical area such as France (Paris) or the Netherlands (Amsterdam).\nExamples: fr-par, nl-ams",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par"
+    },
+    {
+      "name": "defaultZone",
+      "title": "Default zone",
+      "description": "A region can be split into many availability zones (AZ).\nExamples: fr-par-1, nl-ams-1",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par-1"
+    },
+    {
+      "name": "profileName",
+      "title": "Profile Name (default)",
+      "description": "If you have already configure the CLI and your ~/.config/scw/config.yaml to use multiple profile. If you use this field, all others will not be used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "default"
+    }
+  ],
+  "scripts": {
+    "lint": "ray lint",
+    "build": "ray build -e dist -o build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix"
+  }
+}

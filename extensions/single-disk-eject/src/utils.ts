@@ -1,9 +1,9 @@
 import util from "util";
 import child_process from "child_process";
 import os from "os";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, ToastStyle, getPreferenceValues } from "@raycast/api";
 
-import { Volume } from "./types";
+import { Volume, Preferences } from "./types";
 
 const exec = util.promisify(child_process.exec);
 
@@ -24,7 +24,7 @@ export async function listVolumes(): Promise<Volume[]> {
 async function listVolumesMac(): Promise<Volume[]> {
   const exePath = "ls /Volumes";
   const options = {
-    timeout: 5000,
+    timeout: 0,
   };
 
   let volumes: Volume[] = [];
@@ -42,14 +42,20 @@ async function listVolumesMac(): Promise<Volume[]> {
 function getVolumesFromLsCommandMac(raw: string): Volume[] {
   const replacementChars = "~~~~~~~~~";
   const updatedRaw = raw.replace(/\n/g, replacementChars);
+  const prefs = getPreferenceValues<Preferences>();
+  const volumesToIgnore = prefs?.ignoredVolumes?.split(",");
 
   const parts = updatedRaw.split(replacementChars);
-  const volumes: Volume[] = parts
+  let volumes: Volume[] = parts
     .map((p) => ({
       name: p,
     }))
     .filter((v) => v.name !== "")
     .filter((v) => !v.name.includes("TimeMachine.localsnapshots"));
+
+  if (volumesToIgnore != null) {
+    volumes = volumes.filter((v) => volumesToIgnore.findIndex((vol) => vol === v.name) < 0);
+  }
 
   return volumes;
 }
@@ -61,8 +67,9 @@ function getVolumesFromLsCommandMac(raw: string): Volume[] {
  * https://github.com/jayalfredprufrock/node-eject-media/blob/master/index.js
  */
 export async function ejectVolume(volume: Volume): Promise<void> {
+  // NOTE: Timeout of 0 should mean that it will wait infinitely
   const options = {
-    timeout: 15000,
+    timeout: 0,
   };
 
   let exePath;
@@ -81,10 +88,7 @@ export async function ejectVolume(volume: Volume): Promise<void> {
       throw new Error("Unsupported environment");
   }
 
-  try {
-    const { stdout, stderr } = await exec(exePath, options);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast(ToastStyle.Failure, "Error ejecting volume", e.message);
-  }
+  // NOTE: This could potentially let an error go through, however the calling function
+  // should handle it, and show toasts appropriately
+  await exec(exePath, options);
 }

@@ -1,14 +1,16 @@
 import { REOPEN_ISSUE } from "@/queries/issues";
 import { fetcher } from "@/utils";
-import { ActionPanel, Color, showToast, ToastStyle } from "@raycast/api";
-import React from "react";
+import { Color, showToast, Action, Toast } from "@raycast/api";
 import { useSWRConfig } from "swr";
 
 export default function ReopenIssue({ id, number }: any) {
   const { mutate } = useSWRConfig();
 
   async function reopenIssue() {
-    showToast(ToastStyle.Animated, "Reopening issue");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Reopening issue",
+    });
 
     try {
       await fetcher({
@@ -21,18 +23,21 @@ export default function ReopenIssue({ id, number }: any) {
       mutate("issues");
       mutate("issues-search");
       mutate("issues-recent");
-      showToast(ToastStyle.Success, `Issue #${number} reopened`);
+      showToast({
+        style: Toast.Style.Success,
+        title: `Issue #${number} reopened`,
+      });
     } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to reopen issue",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to reopen issue",
+        message: error instanceof Error ? error.message : error.toString(),
+      });
     }
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Reopen Issue"
       icon={{
         source: "issue-open.png",

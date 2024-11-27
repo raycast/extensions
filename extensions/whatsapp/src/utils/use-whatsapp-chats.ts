@@ -1,22 +1,21 @@
-import { useEffect, useState } from "react";
 import { WhatsAppChat } from "./types";
-import { getStoredWhatsAppChats, saveStoredWhatsAppChats } from "./local-storage";
+import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
+import { getStoredWhatsAppChats } from "./local-storage";
 
 export function useWhatsAppChats() {
-  const [chats, setChats] = useState<Array<WhatsAppChat>>();
+  const [chats, setChats] = useCachedState<Array<WhatsAppChat>>("whatsapp-chats", []);
+  const [migrated, setMigrated] = useCachedState<boolean>("migrated", false);
 
   useEffect(() => {
-    getStoredWhatsAppChats().then((chats) => {
-      setChats(chats);
-    });
-  }, []);
+    // Migrate old way of storing chats
+    if (!migrated) {
+      getStoredWhatsAppChats().then((chats) => {
+        setChats(chats);
+        setMigrated(true);
+      });
+    }
+  }, [migrated]);
 
-  return {
-    chats: chats || [],
-    isLoading: chats === undefined,
-    updateChats: async (chats: Array<WhatsAppChat>) => {
-      setChats(chats);
-      await saveStoredWhatsAppChats(chats);
-    },
-  };
+  return [chats, setChats] as const;
 }

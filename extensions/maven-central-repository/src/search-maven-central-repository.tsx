@@ -1,15 +1,19 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { useState } from "react";
 import { searchMavenArtifact } from "./hooks/hooks";
-import { getListIcon } from "./utils/ui-utils";
-import { actionIcons, buildDependency, buildUpdatedDate, dependencyTypes, isEmpty } from "./utils/common-utils";
+import { actionIcons, buildDependency, dependencyTypes, isEmpty } from "./utils/common-utils";
 import { MAVEN_CENTRAL_REPOSITORY_SEARCH } from "./utils/constants";
 import { ActionToAdvancedSearchOptions } from "./components/action-to-advanced-search-options";
 import { ActionToPexels } from "./components/action-to-pexels";
 import { MavenEmptyView } from "./components/maven-empty-view";
+import { getAvatarIcon } from "@raycast/utils";
 
-export default function SearchMavenCentralRepository() {
-  const [searchContent, setSearchContent] = useState<string>("");
+interface MavenCentralRepositorySearchProps {
+  repository: string;
+}
+export default function SearchMavenCentralRepository(props: { arguments: MavenCentralRepositorySearchProps }) {
+  const { repository } = props.arguments;
+  const [searchContent, setSearchContent] = useState<string>(repository ? repository.trim() : "");
   const { docs, loading } = searchMavenArtifact(searchContent.trim());
 
   const emptyViewTitle = () => {
@@ -34,7 +38,7 @@ export default function SearchMavenCentralRepository() {
       {docs.map((value, index) => (
         <List.Item
           key={index}
-          icon={{ source: getListIcon(value.a) }}
+          icon={getAvatarIcon(value.a)}
           title={value.id}
           subtitle={{
             value: value.latestVersion,
@@ -42,7 +46,7 @@ export default function SearchMavenCentralRepository() {
           }}
           accessories={[
             {
-              text: buildUpdatedDate(value.timestamp),
+              date: new Date(value.timestamp),
               tooltip: "Updated: " + new Date(value.timestamp).toLocaleString(),
             },
           ]}

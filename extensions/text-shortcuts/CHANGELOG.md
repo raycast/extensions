@@ -1,5 +1,34 @@
 # Text Shortcuts Changelog
 
+## [Fix command descriptions] - 2024-08-20
+
+- Fix descriptions in extension preferences to match their actions.
+
+## [Sort by Frequency of Use] - 2023-11-09
+
+- Optimize Shortcuts Sorting: Sort by Frequency of Use (Please use Edit Shortcuts in the Shortcut Library command to update custom Shortcuts so that they can be sorted by frequency of use)
+- Add Empty View to the Shortcut Library command
+- Some minor view interface updates
+
+## [Add Menu Bar command] - 2022-10-20
+
+- Add Menu Bar command: Shortcut Library
+- Update Title Case with The Chicago Manual of Style
+
+## [Fix bug] - 2022-08-19
+
+- Fix the bug that the icon is not displayed
+
+## [Add tags in Grid Layout] - 2022-06-20
+
+- Add tags in Grid Layout
+
+## [Add new shortcut layout options] - 2022-06-13
+
+- Add new shortcut layout options: List or Grid
+- Optimize shortcut icons
+- Fix text overflow bug
+
 ## [Fix Bug] - 2022-05-20
 
 - Release of Text Shortcuts version 1.3

@@ -6,7 +6,10 @@
   "author": "Kinbaum",
   "license": "MIT",
   "contributors": [
-    "emanguy"
+    "emanguy",
+    "LunaticMuch",
+    "pernielsentikaer",
+    "perat"
   ],
   "commands": [
     {
@@ -43,6 +46,37 @@
       "subtitle": "GitHub Enterprise",
       "description": "GitHub actions",
       "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "List inbox notifications from all repositories or a selected repository.",
+      "mode": "view"
+    },
+    {
+      "name": "unread-notifications",
+      "title": "Unread Notifications",
+      "description": "Shows unread notifications in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Always Show",
+          "name": "alwaysShow",
+          "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -53,6 +87,14 @@
       "title": "GraphQL API",
       "description": "API of your GitHub GraphQL instance",
       "placeholder": "https://github.mycompany.com/api/graphql"
+    },
+    {
+      "name": "restApiEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "REST API",
+      "description": "API of your GitHub REST instance",
+      "placeholder": "https://github.mycompany.com/api/v3"
     },
     {
       "name": "username",
@@ -81,29 +123,47 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
+    "@raycast/api": "^1.55.0",
+    "@raycast/utils": "^1.12.4",
+    "date-fns": "^2.30.0",
     "debounce": "^1.2.1",
-    "fuse.js": "^6.4.6",
-    "graphql": "^15.6.1",
-    "graphql-request": "^3.6.1",
+    "fuse.js": "^6.6.2",
+    "graphql": "^16.7.1",
+    "graphql-request": "^6.1.0",
+    "graphql-tag": "^2.12.6",
     "gray-matter": "^4.0.3",
-    "swr": "^1.0.1",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "octokit": "^3.1.2",
+    "swr": "^2.2.0",
     "timeago.js": "^4.0.2"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/typescript": "^3.0.2",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^3.0.2",
+    "@parcel/watcher": "^2.4.1",
     "@types/debounce": "^1.2.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-next": "^11.1.2",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/lodash": "^4.17.4",
+    "@types/node": "^20.4.2",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.45.0",
+    "eslint-config-next": "^13.4.10",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.0.0",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "generate": "graphql-codegen --config codegen.ts"
   }
 }

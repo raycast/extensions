@@ -1,36 +1,18 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import json2md from "json2md";
-import { useTable } from "./hooks";
-import { Entry } from "./types/firebase";
+import { getTable } from "./api";
 
 export default function Table() {
   const [competition, setCompetition] = useState<string>("bundesliga");
-  const table = useTable(competition);
   const [showStats, setShowStats] = useState<boolean>(false);
 
-  const clubStats = (entry: Entry): json2md.DataObject => {
-    return [
-      { h1: entry.club.nameFull },
-      { h2: "Stats" },
-      {
-        p: [
-          `Played: ${entry.gamesPlayed}`,
-          `Won: ${entry.wins}`,
-          `Drawn: ${entry.draws}`,
-          `Lost: ${entry.losses}`,
-          `Goals For: ${entry.goalsScored}`,
-          `Goals Against: ${entry.goalsAgainst}`,
-          `Goal Difference: ${entry.goalDifference}`,
-        ],
-      },
-    ];
-  };
+  const { data: table, isLoading } = usePromise(getTable, [competition]);
 
   return (
     <List
       throttle
-      isLoading={!table}
+      isLoading={isLoading}
       isShowingDetail={showStats}
       searchBarAccessory={
         <List.Dropdown
@@ -38,8 +20,16 @@ export default function Table() {
           value={competition}
           onChange={setCompetition}
         >
-          <List.Dropdown.Item title="Bundesliga" value="bundesliga" />
-          <List.Dropdown.Item title="2. Bundesliga" value="2bundesliga" />
+          <List.Dropdown.Item
+            title="Bundesliga"
+            value="bundesliga"
+            icon="bundesliga.svg"
+          />
+          <List.Dropdown.Item
+            title="2. Bundesliga"
+            value="2bundesliga"
+            icon="2bundesliga.svg"
+          />
         </List.Dropdown>
       }
     >
@@ -51,38 +41,87 @@ export default function Table() {
 
         if (entry.tendency === "UP") {
           icon = {
-            source: Icon.ChevronUp,
+            source: Icon.ChevronUpSmall,
             tintColor: Color.Green,
           };
         } else if (entry.tendency === "DOWN") {
           icon = {
-            source: Icon.ChevronDown,
+            source: Icon.ChevronDownSmall,
             tintColor: Color.Red,
           };
         }
 
-        const props: Partial<List.Item.Props> = showStats
-          ? {
-              accessories: [{ text: entry.points.toString() }, { icon }],
-              detail: <List.Item.Detail markdown={json2md(clubStats(entry))} />,
-            }
-          : {
-              accessories: [
-                { text: `Played: ${entry.gamesPlayed}` },
-                { text: `Points: ${entry.points}` },
-                { icon },
-              ],
-            };
+        const accessories: List.Item.Accessory[] = [
+          {
+            text: {
+              color: Color.PrimaryText,
+              value: entry.points.toString(),
+            },
+            icon,
+            tooltip: "Points",
+          },
+        ];
+
+        if (!showStats) {
+          accessories.unshift(
+            {
+              icon: Icon.SoccerBall,
+              text: entry.gamesPlayed.toString(),
+              tooltip: "Played",
+            },
+            {
+              icon: Icon.Goal,
+              text: `${entry.goalsScored} - ${entry.goalsAgainst}`,
+              tooltip: "Goals For - Goals Against",
+            },
+          );
+        }
 
         return (
           <List.Item
-            key={entry.rank}
-            title={`${entry.rank}. ${entry.club.nameFull}`}
-            icon={{
-              source: entry.club.logoUrl,
-              fallback: "default_clublogo.svg",
-            }}
-            {...props}
+            key={entry.club.id}
+            icon={entry.club.logoUrl}
+            title={entry.rank.toString()}
+            subtitle={entry.club.nameFull}
+            keywords={[entry.club.nameFull, entry.club.nameShort]}
+            accessories={accessories}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Stats" />
+                    <List.Item.Detail.Metadata.Label
+                      title="Played"
+                      text={entry.gamesPlayed.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Won"
+                      text={entry.wins.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Drawn"
+                      text={entry.draws.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Lost"
+                      text={entry.losses.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals For"
+                      text={entry.goalsScored.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals Against"
+                      text={entry.goalsAgainst.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goal Difference"
+                      text={entry.goalDifference.toString()}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <Action

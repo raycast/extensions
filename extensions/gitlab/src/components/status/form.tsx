@@ -1,4 +1,4 @@
-import { Form, ActionPanel, useNavigation, showToast, Action, Toast } from "@raycast/api";
+import { Form, ActionPanel, useNavigation, Action } from "@raycast/api";
 import { isValidStatus, Status } from "../../gitlabapi";
 import {
   clearDurations,
@@ -8,7 +8,7 @@ import {
   getClearDurationDate,
 } from "./utils";
 import { gitlab } from "../../common";
-import { getErrorMessage } from "../../utils";
+import { getErrorMessage, showErrorToast } from "../../utils";
 
 export function StatusForm(props: {
   submitTitle: string;
@@ -68,7 +68,7 @@ export function StatusFormSet(props: {
       }
       pop();
     } catch (error) {
-      showToast(Toast.Style.Failure, "Could not set Status", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not set Status");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Set Status" />;
@@ -97,7 +97,7 @@ export function StatusFormPresetCreate(props: {
       const status = getValidStatusFromFormValue(values);
       props.onFinish(status);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Could not create Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not create Preset");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Create Preset" />;
@@ -114,7 +114,7 @@ export function StatusFormPresetEdit(props: {
       const status = getValidStatusFromFormValue(values);
       await props.onFinish(status);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Could not edit Preset", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Could not edit Preset");
     }
   };
   return <StatusForm onSubmit={handle} submitTitle="Edit Preset" existingStatus={props.status} />;

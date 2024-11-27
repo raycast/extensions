@@ -37,6 +37,10 @@ class Service {
     const response = await fileClient.get<string>(`/${slug}.md`);
     return response.data;
   }
+
+  static urlFor(slug: string) {
+    return `https://devhints.io/${slug}`;
+  }
 }
 
 export default Service;

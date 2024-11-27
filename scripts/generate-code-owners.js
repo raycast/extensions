@@ -33,21 +33,24 @@ const raycast2github = require(path.join(__dirname, `../.github/raycast2github.j
 
 async function getExtensions() {
   const extensions = await fs.readdir(extensionsDir);
-  return Promise.all(
-    extensions.map(async (extension) => {
+  return extensions
+    .map((extension) => {
       try {
         const packageJSON = require(path.join(extensionsDir, `${extension}/package.json`));
         return {
-          name: extension,
+          extensionFolder: extension,
+          name: packageJSON.name,
           author: packageJSON.author,
+          owner: packageJSON.owner,
           contributors: packageJSON.contributors,
+          pastContributors: packageJSON.pastContributors,
         };
       } catch (err) {
         console.log(`Skipping ${extension}`);
         console.log(err);
       }
     })
-  );
+    .filter((x) => !!x);
 }
 
 async function fetchGHUsername(extension, raycastUsername) {
@@ -55,7 +58,7 @@ async function fetchGHUsername(extension, raycastUsername) {
     const commitHash = await new Promise((resolve, reject) =>
       exec(
         // find commit that added the package.json
-        `cd "${extensionsDir}" && git log --diff-filter=A --format=format:%H -- "${extension.name}/package.json"`,
+        `cd "${extensionsDir}" && git log --diff-filter=A --format=format:%H -- "${extension.extensionFolder}/package.json"`,
         (err, stdout, stderr) => {
           if (err || stderr) {
             reject(err || new Error(stderr));
@@ -75,13 +78,13 @@ async function fetchGHUsername(extension, raycastUsername) {
 
     return commit.author.login;
   } else {
-    const package = await fs.readFile(path.join(extensionsDir, `${extension.name}/package.json`), "utf8");
+    const package = await fs.readFile(path.join(extensionsDir, `${extension.extensionFolder}/package.json`), "utf8");
 
-    const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1);
+    const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1) + 1;
     const commitHash = await new Promise((resolve, reject) =>
       exec(
         // find commit that added contributor to the package.json
-        `cd "${extensionsDir}" && git blame --porcelain  -L ${line},${line} "${extension.name}/package.json"`,
+        `cd "${extensionsDir}" && git blame --porcelain  -L ${line},${line} "${extension.extensionFolder}/package.json"`,
         (err, stdout, stderr) => {
           if (err || stderr) {
             reject(err || new Error(stderr));
@@ -116,7 +119,9 @@ async function formatAuthorName(extension, raycastUsername) {
 }
 
 async function formatOwners(extension) {
-  const owners = [...new Set([extension.author, ...(extension.contributors || [])])];
+  const owners = [...new Set([extension.author, ...(extension.contributors || [])])].filter(
+    (x) => !(extension.pastContributors || []).includes(x)
+  );
   return (await Promise.all(owners.map((x) => formatAuthorName(extension, x)))).filter(Boolean).join(" ");
 }
 
@@ -124,15 +129,19 @@ async function main() {
   const extensions = await getExtensions();
 
   const longestExtensionNameLength = extensions.reduce(
-    (max, extension) => (extension && extension.name.length > max ? extension.name.length : max),
+    (max, extension) => (extension && extension.extensionFolder.length > max ? extension.extensionFolder.length : max),
     0
   );
 
+  const extensionName2Folder = {};
   let CODEOWNERS = "# This file is generated. Do not modify directly.\n\n";
+
   for (const extension of extensions) {
+    extensionName2Folder[`${extension.owner || extension.author}/${extension.name}`] = extension.extensionFolder;
+
     if (extension && extension.author) {
-      CODEOWNERS += `/extensions/${extension.name}${" ".repeat(
-        longestExtensionNameLength - extension.name.length + 1
+      CODEOWNERS += `/extensions/${extension.extensionFolder}${" ".repeat(
+        longestExtensionNameLength - extension.extensionFolder.length + 1
       )}${await formatOwners(extension)}\n`;
     }
   }
@@ -142,6 +151,11 @@ async function main() {
   await fs.writeFile(
     path.join(__dirname, "../.github/raycast2github.json"),
     JSON.stringify(raycast2github, null, "  "),
+    "utf-8"
+  );
+  await fs.writeFile(
+    path.join(__dirname, "../.github/extensionName2Folder.json"),
+    JSON.stringify(extensionName2Folder, null, "  "),
     "utf-8"
   );
 }

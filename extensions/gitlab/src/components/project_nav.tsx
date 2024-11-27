@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { Project } from "../gitlabapi";
-import { gitlabgql } from "../common";
 import { ReactNode } from "react";
 import { PipelineList } from "./pipelines";
 import { BranchList } from "./branch";
@@ -11,12 +10,14 @@ import { GitLabIcons } from "../icons";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { ProjectLabelList } from "./project_label";
 import { ProjectCommitList } from "./commits/list";
+import { getGitLabGQL } from "../common";
 
 export function ProjectNavMenuItem(props: {
   title: string;
   shortcut?: Keyboard.Shortcut | undefined;
   target: ReactNode;
   icon?: Image.ImageLike;
+  url?: string;
 }): JSX.Element {
   return (
     <List.Item
@@ -24,7 +25,13 @@ export function ProjectNavMenuItem(props: {
       icon={props.icon}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Menu" shortcut={props.shortcut} target={props.target} />
+          <Action.Push
+            title="Open Menu"
+            shortcut={props.shortcut}
+            icon={{ source: Icon.AppWindowList, tintColor: Color.PrimaryText }}
+            target={props.target}
+          />
+          {props.url && <GitLabOpenInBrowserAction url={props.url} shortcut={props.shortcut} />}
         </ActionPanel>
       }
     />
@@ -51,47 +58,57 @@ export function ProjectNavMenuBrowserItem(props: {
 }
 
 function webUrl(project: Project, partial: string) {
-  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
+  return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
 export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
   const project = props.project;
   return (
-    <List navigationTitle="Project Menus">
+    <List navigationTitle={`${project.name_with_namespace}`}>
       <ProjectNavMenuItem
         title="Issues"
+        url={webUrl(project, "-/issues")}
         icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
         target={<IssueList scope={IssueScope.all} project={project} />}
       />
       <ProjectNavMenuItem
         title="Merge Requests"
+        url={webUrl(project, "-/merge_requests")}
         icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
         target={<MRList scope={MRScope.all} project={project} />}
       />
       <ProjectNavMenuItem
         title="Branches"
+        url={webUrl(project, "-/branches")}
         icon={{ source: GitLabIcons.branches, tintColor: Color.PrimaryText }}
-        target={<BranchList project={project} />}
+        target={<BranchList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Commits"
+        url={webUrl(project, "-/commits")}
         icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }}
-        target={<ProjectCommitList projectID={project.id} />}
+        target={<ProjectCommitList projectID={project.id} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Pipelines"
+        url={webUrl(project, "-/pipelines")}
         icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
-        target={<PipelineList projectFullPath={project.fullPath} />}
+        target={<PipelineList projectFullPath={project.fullPath} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Milestones"
         icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-        target={<MilestoneList project={project} />}
+        target={<MilestoneList project={project} navigationTitle={project.name_with_namespace} />}
+      />
+      <ProjectNavMenuBrowserItem
+        title="Wiki"
+        icon={{ source: GitLabIcons.wiki, tintColor: Color.PrimaryText }}
+        url={webUrl(project, "-/wikis")}
       />
       <ProjectNavMenuItem
         title="Labels"
         icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
-        target={<ProjectLabelList project={project} />}
+        target={<ProjectLabelList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuBrowserItem
         title="Security & Compliance"

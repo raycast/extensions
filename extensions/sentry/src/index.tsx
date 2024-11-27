@@ -1,34 +1,30 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { IssueListItem } from "./IssueListItem";
-import { useIssues } from "./hooks";
+import { useIssues } from "./sentry";
 import { Project } from "./types";
 import { ProjectDropdown } from "./ProjectDropdown";
-import { SWRConfig } from "swr";
-import { cacheProvider } from "./cache";
-import { isFakeData } from "./fake";
+import { UnauthorizedError } from "./UnauthorizedError";
 
-function IssueList() {
+export default function Command() {
   const [project, setProject] = useState<Project>();
-  const { data: issues, isValidating } = useIssues(project);
+  const [projectError, setProjectError] = useState<Error>();
+  const { data, error, isLoading, mutate, pagination } = useIssues(project);
+
+  if (projectError || (error && error instanceof Error && error.message.includes("Unauthorized"))) {
+    return <UnauthorizedError />;
+  }
 
   return (
     <List
-      isLoading={project === undefined || isValidating}
-      searchBarPlaceholder="Filter issues by title"
-      searchBarAccessory={<ProjectDropdown onProjectChange={setProject} />}
+      isLoading={project === null || isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Filter issues by title or assignee"
+      searchBarAccessory={<ProjectDropdown onProjectChange={setProject} onError={setProjectError} />}
     >
-      {issues?.map((issue) => (
-        <IssueListItem key={issue.id} issue={issue} />
+      {data?.map((issue) => (
+        <IssueListItem key={issue.id} issue={issue} organization={project?.organization} mutateList={mutate} />
       ))}
     </List>
-  );
-}
-
-export default function Command() {
-  return (
-    <SWRConfig value={{ provider: isFakeData ? undefined : cacheProvider }}>
-      <IssueList />
-    </SWRConfig>
   );
 }

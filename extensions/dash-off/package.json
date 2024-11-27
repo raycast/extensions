@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dash-off",
+  "title": "Dash Off",
+  "description": "The fastest way to dash off a quick email to yourself and others",
+  "icon": "command-icon.png",
+  "author": "peduarte",
+  "contributors": [
+    "xilopaint"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultAddresses",
+      "title": "Send To",
+      "description": "The default recipient's email addresses, If multiple, comma separate them",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "john@dash.com, doe@off.com"
+    },
+    {
+      "name": "defaultSubject",
+      "title": "Default Subject",
+      "description": "The default subject line",
+      "type": "textfield",
+      "required": true,
+      "default": "Note To Self"
+    }
+  ],
+  "commands": [
+    {
+      "name": "email-selected-text",
+      "title": "Just Send",
+      "description": "Quickly email the selected text to the default recipient(s)",
+      "mode": "no-view"
+    },
+    {
+      "name": "email-form",
+      "title": "Compose Email",
+      "description": "Compose an email to send",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.11.1",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
