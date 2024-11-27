@@ -1,6 +1,6 @@
 # changedetection.io Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-27
 
 - List Watches
 - View Watch Details
