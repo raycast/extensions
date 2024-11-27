@@ -10,3 +10,4 @@ To use this extension, you need to fill out the following preference:
 - **Jira Domain**: The domain/site URL of your Jira instance, e.g. `company.atlassian.net`.
 - **Jira Username**: Jira user name.
 - **API Token**: An API token created as described in [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).
+- **Only My Issues**: A checkbox to filter issues assigned only to the provided Jira username.
