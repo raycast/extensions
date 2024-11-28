@@ -1,6 +1,6 @@
 # cURL Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2024-11-28
 
 - Allow the request history to store different body requests for the same URL
 
