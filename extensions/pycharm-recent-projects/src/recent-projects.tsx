@@ -2,51 +2,49 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
-  confirmAlert, getFrontmostApplication,
+  confirmAlert,
+  getFrontmostApplication,
   Icon,
-  List, open,
+  List,
+  open,
   popToRoot,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
-import {useCallback, useState} from "react";
-import {exec} from "child_process";
-import {readFile, writeFile} from "fs/promises";
-import {XMLBuilder, XMLParser} from "fast-xml-parser";
-import {runAppleScript} from "run-applescript";
+import { useCallback, useState } from "react";
+import { exec } from "child_process";
+import { readFile, writeFile } from "fs/promises";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import { runAppleScript } from "run-applescript";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-
-const baseDir = path.join(os.homedir(), 'Library', 'Application Support', 'JetBrains');
+const baseDir = path.join(os.homedir(), "Library", "Application Support", "JetBrains");
 
 const getRecentProjectsFilePath = (): string => {
-    const pyCharmDir = fs.readdirSync(baseDir)
-        .filter(dir => dir.startsWith('PyCharm') && /^\d{4}\.\d+$/.test(dir.slice(7)))
-        .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
+  const pyCharmDir = fs
+    .readdirSync(baseDir)
+    .filter((dir) => dir.startsWith("PyCharm") && /^\d{4}\.\d+$/.test(dir.slice(7)))
+    .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0];
 
-    if (!pyCharmDir) throw new Error('No PyCharm directories found.');
+  if (!pyCharmDir) throw new Error("No PyCharm directories found.");
 
-    const filePath = path.join(baseDir, pyCharmDir, 'options', 'recentProjects.xml');
-    if (!fs.existsSync(filePath)) throw new Error(`recentProjects.xml not found in ${pyCharmDir}.`);
+  const filePath = path.join(baseDir, pyCharmDir, "options", "recentProjects.xml");
+  if (!fs.existsSync(filePath)) throw new Error(`recentProjects.xml not found in ${pyCharmDir}.`);
 
-    return filePath;
+  return filePath;
 };
 
 const recentProjectsFilePath = getRecentProjectsFilePath();
 
-const parser = new XMLParser({ignoreAttributes : false});
+const parser = new XMLParser({ ignoreAttributes: false });
 
 //noinspection JSUnusedGlobalSymbols
 export default function Command() {
   const { state, search } = useSearch();
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search recent projects..."
-    >
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search recent projects...">
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} search={search} state={state} />
@@ -56,7 +54,15 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult, search, state }: { searchResult: SearchResult; search: (searchText: string) => Promise<void>; state: SearchState}) {
+function SearchListItem({
+  searchResult,
+  search,
+  state,
+}: {
+  searchResult: SearchResult;
+  search: (searchText: string) => Promise<void>;
+  state: SearchState;
+}) {
   return (
     <List.Item
       title={searchResult.name}
@@ -78,7 +84,7 @@ function SearchListItem({ searchResult, search, state }: { searchResult: SearchR
             onAction={async () => {
               await closeMainWindow();
               await popToRoot();
-              await openInITerm2(searchResult.path)
+              await openInITerm2(searchResult.path);
             }}
           />
           <Action
@@ -105,7 +111,7 @@ function SearchListItem({ searchResult, search, state }: { searchResult: SearchR
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [] as SearchResult[], isLoading: false, term: ""});
+  const [state, setState] = useState<SearchState>({ results: [] as SearchResult[], isLoading: false, term: "" });
 
   const search = useCallback(
     async function search(searchText: string) {
@@ -141,30 +147,31 @@ function useSearch() {
         }
       }
     },
-    [setState]
+    [setState],
   );
 
-  return {state, search};
+  return { state, search };
 }
 
-
 async function deleteRecord(searchResult: SearchResult): Promise<boolean> {
-  let content = parser.parse(
+  const content = parser.parse(
     await readFile(recentProjectsFilePath, {
       flag: "r",
-    })
+    }),
   );
   const projectPathKey = searchResult.path.replace(process.env.HOME || "~", "$USER_HOME$");
   const additionalInfoIndex = content.application.component.option.findIndex((option: NameValueData) => {
     return option["@_name"] === "additionalInfo";
   });
-  content.application.component.option[additionalInfoIndex].map.entry = content.application.component.option[additionalInfoIndex].map.entry.filter((project: Project) => {
+  content.application.component.option[additionalInfoIndex].map.entry = content.application.component.option[
+    additionalInfoIndex
+  ].map.entry.filter((project: Project) => {
     return project["@_key"] !== projectPathKey;
   });
 
   const xmlWriteOptions = {
     format: true,
-    ignoreAttributes : false,
+    ignoreAttributes: false,
     suppressBooleanAttributes: false,
     suppressUnpairedNode: false,
     unpairedTags: ["option", "frame"],
@@ -173,13 +180,14 @@ async function deleteRecord(searchResult: SearchResult): Promise<boolean> {
   const xmlContent = builder.build(content);
   const isPyCharmWasOpen = await isPyCharmRunning();
   const frontmostApp = await getFrontmostApplication();
-  const isPyCharmWasInForeground = frontmostApp.name === "PyCharm"
+  const isPyCharmWasInForeground = frontmostApp.name === "PyCharm";
   if (isPyCharmWasOpen) {
     exec(`osascript -e 'quit app "/Applications/PyCharm.app"'`);
   }
-  await writeFile(recentProjectsFilePath, xmlContent, {"flag": "w"});
+  await writeFile(recentProjectsFilePath, xmlContent, { flag: "w" });
   if (isPyCharmWasOpen) {
-    if (isPyCharmWasInForeground) {  // Ugly workaround for Raycast window disappearing when closing PyCharm if it was frontmost
+    if (isPyCharmWasInForeground) {
+      // Ugly workaround for Raycast window disappearing when closing PyCharm if it was frontmost
       exec("sleep 2 && open -a /Applications/PyCharm.app/Contents/MacOS/pycharm");
       setTimeout(() => {
         open("raycast://");
@@ -196,7 +204,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
   const content = parser.parse(
     await readFile(recentProjectsFilePath, {
       flag: "r",
-    })
+    }),
   );
   const application = content.application;
   let options =
@@ -211,11 +219,11 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
   const entries = options.find((option: NameValueData) => {
     return option["@_name"] === "additionalInfo";
   });
-  const projectPaths : SearchResult[] = [];
+  const projectPaths: SearchResult[] = [];
   entries.map.entry.forEach((project: Project) => {
     if (project["@_key"]) {
-      let path = project["@_key"].replace("$USER_HOME$", process.env.HOME || "~");
-      let name = path.split("/").at(-1) || "(unknown)";
+      const path = project["@_key"].replace("$USER_HOME$", process.env.HOME || "~");
+      const name = path.split("/").at(-1) || "(unknown)";
       let openTimeStamp = "";
       project.value.RecentProjectMetaInfo.option.forEach((option) => {
         if (option["@_name"] === "projectOpenTimestamp") {
@@ -285,10 +293,10 @@ interface Project {
   "@_key": string;
   value: {
     RecentProjectMetaInfo: {
-      option: [NameValueData]
+      option: [NameValueData];
     };
   };
-  "frame": FrameData;
+  frame: FrameData;
   "@_frameTitle": string;
   "@_opened": string;
   "@_projectWorkspaceId": string;

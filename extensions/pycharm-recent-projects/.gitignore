@@ -5,3 +5,8 @@
 
 # misc
 .DS_Store
+
+#Idea
+.idea
+
+raycast-env.d.ts
