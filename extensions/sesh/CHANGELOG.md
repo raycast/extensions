@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## Add nix-darwin support - 11-20-24
+## [Add nix-darwin support] - {PR_MERGE_DATE}
 
 - Add [nix-darwin](https://github.com/LnL7/nix-darwin) support by adding `/run/current-system/sw/bin/` to the PATH
 
