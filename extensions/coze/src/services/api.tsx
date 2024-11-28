@@ -1,6 +1,7 @@
 import {
   ChatV3Message,
   CozeAPI,
+  EnterMessage,
   getPKCEOAuthToken,
   OAuthToken,
   refreshOAuthToken,
@@ -13,6 +14,10 @@ import { DEFAULT_CN_COZE_CLIENT_ID, DEFAULT_COM_COZE_CLIENT_ID, DEFAULT_REDIRECT
 // @ts-ignore
 import { fetch, OAuth } from "@raycast/api";
 import { getUserId } from "../store";
+import { setBotCache } from "../cache/bot";
+import { getWorkspaceCache, setWorkspaceCache } from "../cache/workspace";
+import fs from "fs";
+import { isImageFile } from "./utils";
 
 export interface PagedData<T> {
   items: T[];
@@ -34,11 +39,11 @@ const getClientId = async (baseUrl: string): Promise<string> => {
 };
 
 const replaceAPIBaseURLToPageURL = (baseURL: string): string => {
-  if (baseURL.includes("api.")) {
-    return baseURL.replace("api.", "www.");
-  }
   if (baseURL.includes("bot-open-api.")) {
     return baseURL.replace("bot-open-api.", "bots.");
+  }
+  if (baseURL.includes("api.")) {
+    return baseURL.replace("api.", "www.");
   }
   return baseURL;
 };
@@ -46,14 +51,10 @@ const replaceAPIBaseURLToPageURL = (baseURL: string): string => {
 const initAPI = async () => {
   const { api_base: baseURL, debug } = await getConfig();
   const clientId = await getClientId(baseURL);
-
-  const workspace_owner_type_map: Record<string, string> = {};
-  const workspace_icon_map: Record<string, string> = {};
-
   const defaultPKCEClient = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
     providerName: "Coze",
-    providerIcon: "coze.png",
+    providerIcon: "coze.svg",
     providerId: "Coze",
     description: "Connect your Coze account\n(Raycast Coze Extension)",
   });
@@ -68,10 +69,8 @@ const initAPI = async () => {
     if (!workspace_id) {
       return true;
     }
-    if (workspace_owner_type_map && workspace_owner_type_map[workspace_id]) {
-      return workspace_owner_type_map[workspace_id] === "owner";
-    }
-    return false;
+    const cachedWorkspace = getWorkspaceCache(workspace_id);
+    return cachedWorkspace?.role_type === "owner";
   };
 
   const getPKCEClient = (workspace_id?: string): OAuth.PKCEClient => {
@@ -81,7 +80,7 @@ const initAPI = async () => {
     return new OAuth.PKCEClient({
       redirectMethod: OAuth.RedirectMethod.Web,
       providerName: `Coze(${workspace_id})`,
-      providerIcon: workspace_icon_map[workspace_id!] || "coze.png",
+      providerIcon: getWorkspaceCache(workspace_id || "")?.icon_url || "coze.svg",
       providerId: `Coze-${workspace_id}`,
       description: `Connect your Coze Workspace(${workspace_id})\n(Raycast Coze Extension)`,
     });
@@ -98,6 +97,9 @@ const initAPI = async () => {
   };
 
   const getAccessToken = async (code: string, codeVerifier: string): Promise<OAuthToken> => {
+    console.log(
+      `[api][getAccessToken] baseURL: ${baseURL}, clientId: ${clientId}, code: ${code}, codeVerifier: ${codeVerifier}`,
+    );
     return await getPKCEOAuthToken({
       code,
       baseURL,
@@ -207,10 +209,8 @@ const initAPI = async () => {
       page_num,
       page_size,
     });
-    // update workspace_owner_type_map
-    workspaces.workspaces.forEach((workspace) => {
-      workspace_owner_type_map[workspace.id] = workspace.role_type;
-      workspace_icon_map[workspace.id] = workspace.icon_url;
+    workspaces?.workspaces?.forEach((workspace) => {
+      setWorkspaceCache(workspace.id, workspace);
     });
     return {
       items: workspaces.workspaces.sort((a, b) => {
@@ -271,6 +271,9 @@ const initAPI = async () => {
       log(
         `[api][listBots] success, space_id: ${space_id}, page_num: ${page_num}, page_size: ${page_size}, data: ${JSON.stringify(bots)}`,
       );
+      bots?.space_bots?.forEach((bot) => {
+        setBotCache(bot.bot_id, bot);
+      });
       return {
         items: bots.space_bots,
         has_more: bots.total > page_num * page_size,
@@ -307,6 +310,29 @@ const initAPI = async () => {
     };
   };
 
+  const getBotInfo = async ({
+    workspaceId,
+    botId,
+  }: {
+    workspaceId: string;
+    botId: string;
+  }): Promise<SimpleBot | undefined> => {
+    const coze = await getAPI(workspaceId);
+    if (!coze) {
+      return undefined;
+    }
+    const botInfo = await coze.bots.retrieve({
+      bot_id: botId,
+    });
+    return {
+      bot_id: botInfo.bot_id,
+      bot_name: botInfo.name,
+      icon_url: botInfo.icon_url,
+      description: botInfo.description,
+      publish_time: botInfo.update_time.toString(),
+    };
+  };
+
   const createConversation = async ({
     workspaceId,
     botId,
@@ -315,58 +341,63 @@ const initAPI = async () => {
     botId: string;
   }): Promise<Conversation | undefined> => {
     const coze = await getAPI(workspaceId);
-    if (!coze) {
-      return undefined;
-    }
-    const apiUrl = "/v1/conversation/create";
+    if (!coze) return undefined;
+
     log(`[api][createConversation] start, workspaceId: ${workspaceId}, botId: ${botId}`);
-    const res: {
-      data: Conversation;
-      // @ts-ignore
-    } = await coze.conversations._client.post(apiUrl, { bot_id: botId }, false);
+    const conversation = await coze.conversations.create({
+      bot_id: botId,
+    });
     log(
-      `[api][createConversation] success, workspaceId: ${workspaceId}, botId: ${botId}, data: ${JSON.stringify(res.data)}`,
+      `[api][createConversation] success, workspaceId: ${workspaceId}, botId: ${botId}, conversation: ${JSON.stringify(conversation)}`,
     );
-    return res.data;
+    return conversation;
   };
 
-  const listConversations = async (params: {
-    bot_id: string;
-    page_num?: number;
-    page_size?: number;
-    space_id?: string;
-    with_messages?: boolean;
-  }): Promise<PagedData<Conversation>> => {
-    const coze = await getAPI(params?.space_id);
-    if (!coze) {
+  const uploadFile = async (workspaceId: string, filePath: string): Promise<string | undefined> => {
+    const coze = await getAPI(workspaceId);
+    if (!coze) return undefined;
+
+    const fileBuffer = await fs.createReadStream(filePath);
+    const file = await coze.files.upload({
+      file: fileBuffer,
+    });
+    if (!file) return undefined;
+    return file.id;
+  };
+
+  const buildUserEnterMessage = async (workspaceId: string, text: string, filePath?: string): Promise<EnterMessage> => {
+    if (!filePath) {
       return {
-        items: [],
-        has_more: false,
+        role: RoleType.User,
+        type: "question",
+        content: text,
+        content_type: "text",
       };
     }
-    const apiUrl = "/v1/conversations";
-    log(`[api][listConversations] start, params: ${JSON.stringify(params)}`);
-    const data: {
-      data: {
-        conversations: Conversation[];
-        has_more: boolean;
+    const fileId = await uploadFile(workspaceId, filePath);
+    if (!fileId) {
+      return {
+        role: RoleType.User,
+        type: "question",
+        content: text,
+        content_type: "text",
       };
-      // @ts-ignore
-    } = await coze.conversations._client.get(apiUrl, params, false);
-    log(`[api][listConversations] success, params: ${JSON.stringify(params)}, data: ${JSON.stringify(data)}`);
-    if (params?.with_messages) {
-      for (const conversation of data.data.conversations) {
-        const res = await coze.conversations.messages.list(conversation.id, { limit: 2 });
-        log(`[api][listConversations] conversation.id: ${conversation.id}, messages: ${JSON.stringify(res)}`);
-        if (res && res.data) {
-          conversation.messages = res.data;
-        }
-      }
     }
 
     return {
-      items: data.data.conversations,
-      has_more: data.data.has_more,
+      role: RoleType.User,
+      type: "question",
+      content: JSON.stringify([
+        {
+          type: isImageFile(filePath) ? "image" : "file",
+          file_id: fileId,
+        },
+        {
+          type: "text",
+          text: text,
+        },
+      ]),
+      content_type: "object_string",
     };
   };
 
@@ -374,12 +405,14 @@ const initAPI = async () => {
     workspaceId,
     botId,
     query,
+    filePath,
     conversationId,
     on_event,
   }: {
     workspaceId: string;
     botId: string;
     query: string;
+    filePath?: string;
     conversationId?: string;
     on_event: (event: StreamChatData) => Promise<void>;
   }): Promise<void> => {
@@ -389,22 +422,17 @@ const initAPI = async () => {
     }
     const userId = await getUserId();
     log(
-      `[api][streamChat] start, workspaceId: ${workspaceId}, botId: ${botId}, conversationId: ${conversationId}, userId: ${userId}`,
+      `[api][streamChat] start, workspaceId: ${workspaceId}, botId: ${botId}, conversationId: ${conversationId}, userId: ${userId}, query: ${query}, filePath: ${filePath}`,
     );
+    const enterMessage = await buildUserEnterMessage(workspaceId, query, filePath);
+    console.log("enterMessage", JSON.stringify(enterMessage));
     const stream = coze.chat.stream(
       {
         bot_id: botId,
         user_id: userId,
         conversation_id: conversationId || undefined,
         auto_save_history: true,
-        additional_messages: [
-          {
-            role: RoleType.User,
-            type: "question",
-            content: query,
-            content_type: "text",
-          },
-        ],
+        additional_messages: [enterMessage],
       },
       {
         adapter: fetch,
@@ -462,8 +490,8 @@ const initAPI = async () => {
     listAllWorkspaces,
     listBots,
     listAllBots,
+    getBotInfo,
     createConversation,
-    listConversations,
     listMessages,
   };
 };

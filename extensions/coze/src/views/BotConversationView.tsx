@@ -6,6 +6,7 @@ import { ChatV3Message } from "@coze/api";
 import { useConversation } from "../hooks/useConversation";
 import EmptyConversationView from "./EmptyConversationView";
 import { APIInstance } from "../services/api";
+import { getBotCache } from "../cache/bot";
 
 export interface BotConversationViewProps {
   isLoading: boolean;
@@ -14,6 +15,7 @@ export interface BotConversationViewProps {
   workspaceId?: string;
   botId?: string;
   newHistory?: History;
+  filePath?: string;
 }
 
 const handleError = (error: Error) => {
@@ -30,12 +32,14 @@ export default function BotConversationView({
   query: defaultQuery,
   workspaceId: defaultWorkspaceId,
   botId: defaultBotId,
+  filePath: defaultFilePath,
   newHistory,
 }: BotConversationViewProps) {
   const [workspaceId, setWorkspaceId] = useState<string>(defaultWorkspaceId || "");
   const [botId, setBotId] = useState<string>(defaultBotId || "");
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(undefined);
   const [query, setQuery] = useState<string>(defaultQuery || "");
+  const [filePath, setFilePath] = useState<string | undefined>(defaultFilePath || "");
   const { histories, setHistories, removeHistories, isLoading: isHistoryLoading } = useHistory();
   const {
     messages,
@@ -96,18 +100,48 @@ export default function BotConversationView({
         workspaceId,
         botId,
         query,
+        filePath,
       });
       setQuery("");
+      setFilePath("");
     } catch (error) {
       handleError(error as Error);
     } finally {
       isSubmitting.current = false;
     }
-  }, [workspaceId, botId, query, streamChat]);
+  }, [workspaceId, botId, query, filePath, streamChat]);
 
   const buildMarkdown = useCallback((): string => {
+    const getContent = (message: ChatV3Message) => {
+      if (message.content_type === "text") {
+        return message.content;
+      } else if (message.content_type === "object_string") {
+        const objects = JSON.parse(message.content);
+        return objects
+          .map(
+            (object: {
+              type: "image" | "file" | "text";
+              file_url?: string;
+              name?: string;
+              file_id?: string;
+              text?: string;
+            }) => {
+              if (object?.type === "image" && object?.file_url) {
+                return `![${object.name}](${object.file_url})`;
+              } else if (object?.type === "file" && object?.file_url) {
+                return `[${object.name}](${object.file_url})`;
+              } else if (object?.type === "text" && object?.text) {
+                return object.text;
+              }
+              return "";
+            },
+          )
+          .join(" ");
+      }
+      return "";
+    };
     const buildMessage = (message: ChatV3Message) => {
-      return `* ` + "`" + `${message.role}` + "`" + `: ${message.content}`;
+      return `* ` + "`" + `${message.role}` + "`" + `: ${getContent(message)}`;
     };
     if (messages?.length > 0) {
       return messages.map(buildMessage).join("\n");
@@ -130,7 +164,13 @@ export default function BotConversationView({
         }
       />
       <Action.SubmitForm
-        title="Clear History"
+        title="Delete History"
+        onSubmit={async () => {
+          selectedConversationId && (await removeHistories(selectedConversationId));
+        }}
+      />
+      <Action.SubmitForm
+        title="Delete All History"
         onSubmit={async () => {
           await removeHistories();
         }}
@@ -156,6 +196,7 @@ export default function BotConversationView({
             key={history.conversation_id}
             title={history.message}
             detail={<List.Item.Detail markdown={markdown} />}
+            icon={{ source: getBotCache(history.bot_id)?.icon_url || "coze.svg" }}
             actions={conversationAction}
           />
         ))

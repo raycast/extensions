@@ -9,6 +9,7 @@ export interface ChatParams {
   workspaceId: string;
   botId: string;
   query: string;
+  filePath?: string;
 }
 
 export interface UseConversationResult {
@@ -63,7 +64,7 @@ export function useConversation({
   );
 
   const streamChat = useCallback(
-    async ({ workspaceId, botId, query }: ChatParams) => {
+    async ({ workspaceId, botId, query, filePath }: ChatParams) => {
       if (!api || !workspaceId || !botId || !query || !conversationId) {
         return;
       }
@@ -78,6 +79,7 @@ export function useConversation({
           workspaceId,
           botId,
           query,
+          filePath,
           conversationId,
           on_event: async (event: StreamChatData) => {
             if (!event) return;

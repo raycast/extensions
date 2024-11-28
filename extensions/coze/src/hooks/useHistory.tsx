@@ -38,7 +38,7 @@ export const loadHistories = async (): Promise<History[]> => {
 export const useHistory = (): {
   histories: History[];
   setHistories: (newHistories: History[]) => Promise<void>;
-  removeHistories: () => Promise<void>;
+  removeHistories: (conversationId?: string) => Promise<void>;
   isLoading: boolean;
 } => {
   const { value: histories, setValue, removeValue, isLoading } = useLocalStorage<History[]>(localStorageKey, []);
@@ -59,9 +59,17 @@ export const useHistory = (): {
     [isLoading],
   );
 
-  const removeHistories = useCallback(async () => {
-    await removeValue();
-  }, []);
+  const removeHistories = useCallback(
+    async (conversationId?: string) => {
+      if (!conversationId) {
+        await removeValue();
+        return;
+      }
+      const old = await loadHistories();
+      await setValue(old.filter((h) => h.conversation_id !== conversationId));
+    },
+    [isLoading],
+  );
 
   return {
     histories: filteredHistories,

@@ -26,6 +26,7 @@ export default function ChatFormView({
 }) {
   const { push } = useNavigation();
   const [query, setQuery] = useState<string>(defaultQuery || "");
+  const [file, setFile] = useState<string[]>([]);
   const [queryFieldError, setQueryFieldError] = useState<string | undefined>();
   const [workspaceFieldError, setWorkspaceFieldError] = useState<string | undefined>();
   const [botFieldError, setBotFieldError] = useState<string | undefined>();
@@ -49,7 +50,7 @@ export default function ChatFormView({
   };
 
   const onConversationCreate = async () => {
-    api?.log(`onConversationCreate: ${workspaceId} ${botId} ${query}`);
+    api?.log(`onConversationCreate: ${workspaceId} ${botId} ${query} ${JSON.stringify(file)}`);
     if (query?.length == 0) {
       setQueryFieldError("Query should not be empty!");
       return;
@@ -80,6 +81,7 @@ export default function ChatFormView({
         workspaceId={workspaceId}
         botId={botId}
         query={query}
+        filePath={file?.length > 0 ? file[0] : undefined}
         newHistory={newHistory}
       />,
     );
@@ -153,6 +155,14 @@ export default function ChatFormView({
         onBlur={(event) => {
           checkField("Query", setQueryFieldError, event?.target?.value);
         }}
+      />
+      <Form.FilePicker
+        allowMultipleSelection={false}
+        canChooseDirectories={false}
+        id="file"
+        title="File"
+        value={file}
+        onChange={(val) => setFile(val)}
       />
     </Form>
   );

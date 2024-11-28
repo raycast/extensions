@@ -4,7 +4,7 @@ export const mockedBotList = {
       bot_id: "Coze Assistant",
       bot_name: "Coze Assistant",
       description: "AI assistant for Coze usage support",
-      icon_url: "coze.png",
+      icon_url: "coze.svg",
       publish_time: "publish_time",
     },
     {

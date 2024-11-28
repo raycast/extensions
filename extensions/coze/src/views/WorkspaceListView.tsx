@@ -1,5 +1,5 @@
 import { WorkSpace } from "@coze/api";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import useWorkspaces from "../hooks/useWorkspaces";
 import ErrorView from "./ErrorView";
 import EmptyData from "./EmptyData";
@@ -38,7 +38,13 @@ export default function WorkspaceListView({
             key={item.id}
             title={item.name}
             icon={{ source: item.icon_url }}
-            subtitle={item.role_type}
+            accessories={[
+              { text: item.role_type },
+              {
+                icon: item.workspace_type === "personal" ? Icon.Person : Icon.TwoPeople,
+                tooltip: item.workspace_type === "personal" ? "Personal" : "Team",
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action title="Select" onAction={() => onSelect(item)} />

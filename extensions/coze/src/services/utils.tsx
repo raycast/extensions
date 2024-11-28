@@ -35,3 +35,24 @@ export const buildAssistantChatV3Message = (
     updated_at: Date.now(),
   };
 };
+
+export const isImageFile = (filePath: string): boolean => {
+  const ext = filePath.toLowerCase().split(".").pop();
+  const imageExtensions = [
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "bmp",
+    "webp",
+    "svg",
+    "tiff",
+    "ico",
+    "raw",
+    "psd",
+    "heic",
+    "heif",
+    "avif",
+  ];
+  return !!ext && imageExtensions.includes(ext);
+};

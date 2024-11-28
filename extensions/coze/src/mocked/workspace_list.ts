@@ -4,7 +4,7 @@ export const mockedWorkspaceList = {
       id: "Personal Team",
       name: "Personal Team",
       role_type: "owner",
-      icon_url: "coze.png",
+      icon_url: "coze.svg",
       workspace_type: "personal",
     },
     {
