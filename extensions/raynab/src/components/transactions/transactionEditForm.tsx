@@ -1,6 +1,6 @@
 import { updateTransaction } from '@lib/api';
 import { easyGetColorFromId, formatToReadablePrice, formatToYnabAmount, isNumberLike } from '@lib/utils';
-import { Action, ActionPanel, Color, Form, Icon, showToast, Toast } from '@raycast/api';
+import { Action, ActionPanel, Alert, confirmAlert, Color, Form, Icon, showToast, Toast } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
 import { CategoryGroupWithCategories, CurrencyFormat, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
@@ -71,11 +71,46 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         payee_id: values.payee_id,
         memo: values.memo || null,
         category_id: values.category?.[0] || undefined,
-        subtransactions:
-          values.category?.length === 0
-            ? subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }))
-            : undefined,
       };
+
+      /**
+       * We need make sure the total of subtransactions is equal to the transaction.
+       * That validation makes sense to keep at this level
+       * */
+      if (subtransactions.length > 0) {
+        submittedValues.category_id = undefined;
+
+        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
+        submittedValues.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
+
+        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
+        const difference = subtransactionsTotal - +values.amount;
+
+        if (difference !== 0) {
+          const options: Alert.Options = {
+            title: `Something Doesn't Add Up`,
+            message: `The total is ${
+              values.amount
+            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
+              2
+            )}?`,
+            primaryAction: {
+              title: 'Auto-Distribute the amounts',
+              onAction: () => {
+                const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
+                  amount.toString()
+                );
+                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+              },
+            },
+            dismissAction: {
+              title: 'Adjust manually',
+            },
+          };
+          await confirmAlert(options);
+          return;
+        }
+      }
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
       updateTransaction(activeBudgetId, transaction.id, submittedValues)
