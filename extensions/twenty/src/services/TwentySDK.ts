@@ -27,12 +27,17 @@ class TwentySDK {
           [Api.KEY]: this.token,
         },
       });
-      const rawData = await response.json();
-      const data = getActiveDataModelsSchema.parse(rawData);
-      const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
-      return activeDataModel;
+
+      if (response.ok) {
+        const rawData = await response.json();
+        const data = getActiveDataModelsSchema.parse(rawData);
+        const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
+        return activeDataModel;
+      }
+
+      return response.statusText;
     } catch (err) {
-      throw new Error(err as string);
+      return err as string;
     }
   }
 

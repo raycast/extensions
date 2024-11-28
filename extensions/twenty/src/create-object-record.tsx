@@ -7,12 +7,25 @@ import { OpenCreateObjectRecordForm } from "./pages";
 import { usePromise } from "@raycast/utils";
 
 export default function CreateObjectRecord() {
-  const { isLoading, data: activeDataModels } = usePromise(async () => {
+  const {
+    isLoading,
+    data: activeDataModels,
+    error,
+  } = usePromise(async () => {
     const activeDataModels = await twenty.getActiveDataModels();
+
+    if (typeof activeDataModels === "string") {
+      throw new Error(activeDataModels as string);
+    }
+
     return activeDataModels;
   });
 
   const { push } = useNavigation();
+
+  if (error) {
+    return <></>;
+  }
 
   const standardActiveModel = activeDataModels?.filter((model) => !model.isCustom);
   const customActiveModel = activeDataModels?.filter((model) => model.isCustom);
