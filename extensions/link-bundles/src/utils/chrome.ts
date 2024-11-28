@@ -1,0 +1,97 @@
+import path from "path";
+import fs from "fs";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { getPreferenceValues } from "@raycast/api";
+
+const execAsync = promisify(exec);
+const preferences: Preferences = getPreferenceValues();
+
+interface ChromeProfile {
+  name: string;
+  directory: string;
+  isDefault: boolean;
+}
+
+// Cache for profiles to avoid repeated file reads
+let profilesCache: ChromeProfile[] | null = null;
+let profilesByDirCache: Map<string, ChromeProfile> | null = null;
+let lastCacheUpdate = 0;
+const CACHE_TTL = 30 * 60 * 1000;
+
+const createProfilesCache = (profiles: ChromeProfile[]) => {
+  profilesCache = profiles;
+  profilesByDirCache = new Map(profiles.map((profile) => [profile.directory, profile]));
+  lastCacheUpdate = Date.now();
+};
+
+export const getChromeProfiles = (): ChromeProfile[] => {
+  // Return cached profiles if they're still valid
+  if (profilesCache && Date.now() - lastCacheUpdate < CACHE_TTL) {
+    return profilesCache;
+  }
+
+  try {
+    const localStatePath = path.join(preferences.chromeProfilesDirectory, "Local State");
+    const localState = JSON.parse(fs.readFileSync(localStatePath, "utf8")) as {
+      profile: {
+        info_cache: Record<string, { name: string }>;
+      };
+    };
+    const profiles = Object.entries(localState.profile.info_cache).map(([dir, { name }]) => ({
+      name,
+      directory: dir,
+      isDefault: dir === "Default",
+    }));
+
+    createProfilesCache(profiles);
+    return profiles;
+  } catch (error) {
+    console.error("Failed to read Chrome profiles:", error);
+    const defaultProfile = {
+      name: "Default Profile",
+      directory: "Default",
+      isDefault: true,
+    };
+    createProfilesCache([defaultProfile]);
+    return [defaultProfile];
+  }
+};
+
+const getProfileByDirectory = (directory: string): ChromeProfile | undefined => {
+  // Ensure cache is initialized and valid
+  if (!profilesByDirCache || Date.now() - lastCacheUpdate >= CACHE_TTL) {
+    getChromeProfiles();
+  }
+
+  return profilesByDirCache?.get(directory);
+};
+
+export const getProfileNameByDirectory = (directory: string): string => {
+  const profile = getProfileByDirectory(directory);
+  return profile?.name || "Default Profile";
+};
+
+export const openLinksInChrome = async (
+  links: string[],
+  profile: string,
+  options: { newWindow?: boolean; incognito?: boolean } = {},
+): Promise<void> => {
+  if (links.length === 0) return;
+
+  const chromePath = path.join(preferences.chromeApplicationDirectory, "Google Chrome.app");
+  const profileArg = `--profile-directory="${profile}"`;
+  const urls = links.map((link) => `"${encodeURI(link)}"`).join(" ");
+
+  const args = [profileArg, options.newWindow ? "--new-window" : "", options.incognito ? "--incognito" : "", urls]
+    .filter(Boolean)
+    .join(" ");
+
+  const command = `open -na "${chromePath}" --args ${args}`;
+
+  try {
+    await execAsync(command);
+  } catch (error) {
+    throw new Error(`Failed to open Chrome: ${error}`);
+  }
+};
