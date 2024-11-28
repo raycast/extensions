@@ -1,5 +1,5 @@
 import { updateTransaction } from '@lib/api';
-import { easyGetColorFromId, formatToReadablePrice, formatToYnabAmount, isNumber } from '@lib/utils';
+import { easyGetColorFromId, formatToReadablePrice, formatToYnabAmount, isNumberLike } from '@lib/utils';
 import { Action, ActionPanel, Color, Form, Icon, showToast, Toast } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
 import { CategoryGroupWithCategories, CurrencyFormat, TransactionDetail } from '@srcTypes';
@@ -63,14 +63,14 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
 
       const submittedValues = {
         ...transaction,
-        ...values,
         date: (values.date ?? new Date()).toISOString(),
         flag_color: values.flag_color
           ? SaveTransaction.FlagColorEnum[values.flag_color as keyof typeof SaveTransaction.FlagColorEnum]
           : null,
         amount: formatToYnabAmount(values.amount),
+        payee_id: values.payee_id,
         memo: values.memo || null,
-        category: values.category?.[0] || undefined,
+        category_id: values.category?.[0] || undefined,
         subtransactions:
           values.category?.length === 0
             ? subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }))
@@ -93,7 +93,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       amount: (value) => {
         if (!value) return 'Please enter a valid amount';
 
-        if (isNumber(value) === false) return `${value} is not a valid number`;
+        if (isNumberLike(value) === false) return `${value} is not a valid number`;
       },
       payee_id: FormValidation.Required,
       category: (value) => {

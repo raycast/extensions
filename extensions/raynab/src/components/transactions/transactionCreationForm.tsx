@@ -1,4 +1,4 @@
-import { formatToYnabAmount, isNumber } from '@lib/utils';
+import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast } from '@raycast/api';
 import { createTransaction } from '@lib/api';
 import { useAccounts } from '@hooks/useAccounts';
@@ -137,7 +137,7 @@ function isValidFormSubmission(values: Values) {
     }
   });
 
-  if (!isNumber(values.amount)) {
+  if (!isNumberLike(values.amount)) {
     isValid = false;
     showToast({
       style: Toast.Style.Failure,

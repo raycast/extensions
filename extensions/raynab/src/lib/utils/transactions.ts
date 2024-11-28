@@ -1,6 +1,6 @@
 import { CurrencyFormat } from '@srcTypes';
 import { utils } from 'ynab';
-import { isNumber } from './validation';
+import { isNumberLike } from './validation';
 
 export function formatToReadablePrice({
   amount,
@@ -36,7 +36,7 @@ export function formatToReadablePrice({
  * Format a number or a valid string input into a currency amount in milliunits.
  */
 export function formatToYnabAmount(amount: string | number): number {
-  if (typeof amount === 'number' || isNumber(amount)) {
+  if (typeof amount === 'number' || isNumberLike(amount)) {
     return Number(amount) * 1000;
   } else {
     throw new Error(`Amount (${amount}) cannot be converted to a number`);
