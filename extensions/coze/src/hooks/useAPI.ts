@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import initAPI, { APIInstance } from '../services/api';
+import { useEffect, useState } from "react";
+import initAPI, { APIInstance } from "../services/api";
 
 const useAPI = (): {
-  isLoading: boolean,
-  api: APIInstance | undefined,
+  isLoading: boolean;
+  api: APIInstance | undefined;
 } => {
   const [isLoading, setIsLoading] = useState(true);
   const [api, setAPI] = useState<APIInstance | undefined>();
@@ -14,7 +14,7 @@ const useAPI = (): {
         const apiInstance = await initAPI();
         setAPI(apiInstance);
       } catch (error) {
-        console.error('Failed to initialize API:', error);
+        console.error("Failed to initialize API:", error);
       } finally {
         setIsLoading(false);
       }

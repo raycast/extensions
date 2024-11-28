@@ -5,7 +5,7 @@ import { loadHistories, useHistory, History } from "../hooks/useHistory";
 import { ChatV3Message } from "@coze/api";
 import { useConversation } from "../hooks/useConversation";
 import EmptyConversationView from "./EmptyConversationView";
-import { APIInstance, Conversation } from "../services/api";
+import { APIInstance } from "../services/api";
 
 export interface BotConversationViewProps {
   isLoading: boolean;

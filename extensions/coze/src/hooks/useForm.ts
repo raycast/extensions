@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
-export const useForm = (defaultQuery: string = '') => {
+export const useForm = (defaultQuery: string = "") => {
   const [query, setQuery] = useState<string>(defaultQuery);
   const [queryError, setQueryError] = useState<string>();
 

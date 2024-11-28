@@ -3,7 +3,7 @@
   "name": "coze",
   "title": "Coze",
   "description": "Coze is an AI assistant that can help you with various tasks, including writing, translation, and coding. This extension allows you to use Coze directly in Raycast.",
-  "icon": "coze.svg",
+  "icon": "coze.png",
   "author": "chyroc",
   "categories": [
     "Productivity"
@@ -32,8 +32,8 @@
   "commands": [
     {
       "name": "bot-chat",
-      "title": "Chat With Bot",
-      "description": "Chat With Bot",
+      "title": "Chat with Bot",
+      "description": "Chat with Bot",
       "mode": "view"
     },
     {

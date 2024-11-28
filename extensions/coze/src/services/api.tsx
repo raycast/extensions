@@ -53,7 +53,7 @@ const initAPI = async () => {
   const defaultPKCEClient = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
     providerName: "Coze",
-    providerIcon: "coze.svg",
+    providerIcon: "coze.png",
     providerId: "Coze",
     description: "Connect your Coze account\n(Raycast Coze Extension)",
   });
@@ -81,7 +81,7 @@ const initAPI = async () => {
     return new OAuth.PKCEClient({
       redirectMethod: OAuth.RedirectMethod.Web,
       providerName: `Coze(${workspace_id})`,
-      providerIcon: workspace_icon_map[workspace_id!] || "coze.svg",
+      providerIcon: workspace_icon_map[workspace_id!] || "coze.png",
       providerId: `Coze-${workspace_id}`,
       description: `Connect your Coze Workspace(${workspace_id})\n(Raycast Coze Extension)`,
     });
@@ -260,7 +260,7 @@ const initAPI = async () => {
       token: token?.access_token || "",
       baseURL,
     });
-    
+
     try {
       log(`[api][listBots] start, space_id: ${space_id}, page_num: ${page_num}, page_size: ${page_size}`);
       const bots = await coze.bots.list({

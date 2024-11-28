@@ -14,7 +14,7 @@ export default function WorkspaceListView({
   api?: APIInstance;
   onSelect: (workspace: WorkSpace) => void;
 }) {
-  const { workspaces, workspaceId, setWorkspaceId, workspaceError, isLoading: isWorkspaceLoading } = useWorkspaces(api);
+  const { workspaces, setWorkspaceId, workspaceError, isLoading: isWorkspaceLoading } = useWorkspaces(api);
   const isLoading = isDefaultLoading || isWorkspaceLoading;
 
   if (workspaceError) {

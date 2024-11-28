@@ -26,14 +26,7 @@ export default function CommandBotList() {
   const onWorkspaceSelect = async (workspace: WorkSpace) => {
     api?.log(`[BotList] workspace selected: ${workspace.id}`);
 
-    push(
-      <BotListView
-        isLoading={isLoading}
-        api={api}
-        workspaceId={workspace.id}
-        onSelect={onBotSelect}
-      />,
-    );
+    push(<BotListView isLoading={isLoading} api={api} workspaceId={workspace.id} onSelect={onBotSelect} />);
   };
 
   return <WorkspaceListView isLoading={isLoading} api={api} onSelect={onWorkspaceSelect} />;

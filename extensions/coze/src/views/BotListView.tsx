@@ -16,7 +16,7 @@ const BotListView = ({
   workspaceId: string;
   onSelect: (workspaceId: string, bot: SimpleBot) => void;
 }) => {
-  const { isLoading: isBotLoading, bots, botId, setBotId, botError } = useBots(api, workspaceId);
+  const { isLoading: isBotLoading, bots, setBotId, botError } = useBots(api, workspaceId);
   const isLoading = isDefaultLoading || isBotLoading;
 
   if (botError) {
