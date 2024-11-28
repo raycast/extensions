@@ -1,6 +1,6 @@
 # Surf Check Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-11-28
 
 - Updated the extension description to better clarify its functionality
 
