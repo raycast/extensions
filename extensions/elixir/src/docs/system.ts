@@ -6,7 +6,8 @@ export const System: ModuleDoc = {
       name: "version/0",
       type: "function",
       specs: ["@spec version() :: String.t()"],
-      documentation: "Elixir version information.\n\nReturns Elixir's version as binary.\n",
+      documentation:
+        "Elixir version information.\n\nReturns Elixir's version as binary.\n",
     },
     {
       name: "user_home!/0",
@@ -19,12 +20,15 @@ export const System: ModuleDoc = {
       name: "user_home/0",
       type: "function",
       specs: ["@spec user_home() :: String.t() | nil"],
-      documentation: "User home directory.\n\nReturns the user home directory (platform independent).\n",
+      documentation:
+        "User home directory.\n\nReturns the user home directory (platform independent).\n",
     },
     {
       name: "untrap_signal/2",
       type: "function",
-      specs: ["@spec untrap_signal(signal(), id) :: :ok | {:error, :not_found} when id: term()"],
+      specs: [
+        "@spec untrap_signal(signal(), id) :: :ok | {:error, :not_found} when id: term()",
+      ],
       documentation: "Removes a previously registered `signal` with `id`.\n",
     },
     {
@@ -172,13 +176,15 @@ export const System: ModuleDoc = {
       name: "no_halt/1",
       type: "function",
       specs: ["@spec no_halt(boolean()) :: :ok"],
-      documentation: "Marks if the system should halt or not at the end of ARGV processing.\n",
+      documentation:
+        "Marks if the system should halt or not at the end of ARGV processing.\n",
     },
     {
       name: "no_halt/0",
       type: "function",
       specs: ["@spec no_halt() :: boolean()"],
-      documentation: "Checks if the system will halt or not at the end of ARGV processing.\n",
+      documentation:
+        "Checks if the system will halt or not at the end of ARGV processing.\n",
     },
     {
       name: "monotonic_time/1",
@@ -197,7 +203,9 @@ export const System: ModuleDoc = {
     {
       name: "halt/1",
       type: "function",
-      specs: ["@spec halt(non_neg_integer() | binary() | :abort) :: no_return()"],
+      specs: [
+        "@spec halt(non_neg_integer() | binary() | :abort) :: no_return()",
+      ],
       documentation:
         "Immediately halts the Erlang runtime system.\n\nTerminates the Erlang runtime system without properly shutting down\napplications and ports. Please see `stop/1` for a careful shutdown of the\nsystem.\n\n`status` must be a non-negative integer, the atom `:abort` or a binary.\n\n  * If an integer, the runtime system exits with the integer value which\n    is returned to the operating system.\n\n  * If `:abort`, the runtime system aborts producing a core dump, if that is\n    enabled in the operating system.\n\n  * If a string, an Erlang crash dump is produced with status as slogan,\n    and then the runtime system exits with status code 1.\n\nNote that on many platforms, only the status codes 0-255 are supported\nby the operating system.\n\nFor more information, see `:erlang.halt/1`.\n\n## Examples\n\n    System.halt(0)\n    System.halt(1)\n    System.halt(:abort)\n\n",
     },
@@ -256,7 +264,8 @@ export const System: ModuleDoc = {
       name: "delete_env/1",
       type: "function",
       specs: ["@spec delete_env(String.t()) :: :ok"],
-      documentation: "Deletes an environment variable.\n\nRemoves the variable `varname` from the environment.\n",
+      documentation:
+        "Deletes an environment variable.\n\nRemoves the variable `varname` from the environment.\n",
     },
     {
       name: "cwd!/0",
@@ -275,7 +284,9 @@ export const System: ModuleDoc = {
     {
       name: "convert_time_unit/3",
       type: "function",
-      specs: ["@spec convert_time_unit(integer(), time_unit() | :native, time_unit() | :native) ::\n        integer()"],
+      specs: [
+        "@spec convert_time_unit(integer(), time_unit() | :native, time_unit() | :native) ::\n        integer()",
+      ],
       documentation:
         "Converts `time` from time unit `from_unit` to time unit `to_unit`.\n\nThe result is rounded via the floor function.\n\n`convert_time_unit/3` accepts an additional time unit (other than the\nones in the `t:time_unit/0` type) called `:native`. `:native` is the time\nunit used by the Erlang runtime system. It's determined when the runtime\nstarts and stays the same until the runtime is stopped, but could differ\nthe next time the runtime is started on the same machine. For this reason,\nyou should use this function to convert `:native` time units to a predictable\nunit before you display them to humans.\n\nTo determine how many seconds the `:native` unit represents in your current\nruntime, you can call this function to convert 1 second to the `:native`\ntime unit: `System.convert_time_unit(1, :second, :native)`.\n",
     },
@@ -340,7 +351,9 @@ export const System: ModuleDoc = {
     {
       name: "time_unit/0",
       type: "type",
-      specs: ["@type time_unit() ::\n        :second | :millisecond | :microsecond | :nanosecond | pos_integer()"],
+      specs: [
+        "@type time_unit() ::\n        :second | :millisecond | :microsecond | :nanosecond | pos_integer()",
+      ],
       documentation:
         'The time unit to be passed to functions like `monotonic_time/1` and others.\n\nThe `:second`, `:millisecond`, `:microsecond` and `:nanosecond` time\nunits controls the return value of the functions that accept a time unit.\n\nA time unit can also be a strictly positive integer. In this case, it\nrepresents the "parts per second": the time will be returned in `1 /\nparts_per_second` seconds. For example, using the `:millisecond` time unit\nis equivalent to using `1000` as the time unit (as the time will be returned\nin 1/1000 seconds - milliseconds).\n',
     },

@@ -5,7 +5,9 @@ export const Macro: ModuleDoc = {
     {
       name: "var/2",
       type: "function",
-      specs: ["@spec var(var, context) :: {var, [], context} when var: atom(), context: atom()"],
+      specs: [
+        "@spec var(var, context) :: {var, [], context} when var: atom(), context: atom()",
+      ],
       documentation:
         "Generates an AST node representing the variable given\nby the atoms `var` and `context`.\n\nNote this variable is not unique. If you later on want\nto access this same variable, you can invoke `var/2`\nagain with the same arguments. Use `unique_var/2` to\ngenerate a unique variable that can't be overridden.\n\n## Examples\n\nIn order to build a variable, a context is expected.\nMost of the times, in order to preserve hygiene, the\ncontext must be `__MODULE__/0`:\n\n    iex> Macro.var(:foo, __MODULE__)\n    {:foo, [], __MODULE__}\n\nHowever, if there is a need to access the user variable,\nnil can be given:\n\n    iex> Macro.var(:foo, nil)\n    {:foo, [], nil}\n\n",
     },
@@ -74,7 +76,9 @@ export const Macro: ModuleDoc = {
     {
       name: "to_string/2",
       type: "function",
-      specs: ["@spec to_string(t(), (t(), String.t() -> String.t())) :: String.t()"],
+      specs: [
+        "@spec to_string(t(), (t(), String.t() -> String.t())) :: String.t()",
+      ],
       documentation:
         'Converts the given expression AST to a string.\n\nThe given `fun` is called for every node in the AST with two arguments: the\nAST of the node being printed and the string representation of that same\nnode. The return value of this function is used as the final string\nrepresentation for that AST node.\n\nThis function discards all formatting of the original code.\n\n## Examples\n\n    Macro.to_string(quote(do: 1 + 2), fn\n      1, _string -> "one"\n      2, _string -> "two"\n      _ast, string -> string\n    end)\n    #=> "one + two"\n\n',
     },
@@ -98,7 +102,8 @@ export const Macro: ModuleDoc = {
       name: "special_form?/2",
       type: "function",
       specs: ["@spec special_form?(name :: atom(), arity()) :: boolean()"],
-      documentation: "Returns `true` if the given name and arity is a special form.\n",
+      documentation:
+        "Returns `true` if the given name and arity is a special form.\n",
     },
     {
       name: "quoted_literal?/1",
@@ -117,7 +122,9 @@ export const Macro: ModuleDoc = {
     {
       name: "prewalk/3",
       type: "function",
-      specs: ["@spec prewalk(t(), any(), (t(), any() -> {t(), any()})) :: {t(), any()}"],
+      specs: [
+        "@spec prewalk(t(), any(), (t(), any() -> {t(), any()})) :: {t(), any()}",
+      ],
       documentation:
         "Performs a depth-first, pre-order traversal of quoted expressions\nusing an accumulator.\n\nReturns a tuple where the first element is a new AST where each node is the\nresult of invoking `fun` on each corresponding node and the second one is the\nfinal accumulator.\n\n## Examples\n\n    iex> ast = quote do: 5 + 3 * 7\n    iex> {:+, _, [5, {:*, _, [3, 7]}]} = ast\n    iex> {new_ast, acc} = Macro.prewalk(ast, [], fn\n    ...>   {:+, meta, children}, acc -> {{:*, meta, children}, [:+ | acc]}\n    ...>   {:*, meta, children}, acc -> {{:+, meta, children}, [:* | acc]}\n    ...>   other, acc -> {other, acc}\n    ...> end)\n    iex> {{:*, _, [5, {:+, _, [3, 7]}]}, [:*, :+]} = {new_ast, acc}\n    iex> Code.eval_quoted(ast)\n    {26, []}\n    iex> Code.eval_quoted(new_ast)\n    {50, []}\n\n",
     },
@@ -138,7 +145,9 @@ export const Macro: ModuleDoc = {
     {
       name: "postwalk/3",
       type: "function",
-      specs: ["@spec postwalk(t(), any(), (t(), any() -> {t(), any()})) :: {t(), any()}"],
+      specs: [
+        "@spec postwalk(t(), any(), (t(), any() -> {t(), any()})) :: {t(), any()}",
+      ],
       documentation:
         "This functions behaves like `prewalk/3`, but performs a depth-first,\npost-order traversal of quoted expressions using an accumulator.\n",
     },
@@ -173,7 +182,9 @@ export const Macro: ModuleDoc = {
     {
       name: "inspect_atom/2",
       type: "function",
-      specs: ["@spec inspect_atom(:literal | :key | :remote_call, atom()) :: binary()"],
+      specs: [
+        "@spec inspect_atom(:literal | :key | :remote_call, atom()) :: binary()",
+      ],
       documentation:
         'Inspects `atom` according to different source formats.\n\nThe atom can be inspected according to the three different\nformats it appears in the AST: as a literal (`:literal`),\nas a key (`:key`), or as the function name of a remote call\n(`:remote_call`).\n\n## Examples\n\n### As a literal\n\nLiterals include regular atoms, quoted atoms, operators,\naliases, and the special `nil`, `true`, and `false` atoms.\n\n    iex> Macro.inspect_atom(:literal, nil)\n    "nil"\n    iex> Macro.inspect_atom(:literal, :foo)\n    ":foo"\n    iex> Macro.inspect_atom(:literal, :<>)\n    ":<>"\n    iex> Macro.inspect_atom(:literal, :Foo)\n    ":Foo"\n    iex> Macro.inspect_atom(:literal, Foo.Bar)\n    "Foo.Bar"\n    iex> Macro.inspect_atom(:literal, :"with spaces")\n    ":\\"with spaces\\""\n\n### As a key\n\nInspect an atom as a key of a keyword list or a map.\n\n    iex> Macro.inspect_atom(:key, :foo)\n    "foo:"\n    iex> Macro.inspect_atom(:key, :<>)\n    "<>:"\n    iex> Macro.inspect_atom(:key, :Foo)\n    "Foo:"\n    iex> Macro.inspect_atom(:key, :"with spaces")\n    "\\"with spaces\\":"\n\n### As a remote call\n\nInspect an atom the function name of a remote call.\n\n    iex> Macro.inspect_atom(:remote_call, :foo)\n    "foo"\n    iex> Macro.inspect_atom(:remote_call, :<>)\n    "<>"\n    iex> Macro.inspect_atom(:remote_call, :Foo)\n    "\\"Foo\\""\n    iex> Macro.inspect_atom(:remote_call, :"with spaces")\n    "\\"with spaces\\""\n\n',
     },
@@ -207,7 +218,9 @@ export const Macro: ModuleDoc = {
     {
       name: "expand_literals/3",
       type: "function",
-      specs: ["@spec expand_literals(t(), acc, (t(), acc -> {t(), acc})) :: t()\n      when acc: term()"],
+      specs: [
+        "@spec expand_literals(t(), acc, (t(), acc -> {t(), acc})) :: t()\n      when acc: term()",
+      ],
       documentation:
         "Expands all literals in `ast` with the given `acc` and `fun`.\n\n`fun` will be invoked with an expandable AST node and `acc` and\nmust return a new node with `acc`. This is a general version of\n`expand_literals/2` which supports a custom expansion function.\nPlease check `expand_literals/2` for use cases and pitfalls.\n",
     },
@@ -228,14 +241,18 @@ export const Macro: ModuleDoc = {
     {
       name: "escape/2",
       type: "function",
-      specs: ["@spec escape(\n        term(),\n        keyword()\n      ) :: t()"],
+      specs: [
+        "@spec escape(\n        term(),\n        keyword()\n      ) :: t()",
+      ],
       documentation:
         "Recursively escapes a value so it can be inserted into a syntax tree.\n\n## Examples\n\n    iex> Macro.escape(:foo)\n    :foo\n\n    iex> Macro.escape({:a, :b, :c})\n    {:{}, [], [:a, :b, :c]}\n\n    iex> Macro.escape({:unquote, [], [1]}, unquote: true)\n    1\n\n## Options\n\n  * `:unquote` - when true, this function leaves `unquote/1` and\n    `unquote_splicing/1` statements unescaped, effectively unquoting\n    the contents on escape. This option is useful only when escaping\n    ASTs which may have quoted fragments in them. Defaults to false.\n\n  * `:prune_metadata` - when true, removes metadata from escaped AST\n    nodes. Note this option changes the semantics of escaped code and\n    it should only be used when escaping ASTs. Defaults to false.\n\n    As an example, `ExUnit` stores the AST of every assertion, so when\n    an assertion fails we can show code snippets to users. Without this\n    option, each time the test module is compiled, we get a different\n    MD5 of the module bytecode, because the AST contains metadata,\n    such as counters, specific to the compilation environment. By pruning\n    the metadata, we ensure that the module is deterministic and reduce\n    the amount of data `ExUnit` needs to keep around. Only the minimal\n    amount of metadata is kept, such as `:line` and `:no_parens`.\n\n## Comparison to `quote/2`\n\nThe `escape/2` function is sometimes confused with `quote/2`,\nbecause the above examples behave the same with both. The key difference is\nbest illustrated when the value to escape is stored in a variable.\n\n    iex> Macro.escape({:a, :b, :c})\n    {:{}, [], [:a, :b, :c]}\n    iex> quote do: {:a, :b, :c}\n    {:{}, [], [:a, :b, :c]}\n\n    iex> value = {:a, :b, :c}\n    iex> Macro.escape(value)\n    {:{}, [], [:a, :b, :c]}\n\n    iex> quote do: value\n    {:value, [], __MODULE__}\n\n    iex> value = {:a, :b, :c}\n    iex> quote do: unquote(value)\n    {:a, :b, :c}\n\n`escape/2` is used to escape *values* (either directly passed or variable\nbound), while `quote/2` produces syntax trees for\nexpressions.\n",
     },
     {
       name: "decompose_call/1",
       type: "function",
-      specs: ["@spec decompose_call(t()) :: {atom(), [t()]} | {t(), atom(), [t()]} | :error"],
+      specs: [
+        "@spec decompose_call(t()) :: {atom(), [t()]} | {t(), atom(), [t()]} | :error",
+      ],
       documentation:
         "Decomposes a local or remote call into its remote part (when provided),\nfunction name and argument list.\n\nReturns `:error` when an invalid call syntax is provided.\n\n## Examples\n\n    iex> Macro.decompose_call(quote(do: foo))\n    {:foo, []}\n\n    iex> Macro.decompose_call(quote(do: foo()))\n    {:foo, []}\n\n    iex> Macro.decompose_call(quote(do: foo(1, 2, 3)))\n    {:foo, [1, 2, 3]}\n\n    iex> Macro.decompose_call(quote(do: Elixir.M.foo(1, 2, 3)))\n    {{:__aliases__, [], [:Elixir, :M]}, :foo, [1, 2, 3]}\n\n    iex> Macro.decompose_call(quote(do: 42))\n    :error\n\n    iex> Macro.decompose_call(quote(do: {:foo, [], []}))\n    :error\n\n",
     },
@@ -256,7 +273,9 @@ export const Macro: ModuleDoc = {
     {
       name: "classify_atom/1",
       type: "function",
-      specs: ["@spec classify_atom(atom()) :: :alias | :identifier | :quoted | :unquoted"],
+      specs: [
+        "@spec classify_atom(atom()) :: :alias | :identifier | :quoted | :unquoted",
+      ],
       documentation:
         'Classifies an `atom` based on its possible AST placement.\n\nIt returns one of the following atoms:\n\n  * `:alias` - the atom represents an alias\n\n  * `:identifier` - the atom can be used as a variable or local function\n    call (as well as be an unquoted atom)\n\n  * `:unquoted` - the atom can be used in its unquoted form,\n    includes operators and atoms with `@` in them\n\n  * `:quoted` - all other atoms which can only be used in their quoted form\n\nMost operators are going to be `:unquoted`, such as `:+`, with\nsome exceptions returning `:quoted` due to ambiguity, such as\n`:"::"`. Use `operator?/2` to check if a given atom is an operator.\n\n## Examples\n\n    iex> Macro.classify_atom(:foo)\n    :identifier\n    iex> Macro.classify_atom(Foo)\n    :alias\n    iex> Macro.classify_atom(:foo@bar)\n    :unquoted\n    iex> Macro.classify_atom(:+)\n    :unquoted\n    iex> Macro.classify_atom(:Foo)\n    :unquoted\n    iex> Macro.classify_atom(:"with spaces")\n    :quoted\n\n',
     },
@@ -276,7 +295,8 @@ export const Macro: ModuleDoc = {
       name: "captured_remote_function/0",
       type: "type",
       specs: ["@type captured_remote_function() :: (... -> any())"],
-      documentation: "A captured remote function in the format of &Mod.fun/arity",
+      documentation:
+        "A captured remote function in the format of &Mod.fun/arity",
     },
     {
       name: "metadata/0",
@@ -301,6 +321,11 @@ export const Macro: ModuleDoc = {
       ],
       documentation: "The inputs of a macro",
     },
-    { name: "t/0", type: "type", specs: ["@type t() :: input()"], documentation: "Abstract Syntax Tree (AST)" },
+    {
+      name: "t/0",
+      type: "type",
+      specs: ["@type t() :: input()"],
+      documentation: "Abstract Syntax Tree (AST)",
+    },
   ],
 };

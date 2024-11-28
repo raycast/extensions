@@ -47,7 +47,9 @@ export const Duration: ModuleDoc = {
     {
       name: "from_iso8601/1",
       type: "function",
-      specs: ["@spec from_iso8601(String.t()) :: {:ok, t()} | {:error, atom()}"],
+      specs: [
+        "@spec from_iso8601(String.t()) :: {:ok, t()} | {:error, atom()}",
+      ],
       documentation:
         'Parses an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#Durations) formatted duration string to a `Duration` struct.\n\nDuration strings, as well as individual units, may be prefixed with plus/minus signs so that:\n\n- `-PT6H3M` parses as `%Duration{hour: -6, minute: -3}`\n- `-PT6H-3M` parses as `%Duration{hour: -6, minute: 3}`\n- `+PT6H3M` parses as `%Duration{hour: 6, minute: 3}`\n- `+PT6H-3M` parses as `%Duration{hour: 6, minute: -3}`\n\nDuration designators must be provided in order of magnitude: `P[n]Y[n]M[n]W[n]DT[n]H[n]M[n]S`.\n\nOnly seconds may be specified with a decimal fraction, using either a comma or a full stop: `P1DT4,5S`.\n\n## Examples\n\n    iex> Duration.from_iso8601("P1Y2M3DT4H5M6S")\n    {:ok, %Duration{year: 1, month: 2, day: 3, hour: 4, minute: 5, second: 6}}\n    iex> Duration.from_iso8601("P3Y-2MT3H")\n    {:ok, %Duration{year: 3, month: -2, hour: 3}}\n    iex> Duration.from_iso8601("-PT10H-30M")\n    {:ok, %Duration{hour: -10, minute: 30}}\n    iex> Duration.from_iso8601("PT4.650S")\n    {:ok, %Duration{second: 4, microsecond: {650000, 3}}}\n\n',
     },
@@ -76,7 +78,8 @@ export const Duration: ModuleDoc = {
       specs: [
         "@type unit_pair() ::\n        {:year, integer()}\n        | {:month, integer()}\n        | {:week, integer()}\n        | {:day, integer()}\n        | {:hour, integer()}\n        | {:minute, integer()}\n        | {:second, integer()}\n        | {:microsecond, {integer(), 0..6}}",
       ],
-      documentation: "The unit pair type specifies a pair of a valid duration unit key and value.\n",
+      documentation:
+        "The unit pair type specifies a pair of a valid duration unit key and value.\n",
     },
     {
       name: "t/0",

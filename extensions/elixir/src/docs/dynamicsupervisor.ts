@@ -14,28 +14,36 @@ export const DynamicSupervisor: ModuleDoc = {
     {
       name: "terminate_child/2",
       type: "function",
-      specs: ["@spec terminate_child(Supervisor.supervisor(), pid()) ::\n        :ok | {:error, :not_found}"],
+      specs: [
+        "@spec terminate_child(Supervisor.supervisor(), pid()) ::\n        :ok | {:error, :not_found}",
+      ],
       documentation:
         "Terminates the given child identified by `pid`.\n\nIf successful, this function returns `:ok`. If there is no process with\nthe given PID, this function returns `{:error, :not_found}`.\n",
     },
     {
       name: "stop/3",
       type: "function",
-      specs: ["@spec stop(Supervisor.supervisor(), reason :: term(), timeout()) :: :ok"],
+      specs: [
+        "@spec stop(Supervisor.supervisor(), reason :: term(), timeout()) :: :ok",
+      ],
       documentation:
         "Synchronously stops the given supervisor with the given `reason`.\n\nIt returns `:ok` if the supervisor terminates with the given\nreason. If it terminates with another reason, the call exits.\n\nThis function keeps OTP semantics regarding error reporting.\nIf the reason is any other than `:normal`, `:shutdown` or\n`{:shutdown, _}`, an error report is logged.\n",
     },
     {
       name: "start_link/3",
       type: "function",
-      specs: ["@spec start_link(module(), term(), [option()]) :: Supervisor.on_start()"],
+      specs: [
+        "@spec start_link(module(), term(), [option()]) :: Supervisor.on_start()",
+      ],
       documentation:
         'Starts a module-based supervisor process with the given `module` and `init_arg`.\n\nTo start the supervisor, the `c:init/1` callback will be invoked in the given\n`module`, with `init_arg` as its argument. The `c:init/1` callback must return a\nsupervisor specification which can be created with the help of the `init/1`\nfunction.\n\nIf the `c:init/1` callback returns `:ignore`, this function returns\n`:ignore` as well and the supervisor terminates with reason `:normal`.\nIf it fails or returns an incorrect value, this function returns\n`{:error, term}` where `term` is a term with information about the\nerror, and the supervisor terminates with reason `term`.\n\nThe `:name` option can also be given in order to register a supervisor\nname, the supported values are described in the "Name registration"\nsection in the `GenServer` module docs.\n\nIf the supervisor is successfully spawned, this function returns\n`{:ok, pid}`, where `pid` is the PID of the supervisor. If the supervisor\nis given a name and a process with the specified name already exists,\nthe function returns `{:error, {:already_started, pid}}`, where `pid`\nis the PID of that process.\n\nNote that a supervisor started with this function is linked to the parent\nprocess and exits not only on crashes but also if the parent process exits\nwith `:normal` reason.\n',
     },
     {
       name: "start_link/1",
       type: "function",
-      specs: ["@spec start_link([option() | init_option()]) :: Supervisor.on_start()"],
+      specs: [
+        "@spec start_link([option() | init_option()]) :: Supervisor.on_start()",
+      ],
       documentation:
         'Starts a supervisor with the given options.\n\nThis function is typically not invoked directly, instead it is invoked\nwhen using a `DynamicSupervisor` as a child of another supervisor:\n\n    children = [\n      {DynamicSupervisor, name: MySupervisor}\n    ]\n\nIf the supervisor is successfully spawned, this function returns\n`{:ok, pid}`, where `pid` is the PID of the supervisor. If the supervisor\nis given a name and a process with the specified name already exists,\nthe function returns `{:error, {:already_started, pid}}`, where `pid`\nis the PID of that process.\n\nNote that a supervisor started with this function is linked to the parent\nprocess and exits not only on crashes but also if the parent process exits\nwith `:normal` reason.\n\n## Options\n\n  * `:name` - registers the supervisor under the given name.\n    The supported values are described under the "Name registration"\n    section in the `GenServer` module docs.\n\n  * `:strategy` - the restart strategy option. The only supported\n    value is `:one_for_one` which means that no other child is\n    terminated if a child process terminates. You can learn more\n    about strategies in the `Supervisor` module docs.\n\n  * `:max_restarts` - the maximum number of restarts allowed in\n    a time frame. Defaults to `3`.\n\n  * `:max_seconds` - the time frame in which `:max_restarts` applies.\n    Defaults to `5`.\n\n  * `:max_children` - the maximum amount of children to be running\n    under this supervisor at the same time. When `:max_children` is\n    exceeded, `start_child/2` returns `{:error, :max_children}`. Defaults\n    to `:infinity`.\n\n  * `:extra_arguments` - arguments that are prepended to the arguments\n    specified in the child spec given to `start_child/2`. Defaults to\n    an empty list.\n\n',
     },

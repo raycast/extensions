@@ -12,7 +12,9 @@ export const Port: ModuleDoc = {
     {
       name: "monitor/1",
       type: "function",
-      specs: ["@spec monitor(port() | {name, node()} | name) :: reference() when name: atom()"],
+      specs: [
+        "@spec monitor(port() | {name, node()} | name) :: reference() when name: atom()",
+      ],
       documentation:
         "Starts monitoring the given `port` from the calling process.\n\nOnce the monitored port process dies, a message is delivered to the\nmonitoring process in the shape of:\n\n    {:DOWN, ref, :port, object, reason}\n\nwhere:\n\n  * `ref` is a monitor reference returned by this function;\n  * `object` is either the `port` being monitored (when monitoring by port ID)\n  or `{name, node}` (when monitoring by a port name);\n  * `reason` is the exit reason.\n\nSee `:erlang.monitor/2` for more information.\n\nInlined by the compiler.\n",
     },
@@ -20,7 +22,8 @@ export const Port: ModuleDoc = {
       name: "list/0",
       type: "function",
       specs: ["@spec list() :: [port()]"],
-      documentation: "Returns a list of all ports in the current node.\n\nInlined by the compiler.\n",
+      documentation:
+        "Returns a list of all ports in the current node.\n\nInlined by the compiler.\n",
     },
     {
       name: "info/2",
@@ -39,7 +42,9 @@ export const Port: ModuleDoc = {
     {
       name: "demonitor/2",
       type: "function",
-      specs: ["@spec demonitor(reference(), options :: [:flush | :info]) :: boolean()"],
+      specs: [
+        "@spec demonitor(reference(), options :: [:flush | :info]) :: boolean()",
+      ],
       documentation:
         "Demonitors the monitor identified by the given `reference`.\n\nIf `monitor_ref` is a reference which the calling process\nobtained by calling `monitor/1`, that monitoring is turned off.\nIf the monitoring is already turned off, nothing happens.\n\nSee `:erlang.demonitor/2` for more information.\n\nInlined by the compiler.\n",
     },
@@ -53,7 +58,9 @@ export const Port: ModuleDoc = {
     {
       name: "command/3",
       type: "function",
-      specs: ["@spec command(port(), iodata(), [:force | :nosuspend]) :: boolean()"],
+      specs: [
+        "@spec command(port(), iodata(), [:force | :nosuspend]) :: boolean()",
+      ],
       documentation:
         "Sends `data` to the port driver `port`.\n\nFor more information, see `:erlang.port_command/3`.\n\nInlined by the compiler.\n",
     },

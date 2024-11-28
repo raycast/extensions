@@ -19,7 +19,9 @@ export const List: ModuleDoc = {
     {
       name: "update_at/3",
       type: "function",
-      specs: ["@spec update_at([elem], integer(), (elem -> any())) :: list() when elem: var"],
+      specs: [
+        "@spec update_at([elem], integer(), (elem -> any())) :: list() when elem: var",
+      ],
       documentation:
         "Returns a list with an updated value at the specified `index`.\n\nNegative indices indicate an offset from the end of the `list`.\nIf `index` is out of bounds, the original `list` is returned.\n\n## Examples\n\n    iex> List.update_at([1, 2, 3], 0, &(&1 + 10))\n    [11, 2, 3]\n\n    iex> List.update_at([1, 2, 3], 10, &(&1 + 10))\n    [1, 2, 3]\n\n    iex> List.update_at([1, 2, 3], -1, &(&1 + 10))\n    [1, 2, 13]\n\n    iex> List.update_at([1, 2, 3], -10, &(&1 + 10))\n    [1, 2, 3]\n\n",
     },
@@ -40,7 +42,9 @@ export const List: ModuleDoc = {
     {
       name: "to_integer/2",
       type: "function",
-      specs: ["@spec to_integer(\n        charlist(),\n        2..36\n      ) :: integer()"],
+      specs: [
+        "@spec to_integer(\n        charlist(),\n        2..36\n      ) :: integer()",
+      ],
       documentation:
         'Returns an integer whose text representation is `charlist` in base `base`.\n\nInlined by the compiler.\n\nThe base needs to be between `2` and `36`.\n\n## Examples\n\n    iex> List.to_integer(~c"3FF", 16)\n    1023\n\n',
     },
@@ -116,28 +120,37 @@ export const List: ModuleDoc = {
     {
       name: "myers_difference/2",
       type: "function",
-      specs: ["@spec myers_difference(list(), list()) :: [{:eq | :ins | :del, list()}]"],
+      specs: [
+        "@spec myers_difference(list(), list()) :: [{:eq | :ins | :del, list()}]",
+      ],
       documentation:
         'Returns a keyword list that represents an *edit script*.\n\nThe algorithm is outlined in the\n"An O(ND) Difference Algorithm and Its Variations" paper by E. Myers.\n\nAn *edit script* is a keyword list. Each key describes the "editing action" to\ntake in order to bring `list1` closer to being equal to `list2`; a key can be\n`:eq`, `:ins`, or `:del`. Each value is a sublist of either `list1` or `list2`\nthat should be inserted (if the corresponding key is `:ins`), deleted (if the\ncorresponding key is `:del`), or left alone (if the corresponding key is\n`:eq`) in `list1` in order to be closer to `list2`.\n\nSee `myers_difference/3` if you want to handle nesting in the diff scripts.\n\n## Examples\n\n    iex> List.myers_difference([1, 4, 2, 3], [1, 2, 3, 4])\n    [eq: [1], del: [4], eq: [2, 3], ins: [4]]\n\n',
     },
     {
       name: "last/2",
       type: "function",
-      specs: ["@spec last([], any()) :: any()", "@spec last([elem, ...], any()) :: elem when elem: var"],
+      specs: [
+        "@spec last([], any()) :: any()",
+        "@spec last([elem, ...], any()) :: elem when elem: var",
+      ],
       documentation:
         "Returns the last element in `list` or `default` if `list` is empty.\n\n`last/2` has been introduced in Elixir v1.12.0, while `last/1` has been available since v1.0.0.\n\n## Examples\n\n    iex> List.last([])\n    nil\n\n    iex> List.last([], 1)\n    1\n\n    iex> List.last([1])\n    1\n\n    iex> List.last([1, 2, 3])\n    3\n\n",
     },
     {
       name: "keytake/3",
       type: "function",
-      specs: ["@spec keytake([tuple()], any(), non_neg_integer()) :: {tuple(), [tuple()]} | nil"],
+      specs: [
+        "@spec keytake([tuple()], any(), non_neg_integer()) :: {tuple(), [tuple()]} | nil",
+      ],
       documentation:
         'Receives a `list` of tuples and returns the first tuple\nwhere the element at `position` in the tuple matches the\ngiven `key`, as well as the `list` without found tuple.\n\nIf such a tuple is not found, `nil` will be returned.\n\n## Examples\n\n    iex> List.keytake([a: 1, b: 2], :a, 0)\n    {{:a, 1}, [b: 2]}\n\n    iex> List.keytake([a: 1, b: 2], 2, 1)\n    {{:b, 2}, [a: 1]}\n\n    iex> List.keytake([a: 1, b: 2], :c, 0)\n    nil\n\nThis function works for any list of tuples:\n\n    iex> List.keytake([{22, "SSH"}, {80, "HTTP"}], 80, 0)\n    {{80, "HTTP"}, [{22, "SSH"}]}\n\n',
     },
     {
       name: "keystore/4",
       type: "function",
-      specs: ["@spec keystore([tuple()], any(), non_neg_integer(), tuple()) :: [tuple(), ...]"],
+      specs: [
+        "@spec keystore([tuple()], any(), non_neg_integer(), tuple()) :: [tuple(), ...]",
+      ],
       documentation:
         'Receives a `list` of tuples and replaces the element\nidentified by `key` at `position` with `new_tuple`.\n\nIf the element does not exist, it is added to the end of the `list`.\n\n## Examples\n\n    iex> List.keystore([a: 1, b: 2], :a, 0, {:a, 3})\n    [a: 3, b: 2]\n\n    iex> List.keystore([a: 1, b: 2], :c, 0, {:c, 3})\n    [a: 1, b: 2, c: 3]\n\nThis function works for any list of tuples:\n\n    iex> List.keystore([{22, "SSH"}], 80, 0, {80, "HTTP"})\n    [{22, "SSH"}, {80, "HTTP"}]\n\n',
     },
@@ -153,14 +166,18 @@ export const List: ModuleDoc = {
     {
       name: "keyreplace/4",
       type: "function",
-      specs: ["@spec keyreplace([tuple()], any(), non_neg_integer(), tuple()) :: [tuple()]"],
+      specs: [
+        "@spec keyreplace([tuple()], any(), non_neg_integer(), tuple()) :: [tuple()]",
+      ],
       documentation:
         'Receives a list of tuples and if the identified element by `key` at `position`\nexists, it is replaced with `new_tuple`.\n\n## Examples\n\n    iex> List.keyreplace([a: 1, b: 2], :a, 0, {:a, 3})\n    [a: 3, b: 2]\n\n    iex> List.keyreplace([a: 1, b: 2], :a, 1, {:a, 3})\n    [a: 1, b: 2]\n\nThis function works for any list of tuples:\n\n    iex> List.keyreplace([{22, "SSH"}, {80, "HTTP"}], 22, 0, {22, "Secure Shell"})\n    [{22, "Secure Shell"}, {80, "HTTP"}]\n\n',
     },
     {
       name: "keymember?/3",
       type: "function",
-      specs: ["@spec keymember?([tuple()], any(), non_neg_integer()) :: boolean()"],
+      specs: [
+        "@spec keymember?([tuple()], any(), non_neg_integer()) :: boolean()",
+      ],
       documentation:
         'Receives a list of tuples and returns `true` if there is\na tuple where the element at `position` in the tuple matches\nthe given `key`.\n\n## Examples\n\n    iex> List.keymember?([a: 1, b: 2], :a, 0)\n    true\n\n    iex> List.keymember?([a: 1, b: 2], 2, 1)\n    true\n\n    iex> List.keymember?([a: 1, b: 2], :c, 0)\n    false\n\nThis function works for any list of tuples:\n\n    iex> List.keymember?([{22, "SSH"}, {80, "HTTP"}], 22, 0)\n    true\n\n',
     },
@@ -174,14 +191,18 @@ export const List: ModuleDoc = {
     {
       name: "keyfind/4",
       type: "function",
-      specs: ["@spec keyfind([tuple()], any(), non_neg_integer(), any()) :: any()"],
+      specs: [
+        "@spec keyfind([tuple()], any(), non_neg_integer(), any()) :: any()",
+      ],
       documentation:
         'Receives a list of tuples and returns the first tuple\nwhere the element at `position` in the tuple matches the\ngiven `key`.\n\nIf no matching tuple is found, `default` is returned.\n\n## Examples\n\n    iex> List.keyfind([a: 1, b: 2], :a, 0)\n    {:a, 1}\n\n    iex> List.keyfind([a: 1, b: 2], 2, 1)\n    {:b, 2}\n\n    iex> List.keyfind([a: 1, b: 2], :c, 0)\n    nil\n\nThis function works for any list of tuples:\n\n    iex> List.keyfind([{22, "SSH"}, {80, "HTTP"}], 22, 0)\n    {22, "SSH"}\n\n',
     },
     {
       name: "keydelete/3",
       type: "function",
-      specs: ["@spec keydelete([tuple()], any(), non_neg_integer()) :: [tuple()]"],
+      specs: [
+        "@spec keydelete([tuple()], any(), non_neg_integer()) :: [tuple()]",
+      ],
       documentation:
         'Receives a `list` of tuples and deletes the first tuple\nwhere the element at `position` matches the\ngiven `key`. Returns the new list.\n\n## Examples\n\n    iex> List.keydelete([a: 1, b: 2], :a, 0)\n    [b: 2]\n\n    iex> List.keydelete([a: 1, b: 2], 2, 1)\n    [a: 1]\n\n    iex> List.keydelete([a: 1, b: 2], :c, 0)\n    [a: 1, b: 2]\n\nThis function works for any list of tuples:\n\n    iex> List.keydelete([{22, "SSH"}, {80, "HTTP"}], 80, 0)\n    [{22, "SSH"}]\n\n',
     },
@@ -202,42 +223,56 @@ export const List: ModuleDoc = {
     {
       name: "foldr/3",
       type: "function",
-      specs: ["@spec foldr([elem], acc, (elem, acc -> acc)) :: acc when elem: var, acc: var"],
+      specs: [
+        "@spec foldr([elem], acc, (elem, acc -> acc)) :: acc when elem: var, acc: var",
+      ],
       documentation:
         "Folds (reduces) the given list from the right with\na function. Requires an accumulator, which can be any value.\n\n## Examples\n\n    iex> List.foldr([1, 2, 3, 4], 0, fn x, acc -> x - acc end)\n    -2\n\n    iex> List.foldr([1, 2, 3, 4], %{sum: 0, product: 1}, fn x, %{sum: a1, product: a2} -> %{sum: a1 + x, product: a2 * x} end)\n    %{product: 24, sum: 10}\n\n",
     },
     {
       name: "foldl/3",
       type: "function",
-      specs: ["@spec foldl([elem], acc, (elem, acc -> acc)) :: acc when elem: var, acc: var"],
+      specs: [
+        "@spec foldl([elem], acc, (elem, acc -> acc)) :: acc when elem: var, acc: var",
+      ],
       documentation:
         "Folds (reduces) the given list from the left with\na function. Requires an accumulator, which can be any value.\n\n## Examples\n\n    iex> List.foldl([5, 5], 10, fn x, acc -> x + acc end)\n    20\n\n    iex> List.foldl([1, 2, 3, 4], 0, fn x, acc -> x - acc end)\n    2\n\n    iex> List.foldl([1, 2, 3], {0, 0}, fn x, {a1, a2} -> {a1 + x, a2 - x} end)\n    {6, -6}\n\n",
     },
     {
       name: "flatten/2",
       type: "function",
-      specs: ["@spec flatten(deep_list, [elem]) :: [elem]\n      when deep_list: [elem | deep_list], elem: var"],
+      specs: [
+        "@spec flatten(deep_list, [elem]) :: [elem]\n      when deep_list: [elem | deep_list], elem: var",
+      ],
       documentation:
         "Flattens the given `list` of nested lists.\nThe list `tail` will be added at the end of\nthe flattened list.\n\nEmpty list elements from `list` are discarded,\nbut not the ones from `tail`.\n\n## Examples\n\n    iex> List.flatten([1, [[2], 3]], [4, 5])\n    [1, 2, 3, 4, 5]\n\n    iex> List.flatten([1, [], 2], [3, [], 4])\n    [1, 2, 3, [], 4]\n\n",
     },
     {
       name: "flatten/1",
       type: "function",
-      specs: ["@spec flatten(deep_list) :: list() when deep_list: [any() | deep_list]"],
+      specs: [
+        "@spec flatten(deep_list) :: list() when deep_list: [any() | deep_list]",
+      ],
       documentation:
         "Flattens the given `list` of nested lists.\n\nEmpty list elements are discarded.\n\n## Examples\n\n    iex> List.flatten([1, [[2], 3]])\n    [1, 2, 3]\n\n    iex> List.flatten([[], [[], []]])\n    []\n\n",
     },
     {
       name: "first/2",
       type: "function",
-      specs: ["@spec first([], any()) :: any()", "@spec first([elem, ...], any()) :: elem when elem: var"],
+      specs: [
+        "@spec first([], any()) :: any()",
+        "@spec first([elem, ...], any()) :: elem when elem: var",
+      ],
       documentation:
         "Returns the first element in `list` or `default` if `list` is empty.\n\n`first/2` has been introduced in Elixir v1.12.0, while `first/1` has been available since v1.0.0.\n\n## Examples\n\n    iex> List.first([])\n    nil\n\n    iex> List.first([], 1)\n    1\n\n    iex> List.first([1])\n    1\n\n    iex> List.first([1, 2, 3])\n    1\n\n",
     },
     {
       name: "duplicate/2",
       type: "function",
-      specs: ["@spec duplicate(any(), 0) :: []", "@spec duplicate(elem, pos_integer()) :: [elem, ...] when elem: var"],
+      specs: [
+        "@spec duplicate(any(), 0) :: []",
+        "@spec duplicate(elem, pos_integer()) :: [elem, ...] when elem: var",
+      ],
       documentation:
         'Duplicates the given element `n` times in a list.\n\n`n` is an integer greater than or equal to `0`.\n\nIf `n` is `0`, an empty list is returned.\n\n## Examples\n\n    iex> List.duplicate("hello", 0)\n    []\n\n    iex> List.duplicate("hi", 1)\n    ["hi"]\n\n    iex> List.duplicate("bye", 2)\n    ["bye", "bye"]\n\n    iex> List.duplicate([1, 2], 3)\n    [[1, 2], [1, 2], [1, 2]]\n\n',
     },
@@ -251,7 +286,10 @@ export const List: ModuleDoc = {
     {
       name: "delete/2",
       type: "function",
-      specs: ["@spec delete([], any()) :: []", "@spec delete([...], any()) :: list()"],
+      specs: [
+        "@spec delete([], any()) :: []",
+        "@spec delete([...], any()) :: list()",
+      ],
       documentation:
         "Deletes the given `element` from the `list`. Returns a new list without\nthe element.\n\nIf the `element` occurs more than once in the `list`, just\nthe first occurrence is removed.\n\n## Examples\n\n    iex> List.delete([:a, :b, :c], :a)\n    [:b, :c]\n\n    iex> List.delete([:a, :b, :c], :d)\n    [:a, :b, :c]\n\n    iex> List.delete([:a, :b, :b, :c], :b)\n    [:a, :b, :c]\n\n    iex> List.delete([], :b)\n    []\n\n",
     },

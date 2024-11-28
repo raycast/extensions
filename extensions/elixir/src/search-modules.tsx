@@ -1,3 +1,4 @@
+import React from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ModuleDetail } from "./screens/ModuleDetail";
 import { MODULES } from "./utils";
@@ -11,8 +12,14 @@ export default function Command() {
           title={module.name}
           actions={
             <ActionPanel>
-              <Action.Push title="Show" icon={Icon.MagnifyingGlass} target={<ModuleDetail module={module} />} />
-              <Action.OpenInBrowser url={`https://hexdocs.pm/elixir/${module.name}.html`} />
+              <Action.Push
+                title="Show"
+                icon={Icon.MagnifyingGlass}
+                target={<ModuleDetail module={module} />}
+              />
+              <Action.OpenInBrowser
+                url={`https://hexdocs.pm/elixir/${module.name}.html`}
+              />
             </ActionPanel>
           }
         />

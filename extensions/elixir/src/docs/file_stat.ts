@@ -6,7 +6,8 @@ export const File_Stat: ModuleDoc = {
       name: "to_record/1",
       type: "function",
       specs: ["@spec to_record(t()) :: :file.file_info()"],
-      documentation: "Converts a `File.Stat` struct to a `:file_info` record.\n",
+      documentation:
+        "Converts a `File.Stat` struct to a `:file_info` record.\n",
     },
     {
       name: "from_record/1",

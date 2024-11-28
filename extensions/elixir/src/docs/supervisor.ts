@@ -14,7 +14,9 @@ export const Supervisor: ModuleDoc = {
     {
       name: "terminate_child/2",
       type: "function",
-      specs: ["@spec terminate_child(supervisor(), term()) :: :ok | {:error, :not_found}"],
+      specs: [
+        "@spec terminate_child(supervisor(), term()) :: :ok | {:error, :not_found}",
+      ],
       documentation:
         "Terminates the given child identified by `child_id`.\n\nThe process is terminated, if there's one. The child specification is\nkept unless the child is temporary.\n\nA non-temporary child process may later be restarted by the supervisor.\nThe child process can also be restarted explicitly by calling `restart_child/2`.\nUse `delete_child/2` to remove the child specification.\n\nIf successful, this function returns `:ok`. If there is no child\nspecification for the given child ID, this function returns\n`{:error, :not_found}`.\n",
     },
@@ -90,7 +92,9 @@ export const Supervisor: ModuleDoc = {
     {
       name: "child_spec/2",
       type: "function",
-      specs: ["@spec child_spec(\n        child_spec() | module_spec(),\n        keyword()\n      ) :: child_spec()"],
+      specs: [
+        "@spec child_spec(\n        child_spec() | module_spec(),\n        keyword()\n      ) :: child_spec()",
+      ],
       documentation:
         'Builds and overrides a child specification.\n\nSimilar to `start_link/2` and `init/2`, it expects a module, `{module, arg}`,\nor a [child specification](`t:child_spec/0`).\n\nIf a two-element tuple in the shape of `{module, arg}` is given,\nthe child specification is retrieved by calling `module.child_spec(arg)`.\n\nIf a module is given, the child specification is retrieved by calling\n`module.child_spec([])`.\n\nAfter the child specification is retrieved, the fields on `overrides`\nare directly applied to the child spec. If `overrides` has keys that\ndo not map to any child specification field, an error is raised.\n\nSee the "Child specification" section in the module documentation\nfor all of the available keys for overriding.\n\n## Examples\n\nThis function is often used to set an `:id` option when\nthe same module needs to be started multiple times in the\nsupervision tree:\n\n    Supervisor.child_spec({Agent, fn -> :ok end}, id: {Agent, 1})\n    #=> %{id: {Agent, 1},\n    #=>   start: {Agent, :start_link, [fn -> :ok end]}}\n\n',
     },
@@ -127,18 +131,23 @@ export const Supervisor: ModuleDoc = {
       name: "type/0",
       type: "type",
       specs: ["@type type() :: :worker | :supervisor"],
-      documentation: "Type of a supervised child.\n\nWhether the supervised child is a worker or a supervisor.\n",
+      documentation:
+        "Type of a supervised child.\n\nWhether the supervised child is a worker or a supervisor.\n",
     },
     {
       name: "auto_shutdown/0",
       type: "type",
-      specs: ["@type auto_shutdown() :: :never | :any_significant | :all_significant"],
+      specs: [
+        "@type auto_shutdown() :: :never | :any_significant | :all_significant",
+      ],
       documentation: "Supported automatic shutdown options.",
     },
     {
       name: "strategy/0",
       type: "type",
-      specs: ["@type strategy() :: :one_for_one | :one_for_all | :rest_for_one"],
+      specs: [
+        "@type strategy() :: :one_for_one | :one_for_all | :rest_for_one",
+      ],
       documentation: "Supported strategies.",
     },
     {
@@ -179,12 +188,15 @@ export const Supervisor: ModuleDoc = {
       name: "option/0",
       type: "type",
       specs: ["@type option() :: {:name, name()}"],
-      documentation: "Option values used by the `start_link/2` and `start_link/3` functions.",
+      documentation:
+        "Option values used by the `start_link/2` and `start_link/3` functions.",
     },
     {
       name: "name/0",
       type: "type",
-      specs: ["@type name() :: atom() | {:global, term()} | {:via, module(), term()}"],
+      specs: [
+        "@type name() :: atom() | {:global, term()} | {:via, module(), term()}",
+      ],
       documentation: "The supervisor name.",
     },
     {

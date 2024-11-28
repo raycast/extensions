@@ -203,7 +203,10 @@ export const String: ModuleDoc = {
     {
       name: "printable?/2",
       type: "function",
-      specs: ["@spec printable?(t(), 0) :: true", "@spec printable?(t(), pos_integer() | :infinity) :: boolean()"],
+      specs: [
+        "@spec printable?(t(), 0) :: true",
+        "@spec printable?(t(), pos_integer() | :infinity) :: boolean()",
+      ],
       documentation:
         'Checks if a string contains only printable characters up to `character_limit`.\n\nTakes an optional `character_limit` as a second argument. If `character_limit` is `0`, this\nfunction will return `true`.\n\n## Examples\n\n    iex> String.printable?("abc")\n    true\n\n    iex> String.printable?("abc" <> <<0>>)\n    false\n\n    iex> String.printable?("abc" <> <<0>>, 2)\n    true\n\n    iex> String.printable?("abc" <> <<0>>, 0)\n    true\n\n',
     },
@@ -322,7 +325,9 @@ export const String: ModuleDoc = {
     {
       name: "downcase/2",
       type: "function",
-      specs: ["@spec downcase(t(), :default | :ascii | :greek | :turkic) :: t()"],
+      specs: [
+        "@spec downcase(t(), :default | :ascii | :greek | :turkic) :: t()",
+      ],
       documentation:
         'Converts all characters in the given string to lowercase according to `mode`.\n\n`mode` may be `:default`, `:ascii`, `:greek` or `:turkic`. The `:default` mode considers\nall non-conditional transformations outlined in the Unicode standard. `:ascii`\nlowercases only the letters A to Z. `:greek` includes the context sensitive\nmappings found in Greek. `:turkic` properly handles the letter i with the dotless variant.\n\nAlso see `upcase/2` and `capitalize/2` for other conversions.\n\n## Examples\n\n    iex> String.downcase("ABCD")\n    "abcd"\n\n    iex> String.downcase("AB 123 XPTO")\n    "ab 123 xpto"\n\n    iex> String.downcase("OLÁ")\n    "olá"\n\nThe `:ascii` mode ignores Unicode characters and provides a more\nperformant implementation when you know the string contains only\nASCII characters:\n\n    iex> String.downcase("OLÁ", :ascii)\n    "olÁ"\n\nThe `:greek` mode properly handles the context sensitive sigma in Greek:\n\n    iex> String.downcase("ΣΣ")\n    "σσ"\n\n    iex> String.downcase("ΣΣ", :greek)\n    "σς"\n\nAnd `:turkic` properly handles the letter i with the dotless variant:\n\n    iex> String.downcase("Iİ")\n    "ii̇"\n\n    iex> String.downcase("Iİ", :turkic)\n    "ıi"\n\n',
     },
@@ -350,7 +355,9 @@ export const String: ModuleDoc = {
     {
       name: "capitalize/2",
       type: "function",
-      specs: ["@spec capitalize(t(), :default | :ascii | :greek | :turkic) :: t()"],
+      specs: [
+        "@spec capitalize(t(), :default | :ascii | :greek | :turkic) :: t()",
+      ],
       documentation:
         'Converts the first character in the given string to\nuppercase and the remainder to lowercase according to `mode`.\n\n`mode` may be `:default`, `:ascii`, `:greek` or `:turkic`. The `:default` mode\nconsiders all non-conditional transformations outlined in the Unicode standard.\n`:ascii` capitalizes only the letters A to Z. `:greek` includes the context\nsensitive mappings found in Greek. `:turkic` properly handles the letter `i`\nwith the dotless variant.\n\nAlso see `upcase/2` and `capitalize/2` for other conversions. If you want\na variation of this function that does not lowercase the rest of string,\nsee Erlang\'s `:string.titlecase/1`.\n\n## Examples\n\n    iex> String.capitalize("abcd")\n    "Abcd"\n    iex> String.capitalize("ABCD")\n    "Abcd"\n\n    iex> String.capitalize("ﬁn")\n    "Fin"\n    iex> String.capitalize("olá")\n    "Olá"\n\n',
     },
@@ -383,7 +390,9 @@ export const String: ModuleDoc = {
     {
       name: "pattern/0",
       type: "type",
-      specs: ["@type pattern() ::\n        t() | [nonempty_binary()] | (compiled_search_pattern :: :binary.cp())"],
+      specs: [
+        "@type pattern() ::\n        t() | [nonempty_binary()] | (compiled_search_pattern :: :binary.cp())",
+      ],
       documentation:
         "Pattern used in functions like `replace/4` and `split/3`.\n\nIt must be one of:\n\n  * a string\n  * an empty list\n  * a list containing non-empty strings\n  * a compiled search pattern created by `:binary.compile_pattern/1`\n\n",
     },
@@ -391,13 +400,15 @@ export const String: ModuleDoc = {
       name: "grapheme/0",
       type: "type",
       specs: ["@type grapheme() :: t()"],
-      documentation: "Multiple code points that may be perceived as a single character by readers",
+      documentation:
+        "Multiple code points that may be perceived as a single character by readers",
     },
     {
       name: "codepoint/0",
       type: "type",
       specs: ["@type codepoint() :: t()"],
-      documentation: "A single Unicode code point encoded in UTF-8. It may be one or more bytes.",
+      documentation:
+        "A single Unicode code point encoded in UTF-8. It may be one or more bytes.",
     },
     {
       name: "t/0",

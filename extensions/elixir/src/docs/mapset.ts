@@ -5,7 +5,9 @@ export const MapSet: ModuleDoc = {
     {
       name: "union/2",
       type: "function",
-      specs: ["@spec union(t(val1), t(val2)) :: t(val1 | val2)\n      when val1: value(), val2: value()"],
+      specs: [
+        "@spec union(t(val1), t(val2)) :: t(val1 | val2)\n      when val1: value(), val2: value()",
+      ],
       documentation:
         "Returns a set containing all members of `map_set1` and `map_set2`.\n\n## Examples\n\n    iex> MapSet.union(MapSet.new([1, 2]), MapSet.new([2, 3, 4]))\n    MapSet.new([1, 2, 3, 4])\n\n",
     },
@@ -35,7 +37,9 @@ export const MapSet: ModuleDoc = {
     {
       name: "split_with/2",
       type: "function",
-      specs: ["@spec split_with(t(), (any() -> as_boolean(term()))) :: {t(), t()}"],
+      specs: [
+        "@spec split_with(t(), (any() -> as_boolean(term()))) :: {t(), t()}",
+      ],
       documentation:
         "Splits the `map_set` into two `MapSet`s according to the given function `fun`.\n\n`fun` receives each element in the `map_set` as its only argument. Returns\na tuple with the first `MapSet` containing all the elements in `map_set` for which\napplying `fun` returned a truthy value, and a second `MapSet` with all the elements\nfor which applying `fun` returned a falsy value (`false` or `nil`).\n\n## Examples\n\n    iex> {while_true, while_false} = MapSet.split_with(MapSet.new([1, 2, 3, 4]), fn v -> rem(v, 2) == 0 end)\n    iex> while_true\n    MapSet.new([2, 4])\n    iex> while_false\n    MapSet.new([1, 3])\n\n    iex> {while_true, while_false} = MapSet.split_with(MapSet.new(), fn {_k, v} -> v > 50 end)\n    iex> while_true\n    MapSet.new([])\n    iex> while_false\n    MapSet.new([])\n\n",
     },
@@ -49,21 +53,27 @@ export const MapSet: ModuleDoc = {
     {
       name: "reject/2",
       type: "function",
-      specs: ["@spec reject(t(a), (a -> as_boolean(term()))) :: t(a) when a: value()"],
+      specs: [
+        "@spec reject(t(a), (a -> as_boolean(term()))) :: t(a) when a: value()",
+      ],
       documentation:
         'Returns a set by excluding the elements from `map_set` for which invoking `fun`\nreturns a truthy value.\n\nSee also `filter/2`.\n\n## Examples\n\n    iex> MapSet.reject(MapSet.new(1..5), fn x -> rem(x, 2) != 0 end)\n    MapSet.new([2, 4])\n\n    iex> MapSet.reject(MapSet.new(["a", :b, "c"]), &is_atom/1)\n    MapSet.new(["a", "c"])\n\n',
     },
     {
       name: "put/2",
       type: "function",
-      specs: ["@spec put(t(val), new_val) :: t(val | new_val)\n      when val: value(), new_val: value()"],
+      specs: [
+        "@spec put(t(val), new_val) :: t(val | new_val)\n      when val: value(), new_val: value()",
+      ],
       documentation:
         "Inserts `value` into `map_set` if `map_set` doesn't already contain it.\n\n## Examples\n\n    iex> MapSet.put(MapSet.new([1, 2, 3]), 3)\n    MapSet.new([1, 2, 3])\n    iex> MapSet.put(MapSet.new([1, 2, 3]), 4)\n    MapSet.new([1, 2, 3, 4])\n\n",
     },
     {
       name: "new/2",
       type: "function",
-      specs: ["@spec new(Enumerable.t(), (term() -> val)) :: t(val) when val: value()"],
+      specs: [
+        "@spec new(Enumerable.t(), (term() -> val)) :: t(val) when val: value()",
+      ],
       documentation:
         "Creates a set from an enumerable via the transformation function.\n\n## Examples\n\n    iex> MapSet.new([1, 2, 1], fn x -> 2 * x end)\n    MapSet.new([2, 4])\n\n",
     },
@@ -78,7 +88,8 @@ export const MapSet: ModuleDoc = {
       name: "new/0",
       type: "function",
       specs: ["@spec new() :: t()"],
-      documentation: "Returns a new set.\n\n## Examples\n\n    iex> MapSet.new()\n    MapSet.new([])\n\n",
+      documentation:
+        "Returns a new set.\n\n## Examples\n\n    iex> MapSet.new()\n    MapSet.new([])\n\n",
     },
     {
       name: "member?/2",
@@ -97,7 +108,9 @@ export const MapSet: ModuleDoc = {
     {
       name: "filter/2",
       type: "function",
-      specs: ["@spec filter(t(a), (a -> as_boolean(term()))) :: t(a) when a: value()"],
+      specs: [
+        "@spec filter(t(a), (a -> as_boolean(term()))) :: t(a) when a: value()",
+      ],
       documentation:
         'Filters the set by returning only the elements from `map_set` for which invoking\n`fun` returns a truthy value.\n\nAlso see `reject/2` which discards all elements where the function returns\na truthy value.\n\n> #### Performance considerations {: .tip}\n>\n> If you find yourself doing multiple calls to `MapSet.filter/2`\n> and `MapSet.reject/2` in a pipeline, it is likely more efficient\n> to use `Enum.map/2` and `Enum.filter/2` instead and convert to\n> a map at the end using `MapSet.new/1`.\n\n## Examples\n\n    iex> MapSet.filter(MapSet.new(1..5), fn x -> x > 3 end)\n    MapSet.new([4, 5])\n\n    iex> MapSet.filter(MapSet.new(["a", :b, "c"]), &is_atom/1)\n    MapSet.new([:b])\n\n',
     },
@@ -118,14 +131,18 @@ export const MapSet: ModuleDoc = {
     {
       name: "difference/2",
       type: "function",
-      specs: ["@spec difference(t(val1), t(val2)) :: t(val1) when val1: value(), val2: value()"],
+      specs: [
+        "@spec difference(t(val1), t(val2)) :: t(val1) when val1: value(), val2: value()",
+      ],
       documentation:
         "Returns a set that is `map_set1` without the members of `map_set2`.\n\n## Examples\n\n    iex> MapSet.difference(MapSet.new([1, 2]), MapSet.new([2, 3, 4]))\n    MapSet.new([1])\n\n",
     },
     {
       name: "delete/2",
       type: "function",
-      specs: ["@spec delete(t(val1), val2) :: t(val1) when val1: value(), val2: value()"],
+      specs: [
+        "@spec delete(t(val1), val2) :: t(val1) when val1: value(), val2: value()",
+      ],
       documentation:
         "Deletes `value` from `map_set`.\n\nReturns a new set which is a copy of `map_set` but without `value`.\n\n## Examples\n\n    iex> map_set = MapSet.new([1, 2, 3])\n    iex> MapSet.delete(map_set, 4)\n    MapSet.new([1, 2, 3])\n    iex> MapSet.delete(map_set, 2)\n    MapSet.new([1, 3])\n\n",
     },
@@ -134,19 +151,35 @@ export const MapSet: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "internal/1", type: "type", specs: ["@opaque internal(value)"], documentation: null },
+    {
+      name: "internal/1",
+      type: "type",
+      specs: ["@opaque internal(value)"],
+      documentation: null,
+    },
     {
       name: "t/0",
       type: "type",
-      specs: ["@type t() :: t(term())", "@type t(value) :: %MapSet{map: internal(value)}"],
+      specs: [
+        "@type t() :: t(term())",
+        "@type t(value) :: %MapSet{map: internal(value)}",
+      ],
       documentation: null,
     },
     {
       name: "t/1",
       type: "type",
-      specs: ["@type t() :: t(term())", "@type t(value) :: %MapSet{map: internal(value)}"],
+      specs: [
+        "@type t() :: t(term())",
+        "@type t(value) :: %MapSet{map: internal(value)}",
+      ],
       documentation: null,
     },
-    { name: "value/0", type: "type", specs: ["@type value() :: term()"], documentation: null },
+    {
+      name: "value/0",
+      type: "type",
+      specs: ["@type value() :: term()"],
+      documentation: null,
+    },
   ],
 };

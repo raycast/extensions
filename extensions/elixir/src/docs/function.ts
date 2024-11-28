@@ -5,7 +5,9 @@ export const Function: ModuleDoc = {
     {
       name: "info/2",
       type: "function",
-      specs: ["@spec info((... -> any()), item) :: {item, term()} when item: information()"],
+      specs: [
+        "@spec info((... -> any()), item) :: {item, term()} when item: information()",
+      ],
       documentation:
         "Returns a specific information about the function.\n\nThe returned information is a two-element tuple in the shape of\n`{info, value}`.\n\nFor any function, the information asked for can be any of the atoms\n`:module`, `:name`, `:arity`, `:env`, or `:type`.\n\nFor anonymous functions, there is also information about any of the\natoms `:index`, `:new_index`, `:new_uniq`, `:uniq`, and `:pid`.\nFor a named function, the value of any of these items is always the\natom `:undefined`.\n\nFor more information on each of the possible returned values, see\n`info/1`.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> f = fn x -> x end\n    iex> Function.info(f, :arity)\n    {:arity, 1}\n    iex> Function.info(f, :type)\n    {:type, :local}\n\n    iex> fun = &String.length/1\n    iex> Function.info(fun, :name)\n    {:name, :length}\n    iex> Function.info(fun, :pid)\n    {:pid, :undefined}\n\n",
     },

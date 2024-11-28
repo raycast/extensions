@@ -37,7 +37,9 @@ export const Code_Fragment: ModuleDoc = {
     {
       name: "position/0",
       type: "type",
-      specs: ["@type position() :: {line :: pos_integer(), column :: pos_integer()}"],
+      specs: [
+        "@type position() :: {line :: pos_integer(), column :: pos_integer()}",
+      ],
       documentation: null,
     },
   ],

@@ -5,7 +5,9 @@ export const StringIO: ModuleDoc = {
     {
       name: "open/3",
       type: "function",
-      specs: ["@spec open(binary(), keyword(), (pid() -> res)) :: {:ok, res} when res: var"],
+      specs: [
+        "@spec open(binary(), keyword(), (pid() -> res)) :: {:ok, res} when res: var",
+      ],
       documentation:
         'Creates an IO device.\n\n`string` will be the initial input of the newly created\ndevice.\n\nThe device will be created and sent to the function given.\nWhen the function returns, the device will be closed. The final\nresult will be a tuple with `:ok` and the result of the function.\n\n## Options\n\n  * `:capture_prompt` - if set to `true`, prompts (specified as\n    arguments to `IO.get*` functions) are captured in the output.\n    Defaults to `false`.\n\n  * `:encoding` (since v1.10.0) - encoding of the IO device. Allowed\n    values are `:unicode` (default) and `:latin1`.\n\n## Examples\n\n    iex> StringIO.open("foo", [], fn pid ->\n    ...>   input = IO.gets(pid, ">")\n    ...>   IO.write(pid, "The input was #{input}")\n    ...>   StringIO.contents(pid)\n    ...> end)\n    {:ok, {"", "The input was foo"}}\n\n    iex> StringIO.open("foo", [capture_prompt: true], fn pid ->\n    ...>   input = IO.gets(pid, ">")\n    ...>   IO.write(pid, "The input was #{input}")\n    ...>   StringIO.contents(pid)\n    ...> end)\n    {:ok, {"", ">The input was foo"}}\n\n',
     },

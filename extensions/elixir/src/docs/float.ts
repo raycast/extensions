@@ -77,6 +77,11 @@ export const Float: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "precision_range/0", type: "type", specs: ["@type precision_range() :: 0..15"], documentation: null },
+    {
+      name: "precision_range/0",
+      type: "type",
+      specs: ["@type precision_range() :: 0..15"],
+      documentation: null,
+    },
   ],
 };

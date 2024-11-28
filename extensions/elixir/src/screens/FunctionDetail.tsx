@@ -1,23 +1,43 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
 import type { Generic } from "../types";
+import React from "react";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
-const DetailActions = ({ module, func }: { module: string; func: Generic }): JSX.Element => {
+const DetailActions = ({
+  module,
+  func,
+}: {
+  module: string;
+  func: Generic;
+}): JSX.Element => {
   const functionCall = `${module}.${func.name.replace(/\/.*/g, "()")}`;
 
   return (
     <ActionPanel title="Panel Title">
-      <Action.CopyToClipboard title="Copy Function Call" content={functionCall} />
+      <Action.CopyToClipboard
+        title="Copy Function Call"
+        content={functionCall}
+      />
       <Action.Paste title="Paste Function Call" content={functionCall} />
-      <Action.OpenInBrowser url={`https://hexdocs.pm/elixir/${module}.html#${func.name}`} />
+      <Action.OpenInBrowser
+        url={`https://hexdocs.pm/elixir/${module}.html#${func.name}`}
+      />
     </ActionPanel>
   );
 };
 
-export function FunctionDetail({ module, func }: { module: string; func: Generic }) {
+export function FunctionDetail({
+  module,
+  func,
+}: {
+  module: string;
+  func: Generic;
+}) {
   let specsSection = "";
 
   if (func.specs.length > 0) {
-    const formattedSpecs = func.specs.map((spec) => `\`\`\`elixir\n${spec}\n\`\`\``);
+    const formattedSpecs = func.specs.map(
+      (spec) => `\`\`\`elixir\n${spec}\n\`\`\``,
+    );
     specsSection = `## Specs\n\n${formattedSpecs.join("\n\n")}`;
   }
 

@@ -1,4 +1,5 @@
 import type { Generic, GenericType, ModuleDoc } from "../types";
+import React from "react";
 import { TYPE_FIELD, TYPE_LABEL, TYPE_COLOR } from "../utils";
 import { List, Action, ActionPanel, Icon } from "@raycast/api";
 import { FunctionDetail } from "../screens/FunctionDetail";
@@ -10,9 +11,20 @@ import { FunctionDetail } from "../screens/FunctionDetail";
  * @param type The type of items to render the items for.
  * @returns An array of `List.Item` components.
  */
-export const ListItems = ({ module, type }: { module: ModuleDoc; type: GenericType }): Array<JSX.Element> => {
+export const ListItems = ({
+  module,
+  type,
+}: {
+  module: ModuleDoc;
+  type: GenericType;
+}): Array<JSX.Element> => {
   return (module[TYPE_FIELD[type]] as Generic[]).map((func: Generic) => (
-    <ListItem module={module} func={func} type={type} key={`list-item-${func.name}-${func.type}`} />
+    <ListItem
+      module={module}
+      func={func}
+      type={type}
+      key={`list-item-${func.name}-${func.type}`}
+    />
   ));
 };
 
@@ -24,7 +36,15 @@ export const ListItems = ({ module, type }: { module: ModuleDoc; type: GenericTy
  * @param type The type of item being rendered (function, macro, type or callback).
  * @returns A `List.Item` component displaying the item details with actions.
  */
-const ListItem = ({ module, func, type }: { module: ModuleDoc; func: Generic; type: GenericType }): JSX.Element => {
+const ListItem = ({
+  module,
+  func,
+  type,
+}: {
+  module: ModuleDoc;
+  func: Generic;
+  type: GenericType;
+}): JSX.Element => {
   return (
     <List.Item
       // We need to use the function and type to create a unique key as the same
@@ -32,8 +52,12 @@ const ListItem = ({ module, func, type }: { module: ModuleDoc; func: Generic; ty
       // Example: `Exception.message/1` is both a function and a callback.
       key={`${func.name}-${func.type}`}
       title={`${module.name}.${func.name}`}
-      subtitle={func.documentation ? `${func.documentation.split(".\n")[0]}.` : ""}
-      accessories={[{ tag: { value: TYPE_LABEL[type], color: TYPE_COLOR[type] } }]}
+      subtitle={
+        func.documentation ? `${func.documentation.split(".\n")[0]}.` : ""
+      }
+      accessories={[
+        { tag: { value: TYPE_LABEL[type], color: TYPE_COLOR[type] } },
+      ]}
       actions={
         <ActionPanel>
           <Action.Push
@@ -41,7 +65,9 @@ const ListItem = ({ module, func, type }: { module: ModuleDoc; func: Generic; ty
             icon={Icon.MagnifyingGlass}
             target={<FunctionDetail module={module.name} func={func} />}
           />
-          <Action.OpenInBrowser url={`https://hexdocs.pm/elixir/${module.name}.html#${func.name}`} />
+          <Action.OpenInBrowser
+            url={`https://hexdocs.pm/elixir/${module.name}.html#${func.name}`}
+          />
         </ActionPanel>
       }
     />

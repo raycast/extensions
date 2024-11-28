@@ -74,7 +74,17 @@ export const Range: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "step/0", type: "type", specs: ["@type step() :: pos_integer() | neg_integer()"], documentation: null },
-    { name: "limit/0", type: "type", specs: ["@type limit() :: integer()"], documentation: null },
+    {
+      name: "step/0",
+      type: "type",
+      specs: ["@type step() :: pos_integer() | neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "limit/0",
+      type: "type",
+      specs: ["@type limit() :: integer()"],
+      documentation: null,
+    },
   ],
 };

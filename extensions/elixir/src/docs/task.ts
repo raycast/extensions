@@ -15,7 +15,9 @@ export const Task: ModuleDoc = {
     {
       name: "yield/2",
       type: "function",
-      specs: ["@spec yield(t(), timeout()) :: {:ok, term()} | {:exit, term()} | nil"],
+      specs: [
+        "@spec yield(t(), timeout()) :: {:ok, term()} | {:exit, term()} | nil",
+      ],
       documentation:
         'Temporarily blocks the caller process waiting for a task reply.\n\nReturns `{:ok, reply}` if the reply is received, `nil` if\nno reply has arrived, or `{:exit, reason}` if the task has already\nexited. Keep in mind that normally a task failure also causes\nthe process owning the task to exit. Therefore this function can\nreturn `{:exit, reason}` if at least one of the conditions below apply:\n\n  * the task process exited with the reason `:normal`\n  * the task isn\'t linked to the caller (the task was started\n    with `Task.Supervisor.async_nolink/2` or `Task.Supervisor.async_nolink/4`)\n  * the caller is trapping exits\n\nA timeout, in milliseconds or `:infinity`, can be given with a default value\nof `5000`. If the time runs out before a message from the task is received,\nthis function will return `nil` and the monitor will remain active. Therefore\n`yield/2` can be called multiple times on the same task.\n\nThis function assumes the task\'s monitor is still active or the\nmonitor\'s `:DOWN` message is in the message queue. If it has been\ndemonitored or the message already received, this function will wait\nfor the duration of the timeout awaiting the message.\n\nIf you intend to shut the task down if it has not responded within `timeout`\nmilliseconds, you should chain this together with `shutdown/1`, like so:\n\n    case Task.yield(task, timeout) || Task.shutdown(task) do\n      {:ok, result} ->\n        result\n\n      nil ->\n        Logger.warning("Failed to get a result in #{timeout}ms")\n        nil\n    end\n\nIf you intend to check on the task but leave it running after the timeout,\nyou can chain this together with `ignore/1`, like so:\n\n    case Task.yield(task, timeout) || Task.ignore(task) do\n      {:ok, result} ->\n        result\n\n      nil ->\n        Logger.warning("Failed to get a result in #{timeout}ms")\n        nil\n    end\n\nThat ensures that if the task completes after the `timeout` but before `shutdown/1`\nhas been called, you will still get the result, since `shutdown/1` is designed to\nhandle this case and return the result.\n',
     },
@@ -50,7 +52,9 @@ export const Task: ModuleDoc = {
     {
       name: "shutdown/2",
       type: "function",
-      specs: ["@spec shutdown(t(), timeout() | :brutal_kill) ::\n        {:ok, term()} | {:exit, term()} | nil"],
+      specs: [
+        "@spec shutdown(t(), timeout() | :brutal_kill) ::\n        {:ok, term()} | {:exit, term()} | nil",
+      ],
       documentation:
         "Unlinks and shuts down the task, and then checks for a reply.\n\nReturns `{:ok, reply}` if the reply is received while shutting down the task,\n`{:exit, reason}` if the task died, otherwise `nil`. Once shut down,\nyou can no longer await or yield it.\n\nThe second argument is either a timeout or `:brutal_kill`. In case\nof a timeout, a `:shutdown` exit signal is sent to the task process\nand if it does not exit within the timeout, it is killed. With `:brutal_kill`\nthe task is killed straight away. In case the task terminates abnormally\n(possibly killed by another process), this function will exit with the same reason.\n\nIt is not required to call this function when terminating the caller, unless\nexiting with reason `:normal` or if the task is trapping exits. If the caller is\nexiting with a reason other than `:normal` and the task is not trapping exits, the\ncaller's exit signal will stop the task. The caller can exit with reason\n`:shutdown` to shut down all of its linked processes, including tasks, that\nare not trapping exits without generating any log messages.\n\nIf there is no process linked to the task, such as tasks started by\n`Task.completed/1`, we check for a response or error accordingly, but without\nshutting a process down.\n\nIf a task's monitor has already been demonitored or received and there is not\na response waiting in the message queue this function will return\n`{:exit, :noproc}` as the result or exit reason can not be determined.\n",
     },
@@ -133,7 +137,12 @@ export const Task: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "ref/0", type: "type", specs: ["@opaque ref()"], documentation: "The task opaque reference.\n" },
+    {
+      name: "ref/0",
+      type: "type",
+      specs: ["@opaque ref()"],
+      documentation: "The task opaque reference.\n",
+    },
     {
       name: "async_stream_option/0",
       type: "type",
@@ -145,7 +154,9 @@ export const Task: ModuleDoc = {
     {
       name: "t/0",
       type: "type",
-      specs: ["@type t() :: %Task{mfa: mfa(), owner: pid(), pid: pid() | nil, ref: ref()}"],
+      specs: [
+        "@type t() :: %Task{mfa: mfa(), owner: pid(), pid: pid() | nil, ref: ref()}",
+      ],
       documentation:
         "The Task type.\n\nSee [`%Task{}`](`__struct__/0`) for information about each field of the structure.\n",
     },

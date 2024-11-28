@@ -12,7 +12,9 @@ export const Protocol: ModuleDoc = {
     {
       name: "extract_impls/2",
       type: "function",
-      specs: ["@spec extract_impls(module(), [charlist() | String.t()]) :: [atom()]"],
+      specs: [
+        "@spec extract_impls(module(), [charlist() | String.t()]) :: [atom()]",
+      ],
       documentation:
         'Extracts all types implemented for the given protocol from\nthe given paths.\n\nThe paths can be either a charlist or a string. Internally\nthey are worked on as charlists, so passing them as lists\navoid extra conversion.\n\nDoes not load any of the implementations.\n\n## Examples\n\n    # Get Elixir\'s ebin directory path and retrieve all protocols\n    iex> path = Application.app_dir(:elixir, "ebin")\n    iex> mods = Protocol.extract_impls(Enumerable, [path])\n    iex> List in mods\n    true\n\n',
     },

@@ -177,7 +177,8 @@ export const Kernel_SpecialForms: ModuleDoc = {
       name: "=/2",
       type: "macro",
       specs: [],
-      documentation: "Match operator. Matches the value on the right against the pattern on the left.\n",
+      documentation:
+        "Match operator. Matches the value on the right against the pattern on the left.\n",
     },
     {
       name: "<<>>/1",

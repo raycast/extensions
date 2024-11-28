@@ -75,7 +75,12 @@ export const IO_ANSI: ModuleDoc = {
       specs: ["@spec primary_font() :: String.t()"],
       documentation: "Sets primary (default) font.",
     },
-    { name: "overlined/0", type: "function", specs: ["@spec overlined() :: String.t()"], documentation: "Overlined." },
+    {
+      name: "overlined/0",
+      type: "function",
+      specs: ["@spec overlined() :: String.t()"],
+      documentation: "Overlined.",
+    },
     {
       name: "not_overlined/0",
       type: "function",
@@ -218,7 +223,8 @@ export const IO_ANSI: ModuleDoc = {
       name: "italic/0",
       type: "function",
       specs: ["@spec italic() :: String.t()"],
-      documentation: "Italic: on. Not widely supported. Sometimes treated as inverse.",
+      documentation:
+        "Italic: on. Not widely supported. Sometimes treated as inverse.",
     },
     {
       name: "inverse_off/0",
@@ -232,7 +238,12 @@ export const IO_ANSI: ModuleDoc = {
       specs: ["@spec inverse() :: String.t()"],
       documentation: "Image: negative. Swap foreground and background.",
     },
-    { name: "home/0", type: "function", specs: ["@spec home() :: String.t()"], documentation: "Sends cursor home." },
+    {
+      name: "home/0",
+      type: "function",
+      specs: ["@spec home() :: String.t()"],
+      documentation: "Sends cursor home.",
+    },
     {
       name: "green_background/0",
       type: "function",
@@ -245,7 +256,12 @@ export const IO_ANSI: ModuleDoc = {
       specs: ["@spec green() :: String.t()"],
       documentation: "Sets foreground color to green.",
     },
-    { name: "framed/0", type: "function", specs: ["@spec framed() :: String.t()"], documentation: "Framed." },
+    {
+      name: "framed/0",
+      type: "function",
+      specs: ["@spec framed() :: String.t()"],
+      documentation: "Framed.",
+    },
     {
       name: "format_fragment/2",
       type: "function",
@@ -320,7 +336,12 @@ export const IO_ANSI: ModuleDoc = {
       specs: ["@spec faint() :: String.t()"],
       documentation: "Faint (decreased intensity). Not widely supported.",
     },
-    { name: "encircled/0", type: "function", specs: ["@spec encircled() :: String.t()"], documentation: "Encircled." },
+    {
+      name: "encircled/0",
+      type: "function",
+      specs: ["@spec encircled() :: String.t()"],
+      documentation: "Encircled.",
+    },
     {
       name: "enabled?/0",
       type: "function",
@@ -379,7 +400,9 @@ export const IO_ANSI: ModuleDoc = {
     {
       name: "cursor/2",
       type: "function",
-      specs: ["@spec cursor(non_neg_integer(), non_neg_integer()) :: String.t()"],
+      specs: [
+        "@spec cursor(non_neg_integer(), non_neg_integer()) :: String.t()",
+      ],
       documentation:
         "Sends cursor to the absolute position specified by `line` and `column`.\n\nLine `0` and column `0` would mean the top left corner.\n",
     },
@@ -387,7 +410,8 @@ export const IO_ANSI: ModuleDoc = {
       name: "crossed_out/0",
       type: "function",
       specs: ["@spec crossed_out() :: String.t()"],
-      documentation: "Crossed-out. Characters legible, but marked for deletion. Not widely supported.",
+      documentation:
+        "Crossed-out. Characters legible, but marked for deletion. Not widely supported.",
     },
     {
       name: "conceal/0",
@@ -427,7 +451,12 @@ export const IO_ANSI: ModuleDoc = {
       specs: ["@spec clear_line() :: String.t()"],
       documentation: "Clears line.",
     },
-    { name: "clear/0", type: "function", specs: ["@spec clear() :: String.t()"], documentation: "Clears screen." },
+    {
+      name: "clear/0",
+      type: "function",
+      specs: ["@spec clear() :: String.t()"],
+      documentation: "Clears screen.",
+    },
     {
       name: "bright/0",
       type: "function",
@@ -456,9 +485,15 @@ export const IO_ANSI: ModuleDoc = {
       name: "blink_rapid/0",
       type: "function",
       specs: ["@spec blink_rapid() :: String.t()"],
-      documentation: "Blink: rapid. MS-DOS ANSI.SYS; 150 per minute or more; not widely supported.",
+      documentation:
+        "Blink: rapid. MS-DOS ANSI.SYS; 150 per minute or more; not widely supported.",
     },
-    { name: "blink_off/0", type: "function", specs: ["@spec blink_off() :: String.t()"], documentation: "Blink: off." },
+    {
+      name: "blink_off/0",
+      type: "function",
+      specs: ["@spec blink_off() :: String.t()"],
+      documentation: "Blink: off.",
+    },
     {
       name: "black_background/0",
       type: "function",
@@ -490,6 +525,11 @@ export const IO_ANSI: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "ansicode/0", type: "type", specs: ["@type ansicode() :: atom()"], documentation: null },
+    {
+      name: "ansicode/0",
+      type: "type",
+      specs: ["@type ansicode() :: atom()"],
+      documentation: null,
+    },
   ],
 };

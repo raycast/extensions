@@ -19,7 +19,9 @@ export const Module: ModuleDoc = {
     {
       name: "safe_concat/2",
       type: "function",
-      specs: ["@spec safe_concat(binary() | atom(), binary() | atom()) :: atom()"],
+      specs: [
+        "@spec safe_concat(binary() | atom(), binary() | atom()) :: atom()",
+      ],
       documentation:
         "Concatenates two aliases and returns a new alias only if the alias was\nalready referenced.\n\nIf the alias was not referenced yet, fails with `ArgumentError`.\nIt handles binaries and atoms.\n\n## Examples\n\n    iex> Module.safe_concat(List, Chars)\n    List.Chars\n\n",
     },
@@ -161,7 +163,9 @@ export const Module: ModuleDoc = {
     {
       name: "defines?/3",
       type: "function",
-      specs: ["@spec defines?(module(), definition(), def_kind()) :: boolean()"],
+      specs: [
+        "@spec defines?(module(), definition(), def_kind()) :: boolean()",
+      ],
       documentation:
         "Checks if the module defines a function or macro of the\ngiven `kind`.\n\n`kind` can be any of `:def`, `:defp`, `:defmacro`, or `:defmacrop`.\n\nThis function can only be used on modules that have not yet been compiled.\nUse `Kernel.function_exported?/3` and `Kernel.macro_exported?/3` to check for\npublic functions and macros respectively in compiled modules.\n\n## Examples\n\n    defmodule Example do\n      Module.defines?(__MODULE__, {:version, 0}, :def) #=> false\n      def version, do: 1\n      Module.defines?(__MODULE__, {:version, 0}, :def) #=> true\n    end\n\n",
     },
@@ -221,6 +225,11 @@ export const Module: ModuleDoc = {
       specs: ["@type def_kind() :: :def | :defp | :defmacro | :defmacrop"],
       documentation: null,
     },
-    { name: "definition/0", type: "type", specs: ["@type definition() :: {atom(), arity()}"], documentation: null },
+    {
+      name: "definition/0",
+      type: "type",
+      specs: ["@type definition() :: {atom(), arity()}"],
+      documentation: null,
+    },
   ],
 };

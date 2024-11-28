@@ -5,7 +5,9 @@ export const Path: ModuleDoc = {
     {
       name: "wildcard/2",
       type: "function",
-      specs: ["@spec wildcard(\n        t(),\n        keyword()\n      ) :: [binary()]"],
+      specs: [
+        "@spec wildcard(\n        t(),\n        keyword()\n      ) :: [binary()]",
+      ],
       documentation:
         'Traverses paths according to the given `glob` expression and returns a\nlist of matches.\n\nThe wildcard looks like an ordinary path, except that the following\n"wildcard characters" are interpreted in a special way:\n\n  * `?` - matches one character.\n\n  * `*` - matches any number of characters up to the end of the filename, the\n    next dot, or the next slash.\n\n  * `**` - two adjacent `*`\'s used as a single pattern will match all\n    files and zero or more directories and subdirectories.\n\n  * `[char1,char2,...]` - matches any of the characters listed; two\n    characters separated by a hyphen will match a range of characters.\n    Do not add spaces before and after the comma as it would then match\n    paths containing the space character itself.\n\n  * `{item1,item2,...}` - matches one of the alternatives.\n    Do not add spaces before and after the comma as it would then match\n    paths containing the space character itself.\n\nOther characters represent themselves. Only paths that have\nexactly the same character in the same position will match. Note\nthat matching is case-sensitive: `"a"` will not match `"A"`.\n\nDirectory separators must always be written as `/`, even on Windows.\nYou may call `Path.expand/1` to normalize the path before invoking\nthis function.\n\nA character preceded by `\\\\` loses its special meaning.\nNote that `\\\\` must be written as `\\\\\\\\` in a string literal.\nFor example, `"\\\\\\\\?*"` will match any filename starting with `?.`.\n\nBy default, the patterns `*` and `?` do not match files starting\nwith a dot `.`. See the `:match_dot` option in the "Options" section\nbelow.\n\n## Options\n\n  * `:match_dot` - (boolean) if `false`, the special wildcard characters `*` and `?`\n    will not match files starting with a dot (`.`). If `true`, files starting with\n    a `.` will not be treated specially. Defaults to `false`.\n\n## Examples\n\nImagine you have a directory called `projects` with three Elixir projects\ninside of it: `elixir`, `ex_doc`, and `plug`. You can find all `.beam` files\ninside the `ebin` directory of each project as follows:\n\n    Path.wildcard("projects/*/ebin/**/*.beam")\n\nIf you want to search for both `.beam` and `.app` files, you could do:\n\n    Path.wildcard("projects/*/ebin/**/*.{beam,app}")\n\n',
     },
@@ -54,7 +56,9 @@ export const Path: ModuleDoc = {
     {
       name: "relative_to_cwd/2",
       type: "function",
-      specs: ["@spec relative_to_cwd(\n        t(),\n        keyword()\n      ) :: binary()"],
+      specs: [
+        "@spec relative_to_cwd(\n        t(),\n        keyword()\n      ) :: binary()",
+      ],
       documentation:
         "Convenience to get the path relative to the current working\ndirectory.\n\nIf, for some reason, the current working directory\ncannot be retrieved, this function returns the given `path`.\n\nCheck `relative_to/3` for the supported options.\n",
     },
@@ -146,5 +150,12 @@ export const Path: ModuleDoc = {
   name: "Path",
   callbacks: [],
   macros: [],
-  types: [{ name: "t/0", type: "type", specs: ["@type t() :: IO.chardata()"], documentation: "A path.\n" }],
+  types: [
+    {
+      name: "t/0",
+      type: "type",
+      specs: ["@type t() :: IO.chardata()"],
+      documentation: "A path.\n",
+    },
+  ],
 };

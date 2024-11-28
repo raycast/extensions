@@ -39,7 +39,9 @@ export const Code: ModuleDoc = {
     {
       name: "string_to_quoted!/2",
       type: "function",
-      specs: ["@spec string_to_quoted!(\n        List.Chars.t(),\n        keyword()\n      ) :: Macro.t()"],
+      specs: [
+        "@spec string_to_quoted!(\n        List.Chars.t(),\n        keyword()\n      ) :: Macro.t()",
+      ],
       documentation:
         "Converts the given string to its quoted form.\n\nIt returns the AST if it succeeds,\nraises an exception otherwise. The exception is a `TokenMissingError`\nin case a token is missing (usually because the expression is incomplete),\n`MismatchedDelimiterError` (in case of mismatched opening and closing delimiters) and\n`SyntaxError` otherwise.\n\nCheck `string_to_quoted/2` for options information.\n",
     },
@@ -62,14 +64,18 @@ export const Code: ModuleDoc = {
     {
       name: "require_file/2",
       type: "function",
-      specs: ["@spec require_file(binary(), nil | binary()) :: [{module(), binary()}] | nil"],
+      specs: [
+        "@spec require_file(binary(), nil | binary()) :: [{module(), binary()}] | nil",
+      ],
       documentation:
         'Requires the given `file`.\n\nAccepts `relative_to` as an argument to tell where the file is located.\nIf the file was already required, `require_file/2` doesn\'t do anything and\nreturns `nil`.\n\nNote that if `require_file/2` is invoked by different processes concurrently,\nthe first process to invoke `require_file/2` acquires a lock and the remaining\nones will block until the file is available. This means that if `require_file/2`\nis called more than once with a given file, that file will be compiled only once.\nThe first process to call `require_file/2` will get the list of loaded modules,\nothers will get `nil`. The list of required files is managed per Erlang VM node.\n\nSee `compile_file/2` if you would like to compile a file without tracking its\nfilenames. Finally, if you would like to get the result of evaluating a file rather\nthan the modules defined in it, see `eval_file/2`.\n\n## Examples\n\nIf the file has not been required, it returns the list of modules:\n\n    modules = Code.require_file("eex_test.exs", "../eex/test")\n    List.first(modules)\n    #=> {EExTest.Compiled, <<70, 79, 82, 49, ...>>}\n\nIf the file has been required, it returns `nil`:\n\n    Code.require_file("eex_test.exs", "../eex/test")\n    #=> nil\n\n',
     },
     {
       name: "quoted_to_algebra/2",
       type: "function",
-      specs: ["@spec quoted_to_algebra(\n        Macro.t(),\n        keyword()\n      ) :: Inspect.Algebra.t()"],
+      specs: [
+        "@spec quoted_to_algebra(\n        Macro.t(),\n        keyword()\n      ) :: Inspect.Algebra.t()",
+      ],
       documentation:
         "Converts a quoted expression to an algebra document using Elixir's formatter rules.\n\nThe algebra document can be converted into a string by calling:\n\n    doc\n    |> Inspect.Algebra.format(:infinity)\n    |> IO.iodata_to_binary()\n\nFor a high-level function that does the same, see `Macro.to_string/1`.\n\n## Formatting considerations\n\nThe Elixir AST does not contain metadata for literals like strings, lists, or\ntuples with two elements, which means that the produced algebra document will\nnot respect all of the user preferences and comments may be misplaced.\nTo get better results, you can use the `:token_metadata`, `:unescape` and\n`:literal_encoder` options to `string_to_quoted/2` to provide additional\ninformation to the formatter:\n\n    [\n      literal_encoder: &{:ok, {:__block__, &2, [&1]}},\n      token_metadata: true,\n      unescape: false\n    ]\n\nThis will produce an AST that contains information such as `do` blocks start\nand end lines or sigil delimiters, and by wrapping literals in blocks they can\nnow hold metadata like line number, string delimiter and escaped sequences, or\ninteger formatting (such as `0x2a` instead of `47`). However, **note this AST is\nnot valid**. If you evaluate it, it won't have the same semantics as the regular\nElixir AST due to the `:unescape` and `:literal_encoder` options. However,\nthose options are useful if you're doing source code manipulation, where it's\nimportant to preserve user choices and comments placing.\n\n## Options\n\n  * `:comments` - the list of comments associated with the quoted expression.\n    Defaults to `[]`. It is recommended that both `:token_metadata` and\n    `:literal_encoder` options are given to `string_to_quoted_with_comments/2`\n    in order to get proper placement for comments\n\n  * `:escape` - when `true`, escaped sequences like `\\n` will be escaped into\n    `\\\\n`. If the `:unescape` option was set to `false` when using\n    `string_to_quoted/2`, setting this option to `false` will prevent it from\n    escaping the sequences twice. Defaults to `true`.\n\n  * `:locals_without_parens` - a keyword list of name and arity\n    pairs that should be kept without parens whenever possible.\n    The arity may be the atom `:*`, which implies all arities of\n    that name. The formatter already includes a list of functions\n    and this option augments this list.\n\n  * `:syntax_colors` - a keyword list of colors the output is colorized.\n    See `Inspect.Opts` for more information.\n",
     },
@@ -90,7 +96,9 @@ export const Code: ModuleDoc = {
     {
       name: "print_diagnostic/2",
       type: "function",
-      specs: ["@spec print_diagnostic(\n        diagnostic(:warning | :error),\n        keyword()\n      ) :: :ok"],
+      specs: [
+        "@spec print_diagnostic(\n        diagnostic(:warning | :error),\n        keyword()\n      ) :: :ok",
+      ],
       documentation:
         "Prints a diagnostic into the standard error.\n\nA diagnostic is either returned by `Kernel.ParallelCompiler`\nor by `Code.with_diagnostics/2`.\n\n## Options\n\n  * `:snippet` - whether to read the code snippet in the diagnostic location.\n    As it may impact performance, it is not recommended to be used in runtime.\n    Defaults to `true`.\n",
     },
@@ -104,7 +112,9 @@ export const Code: ModuleDoc = {
     {
       name: "prepend_path/2",
       type: "function",
-      specs: ["@spec prepend_path(Path.t(), [{:cache, boolean()}]) :: boolean()"],
+      specs: [
+        "@spec prepend_path(Path.t(), [{:cache, boolean()}]) :: boolean()",
+      ],
       documentation:
         'Prepends a path to the Erlang VM code path list.\n\nThis is the list of directories the Erlang VM uses for\nfinding module code. The list of files is managed per Erlang\nVM node.\n\nThe path is expanded with `Path.expand/1` before being prepended.\nIt requires the path to exist. Returns a boolean indicating if\nthe path was successfully added.\n\n## Examples\n\n    Code.prepend_path(".")\n    #=> true\n\n    Code.prepend_path("/does_not_exist")\n    #=> false\n\n## Options\n\n  * `:cache` - (since v1.15.0) when true, the code path is cached\n    the first time it is traversed in order to reduce file system\n    operations. It requires Erlang/OTP 26, otherwise it is a no-op.\n\n',
     },
@@ -125,14 +135,18 @@ export const Code: ModuleDoc = {
     {
       name: "format_string!/2",
       type: "function",
-      specs: ["@spec format_string!(\n        binary(),\n        keyword()\n      ) :: iodata()"],
+      specs: [
+        "@spec format_string!(\n        binary(),\n        keyword()\n      ) :: iodata()",
+      ],
       documentation:
         'Formats the given code `string`.\n\nThe formatter receives a string representing Elixir code and\nreturns iodata representing the formatted code according to\npre-defined rules.\n\n## Options\n\n  * `:file` - the file which contains the string, used for error\n    reporting\n\n  * `:line` - the line the string starts, used for error reporting\n\n  * `:line_length` - the line length to aim for when formatting\n    the document. Defaults to 98. This value indicates when an expression\n    should be broken over multiple lines but it is not guaranteed\n    to do so. See the "Line length" section below for more information\n\n  * `:locals_without_parens` - a keyword list of name and arity\n    pairs that should be kept without parens whenever possible.\n    The arity may be the atom `:*`, which implies all arities of\n    that name. The formatter already includes a list of functions\n    and this option augments this list.\n\n  * `:force_do_end_blocks` (since v1.9.0) - when `true`, converts all\n    inline usages of `do: ...`,  `else: ...` and friends into `do`-`end`\n    blocks. Defaults to `false`. Note that this option is convergent:\n    once you set it to `true`, **all keywords** will be converted.\n    If you set it to `false` later on, `do`-`end` blocks won\'t be\n    converted back to keywords.\n\n  * `:normalize_bitstring_modifiers` (since v1.14.0) - when `true`,\n    removes unnecessary parentheses in known bitstring\n    [modifiers](`<<>>/1`), for example `<<foo::binary()>>`\n    becomes `<<foo::binary>>`, or adds parentheses for custom\n    modifiers, where `<<foo::custom_type>>` becomes `<<foo::custom_type()>>`.\n    Defaults to `true`. This option changes the AST.\n\n  * `:normalize_charlists_as_sigils` (since v1.15.0) - when `true`,\n    formats charlists as [`~c`](`Kernel.sigil_c/2`) sigils, for example\n    `\'foo\'` becomes `~c"foo"`.\n    Defaults to `true`. This option changes the AST.\n\n## Design principles\n\nThe formatter was designed under three principles.\n\nFirst, the formatter never changes the semantics of the code.\nThis means the input AST and the output AST are almost always equivalent.\nThe only cases where the formatter will change the AST is when the input AST\nwould cause *compiler warnings* and the output AST won\'t. The cases where\nthe formatter changes the AST can be disabled through formatting options\nif desired.\n\nThe second principle is to provide as little configuration as possible.\nThis eases the formatter adoption by removing contention points while\nmaking sure a single style is followed consistently by the community as\na whole.\n\nThe formatter does not hard code names. The formatter will not behave\nspecially because a function is named `defmodule`, `def`, or the like. This\nprinciple mirrors Elixir\'s goal of being an extensible language where\ndevelopers can extend the language with new constructs as if they were\npart of the language. When it is absolutely necessary to change behavior\nbased on the name, this behavior should be configurable, such as the\n`:locals_without_parens` option.\n\n## Running the formatter\n\nThe formatter attempts to fit the most it can on a single line and\nintroduces line breaks wherever possible when it cannot.\n\nIn some cases, this may lead to undesired formatting. Therefore, **some\ncode generated by the formatter may not be aesthetically pleasing and\nmay require explicit intervention from the developer**. That\'s why we\ndo not recommend to run the formatter blindly in an existing codebase.\nInstead you should format and sanity check each formatted file.\n\nFor example, the formatter may break a long function definition over\nmultiple clauses:\n\n    def my_function(\n      %User{name: name, age: age, ...},\n      arg1,\n      arg2\n    ) do\n      ...\n    end\n\nWhile the code above is completely valid, you may prefer to match on\nthe struct variables inside the function body in order to keep the\ndefinition on a single line:\n\n    def my_function(%User{} = user, arg1, arg2) do\n      %{name: name, age: age, ...} = user\n      ...\n    end\n\nIn some situations, you can use the fact the formatter does not generate\nelegant code as a hint for refactoring. Take this code:\n\n    def board?(board_id, %User{} = user, available_permissions, required_permissions) do\n      Tracker.OrganizationMembers.user_in_organization?(user.id, board.organization_id) and\n        required_permissions == Enum.to_list(MapSet.intersection(MapSet.new(required_permissions), MapSet.new(available_permissions)))\n    end\n\nThe code above has very long lines and running the formatter is not going\nto address this issue. In fact, the formatter may make it more obvious that\nyou have complex expressions:\n\n    def board?(board_id, %User{} = user, available_permissions, required_permissions) do\n      Tracker.OrganizationMembers.user_in_organization?(user.id, board.organization_id) and\n        required_permissions ==\n          Enum.to_list(\n            MapSet.intersection(\n              MapSet.new(required_permissions),\n              MapSet.new(available_permissions)\n            )\n          )\n    end\n\nTake such cases as a suggestion that your code should be refactored:\n\n    def board?(board_id, %User{} = user, available_permissions, required_permissions) do\n      Tracker.OrganizationMembers.user_in_organization?(user.id, board.organization_id) and\n        matching_permissions?(required_permissions, available_permissions)\n    end\n\n    defp matching_permissions?(required_permissions, available_permissions) do\n      intersection =\n        required_permissions\n        |> MapSet.new()\n        |> MapSet.intersection(MapSet.new(available_permissions))\n        |> Enum.to_list()\n\n      required_permissions == intersection\n    end\n\nTo sum it up: since the formatter cannot change the semantics of your\ncode, sometimes it is necessary to tweak or refactor the code to get\noptimal formatting. To help better understand how to control the formatter,\nwe describe in the next sections the cases where the formatter keeps the\nuser encoding and how to control multiline expressions.\n\n## Line length\n\nAnother point about the formatter is that the `:line_length` configuration\nindicates when an expression should be broken over multiple lines but it is\nnot guaranteed to do so. In many cases, it is not possible for the formatter\nto break your code apart, which means it will go over the line length.\nFor example, if you have a long string:\n\n    "this is a very long string that will go over the line length"\n\nThe formatter doesn\'t know how to break it apart without changing the\ncode underlying syntax representation, so it is up to you to step in:\n\n    "this is a very long string " <>\n       "that will go over the line length"\n\nThe string concatenation makes the code fit on a single line and also\ngives more options to the formatter.\n\nThis may also appear in keywords such as do/end blocks and operators,\nwhere the `do` keyword may go over the line length because there is no\nopportunity for the formatter to introduce a line break in a readable way.\nFor example, if you do:\n\n    case very_long_expression() do\n    end\n\nAnd only the `do` keyword is beyond the line length, Elixir **will not**\nemit this:\n\n    case very_long_expression()\n    do\n    end\n\nSo it prefers to not touch the line at all and leave `do` above the\nline limit.\n\n## Keeping user\'s formatting\n\nThe formatter respects the input format in some cases. Those are\nlisted below:\n\n  * Insignificant digits in numbers are kept as is. The formatter,\n    however, always inserts underscores for decimal numbers with more\n    than 5 digits and converts hexadecimal digits to uppercase\n\n  * Strings, charlists, atoms and sigils are kept as is. No character\n    is automatically escaped or unescaped. The choice of delimiter is\n    also respected from the input\n\n  * Newlines inside blocks are kept as in the input except for:\n    1) expressions that take multiple lines will always have an empty\n    line before and after and 2) empty lines are always squeezed\n    together into a single empty line\n\n  * The choice between `:do` keyword and `do`-`end` blocks is left\n    to the user\n\n  * Lists, tuples, bitstrings, maps, structs and function calls will be\n    broken into multiple lines if they are followed by a newline in the\n    opening bracket and preceded by a new line in the closing bracket\n\n  * Newlines before certain operators (such as the pipeline operators)\n    and before other operators (such as comparison operators)\n\nThe behaviors above are not guaranteed. We may remove or add new\nrules in the future. The goal of documenting them is to provide better\nunderstanding on what to expect from the formatter.\n\n### Multi-line lists, maps, tuples, and the like\n\nYou can force lists, tuples, bitstrings, maps, structs and function\ncalls to have one entry per line by adding a newline after the opening\nbracket and a new line before the closing bracket lines. For example:\n\n    [\n      foo,\n      bar\n    ]\n\nIf there are no newlines around the brackets, then the formatter will\ntry to fit everything on a single line, such that the snippet below\n\n    [foo,\n     bar]\n\nwill be formatted as\n\n    [foo, bar]\n\nYou can also force function calls and keywords to be rendered on multiple\nlines by having each entry on its own line:\n\n    defstruct name: nil,\n              age: 0\n\nThe code above will be kept with one keyword entry per line by the\nformatter. To avoid that, just squash everything into a single line.\n\n### Parens and no parens in function calls\n\nElixir has two syntaxes for function calls. With parens and no parens.\nBy default, Elixir will add parens to all calls except for:\n\n  1. calls that have `do`-`end` blocks\n  2. local calls without parens where the name and arity of the local\n     call is also listed under `:locals_without_parens` (except for\n     calls with arity 0, where the compiler always require parens)\n\nThe choice of parens and no parens also affects indentation. When a\nfunction call with parens doesn\'t fit on the same line, the formatter\nintroduces a newline around parens and indents the arguments with two\nspaces:\n\n    some_call(\n      arg1,\n      arg2,\n      arg3\n    )\n\nOn the other hand, function calls without parens are always indented\nby the function call length itself, like this:\n\n    some_call arg1,\n              arg2,\n              arg3\n\nIf the last argument is a data structure, such as maps and lists, and\nthe beginning of the data structure fits on the same line as the function\ncall, then no indentation happens, this allows code like this:\n\n    Enum.reduce(some_collection, initial_value, fn element, acc ->\n      # code\n    end)\n\n    some_function_without_parens %{\n      foo: :bar,\n      baz: :bat\n    }\n\n## Code comments\n\nThe formatter also handles code comments in a way to guarantee a space\nis always added between the beginning of the comment (#) and the next\ncharacter.\n\nThe formatter also extracts all trailing comments to their previous line.\nFor example, the code below\n\n    hello #world\n\nwill be rewritten to\n\n    # world\n    hello\n\nBecause code comments are handled apart from the code representation (AST),\nthere are some situations where code comments are seen as ambiguous by the\ncode formatter. For example, the comment in the anonymous function below\n\n    fn\n      arg1 ->\n        body1\n        # comment\n\n      arg2 ->\n        body2\n    end\n\nand in this one\n\n    fn\n      arg1 ->\n        body1\n\n      # comment\n      arg2 ->\n        body2\n    end\n\nare considered equivalent (the nesting is discarded alongside most of\nuser formatting). In such cases, the code formatter will always format to\nthe latter.\n\n## Newlines\n\nThe formatter converts all newlines in code from `\\r\\n` to `\\n`.\n',
     },
     {
       name: "format_file!/2",
       type: "function",
-      specs: ["@spec format_file!(\n        binary(),\n        keyword()\n      ) :: iodata()"],
+      specs: [
+        "@spec format_file!(\n        binary(),\n        keyword()\n      ) :: iodata()",
+      ],
       documentation:
         "Formats a file.\n\nSee `format_string!/2` for more information on code formatting and\navailable options.\n",
     },
@@ -166,14 +180,18 @@ export const Code: ModuleDoc = {
     {
       name: "eval_quoted/3",
       type: "function",
-      specs: ["@spec eval_quoted(Macro.t(), binding(), Macro.Env.t() | keyword()) ::\n        {term(), binding()}"],
+      specs: [
+        "@spec eval_quoted(Macro.t(), binding(), Macro.Env.t() | keyword()) ::\n        {term(), binding()}",
+      ],
       documentation:
         "Evaluates the quoted contents.\n\n**Warning**: Calling this function inside a macro is considered bad\npractice as it will attempt to evaluate runtime values at compile time.\nMacro arguments are typically transformed by unquoting them into the\nreturned quoted expressions (instead of evaluated).\n\nSee `eval_string/3` for a description of `binding` and `opts`.\n\n## Examples\n\n    iex> contents = quote(do: var!(a) + var!(b))\n    iex> {result, binding} = Code.eval_quoted(contents, [a: 1, b: 2], file: __ENV__.file, line: __ENV__.line)\n    iex> result\n    3\n    iex> Enum.sort(binding)\n    [a: 1, b: 2]\n\nFor convenience, you can pass `__ENV__/0` as the `opts` argument and\nall options will be automatically extracted from the current environment:\n\n    iex> contents = quote(do: var!(a) + var!(b))\n    iex> {result, binding} = Code.eval_quoted(contents, [a: 1, b: 2], __ENV__)\n    iex> result\n    3\n    iex> Enum.sort(binding)\n    [a: 1, b: 2]\n\n",
     },
     {
       name: "eval_file/2",
       type: "function",
-      specs: ["@spec eval_file(binary(), nil | binary()) :: {term(), binding()}"],
+      specs: [
+        "@spec eval_file(binary(), nil | binary()) :: {term(), binding()}",
+      ],
       documentation:
         "Evaluates the given file.\n\nAccepts `relative_to` as an argument to tell where the file is located.\n\nWhile `require_file/2` and `compile_file/2` return the loaded modules and their\nbytecode, `eval_file/2` simply evaluates the file contents and returns the\nevaluation result and its binding (exactly the same return value as `eval_string/3`).\n",
     },
@@ -195,7 +213,8 @@ export const Code: ModuleDoc = {
       name: "ensure_loaded!/1",
       type: "function",
       specs: ["@spec ensure_loaded!(module()) :: module()"],
-      documentation: "Same as `ensure_loaded/1` but raises if the module cannot be loaded.\n",
+      documentation:
+        "Same as `ensure_loaded/1` but raises if the module cannot be loaded.\n",
     },
     {
       name: "ensure_loaded/1",
@@ -226,7 +245,8 @@ export const Code: ModuleDoc = {
       name: "ensure_all_loaded!/1",
       type: "function",
       specs: ["@spec ensure_all_loaded!([module()]) :: :ok"],
-      documentation: "Same as `ensure_all_loaded/1` but raises if any of the modules cannot be loaded.\n",
+      documentation:
+        "Same as `ensure_all_loaded/1` but raises if any of the modules cannot be loaded.\n",
     },
     {
       name: "ensure_all_loaded/1",
@@ -270,21 +290,27 @@ export const Code: ModuleDoc = {
     {
       name: "compile_string/2",
       type: "function",
-      specs: ["@spec compile_string(List.Chars.t(), binary()) :: [{module(), binary()}]"],
+      specs: [
+        "@spec compile_string(List.Chars.t(), binary()) :: [{module(), binary()}]",
+      ],
       documentation:
         "Compiles the given string.\n\nReturns a list of tuples where the first element is the module name\nand the second one is its bytecode (as a binary). A `file` can be\ngiven as a second argument which will be used for reporting warnings\nand errors.\n\n**Warning**: `string` can be any Elixir code and code can be executed with\nthe same privileges as the Erlang VM: this means that such code could\ncompromise the machine (for example by executing system commands).\nDon't use `compile_string/2` with untrusted input (such as strings coming\nfrom the network).\n",
     },
     {
       name: "compile_quoted/2",
       type: "function",
-      specs: ["@spec compile_quoted(Macro.t(), binary()) :: [{module(), binary()}]"],
+      specs: [
+        "@spec compile_quoted(Macro.t(), binary()) :: [{module(), binary()}]",
+      ],
       documentation:
         "Compiles the quoted expression.\n\nReturns a list of tuples where the first element is the module name and\nthe second one is its bytecode (as a binary). A `file` can be\ngiven as second argument which will be used for reporting warnings\nand errors.\n",
     },
     {
       name: "compile_file/2",
       type: "function",
-      specs: ["@spec compile_file(binary(), nil | binary()) :: [{module(), binary()}]"],
+      specs: [
+        "@spec compile_file(binary(), nil | binary()) :: [{module(), binary()}]",
+      ],
       documentation:
         "Compiles the given file.\n\nAccepts `relative_to` as an argument to tell where the file is located.\n\nReturns a list of tuples where the first element is the module name and\nthe second one is its bytecode (as a binary). Opposite to `require_file/2`,\nit does not track the filename of the compiled file.\n\nIf you would like to get the result of evaluating file rather than the\nmodules defined in it, see `eval_file/2`.\n\nFor compiling many files concurrently, see `Kernel.ParallelCompiler.compile/2`.\n",
     },
@@ -312,7 +338,9 @@ export const Code: ModuleDoc = {
     {
       name: "append_path/2",
       type: "function",
-      specs: ["@spec append_path(Path.t(), [{:cache, boolean()}]) :: true | false"],
+      specs: [
+        "@spec append_path(Path.t(), [{:cache, boolean()}]) :: true | false",
+      ],
       documentation:
         'Appends a path to the Erlang VM code path list.\n\nThis is the list of directories the Erlang VM uses for\nfinding module code. The list of files is managed per Erlang\nVM node.\n\nThe path is expanded with `Path.expand/1` before being appended.\nIt requires the path to exist. Returns a boolean indicating if\nthe path was successfully added.\n\n## Examples\n\n    Code.append_path(".")\n    #=> true\n\n    Code.append_path("/does_not_exist")\n    #=> false\n\n## Options\n\n  * `:cache` - (since v1.15.0) when true, the code path is cached\n    the first time it is traversed in order to reduce file system\n    operations. It requires Erlang/OTP 26, otherwise it is a no-op.\n\n',
     },
@@ -324,7 +352,9 @@ export const Code: ModuleDoc = {
     {
       name: "position/0",
       type: "type",
-      specs: ["@type position() :: line() | {line :: pos_integer(), column :: pos_integer()}"],
+      specs: [
+        "@type position() :: line() | {line :: pos_integer(), column :: pos_integer()}",
+      ],
       documentation:
         "The position of the diagnostic.\n\nCan be either a line number or a `{line, column}`.\nLine and columns numbers are one-based.\nA position of `0` represents unknown.\n",
     },

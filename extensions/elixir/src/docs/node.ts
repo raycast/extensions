@@ -21,7 +21,9 @@ export const Node: ModuleDoc = {
     {
       name: "spawn_monitor/4",
       type: "function",
-      specs: ["@spec spawn_monitor(t(), module(), atom(), [any()]) :: {pid(), reference()}"],
+      specs: [
+        "@spec spawn_monitor(t(), module(), atom(), [any()]) :: {pid(), reference()}",
+      ],
       documentation:
         "Spawns the given module and function passing the given args on a node,\nmonitors it and returns its PID and monitoring reference.\n\nInlined by the compiler.\n",
     },
@@ -65,7 +67,9 @@ export const Node: ModuleDoc = {
     {
       name: "spawn/3",
       type: "function",
-      specs: ["@spec spawn(t(), (-> any()), Process.spawn_opts()) ::\n        pid() | {pid(), reference()}"],
+      specs: [
+        "@spec spawn(t(), (-> any()), Process.spawn_opts()) ::\n        pid() | {pid(), reference()}",
+      ],
       documentation:
         "Returns the PID of a new process started by the application of `fun`\non `node`.\n\nIf `node` does not exist, a useless PID is returned.\n\nFor the list of available options, see `:erlang.spawn_opt/3`.\n\nInlined by the compiler.\n",
     },
@@ -87,7 +91,8 @@ export const Node: ModuleDoc = {
       name: "self/0",
       type: "function",
       specs: ["@spec self() :: t()"],
-      documentation: "Returns the current node.\n\nIt returns the same as the built-in `node()`.\n",
+      documentation:
+        "Returns the current node.\n\nIt returns the same as the built-in `node()`.\n",
     },
     {
       name: "ping/1",
@@ -99,7 +104,9 @@ export const Node: ModuleDoc = {
     {
       name: "monitor/3",
       type: "function",
-      specs: ["@spec monitor(t(), boolean(), [:allow_passive_connect]) :: true"],
+      specs: [
+        "@spec monitor(t(), boolean(), [:allow_passive_connect]) :: true",
+      ],
       documentation:
         "Behaves as `monitor/2` except that it allows an extra\noption to be given, namely `:allow_passive_connect`.\n\nFor more information, see `:erlang.monitor_node/3`.\n\nFor monitoring status changes of all nodes, see `:net_kernel.monitor_nodes/2`.\n",
     },
@@ -160,9 +167,16 @@ export const Node: ModuleDoc = {
     {
       name: "state/0",
       type: "type",
-      specs: ["@type state() :: :visible | :hidden | :connected | :this | :known"],
+      specs: [
+        "@type state() :: :visible | :hidden | :connected | :this | :known",
+      ],
       documentation: null,
     },
-    { name: "t/0", type: "type", specs: ["@type t() :: node()"], documentation: null },
+    {
+      name: "t/0",
+      type: "type",
+      specs: ["@type t() :: node()"],
+      documentation: null,
+    },
   ],
 };

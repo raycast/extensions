@@ -6,7 +6,8 @@ export const Inspect_Algebra: ModuleDoc = {
       name: "to_doc/2",
       type: "function",
       specs: ["@spec to_doc(any(), Inspect.Opts.t()) :: t()"],
-      documentation: "Converts an Elixir term to an algebra document\naccording to the `Inspect` protocol.\n",
+      documentation:
+        "Converts an Elixir term to an algebra document\naccording to the `Inspect` protocol.\n",
     },
     {
       name: "string/1",
@@ -33,7 +34,9 @@ export const Inspect_Algebra: ModuleDoc = {
     {
       name: "nest/3",
       type: "function",
-      specs: ["@spec nest(t(), non_neg_integer() | :cursor | :reset, :always | :break) ::\n        doc_nest() | t()"],
+      specs: [
+        "@spec nest(t(), non_neg_integer() | :cursor | :reset, :always | :break) ::\n        doc_nest() | t()",
+      ],
       documentation:
         'Nests the given document at the given `level`.\n\nIf `level` is an integer, that\'s the indentation appended\nto line breaks whenever they occur. If the level is `:cursor`,\nthe current position of the "cursor" in the document becomes\nthe nesting. If the level is `:reset`, it is set back to 0.\n\n`mode` can be `:always`, which means nesting always happen,\nor `:break`, which means nesting only happens inside a group\nthat has been broken.\n\n## Examples\n\n    iex> doc = Inspect.Algebra.nest(Inspect.Algebra.glue("hello", "world"), 5)\n    iex> doc = Inspect.Algebra.group(doc)\n    iex> Inspect.Algebra.format(doc, 5)\n    ["hello", "\\n     ", "world"]\n\n',
     },
@@ -132,14 +135,18 @@ export const Inspect_Algebra: ModuleDoc = {
     {
       name: "color/3",
       type: "function",
-      specs: ["@spec color(t(), Inspect.Opts.color_key(), Inspect.Opts.t()) :: t()"],
-      documentation: "Colors a document if the `color_key` has a color in the options.\n",
+      specs: [
+        "@spec color(t(), Inspect.Opts.color_key(), Inspect.Opts.t()) :: t()",
+      ],
+      documentation:
+        "Colors a document if the `color_key` has a color in the options.\n",
     },
     {
       name: "collapse_lines/1",
       type: "function",
       specs: ["@spec collapse_lines(pos_integer()) :: doc_collapse()"],
-      documentation: "Collapse any new lines and whitespace following this\nnode, emitting up to `max` new lines.\n",
+      documentation:
+        "Collapse any new lines and whitespace following this\nnode, emitting up to `max` new lines.\n",
     },
     {
       name: "break/1",

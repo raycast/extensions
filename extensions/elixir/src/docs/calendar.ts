@@ -5,7 +5,9 @@ export const Calendar: ModuleDoc = {
     {
       name: "truncate/2",
       type: "function",
-      specs: ["@spec truncate(microsecond(), :microsecond | :millisecond | :second) ::\n        microsecond()"],
+      specs: [
+        "@spec truncate(microsecond(), :microsecond | :millisecond | :second) ::\n        microsecond()",
+      ],
       documentation:
         "Returns a microsecond tuple truncated to a given precision (`:microsecond`,\n`:millisecond`, or `:second`).\n",
     },
@@ -31,7 +33,9 @@ export const Calendar: ModuleDoc = {
     {
       name: "compatible_calendars?/2",
       type: "function",
-      specs: ["@spec compatible_calendars?(calendar(), calendar()) :: boolean()"],
+      specs: [
+        "@spec compatible_calendars?(calendar(), calendar()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if two calendars have the same moment of starting a new day,\n`false` otherwise.\n\nIf two calendars are not compatible, we can only convert datetimes and times\nbetween them. If they are compatible, this means that we can also convert\ndates as well as naive datetimes between them.\n",
     },
@@ -48,55 +52,64 @@ export const Calendar: ModuleDoc = {
       name: "valid_time?/4",
       type: "callback",
       specs: [],
-      documentation: "Should return `true` if the given time describes a proper time in the calendar.\n",
+      documentation:
+        "Should return `true` if the given time describes a proper time in the calendar.\n",
     },
     {
       name: "valid_date?/3",
       type: "callback",
       specs: [],
-      documentation: "Should return `true` if the given date describes a proper date in the calendar.\n",
+      documentation:
+        "Should return `true` if the given date describes a proper date in the calendar.\n",
     },
     {
       name: "time_to_string/4",
       type: "callback",
       specs: [],
-      documentation: "Converts the time into a string according to the calendar.\n",
+      documentation:
+        "Converts the time into a string according to the calendar.\n",
     },
     {
       name: "time_to_day_fraction/4",
       type: "callback",
       specs: [],
-      documentation: "Converts the given time to the `t:day_fraction/0` format.\n",
+      documentation:
+        "Converts the given time to the `t:day_fraction/0` format.\n",
     },
     {
       name: "time_from_day_fraction/1",
       type: "callback",
       specs: [],
-      documentation: "Converts `t:day_fraction/0` to the calendar's time format.\n",
+      documentation:
+        "Converts `t:day_fraction/0` to the calendar's time format.\n",
     },
     {
       name: "shift_time/5",
       type: "callback",
       specs: [],
-      documentation: "Shifts time by given duration according to its calendar.\n",
+      documentation:
+        "Shifts time by given duration according to its calendar.\n",
     },
     {
       name: "shift_naive_datetime/8",
       type: "callback",
       specs: [],
-      documentation: "Shifts naive datetime by given duration according to its calendar.\n",
+      documentation:
+        "Shifts naive datetime by given duration according to its calendar.\n",
     },
     {
       name: "shift_date/4",
       type: "callback",
       specs: [],
-      documentation: "Shifts date by given duration according to its calendar.\n",
+      documentation:
+        "Shifts date by given duration according to its calendar.\n",
     },
     {
       name: "quarter_of_year/3",
       type: "callback",
       specs: [],
-      documentation: "Calculates the quarter of the year from the given `year`, `month`, and `day`.\n",
+      documentation:
+        "Calculates the quarter of the year from the given `year`, `month`, and `day`.\n",
     },
     {
       name: "parse_utc_datetime/1",
@@ -130,19 +143,22 @@ export const Calendar: ModuleDoc = {
       name: "naive_datetime_to_string/7",
       type: "callback",
       specs: [],
-      documentation: "Converts the naive datetime (without time zone) into a string according to the calendar.\n",
+      documentation:
+        "Converts the naive datetime (without time zone) into a string according to the calendar.\n",
     },
     {
       name: "naive_datetime_to_iso_days/7",
       type: "callback",
       specs: [],
-      documentation: "Converts the datetime (without time zone) into the `t:iso_days/0` format.\n",
+      documentation:
+        "Converts the datetime (without time zone) into the `t:iso_days/0` format.\n",
     },
     {
       name: "naive_datetime_from_iso_days/1",
       type: "callback",
       specs: [],
-      documentation: "Converts `t:iso_days/0` to the calendar's datetime format.\n",
+      documentation:
+        "Converts `t:iso_days/0` to the calendar's datetime format.\n",
     },
     {
       name: "months_in_year/1",
@@ -161,19 +177,22 @@ export const Calendar: ModuleDoc = {
       name: "iso_days_to_end_of_day/1",
       type: "callback",
       specs: [],
-      documentation: "Converts the given `t:iso_days/0` to the last moment of the day.\n",
+      documentation:
+        "Converts the given `t:iso_days/0` to the last moment of the day.\n",
     },
     {
       name: "iso_days_to_beginning_of_day/1",
       type: "callback",
       specs: [],
-      documentation: "Converts the given `t:iso_days/0` to the first moment of the day.\n",
+      documentation:
+        "Converts the given `t:iso_days/0` to the first moment of the day.\n",
     },
     {
       name: "days_in_month/2",
       type: "callback",
       specs: [],
-      documentation: "Returns how many days there are in the given month of the given year.\n",
+      documentation:
+        "Returns how many days there are in the given month of the given year.\n",
     },
     {
       name: "day_rollover_relative_to_midnight_utc/0",
@@ -186,7 +205,8 @@ export const Calendar: ModuleDoc = {
       name: "day_of_year/3",
       type: "callback",
       specs: [],
-      documentation: "Calculates the day of the year from the given `year`, `month`, and `day`.\n",
+      documentation:
+        "Calculates the day of the year from the given `year`, `month`, and `day`.\n",
     },
     {
       name: "day_of_week/4",
@@ -199,19 +219,22 @@ export const Calendar: ModuleDoc = {
       name: "day_of_era/3",
       type: "callback",
       specs: [],
-      documentation: "Calculates the day and era from the given `year`, `month`, and `day`.\n",
+      documentation:
+        "Calculates the day and era from the given `year`, `month`, and `day`.\n",
     },
     {
       name: "datetime_to_string/11",
       type: "callback",
       specs: [],
-      documentation: "Converts the datetime (with time zone) into a string according to the calendar.\n",
+      documentation:
+        "Converts the datetime (with time zone) into a string according to the calendar.\n",
     },
     {
       name: "date_to_string/3",
       type: "callback",
       specs: [],
-      documentation: "Converts the date into a string according to the calendar.\n",
+      documentation:
+        "Converts the date into a string according to the calendar.\n",
     },
   ],
   macros: [],
@@ -237,7 +260,8 @@ export const Calendar: ModuleDoc = {
       specs: [
         "@type naive_datetime() :: %{\n        optional(any()) => any(),\n        calendar: calendar(),\n        year: year(),\n        month: month(),\n        day: day(),\n        hour: hour(),\n        minute: minute(),\n        second: second(),\n        microsecond: microsecond()\n      }",
       ],
-      documentation: "Any map or struct that contains the naive datetime fields.",
+      documentation:
+        "Any map or struct that contains the naive datetime fields.",
     },
     {
       name: "time/0",
@@ -266,19 +290,22 @@ export const Calendar: ModuleDoc = {
       name: "utc_offset/0",
       type: "type",
       specs: ["@type utc_offset() :: integer()"],
-      documentation: "The time zone UTC offset in ISO seconds for standard time.\n\nSee also `t:std_offset/0`.\n",
+      documentation:
+        "The time zone UTC offset in ISO seconds for standard time.\n\nSee also `t:std_offset/0`.\n",
     },
     {
       name: "zone_abbr/0",
       type: "type",
       specs: ["@type zone_abbr() :: String.t()"],
-      documentation: "The time zone abbreviation (for example, `CET` or `CEST` or `BST`).",
+      documentation:
+        "The time zone abbreviation (for example, `CET` or `CEST` or `BST`).",
     },
     {
       name: "time_zone/0",
       type: "type",
       specs: ["@type time_zone() :: String.t()"],
-      documentation: "The time zone ID according to the IANA tz database (for example, `Europe/Zurich`).",
+      documentation:
+        "The time zone ID according to the IANA tz database (for example, `Europe/Zurich`).",
     },
     {
       name: "calendar/0",
@@ -289,7 +316,9 @@ export const Calendar: ModuleDoc = {
     {
       name: "microsecond/0",
       type: "type",
-      specs: ["@type microsecond() ::\n        {value :: non_neg_integer(), precision :: non_neg_integer()}"],
+      specs: [
+        "@type microsecond() ::\n        {value :: non_neg_integer(), precision :: non_neg_integer()}",
+      ],
       documentation:
         "Microseconds with stored precision.\n\nThe precision represents the number of digits that must be used when\nrepresenting the microseconds to external format. If the precision is `0`,\nit means microseconds must be skipped.\n",
     },
@@ -303,24 +332,71 @@ export const Calendar: ModuleDoc = {
     {
       name: "day_fraction/0",
       type: "type",
-      specs: ["@type day_fraction() ::\n        {parts_in_day :: non_neg_integer(), parts_per_day :: pos_integer()}"],
+      specs: [
+        "@type day_fraction() ::\n        {parts_in_day :: non_neg_integer(), parts_per_day :: pos_integer()}",
+      ],
       documentation:
         "The internal time format is used when converting between calendars.\n\nIt represents time as a fraction of a day (starting from midnight).\n`parts_in_day` specifies how much of the day is already passed,\nwhile `parts_per_day` signifies how many parts are there in a day.\n",
     },
-    { name: "second/0", type: "type", specs: ["@type second() :: non_neg_integer()"], documentation: null },
-    { name: "minute/0", type: "type", specs: ["@type minute() :: non_neg_integer()"], documentation: null },
-    { name: "hour/0", type: "type", specs: ["@type hour() :: non_neg_integer()"], documentation: null },
+    {
+      name: "second/0",
+      type: "type",
+      specs: ["@type second() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "minute/0",
+      type: "type",
+      specs: ["@type minute() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "hour/0",
+      type: "type",
+      specs: ["@type hour() :: non_neg_integer()"],
+      documentation: null,
+    },
     {
       name: "day_of_era/0",
       type: "type",
       specs: ["@type day_of_era() :: {day :: non_neg_integer(), era()}"],
       documentation: "A tuple representing the `day` and the `era`.\n",
     },
-    { name: "era/0", type: "type", specs: ["@type era() :: non_neg_integer()"], documentation: null },
-    { name: "day_of_week/0", type: "type", specs: ["@type day_of_week() :: non_neg_integer()"], documentation: null },
-    { name: "week/0", type: "type", specs: ["@type week() :: pos_integer()"], documentation: null },
-    { name: "day/0", type: "type", specs: ["@type day() :: pos_integer()"], documentation: null },
-    { name: "month/0", type: "type", specs: ["@type month() :: pos_integer()"], documentation: null },
-    { name: "year/0", type: "type", specs: ["@type year() :: integer()"], documentation: null },
+    {
+      name: "era/0",
+      type: "type",
+      specs: ["@type era() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "day_of_week/0",
+      type: "type",
+      specs: ["@type day_of_week() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "week/0",
+      type: "type",
+      specs: ["@type week() :: pos_integer()"],
+      documentation: null,
+    },
+    {
+      name: "day/0",
+      type: "type",
+      specs: ["@type day() :: pos_integer()"],
+      documentation: null,
+    },
+    {
+      name: "month/0",
+      type: "type",
+      specs: ["@type month() :: pos_integer()"],
+      documentation: null,
+    },
+    {
+      name: "year/0",
+      type: "type",
+      specs: ["@type year() :: integer()"],
+      documentation: null,
+    },
   ],
 };

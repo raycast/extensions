@@ -26,7 +26,9 @@ export const OptionParser: ModuleDoc = {
     {
       name: "parse_head/2",
       type: "function",
-      specs: ["@spec parse_head(argv(), options()) :: {parsed(), argv(), errors()}"],
+      specs: [
+        "@spec parse_head(argv(), options()) :: {parsed(), argv(), errors()}",
+      ],
       documentation:
         'Similar to `parse/2` but only parses the head of `argv`;\nas soon as it finds a non-switch, it stops parsing.\n\nSee `parse/2` for more information.\n\n## Example\n\n    iex> OptionParser.parse_head(\n    ...>   ["--source", "lib", "test/enum_test.exs", "--verbose"],\n    ...>   switches: [source: :string, verbose: :boolean]\n    ...> )\n    {[source: "lib"], ["test/enum_test.exs", "--verbose"], []}\n\n    iex> OptionParser.parse_head(\n    ...>   ["--verbose", "--source", "lib", "test/enum_test.exs", "--unlock"],\n    ...>   switches: [source: :string, verbose: :boolean, unlock: :boolean]\n    ...> )\n    {[verbose: true, source: "lib"], ["test/enum_test.exs", "--unlock"], []}\n\n',
     },
@@ -72,7 +74,17 @@ export const OptionParser: ModuleDoc = {
       specs: ["@type errors() :: [{String.t(), String.t() | nil}]"],
       documentation: null,
     },
-    { name: "parsed/0", type: "type", specs: ["@type parsed() :: keyword()"], documentation: null },
-    { name: "argv/0", type: "type", specs: ["@type argv() :: [String.t()]"], documentation: null },
+    {
+      name: "parsed/0",
+      type: "type",
+      specs: ["@type parsed() :: keyword()"],
+      documentation: null,
+    },
+    {
+      name: "argv/0",
+      type: "type",
+      specs: ["@type argv() :: [String.t()]"],
+      documentation: null,
+    },
   ],
 };

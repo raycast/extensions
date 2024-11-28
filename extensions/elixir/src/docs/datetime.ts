@@ -23,14 +23,18 @@ export const DateTime: ModuleDoc = {
     {
       name: "truncate/2",
       type: "function",
-      specs: ["@spec truncate(Calendar.datetime(), :microsecond | :millisecond | :second) ::\n        t()"],
+      specs: [
+        "@spec truncate(Calendar.datetime(), :microsecond | :millisecond | :second) ::\n        t()",
+      ],
       documentation:
         'Returns the given datetime with the microsecond field truncated to the given\nprecision (`:microsecond`, `:millisecond` or `:second`).\n\nThe given datetime is returned unchanged if it already has lower precision than\nthe given precision.\n\n## Examples\n\n    iex> dt1 = %DateTime{year: 2017, month: 11, day: 7, zone_abbr: "CET",\n    ...>                 hour: 11, minute: 45, second: 18, microsecond: {123456, 6},\n    ...>                 utc_offset: 3600, std_offset: 0, time_zone: "Europe/Paris"}\n    iex> DateTime.truncate(dt1, :microsecond)\n    #DateTime<2017-11-07 11:45:18.123456+01:00 CET Europe/Paris>\n\n    iex> dt2 = %DateTime{year: 2017, month: 11, day: 7, zone_abbr: "CET",\n    ...>                 hour: 11, minute: 45, second: 18, microsecond: {123456, 6},\n    ...>                 utc_offset: 3600, std_offset: 0, time_zone: "Europe/Paris"}\n    iex> DateTime.truncate(dt2, :millisecond)\n    #DateTime<2017-11-07 11:45:18.123+01:00 CET Europe/Paris>\n\n    iex> dt3 = %DateTime{year: 2017, month: 11, day: 7, zone_abbr: "CET",\n    ...>                 hour: 11, minute: 45, second: 18, microsecond: {123456, 6},\n    ...>                 utc_offset: 3600, std_offset: 0, time_zone: "Europe/Paris"}\n    iex> DateTime.truncate(dt3, :second)\n    #DateTime<2017-11-07 11:45:18+01:00 CET Europe/Paris>\n\n',
     },
     {
       name: "to_unix/2",
       type: "function",
-      specs: ["@spec to_unix(Calendar.datetime(), :native | System.time_unit()) :: integer()"],
+      specs: [
+        "@spec to_unix(Calendar.datetime(), :native | System.time_unit()) :: integer()",
+      ],
       documentation:
         'Converts the given `datetime` to Unix time.\n\nThe `datetime` is expected to be using the ISO calendar\nwith a year greater than or equal to 0.\n\nIt will return the integer with the given unit,\naccording to `System.convert_time_unit/3`.\n\n## Examples\n\n    iex> 1_464_096_368 |> DateTime.from_unix!() |> DateTime.to_unix()\n    1464096368\n\n    iex> dt = %DateTime{calendar: Calendar.ISO, day: 20, hour: 18, microsecond: {273806, 6},\n    ...>                minute: 58, month: 11, second: 19, time_zone: "America/Montevideo",\n    ...>                utc_offset: -10800, std_offset: 3600, year: 2014, zone_abbr: "UYST"}\n    iex> DateTime.to_unix(dt)\n    1416517099\n\n    iex> flamel = %DateTime{calendar: Calendar.ISO, day: 22, hour: 8, microsecond: {527771, 6},\n    ...>                minute: 2, month: 3, second: 25, std_offset: 0, time_zone: "Etc/UTC",\n    ...>                utc_offset: 0, year: 1418, zone_abbr: "UTC"}\n    iex> DateTime.to_unix(flamel)\n    -17412508655\n\n',
     },
@@ -58,14 +62,18 @@ export const DateTime: ModuleDoc = {
     {
       name: "to_iso8601/3",
       type: "function",
-      specs: ["@spec to_iso8601(Calendar.datetime(), :basic | :extended, nil | integer()) ::\n        String.t()"],
+      specs: [
+        "@spec to_iso8601(Calendar.datetime(), :basic | :extended, nil | integer()) ::\n        String.t()",
+      ],
       documentation:
         'Converts the given datetime to\n[ISO 8601:2019](https://en.wikipedia.org/wiki/ISO_8601) format.\n\nBy default, `DateTime.to_iso8601/2` returns datetimes formatted in the "extended"\nformat, for human readability. It also supports the "basic" format through passing the `:basic` option.\n\nOnly supports converting datetimes which are in the ISO calendar,\nattempting to convert datetimes from other calendars will raise.\nYou can also optionally specify an offset for the formatted string.\n\nWARNING: the ISO 8601 datetime format does not contain the time zone nor\nits abbreviation, which means information is lost when converting to such\nformat.\n\n### Examples\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "CET",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> DateTime.to_iso8601(dt)\n    "2000-02-29T23:00:07+01:00"\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "UTC",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 0, std_offset: 0, time_zone: "Etc/UTC"}\n    iex> DateTime.to_iso8601(dt)\n    "2000-02-29T23:00:07Z"\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> DateTime.to_iso8601(dt, :extended)\n    "2000-02-29T23:00:07-04:00"\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> DateTime.to_iso8601(dt, :basic)\n    "20000229T230007-0400"\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> DateTime.to_iso8601(dt, :extended, 3600)\n    "2000-03-01T04:00:07+01:00"\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> DateTime.to_iso8601(dt, :extended, 0)\n    "2000-03-01T03:00:07+00:00"\n\n    iex> dt = %DateTime{year: 2000, month: 3, day: 01, zone_abbr: "UTC",\n    ...>                hour: 03, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 0, std_offset: 0, time_zone: "Etc/UTC"}\n    iex> DateTime.to_iso8601(dt, :extended, 0)\n    "2000-03-01T03:00:07Z"\n\n    iex> {:ok, dt, offset} = DateTime.from_iso8601("2000-03-01T03:00:07Z")\n    iex> "2000-03-01T03:00:07Z" = DateTime.to_iso8601(dt, :extended, offset)\n',
     },
     {
       name: "to_gregorian_seconds/1",
       type: "function",
-      specs: ["@spec to_gregorian_seconds(Calendar.datetime()) ::\n        {integer(), non_neg_integer()}"],
+      specs: [
+        "@spec to_gregorian_seconds(Calendar.datetime()) ::\n        {integer(), non_neg_integer()}",
+      ],
       documentation:
         'Converts a `DateTime` struct to a number of gregorian seconds and microseconds.\n\n## Examples\n\n    iex> dt = %DateTime{year: 0000, month: 1, day: 1, zone_abbr: "UTC",\n    ...>                hour: 0, minute: 0, second: 1, microsecond: {0, 0},\n    ...>                utc_offset: 0, std_offset: 0, time_zone: "Etc/UTC"}\n    iex> DateTime.to_gregorian_seconds(dt)\n    {1, 0}\n\n    iex> dt = %DateTime{year: 2020, month: 5, day: 1, zone_abbr: "UTC",\n    ...>                hour: 0, minute: 26, second: 31, microsecond: {5000, 0},\n    ...>                utc_offset: 0, std_offset: 0, time_zone: "Etc/UTC"}\n    iex> DateTime.to_gregorian_seconds(dt)\n    {63_755_511_991, 5000}\n\n    iex> dt = %DateTime{year: 2020, month: 5, day: 1, zone_abbr: "CET",\n    ...>                hour: 1, minute: 26, second: 31, microsecond: {5000, 0},\n    ...>                utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> DateTime.to_gregorian_seconds(dt)\n    {63_755_511_991, 5000}\n\n',
     },
@@ -79,7 +87,9 @@ export const DateTime: ModuleDoc = {
     {
       name: "shift_zone!/3",
       type: "function",
-      specs: ["@spec shift_zone!(t(), Calendar.time_zone(), Calendar.time_zone_database()) ::\n        t()"],
+      specs: [
+        "@spec shift_zone!(t(), Calendar.time_zone(), Calendar.time_zone_database()) ::\n        t()",
+      ],
       documentation:
         'Changes the time zone of a `DateTime` or raises on errors.\n\nSee `shift_zone/3` for more information.\n\n## Examples\n\n    iex> DateTime.shift_zone!(~U[2018-07-16 10:00:00Z], "America/Los_Angeles", FakeTimeZoneDatabase)\n    #DateTime<2018-07-16 03:00:00-07:00 PDT America/Los_Angeles>\n\n    iex> DateTime.shift_zone!(~U[2018-07-16 10:00:00Z], "bad timezone", FakeTimeZoneDatabase)\n    ** (ArgumentError) cannot shift ~U[2018-07-16 10:00:00Z] to "bad timezone" time zone, reason: :time_zone_not_found\n\n',
     },
@@ -104,7 +114,9 @@ export const DateTime: ModuleDoc = {
     {
       name: "now!/2",
       type: "function",
-      specs: ["@spec now!(Calendar.time_zone(), Calendar.time_zone_database()) :: t()"],
+      specs: [
+        "@spec now!(Calendar.time_zone(), Calendar.time_zone_database()) :: t()",
+      ],
       documentation:
         'Returns the current datetime in the provided time zone or raises on errors\n\nSee `now/2` for more information.\n\n## Examples\n\n    iex> datetime = DateTime.now!("Etc/UTC")\n    iex> datetime.time_zone\n    "Etc/UTC"\n\n    iex> DateTime.now!("Europe/Copenhagen")\n    ** (ArgumentError) cannot get current datetime in "Europe/Copenhagen" time zone, reason: :utc_only_time_zone_database\n\n    iex> DateTime.now!("bad timezone", FakeTimeZoneDatabase)\n    ** (ArgumentError) cannot get current datetime in "bad timezone" time zone, reason: :time_zone_not_found\n\n',
     },
@@ -138,7 +150,9 @@ export const DateTime: ModuleDoc = {
     {
       name: "from_unix!/3",
       type: "function",
-      specs: ["@spec from_unix!(integer(), :native | System.time_unit(), Calendar.calendar()) ::\n        t()"],
+      specs: [
+        "@spec from_unix!(integer(), :native | System.time_unit(), Calendar.calendar()) ::\n        t()",
+      ],
       documentation:
         "Converts the given Unix time to `DateTime`.\n\nThe integer can be given in different unit\naccording to `System.convert_time_unit/3` and it will\nbe converted to microseconds internally.\n\nUnix times are always in UTC and therefore the DateTime\nwill be returned in UTC.\n\n## Examples\n\n    # An easy way to get the Unix epoch is passing 0 to this function\n    iex> DateTime.from_unix!(0)\n    ~U[1970-01-01 00:00:00Z]\n\n    iex> DateTime.from_unix!(1_464_096_368)\n    ~U[2016-05-24 13:26:08Z]\n\n    iex> DateTime.from_unix!(1_432_560_368_868_569, :microsecond)\n    ~U[2015-05-25 13:26:08.868569Z]\n\n    iex> DateTime.from_unix!(143_256_036_886_856, 1024)\n    ~U[6403-03-17 07:05:22.320312Z]\n\n",
     },
@@ -208,7 +222,9 @@ export const DateTime: ModuleDoc = {
     {
       name: "convert!/2",
       type: "function",
-      specs: ["@spec convert!(Calendar.datetime(), Calendar.calendar()) :: t()"],
+      specs: [
+        "@spec convert!(Calendar.datetime(), Calendar.calendar()) :: t()",
+      ],
       documentation:
         'Converts a given `datetime` from one calendar to another.\n\nIf it is not possible to convert unambiguously between the calendars\n(see `Calendar.compatible_calendars?/2`), an ArgumentError is raised.\n\n## Examples\n\nImagine someone implements `Calendar.Holocene`, a calendar based on the\nGregorian calendar that adds exactly 10,000 years to the current Gregorian\nyear:\n\n    iex> dt1 = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                 hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                 utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> DateTime.convert!(dt1, Calendar.Holocene)\n    %DateTime{calendar: Calendar.Holocene, day: 29, hour: 23,\n              microsecond: {0, 0}, minute: 0, month: 2, second: 7, std_offset: 0,\n              time_zone: "America/Manaus", utc_offset: -14400, year: 12000,\n              zone_abbr: "AMT"}\n\n',
     },
@@ -224,21 +240,27 @@ export const DateTime: ModuleDoc = {
     {
       name: "compare/2",
       type: "function",
-      specs: ["@spec compare(Calendar.datetime(), Calendar.datetime()) :: :lt | :eq | :gt"],
+      specs: [
+        "@spec compare(Calendar.datetime(), Calendar.datetime()) :: :lt | :eq | :gt",
+      ],
       documentation:
         'Compares two datetime structs.\n\nReturns `:gt` if the first datetime is later than the second\nand `:lt` for vice versa. If the two datetimes are equal\n`:eq` is returned.\n\nNote that both UTC and Standard offsets will be taken into\naccount when comparison is done.\n\n## Examples\n\n    iex> dt1 = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "AMT",\n    ...>                 hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                 utc_offset: -14400, std_offset: 0, time_zone: "America/Manaus"}\n    iex> dt2 = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "CET",\n    ...>                 hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                 utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> DateTime.compare(dt1, dt2)\n    :gt\n\n',
     },
     {
       name: "before?/2",
       type: "function",
-      specs: ["@spec before?(Calendar.datetime(), Calendar.datetime()) :: boolean()"],
+      specs: [
+        "@spec before?(Calendar.datetime(), Calendar.datetime()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if the first datetime is strictly earlier than the second.\n\n## Examples\n\n    iex> DateTime.before?(~U[2021-01-01 11:00:00Z], ~U[2022-02-02 11:00:00Z])\n    true\n    iex> DateTime.before?(~U[2021-01-01 11:00:00Z], ~U[2021-01-01 11:00:00Z])\n    false\n    iex> DateTime.before?(~U[2022-02-02 11:00:00Z], ~U[2021-01-01 11:00:00Z])\n    false\n\n",
     },
     {
       name: "after?/2",
       type: "function",
-      specs: ["@spec after?(Calendar.datetime(), Calendar.datetime()) :: boolean()"],
+      specs: [
+        "@spec after?(Calendar.datetime(), Calendar.datetime()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if the first datetime is strictly later than the second.\n\n## Examples\n\n    iex> DateTime.after?(~U[2022-02-02 11:00:00Z], ~U[2021-01-01 11:00:00Z])\n    true\n    iex> DateTime.after?(~U[2021-01-01 11:00:00Z], ~U[2021-01-01 11:00:00Z])\n    false\n    iex> DateTime.after?(~U[2021-01-01 11:00:00Z], ~U[2022-02-02 11:00:00Z])\n    false\n\n",
     },

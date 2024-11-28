@@ -112,7 +112,12 @@ export const GenServer: ModuleDoc = {
       documentation:
         'Invoked to handle synchronous `call/3` messages. `call/3` will block until a\nreply is received (unless the call times out or nodes are disconnected).\n\n`request` is the request message sent by a `call/3`, `from` is a 2-tuple\ncontaining the caller\'s PID and a term that uniquely identifies the call, and\n`state` is the current state of the `GenServer`.\n\nReturning `{:reply, reply, new_state}` sends the response `reply` to the\ncaller and continues the loop with new state `new_state`.\n\nReturning `{:reply, reply, new_state, timeout}` is similar to\n`{:reply, reply, new_state}` except that it also sets a timeout.\nSee the "Timeouts" section in the module documentation for more information.\n\nReturning `{:reply, reply, new_state, :hibernate}` is similar to\n`{:reply, reply, new_state}` except the process is hibernated and will\ncontinue the loop once a message is in its message queue. However, if a message is\nalready in the message queue, the process will continue the loop immediately.\nHibernating a `GenServer` causes garbage collection and leaves a continuous\nheap that minimises the memory used by the process.\n\nHibernating should not be used aggressively as too much time could be spent\ngarbage collecting, which would delay the processing of incoming messages.\nNormally it should only be used when you are not expecting new messages to\nimmediately arrive and minimising the memory of the process is shown to be\nbeneficial.\n\nReturning `{:reply, reply, new_state, {:continue, continue_arg}}` is similar to\n`{:reply, reply, new_state}` except that `c:handle_continue/2` will be invoked\nimmediately after with `continue_arg` as the first argument and\n`state` as the second one.\n\nReturning `{:noreply, new_state}` does not send a response to the caller and\ncontinues the loop with new state `new_state`. The response must be sent with\n`reply/2`.\n\nThere are three main use cases for not replying using the return value:\n\n  * To reply before returning from the callback because the response is known\n    before calling a slow function.\n  * To reply after returning from the callback because the response is not yet\n    available.\n  * To reply from another process, such as a task.\n\nWhen replying from another process the `GenServer` should exit if the other\nprocess exits without replying as the caller will be blocking awaiting a\nreply.\n\nReturning `{:noreply, new_state, timeout | :hibernate | {:continue, continue_arg}}`\nis similar to `{:noreply, new_state}` except a timeout, hibernation or continue\noccurs as with a `:reply` tuple.\n\nReturning `{:stop, reason, reply, new_state}` stops the loop and `c:terminate/2`\nis called with reason `reason` and state `new_state`. Then, the `reply` is sent\nas the response to call and the process exits with reason `reason`.\n\nReturning `{:stop, reason, new_state}` is similar to\n`{:stop, reason, reply, new_state}` except a reply is not sent.\n\nThis callback is optional. If one is not implemented, the server will fail\nif a call is performed against it.\n',
     },
-    { name: "format_status/2", type: "callback", specs: [], documentation: null },
+    {
+      name: "format_status/2",
+      type: "callback",
+      specs: [],
+      documentation: null,
+    },
     {
       name: "format_status/1",
       type: "callback",
@@ -147,7 +152,9 @@ export const GenServer: ModuleDoc = {
     {
       name: "debug/0",
       type: "type",
-      specs: ["@type debug() :: [:trace | :log | :statistics | {:log_to_file, Path.t()}]"],
+      specs: [
+        "@type debug() :: [:trace | :log | :statistics | {:log_to_file, Path.t()}]",
+      ],
       documentation: "Debug options supported by the `start*` functions",
     },
     {
@@ -167,13 +174,17 @@ export const GenServer: ModuleDoc = {
     {
       name: "name/0",
       type: "type",
-      specs: ["@type name() :: atom() | {:global, term()} | {:via, module(), term()}"],
+      specs: [
+        "@type name() :: atom() | {:global, term()} | {:via, module(), term()}",
+      ],
       documentation: "The GenServer name",
     },
     {
       name: "on_start/0",
       type: "type",
-      specs: ["@type on_start() ::\n        {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}"],
+      specs: [
+        "@type on_start() ::\n        {:ok, pid()} | :ignore | {:error, {:already_started, pid()} | term()}",
+      ],
       documentation: "Return values of `start*` functions",
     },
   ],

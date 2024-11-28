@@ -1,3 +1,4 @@
+import React from "react";
 import { GenericType } from "../types";
 import { List } from "@raycast/api";
 
@@ -8,7 +9,11 @@ import { List } from "@raycast/api";
  * @param onChange Callback function that receives an array of GenericType when selection changes
  * @returns A List.Dropdown JSX element for type selection
  */
-export const TypeDropdown = ({ onChange }: { onChange: (types: GenericType[]) => void }): JSX.Element => {
+export const TypeDropdown = ({
+  onChange,
+}: {
+  onChange: (types: GenericType[]) => void;
+}): JSX.Element => {
   return (
     <List.Dropdown
       tooltip="Select Function Type"

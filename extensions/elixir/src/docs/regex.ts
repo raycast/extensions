@@ -25,14 +25,18 @@ export const Regex: ModuleDoc = {
     {
       name: "scan/3",
       type: "function",
-      specs: ["@spec scan(t(), String.t(), [term()]) ::\n        [[String.t()]] | [[{integer(), integer()}]]"],
+      specs: [
+        "@spec scan(t(), String.t(), [term()]) ::\n        [[String.t()]] | [[{integer(), integer()}]]",
+      ],
       documentation:
         'Same as `run/3` but returns all non-overlapping matches of the regular expression.\n\nA list of lists is returned, where each entry in the primary list represents a\nmatch and each entry in the secondary list represents the captured contents.\n\n## Options\n\n  * `:return` - when set to `:index`, returns byte index and match length.\n    Defaults to `:binary`.\n  * `:capture` - what to capture in the result. See the ["Captures" section](#module-captures)\n    to see the possible capture values.\n  * `:offset` - (since v1.12.0) specifies the starting offset to match in the given string.\n    Defaults to zero.\n\n## Examples\n\n    iex> Regex.scan(~r/c(d|e)/, "abcd abce")\n    [["cd", "d"], ["ce", "e"]]\n\n    iex> Regex.scan(~r/c(?:d|e)/, "abcd abce")\n    [["cd"], ["ce"]]\n\n    iex> Regex.scan(~r/e/, "abcd")\n    []\n\n    iex> Regex.scan(~r/ab|bc|cd/, "abcd")\n    [["ab"], ["cd"]]\n\n    iex> Regex.scan(~r/ab|bc|cd/, "abbccd")\n    [["ab"], ["bc"], ["cd"]]\n\n    iex> Regex.scan(~r/\\p{Sc}/u, "$, £, and €")\n    [["$"], ["£"], ["€"]]\n\n    iex> Regex.scan(~r/=+/, "=ü†ƒ8===", return: :index)\n    [[{0, 1}], [{9, 3}]]\n\n    iex> Regex.scan(~r/c(d|e)/, "abcd abce", capture: :first)\n    [["cd"], ["ce"]]\n\n',
     },
     {
       name: "run/3",
       type: "function",
-      specs: ["@spec run(t(), binary(), [term()]) ::\n        nil | [binary()] | [{integer(), integer()}]"],
+      specs: [
+        "@spec run(t(), binary(), [term()]) ::\n        nil | [binary()] | [{integer(), integer()}]",
+      ],
       documentation:
         'Runs the regular expression against the given string until the first match.\nIt returns a list with all captures or `nil` if no match occurred.\n\n## Options\n\n  * `:return` - when set to `:index`, returns byte index and match length.\n    Defaults to `:binary`.\n  * `:capture` - what to capture in the result. See the ["Captures" section](#module-captures)\n    to see the possible capture values.\n  * `:offset` - (since v1.12.0) specifies the starting offset to match in the given string.\n    Defaults to zero.\n\n## Examples\n\n    iex> Regex.run(~r/c(d)/, "abcd")\n    ["cd", "d"]\n\n    iex> Regex.run(~r/e/, "abcd")\n    nil\n\n    iex> Regex.run(~r/c(d)/, "abcd", return: :index)\n    [{2, 2}, {3, 1}]\n\n    iex> Regex.run(~r/c(d)/, "abcd", capture: :first)\n    ["cd"]\n\n    iex> Regex.run(~r/c(?<foo>d)/, "abcd", capture: ["foo", "bar"])\n    ["d", ""]\n\n',
     },
@@ -49,7 +53,8 @@ export const Regex: ModuleDoc = {
       name: "recompile!/1",
       type: "function",
       specs: ["@spec recompile!(t()) :: t()"],
-      documentation: "Recompiles the existing regular expression and raises `Regex.CompileError` in case of errors.\n",
+      documentation:
+        "Recompiles the existing regular expression and raises `Regex.CompileError` in case of errors.\n",
     },
     {
       name: "recompile/1",
@@ -62,7 +67,8 @@ export const Regex: ModuleDoc = {
       name: "re_pattern/1",
       type: "function",
       specs: ["@spec re_pattern(t()) :: term()"],
-      documentation: "Returns the underlying `re_pattern` in the regular expression.\n",
+      documentation:
+        "Returns the underlying `re_pattern` in the regular expression.\n",
     },
     {
       name: "opts/1",
@@ -103,12 +109,15 @@ export const Regex: ModuleDoc = {
       name: "compile!/2",
       type: "function",
       specs: ["@spec compile!(binary(), binary() | [term()]) :: t()"],
-      documentation: "Compiles the regular expression and raises `Regex.CompileError` in case of errors.\n",
+      documentation:
+        "Compiles the regular expression and raises `Regex.CompileError` in case of errors.\n",
     },
     {
       name: "compile/2",
       type: "function",
-      specs: ["@spec compile(binary(), binary() | [term()]) :: {:ok, t()} | {:error, any()}"],
+      specs: [
+        "@spec compile(binary(), binary() | [term()]) :: {:ok, t()} | {:error, any()}",
+      ],
       documentation:
         'Compiles the regular expression.\n\nThe given options can either be a binary with the characters\nrepresenting the same regex options given to the\n`~r` (see `sigil_r/2`) sigil, or a list of options, as\nexpected by the Erlang\'s [`:re`](`:re`) module.\n\nIt returns `{:ok, regex}` in case of success,\n`{:error, reason}` otherwise.\n\n## Examples\n\n    iex> Regex.compile("foo")\n    {:ok, ~r/foo/}\n\n    iex> Regex.compile("*foo")\n    {:error, {~c"nothing to repeat", 0}}\n\n    iex> Regex.compile("foo", "i")\n    {:ok, ~r/foo/i}\n\n    iex> Regex.compile("foo", [:caseless])\n    {:ok, Regex.compile!("foo", [:caseless])}\n\n',
     },

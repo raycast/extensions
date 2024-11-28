@@ -28,7 +28,9 @@ export const IO: ModuleDoc = {
     {
       name: "stream/2",
       type: "function",
-      specs: ["@spec stream(device(), :line | pos_integer()) :: Enumerable.t()"],
+      specs: [
+        "@spec stream(device(), :line | pos_integer()) :: Enumerable.t()",
+      ],
       documentation:
         'Converts the IO `device` into an `IO.Stream`.\n\nAn `IO.Stream` implements both `Enumerable` and\n`Collectable`, allowing it to be used for both read\nand write.\n\nThe `device` is iterated by the given number of characters or line by line if\n`:line` is given.\n\nThis reads from the IO as UTF-8. Check out\n`IO.binstream/2` to handle the IO as a raw binary.\n\nNote that an IO stream has side effects and every time\nyou go over the stream you may get different results.\n\n`stream/0` has been introduced in Elixir v1.12.0,\nwhile `stream/2` has been available since v1.0.0.\n\n## Examples\n\nHere is an example on how we mimic an echo server\nfrom the command line:\n\n    Enum.each(IO.stream(:stdio, :line), &IO.write(&1))\n\nAnother example where you might want to collect a user input\nevery new line and break on an empty line, followed by removing\nredundant new line characters (`"\\n"`):\n\n    IO.stream(:stdio, :line)\n    |> Enum.take_while(&(&1 != "\\n"))\n    |> Enum.map(&String.replace(&1, "\\n", ""))\n\n',
     },
@@ -42,7 +44,9 @@ export const IO: ModuleDoc = {
     {
       name: "read/2",
       type: "function",
-      specs: ["@spec read(device(), :eof | :line | non_neg_integer()) :: chardata() | nodata()"],
+      specs: [
+        "@spec read(device(), :eof | :line | non_neg_integer()) :: chardata() | nodata()",
+      ],
       documentation:
         "Reads from the IO `device`.\n\nThe `device` is iterated as specified by the `line_or_chars` argument:\n\n  * if `line_or_chars` is an integer, it represents a number of bytes. The device is\n    iterated by that number of bytes.\n\n  * if `line_or_chars` is `:line`, the device is iterated line by line.\n\n  * if `line_or_chars` is `:eof` (since v1.13), the device is iterated until `:eof`.\n    If the device is already at the end, it returns `:eof` itself.\n\nIt returns:\n\n  * `data` - the output characters\n\n  * `:eof` - end of file was encountered\n\n  * `{:error, reason}` - other (rare) error condition;\n    for instance, `{:error, :estale}` if reading from an\n    NFS volume\n\n",
     },
@@ -70,21 +74,27 @@ export const IO: ModuleDoc = {
     {
       name: "inspect/3",
       type: "function",
-      specs: ["@spec inspect(device(), item, keyword()) :: item when item: var"],
+      specs: [
+        "@spec inspect(device(), item, keyword()) :: item when item: var",
+      ],
       documentation:
         "Inspects `item` according to the given options using the IO `device`.\n\nSee `inspect/2` for a full list of options.\n",
     },
     {
       name: "inspect/2",
       type: "function",
-      specs: ["@spec inspect(\n        item,\n        keyword()\n      ) :: item\n      when item: var"],
+      specs: [
+        "@spec inspect(\n        item,\n        keyword()\n      ) :: item\n      when item: var",
+      ],
       documentation:
         'Inspects and writes the given `item` to the standard output.\n\nIt\'s important to note that it returns the given `item` unchanged.\nThis makes it possible to "spy" on values by inserting an\n`IO.inspect/2` call almost anywhere in your code, for example,\nin the middle of a pipeline.\n\nIt enables pretty printing by default with width of\n80 characters. The width can be changed by explicitly\npassing the `:width` option.\n\nThe output can be decorated with a label, by providing the `:label`\noption to easily distinguish it from other `IO.inspect/2` calls.\nThe label will be printed before the inspected `item`.\n\nSee `Inspect.Opts` for a full list of remaining formatting options.\nTo print to other IO devices, see `IO.inspect/3`\n\n## Examples\n\n    IO.inspect(<<0, 1, 2>>, width: 40)\n\nPrints:\n\n    <<0, 1, 2>>\n\nWe can use the `:label` option to decorate the output:\n\n    IO.inspect(1..100, label: "a wonderful range")\n\nPrints:\n\n    a wonderful range: 1..100\n\nThe `:label` option is especially useful with pipelines:\n\n    [1, 2, 3]\n    |> IO.inspect(label: "before")\n    |> Enum.map(&(&1 * 2))\n    |> IO.inspect(label: "after")\n    |> Enum.sum()\n\nPrints:\n\n    before: [1, 2, 3]\n    after: [2, 4, 6]\n\n',
     },
     {
       name: "gets/2",
       type: "function",
-      specs: ["@spec gets(device(), chardata() | String.Chars.t()) :: chardata() | nodata()"],
+      specs: [
+        "@spec gets(device(), chardata() | String.Chars.t()) :: chardata() | nodata()",
+      ],
       documentation:
         'Reads a line from the IO `device`.\n\nIt returns:\n\n  * `data` - the characters in the line terminated\n    by a line-feed (LF) or end of file (EOF)\n\n  * `:eof` - end of file was encountered\n\n  * `{:error, reason}` - other (rare) error condition;\n    for instance, `{:error, :estale}` if reading from an\n    NFS volume\n\n## Examples\n\nTo display "What is your name?" as a prompt and await user input:\n\n    IO.gets("What is your name?\\n")\n\n',
     },
@@ -123,7 +133,9 @@ export const IO: ModuleDoc = {
     {
       name: "binstream/2",
       type: "function",
-      specs: ["@spec binstream(device(), :line | pos_integer()) :: Enumerable.t()"],
+      specs: [
+        "@spec binstream(device(), :line | pos_integer()) :: Enumerable.t()",
+      ],
       documentation:
         "Converts the IO `device` into an `IO.Stream`. The operation is Unicode unsafe.\n\nAn `IO.Stream` implements both `Enumerable` and\n`Collectable`, allowing it to be used for both read\nand write.\n\nThe `device` is iterated by the given number of bytes or line by line if\n`:line` is given. This reads from the IO device as a raw binary.\n\nNote that an IO stream has side effects and every time\nyou go over the stream you may get different results.\n\nFinally, do not use this function on IO devices in Unicode\nmode as it will return the wrong result.\n\n`binstream/0` has been introduced in Elixir v1.12.0,\nwhile `binstream/2` has been available since v1.0.0.\n",
     },
@@ -137,7 +149,9 @@ export const IO: ModuleDoc = {
     {
       name: "binread/2",
       type: "function",
-      specs: ["@spec binread(device(), :eof | :line | non_neg_integer()) :: iodata() | nodata()"],
+      specs: [
+        "@spec binread(device(), :eof | :line | non_neg_integer()) :: iodata() | nodata()",
+      ],
       documentation:
         "Reads from the IO `device`. The operation is Unicode unsafe.\n\nThe `device` is iterated as specified by the `line_or_chars` argument:\n\n  * if `line_or_chars` is an integer, it represents a number of bytes. The device is\n    iterated by that number of bytes.\n\n  * if `line_or_chars` is `:line`, the device is iterated line by line.\n\n  * if `line_or_chars` is `:eof` (since v1.13), the device is iterated until `:eof`.\n    If the device is already at the end, it returns `:eof` itself.\n\nIt returns:\n\n  * `data` - the output bytes\n\n  * `:eof` - end of file was encountered\n\n  * `{:error, reason}` - other (rare) error condition;\n    for instance, `{:error, :estale}` if reading from an\n    NFS volume\n\nNote: do not use this function on IO devices in Unicode mode\nas it will return the wrong result.\n",
     },
@@ -149,10 +163,22 @@ export const IO: ModuleDoc = {
     {
       name: "chardata/0",
       type: "type",
-      specs: ["@type chardata() ::\n        String.t() | maybe_improper_list(char() | chardata(), String.t() | [])"],
+      specs: [
+        "@type chardata() ::\n        String.t() | maybe_improper_list(char() | chardata(), String.t() | [])",
+      ],
       documentation: null,
     },
-    { name: "nodata/0", type: "type", specs: ["@type nodata() :: {:error, term()} | :eof"], documentation: null },
-    { name: "device/0", type: "type", specs: ["@type device() :: atom() | pid()"], documentation: null },
+    {
+      name: "nodata/0",
+      type: "type",
+      specs: ["@type nodata() :: {:error, term()} | :eof"],
+      documentation: null,
+    },
+    {
+      name: "device/0",
+      type: "type",
+      specs: ["@type device() :: atom() | pid()"],
+      documentation: null,
+    },
   ],
 };

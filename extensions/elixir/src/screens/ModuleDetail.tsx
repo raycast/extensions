@@ -1,6 +1,6 @@
+import React, { useState } from "react";
 import { List } from "@raycast/api";
 import { ModuleDoc, GenericType } from "../types";
-import { useState } from "react";
 import { ListItems } from "../components/ListItems";
 import { TypeDropdown } from "../components/TypeDropdown";
 import { TYPE_LABEL } from "../utils";

@@ -12,7 +12,9 @@ export const Map: ModuleDoc = {
     {
       name: "update!/3",
       type: "function",
-      specs: ["@spec update!(map(), key(), (existing_value :: value() -> new_value :: value())) ::\n        map()"],
+      specs: [
+        "@spec update!(map(), key(), (existing_value :: value() -> new_value :: value())) ::\n        map()",
+      ],
       documentation:
         "Updates `key` with the given function.\n\nIf `key` is present in `map` then the existing value is passed to `fun` and its result is\nused as the updated value of `key`. If `key` is\nnot present in `map`, a `KeyError` exception is raised.\n\n## Examples\n\n    iex> Map.update!(%{a: 1}, :a, &(&1 * 2))\n    %{a: 2}\n\n    iex> Map.update!(%{a: 1}, :b, &(&1 * 2))\n    ** (KeyError) key :b not found in: %{a: 1}\n\n",
     },
@@ -42,7 +44,9 @@ export const Map: ModuleDoc = {
     {
       name: "split_with/2",
       type: "function",
-      specs: ["@spec split_with(map(), ({key(), value()} -> as_boolean(term()))) ::\n        {map(), map()}"],
+      specs: [
+        "@spec split_with(map(), ({key(), value()} -> as_boolean(term()))) ::\n        {map(), map()}",
+      ],
       documentation:
         "Splits the `map` into two maps according to the given function `fun`.\n\n`fun` receives each `{key, value}` pair in the `map` as its only argument. Returns\na tuple with the first map containing all the elements in `map` for which\napplying `fun` returned a truthy value, and a second map with all the elements\nfor which applying `fun` returned a falsy value (`false` or `nil`).\n\n## Examples\n\n    iex> Map.split_with(%{a: 1, b: 2, c: 3, d: 4}, fn {_k, v} -> rem(v, 2) == 0 end)\n    {%{b: 2, d: 4}, %{a: 1, c: 3}}\n\n    iex> Map.split_with(%{a: 1, b: -2, c: 1, d: -3}, fn {k, _v} -> k in [:b, :d] end)\n    {%{b: -2, d: -3}, %{a: 1, c: 1}}\n\n    iex> Map.split_with(%{a: 1, b: -2, c: 1, d: -3}, fn {_k, v} -> v > 50 end)\n    {%{}, %{a: 1, b: -2, c: 1, d: -3}}\n\n    iex> Map.split_with(%{}, fn {_k, v} -> v > 50 end)\n    {%{}, %{}}\n\n",
     },
@@ -79,7 +83,9 @@ export const Map: ModuleDoc = {
     {
       name: "reject/2",
       type: "function",
-      specs: ["@spec reject(map(), ({key(), value()} -> as_boolean(term()))) :: map()"],
+      specs: [
+        "@spec reject(map(), ({key(), value()} -> as_boolean(term()))) :: map()",
+      ],
       documentation:
         "Returns map excluding the pairs from `map` for which `fun` returns\na truthy value.\n\nSee also `filter/2`.\n\n## Examples\n\n    iex> Map.reject(%{one: 1, two: 2, three: 3}, fn {_key, val} -> rem(val, 2) == 1 end)\n    %{two: 2}\n\n",
     },
@@ -130,7 +136,9 @@ export const Map: ModuleDoc = {
     {
       name: "new/2",
       type: "function",
-      specs: ["@spec new(Enumerable.t(), (term() -> {key(), value()})) :: map()"],
+      specs: [
+        "@spec new(Enumerable.t(), (term() -> {key(), value()})) :: map()",
+      ],
       documentation:
         "Creates a map from an `enumerable` via the given transformation function.\n\nDuplicated keys are removed; the latest one prevails.\n\n## Examples\n\n    iex> Map.new([:a, :b], fn x -> {x, x} end)\n    %{a: :a, b: :b}\n\n    iex> Map.new(%{a: 2, b: 3, c: 4}, fn {key, val} -> {key, val * 2} end)\n    %{a: 4, b: 6, c: 8}\n\n",
     },
@@ -145,12 +153,15 @@ export const Map: ModuleDoc = {
       name: "new/0",
       type: "function",
       specs: ["@spec new() :: map()"],
-      documentation: "Returns a new empty map.\n\n## Examples\n\n    iex> Map.new()\n    %{}\n\n",
+      documentation:
+        "Returns a new empty map.\n\n## Examples\n\n    iex> Map.new()\n    %{}\n\n",
     },
     {
       name: "merge/3",
       type: "function",
-      specs: ["@spec merge(map(), map(), (key(), value(), value() -> value())) :: map()"],
+      specs: [
+        "@spec merge(map(), map(), (key(), value(), value() -> value())) :: map()",
+      ],
       documentation:
         "Merges two maps into one, resolving conflicts through the given `fun`.\n\nAll keys in `map2` will be added to `map1`. The given function will be invoked\nwhen there are duplicate keys; its arguments are `key` (the duplicate key),\n`value1` (the value of `key` in `map1`), and `value2` (the value of `key` in\n`map2`). The value returned by `fun` is used as the value under `key` in\nthe resulting map.\n\n## Examples\n\n    iex> Map.merge(%{a: 1, b: 2}, %{a: 3, d: 4}, fn _k, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    %{a: 4, b: 2, d: 4}\n\n",
     },
@@ -171,7 +182,9 @@ export const Map: ModuleDoc = {
     {
       name: "intersect/3",
       type: "function",
-      specs: ["@spec intersect(map(), map(), (key(), value(), value() -> value())) :: map()"],
+      specs: [
+        "@spec intersect(map(), map(), (key(), value(), value() -> value())) :: map()",
+      ],
       documentation:
         "Intersects two maps, returning a map with the common keys and resolving conflicts through a function.\n\nThe given function will be invoked when there are duplicate keys; its\narguments are `key` (the duplicate key), `value1` (the value of `key` in\n`map1`), and `value2` (the value of `key` in `map2`). The value returned by\n`fun` is used as the value under `key` in the resulting map.\n\n## Examples\n\n    iex> Map.intersect(%{a: 1, b: 2}, %{b: 2, c: 3}, fn _k, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    %{b: 4}\n",
     },
@@ -238,7 +251,9 @@ export const Map: ModuleDoc = {
     {
       name: "filter/2",
       type: "function",
-      specs: ["@spec filter(map(), ({key(), value()} -> as_boolean(term()))) :: map()"],
+      specs: [
+        "@spec filter(map(), ({key(), value()} -> as_boolean(term()))) :: map()",
+      ],
       documentation:
         "Returns a map containing only those pairs from `map`\nfor which `fun` returns a truthy value.\n\n`fun` receives the key and value of each of the\nelements in the map as a key-value pair.\n\nSee also `reject/2` which discards all elements where the\nfunction returns a truthy value.\n\n> #### Performance considerations {: .tip}\n>\n> If you find yourself doing multiple calls to `Map.filter/2`\n> and `Map.reject/2` in a pipeline, it is likely more efficient\n> to use `Enum.map/2` and `Enum.filter/2` instead and convert to\n> a map at the end using `Map.new/1`.\n\n## Examples\n\n    iex> Map.filter(%{one: 1, two: 2, three: 3}, fn {_key, val} -> rem(val, 2) == 1 end)\n    %{one: 1, three: 3}\n\n",
     },
@@ -282,7 +297,17 @@ export const Map: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "value/0", type: "type", specs: ["@type value() :: any()"], documentation: null },
-    { name: "key/0", type: "type", specs: ["@type key() :: any()"], documentation: null },
+    {
+      name: "value/0",
+      type: "type",
+      specs: ["@type value() :: any()"],
+      documentation: null,
+    },
+    {
+      name: "key/0",
+      type: "type",
+      specs: ["@type key() :: any()"],
+      documentation: null,
+    },
   ],
 };

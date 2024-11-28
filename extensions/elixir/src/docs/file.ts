@@ -5,14 +5,18 @@ export const File: ModuleDoc = {
     {
       name: "write_stat!/3",
       type: "function",
-      specs: ["@spec write_stat!(Path.t(), File.Stat.t(), stat_options()) :: :ok"],
+      specs: [
+        "@spec write_stat!(Path.t(), File.Stat.t(), stat_options()) :: :ok",
+      ],
       documentation:
         "Same as `write_stat/3` but raises a `File.Error` exception if it fails.\nReturns `:ok` otherwise.\n",
     },
     {
       name: "write_stat/3",
       type: "function",
-      specs: ["@spec write_stat(Path.t(), File.Stat.t(), stat_options()) ::\n        :ok | {:error, posix()}"],
+      specs: [
+        "@spec write_stat(Path.t(), File.Stat.t(), stat_options()) ::\n        :ok | {:error, posix()}",
+      ],
       documentation:
         "Writes the given `File.Stat` back to the file system at the given\npath. Returns `:ok` or `{:error, reason}`.\n",
     },
@@ -20,12 +24,15 @@ export const File: ModuleDoc = {
       name: "write!/3",
       type: "function",
       specs: ["@spec write!(Path.t(), iodata(), [mode()]) :: :ok"],
-      documentation: "Same as `write/3` but raises a `File.Error` exception if it fails.\nReturns `:ok` otherwise.\n",
+      documentation:
+        "Same as `write/3` but raises a `File.Error` exception if it fails.\nReturns `:ok` otherwise.\n",
     },
     {
       name: "write/3",
       type: "function",
-      specs: ["@spec write(Path.t(), iodata(), [mode()]) :: :ok | {:error, posix()}"],
+      specs: [
+        "@spec write(Path.t(), iodata(), [mode()]) :: :ok | {:error, posix()}",
+      ],
       documentation:
         "Writes `content` to the file `path`.\n\nThe file is created if it does not exist. If it exists, the previous\ncontents are overwritten. Returns `:ok` if successful, or `{:error, reason}`\nif an error occurs.\n\n`content` must be `iodata` (a list of bytes or a binary). Setting the\nencoding for this function has no effect.\n\n**Warning:** Every time this function is invoked, a file descriptor is opened\nand a new process is spawned to write to the file. For this reason, if you are\ndoing multiple writes in a loop, opening the file via `File.open/2` and using\nthe functions in `IO` to write to the file will yield much better performance\nthan calling this function multiple times.\n\nTypical error reasons are:\n\n  * `:enoent`  - a component of the file name does not exist\n  * `:enotdir` - a component of the file name is not a directory;\n    on some platforms, `:enoent` is returned instead\n  * `:enospc`  - there is no space left on the device\n  * `:eacces`  - missing permission for writing the file or searching one of\n    the parent directories\n  * `:eisdir`  - the named file is a directory\n\nCheck `File.open/2` for other available options.\n",
     },
@@ -39,21 +46,27 @@ export const File: ModuleDoc = {
     {
       name: "touch/2",
       type: "function",
-      specs: ["@spec touch(Path.t(), erlang_time() | posix_time()) :: :ok | {:error, posix()}"],
+      specs: [
+        "@spec touch(Path.t(), erlang_time() | posix_time()) :: :ok | {:error, posix()}",
+      ],
       documentation:
         'Updates modification time (mtime) and access time (atime) of\nthe given file.\n\nThe file is created if it doesn\'t exist. Requires datetime in UTC\n(as returned by `:erlang.universaltime()`) or an integer\nrepresenting the POSIX timestamp (as returned by `System.os_time(:second)`).\n\nIn Unix-like systems, changing the modification time may require\nyou to be either `root` or the owner of the file. Having write\naccess may not be enough. In those cases, touching the file the\nfirst time (to create it) will succeed, but touching an existing\nfile with fail with `{:error, :eperm}`.\n\n## Examples\n\n    File.touch("/tmp/a.txt", {{2018, 1, 30}, {13, 59, 59}})\n    #=> :ok\n    File.touch("/fakedir/b.txt", {{2018, 1, 30}, {13, 59, 59}})\n    {:error, :enoent}\n\n    File.touch("/tmp/a.txt", 1544519753)\n    #=> :ok\n\n',
     },
     {
       name: "stream!/3",
       type: "function",
-      specs: ["@spec stream!(Path.t(), :line | pos_integer(), [stream_mode()]) ::\n        File.Stream.t()"],
+      specs: [
+        "@spec stream!(Path.t(), :line | pos_integer(), [stream_mode()]) ::\n        File.Stream.t()",
+      ],
       documentation:
         'Returns a `File.Stream` for the given `path` with the given `modes`.\n\nThe stream implements both `Enumerable` and `Collectable` protocols,\nwhich means it can be used both for read and write.\n\nThe `line_or_bytes` argument configures how the file is read when\nstreaming, by `:line` (default) or by a given number of bytes. When\nusing the `:line` option, CRLF line breaks (`"\\r\\n"`) are normalized\nto LF (`"\\n"`).\n\nSimilar to other file operations, a stream can be created in one node\nand forwarded to another node. Once the stream is opened in another node,\na request will be sent to the creator node to spawn a process for file\nstreaming.\n\nOperating the stream can fail on open for the same reasons as\n`File.open!/2`. Note that the file is automatically opened each time streaming\nbegins. There is no need to pass `:read` and `:write` modes, as those are\nautomatically set by Elixir.\n\n## Raw files\n\nSince Elixir controls when the streamed file is opened, the underlying\ndevice cannot be shared and as such it is convenient to open the file\nin raw mode for performance reasons. Therefore, Elixir **will** open\nstreams in `:raw` mode with the `:read_ahead` option if the stream is\nopen in the same node as it is created and no encoding has been specified.\nThis means any data streamed into the file must be converted to `t:iodata/0`\ntype. If you pass, for example, `[encoding: :utf8]` or\n`[encoding: {:utf16, :little}]` in the modes parameter, the underlying stream\nwill use `IO.write/2` and the `String.Chars` protocol to convert the data.\nSee `IO.binwrite/2` and `IO.write/2` .\n\nOne may also consider passing the `:delayed_write` option if the stream\nis meant to be written to under a tight loop.\n\n## Byte order marks and read offset\n\nIf you pass `:trim_bom` in the modes parameter, the stream will\ntrim UTF-8, UTF-16 and UTF-32 byte order marks when reading from file.\n\nNote that this function does not try to discover the file encoding\nbased on BOM. From Elixir v1.16.0, you may also pass a `:read_offset`\nthat is skipped whenever enumerating the stream (if both `:read_offset`\nand `:trim_bom` are given, the offset is skipped after the BOM).\n\n## Examples\n\n    # Read a utf8 text file which may include BOM\n    File.stream!("./test/test.txt", [:trim_bom, encoding: :utf8])\n\n    # Read in 2048 byte chunks rather than lines\n    File.stream!("./test/test.data", 2048)\n\nSee `Stream.run/1` for an example of streaming into a file.\n',
     },
     {
       name: "stream!/2",
       type: "function",
-      specs: ["@spec stream!(Path.t(), :line | pos_integer() | [stream_mode()]) ::\n        File.Stream.t()"],
+      specs: [
+        "@spec stream!(Path.t(), :line | pos_integer() | [stream_mode()]) ::\n        File.Stream.t()",
+      ],
       documentation: "Shortcut for `File.stream!/3`.\n",
     },
     {
@@ -66,7 +79,9 @@ export const File: ModuleDoc = {
     {
       name: "stat/2",
       type: "function",
-      specs: ["@spec stat(Path.t(), stat_options()) :: {:ok, File.Stat.t()} | {:error, posix()}"],
+      specs: [
+        "@spec stat(Path.t(), stat_options()) :: {:ok, File.Stat.t()} | {:error, posix()}",
+      ],
       documentation:
         "Returns information about the `path`. If it exists, it\nreturns a `{:ok, info}` tuple, where info is a\n`File.Stat` struct. Returns `{:error, reason}` with\nthe same reasons as `read/1` if a failure occurs.\n\n## Options\n\nThe accepted options are:\n\n  * `:time` - configures how the file timestamps are returned\n\nThe values for `:time` can be:\n\n  * `:universal` - returns a `{date, time}` tuple in UTC (default)\n  * `:local` - returns a `{date, time}` tuple using the same time zone as the\n    machine\n  * `:posix` - returns the time as integer seconds since epoch\n\nNote: Since file times are stored in POSIX time format on most operating systems,\nit is faster to retrieve file information with the `time: :posix` option.\n",
     },
@@ -74,7 +89,8 @@ export const File: ModuleDoc = {
       name: "rmdir!/1",
       type: "function",
       specs: ["@spec rmdir!(Path.t()) :: :ok | {:error, posix()}"],
-      documentation: "Same as `rmdir/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `rmdir/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "rmdir/1",
@@ -93,7 +109,9 @@ export const File: ModuleDoc = {
     {
       name: "rm_rf/1",
       type: "function",
-      specs: ["@spec rm_rf(Path.t()) :: {:ok, [binary()]} | {:error, posix(), binary()}"],
+      specs: [
+        "@spec rm_rf(Path.t()) :: {:ok, [binary()]} | {:error, posix(), binary()}",
+      ],
       documentation:
         'Removes files and directories recursively at the given `path`.\nSymlinks are not followed but simply removed, non-existing\nfiles are simply ignored (i.e. doesn\'t make this function fail).\n\nReturns `{:ok, files_and_directories}` with all files and\ndirectories removed in no specific order, `{:error, reason, file}`\notherwise.\n\n## Examples\n\n    File.rm_rf("samples")\n    #=> {:ok, ["samples", "samples/1.txt"]}\n\n    File.rm_rf("unknown")\n    #=> {:ok, []}\n\n',
     },
@@ -101,7 +119,8 @@ export const File: ModuleDoc = {
       name: "rm!/1",
       type: "function",
       specs: ["@spec rm!(Path.t()) :: :ok"],
-      documentation: "Same as `rm/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `rm/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "rm/1",
@@ -127,7 +146,9 @@ export const File: ModuleDoc = {
     {
       name: "regular?/2",
       type: "function",
-      specs: ["@spec regular?(Path.t(), [regular_option]) :: boolean()\n      when regular_option: :raw"],
+      specs: [
+        "@spec regular?(Path.t(), [regular_option]) :: boolean()\n      when regular_option: :raw",
+      ],
       documentation:
         "Returns `true` if the path is a regular file.\n\nThis function follows symbolic links, so if a symbolic link points to a\nregular file, `true` is returned.\n\n## Options\n\nThe supported options are:\n\n  * `:raw` - a single atom to bypass the file server and only check\n    for the file locally\n\n## Examples\n\n    File.regular?(__ENV__.file)\n    #=> true\n\n",
     },
@@ -141,7 +162,9 @@ export const File: ModuleDoc = {
     {
       name: "read_link/1",
       type: "function",
-      specs: ["@spec read_link(Path.t()) :: {:ok, binary()} | {:error, posix()}"],
+      specs: [
+        "@spec read_link(Path.t()) :: {:ok, binary()} | {:error, posix()}",
+      ],
       documentation:
         "Reads the symbolic link at `path`.\n\nIf `path` exists and is a symlink, returns `{:ok, target}`, otherwise returns\n`{:error, reason}`.\n\nFor more details, see `:file.read_link/1`.\n\nTypical error reasons are:\n\n  * `:einval` - path is not a symbolic link\n  * `:enoent` - path does not exist\n  * `:enotsup` - symbolic links are not supported on the current platform\n\n",
     },
@@ -201,7 +224,8 @@ export const File: ModuleDoc = {
       name: "mkdir_p!/1",
       type: "function",
       specs: ["@spec mkdir_p!(Path.t()) :: :ok"],
-      documentation: "Same as `mkdir_p/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `mkdir_p/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "mkdir_p/1",
@@ -214,7 +238,8 @@ export const File: ModuleDoc = {
       name: "mkdir!/1",
       type: "function",
       specs: ["@spec mkdir!(Path.t()) :: :ok"],
-      documentation: "Same as `mkdir/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `mkdir/1`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "mkdir/1",
@@ -233,7 +258,9 @@ export const File: ModuleDoc = {
     {
       name: "lstat/2",
       type: "function",
-      specs: ["@spec lstat(Path.t(), stat_options()) ::\n        {:ok, File.Stat.t()} | {:error, posix()}"],
+      specs: [
+        "@spec lstat(Path.t(), stat_options()) ::\n        {:ok, File.Stat.t()} | {:error, posix()}",
+      ],
       documentation:
         "Returns information about the `path`. If the file is a symlink, sets\nthe `type` to `:symlink` and returns a `File.Stat` struct for the link. For any\nother file, returns exactly the same values as `stat/2`.\n\nFor more details, see `:file.read_link_info/2`.\n\n## Options\n\nThe accepted options are:\n\n  * `:time` - configures how the file timestamps are returned\n\nThe values for `:time` can be:\n\n  * `:universal` - returns a `{date, time}` tuple in UTC (default)\n  * `:local` - returns a `{date, time}` tuple using the machine time\n  * `:posix` - returns the time as integer seconds since epoch\n\nNote: Since file times are stored in POSIX time format on most operating systems,\nit is faster to retrieve file information with the `time: :posix` option.\n",
     },
@@ -241,7 +268,8 @@ export const File: ModuleDoc = {
       name: "ls!/1",
       type: "function",
       specs: ["@spec ls!(Path.t()) :: [binary()]"],
-      documentation: "The same as `ls/1` but raises a `File.Error` exception in case of an error.\n",
+      documentation:
+        "The same as `ls/1` but raises a `File.Error` exception in case of an error.\n",
     },
     {
       name: "ls/1",
@@ -268,7 +296,8 @@ export const File: ModuleDoc = {
       name: "ln!/2",
       type: "function",
       specs: ["@spec ln!(Path.t(), Path.t()) :: :ok"],
-      documentation: "Same as `ln/2` but raises a `File.LinkError` exception if it fails.\nReturns `:ok` otherwise.\n",
+      documentation:
+        "Same as `ln/2` but raises a `File.LinkError` exception if it fails.\nReturns `:ok` otherwise.\n",
     },
     {
       name: "ln/2",
@@ -280,14 +309,18 @@ export const File: ModuleDoc = {
     {
       name: "exists?/2",
       type: "function",
-      specs: ["@spec exists?(Path.t(), [exists_option]) :: boolean() when exists_option: :raw"],
+      specs: [
+        "@spec exists?(Path.t(), [exists_option]) :: boolean() when exists_option: :raw",
+      ],
       documentation:
         'Returns `true` if the given path exists.\n\nIt can be a regular file, directory, socket, symbolic link, named pipe, or device file.\nReturns `false` for symbolic links pointing to non-existing targets.\n\n## Options\n\nThe supported options are:\n\n  * `:raw` - a single atom to bypass the file server and only check\n    for the file locally\n\n## Examples\n\n    File.exists?("test/")\n    #=> true\n\n    File.exists?("missing.txt")\n    #=> false\n\n    File.exists?("/dev/null")\n    #=> true\n\n',
     },
     {
       name: "dir?/2",
       type: "function",
-      specs: ["@spec dir?(Path.t(), [dir_option]) :: boolean() when dir_option: :raw"],
+      specs: [
+        "@spec dir?(Path.t(), [dir_option]) :: boolean() when dir_option: :raw",
+      ],
       documentation:
         'Returns `true` if the given path is a directory.\n\nThis function follows symbolic links, so if a symbolic link points to a\ndirectory, `true` is returned.\n\n## Options\n\nThe supported options are:\n\n  * `:raw` - a single atom to bypass the file server and only check\n    for the file locally\n\n## Examples\n\n    File.dir?("./test")\n    #=> true\n\n    File.dir?("test")\n    #=> true\n\n    File.dir?("/usr/bin")\n    #=> true\n\n    File.dir?("~/Downloads")\n    #=> false\n\n    "~/Downloads" |> Path.expand() |> File.dir?()\n    #=> true\n\n',
     },
@@ -295,7 +328,8 @@ export const File: ModuleDoc = {
       name: "cwd!/0",
       type: "function",
       specs: ["@spec cwd!() :: binary()"],
-      documentation: "The same as `cwd/0`, but raises a `File.Error` exception if it fails.\n",
+      documentation:
+        "The same as `cwd/0`, but raises a `File.Error` exception if it fails.\n",
     },
     {
       name: "cwd/0",
@@ -325,7 +359,9 @@ export const File: ModuleDoc = {
     {
       name: "cp!/3",
       type: "function",
-      specs: ["@spec cp!(Path.t(), Path.t(), [{:on_conflict, on_conflict_callback()}]) :: :ok"],
+      specs: [
+        "@spec cp!(Path.t(), Path.t(), [{:on_conflict, on_conflict_callback()}]) :: :ok",
+      ],
       documentation:
         "The same as `cp/3`, but raises a `File.CopyError` exception if it fails.\nReturns `:ok` otherwise.\n",
     },
@@ -359,7 +395,9 @@ export const File: ModuleDoc = {
     {
       name: "close/1",
       type: "function",
-      specs: ["@spec close(io_device()) :: :ok | {:error, posix() | :badarg | :terminated}"],
+      specs: [
+        "@spec close(io_device()) :: :ok | {:error, posix() | :badarg | :terminated}",
+      ],
       documentation:
         "Closes the file referenced by `io_device`. It mostly returns `:ok`, except\nfor some severe errors such as out of memory.\n\nNote that if the option `:delayed_write` was used when opening the file,\n`close/1` might return an old write error and not even try to close the file.\nSee `open/2` for more information.\n",
     },
@@ -367,12 +405,15 @@ export const File: ModuleDoc = {
       name: "chown!/2",
       type: "function",
       specs: ["@spec chown!(Path.t(), non_neg_integer()) :: :ok"],
-      documentation: "Same as `chown/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `chown/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "chown/2",
       type: "function",
-      specs: ["@spec chown(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}"],
+      specs: [
+        "@spec chown(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}",
+      ],
       documentation:
         "Changes the owner given by the user ID `uid`\nfor a given `file`. Returns `:ok` on success,\nor `{:error, reason}` on failure.\n",
     },
@@ -380,12 +421,15 @@ export const File: ModuleDoc = {
       name: "chmod!/2",
       type: "function",
       specs: ["@spec chmod!(Path.t(), non_neg_integer()) :: :ok"],
-      documentation: "Same as `chmod/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `chmod/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "chmod/2",
       type: "function",
-      specs: ["@spec chmod(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}"],
+      specs: [
+        "@spec chmod(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}",
+      ],
       documentation:
         "Changes the `mode` for a given `file`.\n\nReturns `:ok` on success, or `{:error, reason}` on failure.\n\n## Permissions\n\nFile permissions are specified by adding together the following octal modes:\n\n  * `0o400` - read permission: owner\n  * `0o200` - write permission: owner\n  * `0o100` - execute permission: owner\n\n  * `0o040` - read permission: group\n  * `0o020` - write permission: group\n  * `0o010` - execute permission: group\n\n  * `0o004` - read permission: other\n  * `0o002` - write permission: other\n  * `0o001` - execute permission: other\n\nFor example, setting the mode `0o755` gives it\nwrite, read and execute permission to the owner\nand both read and execute permission to group\nand others.\n",
     },
@@ -393,12 +437,15 @@ export const File: ModuleDoc = {
       name: "chgrp!/2",
       type: "function",
       specs: ["@spec chgrp!(Path.t(), non_neg_integer()) :: :ok"],
-      documentation: "Same as `chgrp/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
+      documentation:
+        "Same as `chgrp/2`, but raises a `File.Error` exception in case of failure.\nOtherwise `:ok`.\n",
     },
     {
       name: "chgrp/2",
       type: "function",
-      specs: ["@spec chgrp(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}"],
+      specs: [
+        "@spec chgrp(Path.t(), non_neg_integer()) :: :ok | {:error, posix()}",
+      ],
       documentation:
         "Changes the group given by the group ID `gid`\nfor a given `file`. Returns `:ok` on success, or\n`{:error, reason}` on failure.\n",
     },
@@ -413,7 +460,8 @@ export const File: ModuleDoc = {
       name: "cd!/1",
       type: "function",
       specs: ["@spec cd!(Path.t()) :: :ok"],
-      documentation: "The same as `cd/1`, but raises a `File.Error` exception if it fails.\n",
+      documentation:
+        "The same as `cd/1`, but raises a `File.Error` exception if it fails.\n",
     },
     {
       name: "cd/1",
@@ -430,10 +478,17 @@ export const File: ModuleDoc = {
     {
       name: "on_conflict_callback/0",
       type: "type",
-      specs: ["@type on_conflict_callback() :: (Path.t(), Path.t() -> boolean())"],
+      specs: [
+        "@type on_conflict_callback() :: (Path.t(), Path.t() -> boolean())",
+      ],
       documentation: null,
     },
-    { name: "posix_time/0", type: "type", specs: ["@type posix_time() :: integer()"], documentation: null },
+    {
+      name: "posix_time/0",
+      type: "type",
+      specs: ["@type posix_time() :: integer()"],
+      documentation: null,
+    },
     {
       name: "erlang_time/0",
       type: "type",
@@ -475,11 +530,28 @@ export const File: ModuleDoc = {
     {
       name: "stat_options/0",
       type: "type",
-      specs: ["@type stat_options() :: [{:time, :local | :universal | :posix}]"],
+      specs: [
+        "@type stat_options() :: [{:time, :local | :universal | :posix}]",
+      ],
       documentation: null,
     },
-    { name: "file_descriptor/0", type: "type", specs: ["@type file_descriptor() :: :file.fd()"], documentation: null },
-    { name: "io_device/0", type: "type", specs: ["@type io_device() :: :file.io_device()"], documentation: null },
-    { name: "posix/0", type: "type", specs: ["@type posix() :: :file.posix()"], documentation: null },
+    {
+      name: "file_descriptor/0",
+      type: "type",
+      specs: ["@type file_descriptor() :: :file.fd()"],
+      documentation: null,
+    },
+    {
+      name: "io_device/0",
+      type: "type",
+      specs: ["@type io_device() :: :file.io_device()"],
+      documentation: null,
+    },
+    {
+      name: "posix/0",
+      type: "type",
+      specs: ["@type posix() :: :file.posix()"],
+      documentation: null,
+    },
   ],
 };

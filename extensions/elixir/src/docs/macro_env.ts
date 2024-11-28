@@ -51,7 +51,9 @@ export const Macro_Env: ModuleDoc = {
     {
       name: "lookup_import/2",
       type: "function",
-      specs: ["@spec lookup_import(t(), name_arity()) :: [{:function | :macro, module()}]"],
+      specs: [
+        "@spec lookup_import(t(), name_arity()) :: [{:function | :macro, module()}]",
+      ],
       documentation:
         "Returns the modules from which the given `{name, arity}` was\nimported.\n\nIt returns a list of two element tuples in the shape of\n`{:function | :macro, module}`. The elements in the list\nare in no particular order and the order is not guaranteed.\n\n> #### Use only for introspection {: .warning}\n>\n> This function does not emit compiler tracing events,\n> which may block the compiler from correctly tracking\n> dependencies. Use this function for reflection purposes\n> but to do not use it to expand imports into qualified\n> calls. Instead, use `expand_import/5`.\n\n## Examples\n\n    iex> Macro.Env.lookup_import(__ENV__, {:duplicate, 2})\n    []\n    iex> import Tuple, only: [duplicate: 2], warn: false\n    iex> Macro.Env.lookup_import(__ENV__, {:duplicate, 2})\n    [{:function, Tuple}]\n    iex> import List, only: [duplicate: 2], warn: false\n    iex> Macro.Env.lookup_import(__ENV__, {:duplicate, 2})\n    [{:function, List}, {:function, Tuple}]\n\n    iex> Macro.Env.lookup_import(__ENV__, {:def, 1})\n    [{:macro, Kernel}]\n\n",
     },
@@ -66,19 +68,22 @@ export const Macro_Env: ModuleDoc = {
       name: "location/1",
       type: "function",
       specs: ["@spec location(t()) :: keyword()"],
-      documentation: "Returns a keyword list containing the file and line\ninformation as keys.\n",
+      documentation:
+        "Returns a keyword list containing the file and line\ninformation as keys.\n",
     },
     {
       name: "in_match?/1",
       type: "function",
       specs: ["@spec in_match?(t()) :: boolean()"],
-      documentation: "Returns whether the compilation environment is currently\ninside a match clause.\n",
+      documentation:
+        "Returns whether the compilation environment is currently\ninside a match clause.\n",
     },
     {
       name: "in_guard?/1",
       type: "function",
       specs: ["@spec in_guard?(t()) :: boolean()"],
-      documentation: "Returns whether the compilation environment is currently\ninside a guard.\n",
+      documentation:
+        "Returns whether the compilation environment is currently\ninside a guard.\n",
     },
     {
       name: "has_var?/2",
@@ -108,7 +113,9 @@ export const Macro_Env: ModuleDoc = {
     {
       name: "expand_alias/4",
       type: "function",
-      specs: ["@spec expand_alias(t(), keyword(), [atom()], keyword()) ::\n        {:alias, atom()} | :error"],
+      specs: [
+        "@spec expand_alias(t(), keyword(), [atom()], keyword()) ::\n        {:alias, atom()} | :error",
+      ],
       documentation:
         "Expands an alias given by the alias segments.\n\nIt returns `{:alias, alias}` if the segments is a list\nof atoms and an alias was found. Returns `:error` otherwise.\n\nThis expansion may emit the `:alias_expansion` trace event\nbut it does not emit the `:alias_reference` one.\n\n## Options\n\n  * `:trace` - when set to `false`, it disables compilation tracers and\nlexical tracker. This option must only be used by language servers and\nother tools that need to introspect code without affecting how it is compiled.\nDisabling tracer inside macros or regular code expansion is extremely\ndiscouraged as it blocks the compiler from accurately tracking dependencies\n\n## Examples\n\n    iex> alias List, as: MyList\n    iex> Macro.Env.expand_alias(__ENV__, [], [:MyList])\n    {:alias, List}\n    iex> Macro.Env.expand_alias(__ENV__, [], [:MyList, :Nested])\n    {:alias, List.Nested}\n\nIf there is no alias or the alias starts with `Elixir.`\n(which disables aliasing), then `:error` is returned:\n\n    iex> alias List, as: MyList\n    iex> Macro.Env.expand_alias(__ENV__, [], [:Elixir, MyList])\n    :error\n    iex> Macro.Env.expand_alias(__ENV__, [], [:AnotherList])\n    :error\n\n",
     },
@@ -150,11 +157,41 @@ export const Macro_Env: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "variable/0", type: "type", specs: ["@type variable() :: {atom(), atom() | term()}"], documentation: null },
-    { name: "name_arity/0", type: "type", specs: ["@type name_arity() :: {atom(), arity()}"], documentation: null },
-    { name: "line/0", type: "type", specs: ["@type line() :: non_neg_integer()"], documentation: null },
-    { name: "file/0", type: "type", specs: ["@type file() :: binary()"], documentation: null },
-    { name: "context_modules/0", type: "type", specs: ["@type context_modules() :: [module()]"], documentation: null },
-    { name: "context/0", type: "type", specs: ["@type context() :: :match | :guard | nil"], documentation: null },
+    {
+      name: "variable/0",
+      type: "type",
+      specs: ["@type variable() :: {atom(), atom() | term()}"],
+      documentation: null,
+    },
+    {
+      name: "name_arity/0",
+      type: "type",
+      specs: ["@type name_arity() :: {atom(), arity()}"],
+      documentation: null,
+    },
+    {
+      name: "line/0",
+      type: "type",
+      specs: ["@type line() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "file/0",
+      type: "type",
+      specs: ["@type file() :: binary()"],
+      documentation: null,
+    },
+    {
+      name: "context_modules/0",
+      type: "type",
+      specs: ["@type context_modules() :: [module()]"],
+      documentation: null,
+    },
+    {
+      name: "context/0",
+      type: "type",
+      specs: ["@type context() :: :match | :guard | nil"],
+      documentation: null,
+    },
   ],
 };

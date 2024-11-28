@@ -5,14 +5,18 @@ export const Config_Reader: ModuleDoc = {
     {
       name: "read_imports!/2",
       type: "function",
-      specs: ["@spec read_imports!(\n        Path.t(),\n        keyword()\n      ) :: {keyword(), [Path.t()]}"],
+      specs: [
+        "@spec read_imports!(\n        Path.t(),\n        keyword()\n      ) :: {keyword(), [Path.t()]}",
+      ],
       documentation:
         "Reads the given configuration file and returns the configuration\nwith its imports.\n\nAccepts the same options as `read!/2`. Although note the `:imports`\noption cannot be disabled in `read_imports!/2`.\n",
     },
     {
       name: "read!/2",
       type: "function",
-      specs: ["@spec read!(\n        Path.t(),\n        keyword()\n      ) :: keyword()"],
+      specs: [
+        "@spec read!(\n        Path.t(),\n        keyword()\n      ) :: keyword()",
+      ],
       documentation:
         "Reads the configuration file.\n\n## Options\n\n  * `:imports` - a list of already imported paths or `:disabled`\n    to disable imports\n\n  * `:env` - the environment the configuration file runs on.\n    See `Config.config_env/0` for sample usage\n\n  * `:target` - the target the configuration file runs on.\n    See `Config.config_target/0` for sample usage\n\n",
     },

@@ -29,7 +29,8 @@ export const PartitionSupervisor: ModuleDoc = {
       name: "partitions/1",
       type: "function",
       specs: ["@spec partitions(name()) :: pos_integer()"],
-      documentation: "Returns the number of partitions for the partition supervisor.\n",
+      documentation:
+        "Returns the number of partitions for the partition supervisor.\n",
     },
     {
       name: "count_children/1",

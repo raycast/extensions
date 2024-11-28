@@ -15,7 +15,9 @@ export const Inspect: ModuleDoc = {
     {
       name: "inspect/2",
       type: "callback",
-      specs: ["@callback inspect(t(), Inspect.Opts.t()) :: Inspect.Algebra.t()"],
+      specs: [
+        "@callback inspect(t(), Inspect.Opts.t()) :: Inspect.Algebra.t()",
+      ],
       documentation:
         "Converts `term` into an algebra document.\n\nThis function shouldn't be invoked directly, unless when implementing\na custom `inspect_fun` to be given to `Inspect.Opts`. Everywhere else,\n`Inspect.Algebra.to_doc/2` should be preferred as it handles structs\nand exceptions.\n",
     },

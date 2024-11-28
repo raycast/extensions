@@ -33,14 +33,18 @@ export const Process: ModuleDoc = {
     {
       name: "spawn/4",
       type: "function",
-      specs: ["@spec spawn(module(), atom(), list(), spawn_opts()) ::\n        pid() | {pid(), reference()}"],
+      specs: [
+        "@spec spawn(module(), atom(), list(), spawn_opts()) ::\n        pid() | {pid(), reference()}",
+      ],
       documentation:
         "Spawns the given function `fun` from module `mod`, passing the given `args`\naccording to the given options.\n\nThe result depends on the given options. In particular,\nif `:monitor` is given as an option, it will return a tuple\ncontaining the PID and the monitoring reference, otherwise\njust the spawned process PID.\n\nIt also accepts extra options, for the list of available options\ncheck `:erlang.spawn_opt/4`.\n\nInlined by the compiler.\n",
     },
     {
       name: "spawn/2",
       type: "function",
-      specs: ["@spec spawn((-> any()), spawn_opts()) :: pid() | {pid(), reference()}"],
+      specs: [
+        "@spec spawn((-> any()), spawn_opts()) :: pid() | {pid(), reference()}",
+      ],
       documentation:
         "Spawns the given function according to the given options.\n\nThe result depends on the given options. In particular,\nif `:monitor` is given as an option, it will return a tuple\ncontaining the PID and the monitoring reference, otherwise\njust the spawned process PID.\n\nMore options are available; for the comprehensive list of available options\ncheck `:erlang.spawn_opt/4`.\n\nInlined by the compiler.\n\n## Examples\n\n    Process.spawn(fn -> 1 + 2 end, [:monitor])\n    #=> {#PID<0.93.0>, #Reference<0.18808174.1939079169.202418>}\n    Process.spawn(fn -> 1 + 2 end, [:link])\n    #=> #PID<0.95.0>\n\n",
     },
@@ -116,7 +120,9 @@ export const Process: ModuleDoc = {
     {
       name: "monitor/1",
       type: "function",
-      specs: ["@spec monitor(pid() | {name, node()} | name) :: reference() when name: atom()"],
+      specs: [
+        "@spec monitor(pid() | {name, node()} | name) :: reference() when name: atom()",
+      ],
       documentation:
         'Starts monitoring the given `item` from the calling process.\n\nOnce the monitored process dies, a message is delivered to the\nmonitoring process in the shape of:\n\n    {:DOWN, ref, :process, object, reason}\n\nwhere:\n\n  * `ref` is a monitor reference returned by this function;\n  * `object` is either a `pid` of the monitored process (if monitoring\n    a PID) or `{name, node}` (if monitoring a remote or local name);\n  * `reason` is the exit reason.\n\nIf the process is already dead when calling `Process.monitor/1`, a\n`:DOWN` message is delivered immediately.\n\nSee ["The need for monitoring"](genservers.md#the-need-for-monitoring)\nfor an example. See `:erlang.monitor/2` for more information.\n\nInlined by the compiler.\n\n## Examples\n\n    pid = spawn(fn -> 1 + 2 end)\n    #=> #PID<0.118.0>\n    Process.monitor(pid)\n    #=> #Reference<0.906660723.3006791681.40191>\n    Process.exit(pid, :kill)\n    #=> true\n    receive do\n      msg -> msg\n    end\n    #=> {:DOWN, #Reference<0.906660723.3006791681.40191>, :process, #PID<0.118.0>, :noproc}\n\n',
     },
@@ -197,7 +203,8 @@ export const Process: ModuleDoc = {
       name: "get/0",
       type: "function",
       specs: ["@spec get() :: [{term(), term()}]"],
-      documentation: "Returns all key-value pairs in the process dictionary.\n\nInlined by the compiler.\n",
+      documentation:
+        "Returns all key-value pairs in the process dictionary.\n\nInlined by the compiler.\n",
     },
     {
       name: "flag/3",
@@ -233,7 +240,9 @@ export const Process: ModuleDoc = {
     {
       name: "demonitor/2",
       type: "function",
-      specs: ["@spec demonitor(reference(), options :: [:flush | :info]) :: boolean()"],
+      specs: [
+        "@spec demonitor(reference(), options :: [:flush | :info]) :: boolean()",
+      ],
       documentation:
         "Demonitors the monitor identified by the given `reference`.\n\nIf `monitor_ref` is a reference which the calling process\nobtained by calling `monitor/1`, that monitoring is turned off.\nIf the monitoring is already turned off, nothing happens.\n\nSee `:erlang.demonitor/2` for more information.\n\nInlined by the compiler.\n\n## Examples\n\n    pid = spawn(fn -> 1 + 2 end)\n    ref = Process.monitor(pid)\n    Process.demonitor(ref)\n    #=> true\n\n",
     },
@@ -295,7 +304,9 @@ export const Process: ModuleDoc = {
     {
       name: "process_info_result_item/0",
       type: "type",
-      specs: ["@type process_info_result_item() :: {process_info_item(), term()}"],
+      specs: [
+        "@type process_info_result_item() :: {process_info_item(), term()}",
+      ],
       documentation: null,
     },
     {
@@ -304,7 +315,12 @@ export const Process: ModuleDoc = {
       specs: ["@type process_info_item() :: atom() | {:dictionary, term()}"],
       documentation: null,
     },
-    { name: "spawn_opts/0", type: "type", specs: ["@type spawn_opts() :: [spawn_opt()]"], documentation: null },
+    {
+      name: "spawn_opts/0",
+      type: "type",
+      specs: ["@type spawn_opts() :: [spawn_opt()]"],
+      documentation: null,
+    },
     {
       name: "spawn_opt/0",
       type: "type",

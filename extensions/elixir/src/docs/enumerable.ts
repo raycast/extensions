@@ -21,14 +21,18 @@ export const Enumerable: ModuleDoc = {
     {
       name: "member?/2",
       type: "function",
-      specs: ["@spec member?(t(), term()) :: {:ok, boolean()} | {:error, module()}"],
+      specs: [
+        "@spec member?(t(), term()) :: {:ok, boolean()} | {:error, module()}",
+      ],
       documentation:
         "Checks if an `element` exists within the `enumerable`.\n\nIt should return `{:ok, boolean}` if you can check the membership of a\ngiven element in `enumerable` with `===/2` without traversing the whole\nof it.\n\nOtherwise it should return `{:error, __MODULE__}` and a default algorithm\nbuilt on top of `reduce/3` that runs in linear time will be used.\n\nWhen called outside guards, the [`in`](`in/2`) and [`not in`](`in/2`)\noperators work by using this function.\n",
     },
     {
       name: "count/1",
       type: "function",
-      specs: ["@spec count(t()) :: {:ok, non_neg_integer()} | {:error, module()}"],
+      specs: [
+        "@spec count(t()) :: {:ok, non_neg_integer()} | {:error, module()}",
+      ],
       documentation:
         "Retrieves the number of elements in the `enumerable`.\n\nIt should return `{:ok, count}` if you can count the number of elements\nin `enumerable` in a faster way than fully traversing it.\n\nOtherwise it should return `{:error, __MODULE__}` and a default algorithm\nbuilt on top of `reduce/3` that runs in linear time will be used.\n",
     },
@@ -54,14 +58,18 @@ export const Enumerable: ModuleDoc = {
     {
       name: "member?/2",
       type: "callback",
-      specs: ["@callback member?(t(), term()) :: {:ok, boolean()} | {:error, module()}"],
+      specs: [
+        "@callback member?(t(), term()) :: {:ok, boolean()} | {:error, module()}",
+      ],
       documentation:
         "Checks if an `element` exists within the `enumerable`.\n\nIt should return `{:ok, boolean}` if you can check the membership of a\ngiven element in `enumerable` with `===/2` without traversing the whole\nof it.\n\nOtherwise it should return `{:error, __MODULE__}` and a default algorithm\nbuilt on top of `reduce/3` that runs in linear time will be used.\n\nWhen called outside guards, the [`in`](`in/2`) and [`not in`](`in/2`)\noperators work by using this function.\n",
     },
     {
       name: "count/1",
       type: "callback",
-      specs: ["@callback count(t()) :: {:ok, non_neg_integer()} | {:error, module()}"],
+      specs: [
+        "@callback count(t()) :: {:ok, non_neg_integer()} | {:error, module()}",
+      ],
       documentation:
         "Retrieves the number of elements in the `enumerable`.\n\nIt should return `{:ok, count}` if you can count the number of elements\nin `enumerable` in a faster way than fully traversing it.\n\nOtherwise it should return `{:error, __MODULE__}` and a default algorithm\nbuilt on top of `reduce/3` that runs in linear time will be used.\n",
     },
@@ -108,14 +116,18 @@ export const Enumerable: ModuleDoc = {
     {
       name: "reducer/0",
       type: "type",
-      specs: ["@type reducer() :: (element :: term(), element_acc :: term() -> acc())"],
+      specs: [
+        "@type reducer() :: (element :: term(), element_acc :: term() -> acc())",
+      ],
       documentation:
         "The reducer function.\n\nShould be called with the `enumerable` element and the\naccumulator contents.\n\nReturns the accumulator for the next enumeration step.\n",
     },
     {
       name: "acc/0",
       type: "type",
-      specs: ["@type acc() :: {:cont, term()} | {:halt, term()} | {:suspend, term()}"],
+      specs: [
+        "@type acc() :: {:cont, term()} | {:halt, term()} | {:suspend, term()}",
+      ],
       documentation:
         'The accumulator value for each step.\n\nIt must be a tagged tuple with one of the following "tags":\n\n  * `:cont`    - the enumeration should continue\n  * `:halt`    - the enumeration should halt immediately\n  * `:suspend` - the enumeration should be suspended immediately\n\nDepending on the accumulator value, the result returned by\n`Enumerable.reduce/3` will change. Please check the `t:result/0`\ntype documentation for more information.\n\nIn case a `t:reducer/0` function returns a `:suspend` accumulator,\nit must be explicitly handled by the caller and never leak.\n',
     },

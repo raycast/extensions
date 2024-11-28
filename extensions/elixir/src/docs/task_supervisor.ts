@@ -5,7 +5,9 @@ export const Task_Supervisor: ModuleDoc = {
     {
       name: "terminate_child/2",
       type: "function",
-      specs: ["@spec terminate_child(Supervisor.supervisor(), pid()) ::\n        :ok | {:error, :not_found}"],
+      specs: [
+        "@spec terminate_child(Supervisor.supervisor(), pid()) ::\n        :ok | {:error, :not_found}",
+      ],
       documentation: "Terminates the child with the given `pid`.\n",
     },
     {
@@ -88,21 +90,27 @@ export const Task_Supervisor: ModuleDoc = {
     {
       name: "async_nolink/3",
       type: "function",
-      specs: ["@spec async_nolink(Supervisor.supervisor(), (-> any()), Keyword.t()) :: Task.t()"],
+      specs: [
+        "@spec async_nolink(Supervisor.supervisor(), (-> any()), Keyword.t()) :: Task.t()",
+      ],
       documentation:
         "Starts a task that can be awaited on.\n\nThe `supervisor` must be a reference as defined in `Supervisor`.\nThe task won't be linked to the caller, see `Task.async/1` for\nmore information.\n\nRaises an error if `supervisor` has reached the maximum number of\nchildren.\n\nNote this function requires the task supervisor to have `:temporary`\nas the `:restart` option (the default), as `async_nolink/3` keeps a\ndirect reference to the task which is lost if the task is restarted.\n\n## Options\n\n  * `:shutdown` - `:brutal_kill` if the tasks must be killed directly on shutdown\n    or an integer indicating the timeout value, defaults to 5000 milliseconds.\n    The tasks must trap exits for the timeout to have an effect.\n\n## Compatibility with OTP behaviours\n\nIf you create a task using `async_nolink` inside an OTP behaviour\nlike `GenServer`, you should match on the message coming from the\ntask inside your `c:GenServer.handle_info/2` callback.\n\nThe reply sent by the task will be in the format `{ref, result}`,\nwhere `ref` is the monitor reference held by the task struct\nand `result` is the return value of the task function.\n\nKeep in mind that, regardless of how the task created with `async_nolink`\nterminates, the caller's process will always receive a `:DOWN` message\nwith the same `ref` value that is held by the task struct. If the task\nterminates normally, the reason in the `:DOWN` message will be `:normal`.\n\n## Examples\n\nTypically, you use `async_nolink/3` when there is a reasonable expectation that\nthe task may fail, and you don't want it to take down the caller. Let's see an\nexample where a `GenServer` is meant to run a single task and track its status:\n\n    defmodule MyApp.Server do\n      use GenServer\n\n      # ...\n\n      def start_task do\n        GenServer.call(__MODULE__, :start_task)\n      end\n\n      # In this case the task is already running, so we just return :ok.\n      def handle_call(:start_task, _from, %{ref: ref} = state) when is_reference(ref) do\n        {:reply, :ok, state}\n      end\n\n      # The task is not running yet, so let's start it.\n      def handle_call(:start_task, _from, %{ref: nil} = state) do\n        task =\n          Task.Supervisor.async_nolink(MyApp.TaskSupervisor, fn ->\n            ...\n          end)\n\n        # We return :ok and the server will continue running\n        {:reply, :ok, %{state | ref: task.ref}}\n      end\n\n      # The task completed successfully\n      def handle_info({ref, answer}, %{ref: ref} = state) do\n        # We don't care about the DOWN message now, so let's demonitor and flush it\n        Process.demonitor(ref, [:flush])\n        # Do something with the result and then return\n        {:noreply, %{state | ref: nil}}\n      end\n\n      # The task failed\n      def handle_info({:DOWN, ref, :process, _pid, _reason}, %{ref: ref} = state) do\n        # Log and possibly restart the task...\n        {:noreply, %{state | ref: nil}}\n      end\n    end\n\n",
     },
     {
       name: "async/5",
       type: "function",
-      specs: ["@spec async(Supervisor.supervisor(), module(), atom(), [term()], Keyword.t()) ::\n        Task.t()"],
+      specs: [
+        "@spec async(Supervisor.supervisor(), module(), atom(), [term()], Keyword.t()) ::\n        Task.t()",
+      ],
       documentation:
         "Starts a task that can be awaited on.\n\nThe `supervisor` must be a reference as defined in `Supervisor`.\nThe task will still be linked to the caller, see `Task.async/1` for\nmore information and `async_nolink/3` for a non-linked variant.\n\nRaises an error if `supervisor` has reached the maximum number of\nchildren.\n\n## Options\n\n  * `:shutdown` - `:brutal_kill` if the tasks must be killed directly on shutdown\n    or an integer indicating the timeout value, defaults to 5000 milliseconds.\n    The tasks must trap exits for the timeout to have an effect.\n\n",
     },
     {
       name: "async/3",
       type: "function",
-      specs: ["@spec async(Supervisor.supervisor(), (-> any()), Keyword.t()) :: Task.t()"],
+      specs: [
+        "@spec async(Supervisor.supervisor(), (-> any()), Keyword.t()) :: Task.t()",
+      ],
       documentation:
         "Starts a task that can be awaited on.\n\nThe `supervisor` must be a reference as defined in `Supervisor`.\nThe task will still be linked to the caller, see `Task.async/1` for\nmore information and `async_nolink/3` for a non-linked variant.\n\nRaises an error if `supervisor` has reached the maximum number of\nchildren.\n\n## Options\n\n  * `:shutdown` - `:brutal_kill` if the tasks must be killed directly on shutdown\n    or an integer indicating the timeout value, defaults to 5000 milliseconds.\n    The tasks must trap exits for the timeout to have an effect.\n\n",
     },
@@ -117,12 +125,15 @@ export const Task_Supervisor: ModuleDoc = {
       specs: [
         "@type async_stream_option() ::\n        Task.async_stream_option() | {:shutdown, Supervisor.shutdown()}",
       ],
-      documentation: "Options given to `async_stream` and `async_stream_nolink` functions.\n",
+      documentation:
+        "Options given to `async_stream` and `async_stream_nolink` functions.\n",
     },
     {
       name: "option/0",
       type: "type",
-      specs: ["@type option() :: DynamicSupervisor.option() | DynamicSupervisor.init_option()"],
+      specs: [
+        "@type option() :: DynamicSupervisor.option() | DynamicSupervisor.init_option()",
+      ],
       documentation: "Option values used by `start_link`",
     },
   ],

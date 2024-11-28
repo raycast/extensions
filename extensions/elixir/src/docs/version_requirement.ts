@@ -5,5 +5,7 @@ export const Version_Requirement: ModuleDoc = {
   name: "Version.Requirement",
   callbacks: [],
   macros: [],
-  types: [{ name: "t/0", type: "type", specs: ["@opaque t()"], documentation: null }],
+  types: [
+    { name: "t/0", type: "type", specs: ["@opaque t()"], documentation: null },
+  ],
 };

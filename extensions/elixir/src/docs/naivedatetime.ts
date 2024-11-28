@@ -23,7 +23,9 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "truncate/2",
       type: "function",
-      specs: ["@spec truncate(t(), :microsecond | :millisecond | :second) :: t()"],
+      specs: [
+        "@spec truncate(t(), :microsecond | :millisecond | :second) :: t()",
+      ],
       documentation:
         "Returns the given naive datetime with the microsecond field truncated to the\ngiven precision (`:microsecond`, `:millisecond` or `:second`).\n\nThe given naive datetime is returned unchanged if it already has lower precision\nthan the given precision.\n\n## Examples\n\n    iex> NaiveDateTime.truncate(~N[2017-11-06 00:23:51.123456], :microsecond)\n    ~N[2017-11-06 00:23:51.123456]\n\n    iex> NaiveDateTime.truncate(~N[2017-11-06 00:23:51.123456], :millisecond)\n    ~N[2017-11-06 00:23:51.123]\n\n    iex> NaiveDateTime.truncate(~N[2017-11-06 00:23:51.123456], :second)\n    ~N[2017-11-06 00:23:51]\n\n",
     },
@@ -44,21 +46,27 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "to_iso8601/2",
       type: "function",
-      specs: ["@spec to_iso8601(Calendar.naive_datetime(), :basic | :extended) :: String.t()"],
+      specs: [
+        "@spec to_iso8601(Calendar.naive_datetime(), :basic | :extended) :: String.t()",
+      ],
       documentation:
         'Converts the given naive datetime to\n[ISO 8601:2019](https://en.wikipedia.org/wiki/ISO_8601).\n\nBy default, `NaiveDateTime.to_iso8601/2` returns naive datetimes formatted in the "extended"\nformat, for human readability. It also supports the "basic" format through passing the `:basic` option.\n\nOnly supports converting naive datetimes which are in the ISO calendar,\nattempting to convert naive datetimes from other calendars will raise.\n\n### Examples\n\n    iex> NaiveDateTime.to_iso8601(~N[2000-02-28 23:00:13])\n    "2000-02-28T23:00:13"\n\n    iex> NaiveDateTime.to_iso8601(~N[2000-02-28 23:00:13.001])\n    "2000-02-28T23:00:13.001"\n\n    iex> NaiveDateTime.to_iso8601(~N[2000-02-28 23:00:13.001], :basic)\n    "20000228T230013.001"\n\nThis function can also be used to convert a DateTime to ISO 8601 without\nthe time zone information:\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "CET",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> NaiveDateTime.to_iso8601(dt)\n    "2000-02-29T23:00:07"\n\n',
     },
     {
       name: "to_gregorian_seconds/1",
       type: "function",
-      specs: ["@spec to_gregorian_seconds(Calendar.naive_datetime()) ::\n        {integer(), non_neg_integer()}"],
+      specs: [
+        "@spec to_gregorian_seconds(Calendar.naive_datetime()) ::\n        {integer(), non_neg_integer()}",
+      ],
       documentation:
         "Converts a `NaiveDateTime` struct to a number of gregorian seconds and microseconds.\n\n## Examples\n\n    iex> NaiveDateTime.to_gregorian_seconds(~N[0000-01-01 00:00:01])\n    {1, 0}\n    iex> NaiveDateTime.to_gregorian_seconds(~N[2020-05-01 00:26:31.005])\n    {63_755_511_991, 5000}\n\n",
     },
     {
       name: "to_erl/1",
       type: "function",
-      specs: ["@spec to_erl(Calendar.naive_datetime()) :: :calendar.datetime()"],
+      specs: [
+        "@spec to_erl(Calendar.naive_datetime()) :: :calendar.datetime()",
+      ],
       documentation:
         'Converts a `NaiveDateTime` struct to an Erlang datetime tuple.\n\nOnly supports converting naive datetimes which are in the ISO calendar,\nattempting to convert naive datetimes from other calendars will raise.\n\nWARNING: Loss of precision may occur, as Erlang time tuples only store\nhour/minute/second.\n\n## Examples\n\n    iex> NaiveDateTime.to_erl(~N[2000-01-01 13:30:15])\n    {{2000, 1, 1}, {13, 30, 15}}\n\nThis function can also be used to convert a DateTime to an Erlang\ndatetime tuple without the time zone information:\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "CET",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> NaiveDateTime.to_erl(dt)\n    {{2000, 2, 29}, {23, 00, 07}}\n\n',
     },
@@ -72,7 +80,9 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "shift/2",
       type: "function",
-      specs: ["@spec shift(Calendar.naive_datetime(), Duration.duration()) :: t()"],
+      specs: [
+        "@spec shift(Calendar.naive_datetime(), Duration.duration()) :: t()",
+      ],
       documentation:
         "Shifts given `naive_datetime` by `duration` according to its calendar.\n\nAllowed units are: `:year`, `:month`, `:week`, `:day`, `:hour`, `:minute`, `:second`, `:microsecond`.\n\nWhen using the default ISO calendar, durations are collapsed and\napplied in the order of months, then seconds and microseconds:\n\n* when shifting by 1 year and 2 months the date is actually shifted by 14 months\n* weeks, days and smaller units are collapsed into seconds and microseconds\n\nWhen shifting by month, days are rounded down to the nearest valid date.\n\n## Examples\n\n    iex> NaiveDateTime.shift(~N[2016-01-31 00:00:00], month: 1)\n    ~N[2016-02-29 00:00:00]\n    iex> NaiveDateTime.shift(~N[2016-01-31 00:00:00], year: 4, day: 1)\n    ~N[2020-02-01 00:00:00]\n    iex> NaiveDateTime.shift(~N[2016-01-31 00:00:00], year: -2, day: 1)\n    ~N[2014-02-01 00:00:00]\n    iex> NaiveDateTime.shift(~N[2016-01-31 00:00:00], second: 45)\n    ~N[2016-01-31 00:00:45]\n    iex> NaiveDateTime.shift(~N[2016-01-31 00:00:00], microsecond: {100, 6})\n    ~N[2016-01-31 00:00:00.000100]\n\n    # leap years\n    iex> NaiveDateTime.shift(~N[2024-02-29 00:00:00], year: 1)\n    ~N[2025-02-28 00:00:00]\n    iex> NaiveDateTime.shift(~N[2024-02-29 00:00:00], year: 4)\n    ~N[2028-02-29 00:00:00]\n\n    # rounding down\n    iex> NaiveDateTime.shift(~N[2015-01-31 00:00:00], month: 1)\n    ~N[2015-02-28 00:00:00]\n\n",
     },
@@ -125,7 +135,9 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "from_iso8601/2",
       type: "function",
-      specs: ["@spec from_iso8601(String.t(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}"],
+      specs: [
+        "@spec from_iso8601(String.t(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}",
+      ],
       documentation:
         'Parses the extended "Date and time of day" format described by\n[ISO 8601:2019](https://en.wikipedia.org/wiki/ISO_8601).\n\nTime zone offset may be included in the string but they will be\nsimply discarded as such information is not included in naive date\ntimes.\n\nAs specified in the standard, the separator "T" may be omitted if\ndesired as there is no ambiguity within this function.\n\nNote leap seconds are not supported by the built-in Calendar.ISO.\n\n## Examples\n\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:07")\n    {:ok, ~N[2015-01-23 23:50:07]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07")\n    {:ok, ~N[2015-01-23 23:50:07]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07Z")\n    {:ok, ~N[2015-01-23 23:50:07]}\n\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:07.0")\n    {:ok, ~N[2015-01-23 23:50:07.0]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:07,0123456")\n    {:ok, ~N[2015-01-23 23:50:07.012345]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:07.0123456")\n    {:ok, ~N[2015-01-23 23:50:07.012345]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123Z")\n    {:ok, ~N[2015-01-23 23:50:07.123]}\n\n    iex> NaiveDateTime.from_iso8601("2015-01-23P23:50:07")\n    {:error, :invalid_format}\n    iex> NaiveDateTime.from_iso8601("2015:01:23 23-50-07")\n    {:error, :invalid_format}\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:07A")\n    {:error, :invalid_format}\n    iex> NaiveDateTime.from_iso8601("2015-01-23 23:50:61")\n    {:error, :invalid_time}\n    iex> NaiveDateTime.from_iso8601("2015-01-32 23:50:07")\n    {:error, :invalid_date}\n\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123+02:30")\n    {:ok, ~N[2015-01-23 23:50:07.123]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123+00:00")\n    {:ok, ~N[2015-01-23 23:50:07.123]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123-02:30")\n    {:ok, ~N[2015-01-23 23:50:07.123]}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123-00:00")\n    {:error, :invalid_format}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123-00:60")\n    {:error, :invalid_format}\n    iex> NaiveDateTime.from_iso8601("2015-01-23T23:50:07.123-24:00")\n    {:error, :invalid_format}\n\n',
     },
@@ -175,7 +187,9 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "convert!/2",
       type: "function",
-      specs: ["@spec convert!(Calendar.naive_datetime(), Calendar.calendar()) :: t()"],
+      specs: [
+        "@spec convert!(Calendar.naive_datetime(), Calendar.calendar()) :: t()",
+      ],
       documentation:
         "Converts the given `naive_datetime` from one calendar to another.\n\nIf it is not possible to convert unambiguously between the calendars\n(see `Calendar.compatible_calendars?/2`), an ArgumentError is raised.\n\n## Examples\n\nImagine someone implements `Calendar.Holocene`, a calendar based on the\nGregorian calendar that adds exactly 10,000 years to the current Gregorian\nyear:\n\n    iex> NaiveDateTime.convert!(~N[2000-01-01 13:30:15], Calendar.Holocene)\n    %NaiveDateTime{calendar: Calendar.Holocene, year: 12000, month: 1, day: 1,\n                   hour: 13, minute: 30, second: 15, microsecond: {0, 0}}\n\n",
     },
@@ -191,7 +205,9 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "compare/2",
       type: "function",
-      specs: ["@spec compare(Calendar.naive_datetime(), Calendar.naive_datetime()) ::\n        :lt | :eq | :gt"],
+      specs: [
+        "@spec compare(Calendar.naive_datetime(), Calendar.naive_datetime()) ::\n        :lt | :eq | :gt",
+      ],
       documentation:
         'Compares two `NaiveDateTime` structs.\n\nReturns `:gt` if first is later than the second\nand `:lt` for vice versa. If the two NaiveDateTime\nare equal `:eq` is returned.\n\n## Examples\n\n    iex> NaiveDateTime.compare(~N[2016-04-16 13:30:15], ~N[2016-04-28 16:19:25])\n    :lt\n    iex> NaiveDateTime.compare(~N[2016-04-16 13:30:15.1], ~N[2016-04-16 13:30:15.01])\n    :gt\n\nThis function can also be used to compare a DateTime without\nthe time zone information:\n\n    iex> dt = %DateTime{year: 2000, month: 2, day: 29, zone_abbr: "CET",\n    ...>                hour: 23, minute: 0, second: 7, microsecond: {0, 0},\n    ...>                utc_offset: 3600, std_offset: 0, time_zone: "Europe/Warsaw"}\n    iex> NaiveDateTime.compare(dt, ~N[2000-02-29 23:00:07])\n    :eq\n    iex> NaiveDateTime.compare(dt, ~N[2000-01-29 23:00:07])\n    :gt\n    iex> NaiveDateTime.compare(dt, ~N[2000-03-29 23:00:07])\n    :lt\n\n',
     },
@@ -205,14 +221,18 @@ export const NaiveDateTime: ModuleDoc = {
     {
       name: "before?/2",
       type: "function",
-      specs: ["@spec before?(Calendar.naive_datetime(), Calendar.naive_datetime()) :: boolean()"],
+      specs: [
+        "@spec before?(Calendar.naive_datetime(), Calendar.naive_datetime()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if the first `NaiveDateTime` is strictly earlier than the second.\n\n## Examples\n\n    iex> NaiveDateTime.before?(~N[2021-01-01 11:00:00], ~N[2022-02-02 11:00:00])\n    true\n    iex> NaiveDateTime.before?(~N[2021-01-01 11:00:00], ~N[2021-01-01 11:00:00])\n    false\n    iex> NaiveDateTime.before?(~N[2022-02-02 11:00:00], ~N[2021-01-01 11:00:00])\n    false\n\n",
     },
     {
       name: "after?/2",
       type: "function",
-      specs: ["@spec after?(Calendar.naive_datetime(), Calendar.naive_datetime()) :: boolean()"],
+      specs: [
+        "@spec after?(Calendar.naive_datetime(), Calendar.naive_datetime()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if the first `NaiveDateTime` is strictly later than the second.\n\n## Examples\n\n    iex> NaiveDateTime.after?(~N[2022-02-02 11:00:00], ~N[2021-01-01 11:00:00])\n    true\n    iex> NaiveDateTime.after?(~N[2021-01-01 11:00:00], ~N[2021-01-01 11:00:00])\n    false\n    iex> NaiveDateTime.after?(~N[2021-01-01 11:00:00], ~N[2022-02-02 11:00:00])\n    false\n\n",
     },

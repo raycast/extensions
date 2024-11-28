@@ -5,7 +5,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "update_in/3",
       type: "function",
-      specs: ["@spec update_in(Access.t(), [term(), ...], (term() -> term())) :: Access.t()"],
+      specs: [
+        "@spec update_in(Access.t(), [term(), ...], (term() -> term())) :: Access.t()",
+      ],
       documentation:
         'Updates a key in a nested structure.\n\nUses the `Access` module to traverse the structures\naccording to the given `keys`, unless the `key` is a\nfunction. If the key is a function, it will be invoked\nas specified in `get_and_update_in/3`.\n\n`data` is a nested structure (that is, a map, keyword\nlist, or struct that implements the `Access` behaviour).\nThe `fun` argument receives the value of `key` (or `nil`\nif `key` is not present) and the result replaces the value\nin the structure.\n\n## Examples\n\n    iex> users = %{"john" => %{age: 27}, "meg" => %{age: 23}}\n    iex> update_in(users, ["john", :age], &(&1 + 1))\n    %{"john" => %{age: 28}, "meg" => %{age: 23}}\n\nNote the current value given to the anonymous function may be `nil`.\nIf any of the intermediate values are nil, it will raise:\n\n    iex> users = %{"john" => %{age: 27}, "meg" => %{age: 23}}\n    iex> update_in(users, ["jane", :age], & &1 + 1)\n    ** (ArgumentError) could not put/update key :age on a nil value\n\n',
     },
@@ -65,7 +67,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "spawn_monitor/3",
       type: "function",
-      specs: ["@spec spawn_monitor(module(), atom(), list()) :: {pid(), reference()}"],
+      specs: [
+        "@spec spawn_monitor(module(), atom(), list()) :: {pid(), reference()}",
+      ],
       documentation:
         "Spawns the given module and function passing the given args,\nmonitors it and returns its PID and monitoring reference.\n\nTypically developers do not use the `spawn` functions, instead they use\nabstractions such as `Task`, `GenServer` and `Agent`, built on top of\n`spawn`, that spawns processes with more conveniences in terms of\nintrospection and debugging.\n\nCheck the `Process` module for more process-related functions.\n\nInlined by the compiler.\n\n## Examples\n\n    spawn_monitor(SomeModule, :function, [1, 2, 3])\n\n",
     },
@@ -107,7 +111,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "send/2",
       type: "function",
-      specs: ["@spec send(dest :: Process.dest(), message) :: message when message: any()"],
+      specs: [
+        "@spec send(dest :: Process.dest(), message) :: message when message: any()",
+      ],
       documentation:
         "Sends a message to the given `dest` and returns the message.\n\n`dest` may be a remote or local PID, a local port, a locally\nregistered name, or a tuple in the form of `{registered_name, node}` for a\nregistered name at another node.\n\nFor additional documentation, see the [`!` operator Erlang\ndocumentation](https://www.erlang.org/doc/reference_manual/expressions#send).\n\nInlined by the compiler.\n\n## Examples\n\n    iex> send(self(), :hello)\n    :hello\n\n",
     },
@@ -128,7 +134,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "rem/2",
       type: "function",
-      specs: ["@spec rem(integer(), neg_integer() | pos_integer()) :: integer()"],
+      specs: [
+        "@spec rem(integer(), neg_integer() | pos_integer()) :: integer()",
+      ],
       documentation:
         "Computes the remainder of an integer division.\n\n`rem/2` uses truncated division, which means that\nthe result will always have the sign of the `dividend`.\n\nRaises an `ArithmeticError` exception if one of the arguments is not an\ninteger, or when the `divisor` is `0`.\n\nAllowed in guard tests. Inlined by the compiler.\n\n## Examples\n\n    iex> rem(5, 2)\n    1\n    iex> rem(6, -4)\n    2\n\n",
     },
@@ -179,14 +187,18 @@ export const Kernel: ModuleDoc = {
     {
       name: "min/2",
       type: "function",
-      specs: ["@spec min(first, second) :: first | second when first: term(), second: term()"],
+      specs: [
+        "@spec min(first, second) :: first | second when first: term(), second: term()",
+      ],
       documentation:
         'Returns the smallest of the two given terms according to\ntheir structural comparison.\n\nIf the terms compare equal, the first one is returned.\n\nThis performs a structural comparison where all Elixir\nterms can be compared with each other. See the ["Structural\ncomparison"](#module-structural-comparison) section\nfor more information.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> min(1, 2)\n    1\n    iex> min("foo", "bar")\n    "bar"\n\n',
     },
     {
       name: "max/2",
       type: "function",
-      specs: ["@spec max(first, second) :: first | second when first: term(), second: term()"],
+      specs: [
+        "@spec max(first, second) :: first | second when first: term(), second: term()",
+      ],
       documentation:
         'Returns the biggest of the two given terms according to\ntheir structural comparison.\n\nIf the terms compare equal, the first one is returned.\n\nThis performs a structural comparison where all Elixir\nterms can be compared with each other. See the ["Structural\ncomparison"](#module-structural-comparison) section\nfor more information.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> max(1, 2)\n    2\n    iex> max("a", "b")\n    "b"\n\n',
     },
@@ -333,14 +345,18 @@ export const Kernel: ModuleDoc = {
     {
       name: "inspect/2",
       type: "function",
-      specs: ["@spec inspect(\n        Inspect.t(),\n        keyword()\n      ) :: String.t()"],
+      specs: [
+        "@spec inspect(\n        Inspect.t(),\n        keyword()\n      ) :: String.t()",
+      ],
       documentation:
         'Inspects the given argument according to the `Inspect` protocol.\nThe second argument is a keyword list with options to control\ninspection.\n\n## Options\n\n`inspect/2` accepts a list of options that are internally\ntranslated to an `Inspect.Opts` struct. Check the docs for\n`Inspect.Opts` to see the supported options.\n\n## Examples\n\n    iex> inspect(:foo)\n    ":foo"\n\n    iex> inspect([1, 2, 3, 4, 5], limit: 3)\n    "[1, 2, 3, ...]"\n\n    iex> inspect([1, 2, 3], pretty: true, width: 0)\n    "[1,\\n 2,\\n 3]"\n\n    iex> inspect("olá" <> <<0>>)\n    "<<111, 108, 195, 161, 0>>"\n\n    iex> inspect("olá" <> <<0>>, binaries: :as_strings)\n    "\\"olá\\\\0\\""\n\n    iex> inspect("olá", binaries: :as_binaries)\n    "<<111, 108, 195, 161>>"\n\n    iex> inspect(~c"bar")\n    "~c\\"bar\\""\n\n    iex> inspect([0 | ~c"bar"])\n    "[0, 98, 97, 114]"\n\n    iex> inspect(100, base: :octal)\n    "0o144"\n\n    iex> inspect(100, base: :hex)\n    "0x64"\n\nNote that the `Inspect` protocol does not necessarily return a valid\nrepresentation of an Elixir term. In such cases, the inspected result\nmust start with `#`. For example, inspecting a function will return:\n\n    inspect(fn a, b -> a + b end)\n    #=> #Function<...>\n\nThe `Inspect` protocol can be derived to hide certain fields\nfrom structs, so they don\'t show up in logs, inspects and similar.\nSee the "Deriving" section of the documentation of the `Inspect`\nprotocol for more information.\n',
     },
     {
       name: "hd/1",
       type: "function",
-      specs: ["@spec hd(nonempty_maybe_improper_list(elem, any())) :: elem when elem: term()"],
+      specs: [
+        "@spec hd(nonempty_maybe_improper_list(elem, any())) :: elem when elem: term()",
+      ],
       documentation:
         "Returns the head of a list. Raises `ArgumentError` if the list is empty.\n\nThe head of a list is its first element.\n\nIt works with improper lists.\n\nAllowed in guard tests. Inlined by the compiler.\n\n## Examples\n\n    hd([1, 2, 3, 4])\n    #=> 1\n\n    hd([1 | 2])\n    #=> 1\n\nGiving it an empty list raises:\n\n    hd([])\n    ** (ArgumentError) argument error\n\n",
     },
@@ -363,7 +379,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "function_exported?/3",
       type: "function",
-      specs: ["@spec function_exported?(module(), atom(), arity()) :: boolean()"],
+      specs: [
+        "@spec function_exported?(module(), atom(), arity()) :: boolean()",
+      ],
       documentation:
         "Returns `true` if `module` is loaded and contains a\npublic `function` with the given `arity`, otherwise `false`.\n\nNote that this function does not load the module in case\nit is not loaded. Check `Code.ensure_loaded/1` for more\ninformation.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> function_exported?(Enum, :map, 2)\n    true\n\n    iex> function_exported?(Enum, :map, 10)\n    false\n\n    iex> function_exported?(List, :to_string, 1)\n    true\n",
     },
@@ -391,7 +409,9 @@ export const Kernel: ModuleDoc = {
     {
       name: "div/2",
       type: "function",
-      specs: ["@spec div(integer(), neg_integer() | pos_integer()) :: integer()"],
+      specs: [
+        "@spec div(integer(), neg_integer() | pos_integer()) :: integer()",
+      ],
       documentation:
         "Performs an integer division.\n\nRaises an `ArithmeticError` exception if one of the arguments is not an\ninteger, or when the `divisor` is `0`.\n\n`div/2` performs *truncated* integer division. This means that\nthe result is always rounded towards zero.\n\nIf you want to perform floored integer division (rounding towards negative infinity),\nuse `Integer.floor_div/2` instead.\n\nAllowed in guard tests. Inlined by the compiler.\n\n## Examples\n\n    div(5, 2)\n    #=> 2\n\n    div(6, -4)\n    #=> -1\n\n    div(-99, 2)\n    #=> -49\n\n    div(100, 0)\n    ** (ArithmeticError) bad argument in arithmetic expression\n\n",
     },
@@ -433,14 +453,18 @@ export const Kernel: ModuleDoc = {
     {
       name: "binary_part/3",
       type: "function",
-      specs: ["@spec binary_part(binary(), non_neg_integer(), integer()) :: binary()"],
+      specs: [
+        "@spec binary_part(binary(), non_neg_integer(), integer()) :: binary()",
+      ],
       documentation:
         'Extracts the part of the binary at `start` with `size`.\n\nIf `start` or `size` reference in any way outside the binary,\nan `ArgumentError` exception is raised.\n\nAllowed in guard tests. Inlined by the compiler.\n\n## Examples\n\n    iex> binary_part("foo", 1, 2)\n    "oo"\n\nA negative `size` can be used to extract bytes that come *before* the byte\nat `start`:\n\n    iex> binary_part("Hello", 5, -3)\n    "llo"\n\nAn `ArgumentError` is raised when the `size` is outside of the binary:\n\n    binary_part("Hello", 0, 10)\n    ** (ArgumentError) argument error\n\n',
     },
     {
       name: "apply/3",
       type: "function",
-      specs: ["@spec apply(module(), function_name :: atom(), [any()]) :: any()"],
+      specs: [
+        "@spec apply(module(), function_name :: atom(), [any()]) :: any()",
+      ],
       documentation:
         "Invokes the given function from `module` with the list of\narguments `args`.\n\n`apply/3` is used to invoke functions where the module, function\nname or arguments are defined dynamically at runtime. For this\nreason, you can't invoke macros using `apply/3`, only functions.\n\nIf the number of arguments and the function name are known at compile time,\nprefer `module.function(arg_1, arg_2, ..., arg_n)` as it is clearer than\n`apply(module, :function, [arg_1, arg_2, ..., arg_n])`.\n\n`apply/3` cannot be used to call private functions.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> apply(Enum, :reverse, [[1, 2, 3]])\n    [3, 2, 1]\n\n",
     },
@@ -548,7 +572,10 @@ export const Kernel: ModuleDoc = {
     {
       name: "++/2",
       type: "function",
-      specs: ["@spec [] ++ a :: a when a: term()", "@spec [...] ++ term() :: maybe_improper_list()"],
+      specs: [
+        "@spec [] ++ a :: a when a: term()",
+        "@spec [...] ++ term() :: maybe_improper_list()",
+      ],
       documentation:
         'List concatenation operator. Concatenates a proper list and a term, returning a list.\n\nThe complexity of `a ++ b` is proportional to `length(a)`, so avoid repeatedly\nappending to lists of arbitrary length, for example, `list ++ [element]`.\nInstead, consider prepending via `[element | rest]` and then reversing.\n\nIf the `right` operand is not a proper list, it returns an improper list.\nIf the `left` operand is not a proper list, it raises `ArgumentError`.\nIf the `left` operand is an empty list, it returns the `right` operand.\n\nInlined by the compiler.\n\n## Examples\n\n    iex> [1] ++ [2, 3]\n    [1, 2, 3]\n\n    iex> ~c"foo" ++ ~c"bar"\n    ~c"foobar"\n\n    # a non-list on the right will return an improper list\n    # with said element at the end\n    iex> [1, 2] ++ 3\n    [1, 2 | 3]\n    iex> [1, 2] ++ {3, 4}\n    [1, 2 | {3, 4}]\n\n    # improper list on the right will return an improper list\n    iex> [1] ++ [2 | 3]\n    [1, 2 | 3]\n\n    # empty list on the left will return the right operand\n    iex> [] ++ 1\n    1\n\nThe `++/2` operator is right associative, meaning:\n\n    iex> [1, 2, 3] -- [1] ++ [2]\n    [3]\n\nAs it is equivalent to:\n\n    iex> [1, 2, 3] -- ([1] ++ [2])\n    [3]\n\n',
     },
@@ -905,7 +932,8 @@ export const Kernel: ModuleDoc = {
       name: "defprotocol/2",
       type: "macro",
       specs: [],
-      documentation: "Defines a protocol.\n\nSee the `Protocol` module for more information.\n",
+      documentation:
+        "Defines a protocol.\n\nSee the `Protocol` module for more information.\n",
     },
     {
       name: "defp/2",

@@ -21,8 +21,11 @@ export const Exception: ModuleDoc = {
     {
       name: "format_stacktrace_entry/1",
       type: "function",
-      specs: ["@spec format_stacktrace_entry(stacktrace_entry()) :: String.t()"],
-      documentation: "Receives a stacktrace entry and formats it into a string.\n",
+      specs: [
+        "@spec format_stacktrace_entry(stacktrace_entry()) :: String.t()",
+      ],
+      documentation:
+        "Receives a stacktrace entry and formats it into a string.\n",
     },
     {
       name: "format_stacktrace/1",
@@ -34,7 +37,9 @@ export const Exception: ModuleDoc = {
     {
       name: "format_mfa/3",
       type: "function",
-      specs: ["@spec format_mfa(module(), atom(), arity_or_args()) :: String.t()"],
+      specs: [
+        "@spec format_mfa(module(), atom(), arity_or_args()) :: String.t()",
+      ],
       documentation:
         'Receives a module, fun and arity and formats it\nas shown in stacktraces. The arity may also be a list\nof arguments.\n\n## Examples\n\n    iex> Exception.format_mfa(Foo, :bar, 1)\n    "Foo.bar/1"\n\n    iex> Exception.format_mfa(Foo, :bar, [])\n    "Foo.bar()"\n\n    iex> Exception.format_mfa(nil, :bar, [])\n    "nil.bar()"\n\nAnonymous functions are reported as -func/arity-anonfn-count-,\nwhere func is the name of the enclosing function. Convert to\n"anonymous fn in func/arity"\n',
     },
@@ -50,7 +55,9 @@ export const Exception: ModuleDoc = {
     {
       name: "format_file_line/3",
       type: "function",
-      specs: ["@spec format_file_line(String.t() | nil, non_neg_integer() | nil, String.t()) ::\n        String.t()"],
+      specs: [
+        "@spec format_file_line(String.t() | nil, non_neg_integer() | nil, String.t()) ::\n        String.t()",
+      ],
       documentation:
         'Formats the given `file` and `line` as shown in stacktraces.\n\nIf any of the values are `nil`, they are omitted.\n\n## Examples\n\n    iex> Exception.format_file_line("foo", 1)\n    "foo:1:"\n\n    iex> Exception.format_file_line("foo", nil)\n    "foo:"\n\n    iex> Exception.format_file_line(nil, nil)\n    ""\n\n',
     },
@@ -128,7 +135,12 @@ export const Exception: ModuleDoc = {
   ],
   macros: [],
   types: [
-    { name: "location/0", type: "type", specs: ["@type location() :: keyword()"], documentation: null },
+    {
+      name: "location/0",
+      type: "type",
+      specs: ["@type location() :: keyword()"],
+      documentation: null,
+    },
     {
       name: "arity_or_args/0",
       type: "type",
@@ -143,7 +155,12 @@ export const Exception: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "stacktrace/0", type: "type", specs: ["@type stacktrace() :: [stacktrace_entry()]"], documentation: null },
+    {
+      name: "stacktrace/0",
+      type: "type",
+      specs: ["@type stacktrace() :: [stacktrace_entry()]"],
+      documentation: null,
+    },
     {
       name: "non_error_kind/0",
       type: "type",

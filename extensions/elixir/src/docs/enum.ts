@@ -5,7 +5,9 @@ export const Enum: ModuleDoc = {
     {
       name: "zip_with/3",
       type: "function",
-      specs: ["@spec zip_with(t(), t(), (enum1_elem :: term(), enum2_elem :: term() -> term())) ::\n        [term()]"],
+      specs: [
+        "@spec zip_with(t(), t(), (enum1_elem :: term(), enum2_elem :: term() -> term())) ::\n        [term()]",
+      ],
       documentation:
         "Zips corresponding elements from two enumerables into a list, transforming them with\nthe `zip_fun` function as it goes.\n\nThe corresponding elements from each collection are passed to the provided two-arity `zip_fun`\nfunction in turn. Returns a list that contains the result of calling `zip_fun` for each pair of\nelements.\n\nThe zipping finishes as soon as either enumerable runs out of elements.\n\n## Zipping Maps\n\nIt's important to remember that zipping inherently relies on order.\nIf you zip two lists you get the element at the index from each list in turn.\nIf we zip two maps together it's tempting to think that you will get the given\nkey in the left map and the matching key in the right map, but there is no such\nguarantee because map keys are not ordered! Consider the following:\n\n    left =  %{:a => 1, 1 => 3}\n    right = %{:a => 1, :b => :c}\n    Enum.zip(left, right)\n    # [{{1, 3}, {:a, 1}}, {{:a, 1}, {:b, :c}}]\n\nAs you can see `:a` does not get paired with `:a`. If this is what you want,\nyou should use `Map.merge/3`.\n\n## Examples\n\n    iex> Enum.zip_with([1, 2], [3, 4], fn x, y -> x + y end)\n    [4, 6]\n\n    iex> Enum.zip_with([1, 2], [3, 4, 5, 6], fn x, y -> x + y end)\n    [4, 6]\n\n    iex> Enum.zip_with([1, 2, 5, 6], [3, 4], fn x, y -> x + y end)\n    [4, 6]\n\n",
     },
@@ -28,7 +30,9 @@ export const Enum: ModuleDoc = {
     {
       name: "zip_reduce/3",
       type: "function",
-      specs: ["@spec zip_reduce(t(), acc, ([term()], acc -> acc)) :: acc when acc: term()"],
+      specs: [
+        "@spec zip_reduce(t(), acc, ([term()], acc -> acc)) :: acc when acc: term()",
+      ],
       documentation:
         "Reduces over all of the given enumerables, halting as soon as any enumerable is\nempty.\n\nThe reducer will receive 2 args: a list of elements (one from each enum) and the\naccumulator.\n\nIn practice, the behavior provided by this function can be achieved with:\n\n    Enum.reduce(Stream.zip(enums), acc, reducer)\n\nBut `zip_reduce/3` exists for convenience purposes.\n\n## Examples\n\n    iex> enums = [[1, 1], [2, 2], [3, 3]]\n    ...>  Enum.zip_reduce(enums, [], fn elements, acc ->\n    ...>    [List.to_tuple(elements) | acc]\n    ...> end)\n    [{1, 2, 3}, {1, 2, 3}]\n\n    iex> enums = [[1, 2], [a: 3, b: 4], [5, 6]]\n    ...> Enum.zip_reduce(enums, [], fn elements, acc ->\n    ...>   [List.to_tuple(elements) | acc]\n    ...> end)\n    [{2, {:b, 4}, 6}, {1, {:a, 3}, 5}]\n",
     },
@@ -42,7 +46,9 @@ export const Enum: ModuleDoc = {
     {
       name: "zip/1",
       type: "function",
-      specs: ["@spec zip(enumerables) :: [tuple()] when enumerables: [t()] | t()"],
+      specs: [
+        "@spec zip(enumerables) :: [tuple()] when enumerables: [t()] | t()",
+      ],
       documentation:
         'Zips corresponding elements from a finite collection of enumerables\ninto a list of tuples.\n\nThe zipping finishes as soon as any enumerable in the given collection completes.\n\n## Examples\n\n    iex> Enum.zip([[1, 2, 3], [:a, :b, :c], ["foo", "bar", "baz"]])\n    [{1, :a, "foo"}, {2, :b, "bar"}, {3, :c, "baz"}]\n\n    iex> Enum.zip([[1, 2, 3, 4, 5], [:a, :b, :c]])\n    [{1, :a}, {2, :b}, {3, :c}]\n\n',
     },
@@ -87,7 +93,9 @@ export const Enum: ModuleDoc = {
     {
       name: "take_while/2",
       type: "function",
-      specs: ["@spec take_while(t(), (element() -> as_boolean(term()))) :: list()"],
+      specs: [
+        "@spec take_while(t(), (element() -> as_boolean(term()))) :: list()",
+      ],
       documentation:
         "Takes the elements from the beginning of the `enumerable` while `fun` returns\na truthy value.\n\n## Examples\n\n    iex> Enum.take_while([1, 2, 3], fn x -> x < 3 end)\n    [1, 2]\n\n",
     },
@@ -122,14 +130,18 @@ export const Enum: ModuleDoc = {
     {
       name: "split_with/2",
       type: "function",
-      specs: ["@spec split_with(t(), (element() -> as_boolean(term()))) :: {list(), list()}"],
+      specs: [
+        "@spec split_with(t(), (element() -> as_boolean(term()))) :: {list(), list()}",
+      ],
       documentation:
         "Splits the `enumerable` in two lists according to the given function `fun`.\n\nSplits the given `enumerable` in two lists by calling `fun` with each element\nin the `enumerable` as its only argument. Returns a tuple with the first list\ncontaining all the elements in `enumerable` for which applying `fun` returned\na truthy value, and a second list with all the elements for which applying\n`fun` returned a falsy value (`false` or `nil`).\n\nThe elements in both the returned lists are in the same relative order as they\nwere in the original enumerable (if such enumerable was ordered, like a\nlist). See the examples below.\n\n## Examples\n\n    iex> Enum.split_with([5, 4, 3, 2, 1, 0], fn x -> rem(x, 2) == 0 end)\n    {[4, 2, 0], [5, 3, 1]}\n\n    iex> Enum.split_with([a: 1, b: -2, c: 1, d: -3], fn {_k, v} -> v < 0 end)\n    {[b: -2, d: -3], [a: 1, c: 1]}\n\n    iex> Enum.split_with([a: 1, b: -2, c: 1, d: -3], fn {_k, v} -> v > 50 end)\n    {[], [a: 1, b: -2, c: 1, d: -3]}\n\n    iex> Enum.split_with([], fn {_k, v} -> v > 50 end)\n    {[], []}\n\n",
     },
     {
       name: "split_while/2",
       type: "function",
-      specs: ["@spec split_while(t(), (element() -> as_boolean(term()))) :: {list(), list()}"],
+      specs: [
+        "@spec split_while(t(), (element() -> as_boolean(term()))) :: {list(), list()}",
+      ],
       documentation:
         "Splits enumerable in two at the position of the element for which\n`fun` returns a falsy value (`false` or `nil`) for the first time.\n\nIt returns a two-element tuple with two lists of elements.\nThe element that triggered the split is part of the second list.\n\n## Examples\n\n    iex> Enum.split_while([1, 2, 3, 4], fn x -> x < 3 end)\n    {[1, 2], [3, 4]}\n\n    iex> Enum.split_while([1, 2, 3, 4], fn x -> x < 0 end)\n    {[], [1, 2, 3, 4]}\n\n    iex> Enum.split_while([1, 2, 3, 4], fn x -> x > 0 end)\n    {[1, 2, 3, 4], []}\n\n",
     },
@@ -210,7 +222,9 @@ export const Enum: ModuleDoc = {
     {
       name: "reverse_slice/3",
       type: "function",
-      specs: ["@spec reverse_slice(t(), non_neg_integer(), non_neg_integer()) :: list()"],
+      specs: [
+        "@spec reverse_slice(t(), non_neg_integer(), non_neg_integer()) :: list()",
+      ],
       documentation:
         "Reverses the `enumerable` in the range from initial `start_index`\nthrough `count` elements.\n\nIf `count` is greater than the size of the rest of the `enumerable`,\nthen this function will reverse the rest of the enumerable.\n\n## Examples\n\n    iex> Enum.reverse_slice([1, 2, 3, 4, 5, 6], 2, 4)\n    [1, 2, 6, 5, 4, 3]\n\n",
     },
@@ -336,28 +350,36 @@ export const Enum: ModuleDoc = {
     {
       name: "map_reduce/3",
       type: "function",
-      specs: ["@spec map_reduce(t(), acc(), (element(), acc() -> {element(), acc()})) ::\n        {list(), acc()}"],
+      specs: [
+        "@spec map_reduce(t(), acc(), (element(), acc() -> {element(), acc()})) ::\n        {list(), acc()}",
+      ],
       documentation:
         "Invokes the given function to each element in the `enumerable` to reduce\nit to a single element, while keeping an accumulator.\n\nReturns a tuple where the first element is the mapped enumerable and\nthe second one is the final accumulator.\n\nThe function, `fun`, receives two arguments: the first one is the\nelement, and the second one is the accumulator. `fun` must return\na tuple with two elements in the form of `{result, accumulator}`.\n\nFor maps, the first tuple element must be a `{key, value}` tuple.\n\n## Examples\n\n    iex> Enum.map_reduce([1, 2, 3], 0, fn x, acc -> {x * 2, x + acc} end)\n    {[2, 4, 6], 6}\n\n",
     },
     {
       name: "map_join/3",
       type: "function",
-      specs: ["@spec map_join(t(), String.t(), (element() -> String.Chars.t())) :: String.t()"],
+      specs: [
+        "@spec map_join(t(), String.t(), (element() -> String.Chars.t())) :: String.t()",
+      ],
       documentation:
         'Maps and joins the given `enumerable` in one pass.\n\nIf `joiner` is not passed at all, it defaults to an empty string.\n\nAll elements returned from invoking the `mapper` must be convertible to\na string, otherwise an error is raised.\n\n## Examples\n\n    iex> Enum.map_join([1, 2, 3], &(&1 * 2))\n    "246"\n\n    iex> Enum.map_join([1, 2, 3], " = ", &(&1 * 2))\n    "2 = 4 = 6"\n\n',
     },
     {
       name: "map_intersperse/3",
       type: "function",
-      specs: ["@spec map_intersperse(t(), element(), (element() -> any())) :: list()"],
+      specs: [
+        "@spec map_intersperse(t(), element(), (element() -> any())) :: list()",
+      ],
       documentation:
         "Maps and intersperses the given enumerable in one pass.\n\n## Examples\n\n    iex> Enum.map_intersperse([1, 2, 3], :a, &(&1 * 2))\n    [2, :a, 4, :a, 6]\n",
     },
     {
       name: "map_every/3",
       type: "function",
-      specs: ["@spec map_every(t(), non_neg_integer(), (element() -> any())) :: list()"],
+      specs: [
+        "@spec map_every(t(), non_neg_integer(), (element() -> any())) :: list()",
+      ],
       documentation:
         "Returns a list of results of invoking `fun` on every `nth`\nelement of `enumerable`, starting with the first element.\n\nThe first element is always passed to the given function, unless `nth` is `0`.\n\nThe second argument specifying every `nth` element must be a non-negative\ninteger.\n\nIf `nth` is `0`, then `enumerable` is directly converted to a list,\nwithout `fun` being ever applied.\n\n## Examples\n\n    iex> Enum.map_every(1..10, 2, fn x -> x + 1000 end)\n    [1001, 2, 1003, 4, 1005, 6, 1007, 8, 1009, 10]\n\n    iex> Enum.map_every(1..10, 3, fn x -> x + 1000 end)\n    [1001, 2, 3, 1004, 5, 6, 1007, 8, 9, 1010]\n\n    iex> Enum.map_every(1..5, 0, fn x -> x + 1000 end)\n    [1, 2, 3, 4, 5]\n\n    iex> Enum.map_every([1, 2, 3], 1, fn x -> x + 1000 end)\n    [1001, 1002, 1003]\n\n",
     },
@@ -378,7 +400,9 @@ export const Enum: ModuleDoc = {
     {
       name: "into/3",
       type: "function",
-      specs: ["@spec into(Enumerable.t(), Collectable.t(), (term() -> term())) ::\n        Collectable.t()"],
+      specs: [
+        "@spec into(Enumerable.t(), Collectable.t(), (term() -> term())) ::\n        Collectable.t()",
+      ],
       documentation:
         "Inserts the given `enumerable` into a `collectable` according to the\ntransformation function.\n\n## Examples\n\n    iex> Enum.into([1, 2, 3], [], fn x -> x * 3 end)\n    [3, 6, 9]\n\n    iex> Enum.into(%{a: 1, b: 2}, %{c: 3}, fn {k, v} -> {k, v * 2} end)\n    %{a: 2, b: 4, c: 3}\n\n",
     },
@@ -399,7 +423,9 @@ export const Enum: ModuleDoc = {
     {
       name: "group_by/3",
       type: "function",
-      specs: ["@spec group_by(t(), (element() -> any()), (element() -> any())) :: map()"],
+      specs: [
+        "@spec group_by(t(), (element() -> any()), (element() -> any())) :: map()",
+      ],
       documentation:
         'Splits the `enumerable` into groups based on `key_fun`.\n\nThe result is a map where each key is given by `key_fun`\nand each value is a list of elements given by `value_fun`.\nThe order of elements within each list is preserved from the `enumerable`.\nHowever, like all maps, the resulting map is unordered.\n\n## Examples\n\n    iex> Enum.group_by(~w{ant buffalo cat dingo}, &String.length/1)\n    %{3 => ["ant", "cat"], 5 => ["dingo"], 7 => ["buffalo"]}\n\n    iex> Enum.group_by(~w{ant buffalo cat dingo}, &String.length/1, &String.first/1)\n    %{3 => ["a", "c"], 5 => ["d"], 7 => ["b"]}\n\nThe key can be any Elixir value. For example, you may use a tuple\nto group by multiple keys:\n\n    iex> collection = [\n    ...>   %{id: 1, lang: "Elixir", seq: 1},\n    ...>   %{id: 1, lang: "Java", seq: 1},\n    ...>   %{id: 1, lang: "Ruby", seq: 2},\n    ...>   %{id: 2, lang: "Python", seq: 1},\n    ...>   %{id: 2, lang: "C#", seq: 2},\n    ...>   %{id: 2, lang: "Haskell", seq: 2},\n    ...> ]\n    iex> Enum.group_by(collection, &{&1.id, &1.seq})\n    %{\n      {1, 1} => [%{id: 1, lang: "Elixir", seq: 1}, %{id: 1, lang: "Java", seq: 1}],\n      {1, 2} => [%{id: 1, lang: "Ruby", seq: 2}],\n      {2, 1} => [%{id: 2, lang: "Python", seq: 1}],\n      {2, 2} => [%{id: 2, lang: "C#", seq: 2}, %{id: 2, lang: "Haskell", seq: 2}]\n    }\n    iex> Enum.group_by(collection, &{&1.id, &1.seq}, &{&1.id, &1.lang})\n    %{\n      {1, 1} => [{1, "Elixir"}, {1, "Java"}],\n      {1, 2} => [{1, "Ruby"}],\n      {2, 1} => [{2, "Python"}],\n      {2, 2} => [{2, "C#"}, {2, "Haskell"}]\n    }\n\n',
     },
@@ -445,14 +471,18 @@ export const Enum: ModuleDoc = {
     {
       name: "find_index/2",
       type: "function",
-      specs: ["@spec find_index(t(), (element() -> any())) :: non_neg_integer() | nil"],
+      specs: [
+        "@spec find_index(t(), (element() -> any())) :: non_neg_integer() | nil",
+      ],
       documentation:
         "Similar to `find/3`, but returns the index (zero-based)\nof the element instead of the element itself.\n\n## Examples\n\n    iex> Enum.find_index([2, 4, 6], fn x -> rem(x, 2) == 1 end)\n    nil\n\n    iex> Enum.find_index([2, 3, 4], fn x -> rem(x, 2) == 1 end)\n    1\n\n",
     },
     {
       name: "find/3",
       type: "function",
-      specs: ["@spec find(t(), default(), (element() -> any())) :: element() | default()"],
+      specs: [
+        "@spec find(t(), default(), (element() -> any())) :: element() | default()",
+      ],
       documentation:
         "Returns the first element for which `fun` returns a truthy value.\nIf no such element is found, returns `default`.\n\n## Examples\n\n    iex> Enum.find([2, 3, 4], fn x -> rem(x, 2) == 1 end)\n    3\n\n    iex> Enum.find([2, 4, 6], fn x -> rem(x, 2) == 1 end)\n    nil\n    iex> Enum.find([2, 4, 6], 0, fn x -> rem(x, 2) == 1 end)\n    0\n\n",
     },
@@ -494,7 +524,9 @@ export const Enum: ModuleDoc = {
     {
       name: "drop_while/2",
       type: "function",
-      specs: ["@spec drop_while(t(), (element() -> as_boolean(term()))) :: list()"],
+      specs: [
+        "@spec drop_while(t(), (element() -> as_boolean(term()))) :: list()",
+      ],
       documentation:
         "Drops elements at the beginning of the `enumerable` while `fun` returns a\ntruthy value.\n\n## Examples\n\n    iex> Enum.drop_while([1, 2, 3, 2, 1], fn x -> x < 3 end)\n    [3, 2, 1]\n\n",
     },
@@ -529,7 +561,9 @@ export const Enum: ModuleDoc = {
     {
       name: "count_until/3",
       type: "function",
-      specs: ["@spec count_until(t(), (element() -> as_boolean(term())), pos_integer()) ::\n        non_neg_integer()"],
+      specs: [
+        "@spec count_until(t(), (element() -> as_boolean(term())), pos_integer()) ::\n        non_neg_integer()",
+      ],
       documentation:
         "Counts the elements in the enumerable for which `fun` returns a truthy value, stopping at `limit`.\n\nSee `count/2` and `count_until/2` for more information.\n\n## Examples\n\n    iex> Enum.count_until(1..20, fn x -> rem(x, 2) == 0 end, 7)\n    7\n    iex> Enum.count_until(1..20, fn x -> rem(x, 2) == 0 end, 11)\n    10\n",
     },
@@ -543,7 +577,9 @@ export const Enum: ModuleDoc = {
     {
       name: "count/2",
       type: "function",
-      specs: ["@spec count(t(), (element() -> as_boolean(term()))) :: non_neg_integer()"],
+      specs: [
+        "@spec count(t(), (element() -> as_boolean(term()))) :: non_neg_integer()",
+      ],
       documentation:
         "Returns the count of elements in the `enumerable` for which `fun` returns\na truthy value.\n\n## Examples\n\n    iex> Enum.count([1, 2, 3, 4, 5], fn x -> rem(x, 2) == 0 end)\n    2\n\n",
     },
@@ -580,7 +616,9 @@ export const Enum: ModuleDoc = {
     {
       name: "chunk_every/4",
       type: "function",
-      specs: ["@spec chunk_every(t(), pos_integer(), pos_integer(), t() | :discard) :: [list()]"],
+      specs: [
+        "@spec chunk_every(t(), pos_integer(), pos_integer(), t() | :discard) :: [list()]",
+      ],
       documentation:
         "Returns list of lists containing `count` elements each, where\neach new chunk starts `step` elements into the `enumerable`.\n\n`step` is optional and, if not passed, defaults to `count`, i.e.\nchunks do not overlap. Chunking will stop as soon as the collection\nends or when we emit an incomplete chunk.\n\nIf the last chunk does not have `count` elements to fill the chunk,\nelements are taken from `leftover` to fill in the chunk. If `leftover`\ndoes not have enough elements to fill the chunk, then a partial chunk\nis returned with less than `count` elements.\n\nIf `:discard` is given in `leftover`, the last chunk is discarded\nunless it has exactly `count` elements.\n\n## Examples\n\n    iex> Enum.chunk_every([1, 2, 3, 4, 5, 6], 2)\n    [[1, 2], [3, 4], [5, 6]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4, 5, 6], 3, 2, :discard)\n    [[1, 2, 3], [3, 4, 5]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4, 5, 6], 3, 2, [7])\n    [[1, 2, 3], [3, 4, 5], [5, 6, 7]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4], 3, 3, [])\n    [[1, 2, 3], [4]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4], 10)\n    [[1, 2, 3, 4]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4, 5], 2, 3, [])\n    [[1, 2], [4, 5]]\n\n    iex> Enum.chunk_every([1, 2, 3, 4], 3, 3, Stream.cycle([0]))\n    [[1, 2, 3], [4, 0, 0]]\n\n",
     },
@@ -607,7 +645,9 @@ export const Enum: ModuleDoc = {
     {
       name: "any?/2",
       type: "function",
-      specs: ["@spec any?(t(), (element() -> as_boolean(term()))) :: boolean()"],
+      specs: [
+        "@spec any?(t(), (element() -> as_boolean(term()))) :: boolean()",
+      ],
       documentation:
         "Returns `true` if `fun.(element)` is truthy for at least one element in `enumerable`.\n\nIterates over the `enumerable` and invokes `fun` on each element. When an invocation\nof `fun` returns a truthy value (neither `false` nor `nil`) iteration stops\nimmediately and `true` is returned. In all other cases `false` is returned.\n\n## Examples\n\n    iex> Enum.any?([2, 4, 6], fn x -> rem(x, 2) == 1 end)\n    false\n\n    iex> Enum.any?([2, 3, 4], fn x -> rem(x, 2) == 1 end)\n    true\n\n    iex> Enum.any?([], fn x -> x > 0 end)\n    false\n\n",
     },
@@ -621,7 +661,9 @@ export const Enum: ModuleDoc = {
     {
       name: "all?/2",
       type: "function",
-      specs: ["@spec all?(t(), (element() -> as_boolean(term()))) :: boolean()"],
+      specs: [
+        "@spec all?(t(), (element() -> as_boolean(term()))) :: boolean()",
+      ],
       documentation:
         "Returns `true` if `fun.(element)` is truthy for all elements in `enumerable`.\n\nIterates over `enumerable` and invokes `fun` on each element. If `fun` ever\nreturns a falsy value (`false` or `nil`), iteration stops immediately and\n`false` is returned. Otherwise, `true` is returned.\n\n## Examples\n\n    iex> Enum.all?([2, 4, 6], fn x -> rem(x, 2) == 0 end)\n    true\n\n    iex> Enum.all?([2, 3, 4], fn x -> rem(x, 2) == 0 end)\n    false\n\n    iex> Enum.all?([], fn _ -> nil end)\n    true\n\nAs the last example shows, `Enum.all?/2` returns `true` if `enumerable` is\nempty, regardless of `fun`. In an empty enumerable there is no element for\nwhich `fun` returns a falsy value, so the result must be `true`. This is a\nwell-defined logical argument for empty collections.\n\n",
     },
@@ -637,15 +679,35 @@ export const Enum: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "default/0", type: "type", specs: ["@type default() :: any()"], documentation: null },
+    {
+      name: "default/0",
+      type: "type",
+      specs: ["@type default() :: any()"],
+      documentation: null,
+    },
     {
       name: "index/0",
       type: "type",
       specs: ["@type index() :: integer()"],
       documentation: "Zero-based index. It can also be a negative integer.",
     },
-    { name: "element/0", type: "type", specs: ["@type element() :: any()"], documentation: null },
-    { name: "acc/0", type: "type", specs: ["@type acc() :: any()"], documentation: null },
-    { name: "t/0", type: "type", specs: ["@type t() :: Enumerable.t()"], documentation: null },
+    {
+      name: "element/0",
+      type: "type",
+      specs: ["@type element() :: any()"],
+      documentation: null,
+    },
+    {
+      name: "acc/0",
+      type: "type",
+      specs: ["@type acc() :: any()"],
+      documentation: null,
+    },
+    {
+      name: "t/0",
+      type: "type",
+      specs: ["@type t() :: Enumerable.t()"],
+      documentation: null,
+    },
   ],
 };

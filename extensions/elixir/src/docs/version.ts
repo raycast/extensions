@@ -12,14 +12,18 @@ export const Version: ModuleDoc = {
     {
       name: "parse_requirement!/1",
       type: "function",
-      specs: ["@spec parse_requirement!(String.t()) :: Version.Requirement.t()"],
+      specs: [
+        "@spec parse_requirement!(String.t()) :: Version.Requirement.t()",
+      ],
       documentation:
         'Parses a version requirement string into a `Version.Requirement` struct.\n\nIf `string` is an invalid requirement, a `Version.InvalidRequirementError` is raised.\n\n# Examples\n\n    iex> Version.parse_requirement!("== 2.0.1")\n    Version.parse_requirement!("== 2.0.1")\n\n    iex> Version.parse_requirement!("== == 2.0.1")\n    ** (Version.InvalidRequirementError) invalid requirement: "== == 2.0.1"\n\n',
     },
     {
       name: "parse_requirement/1",
       type: "function",
-      specs: ["@spec parse_requirement(String.t()) :: {:ok, Version.Requirement.t()} | :error"],
+      specs: [
+        "@spec parse_requirement(String.t()) :: {:ok, Version.Requirement.t()} | :error",
+      ],
       documentation:
         'Parses a version requirement string into a `Version.Requirement` struct.\n\n## Examples\n\n    iex> {:ok, requirement} = Version.parse_requirement("== 2.0.1")\n    iex> requirement\n    Version.parse_requirement!("== 2.0.1")\n\n    iex> Version.parse_requirement("== == 2.0.1")\n    :error\n\n',
     },
@@ -47,7 +51,9 @@ export const Version: ModuleDoc = {
     {
       name: "compile_requirement/1",
       type: "function",
-      specs: ["@spec compile_requirement(Version.Requirement.t()) :: Version.Requirement.t()"],
+      specs: [
+        "@spec compile_requirement(Version.Requirement.t()) :: Version.Requirement.t()",
+      ],
       documentation:
         "Compiles a requirement to an internal representation that may optimize matching.\n\nThe internal representation is opaque.\n",
     },
@@ -78,17 +84,47 @@ export const Version: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "build/0", type: "type", specs: ["@type build() :: String.t() | nil"], documentation: null },
-    { name: "pre/0", type: "type", specs: ["@type pre() :: [String.t() | non_neg_integer()]"], documentation: null },
-    { name: "patch/0", type: "type", specs: ["@type patch() :: non_neg_integer()"], documentation: null },
-    { name: "minor/0", type: "type", specs: ["@type minor() :: non_neg_integer()"], documentation: null },
-    { name: "major/0", type: "type", specs: ["@type major() :: non_neg_integer()"], documentation: null },
+    {
+      name: "build/0",
+      type: "type",
+      specs: ["@type build() :: String.t() | nil"],
+      documentation: null,
+    },
+    {
+      name: "pre/0",
+      type: "type",
+      specs: ["@type pre() :: [String.t() | non_neg_integer()]"],
+      documentation: null,
+    },
+    {
+      name: "patch/0",
+      type: "type",
+      specs: ["@type patch() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "minor/0",
+      type: "type",
+      specs: ["@type minor() :: non_neg_integer()"],
+      documentation: null,
+    },
+    {
+      name: "major/0",
+      type: "type",
+      specs: ["@type major() :: non_neg_integer()"],
+      documentation: null,
+    },
     {
       name: "requirement/0",
       type: "type",
       specs: ["@type requirement() :: String.t() | Version.Requirement.t()"],
       documentation: null,
     },
-    { name: "version/0", type: "type", specs: ["@type version() :: String.t() | t()"], documentation: null },
+    {
+      name: "version/0",
+      type: "type",
+      specs: ["@type version() :: String.t() | t()"],
+      documentation: null,
+    },
   ],
 };

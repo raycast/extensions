@@ -13,7 +13,8 @@ export const Application: ModuleDoc = {
       name: "stop/1",
       type: "function",
       specs: ["@spec stop(app()) :: :ok | {:error, term()}"],
-      documentation: "Stops the given `app`.\n\nWhen stopped, the application is still loaded.\n",
+      documentation:
+        "Stops the given `app`.\n\nWhen stopped, the application is still loaded.\n",
     },
     {
       name: "started_applications/1",
@@ -21,7 +22,8 @@ export const Application: ModuleDoc = {
       specs: [
         "@spec started_applications(timeout()) :: [\n        {app(), description :: charlist(), vsn :: charlist()}\n      ]",
       ],
-      documentation: "Returns a list with information about the applications which are currently running.\n",
+      documentation:
+        "Returns a list with information about the applications which are currently running.\n",
     },
     {
       name: "start/2",
@@ -47,7 +49,9 @@ export const Application: ModuleDoc = {
     {
       name: "put_env/4",
       type: "function",
-      specs: ["@spec put_env(app(), key(), value(), timeout: timeout(), persistent: boolean()) ::\n        :ok"],
+      specs: [
+        "@spec put_env(app(), key(), value(), timeout: timeout(), persistent: boolean()) ::\n        :ok",
+      ],
       documentation:
         "Puts the `value` in `key` for the given `app`.\n\n## Options\n\n  * `:timeout` - the timeout for the change (defaults to `5_000` milliseconds)\n  * `:persistent` - persists the given value on application load and reloads\n\nIf `put_env/4` is called before the application is loaded, the application\nenvironment values specified in the `.app` file will override the ones\npreviously set.\n\nThe `:persistent` option can be set to `true` when there is a need to guarantee\nparameters set with this function will not be overridden by the ones defined\nin the application resource file on load. This means persistent values will\nstick after the application is loaded and also on application reload.\n",
     },
@@ -66,7 +70,8 @@ export const Application: ModuleDoc = {
       specs: [
         "@spec loaded_applications() :: [\n        {app(), description :: charlist(), vsn :: charlist()}\n      ]",
       ],
-      documentation: "Returns a list with information about the applications which have been loaded.\n",
+      documentation:
+        "Returns a list with information about the applications which have been loaded.\n",
     },
     {
       name: "load/1",
@@ -119,7 +124,9 @@ export const Application: ModuleDoc = {
     {
       name: "ensure_started/2",
       type: "function",
-      specs: ["@spec ensure_started(app(), restart_type()) :: :ok | {:error, term()}"],
+      specs: [
+        "@spec ensure_started(app(), restart_type()) :: :ok | {:error, term()}",
+      ],
       documentation:
         "Ensures the given `app` is started with `t:restart_type/0`.\n\nSame as `start/2` but returns `:ok` if the application was already\nstarted.\n",
     },
@@ -143,21 +150,27 @@ export const Application: ModuleDoc = {
     {
       name: "delete_env/3",
       type: "function",
-      specs: ["@spec delete_env(app(), key(), timeout: timeout(), persistent: boolean()) :: :ok"],
+      specs: [
+        "@spec delete_env(app(), key(), timeout: timeout(), persistent: boolean()) :: :ok",
+      ],
       documentation:
         "Deletes the `key` from the given `app` environment.\n\nIt receives the same options as `put_env/4`. Returns `:ok`.\n",
     },
     {
       name: "compile_env!/3",
       type: "function",
-      specs: ["@spec compile_env!(Macro.Env.t(), app(), key() | list()) :: value()"],
+      specs: [
+        "@spec compile_env!(Macro.Env.t(), app(), key() | list()) :: value()",
+      ],
       documentation:
         "Reads the application environment at compilation time from a macro\nor raises.\n\nTypically, developers will use `compile_env!/2`. This function must\nonly be invoked from macros which aim to read the compilation environment\ndynamically.\n\nIt expects a `Macro.Env` as first argument, where the `Macro.Env` is\ntypically the `__CALLER__` in a macro. It raises if `Macro.Env` comes\nfrom a function.\n",
     },
     {
       name: "compile_env/4",
       type: "function",
-      specs: ["@spec compile_env(Macro.Env.t(), app(), key() | list(), value()) :: value()"],
+      specs: [
+        "@spec compile_env(Macro.Env.t(), app(), key() | list(), value()) :: value()",
+      ],
       documentation:
         "Reads the application environment at compilation time from a macro.\n\nTypically, developers will use `compile_env/3`. This function must\nonly be invoked from macros which aim to read the compilation environment\ndynamically.\n\nIt expects a `Macro.Env` as first argument, where the `Macro.Env` is\ntypically the `__CALLER__` in a macro. It raises if `Macro.Env` comes\nfrom a function.\n",
     },
@@ -195,7 +208,9 @@ export const Application: ModuleDoc = {
     {
       name: "start/2",
       type: "callback",
-      specs: ["@callback start(app(), restart_type()) :: :ok | {:error, term()}"],
+      specs: [
+        "@callback start(app(), restart_type()) :: :ok | {:error, term()}",
+      ],
       documentation:
         "Called when an application is started.\n\nThis function is called when an application is started using\n`Application.start/2` (and functions on top of that, such as\n`Application.ensure_started/2`). This function should start the top-level\nprocess of the application (which should be the top supervisor of the\napplication's supervision tree if the application follows the OTP design\nprinciples around supervision).\n\n`start_type` defines how the application is started:\n\n  * `:normal` - used if the startup is a normal startup or if the application\n    is distributed and is started on the current node because of a failover\n    from another node and the application specification key `:start_phases`\n    is `:undefined`.\n  * `{:takeover, node}` - used if the application is distributed and is\n    started on the current node because of a failover on the node `node`.\n  * `{:failover, node}` - used if the application is distributed and is\n    started on the current node because of a failover on node `node`, and the\n    application specification key `:start_phases` is not `:undefined`.\n\n`start_args` are the arguments passed to the application in the `:mod`\nspecification key (for example, `mod: {MyApp, [:my_args]}`).\n\nThis function should either return `{:ok, pid}` or `{:ok, pid, state}` if\nstartup is successful. `pid` should be the PID of the top supervisor. `state`\ncan be an arbitrary term, and if omitted will default to `[]`; if the\napplication is later stopped, `state` is passed to the `stop/1` callback (see\nthe documentation for the `c:stop/1` callback for more information).\n\n`use Application` provides no default implementation for the `start/2`\ncallback.\n",
     },
@@ -241,11 +256,23 @@ export const Application: ModuleDoc = {
     {
       name: "start_type/0",
       type: "type",
-      specs: ["@type start_type() :: :normal | {:takeover, node()} | {:failover, node()}"],
+      specs: [
+        "@type start_type() :: :normal | {:takeover, node()} | {:failover, node()}",
+      ],
       documentation: null,
     },
-    { name: "state/0", type: "type", specs: ["@type state() :: term()"], documentation: null },
-    { name: "value/0", type: "type", specs: ["@type value() :: term()"], documentation: null },
+    {
+      name: "state/0",
+      type: "type",
+      specs: ["@type state() :: term()"],
+      documentation: null,
+    },
+    {
+      name: "value/0",
+      type: "type",
+      specs: ["@type value() :: term()"],
+      documentation: null,
+    },
     {
       name: "application_key/0",
       type: "type",
@@ -254,7 +281,17 @@ export const Application: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "key/0", type: "type", specs: ["@type key() :: atom()"], documentation: null },
-    { name: "app/0", type: "type", specs: ["@type app() :: atom()"], documentation: null },
+    {
+      name: "key/0",
+      type: "type",
+      specs: ["@type key() :: atom()"],
+      documentation: null,
+    },
+    {
+      name: "app/0",
+      type: "type",
+      specs: ["@type app() :: atom()"],
+      documentation: null,
+    },
   ],
 };

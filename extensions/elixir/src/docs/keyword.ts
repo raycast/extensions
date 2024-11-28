@@ -30,7 +30,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "update!/3",
       type: "function",
-      specs: ["@spec update!(t(), key(), (current_value :: value() -> new_value :: value())) ::\n        t()"],
+      specs: [
+        "@spec update!(t(), key(), (current_value :: value() -> new_value :: value())) ::\n        t()",
+      ],
       documentation:
         "Updates the value under `key` using the given function.\n\nRaises `KeyError` if the `key` does not exist.\n\nRemoves all duplicate keys and only updates the first one.\n\n## Examples\n\n    iex> Keyword.update!([a: 1, b: 2, a: 3], :a, &(&1 * 2))\n    [a: 2, b: 2]\n    iex> Keyword.update!([a: 1, b: 2, c: 3], :b, &(&1 * 2))\n    [a: 1, b: 4, c: 3]\n\n    iex> Keyword.update!([a: 1], :b, &(&1 * 2))\n    ** (KeyError) key :b not found in: [a: 1]\n\n",
     },
@@ -60,7 +62,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "split_with/2",
       type: "function",
-      specs: ["@spec split_with(t(), ({key(), value()} -> as_boolean(term()))) :: {t(), t()}"],
+      specs: [
+        "@spec split_with(t(), ({key(), value()} -> as_boolean(term()))) :: {t(), t()}",
+      ],
       documentation:
         "Splits the `keywords` into two keyword lists according to the given function\n`fun`.\n\nThe provided `fun` receives each `{key, value}` pair in the `keywords` as its only\nargument. Returns a tuple with the first keyword list containing all the\nelements in `keywords` for which applying `fun` returned a truthy value, and\na second keyword list with all the elements for which applying `fun` returned\na falsy value (`false` or `nil`).\n\n## Examples\n\n    iex> Keyword.split_with([a: 1, b: 2, c: 3], fn {_k, v} -> rem(v, 2) == 0 end)\n    {[b: 2], [a: 1, c: 3]}\n\n    iex> Keyword.split_with([a: 1, b: 2, c: 3, b: 4], fn {_k, v} -> rem(v, 2) == 0 end)\n    {[b: 2, b: 4], [a: 1, c: 3]}\n\n    iex> Keyword.split_with([a: 1, b: 2, c: 3, b: 4], fn {k, v} -> k in [:a, :c] and rem(v, 2) == 0 end)\n    {[], [a: 1, b: 2, c: 3, b: 4]}\n\n    iex> Keyword.split_with([], fn {_k, v} -> rem(v, 2) == 0 end)\n    {[], []}\n\n",
     },
@@ -97,7 +101,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "reject/2",
       type: "function",
-      specs: ["@spec reject(t(), ({key(), value()} -> as_boolean(term()))) :: t()"],
+      specs: [
+        "@spec reject(t(), ({key(), value()} -> as_boolean(term()))) :: t()",
+      ],
       documentation:
         "Returns a keyword list excluding the entries from `keywords`\nfor which the function `fun` returns a truthy value.\n\nSee also `filter/2`.\n\n## Examples\n\n    iex> Keyword.reject([one: 1, two: 2, three: 3], fn {_key, val} -> rem(val, 2) == 1 end)\n    [two: 2]\n\n",
     },
@@ -139,7 +145,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "pop_first/3",
       type: "function",
-      specs: ["@spec pop_first(t(), key(), default()) :: {value() | default(), t()}"],
+      specs: [
+        "@spec pop_first(t(), key(), default()) :: {value() | default(), t()}",
+      ],
       documentation:
         "Returns and removes the first value associated with `key` in the keyword list.\n\nKeeps duplicate keys in the resulting keyword list.\n\n## Examples\n\n    iex> Keyword.pop_first([a: 1], :a)\n    {1, []}\n    iex> Keyword.pop_first([a: 1], :b)\n    {nil, [a: 1]}\n    iex> Keyword.pop_first([a: 1], :b, 3)\n    {3, [a: 1]}\n    iex> Keyword.pop_first([a: 1, a: 2], :a)\n    {1, [a: 2]}\n\n",
     },
@@ -181,7 +189,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "merge/3",
       type: "function",
-      specs: ["@spec merge(t(), t(), (key(), value(), value() -> value())) :: t()"],
+      specs: [
+        "@spec merge(t(), t(), (key(), value(), value() -> value())) :: t()",
+      ],
       documentation:
         "Merges two keyword lists into one.\n\nAdds all keys, including duplicate keys, given in `keywords2`\nto `keywords1`. Invokes the given function to solve conflicts.\n\nIf `keywords2` has duplicate keys, it invokes the given function\nfor each matching pair in `keywords1`.\n\nThere are no guarantees about the order of the keys in the returned keyword.\n\n## Examples\n\n    iex> Keyword.merge([a: 1, b: 2], [a: 3, d: 4], fn _k, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    [b: 2, a: 4, d: 4]\n\n    iex> Keyword.merge([a: 1, b: 2], [a: 3, d: 4, a: 5], fn :a, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    [b: 2, a: 4, d: 4, a: 5]\n\n    iex> Keyword.merge([a: 1, b: 2, a: 3], [a: 3, d: 4, a: 5], fn :a, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    [b: 2, a: 4, d: 4, a: 8]\n\n    iex> Keyword.merge([a: 1, b: 2], [:a, :b], fn :a, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    ** (ArgumentError) expected a keyword list as the second argument, got: [:a, :b]\n\n",
     },
@@ -209,7 +219,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "intersect/3",
       type: "function",
-      specs: ["@spec intersect(keyword(), keyword(), (key(), value(), value() -> value())) ::\n        keyword()"],
+      specs: [
+        "@spec intersect(keyword(), keyword(), (key(), value(), value() -> value())) ::\n        keyword()",
+      ],
       documentation:
         'Intersects two keyword lists, returning a keyword with the common keys.\n\nBy default, it returns the values of the intersected keys in `keyword2`.\nThe keys are returned in the order found in `keyword1`.\n\n## Examples\n\n    iex> Keyword.intersect([a: 1, b: 2], [b: "b", c: "c"])\n    [b: "b"]\n\n    iex> Keyword.intersect([a: 1, b: 2], [b: 2, c: 3], fn _k, v1, v2 ->\n    ...>   v1 + v2\n    ...> end)\n    [b: 4]\n\n',
     },
@@ -269,7 +281,9 @@ export const Keyword: ModuleDoc = {
     {
       name: "filter/2",
       type: "function",
-      specs: ["@spec filter(t(), ({key(), value()} -> as_boolean(term()))) :: t()"],
+      specs: [
+        "@spec filter(t(), ({key(), value()} -> as_boolean(term()))) :: t()",
+      ],
       documentation:
         "Returns a keyword list containing only the entries from `keywords`\nfor which the function `fun` returns a truthy value.\n\nSee also `reject/2` which discards all entries where the function\nreturns a truthy value.\n\n## Examples\n\n    iex> Keyword.filter([one: 1, two: 2, three: 3], fn {_key, val} -> rem(val, 2) == 1 end)\n    [one: 1, three: 3]\n\n",
     },
@@ -323,17 +337,38 @@ export const Keyword: ModuleDoc = {
     {
       name: "t/1",
       type: "type",
-      specs: ["@type t() :: [{key(), value()}]", "@type t(value) :: [{key(), value}]"],
+      specs: [
+        "@type t() :: [{key(), value()}]",
+        "@type t(value) :: [{key(), value}]",
+      ],
       documentation: null,
     },
     {
       name: "t/0",
       type: "type",
-      specs: ["@type t() :: [{key(), value()}]", "@type t(value) :: [{key(), value}]"],
+      specs: [
+        "@type t() :: [{key(), value()}]",
+        "@type t(value) :: [{key(), value}]",
+      ],
       documentation: null,
     },
-    { name: "default/0", type: "type", specs: ["@type default() :: any()"], documentation: null },
-    { name: "value/0", type: "type", specs: ["@type value() :: any()"], documentation: null },
-    { name: "key/0", type: "type", specs: ["@type key() :: atom()"], documentation: null },
+    {
+      name: "default/0",
+      type: "type",
+      specs: ["@type default() :: any()"],
+      documentation: null,
+    },
+    {
+      name: "value/0",
+      type: "type",
+      specs: ["@type value() :: any()"],
+      documentation: null,
+    },
+    {
+      name: "key/0",
+      type: "type",
+      specs: ["@type key() :: atom()"],
+      documentation: null,
+    },
   ],
 };

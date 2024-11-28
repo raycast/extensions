@@ -33,14 +33,18 @@ export const Integer: ModuleDoc = {
     {
       name: "parse/2",
       type: "function",
-      specs: ["@spec parse(binary(), 2..36) ::\n        {integer(), remainder_of_binary :: binary()} | :error"],
+      specs: [
+        "@spec parse(binary(), 2..36) ::\n        {integer(), remainder_of_binary :: binary()} | :error",
+      ],
       documentation:
         'Parses a text representation of an integer.\n\nAn optional `base` to the corresponding integer can be provided.\nIf `base` is not given, 10 will be used.\n\nIf successful, returns a tuple in the form of `{integer, remainder_of_binary}`.\nOtherwise `:error`.\n\nRaises an error if `base` is less than 2 or more than 36.\n\nIf you want to convert a string-formatted integer directly to an integer,\n`String.to_integer/1` or `String.to_integer/2` can be used instead.\n\n## Examples\n\n    iex> Integer.parse("34")\n    {34, ""}\n\n    iex> Integer.parse("34.5")\n    {34, ".5"}\n\n    iex> Integer.parse("three")\n    :error\n\n    iex> Integer.parse("34", 10)\n    {34, ""}\n\n    iex> Integer.parse("f4", 16)\n    {244, ""}\n\n    iex> Integer.parse("Awww++", 36)\n    {509216, "++"}\n\n    iex> Integer.parse("fab", 10)\n    :error\n\n    iex> Integer.parse("a2", 38)\n    ** (ArgumentError) invalid base 38\n\n',
     },
     {
       name: "mod/2",
       type: "function",
-      specs: ["@spec mod(integer(), neg_integer() | pos_integer()) :: integer()"],
+      specs: [
+        "@spec mod(integer(), neg_integer() | pos_integer()) :: integer()",
+      ],
       documentation:
         "Computes the modulo remainder of an integer division.\n\nThis function performs a [floored division](`floor_div/2`), which means that\nthe result will always have the sign of the `divisor`.\n\nRaises an `ArithmeticError` exception if one of the arguments is not an\ninteger, or when the `divisor` is `0`.\n\n## Examples\n\n    iex> Integer.mod(5, 2)\n    1\n    iex> Integer.mod(6, -4)\n    -2\n\n",
     },
@@ -54,14 +58,18 @@ export const Integer: ModuleDoc = {
     {
       name: "floor_div/2",
       type: "function",
-      specs: ["@spec floor_div(integer(), neg_integer() | pos_integer()) :: integer()"],
+      specs: [
+        "@spec floor_div(integer(), neg_integer() | pos_integer()) :: integer()",
+      ],
       documentation:
         "Performs a floored integer division.\n\nRaises an `ArithmeticError` exception if one of the arguments is not an\ninteger, or when the `divisor` is `0`.\n\nThis function performs a *floored* integer division, which means that\nthe result will always be rounded towards negative infinity.\n\nIf you want to perform truncated integer division (rounding towards zero),\nuse `Kernel.div/2` instead.\n\n## Examples\n\n    iex> Integer.floor_div(5, 2)\n    2\n    iex> Integer.floor_div(6, -4)\n    -2\n    iex> Integer.floor_div(-99, 2)\n    -50\n\n",
     },
     {
       name: "extended_gcd/2",
       type: "function",
-      specs: ["@spec extended_gcd(integer(), integer()) ::\n        {non_neg_integer(), integer(), integer()}"],
+      specs: [
+        "@spec extended_gcd(integer(), integer()) ::\n        {non_neg_integer(), integer(), integer()}",
+      ],
       documentation:
         "Returns the extended greatest common divisor of the two given integers.\n\nThis function uses the extended Euclidean algorithm to return a three-element tuple with the `gcd`\nand the coefficients `m` and `n` of Bézout's identity such that:\n\n    gcd(a, b) = m*a + n*b\n\nBy convention, `extended_gcd(0, 0)` returns `{0, 0, 0}`.\n\n## Examples\n\n    iex> Integer.extended_gcd(240, 46)\n    {2, -9, 47}\n    iex> Integer.extended_gcd(46, 240)\n    {2, 47, -9}\n    iex> Integer.extended_gcd(-46, 240)\n    {2, -47, -9}\n    iex> Integer.extended_gcd(-46, -240)\n    {2, -47, 9}\n\n    iex> Integer.extended_gcd(14, 21)\n    {7, -1, 1}\n\n    iex> Integer.extended_gcd(10, 0)\n    {10, 1, 0}\n    iex> Integer.extended_gcd(0, 10)\n    {10, 0, 1}\n    iex> Integer.extended_gcd(0, 0)\n    {0, 0, 0}\n\n",
     },

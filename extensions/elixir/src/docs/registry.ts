@@ -21,7 +21,9 @@ export const Registry: ModuleDoc = {
     {
       name: "unregister_match/4",
       type: "function",
-      specs: ["@spec unregister_match(registry(), key(), match_pattern(), guards()) :: :ok"],
+      specs: [
+        "@spec unregister_match(registry(), key(), match_pattern(), guards()) :: :ok",
+      ],
       documentation:
         'Unregisters entries for keys matching a pattern associated to the current\nprocess in `registry`.\n\n## Examples\n\nFor unique registries it can be used to conditionally unregister a key on\nthe basis of whether or not it matches a particular value.\n\n    iex> Registry.start_link(keys: :unique, name: Registry.UniqueUnregisterMatchTest)\n    iex> Registry.register(Registry.UniqueUnregisterMatchTest, "hello", :world)\n    iex> Registry.keys(Registry.UniqueUnregisterMatchTest, self())\n    ["hello"]\n    iex> Registry.unregister_match(Registry.UniqueUnregisterMatchTest, "hello", :foo)\n    :ok\n    iex> Registry.keys(Registry.UniqueUnregisterMatchTest, self())\n    ["hello"]\n    iex> Registry.unregister_match(Registry.UniqueUnregisterMatchTest, "hello", :world)\n    :ok\n    iex> Registry.keys(Registry.UniqueUnregisterMatchTest, self())\n    []\n\nFor duplicate registries:\n\n    iex> Registry.start_link(keys: :duplicate, name: Registry.DuplicateUnregisterMatchTest)\n    iex> Registry.register(Registry.DuplicateUnregisterMatchTest, "hello", :world_a)\n    iex> Registry.register(Registry.DuplicateUnregisterMatchTest, "hello", :world_b)\n    iex> Registry.register(Registry.DuplicateUnregisterMatchTest, "hello", :world_c)\n    iex> Registry.keys(Registry.DuplicateUnregisterMatchTest, self())\n    ["hello", "hello", "hello"]\n    iex> Registry.unregister_match(Registry.DuplicateUnregisterMatchTest, "hello", :world_a)\n    :ok\n    iex> Registry.keys(Registry.DuplicateUnregisterMatchTest, self())\n    ["hello", "hello"]\n    iex> Registry.lookup(Registry.DuplicateUnregisterMatchTest, "hello")\n    [{self(), :world_b}, {self(), :world_c}]\n\n',
     },
@@ -35,7 +37,9 @@ export const Registry: ModuleDoc = {
     {
       name: "start_link/1",
       type: "function",
-      specs: ["@spec start_link([start_option()]) :: {:ok, pid()} | {:error, term()}"],
+      specs: [
+        "@spec start_link([start_option()]) :: {:ok, pid()} | {:error, term()}",
+      ],
       documentation:
         "Starts the registry as a supervisor process.\n\nManually it can be started as:\n\n    Registry.start_link(keys: :unique, name: MyApp.Registry)\n\nIn your supervisor tree, you would write:\n\n    Supervisor.start_link([\n      {Registry, keys: :unique, name: MyApp.Registry}\n    ], strategy: :one_for_one)\n\nFor intensive workloads, the registry may also be partitioned (by specifying\nthe `:partitions` option). If partitioning is required then a good default is to\nset the number of partitions to the number of schedulers available:\n\n    Registry.start_link(\n      keys: :unique,\n      name: MyApp.Registry,\n      partitions: System.schedulers_online()\n    )\n\nor:\n\n    Supervisor.start_link([\n      {Registry, keys: :unique, name: MyApp.Registry, partitions: System.schedulers_online()}\n    ], strategy: :one_for_one)\n\n## Options\n\nThe registry requires the following keys:\n\n  * `:keys` - chooses if keys are `:unique` or `:duplicate`\n  * `:name` - the name of the registry and its tables\n\nThe following keys are optional:\n\n  * `:partitions` - the number of partitions in the registry. Defaults to `1`.\n  * `:listeners` - a list of named processes which are notified of register\n    and unregister events. The registered process must be monitored by the\n    listener if the listener wants to be notified if the registered process\n    crashes. Messages sent to listeners are of type `t:listener_message/0`.\n  * `:meta` - a keyword list of metadata to be attached to the registry.\n\n",
     },
@@ -65,14 +69,18 @@ export const Registry: ModuleDoc = {
     {
       name: "meta/2",
       type: "function",
-      specs: ["@spec meta(registry(), meta_key()) :: {:ok, meta_value()} | :error"],
+      specs: [
+        "@spec meta(registry(), meta_key()) :: {:ok, meta_value()} | :error",
+      ],
       documentation:
         'Reads registry metadata given on `start_link/1`.\n\nAtoms and tuples are allowed as keys.\n\n## Examples\n\n    iex> Registry.start_link(keys: :unique, name: Registry.MetaTest, meta: [custom_key: "custom_value"])\n    iex> Registry.meta(Registry.MetaTest, :custom_key)\n    {:ok, "custom_value"}\n    iex> Registry.meta(Registry.MetaTest, :unknown_key)\n    :error\n\n',
     },
     {
       name: "match/4",
       type: "function",
-      specs: ["@spec match(registry(), key(), match_pattern(), guards()) :: [{pid(), term()}]"],
+      specs: [
+        "@spec match(registry(), key(), match_pattern(), guards()) :: [{pid(), term()}]",
+      ],
       documentation:
         'Returns `{pid, value}` pairs under the given `key` in `registry` that match `pattern`.\n\nPattern must be an atom or a tuple that will match the structure of the\nvalue stored in the registry. The atom `:_` can be used to ignore a given\nvalue or tuple element, while the atom `:"$1"` can be used to temporarily assign part\nof pattern to a variable for a subsequent comparison.\n\nOptionally, it is possible to pass a list of guard conditions for more precise matching.\nEach guard is a tuple, which describes checks that should be passed by assigned part of pattern.\nFor example the `$1 > 1` guard condition would be expressed as the `{:>, :"$1", 1}` tuple.\nPlease note that guard conditions will work only for assigned\nvariables like `:"$1"`, `:"$2"`, and so forth.\nAvoid usage of special match variables `:"$_"` and `:"$$"`, because it might not work as expected.\n\nAn empty list will be returned if there is no match.\n\nFor unique registries, a single partition lookup is necessary. For\nduplicate registries, all partitions must be looked up.\n\n## Examples\n\nIn the example below we register the current process under the same\nkey in a duplicate registry but with different values:\n\n    iex> Registry.start_link(keys: :duplicate, name: Registry.MatchTest)\n    iex> {:ok, _} = Registry.register(Registry.MatchTest, "hello", {1, :atom, 1})\n    iex> {:ok, _} = Registry.register(Registry.MatchTest, "hello", {2, :atom, 2})\n    iex> Registry.match(Registry.MatchTest, "hello", {1, :_, :_})\n    [{self(), {1, :atom, 1}}]\n    iex> Registry.match(Registry.MatchTest, "hello", {2, :_, :_})\n    [{self(), {2, :atom, 2}}]\n    iex> Registry.match(Registry.MatchTest, "hello", {:_, :atom, :_}) |> Enum.sort()\n    [{self(), {1, :atom, 1}}, {self(), {2, :atom, 2}}]\n    iex> Registry.match(Registry.MatchTest, "hello", {:"$1", :_, :"$1"}) |> Enum.sort()\n    [{self(), {1, :atom, 1}}, {self(), {2, :atom, 2}}]\n    iex> guards = [{:>, :"$1", 1}]\n    iex> Registry.match(Registry.MatchTest, "hello", {:_, :_, :"$1"}, guards)\n    [{self(), {2, :atom, 2}}]\n    iex> guards = [{:is_atom, :"$1"}]\n    iex> Registry.match(Registry.MatchTest, "hello", {:_, :"$1", :_}, guards) |> Enum.sort()\n    [{self(), {1, :atom, 1}}, {self(), {2, :atom, 2}}]\n\n',
     },
@@ -116,7 +124,9 @@ export const Registry: ModuleDoc = {
     {
       name: "count_match/4",
       type: "function",
-      specs: ["@spec count_match(registry(), key(), match_pattern(), guards()) ::\n        non_neg_integer()"],
+      specs: [
+        "@spec count_match(registry(), key(), match_pattern(), guards()) ::\n        non_neg_integer()",
+      ],
       documentation:
         'Returns the number of `{pid, value}` pairs under the given `key` in `registry`\nthat match `pattern`.\n\nPattern must be an atom or a tuple that will match the structure of the\nvalue stored in the registry. The atom `:_` can be used to ignore a given\nvalue or tuple element, while the atom `:"$1"` can be used to temporarily assign part\nof pattern to a variable for a subsequent comparison.\n\nOptionally, it is possible to pass a list of guard conditions for more precise matching.\nEach guard is a tuple, which describes checks that should be passed by assigned part of pattern.\nFor example the `$1 > 1` guard condition would be expressed as the `{:>, :"$1", 1}` tuple.\nPlease note that guard conditions will work only for assigned\nvariables like `:"$1"`, `:"$2"`, and so forth.\nAvoid usage of special match variables `:"$_"` and `:"$$"`, because it might not work as expected.\n\nZero will be returned if there is no match.\n\nFor unique registries, a single partition lookup is necessary. For\nduplicate registries, all partitions must be looked up.\n\n## Examples\n\nIn the example below we register the current process under the same\nkey in a duplicate registry but with different values:\n\n    iex> Registry.start_link(keys: :duplicate, name: Registry.CountMatchTest)\n    iex> {:ok, _} = Registry.register(Registry.CountMatchTest, "hello", {1, :atom, 1})\n    iex> {:ok, _} = Registry.register(Registry.CountMatchTest, "hello", {2, :atom, 2})\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {1, :_, :_})\n    1\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {2, :_, :_})\n    1\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {:_, :atom, :_})\n    2\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {:"$1", :_, :"$1"})\n    2\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {:_, :_, :"$1"}, [{:>, :"$1", 1}])\n    1\n    iex> Registry.count_match(Registry.CountMatchTest, "hello", {:_, :"$1", :_}, [{:is_atom, :"$1"}])\n    2\n\n',
     },
@@ -131,7 +141,8 @@ export const Registry: ModuleDoc = {
       name: "child_spec/1",
       type: "function",
       specs: ["@spec child_spec([start_option()]) :: Supervisor.child_spec()"],
-      documentation: "Returns a specification to start a registry under a supervisor.\n\nSee `Supervisor`.\n",
+      documentation:
+        "Returns a specification to start a registry under a supervisor.\n\nSee `Supervisor`.\n",
     },
   ],
   name: "Registry",
@@ -159,25 +170,29 @@ export const Registry: ModuleDoc = {
       name: "spec/0",
       type: "type",
       specs: ["@type spec() :: [{match_pattern(), guards(), body()}]"],
-      documentation: "A full match spec used when selecting objects in the registry",
+      documentation:
+        "A full match spec used when selecting objects in the registry",
     },
     {
       name: "body/0",
       type: "type",
       specs: ["@type body() :: [term()]"],
-      documentation: "A pattern used to representing the output format part of a match spec",
+      documentation:
+        "A pattern used to representing the output format part of a match spec",
     },
     {
       name: "guards/0",
       type: "type",
       specs: ["@type guards() :: [guard()]"],
-      documentation: "A list of guards to be evaluated when matching on objects in a registry",
+      documentation:
+        "A list of guards to be evaluated when matching on objects in a registry",
     },
     {
       name: "guard/0",
       type: "type",
       specs: ["@type guard() :: atom() | tuple()"],
-      documentation: "A guard to be evaluated when matching on objects in a registry",
+      documentation:
+        "A guard to be evaluated when matching on objects in a registry",
     },
     {
       name: "match_pattern/0",

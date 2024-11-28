@@ -37,11 +37,23 @@ export const Config_Provider: ModuleDoc = {
     {
       name: "config_path/0",
       type: "type",
-      specs: ["@type config_path() :: {:system, binary(), binary()} | binary()"],
+      specs: [
+        "@type config_path() :: {:system, binary(), binary()} | binary()",
+      ],
       documentation:
         "A path pointing to a configuration file.\n\nSince configuration files are often accessed on target machines,\nit can be expressed either as:\n\n  * a binary representing an absolute path\n\n  * a `{:system, system_var, path}` tuple where the config is the\n    concatenation of the environment variable `system_var` with\n    the given `path`\n\n",
     },
-    { name: "state/0", type: "type", specs: ["@type state() :: term()"], documentation: null },
-    { name: "config/0", type: "type", specs: ["@type config() :: keyword()"], documentation: null },
+    {
+      name: "state/0",
+      type: "type",
+      specs: ["@type state() :: term()"],
+      documentation: null,
+    },
+    {
+      name: "config/0",
+      type: "type",
+      specs: ["@type config() :: keyword()"],
+      documentation: null,
+    },
   ],
 };

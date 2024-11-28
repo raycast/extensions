@@ -5,7 +5,9 @@ export const Date: ModuleDoc = {
     {
       name: "year_of_era/1",
       type: "function",
-      specs: ["@spec year_of_era(Calendar.date()) :: {Calendar.year(), non_neg_integer()}"],
+      specs: [
+        "@spec year_of_era(Calendar.date()) :: {Calendar.year(), non_neg_integer()}",
+      ],
       documentation:
         "Calculates the year-of-era and era for a given\ncalendar year.\n\nReturns a tuple `{year, era}` representing the\nyear within the era and the era number.\n\n## Examples\n\n    iex> Date.year_of_era(~D[0001-01-01])\n    {1, 1}\n    iex> Date.year_of_era(~D[0000-12-31])\n    {1, 0}\n    iex> Date.year_of_era(~D[-0001-01-01])\n    {2, 0}\n\n",
     },
@@ -26,7 +28,9 @@ export const Date: ModuleDoc = {
     {
       name: "to_iso8601/2",
       type: "function",
-      specs: ["@spec to_iso8601(Calendar.date(), :extended | :basic) :: String.t()"],
+      specs: [
+        "@spec to_iso8601(Calendar.date(), :extended | :basic) :: String.t()",
+      ],
       documentation:
         'Converts the given `date` to\n[ISO 8601:2019](https://en.wikipedia.org/wiki/ISO_8601).\n\nBy default, `Date.to_iso8601/2` returns dates formatted in the "extended"\nformat, for human readability. It also supports the "basic" format through passing the `:basic` option.\n\nOnly supports converting dates which are in the ISO calendar,\nor other calendars in which the days also start at midnight.\nAttempting to convert dates from other calendars will raise an `ArgumentError`.\n\n### Examples\n\n    iex> Date.to_iso8601(~D[2000-02-28])\n    "2000-02-28"\n\n    iex> Date.to_iso8601(~D[2000-02-28], :basic)\n    "20000228"\n\n    iex> Date.to_iso8601(~N[2000-02-28 00:00:00])\n    "2000-02-28"\n\n',
     },
@@ -65,7 +69,9 @@ export const Date: ModuleDoc = {
     {
       name: "range/2",
       type: "function",
-      specs: ["@spec range(Calendar.date(), Calendar.date()) :: Date.Range.t()"],
+      specs: [
+        "@spec range(Calendar.date(), Calendar.date()) :: Date.Range.t()",
+      ],
       documentation:
         "Returns a range of dates.\n\nA range of dates represents a discrete number of dates where\nthe first and last values are dates with matching calendars.\n\nRanges of dates can be increasing (`first <= last`) and are\nalways inclusive. For a decreasing range, use `range/3` with\na step of -1 as first argument.\n\n## Examples\n\n    iex> Date.range(~D[1999-01-01], ~D[2000-01-01])\n    Date.range(~D[1999-01-01], ~D[2000-01-01])\n\nA range of dates implements the `Enumerable` protocol, which means\nfunctions in the `Enum` module can be used to work with\nranges:\n\n    iex> range = Date.range(~D[2001-01-01], ~D[2002-01-01])\n    iex> range\n    Date.range(~D[2001-01-01], ~D[2002-01-01])\n    iex> Enum.count(range)\n    366\n    iex> ~D[2001-02-01] in range\n    true\n    iex> Enum.take(range, 3)\n    [~D[2001-01-01], ~D[2001-01-02], ~D[2001-01-03]]\n\n",
     },
@@ -118,14 +124,18 @@ export const Date: ModuleDoc = {
     {
       name: "from_iso8601/2",
       type: "function",
-      specs: ["@spec from_iso8601(String.t(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}"],
+      specs: [
+        "@spec from_iso8601(String.t(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}",
+      ],
       documentation:
         'Parses the extended "Dates" format described by\n[ISO 8601:2019](https://en.wikipedia.org/wiki/ISO_8601).\n\nThe year parsed by this function is limited to four digits.\n\n## Examples\n\n    iex> Date.from_iso8601("2015-01-23")\n    {:ok, ~D[2015-01-23]}\n\n    iex> Date.from_iso8601("2015:01:23")\n    {:error, :invalid_format}\n\n    iex> Date.from_iso8601("2015-01-32")\n    {:error, :invalid_date}\n\n',
     },
     {
       name: "from_gregorian_days/2",
       type: "function",
-      specs: ["@spec from_gregorian_days(integer(), Calendar.calendar()) :: t()"],
+      specs: [
+        "@spec from_gregorian_days(integer(), Calendar.calendar()) :: t()",
+      ],
       documentation:
         "Converts a number of gregorian days to a `Date` struct.\n\n## Examples\n\n    iex> Date.from_gregorian_days(1)\n    ~D[0000-01-02]\n    iex> Date.from_gregorian_days(730_485)\n    ~D[2000-01-01]\n    iex> Date.from_gregorian_days(-1)\n    ~D[-0001-12-31]\n\n",
     },
@@ -139,14 +149,18 @@ export const Date: ModuleDoc = {
     {
       name: "from_erl/2",
       type: "function",
-      specs: ["@spec from_erl(:calendar.date(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}"],
+      specs: [
+        "@spec from_erl(:calendar.date(), Calendar.calendar()) ::\n        {:ok, t()} | {:error, atom()}",
+      ],
       documentation:
         "Converts an Erlang date tuple to a `Date` struct.\n\nOnly supports converting dates which are in the ISO calendar,\nor other calendars in which the days also start at midnight.\nAttempting to convert dates from other calendars will return an error tuple.\n\n## Examples\n\n    iex> Date.from_erl({2000, 1, 1})\n    {:ok, ~D[2000-01-01]}\n    iex> Date.from_erl({2000, 13, 1})\n    {:error, :invalid_date}\n\n",
     },
     {
       name: "end_of_week/2",
       type: "function",
-      specs: ["@spec end_of_week(Calendar.date(), starting_on :: :default | atom()) :: t()"],
+      specs: [
+        "@spec end_of_week(Calendar.date(), starting_on :: :default | atom()) :: t()",
+      ],
       documentation:
         "Calculates a date that is the last day of the week for the given `date`.\n\nIf the day is already the last day of the week, it returns the\nday itself. For the built-in ISO calendar, the week ends on Sunday.\nA weekday rather than `:default` can be given as `starting_on`.\n\n## Examples\n\n    iex> Date.end_of_week(~D[2020-07-11])\n    ~D[2020-07-12]\n    iex> Date.end_of_week(~D[2020-07-05])\n    ~D[2020-07-05]\n    iex> Date.end_of_week(~D[2020-07-06], :sunday)\n    ~D[2020-07-11]\n    iex> Date.end_of_week(~D[2020-07-06], :saturday)\n    ~D[2020-07-10]\n    iex> Date.end_of_week(~N[2020-07-11 01:23:45])\n    ~D[2020-07-12]\n\n",
     },
@@ -190,7 +204,9 @@ export const Date: ModuleDoc = {
     {
       name: "day_of_era/1",
       type: "function",
-      specs: ["@spec day_of_era(Calendar.date()) :: {Calendar.day(), non_neg_integer()}"],
+      specs: [
+        "@spec day_of_era(Calendar.date()) :: {Calendar.day(), non_neg_integer()}",
+      ],
       documentation:
         "Calculates the day-of-era and era for a given\ncalendar `date`.\n\nReturns a tuple `{day, era}` representing the\nday within the era and the era number.\n\n## Examples\n\n    iex> Date.day_of_era(~D[0001-01-01])\n    {1, 1}\n\n    iex> Date.day_of_era(~D[0000-12-31])\n    {1, 0}\n\n",
     },
@@ -213,14 +229,18 @@ export const Date: ModuleDoc = {
     {
       name: "compare/2",
       type: "function",
-      specs: ["@spec compare(Calendar.date(), Calendar.date()) :: :lt | :eq | :gt"],
+      specs: [
+        "@spec compare(Calendar.date(), Calendar.date()) :: :lt | :eq | :gt",
+      ],
       documentation:
         "Compares two date structs.\n\nReturns `:gt` if first date is later than the second\nand `:lt` for vice versa. If the two dates are equal\n`:eq` is returned.\n\n## Examples\n\n    iex> Date.compare(~D[2016-04-16], ~D[2016-04-28])\n    :lt\n\nThis function can also be used to compare across more\ncomplex calendar types by considering only the date fields:\n\n    iex> Date.compare(~D[2016-04-16], ~N[2016-04-28 01:23:45])\n    :lt\n    iex> Date.compare(~D[2016-04-16], ~N[2016-04-16 01:23:45])\n    :eq\n    iex> Date.compare(~N[2016-04-16 12:34:56], ~N[2016-04-16 01:23:45])\n    :eq\n\n",
     },
     {
       name: "beginning_of_week/2",
       type: "function",
-      specs: ["@spec beginning_of_week(Calendar.date(), starting_on :: :default | atom()) ::\n        t()"],
+      specs: [
+        "@spec beginning_of_week(Calendar.date(), starting_on :: :default | atom()) ::\n        t()",
+      ],
       documentation:
         "Calculates a date that is the first day of the week for the given `date`.\n\nIf the day is already the first day of the week, it returns the\nday itself. For the built-in ISO calendar, the week starts on Monday.\nA weekday rather than `:default` can be given as `starting_on`.\n\n## Examples\n\n    iex> Date.beginning_of_week(~D[2020-07-11])\n    ~D[2020-07-06]\n    iex> Date.beginning_of_week(~D[2020-07-06])\n    ~D[2020-07-06]\n    iex> Date.beginning_of_week(~D[2020-07-11], :sunday)\n    ~D[2020-07-05]\n    iex> Date.beginning_of_week(~D[2020-07-11], :saturday)\n    ~D[2020-07-11]\n    iex> Date.beginning_of_week(~N[2020-07-11 01:23:45])\n    ~D[2020-07-06]\n\n",
     },

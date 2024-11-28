@@ -87,14 +87,18 @@ export const Calendar_ISO: ModuleDoc = {
     {
       name: "shift_date/4",
       type: "function",
-      specs: ["@spec shift_date(year(), month(), day(), Duration.t()) ::\n        {year(), month(), day()}"],
+      specs: [
+        "@spec shift_date(year(), month(), day(), Duration.t()) ::\n        {year(), month(), day()}",
+      ],
       documentation:
         "Shifts Date by Duration according to its calendar.\n\n## Examples\n\n    iex> Calendar.ISO.shift_date(2016, 1, 3, Duration.new!(month: 2))\n    {2016, 3, 3}\n    iex> Calendar.ISO.shift_date(2016, 2, 29, Duration.new!(month: 1))\n    {2016, 3, 29}\n    iex> Calendar.ISO.shift_date(2016, 1, 31, Duration.new!(month: 1))\n    {2016, 2, 29}\n    iex> Calendar.ISO.shift_date(2016, 1, 31, Duration.new!(year: 4, day: 1))\n    {2020, 2, 1}\n",
     },
     {
       name: "quarter_of_year/3",
       type: "function",
-      specs: ["@spec quarter_of_year(year(), month(), day()) :: quarter_of_year()"],
+      specs: [
+        "@spec quarter_of_year(year(), month(), day()) :: quarter_of_year()",
+      ],
       documentation:
         "Calculates the quarter of the year from the given `year`, `month`, and `day`.\n\nIt is an integer from 1 to 4.\n\n## Examples\n\n    iex> Calendar.ISO.quarter_of_year(2016, 1, 31)\n    1\n    iex> Calendar.ISO.quarter_of_year(2016, 4, 3)\n    2\n    iex> Calendar.ISO.quarter_of_year(-99, 9, 31)\n    3\n    iex> Calendar.ISO.quarter_of_year(2018, 12, 28)\n    4\n\n",
     },
@@ -155,21 +159,27 @@ export const Calendar_ISO: ModuleDoc = {
     {
       name: "parse_duration/1",
       type: "function",
-      specs: ["@spec parse_duration(String.t()) ::\n        {:ok, [Duration.unit_pair()]} | {:error, atom()}"],
+      specs: [
+        "@spec parse_duration(String.t()) ::\n        {:ok, [Duration.unit_pair()]} | {:error, atom()}",
+      ],
       documentation:
         "Parses an ISO 8601 formatted duration string to a list of `Duration` compabitble unit pairs.\n\nSee `Duration.from_iso8601/1`.\n",
     },
     {
       name: "parse_date/2",
       type: "function",
-      specs: ["@spec parse_date(String.t(), format()) ::\n        {:ok, {year(), month(), day()}} | {:error, atom()}"],
+      specs: [
+        "@spec parse_date(String.t(), format()) ::\n        {:ok, {year(), month(), day()}} | {:error, atom()}",
+      ],
       documentation:
         'Parses a date `string` according to a given `format`.\n\nThe `format` can either be `:basic` or `:extended`.\n\nFor more information on supported strings, see how this\nmodule implements [ISO 8601](#module-iso-8601-compliance).\n\n## Examples\n\n    iex> Calendar.ISO.parse_date("20150123", :basic)\n    {:ok, {2015, 1, 23}}\n    iex> Calendar.ISO.parse_date("20150123", :extended)\n    {:error, :invalid_format}\n\n',
     },
     {
       name: "parse_date/1",
       type: "function",
-      specs: ["@spec parse_date(String.t()) ::\n        {:ok, {year(), month(), day()}} | {:error, atom()}"],
+      specs: [
+        "@spec parse_date(String.t()) ::\n        {:ok, {year(), month(), day()}} | {:error, atom()}",
+      ],
       documentation:
         'Parses a date `string` in the `:extended` format.\n\nFor more information on supported strings, see how this\nmodule implements [ISO 8601](#module-iso-8601-compliance).\n\n## Examples\n\n    iex> Calendar.ISO.parse_date("2015-01-23")\n    {:ok, {2015, 1, 23}}\n\n    iex> Calendar.ISO.parse_date("2015:01:23")\n    {:error, :invalid_format}\n    iex> Calendar.ISO.parse_date("2015-01-32")\n    {:error, :invalid_date}\n\n',
     },
@@ -217,14 +227,18 @@ export const Calendar_ISO: ModuleDoc = {
     {
       name: "iso_days_to_end_of_day/1",
       type: "function",
-      specs: ["@spec iso_days_to_end_of_day(Calendar.iso_days()) :: Calendar.iso_days()"],
+      specs: [
+        "@spec iso_days_to_end_of_day(Calendar.iso_days()) :: Calendar.iso_days()",
+      ],
       documentation:
         "Converts the `t:Calendar.iso_days/0` to the last moment of the day.\n\n## Examples\n\n    iex> Calendar.ISO.iso_days_to_end_of_day({0, {0, 86400000000}})\n    {0, {86399999999, 86400000000}}\n    iex> Calendar.ISO.iso_days_to_end_of_day({730485, {43200000000, 86400000000}})\n    {730485, {86399999999, 86400000000}}\n    iex> Calendar.ISO.iso_days_to_end_of_day({730485, {46800000000, 86400000000}})\n    {730485, {86399999999, 86400000000}}\n\n",
     },
     {
       name: "iso_days_to_beginning_of_day/1",
       type: "function",
-      specs: ["@spec iso_days_to_beginning_of_day(Calendar.iso_days()) :: Calendar.iso_days()"],
+      specs: [
+        "@spec iso_days_to_beginning_of_day(Calendar.iso_days()) :: Calendar.iso_days()",
+      ],
       documentation:
         "Converts the `t:Calendar.iso_days/0` to the first moment of the day.\n\n## Examples\n\n    iex> Calendar.ISO.iso_days_to_beginning_of_day({0, {0, 86400000000}})\n    {0, {0, 86400000000}}\n    iex> Calendar.ISO.iso_days_to_beginning_of_day({730485, {43200000000, 86400000000}})\n    {730485, {0, 86400000000}}\n    iex> Calendar.ISO.iso_days_to_beginning_of_day({730485, {46800000000, 86400000000}})\n    {730485, {0, 86400000000}}\n\n",
     },
@@ -239,7 +253,8 @@ export const Calendar_ISO: ModuleDoc = {
       name: "day_rollover_relative_to_midnight_utc/0",
       type: "function",
       specs: ["@spec day_rollover_relative_to_midnight_utc() :: {0, 1}"],
-      documentation: "See `c:Calendar.day_rollover_relative_to_midnight_utc/0` for documentation.\n",
+      documentation:
+        "See `c:Calendar.day_rollover_relative_to_midnight_utc/0` for documentation.\n",
     },
     {
       name: "day_of_year/3",
@@ -251,14 +266,18 @@ export const Calendar_ISO: ModuleDoc = {
     {
       name: "day_of_week/4",
       type: "function",
-      specs: ["@spec day_of_week(year(), month(), day(), :default | weekday()) ::\n        {day_of_week(), 1, 7}"],
+      specs: [
+        "@spec day_of_week(year(), month(), day(), :default | weekday()) ::\n        {day_of_week(), 1, 7}",
+      ],
       documentation:
         "Calculates the day of the week from the given `year`, `month`, and `day`.\n\nIt is an integer from 1 to 7, where 1 is the given `starting_on` weekday.\nFor example, if `starting_on` is set to `:monday`, then 1 is Monday and\n7 is Sunday.\n\n`starting_on` can also be `:default`, which is equivalent to `:monday`.\n\n## Examples\n\n    iex> Calendar.ISO.day_of_week(2016, 10, 31, :monday)\n    {1, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 1, :monday)\n    {2, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 2, :monday)\n    {3, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 3, :monday)\n    {4, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 4, :monday)\n    {5, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 5, :monday)\n    {6, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 6, :monday)\n    {7, 1, 7}\n    iex> Calendar.ISO.day_of_week(-99, 1, 31, :monday)\n    {4, 1, 7}\n\n    iex> Calendar.ISO.day_of_week(2016, 10, 31, :sunday)\n    {2, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 1, :sunday)\n    {3, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 2, :sunday)\n    {4, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 3, :sunday)\n    {5, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 4, :sunday)\n    {6, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 5, :sunday)\n    {7, 1, 7}\n    iex> Calendar.ISO.day_of_week(2016, 11, 6, :sunday)\n    {1, 1, 7}\n    iex> Calendar.ISO.day_of_week(-99, 1, 31, :sunday)\n    {5, 1, 7}\n\n    iex> Calendar.ISO.day_of_week(2016, 10, 31, :saturday)\n    {3, 1, 7}\n\n",
     },
     {
       name: "day_of_era/3",
       type: "function",
-      specs: ["@spec day_of_era(year(), month(), day()) :: Calendar.day_of_era()"],
+      specs: [
+        "@spec day_of_era(year(), month(), day()) :: Calendar.day_of_era()",
+      ],
       documentation:
         "Calculates the day and era from the given `year`, `month`, and `day`.\n\n## Examples\n\n    iex> Calendar.ISO.day_of_era(0, 1, 1)\n    {366, 0}\n    iex> Calendar.ISO.day_of_era(1, 1, 1)\n    {1, 1}\n    iex> Calendar.ISO.day_of_era(0, 12, 31)\n    {1, 0}\n    iex> Calendar.ISO.day_of_era(0, 12, 30)\n    {2, 0}\n    iex> Calendar.ISO.day_of_era(-1, 12, 31)\n    {367, 0}\n\n",
     },
@@ -274,7 +293,9 @@ export const Calendar_ISO: ModuleDoc = {
     {
       name: "date_to_string/4",
       type: "function",
-      specs: ["@spec date_to_string(year(), month(), day(), :basic | :extended) :: String.t()"],
+      specs: [
+        "@spec date_to_string(year(), month(), day(), :basic | :extended) :: String.t()",
+      ],
       documentation:
         'Converts the given date into a string.\n\nBy default, returns dates formatted in the "extended" format,\nfor human readability. It also supports the "basic" format\nby passing the `:basic` option.\n\n## Examples\n\n    iex> Calendar.ISO.date_to_string(2015, 2, 28)\n    "2015-02-28"\n    iex> Calendar.ISO.date_to_string(2017, 8, 1)\n    "2017-08-01"\n    iex> Calendar.ISO.date_to_string(-99, 1, 31)\n    "-0099-01-31"\n\n    iex> Calendar.ISO.date_to_string(2015, 2, 28, :basic)\n    "20150228"\n    iex> Calendar.ISO.date_to_string(-99, 1, 31, :basic)\n    "-00990131"\n\n',
     },
@@ -283,14 +304,30 @@ export const Calendar_ISO: ModuleDoc = {
   callbacks: [],
   macros: [],
   types: [
-    { name: "year_of_era/0", type: "type", specs: ["@type year_of_era() :: {1..10000, era()}"], documentation: null },
-    { name: "quarter_of_year/0", type: "type", specs: ["@type quarter_of_year() :: 1..4"], documentation: null },
-    { name: "day_of_year/0", type: "type", specs: ["@type day_of_year() :: 1..366"], documentation: null },
+    {
+      name: "year_of_era/0",
+      type: "type",
+      specs: ["@type year_of_era() :: {1..10000, era()}"],
+      documentation: null,
+    },
+    {
+      name: "quarter_of_year/0",
+      type: "type",
+      specs: ["@type quarter_of_year() :: 1..4"],
+      documentation: null,
+    },
+    {
+      name: "day_of_year/0",
+      type: "type",
+      specs: ["@type day_of_year() :: 1..366"],
+      documentation: null,
+    },
     {
       name: "day_of_week/0",
       type: "type",
       specs: ["@type day_of_week() :: 1..7"],
-      documentation: "Integer that represents the day of the week, where 1 is Monday and 7 is Sunday.\n",
+      documentation:
+        "Integer that represents the day of the week, where 1 is Monday and 7 is Sunday.\n",
     },
     {
       name: "microsecond/0",
@@ -299,8 +336,18 @@ export const Calendar_ISO: ModuleDoc = {
       documentation:
         "Microseconds with stored precision.\n\nThe precision represents the number of digits that must be used when\nrepresenting the microseconds to external format. If the precision is 0,\nit means microseconds must be skipped.\n",
     },
-    { name: "format/0", type: "type", specs: ["@type format() :: :basic | :extended"], documentation: null },
-    { name: "utc_offset/0", type: "type", specs: ["@type utc_offset() :: integer()"], documentation: null },
+    {
+      name: "format/0",
+      type: "type",
+      specs: ["@type format() :: :basic | :extended"],
+      documentation: null,
+    },
+    {
+      name: "utc_offset/0",
+      type: "type",
+      specs: ["@type utc_offset() :: integer()"],
+      documentation: null,
+    },
     {
       name: "weekday/0",
       type: "type",
@@ -309,12 +356,42 @@ export const Calendar_ISO: ModuleDoc = {
       ],
       documentation: null,
     },
-    { name: "second/0", type: "type", specs: ["@type second() :: 0..59"], documentation: null },
-    { name: "minute/0", type: "type", specs: ["@type minute() :: 0..59"], documentation: null },
-    { name: "hour/0", type: "type", specs: ["@type hour() :: 0..23"], documentation: null },
-    { name: "day/0", type: "type", specs: ["@type day() :: 1..31"], documentation: null },
-    { name: "month/0", type: "type", specs: ["@type month() :: 1..12"], documentation: null },
-    { name: "year/0", type: "type", specs: ["@type year() :: -9999..9999"], documentation: null },
+    {
+      name: "second/0",
+      type: "type",
+      specs: ["@type second() :: 0..59"],
+      documentation: null,
+    },
+    {
+      name: "minute/0",
+      type: "type",
+      specs: ["@type minute() :: 0..59"],
+      documentation: null,
+    },
+    {
+      name: "hour/0",
+      type: "type",
+      specs: ["@type hour() :: 0..23"],
+      documentation: null,
+    },
+    {
+      name: "day/0",
+      type: "type",
+      specs: ["@type day() :: 1..31"],
+      documentation: null,
+    },
+    {
+      name: "month/0",
+      type: "type",
+      specs: ["@type month() :: 1..12"],
+      documentation: null,
+    },
+    {
+      name: "year/0",
+      type: "type",
+      specs: ["@type year() :: -9999..9999"],
+      documentation: null,
+    },
     {
       name: "era/0",
       type: "type",
@@ -326,13 +403,15 @@ export const Calendar_ISO: ModuleDoc = {
       name: "ce/0",
       type: "type",
       specs: ["@type ce() :: 1"],
-      documentation: 'The "Current Era" or the "Common Era" (CE) which starts in year `1`.\n',
+      documentation:
+        'The "Current Era" or the "Common Era" (CE) which starts in year `1`.\n',
     },
     {
       name: "bce/0",
       type: "type",
       specs: ["@type bce() :: 0"],
-      documentation: '"Before the Current Era" or "Before the Common Era" (BCE), for those years less than `1`.\n',
+      documentation:
+        '"Before the Current Era" or "Before the Common Era" (BCE), for those years less than `1`.\n',
     },
   ],
 };
