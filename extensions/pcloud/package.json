@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pcloud",
-  "title": "Search pCloud...",
+  "title": "pCloud",
   "description": "Search your pCloud through API and use pCloud Drive to open files and folders in Finder",
   "icon": "command-icon.png",
   "author": "xela92",
@@ -24,7 +24,7 @@
     },
     {
       "name": "excludedFilePatterns",
-      "title": "Excluded file patterns (comma-separated)",
+      "title": "Excluded File Patterns (comma-separated)",
       "type": "textfield",
       "default": ".DS_Store",
       "description": "File patterns to exclude from search results (will be excluded client-side)",
@@ -44,7 +44,7 @@
     },
     {
       "name": "isEuropeRegion",
-      "title": "pCloud data region",
+      "title": "pCloud Data Region",
       "type": "checkbox",
       "default": false,
       "description": "Whether to use the Europe region for pCloud API (needed if you did the migration to European servers)",
@@ -56,7 +56,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "pCloud",
+      "title": "Search pCloud",
       "description": "Search and open pCloud files and folders",
       "mode": "view"
     }
