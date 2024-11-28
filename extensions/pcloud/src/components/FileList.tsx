@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, List, openExtensionPreferences, Icon } from "@raycast/api";
 import React from "react";
 import { useSearchProvider } from "../providers/SearchProvider";
 import { getIconForFile } from "../utils/utils";
@@ -50,7 +50,11 @@ function FileListItem(props: { file: IFile; pcloudBasePath: string }) {
               target={file.path.replace(file.path.substring(file.path.lastIndexOf("/")), "")}
             />
             <Action.CopyToClipboard title={"Copy Path to Clipboard"} content={file.path} />
-            <Action title={"Open Extension Preferences"} onAction={openExtensionPreferences} />
+            <Action
+              title={"Open Extension Preferences"}
+              onAction={openExtensionPreferences}
+              icon={Icon.Gear}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
