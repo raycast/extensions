@@ -30,6 +30,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         search: state.search,
         collection: initialItems,
         initialCollection: initialItems,
+        isShowingDetails: false,
       };
     }
     case 'group': {
@@ -141,6 +142,12 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         collection: newCollection,
       };
     }
+    case 'toggleDetails': {
+      return {
+        ...state,
+        isShowingDetails: !state.isShowingDetails,
+      };
+    }
     default:
       //@ts-expect-error action type does not exist
       throw new Error(`Invalid action type "${action.type}" in transactionViewReducer`);
@@ -156,12 +163,14 @@ export function initView({
   sort = null,
   search = '',
   initialCollection: initialItems,
+  isShowingDetails: isShowingDetail = false,
 }: ViewState): ViewState {
   return {
     filter,
     group,
     sort,
     search,
+    isShowingDetails: isShowingDetail,
     collection: initialItems,
     initialCollection: initialItems,
   };

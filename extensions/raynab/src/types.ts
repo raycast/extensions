@@ -64,6 +64,7 @@ export interface ViewState {
   sort: SortNames | null;
   collection: TransactionDetail[] | TransactionDetailMap;
   initialCollection: TransactionDetail[];
+  isShowingDetails: boolean;
 }
 
 export type ViewAction =
@@ -74,7 +75,8 @@ export type ViewAction =
     }
   | { type: 'search'; query: string }
   | { type: 'group'; groupBy: GroupNames }
-  | { type: 'sort'; sortBy: SortNames };
+  | { type: 'sort'; sortBy: SortNames }
+  | { type: 'toggleDetails' };
 
 export type TransactionState = Omit<ViewState, 'collection' | 'initialCollection'> & {
   timeline: Period | undefined;

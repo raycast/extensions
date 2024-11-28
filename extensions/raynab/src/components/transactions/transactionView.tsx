@@ -21,12 +21,13 @@ export function TransactionView() {
       sort: 'date_desc', // Default to newest transactions first
       search: '',
       collection: transactions,
+      isShowingDetails: false,
       initialCollection: transactions,
     },
     initView
   );
 
-  const { collection, group, sort, filter, search: query } = state;
+  const { collection, group, sort, filter, search: query, isShowingDetails } = state;
 
   // Prevents success toast from overriding a failure
   const errorToastPromise = useRef<Promise<Toast> | null>(null);
@@ -77,9 +78,14 @@ export function TransactionView() {
   }, [timeline, transactions]);
 
   return (
-    <TransactionProvider dispatch={dispatch} state={{ group, sort, filter, timeline }} onTimelineChange={setTimeline}>
+    <TransactionProvider
+      dispatch={dispatch}
+      state={{ group, sort, filter, timeline, isShowingDetails }}
+      onTimelineChange={setTimeline}
+    >
       <List
         isLoading={isValidating}
+        isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
       >
