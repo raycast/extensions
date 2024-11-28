@@ -24,8 +24,8 @@ import { useLocalStorage } from '@hooks/useLocalStorage';
 import { CurrencyFormat } from '@srcTypes';
 import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
 
-const INFLOW_ICON = { source: Icon.ChevronUp, tintColor: Color.Green };
-const OUTFLOW_ICON = { source: Icon.ChevronDown, tintColor: Color.Red };
+const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
+const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
 
 export function TransactionItem({ transaction }: { transaction: TransactionDetail }) {
   const {
