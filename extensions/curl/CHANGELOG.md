@@ -1,5 +1,9 @@
 # cURL Changelog
 
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Allow the request history to store different body requests for the same URL
+
 ## [Bug fix] - 2024-08-05
 
 - The "Copy Headers" button now copies the request's headers instead of copying the body
