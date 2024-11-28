@@ -28,6 +28,17 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "enableExecuteShellSupport",
+      "title": "[Security Warning] Enable Execute Shell Support",
+      "label": "Enable",
+      "description": "Enable the Execute Shell Support. This feature allows you to execute shell commands in the Raycast Port from deeplinks.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.86.1",
     "raycast-cross-extension": "^0.2.3"

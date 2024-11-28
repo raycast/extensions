@@ -45,6 +45,8 @@ Default: `undefined`
 
 Callback with `execSync` after the `AI.ask`. The answer will be set to the environment variable `RAYCAST_PORT_AI_ANSWER`.
 
+This feature is disabled by default. You need to enable it from extension preferences.
+
 #### `callbackLaunchOptions`
 
 Type: `LaunchOptions`\
