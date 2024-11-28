@@ -1,5 +1,12 @@
 # Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- `Action` to `openExtensionPreferences` on invalid token error
+- `EmptyView` when no **Pages**
+- `Cache` **DNS Records** through `useCachedPromise`
+- Changed status icons to be `...Cirle` for consistency
+
 ## [Add copy actions] - 2024-02-28
 
 - Added copy actions in View Pages and View Sites commands. Fixed shortcuts of some actions.

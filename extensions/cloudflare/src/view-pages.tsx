@@ -46,6 +46,9 @@ function Command() {
 
   return (
     <List isLoading={isLoading}>
+    {!isLoading && Object.keys(pages).length && <List.EmptyView icon={'no-pages.svg'} title='Create by importing an existing Git repository' description="or Upload your site's assets including HTML, CSS, and JS files directly from your computer." actions={<ActionPanel>
+      <Action.OpenInBrowser url='https://pages.cloudflare.com/' />
+    </ActionPanel>} />}
       {Object.entries(pages)
         .filter((entry) => entry[1].length > 0)
         .map((entry) => {

@@ -10,7 +10,7 @@ import {
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import Service, { Account, DnsRecord, Zone } from './service';
+import Service, { Account, Zone } from './service';
 import {
   getToken,
   getSiteStatusIcon,
@@ -18,6 +18,7 @@ import {
   handleNetworkError,
 } from './utils';
 import { CachePurgeView, purgeEverything } from './view-cache-purge';
+import { useCachedPromise } from '@raycast/utils';
 
 const service = new Service(getToken());
 
@@ -216,24 +217,10 @@ interface DnsRecordProps {
 
 function DnsRecordView(props: DnsRecordProps) {
   const { siteId } = props;
-
-  const [records, setRecords] = useState<DnsRecord[]>([]);
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchRecords() {
-      try {
-        const records = await service.listDnsRecords(siteId);
-        setRecords(records);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    fetchRecords();
-  });
+  const {isLoading, data: records} = useCachedPromise(async () =>  await service.listDnsRecords(siteId), [], {
+    initialData: [],
+    onError: handleNetworkError
+  })
 
   return (
     <List isLoading={isLoading}>
