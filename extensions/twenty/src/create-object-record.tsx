@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { randomUUID } from "crypto";
 
 import twenty from "./services/TwentySDK";
@@ -47,7 +47,14 @@ export default function CreateObjectRecord() {
                     icon={Icon.List}
                     onAction={async () => {
                       const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                      push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                      if (typeof objectRecordMetadata === "string") {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: objectRecordMetadata,
+                        });
+                      } else {
+                        push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                      }
                     }}
                   />
                 </ActionPanel>
@@ -74,7 +81,14 @@ export default function CreateObjectRecord() {
                     icon={Icon.List}
                     onAction={async () => {
                       const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                      push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                      if (typeof objectRecordMetadata === "string") {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: objectRecordMetadata,
+                        });
+                      } else {
+                        push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                      }
                     }}
                   />
                 </ActionPanel>

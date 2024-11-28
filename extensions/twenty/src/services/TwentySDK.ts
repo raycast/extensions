@@ -50,18 +50,23 @@ class TwentySDK {
           [Api.KEY]: this.token,
         },
       });
-      const rawData = await response.json();
-      const objectRecordWithFieldsMetadata = getDataModelWithFieldsSchema.parse(rawData);
-      const excludeFieldsWithName = ["updatedAt", "deletedAt"];
-      objectRecordWithFieldsMetadata.data.object.fields = objectRecordWithFieldsMetadata.data.object.fields
-        .filter((object) => !object.isSystem)
-        .filter((object) => object.isActive)
-        .filter((object) => object.type !== "RELATION" && object.type !== "ACTOR") // handle relation later
-        .filter((object) => !excludeFieldsWithName.includes(object.name));
 
-      return objectRecordWithFieldsMetadata.data.object;
+      if (response.ok) {
+        const rawData = await response.json();
+        const objectRecordWithFieldsMetadata = getDataModelWithFieldsSchema.parse(rawData);
+        const excludeFieldsWithName = ["updatedAt", "deletedAt"];
+        objectRecordWithFieldsMetadata.data.object.fields = objectRecordWithFieldsMetadata.data.object.fields
+          .filter((object) => !object.isSystem)
+          .filter((object) => object.isActive)
+          .filter((object) => object.type !== "RELATION" && object.type !== "ACTOR") // handle relation later
+          .filter((object) => !excludeFieldsWithName.includes(object.name));
+
+        return objectRecordWithFieldsMetadata.data.object;
+      }
+
+      return response.statusText;
     } catch (err) {
-      throw new Error(err as string);
+      return err as string;
     }
   }
 
