@@ -1,5 +1,5 @@
 # Web Page Design Mode Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-11-28
 
 Release of the Web Page Design Mode extension
