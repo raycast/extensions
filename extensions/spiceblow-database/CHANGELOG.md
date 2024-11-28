@@ -1,6 +1,6 @@
 # Search Database Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-11-28
 
 - Add ordering of tables in the first list view, last used elements are first
 - Improve graph view, it will show a loading indicator instead of a empty image
