@@ -53,7 +53,7 @@ export default async () => {
     showHUD("Converted to Latin");
   } catch (e) {
     if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Decode failed", e);
+      await showToast(ToastStyle.Failure, "Accessibility permission denied.", e);
     }
   }
 };

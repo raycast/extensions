@@ -46,5 +46,10 @@ export function getErrorMessage(error: unknown): string {
       return error.data.error.message;
     }
   }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
   return String(error);
 }

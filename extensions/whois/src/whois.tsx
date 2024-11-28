@@ -1,42 +1,32 @@
-import { Detail, LaunchProps } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import type { LaunchProps } from "@raycast/api";
+import { Detail } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import useDomainOrIp from "@/hooks/use-domain-or-ip";
+import useWhoisData from "@/hooks/use-whois-data";
 
-interface Props {
-  domain: string;
+interface QueryProps {
+  input: string;
 }
 
-const WHOIS = (props: LaunchProps<{ arguments: Props }>) => {
-  const [data, setData] = useState<string | null>(null);
-  const { domain } = props.arguments;
+const WHOIS = (props: LaunchProps<{ arguments: QueryProps }>) => {
+  const input = props.arguments.input; // Get the input directly from props
 
-  useEffect(() => {
-    fetcher();
-  }, []);
+  const { data: domainOrIp, isLoading: domainLoading } = useDomainOrIp(input);
+  const { data: whoisData, isLoading: whoisLoading } = useWhoisData(domainOrIp, domainOrIp !== null);
 
-  const fetcher = async () => {
-    let markdown = `# WHOIS 🌐\n`;
-    const url = "https://scraper.run/whois?addr=" + domain;
+  if (!domainLoading && !domainOrIp) {
+    return <Detail markdown={`Cannot find domain`} />;
+  }
 
-    try {
-      const { data } = await axios.get(url);
+  if (domainOrIp && !domainOrIp.isIp && !domainOrIp.isDomain && !domainLoading && !whoisLoading) {
+    showFailureToast("Invalid input", {
+      title: "Invalid input",
+      message: "Please enter a valid domain or IP address.",
+    });
+    return <Detail markdown={`Invalid input`} />;
+  }
 
-      for (const [key, value] of Object.entries(data)) {
-        const header = key.charAt(0).toUpperCase() + key.slice(1);
-        markdown += `## ${header}\n`;
-
-        for (const [k, v] of Object.entries(value as object)) {
-          markdown += `* ${k}: ${v}\n\n`;
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-    setData(markdown);
-  };
-
-  return <Detail markdown={data} isLoading={!data?.length} />;
+  return <Detail markdown={whoisData} isLoading={domainLoading || whoisLoading} />;
 };
 
 export default WHOIS;

@@ -1,5 +1,95 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-10-04
+
+- Simplify number and special effects on min fields to prevent re-render loop
+
+## [Fix and New Password Generation Options] - 2024-10-02
+
+- Added Minimum numbers and Minimum special password options
+- Fixed some password options not being reflected
+
+## [Fix] - 2024-07-25
+
+- Prevent search vault sections from changing order
+
+## [New Commands] - 2024-04-10
+
+- Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions
+
+## [Fixes and Improvements] - 2024-03-28
+
+- Fixed lock screen bypassing by increasing timeout
+- Lock and Logout commands now still succeed even if the CLI call fails
+- Improved safety and consistency of the lock screen
+
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
+## [Fix] - 2024-03-12
+
+- Use downloaded CLI on arm64 devices that have it working
+
+## [Improvement] - 2024-03-12
+
+- Improve CLI not found error message
+
+## [Fix] - 2024-03-11
+
+- Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
+
+## [Improvements] - 2024-03-02
+
+- Decreased time to get passwords for large vaults by not waiting for all items to be loaded
+
+## [Fixes and Improvements] - 2024-02-27
+
+- Added images to README
+- Bumped the downloaded CLI version from 2023.10.0 to 2024.2.0
+- Added new action to copy the errors captured during the command execution
+- Attempt to fix reported crashes with the new download CLI mechanism
+
+## [Improvements] - 2024-02-25
+
+- Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
+- Improved troubleshooting screen content
+- Added a bug report data collection action
+
+## [New Timeout Option] - 2024-02-24
+
+- Added a new experimental option to lock the vault "On system lock"
+
+## [Fix] - 2024-02-23
+
+- Fixes timeout lock being removed due to lock command updating last activity time
+
+## [New Command and Fix] - 2024-01-06
+
+- Adds Create Folder command
+- Fixes issue with Loading Fallback
+
+## [Error handling] - 2023-11-30
+
+- Improved error handling
+- Fix "not logged in" error when locking the vault
+
+## [Fix] - 2023-09-08
+
+- Fixed irregular identity table
+
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
+## [Improvements] - 2023-08-15
+
+- Adds ability to paste TOTP code into active application
+
+## [Fix] - 2023-08-01
+
+- Removed visible line break in card, identity and note details
+
 ## [Improvements] - 2023-07-06
 
 - Display favorites at the top of the list on a separate section
@@ -28,7 +118,7 @@
 
 ## [Fix] - 2023-05-19
 
-- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Avoid displaying timeout info label on Unlock Form when the preference is Never
 - Fix crashing when getting the name of the frontmost application
 
 ## [Improvements to Actions] - 2023-05-18
@@ -99,7 +189,7 @@
 
 ## [Copy Enhancement] - 2022-11-02
 
-- Copy passwords in a way that asks clipboard managers to not save it 
+- Copy passwords in a way that asks clipboard managers to not save it
 
 ## [UI Enhancement] - 2022-09-21
 

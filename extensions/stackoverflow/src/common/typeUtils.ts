@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function assertNumberProp<Prop extends string>(item: unknown, prop: Prop): asserts item is Record<Prop, number> {
   if (!item || typeof (item as any)[prop] !== "number") {
     throw new Error(`no ${prop} found`);
@@ -26,7 +27,7 @@ export function assertObjectProp<Prop extends string>(item: unknown, prop: Prop)
 
 export function assertArrayProp<Prop extends string>(
   item: unknown,
-  prop: Prop
+  prop: Prop,
 ): asserts item is Record<Prop, unknown[]> {
   if (!item || !Array.isArray((item as any)[prop])) {
     throw new Error(`no ${prop} found`);

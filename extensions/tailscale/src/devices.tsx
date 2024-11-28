@@ -1,84 +1,87 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast, Image } from "@raycast/api";
+import { List, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { Device, LooseObject, loadDevices } from "./shared";
+import {
+  Device,
+  getStatus,
+  getDevices,
+  getErrorDetails,
+  sortDevices,
+  ErrorDetails,
+  MULLVAD_DEVICE_TAG,
+} from "./shared";
+import CopyActions from "./components/CopyActions";
 
-function DeviceList() {
+export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
+  const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = await execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json")
-          .toString()
-          .trim();
-        const data: LooseObject = JSON.parse(ret);
-
-        if (!data.Self.Online) {
-          throw "Tailscale not connected";
-        }
-
-        const _list = loadDevices(data.Self, data.Peer);
-        setDevices(_list);
+        const status = getStatus();
+        const _list = getDevices(status);
+        const _filteredList = _list.filter((device) => {
+          // mullvad devices should not be shown in the devices list - this mirrors the behavior of tailscale cli and client apps
+          if (device.tags?.includes(MULLVAD_DEVICE_TAG)) {
+            return false;
+          }
+          return true;
+        });
+        sortDevices(_filteredList);
+        setDevices(_filteredList);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load devices. Make sure Tailscale is connected.");
+        setError(getErrorDetails(error, "Couldn’t load device list."));
       }
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={devices === undefined}>
-      {devices?.map((device) => (
-        <List.Item
-          title={device.name}
-          subtitle={device.ipv4 + "   " + device.os}
-          key={device.key}
-          icon={
-            device.online
-              ? {
-                  source: {
-                    light: "connected_light.png",
-                    dark: "connected_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-              : {
-                  source: {
-                    light: "lastseen_light.png",
-                    dark: "lastseen_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-          }
-          accessories={
-            device.self
-              ? [
-                  { text: "This device", icon: Icon.Person },
-                  {
-                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
-                  },
-                ]
-              : [
-                  {
-                    text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
-                  },
-                ]
-          }
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={device.ipv4} title="Copy IPv4" />
-              <Action.CopyToClipboard content={device.dns} title="Copy MagicDNS" />
-              <Action.CopyToClipboard content={device.ipv6} title="Copy IPv6" />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={!devices && !error}>
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title={error.title} description={error.description} />
+      ) : (
+        devices?.map((device) => (
+          <List.Item
+            title={device.name}
+            subtitle={device.ipv4 + "   " + device.os}
+            key={device.key}
+            icon={
+              device.online
+                ? {
+                    source: {
+                      light: "connected_light.png",
+                      dark: "connected_dark.png",
+                    },
+                    mask: Image.Mask.Circle,
+                  }
+                : {
+                    source: {
+                      light: "lastseen_light.png",
+                      dark: "lastseen_dark.png",
+                    },
+                    mask: Image.Mask.Circle,
+                  }
+            }
+            accessories={
+              device.self
+                ? [
+                    { text: "This device", icon: Icon.Person },
+                    {
+                      text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
+                    },
+                  ]
+                : [
+                    {
+                      text: device.online ? `        Connected` : "Last seen " + formatDate(device.lastseen),
+                    },
+                  ]
+            }
+            actions={<CopyActions device={device} />}
+          />
+        ))
+      )}
     </List>
   );
-}
-
-export default function Command() {
-  return <DeviceList />;
 }
 
 function formatDate(d: Date) {

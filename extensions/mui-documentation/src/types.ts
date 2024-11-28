@@ -50,7 +50,7 @@ export interface Hit {
   /**
    * A MUI library name.
    */
-  product:
+  productId:
     | 'base'
     | 'data-grid'
     | 'date-pickers'

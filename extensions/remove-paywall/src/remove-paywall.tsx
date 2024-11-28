@@ -1,36 +1,21 @@
-import { LaunchProps, Toast, getPreferenceValues, getSelectedText, open, showToast } from "@raycast/api";
-
-interface Preferences {
-  service: string;
-}
-
-function isUrl(text: string): boolean {
-  return /^https?:\/\//.test(text);
-}
+import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@raycast/api";
+import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
-  const { service } = await getPreferenceValues<Preferences>();
-
-  // Get the selected text (if any)
-  let selectedText = "";
-
-  try {
-    selectedText = (await getSelectedText()).trim();
-  } catch {
-    // Ignore errors
+  let service: string;
+  if (props.arguments.service) {
+    service = props.arguments.service;
+  } else {
+    const preferences = getPreferenceValues<Preferences>();
+    service = preferences.service;
   }
 
+  const urlArgument = props.arguments.url;
   try {
-    const argumentText = props.arguments.url?.trim() ?? "";
-    const fallbackText = props.fallbackText?.trim() ?? "";
-    const url = [argumentText, fallbackText, selectedText].find((v) => !!v);
+    const url = await getUrl(urlArgument);
 
-    if (!url) {
-      throw new Error("No URL provided.");
-    }
-
-    if (!isUrl(url)) {
-      throw new Error(`Invalid URL: "${url}"`);
+    if (typeof url !== "string") {
+      throw url;
     }
 
     // Open the URL with the specified service
@@ -39,7 +24,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
     await showToast({
       style: Toast.Style.Failure,
       title: "Cannot remove paywall",
-      message: String(error),
+      message: (error as Error).message,
     });
   }
 };

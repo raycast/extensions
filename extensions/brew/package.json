@@ -7,7 +7,13 @@
   "contributors": [
     "Aayush9029",
     "mathieudutour",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "ashokbaruaakas",
+    "millerapps",
+    "pernielsentikaer",
+    "stelo",
+    "vyacheslav",
+    "j3lte"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -39,6 +45,24 @@
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
       "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean Up",
+      "subtitle": "Brew",
+      "description": "Clean files and packages from the cache that are older than 120 days",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "withoutThreshold",
+          "title": "Clean Up",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Include --prune=all when cleaning",
+          "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
+        }
+      ]
     }
   ],
   "preferences": [
@@ -53,15 +77,36 @@
       "name": "terminalApp",
       "type": "dropdown",
       "required": false,
+      "default": "terminal",
       "title": "Terminal Application",
       "data": [
+        {
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
+        },
         {
           "title": "Terminal",
           "value": "terminal"
         },
         {
-          "title": "iTerm",
-          "value": "iterm"
+          "title": "Warp",
+          "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
@@ -82,30 +127,41 @@
       "title": "Uninstall",
       "label": "Remove all files associated with a cask.",
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
+    },
+    {
+      "name": "quarantine",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quarantine",
+      "label": "Enable quarantine of downloads",
+      "description": "Enable or disable quarantine of files downloaded by brew"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "@raycast/utils": "^1.4.11",
-    "@types/stream-json": "^1.7.2",
-    "node-fetch": "^2.6.7",
-    "run-applescript": "^6.0.0",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
+    "@types/stream-json": "^1.7.7",
+    "node-fetch": "^3.3.2",
     "stream-chain": "^2.2.5",
-    "stream-json": "^1.7.4"
+    "stream-json": "^1.8.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^16.11.26",
-    "@types/node-fetch": "^2.6.1",
-    "@types/react": "^17.0.40",
-    "eslint": "^7.32.0",
-    "typescript": "^4.6.2"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.14.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

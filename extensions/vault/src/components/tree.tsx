@@ -20,6 +20,7 @@ import {
   Icon,
   List,
   openCommandPreferences,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -40,6 +41,7 @@ export function VaultTree(props: { path: string }) {
     } catch (e: unknown) {
       if (e instanceof ConfigurationError) {
         console.error(e);
+        await showHUD(e.message);
         await openCommandPreferences();
         return;
       }

@@ -3,20 +3,6 @@
 Show local and public IPv4/IPv6 address.
 Query geolocation for any IP address or domain.
 
-**Preferences:**
-
-- Language: Language of location information display.
-  - English (default)
-  - Deutsch (German)
-  - Español (Spanish)
-  - Português - Brasil (Portuguese)
-  - Français (French)
-  - 日本語 (Japanese)
-  - 中国 (Chinese)
-  - Русский (Russian)
-
----
-
 **IP Geolocation** Query Service from [ip-api.com](https://ip-api.com). The following notes are from the official website
 
 **Do I need an API key for the free endpoint?**

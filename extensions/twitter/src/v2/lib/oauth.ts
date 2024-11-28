@@ -1,5 +1,6 @@
-import { OAuth } from "@raycast/api";
+import { OAuth, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
+import { XIcon } from "../../icon";
 
 // Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
 // Select OAuth 2.0
@@ -7,16 +8,21 @@ import fetch from "node-fetch";
 // For the redirect URL enter: https://raycast.com/redirect
 // For the website URL enter: https://raycast.com
 
+interface Preferences {
+  clientid?: string;
+}
+
 export function getClientId(): string {
-  return "aHB6TFU2T3hid2stVjdFZ2ljanM6MTpjaQ";
+  const prefs = getPreferenceValues<Preferences>();
+  return prefs.clientid || "";
 }
 
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
-  providerIcon: "twitter.png",
+  providerIcon: XIcon(),
   providerId: "twitter",
-  description: "Connect your Twitter account",
+  description: "Connect your X account",
 });
 
 // Authorization
@@ -41,7 +47,7 @@ export async function authorize(): Promise<void> {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", getClientId());

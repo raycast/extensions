@@ -3,16 +3,17 @@ export type PerferenceValue = {
 };
 
 export type Progress = {
-  key: string;
   title: string;
-  menubarTitle?: string;
-  showInMenuBar: boolean;
-  startDate: Date;
-  endDate: Date;
-  getProgressNumberFn?: any;
-  pinned?: boolean;
   type?: "default" | "user";
-  editable?: boolean;
+  pinned?: boolean;
+  startDate: number;
+  endDate: number;
+  progressNum: number;
+  menubar: {
+    shown?: boolean;
+    title?: string;
+  };
+  showAsCommand?: boolean;
 };
 
 export type ProgressBarOptions = {

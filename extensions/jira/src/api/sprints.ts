@@ -9,8 +9,7 @@ type DetailedSprint = {
   id: string;
   name: string;
   state: "active" | "future" | "closed";
-  startDate: string;
-  endDate: string;
+  startDate?: string;
 };
 
 type GetSprintsParams = {
@@ -32,7 +31,7 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
       } catch (error) {
         return null;
       }
-    })
+    }),
   );
 
   const filteredSprints = allSprints.filter((sprint) => sprint !== null) as DetailedSprint[];
@@ -43,8 +42,12 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
 
     if (stateOrder[sprintA.state] !== stateOrder[sprintB.state]) {
       return stateOrder[sprintA.state] - stateOrder[sprintB.state];
-    } else if (sprintA.startDate !== sprintB.startDate) {
+    } else if (sprintA.startDate && sprintB.startDate) {
       return sprintA.startDate.localeCompare(sprintB.startDate);
+    } else if (!sprintA.startDate) {
+      return 1;
+    } else if (!sprintB.startDate) {
+      return -1;
     } else {
       return sprintA.name.localeCompare(sprintB.name);
     }

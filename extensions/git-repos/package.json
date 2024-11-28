@@ -5,6 +5,11 @@
   "description": "Quickly access your local git repositories and open them in your favorite editor or any app",
   "icon": "git-repos-icon.png",
   "author": "moored",
+  "contributors": [
+    "nitishpdmn",
+    "go_dima",
+    "cameronsstone"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -55,7 +60,7 @@
           "value": "6"
         }
       ],
-      "description": "Maximnum depth to scan for repos",
+      "description": "Maximum depth to scan for repos",
       "default": "3"
     },
     {
@@ -66,6 +71,24 @@
       "label": "Include submodules",
       "default": false,
       "description": "Include submodules in scan"
+    },
+    {
+      "name": "searchKeys",
+      "type": "dropdown",
+      "required": true,
+      "title": "Search by",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Path",
+          "value": "fullPath"
+        }
+      ],
+      "default": "name",
+      "description": "What to match against when searching"
     },
     {
       "name": "openWith1",
@@ -109,8 +132,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
+    "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.5.2",
+    "get-installed-browsers": "^0.1.7",
     "default-browser": "^4.0.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"

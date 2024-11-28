@@ -1,25 +1,45 @@
-import { autoSetWallpaper } from "./utils/common-utils";
-import { LocalStorageKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
+import { cache } from "./utils/common-utils";
+import { CacheKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper } from "./types/types";
-import { environment, LaunchType, LocalStorage, showHUD } from "@raycast/api";
+import { captureException, closeMainWindow, environment, LaunchType, showHUD } from "@raycast/api";
 import axios from "axios";
+import { autoSetWallpaper } from "./utils/applescript-utils";
+import { refreshIntervalSeconds } from "./types/preferences";
 
 export default async () => {
   if (environment.launchType === LaunchType.UserInitiated) {
-    await showHUD("Downloading and setting wallpaper...");
+    await closeMainWindow();
+    await showHUD("🖥️ Setting wallpaper...");
   }
   await getRandomWallpaper();
 };
 
 export const getRandomWallpaper = async () => {
   try {
-    const _localStorage = await LocalStorage.getItem<string>(LocalStorageKey.WALLPAPER_LIST_CACHE);
-    const _wallpaperList =
-      typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as RaycastWallpaper[]);
+    const lastRefreshTime = cache.get(CacheKey.LAST_REFRESH_TIME);
+    if (
+      environment.launchType === LaunchType.Background &&
+      lastRefreshTime &&
+      Math.floor(Date.now() / 1000) < Number(lastRefreshTime) + Number(refreshIntervalSeconds)
+    ) {
+      return;
+    }
+
+    const cacheString = cache.get(CacheKey.WALLPAPER_LIST_CACHE);
+    const _wallpaperList = typeof cacheString === "undefined" ? [] : (JSON.parse(cacheString) as RaycastWallpaper[]);
+
+    const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
+    const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
+
+    const wallpaperList = _wallpaperList.filter((value) => {
+      return !_excludeList.includes(value.url);
+    });
 
     if (_wallpaperList.length !== 0) {
-      const randomImage = _wallpaperList[Math.floor(Math.random() * _wallpaperList.length)];
+      const randomImage = wallpaperList[Math.floor(Math.random() * wallpaperList.length)];
       await autoSetWallpaper(randomImage);
+      // cache last refresh time
+      cache.set(CacheKey.LAST_REFRESH_TIME, `${Math.floor(Date.now() / 1000)}`);
     } else {
       //cache picture
       await axios({
@@ -31,17 +51,24 @@ export const getRandomWallpaper = async () => {
       })
         .then((axiosRes) => {
           const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
-          const randomImage = _raycastWallpaper[Math.floor(Math.random() * _raycastWallpaper.length)];
+          const raycastWallpaper = _raycastWallpaper.filter((value) => {
+            return !_excludeList.includes(value.url);
+          });
+          const randomImage = raycastWallpaper[Math.floor(Math.random() * raycastWallpaper.length)];
           autoSetWallpaper(randomImage);
 
           //cache list
-          LocalStorage.setItem(LocalStorageKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
+          cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
+          // cache last refresh time
+          cache.set(CacheKey.LAST_REFRESH_TIME, `${Math.floor(Date.now() / 1000)}`);
         })
         .catch((error) => {
-          showHUD(String(error));
+          captureException(error);
+          console.error(error);
         });
     }
   } catch (e) {
-    await showHUD(String(e));
+    captureException(e);
+    console.error(e);
   }
 };

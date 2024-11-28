@@ -42,10 +42,14 @@
     {
       "name": "loginMethod",
       "title": "Login method",
-      "description": "Login method (ldap, token)",
+      "description": "Login method (oidc, ldap, token)",
       "type": "dropdown",
-      "default": "ldap",
+      "default": "oidc",
       "data": [
+        {
+          "title": "Oidc",
+          "value": "oidc"
+        },
         {
           "title": "Ldap",
           "value": "ldap"
@@ -55,7 +59,7 @@
           "value": "token"
         }
       ],
-      "required": false
+      "required": true
     },
     {
       "name": "ldap",

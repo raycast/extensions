@@ -50,24 +50,24 @@ const ListActions = () => {
     return (
       <ActionPanel>
         <Action
-          title="Apply Edits"
-          onAction={() => editTodo()}
           icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+          onAction={() => editTodo()}
+          title="Apply Edits"
         />
         <Action
-          title="Cancel"
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
           onAction={() => {
             setEditing(false);
             setSearchBarText("");
           }}
-          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          title="Cancel"
         />
       </ActionPanel>
     );
   }
   return (
     <ActionPanel>
-      {!searchMode && <Action title="Create Todo" onAction={() => addTodo()} icon={Icon.Plus} />}
+      {!searchMode && <Action icon={Icon.Plus} onAction={() => addTodo()} title="Create Todo" />}
       <SearchModeAction />
       <DeleteAllAction />
     </ActionPanel>

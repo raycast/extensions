@@ -20,7 +20,7 @@ export async function runScript(command: string, isSilently = false): Promise<st
     throw new Error(stderr);
   }
   // replace only the line break character
-  const ret = await stdout.replace(/\r?\n$/, "");
+  const ret = stdout.replace(/\r?\n$/, "");
   if (isSilently === true) {
     await closeMainWindow({ popToRootType: PopToRootType.Immediate });
   }

@@ -1,201 +1,92 @@
-import { List, showToast, ActionPanel, Action, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { queryDatabase, fetchDatabaseProperties } from "../utils/notion";
-import { DatabaseView, Page, DatabaseProperty } from "../utils/types";
-import { recentlyOpenedPagesAtom, databaseViewsAtom, databasePropertiesAtom } from "../utils/state";
-import { CreateDatabaseForm, DatabaseViewForm } from "./forms";
-import { DatabaseKanbanView, DatabaseListView } from "./databaseViews";
-import { ActionSetVisibleProperties } from "./actions";
 
-const databaseViewTypes = {
-  list: DatabaseListView,
-  kanban: DatabaseKanbanView,
+import { useDatabaseProperties, useDatabasesView } from "../hooks";
+import { queryDatabase, getPageName, Page, User } from "../utils/notion";
+
+import { DatabaseView } from "./DatabaseView";
+import { CreatePageForm } from "./forms";
+
+type DatabaseListProps = {
+  databasePage: Page;
+  setRecentPage: (page: Page) => Promise<void>;
+  removeRecentPage: (id: string) => Promise<void>;
+  users?: User[];
 };
 
-/**
- * List of the pages in a Database
- */
-export function DatabaseList(props: { databasePage: Page }): JSX.Element {
-  // Get database info
-  const { databasePage } = props;
+export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, users }: DatabaseListProps) {
   const databaseId = databasePage.id;
-  const databaseName =
-    (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") +
-    (databasePage.title ? databasePage.title : "Untitled");
-
-  const [sort, setSort] = useState<"last_edited_time" | "created_time">("last_edited_time");
-  const [{ value: recentlyOpenedPages }, storeRecentlyOpenedPage] = useAtom(recentlyOpenedPagesAtom);
-  const [databasePages, setDatabasePages] = useState<Page[]>(
-    recentlyOpenedPages.filter((page) => page.parent_database_id === databaseId)
-  );
+  const databaseName = getPageName(databasePage);
   const [searchText, setSearchText] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [{ loading: isLoadingDatabaseView, value: databaseView }, setDatabaseView] = useAtom(
-    databaseViewsAtom(databaseId)
+  const [sort, setSort] = useState<"last_edited_time" | "created_time">("last_edited_time");
+  const {
+    data: databasePages,
+    isLoading,
+    mutate,
+  } = useCachedPromise(
+    (databaseId, searchText, sort) => queryDatabase(databaseId, searchText, sort),
+    [databaseId, searchText, sort],
   );
-  const [{ loading: isLoadingDatabaseProperties, value: databaseProperties }, setDatabaseProperties] = useAtom(
-    databasePropertiesAtom(databaseId)
-  );
+  const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
+  const { data: databaseView, isLoading: isLoadingDatabaseViews, setDatabaseView } = useDatabasesView(databaseId);
 
   useEffect(() => {
-    storeRecentlyOpenedPage(databasePage);
+    setRecentPage(databasePage);
   }, [databaseId]);
 
-  // Load database properties
-  useEffect(() => {
-    const getDatabaseProperties = async () => {
-      const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
-      if (fetchedDatabaseProperties.length) {
-        setDatabaseProperties(fetchedDatabaseProperties);
-      }
-    };
-    getDatabaseProperties();
-  }, []);
-
-  // Fetch last 100 edited database pages
-  useEffect(() => {
-    const getDatabasePages = async () => {
-      setIsLoading(true);
-
-      const fetchedDatabasePages = await queryDatabase(databaseId, searchText, sort);
-      if (fetchedDatabasePages.length) {
-        setDatabasePages(fetchedDatabasePages);
-      }
-      setIsLoading(false);
-    };
-    getDatabasePages();
-  }, [searchText, sort]);
-
-  // Handle save new database view
-  function saveDatabaseView(newDatabaseView: DatabaseView): void {
-    setDatabaseView(newDatabaseView);
-    showToast({
-      title: "View Updated",
-    });
-  }
-
-  if (isLoadingDatabaseProperties || isLoadingDatabaseView) {
+  if (isLoadingDatabaseProperties || isLoadingDatabaseViews) {
     return <List isLoading />;
   }
 
-  const viewType = databaseView?.type ? databaseView.type : "list";
-  const viewTitle = databaseView?.name
+  const navigationTitle = databaseView?.name
     ? (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") + databaseView.name
-    : null;
-
-  const DatabaseViewType = databaseViewTypes[viewType];
-
-  const visiblePropertiesIds: string[] = [];
-  if (databaseView && databaseView.properties) {
-    databaseProperties?.forEach((dp: DatabaseProperty) => {
-      if (databaseView?.properties && databaseView.properties[dp.id]) visiblePropertiesIds.push(dp.id);
-    });
-  }
+    : databaseName;
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter pages"
-      navigationTitle={" →  " + (viewTitle ? viewTitle : databaseName)}
+      navigationTitle={navigationTitle}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort by"
           storeValue
-          onChange={(newValue) => setSort(newValue as "last_edited_time" | "created_time")}
+          onChange={(value) => setSort(value as "last_edited_time" | "created_time")}
         >
           <List.Dropdown.Item title="Last Edited At" value="last_edited_time" />
           <List.Dropdown.Item title="Last Created At" value="created_time" />
         </List.Dropdown>
       }
       throttle
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
+    >
+      <DatabaseView
+        databaseId={databaseId}
+        databasePages={databasePages ?? []}
+        databaseProperties={databaseProperties}
+        databaseView={databaseView}
+        setDatabaseView={setDatabaseView}
+        sort={sort}
+        mutate={mutate}
+        setRecentPage={setRecentPage}
+        removeRecentPage={removeRecentPage}
+        users={users}
+      />
+
+      <List.EmptyView
+        title="No pages found"
+        description="Create a new page for this database by pressing ⏎"
+        actions={
+          <ActionPanel>
             <Action.Push
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={
-                <CreateDatabaseForm
-                  databaseId={databaseId}
-                  onPageCreated={(page) => setDatabasePages((state) => state.concat([page]))}
-                />
-              }
+              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
             />
-          </ActionPanel.Section>
-
-          {databaseProperties ? (
-            <ActionPanel.Section title="View options">
-              <Action.Push
-                title="Set View Type..."
-                icon={{
-                  source: databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png",
-                  tintColor: Color.PrimaryText,
-                }}
-                target={
-                  <DatabaseViewForm
-                    isDefaultView
-                    databaseId={databaseId}
-                    databaseView={databaseView}
-                    saveDatabaseView={saveDatabaseView}
-                  />
-                }
-              />
-              <ActionSetVisibleProperties
-                databaseProperties={databaseProperties}
-                selectedPropertiesIds={visiblePropertiesIds}
-                onSelect={(propertyId) => {
-                  const databaseViewCopy = (
-                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
-                  ) as DatabaseView;
-                  if (!databaseViewCopy.properties) {
-                    databaseViewCopy.properties = {};
-                  }
-                  databaseViewCopy.properties[propertyId] = {};
-                  saveDatabaseView(databaseViewCopy);
-                }}
-                onUnselect={(propertyId) => {
-                  const databaseViewCopy = (
-                    databaseView ? JSON.parse(JSON.stringify(databaseView)) : {}
-                  ) as DatabaseView;
-                  if (!databaseViewCopy.properties) {
-                    databaseViewCopy.properties = {};
-                  }
-                  delete databaseViewCopy.properties[propertyId];
-                  saveDatabaseView(databaseViewCopy);
-                }}
-              />
-            </ActionPanel.Section>
-          ) : null}
-
-          {databasePage.url ? (
-            <ActionPanel.Section>
-              <Action.CopyToClipboard
-                title="Copy Page URL"
-                content={databasePage.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
-              <Action.Paste
-                title="Paste Page URL"
-                content={databasePage.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-              />
-            </ActionPanel.Section>
-          ) : null}
-        </ActionPanel>
-      }
-    >
-      <DatabaseViewType
-        databaseId={databaseId}
-        databasePages={databasePages ? databasePages : ([] as Page[])}
-        databaseProperties={databaseProperties ? databaseProperties : ([] as DatabaseProperty[])}
-        databaseView={databaseView}
-        onPageCreated={(page) => setDatabasePages((state) => state.concat([page]))}
-        onPageUpdated={(page) => setDatabasePages((state) => state.map((x) => (x.id === page.id ? page : x)))}
-        saveDatabaseView={saveDatabaseView}
-        sort={sort}
+          </ActionPanel>
+        }
       />
     </List>
   );

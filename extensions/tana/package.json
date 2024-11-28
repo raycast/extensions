@@ -5,10 +5,21 @@
   "description": "Write notes in Raycast, and capture them in Tana.",
   "icon": "tana-icon.png",
   "author": "cheslip",
+  "contributors": [
+    "neil_brown"
+  ],
   "categories": [
+    "Applications",
     "Productivity"
   ],
   "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
   "commands": [
     {
       "name": "quickAddCommand",
@@ -16,37 +27,46 @@
       "subtitle": "Tana",
       "description": "Create a new node",
       "mode": "view"
+    },
+    {
+      "name": "manageTargetNodesCommand",
+      "title": "Manage Target Nodes",
+      "subtitle": "Tana",
+      "description": "Manage the nodes for Tana quick add",
+      "mode": "view"
+    },
+    {
+      "name": "manageSupertagsCommand",
+      "title": "Manage Supertags",
+      "subtitle": "Tana",
+      "description": "Manage supertags for Tana quick add",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "nodeApiToken",
-      "description": "API token for your capture node",
+      "name": "workspaceApiToken",
+      "description": "API token for your Tana workspace",
       "type": "password",
       "required": true,
       "title": "API Token"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8",
-    "axios": "^1.1.2"
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2",
+    "readline": "^1.3.0",
+    "valtio": "^1.13.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "ray publish"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   }
 }

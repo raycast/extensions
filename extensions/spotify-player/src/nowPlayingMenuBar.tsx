@@ -37,11 +37,7 @@ import { getErrorMessage } from "./helpers/getError";
 import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
 
 function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
-  const preferences = getPreferenceValues<{
-    maxTextLength?: boolean;
-    showEllipsis?: boolean;
-    iconType?: "spotify-icon" | "cover-image";
-  }>();
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
 
   const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
   const shouldExecute = React.useRef<boolean>(false);
@@ -79,9 +75,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   const currentTime = Date.now();
-  const tenMinutesInMilliseconds = 10 * 60 * 1000;
+  const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
   const dataIsOld =
-    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
+    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > twoHoursInMilliseconds;
 
   if (spotifyAppData?.state === "NOT_RUNNING") {
     return (
@@ -243,7 +239,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
         {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
+          ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => {
             return (
               playlist.name &&
@@ -342,7 +338,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 }
 
 function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
-  return (
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+
+  return preferences.hideIconWhenIdle ? null : (
     <MenuBarExtra icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }} isLoading={isLoading}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title="Spotify needs to be opened" />
@@ -366,7 +364,8 @@ function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
 }
 
 function NothingPlaying({ title = "Nothing is playing right now", isLoading }: { title?: string; isLoading: boolean }) {
-  return (
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+  return preferences.hideIconWhenIdle ? null : (
     <MenuBarExtra icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }} isLoading={isLoading}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title={title} />

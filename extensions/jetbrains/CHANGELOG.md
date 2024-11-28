@@ -1,5 +1,32 @@
 # Jetbrains Changelog
 
+## [Shell Script Fixes] - 2024-01-23
+
+- Use correct script name from config
+- Better handling of missing scripts 
+
+## [Toolbox 2.0 Updates] - 2023-07-22
+
+- Post release 2.0 fixes
+- General fixes for different installation paths
+- Icon fixes
+- Handle apps that don't work properly
+- Handle apps that are broken by 2.0 installation
+
+## [Rider tweak] - 2023-07-22
+
+- Small tweak for Rider on Toolbox 2.0
+
+## [JetBrains Toolbox 2.0 Support] - 2023-07-04
+
+- Update to support new Toolbox 2.0 release
+  - This release from JB has major changes to how versions are installed and updated.
+  - Version check added so it should pick up changes automatically
+- Tweaks to menubar extra
+  - Added Toolbox and IDE open actions
+  - Seperators for nice
+  - Consistent naming for favourites and standard projects
+
 ## [Multiple Version Update Mk.II] - 2023-05-01
 
 - Fixes for fixes for multiple version update

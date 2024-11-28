@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Color, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Form, Icon, popToRoot, showToast, Toast, open } from "@raycast/api";
 import { Fragment, ReactElement, useState } from "react";
 import { Tweet } from "../lib/twitter";
 import { clientV2 } from "../lib/twitterapi_v2";
 import { getErrorMessage } from "../../utils";
+import { hasRestrictedAccess } from "../../common";
+import { XIcon } from "../../icon";
 
 interface TweetFormValues {
   text: string;
@@ -120,10 +122,19 @@ async function submitTweets(tweets: TweetContent[]) {
     }
     if (tweets.length === 1) {
       const t = tweets[0];
-      await clientV2.sendTweet(t.text);
-      await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
+      if (hasRestrictedAccess()) {
+        const url = new URL("https://twitter.com/intent/tweet");
+        url.searchParams.append("text", t.text);
+        open(url.href);
+      } else {
+        await clientV2.sendTweet(t.text);
+        await showToast({ style: Toast.Style.Success, title: "Tweet created", message: "Tweet creation successful" });
+      }
       popToRoot();
     } else {
+      if (hasRestrictedAccess()) {
+        throw new Error("This Operation requires a an OAuth client");
+      }
       const tweetTexts: string[] = tweets.map((t) => t.text);
       await clientV2.sendThread(tweetTexts);
       await showToast({ style: Toast.Style.Success, title: "Thread created", message: "Thread creation successful" });
@@ -177,37 +188,35 @@ export function TweetSendThreadFormV2({ defaultValue }: { defaultValue?: string 
         <ActionPanel>
           <ActionPanel.Section>
             {validTweets(tweets) && (
-              <Action.SubmitForm
-                title={submitText}
-                icon="twitter.png"
-                onSubmit={(values: TweetFormValues) => submitTweets(tweets)}
-              />
+              <Action.SubmitForm title={submitText} icon={XIcon()} onSubmit={() => submitTweets(tweets)} />
             )}
           </ActionPanel.Section>
-          <ActionPanel.Section title="Thread">
-            <Action
-              title="Add Tweet"
-              onAction={addTweet}
-              icon={{ source: Icon.Plus, tintColor: Color.PrimaryText }}
-              shortcut={{ modifiers: ["cmd"], key: "+" }}
-            />
-            {tweets.length > 1 && (
+          {!hasRestrictedAccess() && (
+            <ActionPanel.Section title="Thread">
               <Action
-                title="Remove last Tweet"
-                onAction={removeTweet}
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ["cmd"], key: "-" }}
+                title="Add Tweet"
+                onAction={addTweet}
+                icon={{ source: Icon.Plus, tintColor: Color.PrimaryText }}
+                shortcut={{ modifiers: ["cmd"], key: "+" }}
               />
-            )}
-            {tweets.length > 1 && (
-              <Action
-                title="Add Tweet Numbers"
-                onAction={addTweetNumber}
-                icon={Icon.Document}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
-            )}
-          </ActionPanel.Section>
+              {tweets.length > 1 && (
+                <Action
+                  title="Remove Last Tweet"
+                  onAction={removeTweet}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd"], key: "-" }}
+                />
+              )}
+              {tweets.length > 1 && (
+                <Action
+                  title="Add Tweet Numbers"
+                  onAction={addTweetNumber}
+                  icon={Icon.Document}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     >

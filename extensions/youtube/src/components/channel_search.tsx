@@ -1,21 +1,24 @@
-import { Action, ActionPanel, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
-import { Channel, searchChannels, getChannels, useRefresher } from "../lib/youtubeapi";
+import { Channel, getChannels, searchChannels, useRefresher } from "../lib/youtubeapi";
 import { ChannelItem } from "./channel";
+import { FilterDropdown } from "./dropdown";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedChannels, getRecentChannels } from "./recent_channels";
 
 export function SearchChannelList({ searchQuery }: { searchQuery?: string | undefined }) {
   const { griditemsize, showRecentChannels } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const [order, setOrder] = useCachedState<string>("search-channel-order", "relevance");
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {
-      return await searchChannels(searchText);
+      return await searchChannels(searchText, { order });
     }
     return undefined;
-  }, [searchText]);
+  }, [searchText, order]);
   if (error) {
     showToast(Toast.Style.Failure, "Could not search channels", getErrorMessage(error));
   }
@@ -27,14 +30,20 @@ export function SearchChannelList({ searchQuery }: { searchQuery?: string | unde
 
   useEffect(() => {
     (async () => {
-      setPinnedChannels(await getChannels(getPinnedChannels()));
-      setRecentChannels(await getChannels(getRecentChannels()));
+      setPinnedChannels(await getChannels(await getPinnedChannels()));
+      setRecentChannels(await getChannels(await getRecentChannels()));
       setLoading(false);
     })();
   }, [state]);
 
   return data ? (
-    <ListOrGrid isLoading={isLoading} columns={griditemsize} onSearchTextChange={setSearchText} throttle={true}>
+    <ListOrGrid
+      isLoading={isLoading}
+      columns={griditemsize}
+      onSearchTextChange={setSearchText}
+      throttle={true}
+      searchBarAccessory={<FilterDropdown onChange={setOrder} defaultValue={order} />}
+    >
       {data.map((c) => (
         <ChannelItem key={c.id} channel={c} refresh={refresh} />
       ))}

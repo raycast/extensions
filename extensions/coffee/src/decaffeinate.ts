@@ -1,5 +1,9 @@
-import { stopCaffeinate } from "./utils";
+import { stopCaffeinate, getSchedule } from "./utils";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
-  await stopCaffeinate(true, "Your Mac is now decaffeinated");
+  const schedule = await getSchedule();
+  if (schedule != undefined && schedule.IsRunning == true)
+    await showToast(Toast.Style.Failure, "Caffeination schedule running, pause to decaffeinate");
+  else await stopCaffeinate({ menubar: true, status: true }, "Your Mac is now decaffeinated");
 };

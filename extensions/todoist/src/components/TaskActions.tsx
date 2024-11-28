@@ -32,7 +32,7 @@ import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import Project from "./Project";
 import RefreshAction from "./RefreshAction";
 import SubTasks from "./SubTasks";
@@ -254,10 +254,15 @@ export default function TaskActions({
 
         <Action.PickDate
           title="Schedule Task"
-          type={Action.PickDate.Type.Date}
+          type={Action.PickDate.Type.DateTime}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onChange={(date) =>
-            updateTask({ id: task.id, due: date ? { date: getAPIDate(date) } : { string: "no due date" } })
+            updateTask({
+              id: task.id,
+              due: date
+                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                : { string: "no due date" },
+            })
           }
         />
 
@@ -620,7 +625,7 @@ export default function TaskActions({
 
       {quickLinkView ? (
         <ActionPanel.Section>
-          <CreateViewAction {...quickLinkView} />
+          <CreateViewActions {...quickLinkView} />
         </ActionPanel.Section>
       ) : null}
 

@@ -9,7 +9,7 @@ export function createLightOnIconPngUri(
   iconPath: string,
   colorHex: string,
   width: number,
-  height: number
+  height: number,
 ): Promise<PngUri> {
   return new Promise((resolve, reject) => {
     new Jimp(width, height, async (error, image) => {
@@ -47,7 +47,7 @@ export function createLightOffIconPngUri(
   iconPath: string,
   theme: "light" | "dark",
   width: number,
-  height: number
+  height: number,
 ): Promise<PngUri> {
   return new Promise((resolve, reject) => {
     new Jimp(width, height, async (error, image) => {
@@ -56,7 +56,7 @@ export function createLightOffIconPngUri(
       }
 
       const lightOffImage = await Jimp.read(
-        environment.assetsPath + `/light-off${theme === "dark" ? "@dark" : ""}.png`
+        environment.assetsPath + `/light-off${theme === "dark" ? "@dark" : ""}.png`,
       );
       image.composite(lightOffImage, 0, 0);
 

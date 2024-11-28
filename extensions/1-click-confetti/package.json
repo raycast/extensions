@@ -21,10 +21,16 @@
   ],
   "commands": [
     {
-      "name": "index",
+      "name": "confetti-menu",
       "title": "Confetti in Menu Bar",
       "description": "Confetti Gun with just 1 click.",
       "mode": "menu-bar"
+    },
+    {
+      "name": "confetti-no-view",
+      "title": "Confetti Command",
+      "description": "Confetti Gun.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

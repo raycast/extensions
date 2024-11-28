@@ -39,7 +39,7 @@ export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
       <Form.Dropdown id="color" title="Color" defaultValue={item.color}>
         <Form.Dropdown.Item value="" title="No Color" />
         {Object.entries(Color).map(([key, value]) => (
-          <Form.Dropdown.Item value={value} key={key} title={key} icon={{ source: Icon.Dot, tintColor: value }} />
+          <Form.Dropdown.Item value={`${value}`} key={key} title={key} icon={{ source: Icon.Dot, tintColor: value }} />
         ))}
       </Form.Dropdown>
     </Form>

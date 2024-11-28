@@ -10,7 +10,10 @@ interface Arguments {
 }
 
 export default async function downloadFavicon(props: { arguments: Arguments }) {
-  const url = props.arguments.url;
+  let url = props.arguments.url;
+  if (!url.includes("https://")) {
+    url = "https://" + url;
+  }
 
   const toast = new Toast({
     title: "Downloading favicon...",

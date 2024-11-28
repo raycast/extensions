@@ -2,14 +2,15 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
-import { ApiUrls } from "../api/helpers";
-import { ApiTask } from "../api/task";
-import { Preferences, UseCachedPromiseOptions } from "../types/utils";
+
+import { ApiUrls } from "@/api/helpers";
+import { getTask } from "@/api/task";
+import { Preferences, CachedPromiseOptionsType } from "@/types/utils";
 
 type Props = {
   listId?: string;
   assigneeId?: string;
-  options?: UseCachedPromiseOptions<typeof ApiTask.get>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getTask>>>;
 };
 
 type EndpointProps = Pick<Props, "listId" | "assigneeId"> & {
@@ -43,22 +44,22 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
   const { apiResultsLimit } = getPreferenceValues<Preferences>();
 
   const { data, error, isLoading, mutate } = useCachedPromise(
-    (listId, assigneeId, apiResultsLimit) => ApiTask.get(endpoint({ listId, assigneeId, apiResultsLimit })),
+    (listId, assigneeId, apiResultsLimit) => getTask(endpoint({ listId, assigneeId, apiResultsLimit })),
     [listId, assigneeId, apiResultsLimit],
     {
       ...options,
-    }
+    },
   );
 
   const { unorderedTasks, orderedTasks } = useMemo(() => {
     const unorderedTasks = data?.list?.filter(
-      (task) => !task.deleted && (assigneeId === "all" ? task.assigneesIds.length > 0 : true)
+      (task) => !task.deleted && (assigneeId === "all" ? task.assigneesIds.length > 0 : true),
     );
 
     const orderedTasks = orderBy(
       unorderedTasks,
       [(item) => item.fields.find((field) => field.name.toLowerCase() === "due date")?.date, "createdAt"],
-      ["asc", "desc"]
+      ["asc", "desc"],
     );
 
     return { unorderedTasks, orderedTasks };

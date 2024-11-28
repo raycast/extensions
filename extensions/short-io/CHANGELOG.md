@@ -1,6 +1,11 @@
 # Short.io Changelog
 
-## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+## [Fix crash] - 2024-02-05
+
+- Fix potential crash issues
+- Add dark mode extension icon
+
+## [Add actions to Menu Bar command] - 2022-09-29
 
 - Add new actions to menu bar commands: Copy(Left click) and Open(Right click)
 

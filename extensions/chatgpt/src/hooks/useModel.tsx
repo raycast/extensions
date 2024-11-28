@@ -1,7 +1,8 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
+import { useProxy } from "./useProxy";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -9,24 +10,69 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-3.5-turbo",
+  option: "gpt-4o-mini",
   temperature: "1",
   pinned: false,
+  vision: false,
 };
 
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
-  const { useAzure, azureDeployment } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
+  const proxy = useProxy();
+  const { useAzure, isCustomModel } = getConfiguration();
+  const [option, setOption] = useState<Model["option"][]>(["gpt-4o-mini", "chatgpt-4o-latest"]);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
+    if (isCustomModel) {
+      // If choose to use custom model, we don't need to fetch models from the API
+      setFetching(false);
+      return;
+    }
     if (!useAzure) {
-      gpt.listModels().then((res) => {
-        const models = res.data.data;
-        setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
-      });
+      gpt.models
+        .list({ httpAgent: proxy })
+        .then((res) => {
+          let models = res.data;
+          // some provider return text/plain content type
+          // and the sdk `defaultParseResponse` simply return `text`
+          if (models.length === 0) {
+            try {
+              const body = JSON.parse((res as unknown as { body: string }).body);
+              models = body.data;
+            } catch (e) {
+              // ignore try to parse it
+            }
+          }
+          setOption(models.map((x) => x.id));
+        })
+        .catch(async (err) => {
+          console.error(err);
+          if (!(err instanceof Error || err.message)) {
+            return;
+          }
+          await showToast(
+            err.message.includes("401")
+              ? {
+                  title: "Could not authenticate to API",
+                  message: "Please ensure that your API token is valid",
+                  style: Toast.Style.Failure,
+                }
+              : {
+                  title: "Error",
+                  message: err.message,
+                  style: Toast.Style.Failure,
+                }
+          );
+        })
+        .finally(() => {
+          setFetching(false);
+        });
+    } else {
+      setFetching(false);
     }
   }, [gpt]);
 
@@ -34,16 +80,21 @@ export function useModel(): ModelHook {
     (async () => {
       const storedModels = await LocalStorage.getItem<string>("models");
 
-      if (!storedModels) {
+      if (!storedModels || storedModels === "[]") {
         setData([DEFAULT_MODEL]);
       } else {
-        setData((previous) => [...previous, ...JSON.parse(storedModels)]);
+        setData(JSON.parse(storedModels));
       }
       setLoading(false);
+      isInitialMount.current = false;
     })();
   }, []);
 
   useEffect(() => {
+    // Avoid saving when initial loading
+    if (isInitialMount.current) {
+      return;
+    }
     LocalStorage.setItem("models", JSON.stringify(data));
   }, [data]);
 
@@ -100,8 +151,15 @@ export function useModel(): ModelHook {
     toast.style = Toast.Style.Success;
   }, [setData]);
 
+  const setModels = useCallback(
+    async (models: Model[]) => {
+      setData(models);
+    },
+    [setData]
+  );
+
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear }),
-    [data, isLoading, option, add, update, remove, clear]
+    () => ({ data, isLoading, option, add, update, remove, clear, setModels, isFetching }),
+    [data, isLoading, option, add, update, remove, clear, setModels, isFetching]
   );
 }

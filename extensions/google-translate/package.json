@@ -11,9 +11,14 @@
   ],
   "contributors": [
     "FezVrasta",
+    "ickas",
     "metakirby5",
     "AlanHuang",
-    "nirtamir2"
+    "nirtamir2",
+    "pernielsentikaer",
+    "rasitayaz",
+    "popalay",
+    "litomore"
   ],
   "license": "MIT",
   "commands": [
@@ -30,14 +35,22 @@
       "subtitle": "Google Translate",
       "description": "Simple translation via Google Translate",
       "mode": "view"
+    },
+    {
+      "name": "quick-translate",
+      "title": "Quick Translate",
+      "subtitle": "Google Translate",
+      "description": "Quickly translate to multiple languages",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "lang1",
-      "type": "dropdown",
+      "title": "Primary Language",
+      "description": "Preferred language to translate from",
       "required": true,
-      "title": "First Language",
+      "type": "dropdown",
       "default": "auto",
       "data": [
         {
@@ -97,11 +110,11 @@
           "value": "ceb"
         },
         {
-          "title": "🇨🇳 Chinese Simplified",
+          "title": "Chinese (Simplified)",
           "value": "zh-CN"
         },
         {
-          "title": "Chinese Traditional",
+          "title": "Chinese (Traditional)",
           "value": "zh-TW"
         },
         {
@@ -476,13 +489,14 @@
           "title": "Zulu",
           "value": "zu"
         }
-      ],
-      "description": "First language"
+      ]
     },
     {
       "name": "lang2",
-      "type": "dropdown",
+      "title": "Secondary Language",
+      "description": "Preferred language to translate to",
       "required": true,
+      "type": "dropdown",
       "default": "de",
       "data": [
         {
@@ -538,11 +552,11 @@
           "value": "ceb"
         },
         {
-          "title": "🇨🇳 Chinese Simplified",
+          "title": "Chinese (Simplified)",
           "value": "zh-CN"
         },
         {
-          "title": "🇹🇼 Taiwanese Mandarin",
+          "title": "Chinese (Tranditional)",
           "value": "zh-TW"
         },
         {
@@ -700,6 +714,10 @@
         {
           "title": "🇱🇻 Latvian",
           "value": "lv"
+        },
+        {
+          "title": "🏛 Latin",
+          "value": "la"
         },
         {
           "title": "🇱🇹 Lithuanian",
@@ -917,15 +935,41 @@
           "title": "Zulu",
           "value": "zu"
         }
-      ],
-      "title": "Second Language",
-      "description": "Second language"
+      ]
+    },
+    {
+      "name": "autoInput",
+      "title": "Autofill Input",
+      "label": "Automatically fill input with selected text.",
+      "description": "When enabled, selected text from the foremost app will be automatically filled in the input field.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The default action to take when translating.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to App",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@iamtraction/google-translate": "^2.0.1",
     "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16"
+    "@raycast/utils": "^1.4.16",
+    "google-tts-api": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -934,6 +978,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.1",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -1,115 +1,151 @@
-import { ActionPanel, Action, List, Detail } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { $, ProcessOutput } from "zx";
+import { Application, Detail, List, getFrontmostApplication } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ProcessOutput } from "zx";
+import { capitalCase, kebabCase } from "change-case";
 
-const noContentMd = `# No Espanso Expansion Rules Detected
+import { commandNotFoundMd, noContentMd } from "./content/messages";
 
-We've noticed that you haven't created any expansion rules in Espanso yet. Espanso works by replacing keywords with longer phrases, making your typing faster and more efficient.
+import { FormattedMatch } from "./lib/types";
+import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
 
-To start using Espanso, you need to create at least one rule. This can be done by following these steps:
-
-1. Open Espanso's configuration file (default.yml) in your text editor.
-
-2. Add a rule in the following format:
-\`\`\`
-   - trigger: ":keyword"
-     replace: "The phrase you want to expand to."
-\`\`\`
-
-3. Save the configuration file and restart Espanso.
-
-For more detailed instructions, please refer to the official Espanso documentation at https://espanso.org/docs/.
-
-Remember, the power of Espanso comes from its customizability. Make it work for you!`;
-
-const commandNotFoundMd = `# Espanso Command Not Found
-
-It seems like the Espanso command-line tool is not currently installed on your system. Espanso is necessary for creating and managing text expansion rules to streamline your typing.
-
-Please follow these steps to install Espanso:
-
-For MacOS:
-
-1. Open Terminal.
-
-2. Install Homebrew by pasting the following command and pressing Enter:
-\`\`\`
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-\`\`\`
-3. Once Homebrew is installed, paste the following command to install Espanso:
-\`\`\`
-brew install espanso
-\`\`\`
-4. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
-
-For Windows:
-1. Download the latest Espanso installer from the official website: https://espanso.org/install/
-2. Run the installer and follow the on-screen instructions.
-3. Verify the installation by opening PowerShell and typing \`espanso\`. If the installation was successful, you'll see information about how to use Espanso.
-
-For Linux:
-1. Open Terminal.
-2. Depending on your distribution, use the appropriate command to install Espanso. For example, on Debian-based distributions (like Ubuntu), you'd use:
-\`\`\`
-sudo apt install espanso
-\`\`\`
-3. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
-
-Remember to restart your computer after the installation process. If you need more detailed instructions, please refer to the official Espanso installation guide at https://espanso.org/install/.
-`;
-
-interface EspansoMatch {
-  triggers: string[];
-  replace: string;
-}
+import CategoryDropdown from "./components/category-dropdown";
+import MatchItem from "./components/match-item";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [items, setItems] = useState<EspansoMatch[]>([]);
+  const [items, setItems] = useState<FormattedMatch[]>([]);
+  const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [error, setError] = useState<ProcessOutput | null>(null);
+  const [application, setApplication] = useState<Application | undefined>(undefined);
 
   useEffect(() => {
-    async function fetchData() {
+    getFrontmostApplication().then(setApplication);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        const { stdout: result } = await $`espanso match list -j`;
-        let matches: EspansoMatch[] = JSON.parse(result);
-        matches = matches.sort((a, b) => a.triggers[0].localeCompare(b.triggers[0]));
-        setItems(matches);
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+
+        const combinedMatches = [
+          ...getMatches(packageFilesDirectory, { packagePath: true }),
+          ...getMatches(matchFilesDirectory),
+        ];
+
+        const sortedMatches = sortMatches(combinedMatches);
+
+        const categoriesSet = new Set<string>();
+        const formattedMatches: FormattedMatch[] = sortedMatches
+          .filter((match) => !match.form) // Filter out items with a `form` property
+          .map((match, index) => {
+            const pathParts = match.filePath.split("match/")[1]?.split("/") || [];
+            let category = pathParts[0]?.replace(".yml", "") ?? "";
+            let subcategory = pathParts[1]?.replace(".yml", "");
+
+            if (subcategory?.toLowerCase() === "index" || subcategory === category) {
+              subcategory = "";
+            } else {
+              subcategory = kebabCase(subcategory ?? "");
+            }
+
+            category = kebabCase(category);
+            categoriesSet.add(category);
+
+            return {
+              ...match,
+              category,
+              subcategory,
+              triggers: match.triggers,
+              replace: match.replace,
+              label: match.label,
+              filePath: match.filePath,
+              index,
+            };
+          });
+
+        const sortedCategories = Array.from(categoriesSet).sort((a, b) => {
+          if (a === "base") return -1;
+          if (b === "base") return 1;
+          return a.localeCompare(b);
+        });
+
+        setItems(formattedMatches);
+        setFilteredItems(formattedMatches);
+        setCategories(["all", ...sortedCategories]);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof ProcessOutput ? err : null);
         setIsLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
 
-  if (error) {
-    const notFound = Boolean(error.stderr.match("command not found"));
+  useEffect(() => {
+    setFilteredItems(selectedCategory === "all" ? items : items.filter((item) => item.category === selectedCategory));
+  }, [selectedCategory, items]);
 
-    return notFound ? <Detail markdown={commandNotFoundMd} /> : <Detail markdown={error.stderr} />;
+  if (error) {
+    const notFound = /command not found/.test(error.stderr);
+    return <Detail markdown={notFound ? commandNotFoundMd : error.stderr} />;
   }
 
   if (!isLoading && items.length === 0) {
     return <Detail markdown={noContentMd} />;
   }
 
+  const groupByCategory = (matches: FormattedMatch[]) =>
+    matches.reduce(
+      (sections, match) => {
+        const sectionKey = match.category;
+        if (!sections[sectionKey]) sections[sectionKey] = [];
+        sections[sectionKey].push(match);
+        return sections;
+      },
+      {} as Record<string, FormattedMatch[]>,
+    );
+
+  const sections = groupByCategory(filteredItems);
+
+  const sortedSectionKeys = Object.keys(sections).sort((a, b) => {
+    if (a === "base") return -1;
+    if (b === "base") return 1;
+    return a.localeCompare(b);
+  });
+
+  const sortItems = (items: FormattedMatch[]) => {
+    return items.sort((a, b) => {
+      if (!a.subcategory && b.subcategory) return -1;
+      if (a.subcategory && !b.subcategory) return 1;
+      if (a.subcategory && b.subcategory) {
+        const subcategoryCompare = a.subcategory.localeCompare(b.subcategory);
+        if (subcategoryCompare !== 0) return subcategoryCompare;
+      }
+      const labelA = a.label ?? a.replace;
+      const labelB = b.label ?? b.replace;
+      return labelA.localeCompare(labelB);
+    });
+  };
+
   return (
-    <List isShowingDetail isLoading={isLoading}>
-      {items.map(({ triggers, replace }, index) => (
-        <List.Item
-          key={index}
-          title={triggers.join(", ")}
-          detail={<List.Item.Detail markdown={replace} />}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy Content" content={replace} />
-              <Action.CopyToClipboard title="Copy Triggers" content={triggers.join(", ")} />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List
+      isShowingDetail
+      isLoading={isLoading}
+      searchBarAccessory={<CategoryDropdown categories={categories} onCategoryChange={setSelectedCategory} />}
+    >
+      {sortedSectionKeys.map((sectionKey) => {
+        const sortedItems = sortItems(sections[sectionKey]);
+        return (
+          <List.Section key={sectionKey} title={capitalCase(sectionKey)}>
+            {sortedItems.map((match, index) => (
+              <MatchItem key={match.filePath + index} match={match} sectionKey={sectionKey} application={application} />
+            ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }

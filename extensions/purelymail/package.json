@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "purelymail",
   "title": "Purelymail",
-  "description": "Interact with Purelymail with the help of Raycast",
+  "description": "Manage Purelymail - Domains, Users, Routing Rules and more",
   "icon": "purelymail.png",
   "author": "xmok",
   "categories": [
-    "Communication"
+    "Communication",
+    "Productivity"
   ],
   "license": "MIT",
   "preferences": [
@@ -15,7 +16,8 @@
       "title": "Purelymail API Token",
       "description": "Before you can start using this command, you'll need to add your API key. You can find this at https://purelymail.com/manage/account",
       "type": "password",
-      "required": true
+      "required": true,
+      "placeholder": "pm-live-xxxxxx...xxx"
     }
   ],
   "commands": [
@@ -31,7 +33,15 @@
       "title": "Add Domain",
       "subtitle": "Purelymail",
       "description": "Add a new domain to your Purelymail account",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "domainName",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": true
+        }
+      ]
     },
     {
       "name": "get-ownership-code",
@@ -48,17 +58,17 @@
       "mode": "view"
     },
     {
+      "name": "list-users",
+      "title": "List Users",
+      "subtitle": "Purelymail",
+      "description": "List users in your Purelymail account",
+      "mode": "view"
+    },
+    {
       "name": "create-user",
       "title": "Create User",
       "subtitle": "Purelymail",
       "description": "Creates a new user",
-      "mode": "view"
-    },
-    {
-      "name": "delete-user",
-      "title": "Delete User",
-      "subtitle": "Purelymail",
-      "description": "Deletes a user",
       "mode": "view"
     },
     {
@@ -74,26 +84,77 @@
       "subtitle": "Purelymail",
       "description": "Routing rule must not have the same user/prefix as any other existing rules for the domain",
       "mode": "view"
+    },
+    {
+      "name": "check-account-credit",
+      "title": "Check Account Credit",
+      "subtitle": "Purelymail",
+      "description": "Returns current account credit",
+      "mode": "no-view",
+      "interval": "1h"
+    },
+    {
+      "name": "create-app-password",
+      "title": "Create App Password",
+      "subtitle": "Purelymail",
+      "description": "Creates a new app password",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "userHandle",
+          "type": "text",
+          "placeholder": "USER",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "placeholder": "APP_PASSWORD_NAME",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "delete-app-password",
+      "title": "Delete App Password",
+      "subtitle": "Purelymail",
+      "description": "Deletes an app password",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "userName",
+          "type": "text",
+          "placeholder": "USER",
+          "required": true
+        },
+        {
+          "name": "appPassword",
+          "type": "password",
+          "placeholder": "APP_PASSWORD",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

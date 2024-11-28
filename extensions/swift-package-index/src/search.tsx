@@ -101,10 +101,13 @@ async function performSearch(query: string, page: number, signal: AbortSignal): 
   params.append("query", query);
   params.append("page", page.toString());
 
-  const response = await fetch("https://swiftpackageindex.com/api/search?" + params.toString(), {
-    method: "get",
-    signal: signal as any,
-  });
+  const response = await fetch(
+    "https://spi-proxy-worker.dev-capturecontext-8f5.workers.dev/search?" + params.toString(),
+    {
+      method: "get",
+      signal: signal as any,
+    }
+  );
 
   const json = (await response.json()) as {
     hasMoreResults: boolean;
@@ -126,7 +129,7 @@ async function performSearch(query: string, page: number, signal: AbortSignal): 
     throw new Error(`Could not fetch packages [status: ${response.statusText}]`);
   }
 
-  const items = await json.results
+  const items = json.results
     .filter((result) => {
       return result.package;
     })

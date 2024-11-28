@@ -19,6 +19,7 @@ type CreateTaskValues = {
   content: string;
   description: string;
   dueDate: Date | null;
+  duration: string;
   priority: string;
   projectId: string;
   sectionId: string;
@@ -51,7 +52,16 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
       if (values.dueDate) {
-        body.due = { date: getAPIDate(values.dueDate) };
+        body.due = {
+          date: Form.DatePicker.isFullDay(values.dueDate) ? getAPIDate(values.dueDate) : values.dueDate.toISOString(),
+        };
+      }
+
+      if (values.duration) {
+        body.duration = {
+          unit: "minute",
+          amount: parseInt(values.duration, 10),
+        };
       }
 
       if (values.priority) {
@@ -138,6 +148,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       content: draftValues?.content,
       description: draftValues?.description,
       dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      duration: draftValues?.duration ?? "",
       priority: draftValues?.priority || String(lowestPriority.value),
       projectId: draftValues?.projectId ? draftValues.projectId : "" || fromProjectId ? fromProjectId : "",
       sectionId: draftValues?.sectionId ? draftValues.sectionId : "",
@@ -146,6 +157,11 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     },
     validation: {
       content: FormValidation.Required,
+      duration: (value) => {
+        if (value && Number.isNaN(parseInt(value, 10))) {
+          return "Duration must be a number";
+        }
+      },
     },
   });
 
@@ -176,7 +192,11 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.Date} />
+      <Form.DatePicker {...itemProps.dueDate} title="Due date" />
+
+      {values.dueDate && !Form.DatePicker.isFullDay(values.dueDate) ? (
+        <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
+      ) : null}
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

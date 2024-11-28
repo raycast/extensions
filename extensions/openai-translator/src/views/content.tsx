@@ -1,21 +1,37 @@
-import { Action, ActionPanel, confirmAlert, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { DetailView } from "./detail";
-import { EmptyView } from "./empty";
-import { QueryHook } from "../hooks/useQuery";
-import { useProxy } from "../hooks/useProxy";
-import { Record, HistoryHook } from "../hooks/useHistory";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
+import capitalize from "capitalize";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import capitalize from "capitalize";
 import { getLoadActionSection } from "../actions/load";
 import { getModeActionSection } from "../actions/mode";
-import { TranslateMode, TranslateQuery } from "../providers/types";
+import { HistoryHook, Record } from "../hooks/useHistory";
+import { useProxy } from "../hooks/useProxy";
+import { QueryHook } from "../hooks/useQuery";
 import { detectLang } from "../providers/lang";
-import { getProvider } from "../providers";
+import { TranslateMode, TranslateQuery } from "../providers/types";
+import { DetailView } from "./detail";
+import { EmptyView } from "./empty";
+import { getErrorText } from "../providers/utils";
+import { Provider } from "../providers/base";
+import { getProviderActionSection } from "../actions/provider";
+import { ProvidersHook } from "../hooks/useProvider";
+import { createProvider } from "../providers";
 
 export interface ContentViewProps {
   query: QueryHook;
   history: HistoryHook;
+  provider: Provider;
+  providerHook: ProvidersHook | null;
   mode: TranslateMode;
   setMode: (value: TranslateMode) => void;
   setSelectedId: (value: string) => void;
@@ -42,27 +58,28 @@ type FinishReason = {
   img: string | undefined;
 };
 
-const { provider: providerName } = getPreferenceValues<{
-  entrypoint: string;
-  apikey: string;
-  apiModel: string;
-  provider: string;
+const { alwayShowMetadata } = getPreferenceValues<{
+  alwayShowMetadata: boolean;
 }>();
 
-const provider = getProvider(providerName);
+const { isAutoCopy2Clipboard } = getPreferenceValues<{
+  isAutoCopy2Clipboard: boolean;
+}>();
 
 export const ContentView = (props: ContentViewProps) => {
-  const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
+  const { query, history, provider, providerHook, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
   const agent = useProxy();
   const [data, setData] = useState<ViewItem[]>();
   const [querying, setQuerying] = useState<Querying | null>();
   const [finishReason, setFinishReason] = useState<FinishReason | null>();
   const [translatedText, setTranslatedText] = useState("");
-
+  const [showMetadata, setShowMetadata] = useState(alwayShowMetadata);
+  const [activeRecord, setActiveRecord] = useState({ provider, id: providerHook?.selected?.id });
+  const activeProvider = activeRecord.provider;
   function updateData() {
     if (history.data) {
       const sortedResults = history.data.sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
       if (querying == null) {
         setData(sortedResults);
@@ -96,20 +113,32 @@ export const ContentView = (props: ContentViewProps) => {
         error: message,
       },
       ocrImg: img,
-      provider: providerName,
+      provider: activeProvider.name,
     };
     history.add(record);
     setFinishReason(null);
     query.updateQuerying(false);
   }
 
+  async function copy2Clipboard(text: string) {
+    await Clipboard.copy(text);
+    await showToast({
+      title: "Translation copied to Clipboard",
+      style: Toast.Style.Success,
+    });
+  }
+
   function onTranslationStop(finishReason: FinishReason) {
     const { toast, detectFrom, detectTo, text, img } = finishReason;
-    toast.title = "Got your translation!";
-    toast.style = Toast.Style.Success;
     const txt = translatedText;
     const newText = ["”", '"', "」"].indexOf(txt[txt.length - 1]) >= 0 ? txt.slice(0, -1) : txt;
     setTranslatedText(newText);
+    if (isAutoCopy2Clipboard) {
+      copy2Clipboard(newText);
+    } else {
+      toast.title = "Got your translation!";
+      toast.style = Toast.Style.Success;
+    }
     const record: Record = {
       id: uuidv4(),
       mode,
@@ -121,7 +150,7 @@ export const ContentView = (props: ContentViewProps) => {
         text: newText,
       },
       ocrImg: img,
-      provider: providerName,
+      provider: activeProvider.name,
     };
     history.add(record);
     setFinishReason(null);
@@ -168,10 +197,32 @@ export const ContentView = (props: ContentViewProps) => {
         text,
         detectFrom,
         detectTo,
-        onMessage: (message) => {
-          if (message.role) {
-            return;
-          }
+      },
+      id: "querying",
+    };
+    setTranslatedText("");
+    setQuerying(_querying);
+    query.updateText("");
+    try {
+      const translationStream = activeProvider.translate(_querying.query);
+      for await (const message of translationStream) {
+        // console.debug("=====ui====");
+        // console.debug(message);
+        if (typeof message === "string") {
+          setFinishReason({
+            reason: message,
+            error: `failed: ${message}`,
+            toast,
+            detectFrom,
+            detectTo,
+            text,
+            img,
+          });
+          return;
+        } else {
+          // if (message.role) {
+          //   continue;
+          // }
           // setIsWordMode(message.isWordMode)
           setTranslatedText((txt) => {
             if (message.isFullText) {
@@ -179,36 +230,20 @@ export const ContentView = (props: ContentViewProps) => {
             }
             return txt + message.content;
           });
-        },
-        onFinish: (reason) => {
-          setFinishReason({
-            reason,
-            error: `failed: ${reason}`,
-            toast,
-            detectFrom,
-            detectTo,
-            text,
-            img,
-          });
-        },
-        onError: (error) => {
-          setFinishReason({
-            reason: "error",
-            error,
-            toast,
-            detectFrom,
-            detectTo,
-            text,
-            img,
-          });
-        },
-      },
-      id: "querying",
-    };
-    setTranslatedText("");
-    setQuerying(_querying);
-    query.updateText("");
-    provider.translate(_querying.query);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      setFinishReason({
+        reason: "error",
+        error: getErrorText(error),
+        toast,
+        detectFrom,
+        detectTo,
+        text,
+        img,
+      });
+    }
   }
 
   useEffect(() => {
@@ -274,10 +309,27 @@ export const ContentView = (props: ContentViewProps) => {
       {getModeActionSection((mode) => {
         setMode(mode);
       })}
+      {providerHook &&
+        getProviderActionSection(providerHook, activeRecord.id, (record) => {
+          setActiveRecord({
+            provider: createProvider(record.type, record.props),
+            id: record.id,
+          });
+        })}
+      <ActionPanel.Section title="Options">
+        <Action
+          title={showMetadata ? "Hide Metadata" : "Show Metadata"}
+          icon={showMetadata ? Icon.EyeSlash : Icon.Eye}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "m" }}
+          onAction={() => {
+            setShowMetadata(!showMetadata);
+          }}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section title="History">
         <Action
           title="Delete Item"
-          icon={Icon.Trash}
+          icon={{ source: Icon.Trash, tintColor: "red" }}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
@@ -322,17 +374,18 @@ export const ContentView = (props: ContentViewProps) => {
             id={item.id}
             key={item.id}
             title={item.query.text}
-            accessories={[{ text: `#${i + 1}` }]}
+            accessories={[{ text: `#${i}` }]}
             actions={getQueryingActionPanel()}
             detail={
               <DetailView
+                showMetadata={showMetadata}
                 text={translatedText}
                 original={querying ? querying.query.text : ""}
                 from={querying ? querying.query.detectFrom : "auto"}
                 mode={querying ? querying.query.mode : "translate"}
                 ocrImg={query.ocrImage}
                 to={query.to}
-                provider={providerName}
+                provider={activeProvider.name}
               />
             }
           />
@@ -345,6 +398,7 @@ export const ContentView = (props: ContentViewProps) => {
             actions={getRecordActionPanel(item)}
             detail={
               <DetailView
+                showMetadata={showMetadata}
                 text={item.result.text}
                 original={item.result.original}
                 from={item.result.from}

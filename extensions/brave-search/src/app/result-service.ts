@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
-import { BraveResult, Preferences, SearchResult } from "./models";
+import { BraveResult, SearchResult } from "./models";
 import fetch from "node-fetch";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
-  const { rememberSearchHistory } = getPreferenceValues<Preferences>();
+  const { rememberSearchHistory } = getPreferenceValues<ExtensionPreferences>();
 
   if (!rememberSearchHistory) {
     return [];
@@ -18,6 +18,15 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   }
 
   return JSON.parse(historyString);
+}
+
+function isValidURL(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function getStaticResult(searchText: string): SearchResult[] {
@@ -34,6 +43,11 @@ export function getStaticResult(searchText: string): SearchResult[] {
     },
   ];
 
+  if (isValidURL(searchText) && !getPreferenceValues()["enableSearchForURLs"]) {
+    result[0].description = `Open ${new URL(searchText).host}`;
+    result[0].url = searchText;
+  }
+
   return result;
 }
 
@@ -46,7 +60,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {

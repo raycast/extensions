@@ -3,5 +3,14 @@
 # dependencies
 /node_modules
 
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
 # misc
 .DS_Store
+./assets/images/*.json
+
+dist

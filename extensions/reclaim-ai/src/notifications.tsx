@@ -1,14 +1,27 @@
-import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import "./initSentry";
+
+import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import {
+  addDays,
+  differenceInMinutes,
+  differenceInHours,
+  endOfDay,
+  formatDistance,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
-import { useEvent } from "./hooks/useEvent";
-import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
+import { MenuBarEventSection } from "./components/MenuBarEventSection";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { useEvents } from "./hooks/useEvent";
+import { useMoment } from "./hooks/useMoment";
+import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
-import { eventColors, truncateEventSize } from "./utils/events";
-import { parseEmojiField } from "./utils/string";
 import { miniDuration } from "./utils/dates";
+import { getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
+import { stripPlannerEmojis } from "./utils/string";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -19,80 +32,68 @@ type TitleInfo = {
   nowOrNext: "NOW" | "NEXT" | "NONE";
 };
 
-const ActionOptionsWithContext = ({ event }: { event: Event }) => {
-  const { getEventActions } = useEvent();
+function Command() {
+  /********************/
+  /*   custom hooks   */
+  /********************/
 
-  return (
-    <>
-      {getEventActions(event).map((action) => (
-        <MenuBarExtra.Item key={action.title} title={action.title} onAction={action.action} />
-      ))}
-    </>
-  );
-};
+  const { upcomingEventsCount } = getPreferenceValues<NativePreferences>();
 
-const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle: string }) => {
-  const { showFormattedEventTitle } = useEvent();
+  const { currentUser } = useUser();
 
-  return (
-    <>
-      <MenuBarExtra.Section title={sectionTitle} />
-      {events.map((event) => (
-        <MenuBarExtra.Submenu
-          key={event.eventId}
-          icon={{
-            source: Icon.Dot,
-            tintColor: eventColors[event.color],
-          }}
-          title={showFormattedEventTitle(event, true)}
-        >
-          <ActionOptionsWithContext event={event} />
-        </MenuBarExtra.Submenu>
-      ))}
-    </>
-  );
-};
+  const now = new Date();
 
-export default function Command() {
-  const { apiToken, apiUrl, upcomingEventsCount } = getPreferenceValues<NativePreferences>();
+  const { events, isLoading: isLoadingEvents } = useEvents({
+    start: startOfDay(now),
+    end: addDays(now, 2),
+  });
+
+  const { momentData, isLoading: isLoadingMoment } = useMoment();
+
+  /********************/
+  /* useMemo & consts */
+  /********************/
 
   const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
-  const fetchHeaders = {
-    Authorization: `Bearer ${apiToken}`,
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
+  // if the events returned by moment/next are synced events then return the original event from the events call if it exists
+  const eventMoment = useMemo(() => {
+    if (!momentData) return momentData;
 
-  const range = {
-    start: format(startOfDay(new Date()), "yyyy-MM-dd"),
-    end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
-  };
+    const findEvent = (event: Event | undefined | null) => {
+      if (!event || !events || events.length === 0) return event;
 
-  const { data: eventData, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
-    `${apiUrl}/events?sourceDetails=true&start=${range.start}&end=${range.end}`,
-    {
-      headers: fetchHeaders,
-      keepPreviousData: true,
-    }
-  );
+      const originalEventID = getOriginalEventIDFromSyncEvent(event);
+      if (!originalEventID) return event;
 
-  const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
-    headers: fetchHeaders,
-    keepPreviousData: true,
-  });
+      return events.find((e) => e.eventId === originalEventID) ?? event;
+    };
 
-  const events = useMemo<EventSection[]>(() => {
-    if (!eventData) return [];
+    const { event } = momentData;
+
+    return {
+      event: findEvent(event),
+    };
+  }, [momentData, events]);
+
+  const showDeclinedEvents = useMemo(() => {
+    return !!currentUser?.settings.showDeclinedEvents;
+  }, [currentUser]);
+
+  const eventSections = useMemo<EventSection[]>(() => {
+    if (!events) return [];
 
     const now = new Date();
     const today = startOfDay(now);
 
-    const events: EventSection[] = [
+    const eventSectionsUnfiltered: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: eventData
+        events: events
+          .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -108,7 +109,10 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: eventData
+        events: events
+          .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -123,20 +127,32 @@ export default function Command() {
       },
     ];
 
-    return events.filter((event) => event.events.length > 0);
-  }, [eventData]);
-
-  const handleOpenReclaim = () => {
-    open("https://app.reclaim.ai");
-  };
-
-  const handleOpenRaycast = async () => {
-    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
-  };
+    return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
+  }, [events, showDeclinedEvents]);
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
-    const eventNextNow = eventMoment?.event;
+    let eventNextNow;
+    const showNowEvent = getPreferenceValues()["showNowEvent"];
+    if (showNowEvent) {
+      const nowEvent = events?.filter((event) => {
+        const start = new Date(event.eventStart);
+        const end = new Date(event.eventEnd);
+        return isWithinInterval(now, { start, end });
+      });
+
+      const recentNowEvent = nowEvent?.find((event) => differenceInMinutes(now, new Date(event.eventStart)) <= 5);
+
+      if (recentNowEvent) {
+        eventNextNow = recentNowEvent;
+      } else if (eventMoment?.event) {
+        eventNextNow = eventMoment.event;
+      } else if (nowEvent?.length) {
+        eventNextNow = nowEvent[0];
+      }
+    } else {
+      eventNextNow = eventMoment?.event;
+    }
 
     if (eventNextNow) {
       const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
@@ -145,8 +161,8 @@ export default function Command() {
 
       const isNow = isWithinInterval(new Date(), { start: eventStart, end: eventEnd });
 
-      const miniEventString = truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji);
-      const eventString = parseEmojiField(realEventTitle).textWithoutEmoji;
+      const eventString = stripPlannerEmojis(realEventTitle);
+      const miniEventString = truncateEventSize(eventString);
 
       const distanceString = miniDuration(
         formatDistance(new Date(eventStart), now, {
@@ -175,7 +191,23 @@ export default function Command() {
       nowOrNext: "NONE",
       event: null,
     };
-  }, [eventMoment]);
+  }, [eventMoment, events]);
+
+  /********************/
+  /*    useCallback   */
+  /********************/
+
+  const handleOpenReclaim = useCallbackSafeRef(() => {
+    open("https://app.reclaim.ai");
+  });
+
+  const handleOpenRaycast = useCallbackSafeRef(async () => {
+    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
+  });
+
+  /********************/
+  /*       JSX        */
+  /********************/
 
   return (
     <MenuBarExtra
@@ -184,8 +216,8 @@ export default function Command() {
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}
     >
-      {events.map((eventSection) => (
-        <EventsSection
+      {eventSections.map((eventSection) => (
+        <MenuBarEventSection
           key={eventSection.section}
           events={eventSection.events}
           sectionTitle={eventSection.sectionTitle}
@@ -197,3 +229,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withRAIErrorBoundary(Command);

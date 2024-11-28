@@ -5,6 +5,9 @@
   "description": "Search Paperless-ngx for documents and upload",
   "icon": "command-icon.png",
   "author": "damdam",
+  "contributors": [
+    "igor_brikin"
+  ],
   "categories": [
     "Productivity",
     "Media"
@@ -20,7 +23,7 @@
     },
     {
       "name": "documentForm",
-      "title": "Upload a Document",
+      "title": "Upload Document",
       "subtitle": "Paperless-ngx",
       "description": "Upload document to your Paperless-ngx instance",
       "mode": "view"

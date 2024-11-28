@@ -44,11 +44,14 @@ const decode = (string: string) => {
  */
 export const count = (text: string, includeWhitespace: boolean): ICountResult => {
   const trimmed = text.trim();
+  const words = trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, "").match(/\S+/g) || []).length : 0;
 
   return {
     paragraphs: trimmed ? (trimmed.match(/\n+/g) || []).length + 1 : 0,
     sentences: trimmed ? (trimmed.match(/[.?!…]+./g) || []).length + 1 : 0,
-    words: trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, "").match(/\S+/g) || []).length : 0,
+    words: words,
+    reading_time: Math.ceil(words / 275),
+    speaking_time: Math.ceil(words / 180),
     characters: includeWhitespace ? decode(text).length : trimmed ? decode(trimmed.replace(/\s/g, "")).length : 0,
   };
 };

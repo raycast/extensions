@@ -54,6 +54,7 @@ const PlayerComponent = ({ player, isShowingDetail, setIsShowingDetail }: PropTy
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.OpenInBrowser title="View Player on ESPN" url={player.link} />
         </ActionPanel>
       }

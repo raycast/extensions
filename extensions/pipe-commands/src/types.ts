@@ -35,5 +35,5 @@ export type ScriptArgument = {
   percentEncoded?: boolean;
 };
 
-export type InputType = "text" | "file" | "url";
+export type InputType = "text" | "file" | "url" | "clipboard";
 export type ScriptOutput = "text" | "url";

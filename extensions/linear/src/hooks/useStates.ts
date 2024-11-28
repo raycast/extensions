@@ -1,4 +1,4 @@
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function useStates(teamId?: string, config?: { execute?: boolean }) {
@@ -17,7 +17,7 @@ export default function useStates(teamId?: string, config?: { execute?: boolean 
     {
       initialData: [],
       execute: config?.execute !== false,
-    }
+    },
   );
 
   return { states, isLoadingStates, statesError };

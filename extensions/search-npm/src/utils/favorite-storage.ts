@@ -1,6 +1,6 @@
 import { LocalStorage } from '@raycast/api'
 import dedupe from 'dedupe'
-import { Package } from '../npmResponse.model'
+import type { Package } from '../model/npmResponse.model'
 
 const LOCAL_STORAGE_KEY = 'npm-faves'
 

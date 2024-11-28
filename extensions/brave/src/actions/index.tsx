@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
-import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
@@ -11,9 +11,11 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
+  const { browserOption } = getPreferenceValues<Preferences>();
+
   const openTabs = await runAppleScript(`
       set _output to ""
-      tell application "Brave Browser"
+      tell application "${browserOption}"
         set _window_index to 1
         repeat with w in windows
           set _tab_index to 1
@@ -62,20 +64,22 @@ export async function openNewTab({
     closeMainWindow({ clearRootSearch: true });
   }
 
+  const { browserOption } = getPreferenceValues<Preferences>();
+
   let script = "";
 
   const getOpenInProfileCommand = (profile: string) =>
     `
     set profile to quoted form of "${profile}"
     set link to quoted form of "${url ? url : "about:blank"}"
-    do shell script "open -na 'Brave Browser' --args --profile-directory=" & profile & " " & link
+    do shell script "open -na '${browserOption}' --args --profile-directory=" & profile & " " & link
   `;
 
   switch (openTabInProfile) {
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Brave Browser"
+    tell application "${browserOption}"
       ${newWindow ? "make new window" : ""}
       ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
       activate
@@ -106,7 +110,8 @@ export async function openNewTab({
 }
 
 export async function closeTab(tabIndex: number): Promise<void> {
-  await runAppleScript(`tell application "Brave Browser"
+  const { browserOption } = getPreferenceValues<Preferences>();
+  await runAppleScript(`tell application "${browserOption}}"
     tell window 1
       delete tab ${tabIndex}
     end tell
@@ -114,8 +119,9 @@ export async function closeTab(tabIndex: number): Promise<void> {
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
+  const { browserOption } = getPreferenceValues<Preferences>();
   await runAppleScript(`
-    tell application "Brave Browser"
+    tell application "${browserOption}"
       activate
       set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
@@ -125,10 +131,12 @@ export async function setActiveTab(tab: Tab): Promise<void> {
 }
 
 const checkAppInstalled = async (): Promise<boolean> => {
+  const { browserOption } = getPreferenceValues<Preferences>();
+
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
-    do shell script "osascript -e 'exists application \\"Brave Browser\\"'"
+    do shell script "osascript -e 'exists application \\"${browserOption}\\"'"
     set isInstalled to true
 end try
 

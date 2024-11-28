@@ -1,6 +1,5 @@
-import algoliasearch from 'algoliasearch';
-
 import { getPreferenceValues } from '@raycast/api';
+import algoliasearch from 'algoliasearch';
 
 import { Hit, ListItem, Preferences, ProductName } from './types';
 
@@ -20,8 +19,8 @@ export const algoliaIndex = client.initIndex('material-ui');
  */
 const prepareFilterString = (library: string) => {
   return library === 'mui-x'
-    ? 'product:data-grid OR product:date-pickers'
-    : `product:${library}`;
+    ? 'productId:data-grid OR productId:date-pickers'
+    : `productId:${library}`;
 };
 
 /**
@@ -33,7 +32,7 @@ const prepareFilterString = (library: string) => {
  * See more: [Filters and facet filters](https://www.algolia.com/doc/guides/managing-results/refine-results/filtering/in-depth/filters-and-facetfilters/)
  * @example
  * prepareFilters('preferences')
- * // => 'product:material-ui OR product:data-grid'
+ * // => 'productId:material-ui OR productId:data-grid'
  */
 export const prepareFilters = (dropdownValue: string) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -84,7 +83,7 @@ const prepareSubtitle = (hierarchy: Hit['hierarchy']) => {
  * @param {string} product - The MUI product name.
  * @returns {string} The formatted display name.
  */
-const formatProductName = (product: Hit['product']) => {
+const formatProductName = (product: Hit['productId']) => {
   switch (product) {
     case 'base':
       return 'Base UI';
@@ -113,7 +112,7 @@ const formatSectionTitle = (str: string) => {
     .replace('&amp;', '&')
     .replace(
       /^(Data Grid|Date and Time Pickers)(.*)$/,
-      (_match, p1, p2) => p1 + (p2 ? ` > ${p2}` : '')
+      (_match, p1, p2) => p1 + (p2 ? ` > ${p2}` : ''),
     );
 };
 
@@ -135,7 +134,7 @@ export const prepareResults = (results: Hit[]) => {
     // Limit each section to a maximum number of results to display.
     // This acts as a frontend alternative to `distinct`.
     if (acc[section].length < Number(limit === 'all' ? 100 : limit)) {
-      const { objectID, product, url, hierarchy = {} } = curr;
+      const { hierarchy = {}, objectID, productId, url } = curr;
 
       // Omit results for nested 'Component API' hits, for example:
       // Alert API > Import
@@ -143,7 +142,7 @@ export const prepareResults = (results: Hit[]) => {
 
       const item = {
         objectID,
-        product: formatProductName(product) as ProductName,
+        product: formatProductName(productId) as ProductName,
         subtitle: prepareSubtitle(hierarchy),
         title: hierarchy.lvl1,
         url,
@@ -164,7 +163,7 @@ const packageMap = {
 };
 
 const isMaterialPackage = (
-  product: ProductName
+  product: ProductName,
 ): product is Exclude<ProductName, 'MUI X'> => {
   if (product in packageMap) return true;
   else return false;

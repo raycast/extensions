@@ -8,7 +8,7 @@ Before using the extension, you need to link with your Philips Hue bridge.
 
 ### Automatic setup
 
-Please follow the instructions in the Manage Hue Bridge command.
+Please follow the instructions shown when using any of the commands except the “Toggle All Lights” command.
 
 ### Manual setup
 

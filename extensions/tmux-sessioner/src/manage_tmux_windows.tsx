@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, Detail } from "@raycast/api";
-import { SelectTerminalApp } from "./SelectTermnialApp";
+import { List, Icon, Action, ActionPanel, launchCommand, LaunchType, Color } from "@raycast/api";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 import { getAllWindow, switchToWindow, TmuxWindow, deleteWindow } from "./utils/windowUtils";
 
@@ -9,6 +8,7 @@ export default function ManageTmuxWindows() {
   const [isLoading, setIsLoading] = useState(true);
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
+  // Init list of windows
   const setupListWindows = () => {
     getAllWindow((error, stdout) => {
       if (error) {
@@ -39,6 +39,7 @@ export default function ManageTmuxWindows() {
     });
   };
 
+  // Terminal Setup Check
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -62,43 +63,51 @@ export default function ManageTmuxWindows() {
     setupListWindows();
   }, [isTerminalSetup]);
 
-  return (
-    <>
-      <List isLoading={isLoading}>
-        {windows.map((window, index) => (
-          <List.Item
-            key={index}
-            icon={Icon.Window}
-            title={window.windowName}
-            subtitle={window.sessionName}
-            actions={
-              <ActionPanel>
-                <Action title="Switch To Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
-                <Action
-                  title="Delete This Window"
-                  onAction={() =>
-                    deleteWindow(window, setIsLoading, () =>
-                      setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex))
-                    )
-                  }
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
+  useEffect(() => {
+    if (isLoading || isTerminalSetup) {
+      return;
+    }
+    launchCommand({
+      type: LaunchType.UserInitiated,
+      name: "choose_terminal_app",
+      extensionName: "tmux-sessioner",
+      ownerOrAuthorName: "louishuyng",
+      context: { launcherCommand: "manage_tmux_windows" },
+    });
+  }, [isTerminalSetup, isLoading]);
 
-      {!isTerminalSetup && !isLoading && (
-        <Detail
-          markdown="**Setup Default Terminal App Before Usage** `Go to Actions or using Cmd + k`"
+  return (
+    <List isLoading={isLoading}>
+      {windows.map((window, index) => (
+        <List.Item
+          key={index}
+          icon={Icon.Gear}
+          keywords={[window.sessionName, window.windowName]}
+          title={{
+            value: window.windowName,
+            tooltip: `Session: ${window.sessionName} / Window No: ${window.windowIndex}`,
+          }}
+          accessories={[
+            {
+              text: { value: window.sessionName, color: Color.Green },
+            },
+          ]}
           actions={
             <ActionPanel>
-              <Action.Push title="Setup Here" target={<SelectTerminalApp setIsTerminalSetup={setIsTerminalSetup} />} />
+              <Action title="Switch To Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
+              <Action
+                title="Delete This Window"
+                onAction={() =>
+                  deleteWindow(window, setIsLoading, () =>
+                    setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex))
+                  )
+                }
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
             </ActionPanel>
           }
         />
-      )}
-    </>
+      ))}
+    </List>
   );
 }

@@ -4,6 +4,21 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { newTab } from "./uri";
 
+const getSelectedPathFinderItems = async () => {
+  const script = `
+    tell application "Path Finder"
+      set thePaths to {}
+      repeat with pfItem in (get selection)
+        set the end of thePaths to POSIX path of pfItem
+      end repeat
+      return thePaths
+    end tell
+  `;
+
+  const paths = await runAppleScript(script);
+  return paths.split(",");
+};
+
 const fallback = async (): Promise<boolean> => {
   const app = await getFrontmostApplication();
 
@@ -26,7 +41,16 @@ const fallback = async (): Promise<boolean> => {
 
 export default async function Command() {
   try {
-    const selectedItems = await getSelectedFinderItems();
+    let selectedItems: { path: string }[] = [];
+
+    const app = await getFrontmostApplication();
+
+    if (app.name === "Finder") {
+      selectedItems = await getSelectedFinderItems();
+    } else if (app.name === "Path Finder") {
+      const paths = await getSelectedPathFinderItems();
+      selectedItems = paths.map((p) => ({ path: p }));
+    }
 
     if (selectedItems.length === 0) {
       const ranFallback = await fallback();
@@ -35,7 +59,7 @@ export default async function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "No directory selected",
-          message: "Please select a directory in Finder first",
+          message: "Please select a directory in Finder or Path Finder first",
         });
       }
 

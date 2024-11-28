@@ -1,5 +1,17 @@
 # HubSpot Changelog
 
+## [Updates] - 2024-07-23
+
+- Update dependencies, linting code
+- Add search through descriptions for companies ([#13602](https://github.com/raycast/extensions/issues/13602))
+
+## [Added new commands] - 2024-02-02
+- Search Companies
+
+## [Fix] - 2023-10-03
+
+- Fixed a bug that caused the extension to crash.
+
 ## [Enhancements] - 2022-02-27
 
 - Added a call to fetch account info (portalId, uiDomain) to open contact and deal URLs in the browser.

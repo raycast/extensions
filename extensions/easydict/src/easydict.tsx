@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 22:48
+ * @lastEditTime: 2023-11-21 22:18
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -49,6 +49,7 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
   const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
+  const [isInputChanged, setInputChangedState] = useState<boolean>(false);
 
   // check if need show release prompt, every time the list is rendered.
   checkIfNeedShowReleasePrompt((isShowing) => {
@@ -100,8 +101,6 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
     if (inputText === undefined) {
       setup();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
   /**
@@ -234,6 +233,13 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
 
   function onInputChange(text: string) {
     // console.warn(`onInputChange: ${text}`);
+
+    // Ignore the first inputChange event to avoid lost queryText argument, fix https://github.com/tisfeng/Raycast-Easydict/issues/62
+    if (!isInputChanged) {
+      setInputChangedState(true);
+      console.log("ignore first inputChange event");
+      return;
+    }
     updateInputTextAndQueryText(text, true);
   }
 

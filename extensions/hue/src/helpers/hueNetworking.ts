@@ -96,7 +96,7 @@ function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId?: s
 export async function getUsernameFromBridge(
   ipAddress: string,
   bridgeId: string | undefined = undefined,
-  certificate: Buffer
+  certificate: Buffer,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
@@ -134,14 +134,14 @@ export async function getUsernameFromBridge(
             return resolve(response.success.username);
           }
         });
-      }
+      },
     );
 
     request.write(
       JSON.stringify({
         devicetype: APP_NAME,
         generateclientkey: true,
-      })
+      }),
     );
 
     request.end();
@@ -174,7 +174,7 @@ export function getCertificate(host: string, bridgeId?: string): Promise<PeerCer
         }
 
         return resolve(peerCertificate);
-      }
+      },
     );
 
     socket.on("error", (error) => {
@@ -189,5 +189,5 @@ export function createPemString(cert: PeerCertificate): string {
     return str.replace(regex, "$1\n");
   };
   const base64 = cert.raw.toString("base64");
-  return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}\n-----END CERTIFICATE-----\n`;
+  return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}-----END CERTIFICATE-----\n`;
 }

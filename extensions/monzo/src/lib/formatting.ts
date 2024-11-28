@@ -2,6 +2,9 @@ import { Monzo } from "@marceloclp/monzojs";
 import { Color } from "@raycast/api";
 
 export function formatCurrency(value: number, currency: string): string {
+  if (!currency) {
+    return value.toString();
+  }
   const denominator = currency == "JPY" ? 1 : 100;
   return new Intl.NumberFormat("en-US", {
     style: "currency",

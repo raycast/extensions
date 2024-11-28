@@ -1,14 +1,8 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { lastPass } from "./cli";
 import { EmptyListView, ErrorDetails, ListItem } from "./components";
-
-type SyncRate = "0" | "86400000" | "604800000";
-interface Preferences {
-  email: string;
-  password: string;
-  syncRate: SyncRate;
-}
+import { Preferences, SyncRate } from "./types";
 
 const calculateSyncState = async (syncRate: SyncRate): Promise<"now" | "no"> => {
   const localStorageKey = "lastpass-sync-timestamp";
@@ -21,14 +15,15 @@ const calculateSyncState = async (syncRate: SyncRate): Promise<"now" | "no"> => 
 };
 
 export default function Command() {
-  const { email, password, syncRate } = getPreferenceValues<Preferences>();
+  const { email, password, syncRate, hidePassword } = getPreferenceValues<Preferences>();
+  const [showPassword, setShowPassword] = useState(!hidePassword);
 
   const api = lastPass(email, password);
   const [isLoading, setIsLoading] = useState(true);
   const [accounts, setAccounts] = useState<
     { id: string; name: string; username: string; password: string; url: string }[]
   >([]);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -42,38 +37,26 @@ export default function Command() {
         setAccounts(accounts);
         setIsLoading(false);
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error);
-        }
+        setError((error as Error)?.message || "");
       }
     })();
   }, []);
 
   if (error) {
-    return <ErrorDetails error={error} />;
+    return <ErrorDetails maskPattern={password} error={error} />;
   }
 
-  const actions = (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.ArrowClockwise}
-          title="Manual Sync"
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
-          onAction={() => api.export({ sync: "now" }).then(setAccounts, setError)}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-
   return (
-    <List isLoading={isLoading} isShowingDetail actions={actions}>
+    <List isLoading={isLoading} isShowingDetail>
       {!accounts.length ? (
         <EmptyListView />
       ) : (
         accounts.map((account) => (
           <ListItem
+            key={account.id}
             {...account}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
             getDetails={() => calculateSyncState(syncRate).then((sync) => api.show(account.id, { sync }))}
           />
         ))

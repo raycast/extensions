@@ -9,50 +9,34 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/menu";
+import { showErrorToast, getErrorMessage } from "./utils";
 
-function launchTodosCommand() {
-  launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+async function launchTodosCommand() {
+  try {
+    await launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showErrorToast(getErrorMessage(error), "Could not open Todos Command");
+  }
 }
 
 function getMaxTodosPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxtodos" });
 }
 
-function getAlwaysVisiblePreference(): boolean {
-  const prefs = getPreferenceValues();
-  const result = prefs.alwaysshow as boolean;
-  return result;
-}
-
-function getShowTodoCountPreference(): boolean {
-  const prefs = getPreferenceValues();
-  const result = prefs.showtext as boolean;
-  return result;
-}
-
-function menuBarIcon(): Image.ImageLike {
-  const prefs = getPreferenceValues();
-  const useGrayscale = prefs.grayicon as boolean;
-  if (useGrayscale === true) {
-    return { source: "gitlab.svg", tintColor: Color.PrimaryText };
-  }
-  return { source: "gitlab.svg" };
-}
-
 export default function TodosMenuBarCommand(): JSX.Element | null {
   const { todos, error, isLoading } = useTodos();
+  const { grayicon, alwaysshow, showtext } = getPreferenceValues<Preferences.Todomenubar>();
 
-  if (!todos && !isLoading) {
-    if (!getAlwaysVisiblePreference()) {
-      return null;
-    }
+  if (!todos.length && !isLoading && !alwaysshow) {
+    return null;
   }
+
   return (
     <MenuBarRoot
-      icon={menuBarIcon()}
+      icon={{ source: "gitlab.svg", ...(grayicon && { tintColor: Color.PrimaryText }) }}
       isLoading={isLoading}
       error={error}
-      title={todos && todos.length > 0 && getShowTodoCountPreference() ? `${todos.length}` : undefined}
+      title={todos && todos.length > 0 && showtext ? `${todos.length}` : undefined}
       tooltip="GitLab Todos"
     >
       <MenuBarSection>
@@ -76,7 +60,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
         {todos?.map((t) => (
           <MenuBarItem
             key={t.id}
-            title={t.title}
+            title={t.title ? t.title : "?"}
             subtitle={getPrettyTodoActionName(t)}
             icon={getTodoIcon(t, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
             tooltip={t.project_with_namespace}

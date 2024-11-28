@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import ResponseActions from "./actions/ResponseActions";
-import { CommandOptions } from "../../utils/types";
+import { CommandOptions } from "../../lib/commands/types";
 import { useSpeech } from "../../hooks/useSpeech";
 
 export default function CommandDetailView(props: {
@@ -16,25 +16,12 @@ export default function CommandDetailView(props: {
   const { isLoading, commandName, options, prompt, response, revalidate, cancel, selectedFiles } = props;
   const { speaking, stopSpeech, restartSpeech } = useSpeech(options, isLoading, response);
 
-  const lines = [];
-  const parsedResponse = response.replaceAll("<", "\\<").split("\n");
-  let inCodeBlock = false;
-  for (const line of parsedResponse) {
-    if (line.startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
-    }
-
-    if (!inCodeBlock) {
-      lines.push(line + "\n");
-    } else {
-      lines.push(line);
-    }
-  }
-
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${commandName}\n${lines.join("\n")}`}
+      markdown={`# ${commandName}\n${response
+        .replaceAll("<", "\\<")
+        .replaceAll(/(?<!(```|\t..| {2}.))([\s\S]*?)\n$/gm, "$1\n\n$2")}`}
       navigationTitle={commandName}
       actions={
         <ResponseActions

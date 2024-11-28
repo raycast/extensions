@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-gpt",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "title": "OpenAI GPT",
   "description": "Interact with OpenAI GPT AI",
   "icon": "openai-logo.png",
   "author": "simicvm",
   "contributors": [
-    "DorukAkinci"
+    "DorukAkinci",
+    "evilmouth"
   ],
   "categories": [
     "Productivity",
@@ -28,6 +29,13 @@
           "description": "API Key is used to authenticate with OpenAI API",
           "type": "password",
           "required": true
+        },
+        {
+          "name": "openAiBasePath",
+          "title": "OpenAI Base Path (Optional)",
+          "description": "Base Path is used to override base path with OpenAI API",
+          "type": "textfield",
+          "required": false
         }
       ]
     }

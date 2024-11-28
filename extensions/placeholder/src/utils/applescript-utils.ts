@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 const scriptCopyFile = (path: string) => {
   return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;

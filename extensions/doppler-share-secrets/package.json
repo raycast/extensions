@@ -5,6 +5,9 @@
   "description": "Share sensitive data (a \"secret\") with friends, teammates, or strangers on the internet.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools",
@@ -17,19 +20,25 @@
       "subtitle": "Doppler",
       "description": "Share sensitive data (a \"secret\") with friends, teammates, or strangers on the internet.",
       "mode": "view"
+    },
+    {
+      "name": "clipboardSecret",
+      "title": "Share Clipboard Secret",
+      "subtitle": "Doppler",
+      "description": "Share clipboard sensitive data (a \"secret\") with friends, teammates, or strangers on the internet.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.79.0",
     "got": "^11.8.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

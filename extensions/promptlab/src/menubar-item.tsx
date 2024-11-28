@@ -8,9 +8,9 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect } from "react";
-import { Command } from "./utils/types";
+import { Command } from "./lib/commands/types";
 import { useCachedState } from "@raycast/utils";
-import { installDefaults } from "./utils/file-utils";
+import { installDefaults } from "./lib/files/file-utils";
 
 interface CommandPreferences {
   showNewChatShortcut: boolean;
@@ -35,7 +35,7 @@ export default function PromptLabMenubar() {
         const allCommands = Object.values(commandData)
           .filter(
             (cmd, index) =>
-              !Object.keys(commandData)[index].startsWith("--") && !Object.keys(commandData)[index].startsWith("id-")
+              !Object.keys(commandData)[index].startsWith("--") && !Object.keys(commandData)[index].startsWith("id-"),
           )
           .map((cmd) => JSON.parse(cmd) as Command)
           .sort((a, b) => a.name.localeCompare(b.name));
@@ -97,7 +97,7 @@ export default function PromptLabMenubar() {
 
   const hasOtherCategory = commands?.some(
     (cmd) =>
-      !cmd.favorited && (!cmd.categories?.length || (cmd.categories?.length == 1 && cmd.categories[0] == "Other"))
+      !cmd.favorited && (!cmd.categories?.length || (cmd.categories?.length == 1 && cmd.categories[0] == "Other")),
   );
 
   const categories = preferences.displayCategories
@@ -113,7 +113,7 @@ export default function PromptLabMenubar() {
             }
             return acc;
           },
-          hasOtherCategory ? (["Other"] as string[]) : []
+          hasOtherCategory ? (["Other"] as string[]) : [],
         )
         .map((category) => (
           <MenuBarExtra.Submenu title={category} icon={preferences.displayIcons ? Icon.Tag : undefined} key={category}>
@@ -121,7 +121,7 @@ export default function PromptLabMenubar() {
               .filter(
                 (cmd) =>
                   !cmd.favorited &&
-                  (cmd.categories?.includes(category) || (category == "Other" && !cmd.categories?.length))
+                  (cmd.categories?.includes(category) || (category == "Other" && !cmd.categories?.length)),
               )
               .map((cmd) => (
                 <MenuBarExtra.Item

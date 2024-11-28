@@ -1,17 +1,17 @@
 export const resolveTimePolicy = (tp: string) => {
   switch (tp) {
     case "WORK": {
-      return "Working hours";
+      return "Working Hours";
     }
     case "MEETING": {
-      return "Meeting hours";
+      return "Meeting Hours";
     }
     case "PERSONAL": {
-      return "Personal hours";
+      return "Personal Hours";
     }
     case "CUSTOM":
     default: {
-      return "Custom hours";
+      return "Custom Hours";
     }
   }
 };

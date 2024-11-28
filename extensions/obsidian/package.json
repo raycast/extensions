@@ -13,7 +13,8 @@
     "iancanderson",
     "pernielsentikaer",
     "ofalvai",
-    "adamadamsmusic"
+    "adamadamsmusic",
+    "fservais"
   ],
   "license": "MIT",
   "preferences": [
@@ -24,6 +25,15 @@
       "title": "Path to Vault",
       "required": false,
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    },
+    {
+      "name": "configFileName",
+      "type": "textfield",
+      "placeholder": ".obsidian",
+      "title": "Config filename",
+      "required": false,
+      "default": ".obsidian",
+      "description": "Override the vault config filename (default: .obsidian)"
     },
     {
       "name": "excludedFolders",
@@ -120,6 +130,15 @@
           "default": false
         },
         {
+          "name": "fuzzySearch",
+          "type": "checkbox",
+          "label": "Use Fuzzy Search",
+          "title": "Use Fuzzy Search",
+          "required": false,
+          "description": "If fuzzy search should be used",
+          "default": false
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -136,8 +155,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -222,8 +245,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -416,8 +443,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -548,11 +579,14 @@
   "dependencies": {
     "@raycast/api": "^1.47.0",
     "@types/uuid": "^8.3.4",
+    "fuse.js": "^7.0.0",
+    "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/luxon": "^3.4.2",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.52",
     "eslint": "^8.42.0",

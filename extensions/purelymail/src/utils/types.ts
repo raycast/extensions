@@ -1,7 +1,3 @@
-export type Preferences = {
-  api_token: string;
-};
-
 export type Domain = {
   name: string;
   allowAccountReset: boolean;
@@ -39,16 +35,25 @@ export type CreateUserRequest = {
 export type DeleteUserRequest = {
   userName: string;
 };
+export type ModifyUserRequest = {
+  userName: string;
+  newUserName?: string;
+  newPassword?: string;
+  enableSearchIndexing?: boolean;
+  enablePasswordReset?: boolean;
+  requireTwoFactorAuthentication?: boolean;
+};
 export type CreateRoutingRequest = {
   domainName: string;
   prefix: boolean;
   matchUser: string;
   targetAddresses: string[];
+  catchall: boolean;
 };
 type DeleteRoutingRequest = {
   routingRuleId: number;
 };
-type AddDomainRequest = {
+export type AddDomainRequest = {
   domainName: string;
 };
 type ListDomainsRequest = {
@@ -63,15 +68,28 @@ export type UpdateDomainSettingsRequest = {
 type DeleteDomainRequest = {
   name: string;
 };
+
+export type CreateAppPasswordRequest = {
+  userHandle: string;
+  name: string;
+};
+export type DeleteAppPasswordRequest = {
+  userName: string;
+  appPassword: string;
+};
+
 export type RequestBody =
   | CreateUserRequest
   | DeleteUserRequest
+  | ModifyUserRequest
   | CreateRoutingRequest
   | DeleteRoutingRequest
   | AddDomainRequest
   | ListDomainsRequest
   | UpdateDomainSettingsRequest
   | DeleteDomainRequest
+  | CreateAppPasswordRequest
+  | DeleteAppPasswordRequest
   | Record<string, never>;
 
 type SuccessResponse = {
@@ -80,6 +98,9 @@ type SuccessResponse = {
     domains?: Domain[];
     rules?: Rule[];
     code?: string;
+    credit?: string;
+    appPassword?: string;
+    users?: string[];
   };
 };
 export type ErrorResponse = {

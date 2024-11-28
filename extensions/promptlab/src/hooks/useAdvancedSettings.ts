@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { defaultAdvancedSettings } from "../data/default-advanced-settings";
 import * as fs from "fs";
 import { environment, showToast } from "@raycast/api";
-import { ADVANCED_SETTINGS_FILENAME } from "../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../lib/common/constants";
 import path from "path";
 
 /**

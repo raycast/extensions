@@ -1,5 +1,5 @@
 import { LocalStorage, Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAccessToken } from "../utils/oauth";
 import apiServer from "../utils/api";
 import { Status, MastodonError } from "../utils/types";
@@ -12,7 +12,7 @@ export function useMe() {
 
   const [statuses, setStatuses] = useCachedState<Status[]>("latest_statuses");
 
-  const getUsername = useCallback(async () => {
+  const getUsername = async () => {
     try {
       await getAccessToken();
       const storedUsername = await LocalStorage.getItem<string>("account-username");
@@ -26,10 +26,11 @@ export function useMe() {
     } catch (error) {
       errorHandler(error as MastodonError);
     }
-  }, []);
+  };
 
   const getMyStatuses = async () => {
     try {
+      await getAccessToken();
       showToast(Toast.Style.Animated, "Loading Statuses...");
       const statuses = await apiServer.fetchUserStatus();
 

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Link } from "../types";
+import { Link } from "@/types";
 
 type Props = {
   link: Link;

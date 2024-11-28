@@ -4,7 +4,6 @@ import { SaveAction } from "./index";
 export const SaveActionSection = ({
   onSaveConversationAction,
   onSaveAnswerAction,
-  snippet,
 }: {
   onSaveConversationAction?: () => void;
   onSaveAnswerAction: () => void;

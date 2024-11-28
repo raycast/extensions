@@ -1,5 +1,5 @@
 import { Alert, Color, confirmAlert, Icon, showHUD, Toast } from "@raycast/api";
-import { getCurrentPhase, isFlowInstalled, skipSession } from "./utils";
+import { getCurrentPhase, isFlowInstalled, skipSession, startTimer } from "./utils";
 
 export default async function () {
   const toast = new Toast({
@@ -19,6 +19,7 @@ export default async function () {
   const phase = await getCurrentPhase();
   if (phase === "Flow") {
     await skipSession();
+    await startTimer();
     await showHUD("Break started");
     return;
   }
@@ -34,5 +35,7 @@ export default async function () {
   if (await confirmAlert(options)) {
     await skipSession();
     await skipSession();
+    await startTimer();
+    await showHUD("Break started");
   }
 }

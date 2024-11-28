@@ -44,7 +44,7 @@ export function hasBaiduAppKey(): boolean {
 /**
  * Baidu translate. Cost time: ~0.4s
  *
- * 百度翻译API https://fanyi-api.baidu.com/doc/21
+ * 百度翻译 API https://fanyi-api.baidu.com/doc/21
  */
 export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start request Baidu translate`);
@@ -55,13 +55,8 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
   const from = getBaiduLangCode(fromLanguage);
   const to = getBaiduLangCode(toLanguage);
 
-  if (!hasBaiduAppKey() || !from || !to) {
-    if (!hasBaiduAppKey()) {
-      console.warn(`Baidu AppId or AppSecret is empty`);
-    } else {
-      console.warn(`Baidu translate not support language: ${fromLanguage} to ${toLanguage}`);
-    }
-
+  if (!from || !to) {
+    console.warn(`Baidu translate not support language: ${fromLanguage} to ${toLanguage}`);
     const result: QueryTypeResult = {
       type: type,
       result: undefined,
@@ -136,7 +131,7 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
  *
  * Although Baidu provides a dedicated language recognition interface, the number of supported languages is too small, so we directly use Baidu Translate's automatic language recognition instead.
  *
- * 百度语种识别API https://fanyi-api.baidu.com/doc/24
+ * 百度语种识别 API https://fanyi-api.baidu.com/doc/24
  *
  * Incorrect examples: const -> glg ??
  */

@@ -8,19 +8,25 @@ import {
   getIssuePriorities,
   getIssueTransitions,
   Issue,
-  IssueDetail as TIssueDetail,
   Priority,
+  startWatchingIssue,
+  stopWatchingIssue,
+  IssueDetail as TIssueDetail,
   Transition,
   updateIssue,
   updateIssueAssignee,
 } from "../api/issues";
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
+import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
+import IssueChildIssues from "./IssueChildIssues";
+import IssueCommentForm from "./IssueCommentForm";
+import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
 
 type IssueActionsProps = {
@@ -28,6 +34,7 @@ type IssueActionsProps = {
   mutate?: MutatePromise<Issue[] | undefined>;
   mutateDetail?: MutatePromise<Issue | TIssueDetail | null>;
   showDetailsAction?: boolean;
+  showChildIssuesAction?: boolean;
   showAttachmentsAction?: boolean;
 };
 
@@ -41,10 +48,11 @@ export default function IssueActions({
   mutate,
   mutateDetail,
   showDetailsAction,
+  showChildIssuesAction,
   showAttachmentsAction,
 }: IssueActionsProps) {
   const { siteUrl, myself } = getJiraCredentials();
-  const issueUrl = `${siteUrl}/browse/${issue.key}`;
+  const issueUrl = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
 
   async function mutateWithOptimisticUpdate({ asyncUpdate, optimisticUpdate }: MutateParams) {
     if (mutate) {
@@ -105,6 +113,39 @@ export default function IssueActions({
     }
   }
 
+  const isWatchedByMe = issue.fields?.watches?.isWatching;
+
+  async function watchIssue() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing watching status" });
+
+      await mutateWithOptimisticUpdate({
+        asyncUpdate: isWatchedByMe ? stopWatchingIssue(issue.key, myself.accountId) : startWatchingIssue(issue.key),
+        optimisticUpdate(issue) {
+          return {
+            ...issue,
+            fields: {
+              ...issue.fields,
+              watches: { isWatching: !isWatchedByMe },
+            },
+          };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed watching status",
+        message: `${isWatchedByMe ? "Stopped watching" : "Started watching"} ${issue.key}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed changing watching status",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -128,6 +169,14 @@ export default function IssueActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        {showChildIssuesAction && (
+          <Action.Push
+            target={<IssueChildIssues issue={issue} />}
+            title="Open Child Issues"
+            icon={Icon.Tree}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        )}
         <ChangePrioritySubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
         <ChangeAssigneeSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
@@ -139,7 +188,36 @@ export default function IssueActions({
           onAction={assignToMe}
         />
 
+        <Action
+          title={isWatchedByMe ? "Stop Watching" : "Start Watching"}
+          icon={isWatchedByMe ? Icon.EyeDisabled : Icon.Eye}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+          onAction={watchIssue}
+        />
+
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+
+        <Action.Push
+          title="Add Comment"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<IssueCommentForm issue={issue} />}
+        />
+        <Action.Push
+          title="Show Comments"
+          icon={Icon.Bubble}
+          target={<IssueComments issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Push
+          title="Create Issue"
+          icon={Icon.NewDocument}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          target={<CreateIssueForm />}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
@@ -171,6 +249,12 @@ export default function IssueActions({
           title="Copy Git Branch Name"
           content={`${issue.key}-${slugify(issue.fields.summary)}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Markdown Link"
+          content={`[${issue.key} - ${issue.fields.summary}](${issueUrl})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "," }}
         />
       </ActionPanel.Section>
 
@@ -287,7 +371,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       return autocompleteUsers(autocompleteURL, query);
     },
     [query],
-    { execute: !!autocompleteURL }
+    { execute: !!autocompleteURL },
   );
 
   async function changeAssignee(assignee: User | null) {
@@ -388,6 +472,19 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
     }
   }
 
+  function formattedTitle(transition: Transition): string {
+    if (!transition.name) {
+      return "Unknown status name";
+    }
+    if (!transition.to.name) {
+      return transition.name;
+    }
+    if (transition.name === transition.to.name) {
+      return transition.name;
+    }
+    return `${transition.name} -> ${transition.to.name}`;
+  }
+
   return (
     <ActionPanel.Submenu
       title="Change Status"
@@ -406,7 +503,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={transition.id}
-              title={transition.name ?? "Unknown status name"}
+              title={formattedTitle(transition)}
               onAction={() => changeTransition(transition)}
             />
           );

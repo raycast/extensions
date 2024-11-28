@@ -1,6 +1,15 @@
-import { Action, getPreferenceValues, Icon, Color, List, ActionPanel, confirmAlert } from "@raycast/api";
+import {
+  Action,
+  getPreferenceValues,
+  Icon,
+  Color,
+  List,
+  ActionPanel,
+  confirmAlert,
+  getDefaultApplication,
+} from "@raycast/api";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { AppendNoteForm } from "../components/AppendNoteForm";
 import { EditNote } from "../components/EditNote";
@@ -87,6 +96,13 @@ export function CopyNoteAction(props: { note: Note }) {
   );
 }
 
+export function CopyNoteTitleAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+  );
+}
+
 export function PasteNoteAction(props: { note: Note }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -143,8 +159,30 @@ export function DeleteNoteAction(props: { note: Note; vault: Vault }) {
 }
 
 export function QuickLookAction(props: { note: Note; notes: Note[]; vault: Vault }) {
+  const { note, notes, vault } = props;
+  return (
+    <Action.Push
+      title="Quick Look"
+      target={<NoteQuickLook note={note} showTitle={true} allNotes={notes} vault={vault} />}
+      icon={Icon.Eye}
+    />
+  );
+}
+
+export function OpenInDefaultAppAction(props: { note: Note; notes: Note[]; vault: Vault }) {
   const { note } = props;
-  return <Action.Push title="Quick Look" target={<NoteQuickLook note={note} showTitle={true} />} icon={Icon.Eye} />;
+  const [defaultApp, setDefaultApp] = useState<string>("Default App");
+  useEffect(() => {
+    getDefaultApplication(note.path)
+      .then((app) => setDefaultApp(app.name))
+      .catch((err) => {
+        console.error(err);
+        setDefaultApp("");
+      });
+  }, [note.path]);
+
+  if (!defaultApp) return null;
+  return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
 }
 
 export function BookmarkNoteAction(props: { note: Note; vault: Vault }) {
@@ -188,7 +226,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vaul
 
   return (
     <Action.Open
-      title="Open in new Pane"
+      title="Open in New Obsidian Tab"
       target={
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
@@ -292,6 +330,7 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
       <AppendToNoteAction note={note} vault={vault} />
       <AppendSelectedTextToNoteAction note={note} vault={vault} />
       <CopyNoteAction note={note} />
+      <CopyNoteTitleAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
@@ -308,6 +347,7 @@ export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault
   const [vaultsWithPlugin] = vaultPluginCheck([vault], "obsidian-advanced-uri");
 
   const quicklook = <QuickLookAction note={note} notes={notes} vault={vault} />;
+  const openInDefaultApp = <OpenInDefaultAppAction note={note} notes={notes} vault={vault} />;
   const obsidian = <OpenPathInObsidianAction path={note.path} />;
   const obsidianNewPane = vaultsWithPlugin.includes(vault) ? (
     <OpenNoteInObsidianNewPaneAction note={note} vault={vault} />
@@ -319,11 +359,22 @@ export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault
         {quicklook}
         {obsidian}
         {obsidianNewPane}
+        {openInDefaultApp}
       </React.Fragment>
     );
   } else if (primaryAction == PrimaryAction.OpenInObsidian) {
     return (
       <React.Fragment>
+        {obsidian}
+        {obsidianNewPane}
+        {openInDefaultApp}
+        {quicklook}
+      </React.Fragment>
+    );
+  } else if (primaryAction == PrimaryAction.OpenInDefaultApp) {
+    return (
+      <React.Fragment>
+        {openInDefaultApp}
         {obsidian}
         {obsidianNewPane}
         {quicklook}
@@ -335,6 +386,7 @@ export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault
         {obsidianNewPane}
         {obsidian}
         {quicklook}
+        {openInDefaultApp}
       </React.Fragment>
     );
   } else {
@@ -343,6 +395,7 @@ export function OpenNoteActions(props: { note: Note; notes: Note[]; vault: Vault
         {obsidian}
         {obsidianNewPane}
         {quicklook}
+        {openInDefaultApp}
       </React.Fragment>
     );
   }
@@ -354,7 +407,7 @@ export function AppendTaskAction(props: { note: Note; vault: Vault }) {
 
   return (
     <Action.Push
-      title="Append task"
+      title="Append Task"
       target={<AppendNoteForm note={note} vault={vault} dispatch={dispatch} />}
       shortcut={{ modifiers: ["opt"], key: "a" }}
       icon={Icon.Pencil}

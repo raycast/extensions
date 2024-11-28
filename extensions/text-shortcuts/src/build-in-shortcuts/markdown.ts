@@ -1,9 +1,11 @@
 export const markdowns = [
   {
+    id: "build_in_1647443203978",
     info: {
       name: "Heading 1",
       id: "build_in_1647443203978",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -11,10 +13,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["# $TEXT$", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647443221801",
     info: {
       name: "Heading 2",
       id: "build_in_1647443221801",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -22,10 +26,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["## $TEXT$", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647443240284",
     info: {
       name: "Heading 3",
       id: "build_in_1647443240284",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -33,10 +39,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["### $TEXT$", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647443150475",
     info: {
       name: "Horizontal Line",
       id: "build_in_1647443150475",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -44,10 +52,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["------"] }],
   },
   {
+    id: "build_in_1647440706193",
     info: {
       name: "Strong",
       id: "build_in_1647440706193",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -55,10 +65,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["**$TEXT$**", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647440760358",
     info: {
       name: "Emphasis",
       id: "build_in_1647440760358",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -66,10 +78,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["*$TEXT$*", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647440802239",
     info: {
       name: "Strong&Emphasis",
       id: "build_in_1647440802239",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -77,10 +91,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["***$TEXT$***", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647441893669",
     info: {
       name: "Highlight",
       id: "build_in_1647441893669",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -88,10 +104,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["==$TEXT$==", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647441950187",
     info: {
       name: "Strike",
       id: "build_in_1647441950187",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -99,10 +117,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["~~$TEXT$~~", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442258487",
     info: {
       name: "Underline",
       id: "build_in_1647442258487",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -110,10 +130,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["<u>$TEXT$</u>", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647440897610",
     info: {
       name: "List Ordered",
       id: "build_in_1647440897610",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -121,10 +143,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["1. $LINE$", "$LINE$"] }],
   },
   {
+    id: "build_in_1647440921890",
     info: {
       name: "List Unordered",
       id: "build_in_1647440921890",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -132,10 +156,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["- $LINE$", "$LINE$"] }],
   },
   {
+    id: "build_in_1647443032167",
     info: {
       name: "Task List",
       id: "build_in_1647443032167",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -143,10 +169,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["- [ ] $LINE$", "$LINE$"] }],
   },
   {
+    id: "build_in_1647441000319",
     info: {
       name: "Image",
       id: "build_in_1647441000319",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -154,10 +182,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["![$TEXT$]()", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442293304",
     info: {
       name: "Code",
       id: "build_in_1647442293304",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -165,10 +195,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["`$TEXT$`", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647441093441",
     info: {
       name: "Code Fences",
       id: "build_in_1647441093441",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -176,10 +208,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["```\n$TEXT$\n```", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647441516972",
     info: {
       name: "Hyperlink",
       id: "build_in_1647441516972",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -187,10 +221,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["[$TEXT$]()", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647441619992",
     info: {
       name: "Table",
       id: "build_in_1647441619992",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -205,10 +241,12 @@ export const markdowns = [
     ],
   },
   {
+    id: "build_in_1647441750956",
     info: {
       name: "Comment",
       id: "build_in_1647441750956",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -217,10 +255,12 @@ export const markdowns = [
   },
 
   {
+    id: "build_in_1647442341516",
     info: {
       name: "Inline Math",
       id: "build_in_1647442341516",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -228,10 +268,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["$$TEXT$$", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442414040",
     info: {
       name: "Superscript",
       id: "build_in_1647442414040",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -239,10 +281,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["^$TEXT$^", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442448465",
     info: {
       name: "Subscript",
       id: "build_in_1647442448465",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -250,10 +294,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["~$TEXT$~", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442850830",
     info: {
       name: "Math Block",
       id: "build_in_1647442850830",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -261,10 +307,12 @@ export const markdowns = [
     tactions: [{ type: "Live Template", content: ["$$\n$TEXT$\n$$", "$TEXT$"] }],
   },
   {
+    id: "build_in_1647442953342",
     info: {
       name: "Quote",
       id: "build_in_1647442953342",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],
@@ -273,10 +321,12 @@ export const markdowns = [
   },
 
   {
+    id: "build_in_1647443479565",
     info: {
       name: "Footnotes",
       id: "build_in_1647443479565",
       icon: "quote-block-16",
+      iconColor: "raycast-secondary-text",
       source: "Build-in",
       visibility: true,
       tag: ["Markdown"],

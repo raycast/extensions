@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
-import { Chat, ChatManager, ChatStatistics, ExtensionPreferences } from "../utils/types";
 import * as fs from "fs";
-import { Color, Icon, LocalStorage, environment, getPreferenceValues } from "@raycast/api";
-import { installDefaults } from "../utils/file-utils";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME } from "../utils/constants";
+
+import { environment, Icon, Color, LocalStorage, getPreferenceValues } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { ChatManager, Chat, ChatStatistics } from "../lib/chats/types";
+import { ADVANCED_SETTINGS_FILENAME } from "../lib/common/constants";
+import { installDefaults } from "../lib/files/file-utils";
+import { ExtensionPreferences } from "../lib/preferences/types";
 
 export function useChats(): ChatManager {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -50,7 +52,7 @@ export function useChats(): ChatManager {
 
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("chatDefaults" in advancedSettingsValues) {
         newChat = { ...advancedSettingsValues.chatDefaults, name: name, basePrompt: basePrompt, contextData: [] };
@@ -104,22 +106,6 @@ export function useChats(): ChatManager {
     return chats.filter((chat) => chat.favorited);
   };
 
-  const deleteChat = async (name: string) => {
-    if (!chats.find((chat) => chat.name === name)) {
-      setError("A chat with that name does not exist.");
-      return;
-    }
-
-    // Delete the chat file and remove it from the active list of chats
-    const chatFile = `${chatsDir}/${name}.txt`;
-    if (fs.existsSync(chatFile)) {
-      fs.unlinkSync(chatFile);
-    }
-
-    // Remove the chat's settings entry
-    await LocalStorage.removeItem(`--chat-${name}`);
-  };
-
   const appendToChat = async (chat: Chat, text: string) => {
     const chatFile = `${chatsDir}/${chat.name}.txt`;
     fs.appendFileSync(chatFile, `${text}\n`);
@@ -128,17 +114,6 @@ export function useChats(): ChatManager {
   const setChatProperty = async (chat: Chat, property: string, value: string | boolean) => {
     const newChat = { ...chat, [property]: value };
     await LocalStorage.setItem(`--chat-${chat.name}`, JSON.stringify(newChat));
-  };
-
-  const updateChat = async (name: string, chatData: Chat) => {
-    if (name !== chatData.name) {
-      // Rename the chat file
-      const oldChatFile = `${chatsDir}/${name}.txt`;
-      const newChatFile = `${chatsDir}/${chatData.name}.txt`;
-      fs.renameSync(oldChatFile, newChatFile);
-      await LocalStorage.removeItem(`--chat-${name}`);
-    }
-    await LocalStorage.setItem(`--chat-${chatData.name}`, JSON.stringify(chatData));
   };
 
   const checkExists = (chat: Chat) => {
@@ -293,13 +268,11 @@ export function useChats(): ChatManager {
     error: error,
     revalidate: revalidate,
     createChat: createChat,
-    deleteChat: deleteChat,
     appendToChat: appendToChat,
     loadConversation: loadConversation,
     favorites: favorites,
     checkExists: checkExists,
     setChatProperty: setChatProperty,
-    updateChat: updateChat,
     getChatContents: getChatContents,
     calculateStats: calculateStats,
   };

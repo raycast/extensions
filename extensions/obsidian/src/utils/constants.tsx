@@ -21,6 +21,7 @@ export enum PrimaryAction {
   QuickLook = "quicklook",
   OpenInObsidian = "obsidian",
   OpenInObsidianNewPane = "newpane",
+  OpenInDefaultApp = "defaultapp",
 }
 
 export const APPLICATION_UUID = "49acc9ee-69a0-4419-9aad-5c2689ff0119";

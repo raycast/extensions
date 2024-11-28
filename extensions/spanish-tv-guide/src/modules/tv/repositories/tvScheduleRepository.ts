@@ -1,38 +1,36 @@
 import fetch from "isomorphic-fetch";
 
-import { TVSchedule } from "../domain/tvSchedule";
-import { parseDate } from "../../../utils/dateUtils";
-import { truncate } from "../../../utils/stringUtils";
-import { ProgramResponse } from "./dto/programResponse";
-import { ChannelResponse } from "./dto/channelResponse";
+import { ProgramDto, ProgramDetailsDto, TvScheduleDto } from "../domain/tvScheduleDto";
+import { dateReviver } from "../../../utils/dateUtils";
 
-const TV_GUIDE_URL = "https://www.movistarplus.es/programacion-tv?v=json";
-const ICON_URL = "https://www.movistarplus.es/recorte/m-NEO/canal";
-const ICON_EXTENSION = ".png";
+const TV_GUIDE_CHANNELS_URL = "https://spanish-tv-guide-api.vercel.app/api/guide/channels";
+const TV_GUIDE_PROGRAM_DETAILS_URL = "https://spanish-tv-guide-api.vercel.app/api/guide/program";
 
-const getAll = async (): Promise<TVSchedule> => {
-  return fetch(TV_GUIDE_URL, { headers: { Accept: "application/json" } })
-    .then((response: { json: () => Promise<object> }) => response.json())
-    .then((response: { data: object }) => Object.values(response.data))
-    .then((channels: ChannelResponse[]) => channels.map(mapToChannel));
+const getAll = async (): Promise<TvScheduleDto> => {
+  return fetch(TV_GUIDE_CHANNELS_URL)
+    .then((response) => response.json())
+    .then((response) => JSON.parse(JSON.stringify(response), dateReviver));
 };
 
-const mapToChannel = (channel: ChannelResponse) => {
-  return {
-    icon: `${ICON_URL}/${channel.DATOS_CADENA.CODIGO}${ICON_EXTENSION}`,
-    name: channel.DATOS_CADENA.NOMBRE,
-    schedule: channel.PROGRAMAS.map(mapToProgram),
-  };
+const getProgramDetails = async (program: ProgramDto): Promise<ProgramDetailsDto> => {
+  const url = buildGetProgramDetailsUrl(TV_GUIDE_PROGRAM_DETAILS_URL, program.url);
+
+  return fetch(url)
+    .then((response) => response.json())
+    .then((response) => JSON.parse(JSON.stringify(response), dateReviver));
 };
 
-const mapToProgram = (program: ProgramResponse) => {
-  const startTime = parseDate(program.HORA_INICIO);
+const buildGetProgramDetailsUrl = (baseUrl: string, url: string) => {
+  const encodedProgramUrl = encodeURI(url);
 
-  return {
-    startTime,
-    gender: program.GENERO,
-    description: truncate(program.TITULO),
-  };
+  return `${baseUrl}?${toQueryString("url", encodedProgramUrl)}`;
 };
 
-export const tvScheduleRepository = { getAll };
+const toQueryString = (key: string, value: string) => {
+  const params = new URLSearchParams();
+  params.append(key, value);
+
+  return params.toString();
+};
+
+export const tvScheduleRepository = { getAll, getProgramDetails };

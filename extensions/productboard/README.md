@@ -1,10 +1,13 @@
 # Productboard
 
-![screenshot](./assets/preview.png)
+![screenshot](./metadata/productboard-1.png)
 
 ## Setup
 
-Currently, this extension can add new notes to Productboard.
+Currently, this extension can:
+
+- view existing notes
+- add new notes
 
 You'll also need a Public API Access token. To create access token, go to Integrations. Scroll down to _Public API_ section and create a new one to use with Raycast. You will need to have admin rights to be able to do it.
 

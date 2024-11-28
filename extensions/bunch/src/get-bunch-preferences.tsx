@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, open, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
 import React, { useState } from "react";
 import { getBunchPreferences } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";

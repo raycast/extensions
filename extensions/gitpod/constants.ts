@@ -1,10 +1,9 @@
 import { Color } from "@raycast/api";
 
-export enum workspaceStatus {
-  workspace_Inactive = "stopped",
-  workspace_active = "running",
-  workspace_progressing = "progressing",
-  workspace_failed = "failed",
+export interface workspaceStatus  {
+  workspace_Inactive : "PHASE_STOPPED",
+  workspace_active : "PHASE_RUNNING",
+  workspace_progressing : "PHASE_CREATED" | "PHASE_INITIALIZING" | "PHASE_STOPPING" | "PHASE_PENDING"
 }
 
 export enum branchStatus {
@@ -71,13 +70,20 @@ export const GitpodIcons = {
   stopped_icon_menubar: { source: "Icons/status_icon_small.png", tintColor: statusColors.stopped },
   failed_icon_menubar: { source: "Icons/status_icon_small.png", tintColor: statusColors.failed },
   progressing_icon_menubar: { source: "Icons/status_icon_small.png", tintColor: statusColors.progressing },
+  settings_icon: {source: "Icons/settings.png"},
+  project_icon: {source: "Icons/projects.png"},
+  docs_icon: {source: "Icons/documentation.png"},
 
   repoIcon : {
     source: "Icons/repo-16.svg",
     tintColor: statusColors.progressing
   },
 
+  info_icon: { source: "Icons/info1.svg", tintColor: UIColors.red},
+  link_icon: { source: "Icons/link.svg", tintColor: UIColors.gitpod_gold},
+
   commit_icon: {source: "Icons/git-commit.svg", tintColor: UIColors.gitpod_gold},
+  dashboard_icon: {source: "Icons/dashboard1.png"},
 
   branch_icon: {
     source: "Icons/merge.svg",

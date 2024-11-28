@@ -1,39 +1,37 @@
-import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { isEmpty, isNull } from "lodash";
+import { showToast, Toast } from "@raycast/api";
+import { useEffect, useReducer } from "react";
 
-import { ChannelSchedule, TVSchedule } from "./modules/tv/domain/tvSchedule";
-import ChannelDetails from "./components/ChannelDetails";
+import { TvScheduleDto } from "./modules/tv/domain/tvScheduleDto";
 import { tvScheduleRepository } from "./modules/tv/repositories/tvScheduleRepository";
+import { ERROR_MESSAGE, ErrorMessage } from "./components/ErrorMessage";
+import { ChannelList } from "./components/ChannelList";
+import { generateIcon } from "./utils/iconUtils";
+
+export type State = {
+  tvSchedule: TvScheduleDto;
+  selectedChannel?: string;
+  error?: Error;
+};
+
+const initialState: State = { tvSchedule: [] };
+const reducer = (state: State, newState: Partial<State>) => ({ ...state, ...newState });
 
 const Command = () => {
-  const [tvSchedule, setTvSchedule] = useState<TVSchedule>([]);
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
+  const [state, setState] = useReducer(reducer, initialState);
 
-  useEffect(() => void tvScheduleRepository.getAll().then(setTvSchedule), []);
-
-  const selectChannel = (channel: string | null) => {
-    const channelSelected = !isNull(channel);
-    if (channelSelected) setSelectedChannel(channel);
-    setIsShowingDetail(channelSelected);
+  const initialize = async () => {
+    return tvScheduleRepository
+      .getAll()
+      .then((tvSchedule) => cacheIcons(tvSchedule).then(() => setState({ tvSchedule })))
+      .catch((error) => setState({ error }));
   };
 
-  return (
-    <List
-      isLoading={isEmpty(tvSchedule)}
-      selectedItemId={selectedChannel}
-      isShowingDetail={isShowingDetail}
-      onSelectionChange={selectChannel}
-    >
-      {tvSchedule.map(renderChannel)}
-    </List>
-  );
+  useEffect(() => void initialize(), []);
+  useEffect(() => state.error && void showToast({ style: Toast.Style.Failure, title: ERROR_MESSAGE }), [state.error]);
+
+  return state.error ? <ErrorMessage /> : <ChannelList state={state} setState={setState} />;
 };
 
-const renderChannel = ({ icon, name, schedule }: ChannelSchedule) => {
-  const detail = <ChannelDetails icon={icon} name={name} schedule={schedule} />;
-  return <List.Item key={name} title={name} icon={icon} detail={detail} />;
-};
+const cacheIcons = (tvSchedule: TvScheduleDto) => Promise.all(tvSchedule.map(({ icon }) => generateIcon(icon)));
 
 export default Command;

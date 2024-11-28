@@ -5,7 +5,7 @@ import { isPermissionError, PermissionErrorScreen } from "./core/permission-erro
 
 const scriptToCreateNewWindow = `
   tell application "iTerm"
-    activate
+    launch
     repeat until application "iTerm" is running
       delay 0.1
     end repeat

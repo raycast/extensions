@@ -2,9 +2,10 @@ import React from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
-import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
+import { LanguageCode, supportedLanguagesByCode, languages, getLanguageFlag } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction } from "./actions";
 
 export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -28,7 +29,7 @@ export default function TranslateForm() {
           message: error.message,
         });
       },
-    }
+    },
   );
 
   const handleChange = (value: string) => {
@@ -58,25 +59,14 @@ export default function TranslateForm() {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Generals">
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translated" value={translated?.translatedText ?? ""} />
+            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
             <Action.CopyToClipboard
-              title="Copy Translated"
-              content={translated?.translatedText ?? ""}
-              icon={toLangObj?.flag}
+              title="Copy Pronunciation"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              content={translated?.pronunciationText ?? ""}
             />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} icon={fromLangObj?.flag} />
-            <Action.OpenInBrowser
-              title="Open in Google Translate"
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-              url={
-                "https://translate.google.com/?sl=" +
-                langFrom +
-                "&tl=" +
-                langTo +
-                "&text=" +
-                encodeURIComponent(text) +
-                "&op=translate"
-              }
-            />
+            <OpenOnGoogleTranslateWebsiteAction translationText={text} translation={{ langFrom, langTo }} />
             <Action.Push
               icon={Icon.Pencil}
               title="Manage language sets..."
@@ -84,45 +74,47 @@ export default function TranslateForm() {
               target={<LanguagesManagerList />}
             />
           </ActionPanel.Section>
-
           <ActionPanel.Section title="Settings">
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
                 setSelectedLanguageSet({ langFrom: langTo, langTo: langFrom });
               }}
-              title={`${toLangObj.flag || toLangObj.code} <-> ${fromLangObj.flag || fromLangObj.code} Switch Languages`}
+              title={`${getLanguageFlag(toLangObj, toLangObj?.code)} <-> ${getLanguageFlag(
+                fromLangObj,
+                fromLangObj?.code,
+              )} Switch Languages`}
             />
             <ActionPanel.Submenu
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               title="Change Languages"
-              icon={fromLangObj?.flag}
+              icon={getLanguageFlag(fromLangObj)}
             >
               <ActionPanel.Submenu
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 title="Change From Language"
-                icon={fromLangObj?.flag}
+                icon={getLanguageFlag(fromLangObj)}
               >
                 {languages.map((lang) => (
                   <Action
                     key={lang.code}
                     onAction={() => setLangFrom(lang.code)}
                     title={lang.name}
-                    icon={lang?.flag ?? "🏳️"}
+                    icon={getLanguageFlag(lang)}
                   />
                 ))}
               </ActionPanel.Submenu>
               <ActionPanel.Submenu
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                 title="Change To Language"
-                icon={toLangObj?.flag}
+                icon={getLanguageFlag(toLangObj)}
               >
                 {languages.map((lang) => (
                   <Action
                     key={lang.code}
                     onAction={() => setLangTo(lang.code)}
                     title={lang.name}
-                    icon={lang?.flag ?? "🏳️"}
+                    icon={getLanguageFlag(lang)}
                   />
                 ))}
               </ActionPanel.Submenu>
@@ -143,11 +135,11 @@ export default function TranslateForm() {
           <Form.Dropdown.Item
             value={autoDetectedLanguage.code}
             title={`${autoDetectedLanguage.name} (Auto-detect)`}
-            icon={autoDetectedLanguage?.flag ?? "🏳️"}
+            icon={getLanguageFlag(autoDetectedLanguage)}
           />
         )}
         {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown
@@ -160,7 +152,7 @@ export default function TranslateForm() {
         {languages
           .filter((lang) => lang.code !== AUTO_DETECT)
           .map((lang) => (
-            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
           ))}
       </Form.Dropdown>
       <Form.TextArea
@@ -169,6 +161,7 @@ export default function TranslateForm() {
         value={translated?.translatedText ?? ""}
         placeholder="Translation"
       />
+      <Form.Description title="Pronunciation" text={translated?.pronunciationText ?? ""} />
     </Form>
   );
 }

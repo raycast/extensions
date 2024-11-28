@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "type-the-alphabet",
+  "title": "Type the Alphabet",
+  "description": "\"Type the Alphabet\" is a typing game that measures how long it takes you to type the entire alphabet.",
+  "icon": "command-icon.png",
+  "author": "Visual-Studio-Coder",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "typethealphabet",
+      "title": "Type the Alphabet",
+      "description": "See how many seconds it will take you to type the entire alphabet using the Type the Alphabet extension!",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

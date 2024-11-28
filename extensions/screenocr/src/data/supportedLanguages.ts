@@ -13,4 +13,6 @@ export default [
   { title: "🇯🇵 Japanese (Japan)", value: "ja-JP" },
   { title: "🇷🇺 Russian (Russia)", value: "ru-RU" },
   { title: "🇺🇦 Ukrainian (Ukraine)", value: "uk-UA" },
+  { title: "🇹🇭 Thai (Thailand)", value: "th-TH" },
+  { title: "🇻🇳 Vietnamese (Vietnam)", value: "vi-VT" },
 ] as const;

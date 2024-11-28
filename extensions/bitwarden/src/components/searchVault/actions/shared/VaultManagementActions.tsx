@@ -9,14 +9,19 @@ function VaultManagementActions() {
 
   const handleLockVault = async () => {
     const toast = await showToast(Toast.Style.Animated, "Locking Vault...", "Please wait");
-    await bitwarden.lock(VAULT_LOCK_MESSAGES.MANUAL);
+    await bitwarden.lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
     await toast.hide();
   };
 
   const handleLogoutVault = async () => {
     const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
-    await bitwarden.logout();
-    await toast.hide();
+    try {
+      await bitwarden.logout();
+      await toast.hide();
+    } catch (error) {
+      toast.title = "Failed to logout";
+      toast.style = Toast.Style.Failure;
+    }
   };
 
   return (

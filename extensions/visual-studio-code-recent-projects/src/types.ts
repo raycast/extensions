@@ -30,16 +30,11 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry |
 
 export enum VSCodeBuild {
   Code = "Code",
+  Cursor = "Cursor",
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
+  Windsurf = "Windsurf",
 }
-
-export type Preferences = {
-  build: VSCodeBuild;
-  keepSectionOrder: boolean;
-  layout: "grid" | "list";
-  closeOtherWindows: boolean;
-};
 
 export type RecentEntries = {
   entries: string;

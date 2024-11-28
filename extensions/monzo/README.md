@@ -16,13 +16,13 @@ If you're comfortable with OAuth API setup, feel free to skip through these step
 4. Head to the [Clients][monzo-clients] page on the developer portal and start creating a new client.
 5. Enter the following details
 
-| Field           | Details to enter                                    |
-| --------------- | --------------------------------------------------- |
-| Name            | `Monzo for Raycast`                                 |
-| Logo URL        | Leave blank                                         |
-| Redirect URLs   | `https://monzo.oauth-proxy.raycast.com/redirect` |
-| Description     | This is a required field, enter whatever you like   |
-| Confidentiality | `Confidential`                                      |
+| Field           | Details to enter                                                  |
+| --------------- | ----------------------------------------------------------------- |
+| Name            | `Monzo for Raycast`                                               |
+| Logo URL        | Leave blank                                                       |
+| Redirect URLs   | `https://monzo.oauth-proxy.raycast.com/redirect`                  |
+| Description     | `Access to Monzo account, balance, and transactions in Raycast..` |
+| Confidentiality | `Confidential`                                                    |
 
 6. Click submit, and open your new client from the list.
 7. Copy the **Client ID** into the extension preferences under **OAuth Client ID**. Make sure not to include anything else. It should start with `oauth2client_`.

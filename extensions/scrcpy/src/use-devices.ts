@@ -1,27 +1,50 @@
-import { exec } from "child_process";
 import { useEffect, useState } from "react";
-import { getAdbDir } from "./utils";
-import { showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import useAdbDevices from "./use-adb-devices";
+import type { DeviceOption } from "./types";
 
-export default function useDevices() {
-  const [devices, setDevices] = useState<string[]>([]);
+const DEFAULT_DEVICE_STORAGE_KEY = "defaultDevice";
+
+export default function useDevices(): readonly [readonly DeviceOption[], (device: DeviceOption) => Promise<void>] {
+  const devices = useAdbDevices();
+  const [defaultDevice, handleDeviceChange] = useDefaultDevice();
+
+  if (devices.length === 0 || !defaultDevice) {
+    return [[] as DeviceOption[], handleDeviceChange] as const;
+  }
+
+  // Manipulate Form.Dropdown with `value` and `onChange` is buggy
+  // To select previous used device, we move it to the top of the devices, so
+  // that Form.Dropdown will automatically choose it for us.
+  const foundDefaultDevice = devices.find((device) => device.serial === defaultDevice.serial);
+  if (foundDefaultDevice) {
+    return [
+      [defaultDevice, ...devices.filter((device) => device.serial !== defaultDevice.serial)],
+      handleDeviceChange,
+    ] as const;
+  }
+  return [devices, handleDeviceChange];
+}
+
+function useDefaultDevice() {
+  const [defaultDevice, setDefaultDevice] = useState<DeviceOption>();
+
   useEffect(() => {
-    exec(`${getAdbDir()}/adb devices`, (err, stdout) => {
-      if (err) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch devices! Please config adb in extension preference",
-          message: err.message,
-        });
-        return;
-      }
-      const devices = stdout
-        .split("\n")
-        .slice(1)
-        .filter(Boolean)
-        .map((device) => device.split("\t")[0]);
-      setDevices(devices);
+    LocalStorage.getItem<string>(DEFAULT_DEVICE_STORAGE_KEY).then((deviceserial) => {
+      setDefaultDevice({
+        serial: deviceserial ?? "",
+        default: true,
+      });
     });
   }, []);
-  return devices;
+
+  const handleDeviceChange = (device: DeviceOption) => {
+    setDefaultDevice({
+      serial: device.serial,
+      default: true,
+    });
+    return LocalStorage.setItem(DEFAULT_DEVICE_STORAGE_KEY, device.serial);
+  };
+
+  return [defaultDevice, handleDeviceChange] as const;
 }

@@ -43,7 +43,7 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
   const params = {
     SourceLanguage: from, // 若不配置此字段，则代表自动检测源语言
     TargetLanguage: to,
-    TextList: [word], // 列表长度不超过8，总文本长度不超过5000字符
+    TextList: [word], // 列表长度不超过 8，总文本长度不超过 5000 字符
     Category: "", // 默认使用通用翻译领域，无需填写
   };
 

@@ -1,4 +1,4 @@
-import { FlatRateTaxSymbol } from "./utils";
+import { FlatRateTaxSymbol } from "@/types/utils";
 
 export type ProductObject = {
   id: number;

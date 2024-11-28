@@ -16,22 +16,6 @@ export class XcodeCodeSnippetService {
   }
 
   /**
-   * Create directory path if needed
-   */
-  private static async createDirectoryPathIfNeeded() {
-    const directoryPath = XcodeCodeSnippetService.directoryPath;
-    try {
-      // Check if directory path does not exist
-      if (!(await existsAsync(directoryPath))) {
-        // Make directory
-        await makeDirectoryAsync(directoryPath);
-      }
-    } catch {
-      // Ignore any error
-    }
-  }
-
-  /**
    * Retrieve the file path of a Xcode Code Snippet
    * @param codeSnippet The Xcode Code Snippet
    */
@@ -77,5 +61,21 @@ export class XcodeCodeSnippetService {
       buildPlist({ ...codeSnippet }),
       "utf-8"
     );
+  }
+
+  /**
+   * Create directory path if needed
+   */
+  private static async createDirectoryPathIfNeeded() {
+    const directoryPath = XcodeCodeSnippetService.directoryPath;
+    try {
+      // Check if directory path does not exist
+      if (!(await existsAsync(directoryPath))) {
+        // Make directory
+        await makeDirectoryAsync(directoryPath);
+      }
+    } catch {
+      // Ignore any error
+    }
   }
 }

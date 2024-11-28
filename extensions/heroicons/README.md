@@ -18,7 +18,7 @@
 
 ### Alternative search terms for icons
 
-![Alternative search terms for icosn](./metadata/heroicons-search-2.png)
+![Alternative search terms for icons](./metadata/heroicons-search-2.png)
 
 ### Filter variants
 
@@ -33,7 +33,7 @@
 - All icons at your fingertips
 - Search by keywords
 - Filter by variants (outline, solid, mini)
-- Paste SVG and JSX
+- Copy or paste: SVG, JSX, icon name or even import declaration for React/Vue components
 
 ---
 

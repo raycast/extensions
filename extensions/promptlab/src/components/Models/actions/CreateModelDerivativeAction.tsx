@@ -1,8 +1,8 @@
 import { Action, Icon, useNavigation } from "@raycast/api";
 import ModelForm from "../ModelForm";
-import { Model, ModelManager } from "../../../utils/types";
+import { Model, ModelManager } from "../../../lib/models/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
 
 /**
  * Action to create a new model based on an existing model.
@@ -27,7 +27,7 @@ export default function CreateModelDerivativeAction(props: {
     <Action
       title="Create Derivative"
       icon={Icon.EyeDropper}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      shortcut={getActionShortcut("CreateModelDerivativeAction", settings)}
       onAction={async () => {
         const newModel = await models.createModel({
           ...model,

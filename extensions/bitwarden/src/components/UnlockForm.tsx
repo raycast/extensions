@@ -1,24 +1,25 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
+import { useLocalStorageItem } from "~/utils/localstorage";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
-export type UnlockFormProps = {
-  lockReason?: string;
+type UnlockFormProps = {
+  pendingAction?: Promise<void>;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
-const UnlockForm = (props: UnlockFormProps) => {
-  const { lockReason: lockReasonProp } = props;
-
+const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const bitwarden = useBitwarden();
-  const [isLoading, setLoading] = useState(false);
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
-  const lockReason = useRef(lockReasonProp ?? bitwarden.lockReason).current;
+
+  const [isLoading, setLoading] = useState(false);
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+  const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length === 0) return;
@@ -28,10 +29,15 @@ const UnlockForm = (props: UnlockFormProps) => {
       setLoading(true);
       setUnlockError(undefined);
 
-      const state = await bitwarden.status();
-      if (state.status === "unauthenticated") {
+      await pendingAction;
+
+      const { error, result: vaultState } = await bitwarden.status();
+      if (error) throw error;
+
+      if (vaultState.status === "unauthenticated") {
         try {
-          await bitwarden.login();
+          const { error } = await bitwarden.login();
+          if (error) throw error;
         } catch (error) {
           const {
             displayableError = `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
@@ -45,6 +51,7 @@ const UnlockForm = (props: UnlockFormProps) => {
       }
 
       await bitwarden.unlock(password);
+      await clearLockReason();
       await toast.hide();
     } catch (error) {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);

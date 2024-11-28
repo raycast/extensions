@@ -1,42 +1,59 @@
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
+import { open, showToast, Toast } from "@raycast/api";
+import { SchedulingLink } from "../types/scheduling-link";
+import useApi from "./useApi";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
+import { fetchPromise } from "../utils/fetcher";
 
-const useSchedulingLinks = () => {
-  const { fetcher } = reclaimApi();
+export const useSchedulingLinks = () => {
+  const {
+    data: schedulingLinks,
+    error: schedulingLinksError,
+    isLoading: schedulingLinksIsLoading,
+  } = useApi<ApiSchedulingLink>("/scheduling-link");
 
-  const getSchedulingLinks = async () => {
-    try {
-      const [schedulingLinks, error] = await axiosPromiseData<ApiSchedulingLink>(
-        fetcher("/scheduling-link", {
-          method: "GET",
-        })
-      );
-      if (!schedulingLinks || error) throw error;
-      return schedulingLinks;
-    } catch (error) {
-      console.error("Error while fetching scheduling links", error);
-    }
-  };
+  const {
+    data: schedulingLinksGroups,
+    error: schedulingLinksGroupsError,
+    isLoading: schedulingLinksGroupsIsLoading,
+  } = useApi<ApiSchedulingLinkGroups>("/scheduling-link/group");
 
-  const getSchedulingLinksGroups = async () => {
-    try {
-      const [schedulingLinksGroups, error] = await axiosPromiseData<ApiSchedulingLinkGroups>(
-        fetcher("/scheduling-link/group", {
-          method: "GET",
-        })
-      );
-      if (!schedulingLinksGroups || error) throw error;
-      return schedulingLinksGroups;
-    } catch (error) {
-      console.error("Error while fetching scheduling links groups", error);
-    }
-  };
+  if (schedulingLinksError) console.error("Error while fetching Scheduling Links", schedulingLinksError);
+  if (schedulingLinksGroupsError)
+    console.error("Error while fetching Scheduling Links Groups", schedulingLinksGroupsError);
 
   return {
-    getSchedulingLinks,
-    getSchedulingLinksGroups,
+    schedulingLinks,
+    schedulingLinksError,
+    schedulingLinksIsLoading,
+    schedulingLinksGroups,
+    schedulingLinksGroupsError,
+    schedulingLinksGroupsIsLoading,
   };
 };
 
-export { useSchedulingLinks };
+export const useSchedulingLinkActions = (link: SchedulingLink) => {
+  const createOneOffLink = async () => {
+    const [oneOff, error] = await fetchPromise<SchedulingLink>("/scheduling-link/derivative", {
+      init: { method: "POST" },
+      payload: { parentId: link.id },
+    });
+
+    if (!error && oneOff) {
+      open(`https://app.reclaim.ai/scheduling-links?personalize=${oneOff.id}`);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error creating one-off link. Try using the reclaim.ai web app.",
+      });
+    }
+  };
+
+  const createShareLink = async () => {
+    open(`https://app.reclaim.ai/quick-forms/scheduling-links/${link.id}/available-times`);
+  };
+
+  return {
+    createOneOffLink,
+    createShareLink,
+  };
+};

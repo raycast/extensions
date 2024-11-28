@@ -6,7 +6,7 @@ import { environment } from "@raycast/api";
 export async function linkWithBridge(
   bridgeIpAddress: string,
   bridgeId?: string,
-  bridgeUsername?: string
+  bridgeUsername?: string,
 ): Promise<BridgeConfig> {
   const bridgeCertificate = await getCertificate(bridgeIpAddress, bridgeId);
   const isSelfSigned = bridgeCertificate.subject.CN === bridgeCertificate.issuer.CN;

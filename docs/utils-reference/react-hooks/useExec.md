@@ -1,6 +1,10 @@
 # `useExec`
 
-Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command. The last value will be kept between command runs.
+Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useExec` first returns the data from cache (stale), then executes the command (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 
@@ -26,7 +30,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -57,7 +62,8 @@ function useExec<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: string[]) -> void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   }
 ): AsyncState<T> & {
   revalidate: () => void;
@@ -106,6 +112,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
 - `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 
@@ -190,7 +197,7 @@ export default function Command() {
           optimisticUpdate(data) {
             return data?.concat({ name: "foo", id: "foo" });
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -269,7 +276,7 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```
 

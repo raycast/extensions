@@ -5,6 +5,12 @@
   "description": "Quickly check your internet connection speed",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "keywords": [
+    "wifi",
+    "test",
+    "network",
+    "speed"
+  ],
   "categories": [
     "Developer Tools",
     "System"
@@ -12,15 +18,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "network-speed",
-      "title": "Network Speed",
-      "description": "Quickly check your internet connection speed",
+      "name": "test-network-speed",
+      "title": "Test Network Speed",
+      "description": "Quickly test your internet connection speed",
       "mode": "view",
       "preferences": [
         {
           "name": "testSequentially",
           "type": "checkbox",
-          "required": true,
+          "required": false,
           "title": "Test Method",
           "label": "Run tests sequentially instead of parallel",
           "description": "Running the tests in parallel better reflects real-world situations",
@@ -30,17 +36,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1"
+    "@raycast/api": "^1.77.0"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

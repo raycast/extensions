@@ -1,5 +1,9 @@
 # OpenAI Generator Changelog
 
+## [AbortController fix] - 2023-08-10
+
+- Updated the API calls to OpenAI to use AbortController signals
+
 ## [Update text completion model] - 2022-11-28
 - Uses new GPT-3 `text-davinci-003` version
 

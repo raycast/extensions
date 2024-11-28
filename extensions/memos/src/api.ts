@@ -1,14 +1,13 @@
-import { getPreferenceValues, Cache } from "@raycast/api";
+import { getPreferenceValues, Cache, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import parse from "url-parse";
-import qs from "qs";
 import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS, ROW_STATUS_KEY } from "./types";
+import { Preferences, ResponseData, ROW_STATUS, ResourceObj } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -23,16 +22,38 @@ const parseResponse = async (response: Response) => {
   return data;
 };
 
-const getOpenApi = () => {
+const getHost = () => {
   const preferences = getPreferenceValues<Preferences>();
 
-  const { openApi } = preferences;
+  const { host } = preferences;
 
-  return openApi;
+  return host;
+};
+
+export const getToken = () => {
+  const preferences = getPreferenceValues<Preferences>();
+
+  const { token } = preferences;
+
+  return token;
+};
+
+export const getCookie = () => {
+  return `memos.access-token=${getToken()}`;
 };
 
 export const getOriginUrl = () => {
-  const { origin } = parse(getOpenApi());
+  const api = getHost();
+
+  if (!api) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Please set the host or openApi in the preferences",
+    });
+    return "";
+  }
+
+  const { origin } = parse(api);
   return origin;
 };
 
@@ -43,17 +64,25 @@ export const getRequestUrl = (path = "") => {
 };
 
 const getOpenId = () => {
-  const { query } = parse(getOpenApi());
-  const parseQuery = parse.qs.parse(query);
+  const token = getToken();
 
-  return parseQuery.openId;
+  if (token) {
+    return token;
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Please set the host or openApi in the preferences",
+    });
+    return "";
+  }
 };
 
-const getUseFetch = <T>(url: string, options: Record<string, any>) => {
+const getUseFetch = <T>(url: string, options: Record<string, unknown>) => {
   return useFetch<T, T>(url, {
     headers: {
       "Content-Type": "application/json",
-      cookie: cache.get("cookie") || "",
+      // Cookie: getCookie(),
+      Authorization: `Bearer ${getToken()}`,
     },
     parseResponse,
     ...options,
@@ -64,7 +93,8 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
   return axios<T>({
     headers: {
       "Content-Type": "application/json; charset=UTF-8",
-      cookie: cache.get("cookie") || "",
+      cookie: getCookie(),
+      Authorization: `Bearer ${getToken()}`,
     },
     ...options,
   }).then((res) => {
@@ -80,29 +110,33 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
 };
 
 export const getMe = () => {
-  return getUseFetch<ResponseData<MeResponse>>(getRequestUrl(`/api/user/me?openId=${getOpenId()}`), {});
+  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/status`), {
+    method: "POST",
+  });
 };
 
 export const sendMemo = (data: PostMemoParams) => {
-  return getFetch<ResponseData<MemoInfoResponse>>({
-    url: getOpenApi(),
+  const url = getRequestUrl(`/api/v1/memos`);
+
+  return getFetch<MemoInfoResponse>({
+    url,
     method: "POST",
     data,
   });
 };
 
 export const getTags = () => {
-  const url = getRequestUrl(`/api/tag?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api/v1/memos/-/tags`);
 
-  return getUseFetch<ResponseData<TagResponse>>(url, {
+  return getUseFetch<TagResponse>(url, {
     keepPreviousData: true,
     initialData: {
-      data: [],
+      tagAmounts: {},
     },
   });
 };
 
-export const postFile = (filePath: string) => {
+export const postFile = (filePath: string, filename: string) => {
   const readFile = fs.readFileSync(filePath);
 
   const formData = new FormData();
@@ -111,34 +145,72 @@ export const postFile = (filePath: string) => {
     contentType: mime.getType(filePath) || undefined,
   });
 
-  return getFetch<ResponseData<PostFileResponse>>({
-    url: getRequestUrl(`/api/resource/blob?openId=${getOpenId()}`),
+  return getFetch<PostFileResponse>({
+    url: getRequestUrl(`/api/v1/resources`),
     method: "POST",
-    data: formData,
-    headers: {},
-  });
-};
-
-export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
-  const queryString = qs.stringify({
-    openId: getOpenId(),
-    rowStatus,
-  });
-
-  const url = getRequestUrl(`/api/memo?${queryString}`);
-
-  const { isLoading, data, revalidate } = getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {
-    keepPreviousData: true,
-    initialData: {
-      data: [],
+    data: {
+      content: readFile.toString("base64"),
+      filename,
+      type: mime.getType(filePath) || undefined,
     },
   });
-
-  return { isLoading, data, revalidate };
 };
 
-export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
-  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+export const postMemoResources = (memoName: string, resources: Partial<ResourceObj>[]) => {
+  const url = getRequestUrl(`/api/v1/${memoName}/resources`);
+
+  return getFetch<object>({
+    url,
+    method: "PATCH",
+    data: {
+      resources,
+    },
+  });
+};
+
+export const getAllMemos = (currentUserId?: number) => {
+  let filter = encodeURIComponent(`creator=='users/${currentUserId}'`);
+
+  if (!currentUserId) {
+    filter = "";
+  }
+
+  const url = getRequestUrl(`/api/v1/memos?filter=${filter}&pageSize=20`);
+
+  const { isLoading, data, revalidate, pagination } = useFetch<
+    {
+      memos: MemoInfoResponse[];
+      nextPageToken: string;
+    },
+    MemoInfoResponse[],
+    MemoInfoResponse[]
+  >(
+    (options) => {
+      return `${url}&pageToken=${options?.cursor || ""}`;
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      parseResponse,
+      mapResult(result) {
+        return {
+          data: result?.memos || [],
+          cursor: result?.nextPageToken || "",
+          hasMore: !!result.nextPageToken || false,
+        };
+      },
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
+
+  return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
+};
+
+export const patchMemo = (memoId: string, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
+  const url = getRequestUrl(`/api/v1/memo/${memoId}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
@@ -150,23 +222,33 @@ export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}
   });
 };
 
-export const archiveMemo = (memoId: number) => {
+export const archiveMemo = (memoId: string) => {
   return patchMemo(memoId, {
     rowStatus: ROW_STATUS.ARCHIVED,
   });
 };
 
-export const restoreMemo = (memoId: number) => {
+export const restoreMemo = (memoId: string) => {
   return patchMemo(memoId, {
     rowStatus: ROW_STATUS.NORMAL,
   });
 };
 
-export const deleteMemo = (memoId: number) => {
-  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+export const deleteMemo = (memoId: string) => {
+  const url = getRequestUrl(`/api/v1/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
     method: "DELETE",
+  });
+};
+
+export const getResourceBin = (resourceName: string, resourceFilename: string) => {
+  const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}`);
+
+  return getFetch<BinaryData>({
+    url,
+    method: "GET",
+    responseType: "blob",
   });
 };

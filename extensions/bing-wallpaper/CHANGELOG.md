@@ -1,5 +1,18 @@
 # Bing Wallpaper Changelog
 
+## [Remove error dialog] - 2024-09-30
+
+- Remove error dialog that pops up not as expected
+
+## [Fix error] - 2024-05-21
+
+- Fix the problem of not being able to set wallpaper
+
+## [Fix error] - 2024-02-05
+
+- Fix network request errors
+- Optimize wallpaper information display
+
 ## [Update grid layout] - 2022-10-15
 
 - Update grid layout

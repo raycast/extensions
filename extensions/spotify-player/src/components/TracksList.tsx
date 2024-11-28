@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { SimplifiedAlbumObject, SimplifiedPlaylistObject, TrackObject } from "../helpers/spotify.api";
+import { SimplifiedAlbumObject, SimplifiedPlaylistObject, SimplifiedTrackObject } from "../helpers/spotify.api";
 import { useAlbumTracks } from "../hooks/useAlbumTracks";
 import { usePlaylistTracks } from "../hooks/usePlaylistTracks";
 import TrackListItem from "./TrackListItem";
@@ -7,7 +7,7 @@ import TrackListItem from "./TrackListItem";
 type TracksListProps = {
   album?: SimplifiedAlbumObject;
   playlist?: SimplifiedPlaylistObject;
-  tracks?: TrackObject[];
+  tracks?: SimplifiedTrackObject[];
   showGoToAlbum?: boolean;
 };
 

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from '@raycast/api'
 import PackageList from '.'
-import { PackageListItem } from './PackagListItem'
-import { useFavorites } from './useFavorites'
+import { PackageListItem } from './components/PackagListItem'
+import { useFavorites } from './hooks/useFavorites'
 
 export default function Favorites() {
   const [favorites, fetchFavorites] = useFavorites()

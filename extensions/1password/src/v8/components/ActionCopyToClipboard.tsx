@@ -1,53 +1,20 @@
-import {
-  Action,
-  Clipboard,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  closeMainWindow,
-} from "@raycast/api";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast, showHUD } from "@raycast/api";
 import { execFileSync } from "child_process";
 
-import { CLI_PATH, titleCaseWord } from "../utils";
-
-async function copyPassword(password: string): Promise<boolean> {
-  const applescript = `
-use AppleScript version "2.4"
-use framework "Foundation"
-use framework "AppKit"
-use scripting additions
-property NSPasteboardTypeString : a reference to current application's NSPasteboardTypeString
-on run argv
-  set textToCopy to item 1 of argv
-  set cb to current application's NSPasteboard's generalPasteboard() -- get pasteboard
-  cb's clearContents()
-  cb's setString:textToCopy forType:"org.nspasteboard.ConcealedType" -- http://nspasteboard.org/
-  cb's setString:textToCopy forType:"com.agilebits.onepassword" -- 1Password
-  cb's setString:textToCopy forType:NSPasteboardTypeString
-end run
-`;
-
-  try {
-    execFileSync("/usr/bin/osascript", ["-e", applescript, password]);
-    return true;
-  } catch (error) {
-    await Clipboard.copy(password);
-    return false;
-  }
-}
+import { CLI_PATH, ExtensionError, handleErrors, titleCaseWord } from "../utils";
 
 export function CopyToClipboard({
   id,
   vault_id,
   shortcut,
   field = "password",
+  attribute,
 }: {
   id: string;
   field?: string;
   shortcut: Keyboard.Shortcut;
   vault_id: string;
+  attribute?: string;
 }) {
   return (
     <Action
@@ -60,28 +27,50 @@ export function CopyToClipboard({
           title: `Copying ${field}...`,
         });
         try {
-          const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
-          await copyPassword(stdout.toString().trim());
+          let stdout;
+          if (attribute === "otp") {
+            // based on OTP-type not field name
+            stdout = execFileSync(CLI_PATH, ["item", "get", id, "--otp"]);
+          } else {
+            const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
+            const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+            stdout = execFileSync(CLI_PATH, ["read", uri]);
+          }
+          await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;
           toast.title = "Copied to clipboard";
+          await showHUD(`Copied ${field} to clipboard`);
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to copy";
-          if (error instanceof Error) {
-            toast.message = error.message;
-            toast.primaryAction = {
-              title: "Copy logs",
-              onAction: async (toast) => {
-                await Clipboard.copy((error as Error).message);
-                toast.hide();
-              },
-            };
-          }
-        } finally {
-          const preferences = getPreferenceValues();
-          if (preferences.closeWindowAfterCopying) {
-            await closeMainWindow();
+          if (error instanceof Error || error instanceof ExtensionError) {
+            try {
+              handleErrors(error.message);
+            } catch (err) {
+              if (err instanceof ExtensionError) {
+                if (err.title != err.message) {
+                  toast.message = err.message;
+                }
+                toast.title = err.title;
+                toast.primaryAction = {
+                  title: "Copy logs",
+                  onAction: async (toast) => {
+                    await Clipboard.copy((err as Error).message);
+                    toast.hide();
+                  },
+                };
+              } else if (err instanceof Error) {
+                toast.title = err.message;
+                toast.primaryAction = {
+                  title: "Copy logs",
+                  onAction: async (toast) => {
+                    await Clipboard.copy((err as Error).message);
+                    toast.hide();
+                  },
+                };
+              }
+            }
           }
         }
       }}

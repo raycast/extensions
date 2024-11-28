@@ -1,5 +1,9 @@
 # Maven Central Repository Changelog
 
+## [Fix Hotkey Error] - 2024-05-28
+
+-  Fix the problem of using hotkeys to invoke commands
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

@@ -9,10 +9,11 @@ import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
-    <BitwardenProvider>
+    <BitwardenProvider loadingFallback={<VaultLoadingFallback />}>
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>
@@ -31,7 +32,12 @@ function SearchVaultComponent() {
   const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
 
   return (
-    <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
+    <List
+      searchBarPlaceholder="Search vault"
+      filtering={{ keepSectionOrder: true }}
+      isLoading={isLoading}
+      searchBarAccessory={<ListFolderDropdown />}
+    >
       {favoriteItems.length > 0 ? (
         <>
           <List.Section title="Favorites">

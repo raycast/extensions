@@ -1,14 +1,13 @@
-import { ActionPanel, getPreferenceValues, Grid, List } from "@raycast/api";
+import { ActionPanel, Grid, List } from "@raycast/api";
 import React from "react";
 import { ActionOpenPreferences } from "./action-open-preferences";
-import { Preferences } from "../types/preferences";
+import { layout } from "../types/preferences";
 
 export function OpenLinkInEmptyView() {
-  const { layout } = getPreferenceValues<Preferences>();
   return layout === "List" ? (
     <List.EmptyView
-      icon={{ source: { light: "empty-icon.svg", dark: "empty-icon@dark.svg" } }}
-      title={"No Application"}
+      icon={{ source: "empty-icon.png" }}
+      title={"No Browsers"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
@@ -17,8 +16,8 @@ export function OpenLinkInEmptyView() {
     />
   ) : (
     <Grid.EmptyView
-      icon={{ source: { light: "empty-icon.svg", dark: "empty-icon@dark.svg" } }}
-      title={"No Application"}
+      icon={{ source: "empty-icon.png" }}
+      title={"No Browsers"}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />

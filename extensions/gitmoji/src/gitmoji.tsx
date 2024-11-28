@@ -60,32 +60,40 @@ const GitmojiListItem = ({ gitmoji }: GitmojiListItemProps) => {
           {copy === "description-code" && <PrimaryAction content={`${code} ${description}`} />}
 
           <ActionPanel.Section>
-            <Action.CopyToClipboard content={emoji} title="Copy Emoji" shortcut={{ modifiers: ["cmd"], key: "c" }} />
-            <Action.CopyToClipboard content={code} title="Copy Code" shortcut={{ modifiers: ["opt"], key: "c" }} />
+            <Action.CopyToClipboard
+              content={emoji}
+              title="Copy Emoji"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              content={code}
+              title="Copy Code"
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            />
             <Action.CopyToClipboard
               content={`${emoji} ${description}`}
               title="Copy Emoji + Description"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
             />
             <Action.CopyToClipboard
               content={`${code} ${description}`}
               title="Copy Code + Description"
-              shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+              shortcut={{ modifiers: ["ctrl", "opt"], key: "c" }}
             />
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action.Paste content={emoji} title="Paste Emoji" shortcut={{ modifiers: ["cmd"], key: "p" }} />
-            <Action.Paste content={code} title="Paste Code" shortcut={{ modifiers: ["opt"], key: "p" }} />
+            <Action.Paste content={emoji} title="Paste Emoji" shortcut={{ modifiers: ["cmd", "shift"], key: "p" }} />
+            <Action.Paste content={code} title="Paste Code" shortcut={{ modifiers: ["cmd", "opt"], key: "p" }} />
             <Action.Paste
               content={`${emoji} ${description}`}
               title="Paste Emoji + Description"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
             />
             <Action.Paste
               content={`${code} ${description}`}
               title="Paste Code + Description"
-              shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
+              shortcut={{ modifiers: ["ctrl", "opt"], key: "p" }}
             />
           </ActionPanel.Section>
         </ActionPanel>

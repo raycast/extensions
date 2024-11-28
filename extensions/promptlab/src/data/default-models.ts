@@ -1,6 +1,9 @@
 import { Color, Icon } from "@raycast/api";
-import { Model } from "../utils/types";
+import { Model } from "../lib/models/types";
 
+/**
+ * Default models included with the extension.
+ */
 export const defaultModels: { [key: string]: Model } = {
   "--model-GPT-3.5-Turbo via Raycast AI": {
     name: "GPT-3.5-Turbo via Raycast AI",
@@ -20,8 +23,8 @@ export const defaultModels: { [key: string]: Model } = {
     isDefault: false,
     temperature: "1.0",
   },
-  "--model-Text-Davinci-003 Via Raycast AI": {
-    name: "Text-Davinci-003 Via Raycast AI",
+  "--model-GPT-3.5-Turbo-Instruct Via Raycast AI": {
+    name: "GPT-3.5-Turbo-Instruct Via Raycast AI",
     description:
       "Can do any language task with better quality, longer output, and consistent instruction-following than the curie, babbage, or ada models.",
     endpoint: "Raycast AI",
@@ -62,7 +65,7 @@ export const defaultModels: { [key: string]: Model } = {
   "--model-GPT-3.5-Turbo Via OpenAI": {
     endpoint: "https://api.openai.com/v1/chat/completions",
     apiKey: "",
-    inputSchema: '{ "model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "{prompt}"}] }',
+    inputSchema: '{ "model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "{prompt}"}], "stream": true }',
     iconColor: "raycast-green",
     notes: "",
     temperature: "1.0",

@@ -24,21 +24,22 @@ export default function finergifs() {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, limit, abort } = opt || {};
-      return (await api.search(term, { offset, limit, abort })).results.map(mapFinerGifsResponse);
+      const { offset = 0, limit } = opt || {};
+      const results = await api.search(term, { offset, limit });
+      return { results: results.results.map(mapFinerGifsResponse) };
     },
 
-    async trending(opt?: APIOpt) {
-      return [];
+    async trending() {
+      return { results: [] };
     },
 
-    async gifs(ids: string[], opt?: APIOpt) {
+    async gifs(ids: string[]) {
       if (!ids.length) {
         return [];
       }
 
-      const { abort } = opt || {};
-      return (await api.gifs(ids, { abort })).results.map(mapFinerGifsResponse);
+      const results = await api.gifs(ids);
+      return results.results.map(mapFinerGifsResponse);
     },
   };
 }
@@ -64,14 +65,14 @@ export class FinerGifsClubAPI {
     return (await resp.json()) as FinerGifsClubResults;
   }
 
-  async gifs(ids: string[], options: { limit?: number; abort?: AbortController }) {
+  async gifs(ids: string[]) {
     const reqUrl = new URL("/search", API_BASE_URL);
     reqUrl.searchParams.set("q", ids.join("|"));
     reqUrl.searchParams.set("q.parser", "simple");
     reqUrl.searchParams.set("q.options", JSON.stringify({ fields: ["fileid"] }));
-    reqUrl.searchParams.set("size", options?.limit?.toString() ?? "10");
+    reqUrl.searchParams.set("size", "10");
 
-    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    const resp = await fetch(reqUrl.toString());
     if (!resp.ok) {
       throw new Error(resp.statusText);
     }
@@ -86,10 +87,14 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   const [, season, episode] = finerGifsResp.fields.fileid.match(EPISODE_NUM_REGEX) || new Array(2);
   const epInt = parseInt(season, 10);
 
+  const slug = slugify(finerGifsResp.fields.text);
+
   return <IGif>{
     id: finerGifsResp.fields.fileid,
     title: finerGifsResp.fields.text,
-    slug: slugify(finerGifsResp.fields.text),
+    slug,
+    download_url: gifUrl.toString(),
+    download_name: `${slug}.gif`,
     preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
     metadata:

@@ -15,9 +15,9 @@ const products: { id: DropdownOptions; title: string }[] = [
 const ProductDropDown = ({ onChange }: ProductDropDownProps) => {
   return (
     <List.Dropdown
-      tooltip="Search Filter"
-      onChange={onChange}
       defaultValue="preferences"
+      onChange={onChange}
+      tooltip="Search Filter"
     >
       <List.Dropdown.Section title="Search Filter">
         {products.map(({ id, title }) => (

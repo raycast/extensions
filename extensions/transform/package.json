@@ -9,7 +9,8 @@
     "Developer Tools"
   ],
   "contributors": [
-    "robertrosman"
+    "robertrosman",
+    "Francois"
   ],
   "license": "MIT",
   "commands": [
@@ -140,6 +141,13 @@
       "mode": "view"
     },
     {
+      "name": "json-to-string",
+      "title": "JSON to String",
+      "subtitle": "Transform",
+      "description": "Transform JSON to String",
+      "mode": "view"
+    },
+    {
       "name": "markdown-to-html",
       "title": "Markdown to HTML",
       "subtitle": "Transform",
@@ -172,6 +180,13 @@
       "title": "String to Regex",
       "subtitle": "Transform",
       "description": "Transform String to Regex",
+      "mode": "view"
+    },
+    {
+      "name": "string-to-json",
+      "title": "String to JSON",
+      "subtitle": "Transform",
+      "description": "Transform String to JSON",
       "mode": "view"
     },
     {

@@ -1,9 +1,10 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
 import { openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../types/interfaces";
 import { useCachedState } from "@raycast/utils";
-import { EDGE_PROFILE_KEY, DEFAULT_EDGE_PROFILE_ID } from "../constants";
+import { DEFAULT_PROFILE_ID } from "../constants";
+import { getCurrentProfileCacheKey } from "../utils/appUtils";
 
 export class EdgeActions {
   public static NewTab = NewTabActions;
@@ -13,11 +14,11 @@ export class EdgeActions {
 
 function NewTabActions({ query }: { query?: string }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
-  const [profileCurrent] = useCachedState(EDGE_PROFILE_KEY, DEFAULT_EDGE_PROFILE_ID);
+  const [profileCurrent] = useCachedState(getCurrentProfileCacheKey(), DEFAULT_PROFILE_ID);
 
   return (
     <ActionPanel title="New Tab">
-      <ActionPanel.Item
+      <Action
         onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
       />
@@ -44,16 +45,13 @@ function HistoryItemActions({
   profile: string;
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
-  const [profileCurrent] = useCachedState(EDGE_PROFILE_KEY, DEFAULT_EDGE_PROFILE_ID);
+  const [profileCurrent] = useCachedState(getCurrentProfileCacheKey(), DEFAULT_PROFILE_ID);
 
   return (
     <ActionPanel title={title}>
-      <ActionPanel.Item
-        onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
-        title={"Open"}
-      />
+      <Action onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} title={"Open"} />
       <ActionPanel.Section title={"Open in profile"}>
-        <ActionPanel.Item
+        <Action
           onAction={() =>
             openNewTab({
               url,
@@ -62,9 +60,9 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in current profile"}
+          title={"Open in Current Profile"}
         />
-        <ActionPanel.Item
+        <Action
           onAction={() =>
             openNewTab({
               url,
@@ -73,7 +71,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in original profile"}
+          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
@@ -87,5 +85,5 @@ function GoToTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }

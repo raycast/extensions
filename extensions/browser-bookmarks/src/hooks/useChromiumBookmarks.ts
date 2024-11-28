@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFile } from "fs";
+import { join } from "path";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
@@ -69,14 +70,33 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
   return folders;
 }
 
+async function getChromiumProfilesFallback(path: string) {
+  if (!existsSync(path)) return { profiles: [], defaultProfile: "" };
+
+  const profiles = readdirSync(path, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
+    .map((d) => ({ path: d.name, name: d.name }));
+
+  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  const defaultProfile = profiles.find((p) => p.path === "Default")?.path || profiles[0]?.path || "";
+
+  return { profiles, defaultProfile };
+}
+
 async function getChromiumProfiles(path: string) {
   if (!existsSync(`${path}/Local State`)) {
     return { profiles: [], defaultProfile: "" };
   }
 
   const file = await read(`${path}/Local State`, "utf-8");
-  const localState = JSON.parse(file);
+  let localState;
+  try {
+    localState = JSON.parse(file);
+  } catch (e) {
+    return getChromiumProfilesFallback(path);
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileInfoCache: Record<string, any> = localState.profile.info_cache;
 
   const profiles = Object.entries(profileInfoCache)
@@ -94,7 +114,7 @@ async function getChromiumProfiles(path: string) {
 
   const defaultProfile = localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0].path;
 
-  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  profiles.sort((a, b) => a.name?.localeCompare(b.name));
   return { profiles, defaultProfile };
 }
 
@@ -107,7 +127,7 @@ type UseChromiumBookmarksParams = {
 
 export default function useChromiumBookmarks(
   enabled: boolean,
-  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams
+  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams,
 ) {
   const [currentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
 
@@ -126,7 +146,7 @@ export default function useChromiumBookmarks(
 
       return profiles;
     },
-    [enabled, path]
+    [enabled, path],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
@@ -138,7 +158,7 @@ export default function useChromiumBookmarks(
       const file = await read(`${path}/${profile}/Bookmarks`);
       return JSON.parse(file.toString()) as BookmarksRoot;
     },
-    [currentProfile, enabled, path]
+    [currentProfile, enabled, path],
   );
 
   const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];

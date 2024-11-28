@@ -1,25 +1,33 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { ratio } from "fuzzball";
-import { disconnectDevice } from "./helpers/devices";
-import { getDevices } from "./services/devices";
+import { disconnectDevice } from "./core/devices/handlers/disconnect-device";
+import { getDevicesService } from "./core/devices/devices.service";
+import { showErrorMessage } from "./utils";
 
-export default async (props: { arguments: { nameOrMacAddress: string } }) => {
-  const { fuzzyRatio } = getPreferenceValues();
-  if (isNaN(parseFloat(fuzzyRatio))) {
-    await showToast({ style: Toast.Style.Failure, title: "Invalid fuzzy ratio. Check extension preferences." });
+export default async (props: { arguments: { nameOrMacAddress: string | undefined } }) => {
+  const { fuzzyRatio, bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
+
+  if (props.arguments.nameOrMacAddress === undefined) {
+    await showErrorMessage("Undefined value. Check extension preferences.");
     return;
   }
 
-  const devices = getDevices();
+  if (isNaN(parseFloat(fuzzyRatio))) {
+    await showErrorMessage("Invalid fuzzy ratio. Check extension preferences.");
+    return;
+  }
+
+  const devices = getDevicesService(bluetoothBackend)?.getDevices() ?? [];
+
   const device = devices.find(
     (device) =>
-      ratio(device.name, props.arguments.nameOrMacAddress) > fuzzyRatio ||
+      ratio(device.name, props.arguments.nameOrMacAddress || "") > parseInt(fuzzyRatio) ||
       device.macAddress === props.arguments.nameOrMacAddress
   );
 
-  if (device === undefined) {
-    await showToast({ style: Toast.Style.Failure, title: "Device not found." });
+  if (!device) {
+    await showErrorMessage("Device not found");
   } else {
-    disconnectDevice(device);
+    await disconnectDevice(device);
   }
 };

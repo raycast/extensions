@@ -1,8 +1,12 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Application, Color, List } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 
-export default function BookmarkListItem(props: { bookmark: Bookmark }) {
+export default function BookmarkListItem(props: {
+  bookmark: Bookmark;
+  defaultTerminalApplication: Application;
+  defaultEditorApplication: Application;
+}) {
   const bookmark: Bookmark = props.bookmark;
 
   return (
@@ -10,8 +14,6 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
       icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
-      accessoryTitle={bookmark.getBranch}
-      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -19,18 +21,25 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
             <Action.ShowInFinder path={bookmark.getPath} />
             <Action.OpenWith path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
             <Action.Open
-              title="Open in Code"
-              icon="icon-vscode.png"
+              title={`Open in ${props.defaultEditorApplication.name}`}
+              icon={{ fileIcon: props.defaultEditorApplication.path }}
               target={bookmark.getPath}
-              application="Visual Studio Code"
+              application={props.defaultEditorApplication}
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
             <Action.Open
-              title="Open in iTerm"
-              icon="icon-iterm.png"
+              title={`Open in ${props.defaultTerminalApplication.name}`}
+              icon={{ fileIcon: props.defaultTerminalApplication.path }}
               target={bookmark.getPath}
-              application="iTerm"
+              application={props.defaultTerminalApplication}
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            />
+            <Action.Open
+              title="Open in Warp"
+              icon="icon-warp.png"
+              target={bookmark.getPath}
+              application="Warp"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -47,6 +56,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: bookmark.getBranch.name,
+          icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
+        },
+      ]}
     />
   );
 }

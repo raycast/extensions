@@ -5,8 +5,12 @@
   "description": "Search Zotero Database from Raycast",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
+  "categories": [
+    "Productivity"
+  ],
   "contributors": [
-    "lazarjov"
+    "lazarjov",
+    "joshuahhh"
   ],
   "version": "1.0.0",
   "license": "MIT",
@@ -28,6 +32,15 @@
       "title": "Zotero Path",
       "description": "Path to locate zotero sqlite file",
       "placeholder": "~/Zotero/zotero.sqlite"
+    },
+    {
+      "name": "cache_period",
+      "type": "textfield",
+      "title": "Cache Period (in minutes)",
+      "required": false,
+      "default": "10",
+      "label": "Number of Minutes to Cache",
+      "description": "Minutes after which cache must be updated"
     },
     {
       "name": "use_bibtex",
@@ -162,24 +175,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
-    "citation-js": "^0.5.7",
-    "fuse.js": "^6.6.1",
-    "sql.js": "^1.6.2"
+    "@raycast/api": "^1.62.1",
+    "citation-js": "^0.6.8",
+    "fuse.js": "^6.6.2",
+    "sql.js": "^1.8.0"
   },
   "devDependencies": {
-    "@types/he": "^1.1.2",
-    "@types/node": "^16.0.17",
-    "@types/react": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.22.0",
-    "@typescript-eslint/parser": "^5.22.0",
-    "eslint": "^8.15.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.24.5",
-    "typescript": "^4.6.4"
+    "@types/he": "^1.2.0",
+    "@types/node": "^20.4.5",
+    "@types/react": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "eslint-config-prettier": "^8.9.0",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint --fix"
   }
 }

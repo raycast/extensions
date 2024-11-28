@@ -11,7 +11,7 @@ import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 
 type CompletedTaskProps = { quickLinkView: QuickLinkView };
 
@@ -76,14 +76,16 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
 
                       <Action.CopyToClipboard title="Copy Task Title" content={event.extra_data.content} />
 
-                      <CreateViewAction {...quickLinkView} />
+                      <ActionPanel.Section>
+                        <CreateViewActions {...quickLinkView} />
 
-                      <Action
-                        title="Refresh Data"
-                        icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                        onAction={mutate}
-                      />
+                        <Action
+                          title="Refresh Data"
+                          icon={Icon.ArrowClockwise}
+                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                          onAction={mutate}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />

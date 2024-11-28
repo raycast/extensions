@@ -1,13 +1,11 @@
+import { Action, ActionPanel, Form } from "@raycast/api";
 import React from "react";
 
-import { Action, ActionPanel, Form } from "@raycast/api";
+import CardDetail from "~/components/CardDetail";
+import useCreate from "~/hooks/useCreate";
+import type { ICard, ISimpleCard } from "~/utils/types";
 
-import useCreate, { SimpleCardData } from "hooks/useCreate";
-import { ICard } from "utils/types";
-
-import CardDetail from "components/CardDetail";
-
-const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
+const CreateCard = ({ draftValues }: { draftValues?: ISimpleCard }) => {
   const [markupError, setMarkupError] = React.useState<string | undefined>();
   const [createdCard, setCreatedCard] = React.useState<ICard>();
 
@@ -31,7 +29,12 @@ const CreateCard = ({ draftValues }: { draftValues?: SimpleCardData }) => {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" defaultValue={draftValues?.name} title="Name" placeholder="The name of the card..." />
+      <Form.TextField
+        id="name"
+        defaultValue={draftValues?.name}
+        title="Name"
+        placeholder="The name of the card..."
+      />
       <Form.TextArea
         id="markup"
         defaultValue={draftValues?.markup}

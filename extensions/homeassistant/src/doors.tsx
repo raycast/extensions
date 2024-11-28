@@ -1,5 +1,5 @@
-import { DoorsList } from "./components/doors";
+import { DoorsList } from "@components/door/list";
 
-export default function main(): JSX.Element {
+export default function main() {
   return <DoorsList />;
 }

@@ -31,15 +31,15 @@ export const shortenLinkWithSlug = async (domain: string, originalURL: string, s
             title: title,
           }
         : isEmpty(title)
-        ? {
-            allowDuplicates: false,
-            path: slug,
-          }
-        : {
-            allowDuplicates: false,
-            path: slug,
-            title: title,
-          };
+          ? {
+              allowDuplicates: false,
+              path: slug,
+            }
+          : {
+              allowDuplicates: false,
+              path: slug,
+              title: title,
+            };
 
       const options = {
         headers: {

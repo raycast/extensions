@@ -1,23 +1,23 @@
+import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import {
+  Action,
   ActionPanel,
   Color,
   Detail,
-  environment,
   Icon,
   List,
+  Toast,
+  environment,
   showToast,
   useNavigation,
-  Action,
-  Toast,
 } from "@raycast/api";
-import { useState } from "react";
-import { Repository } from "./types";
-import { useDebounce } from "use-debounce";
-import { useRepositories } from "./useRepositories";
-import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
-import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
-import { useRepositoryReleases } from "./useRepositoryReleases";
-import { OpenInWebIDEAction } from "./website";
+import type { Repository } from "@/types";
+import { useRepositories } from "@/hooks/useRepositories";
+import { useRepositoryReleases } from "@/hooks/useRepositoryReleases";
+import { clearVisitedRepositories, useVisitedRepositories } from "@/hooks/useVisitedRepositories";
+import { OpenInWebIDEAction } from "@/components/website";
+import { getAccessoryTitle, getIcon, getSubtitle } from "@/utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -95,7 +95,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -112,7 +112,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
-            shortcut={{ modifiers: ["cmd"], key: "w" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}

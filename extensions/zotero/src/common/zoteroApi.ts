@@ -1,7 +1,7 @@
 import { stat, readFile, writeFile, copyFile } from "fs/promises";
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import * as utils from "./utils";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import Fuse from "fuse.js";
 import initSqlJs from "sql.js";
 import path = require("path");
@@ -11,6 +11,7 @@ export interface Preferences {
   use_bibtex?: boolean;
   bibtex_path?: string;
   csl_style?: string;
+  cache_period?: string;
 }
 
 export interface RefData {
@@ -23,6 +24,7 @@ export interface RefData {
   citekey?: string;
   tags?: string[];
   attachment?: Attachment;
+  collection?: string[];
   [key: string]: any;
 }
 
@@ -66,6 +68,13 @@ WHERE itemTags.itemID = :id
 `;
 
 const BIBTEX_SQL = `
+SELECT citationkey.citationKey AS citekey
+    FROM citationkey
+WHERE citationkey.itemKey = :key
+AND citationkey.libraryID = :lib
+`;
+
+const BIBTEX_SQL_OLD = `
 SELECT citekeys.citekey AS citekey
     FROM citekeys
 WHERE citekeys.itemKey = :key
@@ -124,6 +133,20 @@ WHERE itemCreators.itemID = :id
 ORDER BY "index" ASC
 `;
 
+const ALL_COLLECTIONS_SQL = `
+SELECT  collections.collectionName AS name
+    FROM collections
+`;
+
+const COLLECTIONS_SQL = `
+SELECT  collections.collectionName AS name,
+        collections.key AS key
+    FROM collections
+    LEFT JOIN collectionItems
+        ON collections.collectionID = collectionItems.collectionID
+WHERE collectionItems.itemID = :id
+`;
+
 const cachePath = utils.cachePath("zotero.json");
 
 export function resolveHome(filepath: string): string {
@@ -137,6 +160,7 @@ async function openDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
   const new_fPath = f_path + ".raycast";
+  await copyFile(f_path, new_fPath);
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
@@ -145,8 +169,8 @@ async function openDb() {
 }
 
 async function getBibtexKey(key: string, library: string): Promise<string> {
-  const db = await openBibtexDb();
-  const st = db.prepare(BIBTEX_SQL);
+  const [db, isBBTUpdated] = await openBibtexDb();
+  const st = db.prepare(isBBTUpdated ? BIBTEX_SQL : BIBTEX_SQL_OLD);
   st.bind({ ":key": key, ":lib": library });
   st.step();
   const res = st.getAsObject();
@@ -163,12 +187,17 @@ async function getBibtexKey(key: string, library: string): Promise<string> {
 async function openBibtexDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+  let new_fPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
+  let isBBTUpdated = true;
+  if (!existsSync(new_fPath)) {
+    new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+    isBBTUpdated = false;
+  }
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(new_fPath);
-  return new SQL.Database(db);
+  return [new SQL.Database(db), isBBTUpdated];
 }
 
 async function getLatestModifyDate(): Promise<Date> {
@@ -206,6 +235,16 @@ async function getLatestModifyDate(): Promise<Date> {
 
   return latest;
 }
+
+export const getCollections = async (): Promise<string[]> => {
+  const db = await openDb();
+  const st = db.prepare(ALL_COLLECTIONS_SQL);
+  const cols = [];
+  while (st.step()) {
+    cols.push(st.getAsObject().name);
+  }
+  return cols;
+};
 
 async function getData(): Promise<RefData[]> {
   const db = await openDb();
@@ -277,6 +316,20 @@ async function getData(): Promise<RefData[]> {
       row.creators = cts;
     }
 
+    const st6 = db.prepare(COLLECTIONS_SQL);
+    st6.bind({ ":id": row.id });
+
+    const clt = [];
+    while (st6.step()) {
+      clt.push(st6.getAsObject().name);
+    }
+
+    st6.free();
+
+    if (clt.length > 0) {
+      row.collection = clt;
+    }
+
     if (preferences.use_bibtex) {
       row.citekey = await getBibtexKey(row.key, row.library);
     }
@@ -310,9 +363,6 @@ const parseQuery = (q: string) => {
 
 export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
-  const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + ".raycast";
-  await copyFile(f_path, new_fPath);
 
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
@@ -338,11 +388,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 3600000) {
-      const cacheBuffer = await readFile(cachePath);
-      const fData = JSON.parse(cacheBuffer.toString());
-      return fData.data;
-    } else {
+    if (diffTime < 60000 * Number(preferences.cache_period)) {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
@@ -355,6 +401,8 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       } else {
         throw "Invalid cache";
       }
+    } else {
+      throw "Invalid cache";
     }
   }
 
@@ -404,15 +452,15 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     keys: [
       {
         name: "title",
-        weight: 2,
+        weight: 10,
       },
       {
         name: "abstractNote",
-        weight: 1,
+        weight: 5,
       },
       {
         name: "tags",
-        weight: 5,
+        weight: 15,
       },
       {
         name: "date",
@@ -424,7 +472,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       },
       {
         name: "DOI",
-        weight: 1,
+        weight: 10,
       },
     ],
   };

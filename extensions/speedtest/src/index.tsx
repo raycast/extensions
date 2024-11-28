@@ -1,336 +1,188 @@
-import { ActionPanel, Color, Icon, List, showToast, Action, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
-import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
-import { pingToString, speedToString } from "./lib/utils";
-import * as afs from "fs/promises";
-
-function percentageToString(val: number | undefined): string | undefined {
-  if (val === undefined) {
-    return undefined;
-  }
-  const v = Math.round(val * 100);
-  if (v === 100) {
-    return undefined;
-  }
-  return `${v}%`;
-}
-
-function ClearCacheAction(): JSX.Element {
-  const handle = async () => {
-    try {
-      const d = speedtestCLIDirectory();
-      await afs.rm(d, { recursive: true });
-    } catch (error) {
-      // ignore
-    }
-  };
-  return <Action title="Clear CLI Cache" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
-}
-
-function ISPListItem(props: { url: string | undefined; name: string | undefined; summary: JSX.Element }): JSX.Element {
-  const n = props.name;
-  const url = props.url;
-  return (
-    <List.Item
-      title="Internet Service Provider"
-      icon={{ source: Icon.Globe, tintColor: Color.Green }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {n && <Action.CopyToClipboard content={n} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-          <ClearCacheAction />
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: `${n ? n : "?"}`,
-        },
-      ]}
-    />
-  );
-}
-
-function ServerListItem(props: {
-  url: string | undefined;
-  serverName: string | undefined;
-  summary: JSX.Element;
-}): JSX.Element {
-  const sn = props.serverName;
-  const url = props.url;
-  return (
-    <List.Item
-      title="Server"
-      icon={{ source: "server.png" }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {sn && <Action.CopyToClipboard content={sn} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: `${sn ? sn : "?"}`,
-        },
-      ]}
-    />
-  );
-}
-
-function PingListItem(props: {
-  url: string | undefined;
-  ping: number | undefined;
-  progress: number | undefined;
-  summary: JSX.Element;
-}): JSX.Element {
-  const p = props.ping;
-  const url = props.url;
-  return (
-    <List.Item
-      title="Ping"
-      subtitle={percentageToString(props.progress)}
-      icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {p && <Action.CopyToClipboard content={pingToString(p)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: `${pingToString(p)}`,
-        },
-      ]}
-    />
-  );
-}
-
-function DownloadListItem(props: {
-  url: string | undefined;
-  download: number | undefined;
-  progress: number | undefined;
-  summary: JSX.Element;
-}): JSX.Element {
-  const d = props.download;
-  const url = props.url;
-  return (
-    <List.Item
-      title="Download"
-      subtitle={percentageToString(props.progress)}
-      icon={{ source: "download.png", tintColor: Color.Blue }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {d && <Action.CopyToClipboard content={speedToString(d)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: `${speedToString(d)}`,
-        },
-      ]}
-    />
-  );
-}
-
-function UploadListItem(props: {
-  url: string | undefined;
-  upload: number | undefined;
-  progress: number | undefined;
-  summary: JSX.Element;
-}): JSX.Element {
-  const u = props.upload;
-  const url = props.url;
-  return (
-    <List.Item
-      title="Upload"
-      subtitle={percentageToString(props.progress)}
-      icon={{ source: "upload.png", tintColor: "#bf71ff" }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {u && <Action.CopyToClipboard content={speedToString(u)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: `${speedToString(u)}`,
-        },
-      ]}
-    />
-  );
-}
-
-function ResultListItem(props: { result: Result; isLoading: boolean; summary: JSX.Element }): JSX.Element {
-  const url = props.result?.url;
-  return (
-    <List.Item
-      title="Result Link"
-      icon={{ source: "results.png", tintColor: Color.Blue }}
-      actions={
-        <ActionPanel>
-          {props.summary}
-          {!props.isLoading && <Action.CopyToClipboard content={url ?? ""} />}
-          {!props.isLoading && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-        </ActionPanel>
-      }
-      accessories={[
-        {
-          text: props.isLoading ? "?" : `${props.result.url}`,
-        },
-      ]}
-    />
-  );
-}
-
-function CopySummaryAction(props: { result: Result }): JSX.Element {
-  const r = props.result;
-  const parts: string[] = [
-    `ISP: ${r.isp || "?"}`,
-    `Server: ${r.serverName || "?"}`,
-    `Ping: ${pingToString(r.ping)}`,
-    `Download: ${speedToString(r.download)}`,
-    `Upload: ${speedToString(r.upload)}`,
-    `Result: ${r.url || "?"}`,
-  ];
-  return <Action.CopyToClipboard title="Copy Summary to Clipboard" content={parts.join("; ")} />;
-}
+import { Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { ListBandwidthItem } from "./components/bandwidth/component";
+import { ActivitySpeedQualityBandwidth } from "./components/bandwidth/thresholds";
+import { ISPListItem } from "./components/isp";
+import { ListItemActions } from "./components/list-item-actions";
+import { PingListItem } from "./components/ping";
+import { ResultListItem } from "./components/result";
+import { ServerListItem } from "./components/server";
+import { SpeedListItem } from "./components/speed";
+import { CopySummaryAction, HideDetailsAction, RestartAction, ShowDetailsAction } from "./lib/actions";
+import { useDetailedView, useSpeedtest } from "./lib/hooks";
 
 export default function SpeedtestList() {
-  const { result, error, isLoading, resultProgress } = useSpeedtest();
-  if (error) {
+  const { result, error, isLoading, resultProgress, revalidate } = useSpeedtest();
+  const [isDetailedViewEnabled, showDetailedView, hideDetailedView] = useDetailedView();
+
+  if (error || result.error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Speedtest failed",
       message: error,
     });
   }
-  const title = isLoading ? "Speedtest running" : undefined;
+
+  const title = isLoading ? "Speedtest running" : "";
   const summaryAction = <CopySummaryAction result={result} />;
+  const restartAction = <RestartAction isLoading={isLoading} revalidate={revalidate} />;
+  const showDetailsAction = <ShowDetailsAction showDetails={showDetailedView} />;
+  const hideDetailsAction = <HideDetailsAction hideDetails={hideDetailedView} />;
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={title}>
-      <ISPListItem url={result.url} name={result.isp} summary={summaryAction} />
-      <ServerListItem url={result.url} serverName={result.serverName} summary={summaryAction} />
-      <PingListItem url={result.url} ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
-      <DownloadListItem
-        url={result.url}
-        download={result.download}
-        progress={resultProgress.download}
-        summary={summaryAction}
-      />
-      <UploadListItem
-        url={result.url}
-        upload={result.upload}
-        progress={resultProgress.upload}
-        summary={summaryAction}
-      />
-      <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} />
+    <List isLoading={isLoading} searchBarPlaceholder={title} isShowingDetail={isDetailedViewEnabled}>
+      {result.error ? (
+        <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
+      ) : (
+        <List.Section title="Speedtest by Ookla">
+          <ISPListItem isp={result.interface} name={result.isp}>
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result.interface}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </ISPListItem>
+
+          <ServerListItem server={result.server} serverName={result.server.name}>
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result.server}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </ServerListItem>
+
+          <PingListItem fullPingData={result.ping} ping={result.ping.latency}>
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result.ping}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </PingListItem>
+
+          <SpeedListItem
+            type="Download"
+            fullSpeedInfo={result.download}
+            speed={result.download.bandwidth}
+            progress={resultProgress.download}
+          >
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result.download}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </SpeedListItem>
+
+          <SpeedListItem
+            type="Upload"
+            fullSpeedInfo={result.upload}
+            speed={result.upload.bandwidth}
+            progress={resultProgress.upload}
+          >
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result.upload}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </SpeedListItem>
+
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.voiceCall}
+            title="Voice Call"
+            icon={{ source: Icon.Phone, tintColor: Color.Blue }}
+            isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
+          />
+
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.videoCall}
+            title="Video Call"
+            icon={{ source: Icon.Video, tintColor: Color.Blue }}
+            isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
+          />
+
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.stream}
+            title="Streaming"
+            icon={{ source: Icon.Livestream, tintColor: Color.Blue }}
+            isLoading={isLoading}
+            actions={
+              <ListItemActions
+                url={result.result.url}
+                sectionClipboard={{ ...result, download: result.download, upload: result.upload }}
+                summary={summaryAction}
+                isLoading={isLoading}
+                restart={restartAction}
+                isDetailedViewEnabled={isDetailedViewEnabled}
+                showViewAction={showDetailsAction}
+                hideViewAction={hideDetailsAction}
+              />
+            }
+          />
+
+          <ResultListItem speedtestResult={result} isLoading={isLoading}>
+            <ListItemActions
+              url={result.result.url}
+              sectionClipboard={result}
+              summary={summaryAction}
+              isLoading={isLoading}
+              restart={restartAction}
+              isDetailedViewEnabled={isDetailedViewEnabled}
+              showViewAction={showDetailsAction}
+              hideViewAction={hideDetailsAction}
+            />
+          </ResultListItem>
+        </List.Section>
+      )}
     </List>
   );
-}
-
-function useSpeedtest(): {
-  result: Result;
-  error: string | undefined;
-  isLoading: boolean;
-  resultProgress: ResultProgress;
-} {
-  const [result, setResult] = useState<Result>({
-    isp: undefined,
-    location: undefined,
-    serverName: undefined,
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-    url: undefined,
-  });
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [resultProgress, setResultProgress] = useState<ResultProgress>({
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-  });
-  let cancel = false;
-  useEffect(() => {
-    async function runTest() {
-      try {
-        await ensureCLI();
-        runSpeedTest(
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-            }
-          },
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-              setIsLoading(false);
-            }
-          },
-          (err: Error) => {
-            if (!cancel) {
-              setError(err.message);
-            }
-          },
-          (prog: ResultProgress) => {
-            if (!cancel) {
-              setResultProgress(prog);
-            }
-          }
-        );
-      } catch (err) {
-        if (!cancel) {
-          setError(err instanceof Error ? err.message : "unknown error");
-          setIsLoading(false);
-        }
-      }
-    }
-    runTest();
-    return () => {
-      cancel = true;
-    };
-  }, []);
-  return { result, error, isLoading, resultProgress };
 }

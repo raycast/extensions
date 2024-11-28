@@ -118,7 +118,7 @@ function formatException(lastEvent?: Event) {
 export type IssueDetailsProps = {
   issue: Issue;
   organization?: Organization;
-  mutateList?: MutatePromise<Issue[] | undefined>;
+  mutateList?: MutatePromise<Issue[]>;
 };
 
 export function IssueDetails(props: IssueDetailsProps) {

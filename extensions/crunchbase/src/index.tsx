@@ -58,80 +58,99 @@ export default function Command() {
             : searchResults?.length + ""
         }
       >
-        {searchResults?.map((searchResult) => (
-          <List.Item
-            key={searchResult.uuid}
-            title={searchResult.name}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  {searchResult.cb_url ? (
-                    <Action.OpenInBrowser title="Open Crunchbase" url={searchResult.cb_url} />
-                  ) : null}
-                  {searchResult.homepage_url ? (
-                    <Action.OpenInBrowser title="Open Website" url={searchResult.homepage_url} />
-                  ) : null}
-                  {searchResult.facebook_url ? (
-                    <Action.OpenInBrowser title="Open Facebook" url={searchResult.facebook_url} />
-                  ) : null}
-                  {searchResult.twitter_url ? (
-                    <Action.OpenInBrowser title="Open Twitter" url={searchResult.twitter_url} />
-                  ) : null}
-                  {searchResult.linkedin_url ? (
-                    <Action.OpenInBrowser title="Open Linkedin" url={searchResult.linkedin_url} />
-                  ) : null}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Toggle Details"
-                    icon={Icon.Sidebar}
-                    onAction={() => setShowingDetail(!showingDetail)}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-            detail={
-              <List.Item.Detail
-                markdown={searchResult.logo_url ? `<img src="${searchResult.logo_url}" alt="logo" height="200"/>` : ""}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title={searchResult.short_description} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Info" />
-                    <List.Item.Detail.Metadata.Label title="Type" text={searchResult.type} />
-                    <List.Item.Detail.Metadata.Label title="Role" text={searchResult.primary_role} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Location" />
-                    <List.Item.Detail.Metadata.Label title="City" text={searchResult.city} />
-                    <List.Item.Detail.Metadata.Label title="Region" text={searchResult.region} />
-                    <List.Item.Detail.Metadata.Label title="Country Code" text={searchResult.country_code} />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Social" />
+        {searchResults
+          ?.filter((searchResult) => {
+            return searchResult.uuid && searchResult.name;
+          })
+          .map((searchResult) => (
+            <List.Item
+              key={searchResult.uuid}
+              title={searchResult.name}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
                     {searchResult.cb_url ? (
-                      <List.Item.Detail.Metadata.Link title="Crunchbase" target={searchResult.cb_url} text="Link" />
-                    ) : null}
-                    {searchResult.facebook_url ? (
-                      <List.Item.Detail.Metadata.Link title="Facebook" target={searchResult.facebook_url} text="Link" />
-                    ) : null}
-                    {searchResult.twitter_url ? (
-                      <List.Item.Detail.Metadata.Link title="Twitter" target={searchResult.twitter_url} text="Link" />
-                    ) : null}
-                    {searchResult.linkedin_url ? (
-                      <List.Item.Detail.Metadata.Link title="Linkedin" target={searchResult.linkedin_url} text="Link" />
+                      <Action.OpenInBrowser title="Open Crunchbase" url={searchResult.cb_url} />
                     ) : null}
                     {searchResult.homepage_url ? (
-                      <List.Item.Detail.Metadata.Link
-                        title="Website"
-                        target={searchResult.homepage_url}
-                        text={searchResult.domain}
-                      />
+                      <Action.OpenInBrowser title="Open Website" url={searchResult.homepage_url} />
                     ) : null}
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-          />
-        ))}
+                    {searchResult.facebook_url ? (
+                      <Action.OpenInBrowser title="Open Facebook" url={searchResult.facebook_url} />
+                    ) : null}
+                    {searchResult.twitter_url ? (
+                      <Action.OpenInBrowser title="Open Twitter" url={searchResult.twitter_url} />
+                    ) : null}
+                    {searchResult.linkedin_url ? (
+                      <Action.OpenInBrowser title="Open Linkedin" url={searchResult.linkedin_url} />
+                    ) : null}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Toggle Details"
+                      icon={Icon.Sidebar}
+                      onAction={() => setShowingDetail(!showingDetail)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+              detail={
+                <List.Item.Detail
+                  markdown={
+                    searchResult.logo_url ? `<img src="${searchResult.logo_url}" alt="logo" height="200"/>` : ""
+                  }
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      {searchResult.short_description ? (
+                        <>
+                          <List.Item.Detail.Metadata.Label title="Description" />
+                          <List.Item.Detail.Metadata.Label title={searchResult.short_description} />
+                          <List.Item.Detail.Metadata.Separator />
+                        </>
+                      ) : null}
+                      <List.Item.Detail.Metadata.Label title="Info" />
+                      <List.Item.Detail.Metadata.Label title="Type" text={searchResult.type || "-"} />
+                      <List.Item.Detail.Metadata.Label title="Role" text={searchResult.primary_role || "-"} />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Location" />
+                      <List.Item.Detail.Metadata.Label title="City" text={searchResult.city || "-"} />
+                      <List.Item.Detail.Metadata.Label title="Region" text={searchResult.region || "-"} />
+                      <List.Item.Detail.Metadata.Label title="Country Code" text={searchResult.country_code || "-"} />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Social" />
+                      {searchResult.cb_url ? (
+                        <List.Item.Detail.Metadata.Link title="Crunchbase" target={searchResult.cb_url} text="Link" />
+                      ) : null}
+                      {searchResult.facebook_url ? (
+                        <List.Item.Detail.Metadata.Link
+                          title="Facebook"
+                          target={searchResult.facebook_url}
+                          text="Link"
+                        />
+                      ) : null}
+                      {searchResult.twitter_url ? (
+                        <List.Item.Detail.Metadata.Link title="Twitter" target={searchResult.twitter_url} text="Link" />
+                      ) : null}
+                      {searchResult.linkedin_url ? (
+                        <List.Item.Detail.Metadata.Link
+                          title="Linkedin"
+                          target={searchResult.linkedin_url}
+                          text="Link"
+                        />
+                      ) : null}
+                      {searchResult.homepage_url ? (
+                        <List.Item.Detail.Metadata.Link
+                          title="Website"
+                          target={searchResult.homepage_url}
+                          text={searchResult.domain}
+                        />
+                      ) : null}
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );

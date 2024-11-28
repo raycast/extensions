@@ -84,8 +84,7 @@ export function AvatarGridLayout(props: {
               id={value.name}
               key={value.name}
               content={{
-                value:
-                  AVATAR_URL + "/" + value.name + "/" + encodeURI(avatarOptions.seed) + ".png" + options(avatarOptions),
+                value: AVATAR_URL + value.name + "/svg?seed=" + encodeURI(avatarOptions.seed) + options(avatarOptions),
                 tooltip: `Designer: ${value.designer}, License: ${value.license.name}`,
               }}
               title={value.name}

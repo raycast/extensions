@@ -10,6 +10,9 @@ import {
   AI,
   getPreferenceValues,
   Icon,
+  getSelectedText,
+  Clipboard,
+  Color,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useStartApp from "./hooks/useStartApp";
@@ -18,21 +21,49 @@ import useDebouncedCallback from "./hooks/useDebouncedCallback";
 import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
 import guessProject from "./service/ai/guessProject";
+import { getDefaultDate } from "./service/preference";
+import moment from "moment-timezone";
 
 interface FormValues {
   list: string;
   title: string;
   dueDate: Date | null;
   desc: string;
+  priority: string;
 }
 
 export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
-  const { autoFillEnabled } = getPreferenceValues<Preferences>();
+  const { autoFillEnabled, defaultTitle } = getPreferenceValues<Preferences>();
+  const defaultDate = useMemo(() => {
+    return getDefaultDate();
+  }, []);
 
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+  const [priority, setPriority] = useState<string>("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        switch (defaultTitle) {
+          case "selection": {
+            setTitle((await getSelectedText()) || "");
+            break;
+          }
+          case "clipboard": {
+            setTitle((await Clipboard.readText()) || "");
+            break;
+          }
+          default:
+            break;
+        }
+      } catch (error) {
+        // error
+      }
+    })();
+  }, [defaultTitle]);
 
   useEffect(() => {
     (async () => {
@@ -47,6 +78,7 @@ export default function TickTickCreate() {
   const titleRef = useRef<Form.TextField>(null);
   const descRef = useRef<Form.TextArea>(null);
   const dueDatePickerRef = useRef<Form.DatePicker>(null);
+  const priorityRef = useRef<Form.Dropdown>(null);
   const listPickerRef = useRef<Form.Dropdown>(null);
 
   const handleSubmit = useCallback(
@@ -54,12 +86,18 @@ export default function TickTickCreate() {
       if (!isInitCompleted) return;
       const result = await addTask({
         projectId: values.list,
-        // eslint-disable-next-line no-useless-escape
-        title: values.title.replace(/"/g, `\"`),
-        // eslint-disable-next-line no-useless-escape
-        description: values.desc.replace(/"/g, `\"`),
+        title: values.title.replace(/"/g, `\\"`),
+        description: values.desc.replace(/"/g, `\\"`),
         dueDate: formatToServerDate(values.dueDate),
-        isAllDay: false,
+        isAllDay: (() => {
+          if (values.dueDate) {
+            return (
+              moment(values.dueDate).toDate().getTime() - moment(values.dueDate).startOf("day").toDate().getTime() === 1
+            );
+          }
+          return false;
+        })(),
+        priority: values.priority,
       });
 
       switch (result) {
@@ -107,7 +145,7 @@ export default function TickTickCreate() {
       // Hiding the toast
       toast.hide();
     },
-    500,
+    1000,
     []
   );
 
@@ -156,7 +194,19 @@ export default function TickTickCreate() {
         })}
       </Form.Dropdown>
       <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
-      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
+      <Form.DatePicker
+        defaultValue={defaultDate}
+        ref={dueDatePickerRef}
+        id="dueDate"
+        title="Due Date"
+        type={Form.DatePicker.Type.DateTime}
+      />
+      <Form.Dropdown ref={priorityRef} id="priority" title="Priority">
+        <Form.Dropdown.Item value="" title="None" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />
+        <Form.Dropdown.Item value="1" title="Low" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
+        <Form.Dropdown.Item value="3" title="Medium" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />
+        <Form.Dropdown.Item value="5" title="High" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      </Form.Dropdown>
     </Form>
   );
 }

@@ -60,7 +60,7 @@ export class Hub {
       },
       (err) => {
         return Promise.reject(err);
-      }
+      },
     );
     this.#client.interceptors.response.use(
       (resp: AxiosResponse) => {
@@ -76,7 +76,7 @@ export class Hub {
           return Promise.reject(new Error(errMsg));
         }
         return Promise.reject(err);
-      }
+      },
     );
   }
 
@@ -196,7 +196,7 @@ export class Hub {
         meta.path = ext;
         meta.url = `https://hub.docker.com/extensions/${ext}`;
         result.push(meta);
-      })
+      }),
     );
     await Promise.all(extPros);
     return result;
@@ -209,7 +209,7 @@ export class Hub {
 
   async listAccessTokens(
     params: { page: number; page_size: number } | any,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ): Promise<ListAccessTokensResponse> {
     const resp = await this.#client.get(accessTokensURL, { params, signal });
     const res = resp.data as ListAccessTokensResponse;

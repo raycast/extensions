@@ -1,58 +1,23 @@
-import { Color, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { differenceInMinutes, isWeekend } from "date-fns";
-
-function getRemainingTime(now: Date) {
-  const { endHour } = getPreferenceValues();
-  const endOfWorkday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour);
-
-  const difference = differenceInMinutes(endOfWorkday, now, { roundingMethod: "floor" });
-  const hours = Math.floor(difference / 60);
-  const minutes = difference - hours * 60;
-
-  return { hours, minutes };
-}
-
-function getIcon(hours: number) {
-  if (hours < 1) {
-    return { source: Icon.Clock, tintColor: Color.Red };
-  } else if (hours < 2) {
-    return { source: Icon.Clock, tintColor: Color.Orange };
-  } else if (hours < 3) {
-    return { source: Icon.Clock, tintColor: Color.Yellow };
-  } else {
-    return { source: Icon.Clock };
-  }
-}
-
-function getTitle(hours: number, minutes: number) {
-  if (!minutes) {
-    return `${hours}h`;
-  } else if (!hours) {
-    return `${minutes}m`;
-  } else {
-    return `${hours}h ${minutes}m`;
-  }
-}
+import { getPreferenceValues, MenuBarExtra, openCommandPreferences, updateCommandMetadata } from "@raycast/api";
+import { isWeekend } from "date-fns";
+import { getRemainingTime, getIcon, getTitle, getRemainingPercentage, getProgressBar } from "./utils/time";
 
 export default function Command() {
   const now = new Date();
   const { hours, minutes } = getRemainingTime(now);
-  const { includeWeekends, startHour } = getPreferenceValues();
+  const { includeWeekends } = getPreferenceValues();
+  const progress = getRemainingPercentage(now);
 
-  if (hours < 0 || minutes < 0) {
-    return null;
-  }
+  updateCommandMetadata({
+    subtitle: getProgressBar((!includeWeekends && isWeekend(now)) || progress < 0 || progress > 100 ? null : progress),
+  });
 
-  if (now.getHours() < startHour) {
-    return null;
-  }
-
-  if (!includeWeekends && isWeekend(now)) {
+  if ((!includeWeekends && isWeekend(now)) || progress <= 0 || progress >= 100) {
     return null;
   }
 
   return (
-    <MenuBarExtra icon={getIcon(hours)} title={getTitle(hours, minutes)}>
+    <MenuBarExtra icon={getIcon(hours, minutes)} title={getTitle(hours, minutes)}>
       <MenuBarExtra.Item
         title="Configure Command"
         shortcut={{ modifiers: ["cmd"], key: "," }}

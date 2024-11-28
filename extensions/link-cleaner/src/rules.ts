@@ -25,6 +25,16 @@ const rules: Rule[] = [
     url: "music.163.com",
     allowParams: ["id"],
   },
+  {
+    name: "Youtube",
+    url: "youtube.com",
+    allowParams: ["v", "search_query"],
+  },
+  {
+    name: "Instagram Reel",
+    url: "instagram.com/reel",
+    allowParams: [],
+  },
 ];
 
 export { rules };

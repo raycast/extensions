@@ -1,92 +1,16 @@
-import { getPreferenceValues } from "@raycast/api";
-import urlJoin from "url-join";
+import fetch from "cross-fetch";
 import fs from "fs";
 import { pipeline } from "stream";
+import urlJoin from "url-join";
 import util from "util";
-import { resolveFilepath } from "./utils";
-import fetch from "cross-fetch";
+
+import { getPreferenceValues } from "@raycast/api";
+
+import type { ImageSearchResult, SearchImageType, SearchVideoType, VideoSearchResult } from "@/types";
+
+import { getResultsPerPage, hasSafeSearch } from "@/lib/prefs";
 
 const streamPipeline = util.promisify(pipeline);
-
-export function getDownloadFolder(): string {
-  const d = "~/Downloads";
-  const prefs = getPreferenceValues();
-  const folder = (prefs.downloadfolder as string) || d;
-  return resolveFilepath(folder);
-}
-
-export function showInFolderAfterDownload(): boolean {
-  const prefs = getPreferenceValues();
-  return (prefs.showinfinder as boolean) || true;
-}
-
-export interface Hit {
-  id: number;
-  pageURL: string;
-  type: string;
-  tags: string;
-  previewURL: string;
-  previewWidth: number;
-  previewHeight: number;
-  webformatURL: string;
-  webformatWidth: number;
-  webformatHeight: number;
-  largeImageURL: string;
-  imageWidth: number;
-  imageHeight: number;
-  imageSize: number;
-  views: number;
-  downloads: number;
-  collections: number;
-  likes: number;
-  comments: number;
-  user_id: number;
-  user: string;
-  userImageURL: string;
-}
-
-export interface ImageSearchResult {
-  total: number;
-  totalHits: number;
-  hits?: Hit[];
-}
-
-export interface Video {
-  url: string;
-  width: number;
-  height: number;
-  size: number;
-}
-
-export interface Videos {
-  large: Video;
-  medium: Video;
-  small: Video;
-  tiny: Video;
-}
-
-export interface VideoHit {
-  id: number;
-  pageURL: string;
-  type: string;
-  tags: string;
-  duration: number;
-  picture_id: string;
-  videos: Videos;
-  views: number;
-  downloads: number;
-  likes: number;
-  comments: number;
-  user_id: number;
-  user: string;
-  userImageURL: string;
-}
-
-export interface VideoSearchResult {
-  total: number;
-  totalHits: number;
-  hits: VideoHit[];
-}
 
 class PixabayClient {
   private apikey?: string;
@@ -95,6 +19,7 @@ class PixabayClient {
     this.apikey = prefs.apikey as string | undefined;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async fetch(url: string, params: URLSearchParams | undefined): Promise<any> {
     const fullUrl = urlJoin("https://pixabay.com/api", url);
 
@@ -135,40 +60,55 @@ class PixabayClient {
     if (!response.body) {
       throw new Error("Bad response body");
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await streamPipeline(response.body as any, fs.createWriteStream(params.localFilepath));
   }
 
   async searchImages(
     query: string | undefined,
-    imagetype?: string | undefined
+    opts: {
+      imagetype?: SearchImageType;
+    } = {},
   ): Promise<ImageSearchResult | undefined> {
     if (!query || query.length <= 0) {
       return;
     }
     const params = new URLSearchParams();
+    params.append("per_page", getResultsPerPage().toString());
     if (query) {
       params.append("q", query);
     }
-    if (imagetype) {
-      params.append("image_type", imagetype);
+    if (opts.imagetype) {
+      params.append("image_type", opts.imagetype);
     }
+    if (hasSafeSearch()) {
+      params.append("safesearch", "true");
+    }
+
+    console.log("searchImages", query, params.toString());
     const data = (await this.fetch("", params)) as ImageSearchResult | undefined;
     return data;
   }
 
   async searchVideos(
     query: string | undefined,
-    videotype?: string | undefined
+    opts: {
+      videotype?: SearchVideoType;
+    } = {},
   ): Promise<VideoSearchResult | undefined> {
     if (!query || query.length <= 0) {
       return;
     }
     const params = new URLSearchParams();
+    params.append("per_page", getResultsPerPage().toString());
     if (query) {
       params.append("q", query);
     }
-    if (videotype) {
-      params.append("video_type", videotype);
+    if (opts.videotype) {
+      params.append("video_type", opts.videotype);
+    }
+    if (hasSafeSearch()) {
+      params.append("safesearch", "true");
     }
     const data = (await this.fetch("videos", params)) as VideoSearchResult | undefined;
     return data;

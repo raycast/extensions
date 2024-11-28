@@ -107,10 +107,23 @@ dist
 .DS_Store
 
 # Icon/r
-Icon*
+# Icon*
 
 # vscode
 .vscode/
 
 # Webstorm config
 .idea/
+
+.VSCodeCounter
+
+
+# swiftc
+.build
+.swiftpm
+
+raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

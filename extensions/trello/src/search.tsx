@@ -1,5 +1,5 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+import { useState } from "react";
 import { returnTodos } from "./utils/fetchTodos";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { TodoListItem } from "./TrelloListItem";

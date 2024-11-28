@@ -7,7 +7,10 @@
   "author": "fedevitaledev",
   "contributors": [
     "peterdev22",
-    "danpalmer"
+    "danpalmer",
+    "itsjustxan",
+    "Shpigford",
+    "urwrstkn8mare"
   ],
   "license": "MIT",
   "keywords": [
@@ -51,6 +54,7 @@
       "title": "Toggle Shuffle",
       "subtitle": "Apple Music",
       "description": "Toggle Shuffle",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -58,6 +62,7 @@
       "title": "Reveal Track",
       "subtitle": "Apple Music",
       "description": "Reveal current track inside the Music app",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -72,6 +77,7 @@
       "title": "Play",
       "subtitle": "Apple Music",
       "description": "Play current track in Music.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -79,6 +85,7 @@
       "title": "Pause",
       "subtitle": "Apple Music",
       "description": "Pause current track in Music.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -100,13 +107,23 @@
       "title": "Currently Playing Track",
       "subtitle": "Apple Music",
       "description": "Get info about currently playing track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
-      "name": "love",
-      "title": "Love Track",
+      "name": "remove-current-playing-from-current-playlist",
+      "title": "Remove Current Track From Current Playlist",
       "subtitle": "Apple Music",
-      "description": "Love currently playing track.",
+      "description": "Remove the currently playing track from the current playlist and skip to the next track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite",
+      "title": "Favorite Track",
+      "subtitle": "Apple Music",
+      "description": "Favorite currently playing track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -114,6 +131,15 @@
       "title": "Dislike Track",
       "subtitle": "Apple Music",
       "description": "Dislike currently playing track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-skip",
+      "title": "Dislike and Skip Track",
+      "subtitle": "Apple Music",
+      "description": "Dislike and skip currently playing track.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -124,10 +150,11 @@
       "mode": "no-view"
     },
     {
-      "name": "love-and-add-to-library",
-      "title": "Love and Add to Library",
+      "name": "favorite-and-add-to-library",
+      "title": "Favorite and Add to Library",
       "subtitle": "Apple Music",
-      "description": "Love and add currently playing track to your library.",
+      "description": "Favorite and add currently playing track to your library.",
+      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
@@ -135,6 +162,7 @@
       "title": "Add to Playlist",
       "subtitle": "Apple Music",
       "description": "Add currently playing track to a playlist",
+      "disabledByDefault": true,
       "keywords": [
         "playlist"
       ],
@@ -145,6 +173,7 @@
       "title": "Start Playlist",
       "subtitle": "Apple Music",
       "description": "Start any of your playlists.",
+      "disabledByDefault": true,
       "keywords": [
         "playlist"
       ],
@@ -155,6 +184,7 @@
       "title": "Play Library Track",
       "subtitle": "Apple Music",
       "description": "Search and start a track from your library.",
+      "disabledByDefault": true,
       "keywords": [
         "track"
       ],
@@ -165,6 +195,7 @@
       "title": "Play Library Album",
       "subtitle": "Apple Music",
       "description": "Search and start an album from your library.",
+      "disabledByDefault": true,
       "keywords": [
         "album"
       ],
@@ -175,6 +206,7 @@
       "title": "Rate Track",
       "subtitle": "Apple Music",
       "description": "Rate currently playing track.",
+      "disabledByDefault": true,
       "mode": "view",
       "keywords": [
         "track",
@@ -186,6 +218,7 @@
       "title": "Set Volume",
       "subtitle": "Apple Music",
       "description": "Set Music volume",
+      "disabledByDefault": true,
       "mode": "view",
       "keywords": [
         "volume",
@@ -205,6 +238,7 @@
       "title": "Volume Up",
       "subtitle": "Apple Music",
       "description": "Increase Music volume",
+      "disabledByDefault": true,
       "mode": "no-view",
       "keywords": [
         "volume",
@@ -217,6 +251,7 @@
       "title": "Volume Down",
       "subtitle": "Apple Music",
       "description": "Decrease Music volume",
+      "disabledByDefault": true,
       "mode": "no-view",
       "keywords": [
         "volume",
@@ -226,7 +261,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.2",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
     "run-applescript": "^6.0.0",

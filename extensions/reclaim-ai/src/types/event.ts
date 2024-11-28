@@ -2,13 +2,26 @@ export enum ReclaimEventTypeEnum {
   USER = "USER",
   SYNC = "SYNC",
   HABITASSIGNMENT = "HABIT_ASSIGNMENT",
+  SMARTHABIT = "SMART_HABIT",
   ONEONONEASSIGNMENT = "ONE_ON_ONE_ASSIGNMENT",
+  SMARTMEETING = "SMART_MEETING",
   TASKASSIGNMENT = "TASK_ASSIGNMENT",
   CONFBUFFER = "CONF_BUFFER",
   TRAVELBUFFER = "TRAVEL_BUFFER",
   SCHEDULINGLINKMEETING = "SCHEDULING_LINK_MEETING",
   UNKNOWN = "UNKNOWN",
 }
+
+export enum EventResponseStatusEnum {
+  None = "None",
+  Organizer = "Organizer",
+  Accepted = "Accepted",
+  Declined = "Declined",
+  TentativelyAccepted = "TentativelyAccepted",
+  NotResponded = "NotResponded",
+}
+
+export type EventResponseStatusType = `${EventResponseStatusEnum}`;
 
 export type ReclaimEventType = `${ReclaimEventTypeEnum}`;
 
@@ -58,6 +71,7 @@ export enum RecurringAssignmentType {
 export interface AssistDetails {
   type?: AssistType;
   customHabit?: boolean;
+  smartSeries?: boolean;
   habitOrTask?: boolean;
   task?: boolean;
   conferenceBuffer?: boolean;
@@ -74,12 +88,15 @@ export interface AssistDetails {
   pinned?: boolean;
   lockState?: LockState | null;
   dailyHabitId?: number | null;
+  seriesLineageId?: number | null;
+  seriesId?: number | null;
   taskId?: number | null;
   taskIndex?: number | null;
   policyOverride?: AssistPolicyOverride | null;
   lastManualAdjustment?: string;
   recurringAssignmentType?: RecurringAssignmentType;
   eventType?: ReclaimEventType;
+  manuallyStarted?: boolean;
   assistReferenceValid?: boolean;
 }
 
@@ -127,11 +144,12 @@ export interface Event {
   published: boolean;
   reclaimEventType: string;
   reclaimManaged: boolean;
+  recurringEventId?: string;
   recurring: boolean;
   recurringException: boolean;
   recurringInstance: boolean;
   requiresTravel: boolean;
-  rsvpStatus: string;
+  rsvpStatus: EventResponseStatusType;
   scoredType: string;
   status: string;
   subType: string;
@@ -142,4 +160,19 @@ export interface Event {
   underAssistControl: boolean;
   updated: string;
   version: string;
+}
+
+export enum EventColor {
+  NONE = "NONE",
+  LAVENDER = "LAVENDER",
+  SAGE = "SAGE",
+  GRAPE = "GRAPE",
+  FLAMINGO = "FLAMINGO",
+  BANANA = "BANANA",
+  TANGERINE = "TANGERINE",
+  PEACOCK = "PEACOCK",
+  GRAPHITE = "GRAPHITE",
+  BLUEBERRY = "BLUEBERRY",
+  BASIL = "BASIL",
+  TOMATO = "TOMATO",
 }

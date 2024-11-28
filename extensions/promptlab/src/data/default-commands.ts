@@ -1262,7 +1262,7 @@ export const defaultCommands = {
     useSubjectClassification: false,
     outputKind: "detail",
     prompt:
-      "Provide a weather report based on the following forecast data for the next 7 days in {{location}}: ###{{weather}}###\n\nDiscuss how this might affect my events over the next week. Consider the purpose and type of each event. My events are: ###{{weekEvents}}###",
+      "Provide a weather report based on the following forecast data for the next 7 days in {{location}}: ###{{weekWeather}}###\n\nDiscuss how this might affect my events over the next week. Consider the purpose and type of each event. My events are: ###{{weekEvents}}###",
     icon: "cloud-sun-16",
     useSoundClassification: false,
     useRectangleDetection: false,

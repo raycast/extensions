@@ -36,7 +36,8 @@ export default function Command() {
 
         items.each((index, item) => {
           const category = $(item).find("h3 span:first")?.text()?.trim() || "";
-          const url = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const sourceUrl = $(item).find("div.content a")?.prop("href")?.trim() || "";
+          const url = new URL(sourceUrl).searchParams.get("url") || "";
           const title = $(item).find("div.title a")?.text()?.trim() || "";
           const cover = $(item).find("img[src^='https']").attr("src") || "";
           const info = $(item).find("div.info")?.text()?.trim() || "";
@@ -97,6 +98,11 @@ export default function Command() {
                   icon={Icon.AppWindowList}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   onAction={() => setShowingDetail(!showingDetail)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy as Markdown"
+                  content={`[${site.title}](${site.url})`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel>
             }

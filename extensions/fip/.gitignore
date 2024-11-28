@@ -6,3 +6,4 @@
 # misc
 .DS_Store
 .npmrc
+.idea/

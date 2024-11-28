@@ -15,31 +15,34 @@ const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: Prop
       icon={{ source: article.imageURL }}
       accessories={[{ date: new Date(article.publishedAt) }]}
       detail={
-        <List.Item.Detail
-          markdown={`<img src="${article.imageURL}" alt="image" width="350" />`}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="Title" text={article.title} />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title="Date Published"
-                text={`${new Date(article.publishedAt).toLocaleDateString()}`}
-              />
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Details" text={article.description} />
-              <List.Item.Detail.Metadata.Separator />
-            </List.Item.Detail.Metadata>
-          }
-        />
+        isShowingDetail ? (
+          <List.Item.Detail
+            markdown={`<img src="${article.imageURL}" alt="image" width="350" />`}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Title" text={article.title} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label
+                  title="Date Published"
+                  text={`${new Date(article.publishedAt).toLocaleDateString()}`}
+                />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Details" text={article.description} />
+                <List.Item.Detail.Metadata.Separator />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        ) : null
       }
       actions={
-        <ActionPanel title="NBA News Actions">
+        <ActionPanel title="News Actions">
           <Action
             title={isShowingDetail ? "Hide Article Info" : "Show Article Info"}
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => setIsShowingDetail(!isShowingDetail)}
           />
+          {/* eslint-disable-next-line @raycast/prefer-title-case */}
           <Action.OpenInBrowser url={article.url} title="View on ESPN" />
         </ActionPanel>
       }

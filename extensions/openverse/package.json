@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "name": "openverse",
   "title": "Openverse",
   "description": "Openverse is a search engine for openly-licensed media.",

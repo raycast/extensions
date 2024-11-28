@@ -114,12 +114,71 @@ export type SendEmailResponse = {
   created_at: string;
 };
 
+// Audiences
+export type Audience = {
+  object: "audience";
+  id: string;
+  name: string;
+  created_at: string;
+};
+
+export type GetAudiencesResponse = {
+  data: Audience[];
+};
+
+// Contacts
+export type Contact = {
+  obect: "contact";
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  created_at: string;
+  unsubscribed: boolean;
+};
+
+export type GetContactsResponse = {
+  data: Contact[];
+};
+
+export type CreateContactRequestForm = {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  unsubscribed: boolean;
+};
+
+export type CreateContactRequest = {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  unsubscribed: boolean;
+};
+
+export type CreateContactResponse = Contact;
+
+export type UpdateContactRequestForm = {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  unsubscribed: boolean;
+};
+
+export type UpdateContactRequest = {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  unsubscribed: boolean;
+};
+
+export type UpdateContactResponse = Contact;
+
 export type ErrorResponse = {
   statusCode: number;
   message: string;
   name: string;
 };
 
-export type APIMethod = "GET" | "POST" | "DELETE";
+export type APIMethod = "GET" | "POST" | "DELETE" | "PATCH";
 
-export type BodyRequest = CreateAPIKeyRequest | SendEmailRequest;
+export type BodyRequest = CreateAPIKeyRequest | SendEmailRequest | CreateContactRequest;

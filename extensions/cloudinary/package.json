@@ -85,35 +85,30 @@
       "description": "Your preferred folder in Cloudinary",
       "required": true,
       "default": "raycast-uploads"
-    },
-    {
-      "name": "pngpasteFullPath",
-      "title": "Pngpaste Full Path",
-      "type": "textfield",
-      "required": true,
-      "description": "Your local pngpaste path",
-      "default": "/opt/homebrew/bin/pngpaste"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.1",
-    "@raycast/utils": "^1.6.1",
-    "cloudinary": "^1.36.4",
-    "execa": "^7.1.1"
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "^1.9.1",
+    "cloudinary": "^1.40.0",
+    "file-uri-to-path": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.5.4",
+    "@types/react": "^18.2.21",
+    "eslint": "^8.47.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.2",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "husky install"
   }
 }

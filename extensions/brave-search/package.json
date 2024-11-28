@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "VishwasShashidhar",
   "contributors": [
-    "0xChain"
+    "0xChain",
+    "justiniscoding"
   ],
   "categories": [
     "Web"
@@ -29,22 +30,29 @@
       "default": true,
       "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Brave search history."
+    },
+    {
+      "name": "enableSearchForURLs",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable URL search",
+      "description": "When enabled, typing a url into the search bar will search the url. However, when disabled, typing the url in the search bar will instead open it, instead of searching for it with brave search."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
+    "@raycast/api": "^1.60.0",
     "iconv-lite": "^0.6.3",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^18.8.4",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

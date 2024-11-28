@@ -1,14 +1,18 @@
-# <img src="./assets/porkbun.png" width="20" height="20" /> Porkbun Raycast Extension
+<p align="center">
+    <img src="./assets/porkbun.png" width="200" height="200" />
+</p>
 
-This is a Raycast extension for [Porkbun](https://porkbun.com/). With this extension, you can fetch latest domain pricing and create, list, edit or delete DNS records for API-enabled domains in your account.
+# Porkbun Raycast Extension
+
+This is a Raycast extension for [Porkbun](https://porkbun.com/). With this extension, you can fetch latest domain pricing and create, list, edit or delete DNS records, URL Forwarding and Name Servers for API-enabled domains in your account.
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/porkbun)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/porkbun) OR via Raycast Store
 
 2. **Get your API Key and API Secret Key**: The first time you use the extension, you'll need to enter your Porkbun API keys:
 
-    a. `Sign in to your Porkbun Account` at this [link](https://porkbun.com/account/login)
+    a. `Sign in to your Porkbun Account` at [this link](https://porkbun.com/account/login)
 
     b. `Navigate` to [API page](https://porkbun.com/account/api)
     
@@ -35,12 +39,9 @@ This extension provides the following commands:
 - Ping
 - Retrieve DNS Record
 - Retrieve SSL Bundle
-
-## 🛠️ Installation
-
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.
+- Retrieve All Domains
+    - Get Name Servers
+        - Update Name Servers
+    - Get URL Forwarding
+        - Add URL Forwarding
+        - Delete URL Forwarding

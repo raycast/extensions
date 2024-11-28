@@ -5,9 +5,9 @@ import { clientV2, useRefresher } from "../lib/twitterapi_v2";
 
 export function AuthorTweetList(props: { authorID: string }) {
   const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
-    async (updateInline): Promise<Tweet[] | undefined> => {
+    async (): Promise<Tweet[] | undefined> => {
       return await clientV2.getTweetsFromAuthor(props.authorID);
-    }
+    },
   );
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

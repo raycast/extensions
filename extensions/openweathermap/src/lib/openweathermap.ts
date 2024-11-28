@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { getUnitSystem, UnitSystem } from "./unit";
 import { getErrorMessage } from "./utils";
+import { URLSearchParams } from "url";
 
 const endpoint = "https://api.openweathermap.org";
 
@@ -132,7 +133,7 @@ export function getDefaultQuery(): string {
 
 export async function getGeocoding(query: string): Promise<Location[]> {
   const APIKey = getAPIKey();
-  const params = new URLSearchParams({ appid: APIKey, q: query });
+  const params: URLSearchParams = new URLSearchParams({ appid: APIKey, q: query });
 
   const url = `${endpoint}/geo/1.0/direct?${params.toString()}`;
   const locations: Location[] | undefined = await fetch(url)
@@ -157,14 +158,14 @@ export function getIconURL(code: string): string {
 export async function getWeather(coords: Coordinates): Promise<Weather> {
   const APIKey = getAPIKey();
   const us = getUnitSystem();
-  const params = new URLSearchParams({
+  const params: URLSearchParams = new URLSearchParams({
     appid: APIKey,
     lat: coords.lat.toString(),
     lon: coords.lon.toString(),
     units: us === UnitSystem.Imperial ? "imperial" : "metric",
   });
 
-  const url = `${endpoint}/data/2.5/onecall?${params.toString()}`;
+  const url = `${endpoint}/data/3.0/onecall?${params.toString()}`;
   const w: Weather | undefined = await fetch(url)
     .then((d) => d.json())
     .then((d) => {

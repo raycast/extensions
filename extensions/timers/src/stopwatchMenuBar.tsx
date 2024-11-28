@@ -1,11 +1,14 @@
 import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
-import { formatTime } from "./formatUtils";
-import { Preferences } from "./types";
+import { formatTime } from "./backend/formatUtils";
+import { Preferences, Stopwatch } from "./backend/types";
+import { formatMenuBarIcon, formatMenuBarTitle } from "./backend/menuBarUtils";
+import { shortCircuitMenuBar } from "./backend/utils";
 
 export default function Command() {
-  const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW } = useStopwatches();
+  const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW, handleStopSW, handleUnpauseSW } =
+    useStopwatches();
   useEffect(() => {
     refreshSWes();
     setInterval(() => {
@@ -17,40 +20,38 @@ export default function Command() {
     refreshSWes();
   }
   const prefs = getPreferenceValues<Preferences>();
-  if (
-    (stopwatches == undefined || stopwatches.length == 0 || stopwatches.length == undefined) &&
-    prefs.showMenuBarItemWhen !== "always"
-  ) {
-    return null;
-  }
+  if (shortCircuitMenuBar<Stopwatch>(stopwatches, prefs)) return null;
 
-  const getSWMenuBarTitle = () => {
-    if (stopwatches === undefined || stopwatches?.length === 0 || stopwatches.length == undefined) {
-      return undefined;
-    } else if (prefs.showTitleInMenuBar) {
-      return `${stopwatches[0].name}: ~${formatTime(stopwatches[0].timeElapsed)}`;
-    } else {
-      return `~${formatTime(stopwatches[0].timeElapsed)}`;
-    }
+  const swTitleSuffix = (sw: Stopwatch) => {
+    return sw.lastPaused === "----" ? " elapsed" : " (paused)";
   };
 
   return (
     <MenuBarExtra
-      icon={prefs.showMenuBarItemWhen !== "never" ? Icon.Stopwatch : undefined}
+      icon={formatMenuBarIcon<Stopwatch>(stopwatches, prefs, Icon.Stopwatch)}
       isLoading={isLoading}
-      title={getSWMenuBarTitle()}
+      title={formatMenuBarTitle<Stopwatch>(stopwatches, prefs)}
     >
       <MenuBarExtra.Item title="Click running stopwatch to pause" />
       {stopwatches?.map((sw) => (
         <MenuBarExtra.Item
-          title={sw.name + ": " + formatTime(sw.timeElapsed) + " elapsed"}
+          title={sw.name + ": " + formatTime(sw.timeElapsed) + swTitleSuffix(sw)}
           key={sw.swID}
-          onAction={() => handlePauseSW(sw.swID)}
+          onAction={() => (sw.lastPaused === "----" ? handlePauseSW(sw.swID) : handleUnpauseSW(sw.swID))}
         />
       ))}
+      <MenuBarExtra.Section>
+        {stopwatches?.map((sw) => (
+          <MenuBarExtra.Item title={`Delete "${sw.name}"`} key={sw.swID} onAction={() => handleStopSW(sw)} />
+        ))}
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Start Stopwatch" onAction={() => handleStartSW()} key="startSW" />
+        <MenuBarExtra.Item
+          title="Start New Stopwatch"
+          onAction={() => handleStartSW({ launchedFromMenuBar: true })}
+          key="startSW"
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

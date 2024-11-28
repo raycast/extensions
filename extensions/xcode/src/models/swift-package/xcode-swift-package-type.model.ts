@@ -11,13 +11,21 @@ export enum XcodeSwiftPackageType {
    */
   executable = "executable",
   /**
-   * System Module
+   * Tool
    */
-  systemModule = "system-module",
+  tool = "tool",
   /**
-   * Manifest
+   * Build tool plugin
    */
-  manifest = "manifest",
+  buildToolPlugin = "build-tool-plugin",
+  /**
+   * Command tool plugin
+   */
+  commandPlugin = "command-plugin",
+  /**
+   * Macro
+   */
+  macro = "macro",
   /**
    * Empty
    */

@@ -5,6 +5,9 @@
   "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
   "icon": "keepassxc.png",
   "author": "zkytech",
+  "contributors": [
+    "Sulfyderz"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -51,21 +54,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "@types/crypto-js": "^4.1.0",
-    "run-applescript": "^6.0.0",
-    "crypto-js": "^4.1.1"
+    "@raycast/api": "^1.60.0",
+    "@types/crypto-js": "^4.1.2",
+    "crypto-js": "^4.1.1",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "~18.18.2",
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^2.8.8",
+    "react-devtools": "^4.28.0",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",

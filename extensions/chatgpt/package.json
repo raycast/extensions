@@ -10,12 +10,21 @@
     "pernielsentikaer",
     "shichongrui",
     "timolins",
-    "pomdtr",
     "cruelmoney",
     "sykuang",
     "thanhlongb",
     "k8scat",
-    "Nauxscript"
+    "Nauxscript",
+    "lin",
+    "leeonfield",
+    "husniadil",
+    "luckykong",
+    "smilemachine",
+    "iamEvan"
+  ],
+  "pastContributors": [
+    "pomdtr",
+    "Lemon"
   ],
   "categories": [
     "Productivity",
@@ -61,7 +70,66 @@
       "subtitle": "ChatGPT",
       "description": "Collection of your custom and default model",
       "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize Website",
+      "subtitle": "ChatGPT",
+      "description": "Summarize Website and YouTube video",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptTemplate",
+          "description": "Template support {{content}} tag, and it will replace with the content",
+          "type": "file",
+          "title": "Prompt template for the website",
+          "required": false
+        },
+        {
+          "name": "promptTemplate2",
+          "description": "Template support {{content}} tag, and it will replace with the video transcript",
+          "type": "file",
+          "title": "Prompt template for the YouTube",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask-selected-image",
+      "title": "Ask Selected Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "ask-clipboard-image",
+      "title": "Ask Clipboard Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "icon": "vision.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
     }
+  ],
+  "keywords": [
+    "chat",
+    "gpt",
+    "openai",
+    "vision"
   ],
   "preferences": [
     {
@@ -128,6 +196,15 @@
     },
     {
       "default": false,
+      "description": "Enable custom model names without selecting from the model API",
+      "label": "Enable custom model name",
+      "name": "isCustomModel",
+      "required": false,
+      "title": "Custom model",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "label": "Change API Endpoint",
       "name": "useApiEndpoint",
@@ -140,6 +217,24 @@
       "name": "apiEndpoint",
       "required": false,
       "title": "API Endpoint",
+      "placeholder": "https://api.openai.com/v1",
+      "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "Change the default vision model",
+      "label": "Change Vision Model",
+      "name": "useVisionModel",
+      "required": false,
+      "title": "Change Vision Model",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom Vision Model Name",
+      "name": "visionModelName",
+      "required": false,
+      "title": "Vision Model Name",
+      "placeholder": "gpt-4o",
       "type": "textfield"
     },
     {
@@ -230,17 +325,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.5.2",
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
-    "openai": "^3.2.1",
+    "cross-fetch": "^4.0.0",
+    "csv-parse": "^5.5.3",
+    "image-meta": "^0.2.0",
+    "moment": "^2.30.1",
+    "openai": "^4.40.0",
+    "proxy-agent": "^6.3.1",
+    "run-applescript": "^7.0.0",
     "say": "^0.16.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
@@ -250,6 +353,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
   }
 }

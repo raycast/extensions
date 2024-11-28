@@ -12,10 +12,13 @@
   "commands": [
     {
       "name": "show_accounts",
-      "title": "Show Accounts",
+      "title": "View Accounts",
       "subtitle": "Monzo",
       "description": "View accounts, pots, and transactions on Monzo.\n\nThis extension requires a few setup steps, read the documentation for a full walkthrough.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "show"
+      ]
     },
     {
       "name": "transfer_money",
@@ -51,7 +54,7 @@
   },
   "devDependencies": {
     "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@types/react": "^18.2.46",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

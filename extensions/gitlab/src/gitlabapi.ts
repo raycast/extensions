@@ -360,7 +360,7 @@ async function toJsonOrError(response: Response): Promise<any> {
   } else if (s == 401) {
     throw Error("Unauthorized");
   } else if (s == 403) {
-    const json = await response.json();
+    const json = (await response.json()) as any;
     let msg = "Forbidden";
     if (json.error && json.error == "insufficient_scope") {
       msg = "Insufficient API token scope";
@@ -370,7 +370,7 @@ async function toJsonOrError(response: Response): Promise<any> {
   } else if (s == 404) {
     throw Error("Not found");
   } else if (s >= 400 && s < 500) {
-    const json = await response.json();
+    const json = (await response.json()) as any;
     logAPI(json);
     const msg = json.message;
     throw Error(msg);
@@ -471,7 +471,7 @@ export class GitLab {
       } else if (s == 401) {
         throw Error("Unauthorized");
       } else if (s == 403) {
-        const json = await response.json();
+        const json = (await response.json()) as any;
         let msg = "Forbidden";
         if (json.error && json.error == "insufficient_scope") {
           msg = "Insufficient API token scope";
@@ -481,7 +481,7 @@ export class GitLab {
       } else if (s == 404) {
         throw Error("Not found");
       } else if (s >= 400 && s < 500) {
-        const json = await response.json();
+        const json = (await response.json()) as any;
         logAPI(json);
         let msg = `http status ${s}`;
         if (json.message) {
@@ -560,7 +560,7 @@ export class GitLab {
   }
 
   async getProjectMember(projectId: number): Promise<User[]> {
-    const userItems: User[] = await this.fetch(`projects/${projectId}/users`).then((users) => {
+    const userItems: User[] = await this.fetch(`projects/${projectId}/users`, {}, true).then((users) => {
       return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
@@ -640,12 +640,13 @@ export class GitLab {
     });
   }
 
-  async getProjects(args = { searchText: "", searchIn: "" }): Promise<Project[]> {
+  async getProjects(args = { searchText: "", searchIn: "", membership: "true" }): Promise<Project[]> {
     const params: { [key: string]: string } = {};
     if (args.searchText) {
       params.search = args.searchText;
       params.in = args.searchIn || "title";
     }
+    params.membership = args.membership;
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
       return projects.map((project: any) => dataToProject(project));
     });
@@ -769,6 +770,16 @@ export class GitLab {
       return user;
     });
     return user;
+  }
+
+  async getGroups(args = { searchText: "", searchIn: "" }): Promise<Group[]> {
+    const params: { [key: string]: string } = {};
+    if (args.searchText) {
+      params.search = args.searchText;
+      params.in = args.searchIn || "title";
+    }
+    const groupItems: Group[] = ((await this.fetch("groups", params)) as Group[]) || [];
+    return groupItems;
   }
 
   async getUserGroups(

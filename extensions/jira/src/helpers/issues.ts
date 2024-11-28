@@ -1,4 +1,5 @@
 import { Color } from "@raycast/api";
+import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
 import markdownToAdf from "md-to-adf";
@@ -64,9 +65,9 @@ export function getIssueListSections(issues?: Issue[]) {
     });
 }
 
-export function getIssueDescription(description: string) {
+export function getMarkdownFromHtml(description: string) {
   const nodeToMarkdown = new NodeHtmlMarkdown(
-    {},
+    { keepDataImages: true },
     // For some reasons, Jira doesn't wrap code blocks within a <code> block
     // but only within a <pre> block which is not recognized by NodeHtmlMarkdown.
     {
@@ -74,7 +75,7 @@ export function getIssueDescription(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-    }
+    },
   );
 
   return nodeToMarkdown.translate(description);
@@ -138,14 +139,14 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
     customFieldsWithValueKeys,
-    (key) => issue.schema[key].custom === CustomFieldSchema.textarea
+    (key) => issue.schema[key].custom === CustomFieldSchema.textarea,
   );
 
   const customMarkdownFields = markdownFieldsKeys.map((key) => {
     const name = issue.names[key];
     const value = issue.renderedFields[key];
 
-    return value ? `\n\n## ${name}\n\n${getIssueDescription(value)}` : null;
+    return value ? `\n\n## ${name}\n\n${getMarkdownFromHtml(value)}` : null;
   });
 
   const customMetadataFields = metadataFieldsKeys
@@ -224,10 +225,10 @@ export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFiel
     };
   }, {});
 
-  const validation = customFields.reduce((acc, { key, fieldSchema }) => {
+  const validation = customFields.reduce((acc, { key, fieldSchema, required }) => {
     return {
       ...acc,
-      [key]: getCustomFieldValidation(fieldSchema),
+      [key]: getCustomFieldValidation(fieldSchema, required),
     };
   }, {});
 
@@ -249,18 +250,25 @@ export function getCustomFieldInitialValue(fieldSchema: CustomFieldSchema) {
   }
 }
 
-export function getCustomFieldValidation(fieldSchema: CustomFieldSchema) {
-  switch (fieldSchema) {
-    case CustomFieldSchema.float:
-    case CustomFieldSchema.storyPointEstimate:
-      return (value: string) => {
+export function getCustomFieldValidation(fieldSchema: CustomFieldSchema, required: boolean) {
+  return (value: string) => {
+    if (required && !value) {
+      return FormValidation.Required;
+    }
+
+    switch (fieldSchema) {
+      case CustomFieldSchema.float:
+      case CustomFieldSchema.storyPointEstimate:
         if (value && isNaN(Number(value))) {
           return "Please enter a valid number";
         }
-      };
-    default:
-      return "";
-  }
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  };
 }
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {

@@ -22,25 +22,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
+    "@raycast/api": "^1.68.1",
     "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^3.3.2",
     "showdown": "^2.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@types/showdown": "^2.0.0",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.22",
+    "@types/react": "18.2.60",
+    "@types/showdown": "^2.0.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

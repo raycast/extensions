@@ -6,7 +6,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { capitalizeFirstLetter, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
@@ -88,9 +88,13 @@ export function TodoList(): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
-  const refreshAll = () => {
+  const refreshAll = async () => {
     refresh();
-    launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
+    }
   };
 
   return (
@@ -121,7 +125,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
   return (
     <List.Item
       id={todo.id.toString()}
-      title={todo.title}
+      title={todo.title ? todo.title : "?"}
       subtitle={subtitle}
       accessories={[
         { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },

@@ -1,16 +1,11 @@
-import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
-
 import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
+
+import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 
 export default async function main() {
   try {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating meeting...",
-    });
-
     await openMeetTabDefaultProfile();
-
+    await new Promise((r) => setTimeout(r, 500));
     const meetTab = await getMeetTab();
 
     await Clipboard.copy(meetTab);

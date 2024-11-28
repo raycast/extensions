@@ -1,85 +1,38 @@
-import { Action, ActionPanel, Icon, List, Toast, open, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import "./initSentry";
+
+import { Icon, List } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { ListItemDetailMetadataField } from "./components/ListItemDetailMetadataField";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { SchedulingLinkActionPanel } from "./components/SchedulingLinkActionPanel";
 import { useSchedulingLinks } from "./hooks/useSchedulingLinks";
 import { useUser } from "./hooks/useUser";
-import { SchedulingLink, SchedulingLinkGroup } from "./types/scheduling-link";
-import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
 import { resolveTimePolicy } from "./utils/time-policy";
 
-const SLActions = ({ link }: { link: SchedulingLink }) => {
-  const url = `https://app.reclaim.ai/m/${link.pageSlug}/${link.slug}`;
-
-  const createOneOffLink = async () => {
-    const [oneOff, error] = await axiosPromiseData<SchedulingLink>(
-      fetcher("/scheduling-link/derivative", {
-        method: "POST",
-        data: {
-          parentId: link.id,
-        },
-      })
-    );
-
-    if (!error && oneOff) {
-      open(`https://app.reclaim.ai/scheduling-links/one-off/${oneOff.id}/edit`);
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error creating one-off link. Try using the reclaim.ai web app.",
-      });
-    }
-  };
-
-  return (
-    <ActionPanel>
-      <Action.CopyToClipboard title="Copy Link to Clipboard" content={url} />
-      <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />
-      <Action.Open title="Open in Browser" target={url} />
-    </ActionPanel>
-  );
-};
-
-const ListDetailMetadataField = ({
-  title,
-  value,
-  description,
-}: {
-  title: string;
-  value: string;
-  description?: string;
-}) => (
-  <>
-    <List.Item.Detail.Metadata.Label title={title} />
-    <List.Item.Detail.Metadata.Label title={value} text={description} />
-    <List.Item.Detail.Metadata.Separator />
-  </>
-);
-
-export default function Command() {
+function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const [links, setLinks] = useState<SchedulingLink[]>([]);
-  const [groups, setGroups] = useState<SchedulingLinkGroup[]>([]);
-  const [loading, setIsLoading] = useState<boolean>(false);
+  const { schedulingLinks, schedulingLinksIsLoading, schedulingLinksGroups, schedulingLinksGroupsIsLoading } =
+    useSchedulingLinks();
 
-  const { getSchedulingLinks, getSchedulingLinksGroups } = useSchedulingLinks();
+  const isLoading = schedulingLinksIsLoading || schedulingLinksGroupsIsLoading;
+
+  const { links, groups } = useMemo(
+    () =>
+      !schedulingLinks || !schedulingLinksGroups
+        ? { links: [], groups: [] }
+        : {
+            links: schedulingLinks,
+            groups: schedulingLinksGroups,
+          },
+    [schedulingLinks, schedulingLinksGroups]
+  );
+
   const { currentUser } = useUser();
-
-  const fetchLinks = async () => {
-    setIsLoading(true);
-    const schedulingLinks = await getSchedulingLinks();
-    const schedulingGroups = await getSchedulingLinksGroups();
-    setLinks(schedulingLinks || []);
-    setGroups(schedulingGroups || []);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    void fetchLinks();
-  }, []);
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       filtering={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -114,18 +67,18 @@ export default function Command() {
 
                           return (
                             <List.Item.Detail.Metadata>
-                              <ListDetailMetadataField title="Hours:" value={hours} />
-                              <ListDetailMetadataField title="Organizers:" value={organizers} />
-                              <ListDetailMetadataField title="Duration:" value={duration} />
+                              <ListItemDetailMetadataField title="Hours:" value={hours} />
+                              <ListItemDetailMetadataField title="Organizers:" value={organizers} />
+                              <ListItemDetailMetadataField title="Duration:" value={duration} />
                               {sl.priority === "HIGH" && (
-                                <ListDetailMetadataField title="Priority:" value="High Priority" />
+                                <ListItemDetailMetadataField title="Priority:" value="High Priority" />
                               )}
                             </List.Item.Detail.Metadata>
                           );
                         })()}
                       />
                     }
-                    actions={<SLActions link={sl} />}
+                    actions={<SchedulingLinkActionPanel link={sl} />}
                   />
                 ))}
             </List.Section>
@@ -134,3 +87,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withRAIErrorBoundary(Command);

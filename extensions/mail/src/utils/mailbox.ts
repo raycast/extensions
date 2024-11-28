@@ -5,7 +5,7 @@ import { MailIcon } from "./presets";
 
 const MAILBOXES = ["inbox", "important", "starred", "drafts", "outbox", "junk", "trash", "archive"] as const;
 
-const MAILBOX_ICONS = {
+const MAILBOX_ICONS: Record<string, Image.ImageLike> = {
   inbox: MailIcon.Inbox,
   important: MailIcon.Important,
   starred: MailIcon.Starred,
@@ -89,6 +89,7 @@ const TRASH_ALIAS = [
 const ARCHIVE_ALIAS = [
   // english
   "archive",
+  "[gmail]", // gmail archive
   // chinese
   "归档",
   "存档",
@@ -129,6 +130,10 @@ export const isInbox = (mailbox: Mailbox) => {
 
 export const isImportantMailbox = (mailbox: Mailbox) => {
   return IMPORTANT_ALIAS.includes(mailbox.name.toLowerCase());
+};
+
+export const isArchiveMailbox = (mailbox: Mailbox) => {
+  return ARCHIVE_ALIAS.includes(mailbox.name.toLowerCase());
 };
 
 export const isJunkMailbox = (mailbox: Mailbox) => {

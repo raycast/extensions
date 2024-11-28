@@ -1,56 +1,23 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { Pipeline } from "./components/PipelineListItem";
 import { PipelineListSection } from "./components/PipelineListSection";
-import { Pager } from "./utils/types";
-import { useQuery } from "./utils/useQuery";
+import { getBuildkiteClient } from "./api/withBuildkiteClient";
+import { useCachedPromise } from "@raycast/utils";
+import { truthy } from "./utils/truthy";
+import View from "./components/View";
 
-interface QueryResponse {
-  organization: {
-    pipelines: Pager<Pipeline>;
-  };
-}
-
-const QUERY = `
-query SearchPipelinesQuery($org: ID!, $search: String) {
-  organization(slug: $org) {
-    pipelines(
-      first: 20,
-      archived: false,
-      order: NAME_WITH_FAVORITES_FIRST,
-      search: $search
-    ) {
-      edges {
-        node {
-          slug
-          name
-          description
-          favorite
-          url
-          builds(first: 1) {
-            edges {
-              node {
-                state
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
-export default function Pipelines() {
+function Pipelines() {
   const { org } = getPreferenceValues();
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useQuery<QueryResponse>({
-    query: QUERY,
-    errorMessage: "Could not load pipelines",
-    variables: { org, search },
-  });
-
-  const pipelines = data?.organization.pipelines.edges ?? [];
+  const buildkite = getBuildkiteClient();
+  const { data, isLoading } = useCachedPromise(
+    async (org: string, search: string) => {
+      const result = await buildkite.searchPipelines({ org, search });
+      return result.organization?.pipelines?.edges?.map((edge) => edge?.node).filter(truthy);
+    },
+    [org, search],
+    { keepPreviousData: true },
+  );
 
   return (
     <List
@@ -59,8 +26,16 @@ export default function Pipelines() {
       onSearchTextChange={(search) => setSearch(search)}
       throttle
     >
-      <PipelineListSection title="Favorites" pipelines={pipelines.filter(({ node }) => node.favorite)} />
-      <PipelineListSection title="All pipelines" pipelines={pipelines.filter(({ node }) => !node.favorite)} />
+      <PipelineListSection title="Favorites" pipelines={data?.filter((node) => node.favorite) ?? []} />
+      <PipelineListSection title="All pipelines" pipelines={data?.filter((node) => !node.favorite) ?? []} />
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Pipelines />
+    </View>
   );
 }

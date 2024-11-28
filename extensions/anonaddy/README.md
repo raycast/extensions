@@ -1,3 +1,3 @@
-# AnonAddy
+# Addy
 
-Generate and manage your AnonAddy aliases from your keyboard.
+Generate and manage your Addy aliases from your keyboard.

@@ -54,8 +54,8 @@ function DetailsScreen({ itemName, notes }: { itemName: string; notes: string })
 
 function getNotesDetailsMarkdown(itemName: string, notes: string) {
   return `# 📄 ${itemName}
-<br></br>
-  \`\`\`
+&nbsp;
+\`\`\`
 ${notes}
 \`\`\`
 `;

@@ -36,10 +36,8 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
 
   const { isLoading, data } = useFetch<{
     builds: Build[];
-    // TODO: why can't I `{ headers: FetchHeaders }` here?
   }>(url, {
-    // @ts-expect-error Type 'null' is not assignable to type 'string'.
-    headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
+    headers: FetchHeaders,
   });
 
   const mostRecentBuild = data?.builds?.[0];

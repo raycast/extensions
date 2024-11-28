@@ -9,7 +9,7 @@ export default function RunProfileScript() {
   const { configFile } = configs;
 
   const profileOptions = Object.entries(configFile)
-    .map(([name, profile]) => ({ ...profile, name } as Record<string, string>))
+    .map(([name, profile]) => ({ ...profile, name }) as Record<string, string>)
     .map((profile, _, self) => {
       const profileToExtend = profile.source_profile ?? profile.include_profile;
       const sourceProfile = profileToExtend ? self.find((p) => p.name === profileToExtend) : undefined;
@@ -41,11 +41,11 @@ function Profile({ profile }: { profile: Record<string, string | undefined> }) {
           <Action
             title="Run Script"
             onAction={async () => {
-              const { script } = getPreferenceValues();
+              const { script } = getPreferenceValues<Preferences.RunProfileScript>();
               const regex = /<profile>/i;
 
               if (script) {
-                const scriptToExecute = script.replace(regex, profile.name);
+                const scriptToExecute = script.replace(regex, profile.name || "");
                 await promisify(exec)(scriptToExecute);
 
                 showToast(Toast.Style.Success, "Script executed successfully");

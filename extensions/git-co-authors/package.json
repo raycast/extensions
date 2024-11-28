@@ -6,7 +6,8 @@
   "icon": "extension_icon.png",
   "author": "nickradford",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "mateusjunges"
   ],
   "categories": [
     "Developer Tools",

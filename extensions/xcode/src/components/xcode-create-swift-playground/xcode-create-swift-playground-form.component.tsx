@@ -10,7 +10,7 @@ import { useState } from "react";
 /**
  * Xcode create Swift Playground Form
  */
-export function XcodeCreateSwiftPlaygroundForm(): JSX.Element {
+export function XcodeCreateSwiftPlaygroundForm() {
   const navigation = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [locationError, setLocationError] = useState<string | undefined>();

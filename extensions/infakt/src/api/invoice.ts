@@ -1,13 +1,14 @@
 import fetch from "node-fetch";
+
+import { ApiBaseUrl, ApiHeaders, ApiUrls } from "@/api/helpers";
 import {
   CreateInvoicePayload,
   InvoiceObject,
   SendViaMailPayload,
   SetAsPaidInvoicePayload,
   UpdateInvoicePayload,
-} from "../types/invoice";
-import { ApiErrorResponse } from "../types/utils";
-import { ApiBaseUrl, ApiHeaders, ApiUrls } from "./helpers";
+} from "@/types/invoice";
+import { ApiErrorResponse } from "@/types/utils";
 
 export const ApiInvoice = {
   async create(values: CreateInvoicePayload) {
@@ -41,7 +42,7 @@ export const ApiInvoice = {
     invoiceId: number,
     options: SendViaMailPayload = {
       print_type: "original",
-    }
+    },
   ) {
     return fetch(`${ApiBaseUrl}/invoices/${invoiceId}/deliver_via_email.json`, {
       method: "POST",

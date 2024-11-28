@@ -1,5 +1,14 @@
 # Social Network Trends Changelog
 
+## [Show Trend on Menubar Title] - 2024-06-27
+
+- Show the first trend on the menu bar title
+- Data loading performance optimisation
+
+## [Minor Updates] - 2023-10-04
+
+- Some minor updates to stay consistent with Raycast's latest version
+
 ## [More Trends] - 2023-05-22
 
 - Add more hotspot options for social platforms

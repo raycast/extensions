@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -25,13 +25,15 @@ import { getTeamIcon } from "../helpers/teams";
 import useIssueDetail from "../hooks/useIssueDetail";
 import { MutatePromise } from "@raycast/utils";
 import { CreateIssueValues } from "./CreateIssueForm";
+import useMilestones from "../hooks/useMilestones";
+import { getMilestoneIcon } from "../helpers/milestones";
+import useUsers from "../hooks/useUsers";
 
 type EditIssueFormProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
@@ -40,8 +42,12 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(props.issue);
 
-  const { teams, isLoadingTeams } = useTeams();
+  const [teamQuery, setTeamQuery] = useState<string>("");
+  const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
   const hasMoreThanOneTeam = teams && teams.length > 1;
+
+  const [userQuery, setUserQuery] = useState<string>("");
+  const { users, supportsUserTypeahead, isLoadingUsers } = useUsers(userQuery);
 
   const { handleSubmit, itemProps, values, setValue } = useForm<CreateIssueValues>({
     async onSubmit(values) {
@@ -59,6 +65,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
           ...(values.cycleId ? { cycleId: values.cycleId } : {}),
           ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.milestoneId ? { projectMilestoneId: values.milestoneId } : {}),
           ...(values.parentId ? { parentId: values.parentId } : {}),
           priority: parseInt(values.priority),
         };
@@ -105,6 +112,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       dueDate: issue.dueDate ? new Date(issue.dueDate) : null,
       cycleId: props.issue.cycle?.id,
       projectId: props.issue.project?.id,
+      milestoneId: props.issue.projectMilestone?.id,
       parentId: props.issue.parent?.id,
     },
   });
@@ -116,11 +124,13 @@ export default function EditIssueForm(props: EditIssueFormProps) {
     setValue("dueDate", issue.dueDate ? new Date(issue.dueDate) : null);
   }, [issue]);
 
-  const { states } = useStates(values.teamId);
-  const { labels } = useLabels(values.teamId);
-  const { cycles } = useCycles(values.teamId);
-  const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(values.teamId);
+  const execute = !!values.teamId && values.teamId.trim().length > 0;
+  const { states } = useStates(values.teamId, { execute });
+  const { labels } = useLabels(values.teamId, { execute });
+  const { cycles } = useCycles(values.teamId, { execute });
+  const { issues } = useIssues(getLastCreatedIssues, [], { execute });
+  const { projects } = useProjects(values.teamId, { execute });
+  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -136,10 +146,10 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
-  const hasUsers = props.users && props.users.length > 0;
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
+  const hasMilestones = milestones && milestones.length > 0;
   const hasIssues = issues && issues.length > 0;
 
   return (
@@ -149,18 +159,28 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           <Action.SubmitForm onSubmit={handleSubmit} title="Edit Issue" />
         </ActionPanel>
       }
-      isLoading={isLoadingTeams || isLoadingIssue}
+      isLoading={isLoadingTeams || isLoadingIssue || isLoadingUsers}
     >
-      {hasMoreThanOneTeam ? (
+      {(supportsTeamTypeahead || hasMoreThanOneTeam) && (
         <>
-          <Form.Dropdown title="Team" {...itemProps.teamId}>
-            {teams.map((team) => {
-              return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
+          <Form.Dropdown
+            title="Team"
+            {...itemProps.teamId}
+            {...(supportsTeamTypeahead && {
+              onSearchTextChange: setTeamQuery,
+              isLoading: isLoadingTeams,
+              throttle: true,
+            })}
+          >
+            {teams?.map((team) => {
+              return (
+                <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team, org)} />
+              );
             })}
           </Form.Dropdown>
           <Form.Separator />
         </>
-      ) : null}
+      )}
 
       <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
 
@@ -195,15 +215,17 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      {hasUsers ? (
-        <Form.Dropdown title="Assignee" {...itemProps.assigneeId}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown
+        title="Assignee"
+        {...itemProps.assigneeId}
+        {...(supportsUserTypeahead && { onSearchTextChange: setUserQuery, isLoading: isLoadingUsers, throttle: true })}
+      >
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {props.users?.map((user) => {
-            return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
-          })}
-        </Form.Dropdown>
-      ) : null}
+        {users?.map((user) => {
+          return <Form.Dropdown.Item title={user.name} value={user.id} key={user.id} icon={getUserIcon(user)} />;
+        })}
+      </Form.Dropdown>
 
       <Form.TagPicker title="Labels" {...itemProps.labelIds} placeholder="Add label">
         {hasLabels
@@ -269,6 +291,23 @@ export default function EditIssueForm(props: EditIssueFormProps) {
                 value={project.id}
                 key={project.id}
                 icon={getProjectIcon(project)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+
+      {hasMilestones ? (
+        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
+          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
+
+          {milestones.map((milestone) => {
+            return (
+              <Form.Dropdown.Item
+                title={`${milestone.name}  (${milestone.targetDate || "No Target Date"})`}
+                value={milestone.id}
+                key={milestone.id}
+                icon={getMilestoneIcon(milestone)}
               />
             );
           })}

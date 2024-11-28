@@ -1,4 +1,4 @@
-import { Currency } from "./utils";
+import { Currency } from "@/types/utils";
 
 export type BankAccountObject = {
   id: number;

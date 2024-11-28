@@ -12,7 +12,7 @@ export function XcodeCodeSnippetListItem(props: {
   codeSnippet: XcodeCodeSnippet;
   onSave: () => void;
   onDelete: () => void;
-}): JSX.Element {
+}) {
   const codeSnippetFilePath = XcodeCodeSnippetService.codeSnippetFilePath(props.codeSnippet);
   return (
     <List.Item

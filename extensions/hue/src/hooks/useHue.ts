@@ -21,7 +21,7 @@ export function useHue() {
     setGroupedLights,
     setRooms,
     setZones,
-    setScenes
+    setScenes,
   );
 
   useEffect(() => {

@@ -1,9 +1,10 @@
 import { Icon, Image } from "@raycast/api";
-import type { Option, StatusState } from "../types/fieldTemplate";
-import { UserObject } from "../types/user";
 
-export function getIconByStatusState(statusId: string | undefined, statuses: Option[] | undefined) {
-  const status: StatusState = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";
+import type { Label } from "@/types/fieldTemplate";
+import { UserObject } from "@/types/user";
+
+export function getIconByStatusState(statusId: string | undefined, statuses: Label[] | undefined) {
+  const status = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";
 
   switch (status) {
     case "default":
@@ -21,7 +22,7 @@ export function getIconByStatusState(statusId: string | undefined, statuses: Opt
   }
 }
 
-export function getStatusById(status: string | undefined, statuses: Option[] | undefined) {
+export function getStatusById(status: string | undefined, statuses: Label[] | undefined) {
   return statuses?.find((item) => item.id === status);
 }
 

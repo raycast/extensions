@@ -5,13 +5,16 @@ import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./ser
 import useStartApp from "./hooks/useStartApp";
 import useSearchTasks from "./hooks/useSearchTasks";
 import TaskItem from "./components/taskItem";
+import useRefreshList from "./hooks/useRefreshList";
 
 const TickTickNext7Days: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sections, setSections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();
+  const { refreshPoint, refresh } = useRefreshList();
 
   useEffect(() => {
+    console.log("refreshPoint", refreshPoint);
     const getTasks = async () => {
       const tasks = await getNext7Days();
       setSections(tasks);
@@ -20,7 +23,7 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
     if (isInitCompleted) {
       getTasks();
     }
-  }, [isInitCompleted]);
+  }, [isInitCompleted, refreshPoint]);
 
   const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
@@ -51,9 +54,15 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              dueDate={task.dueDate}
+              startDate={task.startDate}
+              isFloating={task.isFloating}
+              isAllDay={task.isAllDay}
+              timeZone={task.timeZone}
               tags={task.tags}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
               copyContent={getTaskCopyContent(task)}
+              refresh={refresh}
             />
           ))
         : sections?.map((section) => {
@@ -67,9 +76,15 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    dueDate={task.dueDate}
+                    startDate={task.startDate}
+                    isFloating={task.isFloating}
+                    isAllDay={task.isAllDay}
+                    timeZone={task.timeZone}
                     tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
                     copyContent={getTaskCopyContent(task)}
+                    refresh={refresh}
                   />
                 ))}
               </List.Section>

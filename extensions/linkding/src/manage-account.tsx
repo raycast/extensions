@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Form, List, useNavigation } from "@raycast/api";
-import { LinkdingAccountMap, LinkdingForm } from "./types/linkding-types";
+import { LinkdingAccountForm, LinkdingAccountMap } from "./types/linkding-types";
 import React, { useEffect, useState } from "react";
 import { getPersistedLinkdingAccounts, setPersistedLinkdingAccounts } from "./service/user-account-service";
+import { validateUrl } from "./util/bookmark-util";
+import { LinkdingShortcut } from "./types/linkding-shortcuts";
 
 export default function ManageAccounts() {
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
@@ -25,7 +27,7 @@ export default function ManageAccounts() {
     updateLinkdingAccountMap(filteredMapEntries);
   }
 
-  function createUpdateAccount(account: LinkdingForm): void {
+  function createUpdateAccount(account: LinkdingAccountForm): void {
     const { name, ...linkdingServer } = account;
     if (name) {
       const accounts = { ...linkdingAccountMap, [name]: { ...linkdingServer } };
@@ -38,7 +40,7 @@ export default function ManageAccounts() {
     setPersistedLinkdingAccounts(linkdingMap);
   }
 
-  function showCreateEditAccount(formValue?: LinkdingForm) {
+  function showCreateEditAccount(formValue?: LinkdingAccountForm) {
     push(
       <CreateEditAccount
         initialValue={formValue}
@@ -76,7 +78,11 @@ export default function ManageAccounts() {
                 <ActionPanel title="Manage Accounts">
                   <Action title="Create Account" onAction={() => showCreateEditAccount()} />
                   <Action title="Edit Account" onAction={() => showCreateEditAccount({ name, ...linkdingAccount })} />
-                  <Action title="Delete Account" onAction={() => deleteAccount(name)} />
+                  <Action
+                    title="Delete Account"
+                    shortcut={LinkdingShortcut.DELETE_SHORTCUT}
+                    onAction={() => deleteAccount(name)}
+                  />
                 </ActionPanel>
               }
             />
@@ -92,8 +98,8 @@ function CreateEditAccount({
   onSubmit,
   linkdingAccountMap,
 }: {
-  initialValue?: LinkdingForm;
-  onSubmit: (formValue: LinkdingForm) => void;
+  initialValue?: LinkdingAccountForm;
+  onSubmit: (formValue: LinkdingAccountForm) => void;
   linkdingAccountMap: LinkdingAccountMap;
 }) {
   const { pop } = useNavigation();
@@ -102,7 +108,7 @@ function CreateEditAccount({
   const [serverUrlError, setServerUrlError] = useState<string | undefined>();
   const [apiKeyError, setApiKeyError] = useState<string | undefined>();
 
-  function submitForm(formValues: LinkdingForm): void {
+  function submitForm(formValues: LinkdingAccountForm): void {
     onSubmit({
       name: formValues.name?.trim() ?? initialValue?.name,
       apiKey: formValues.apiKey.trim(),
@@ -128,8 +134,8 @@ function CreateEditAccount({
 
   function validateServerUrl(value?: string) {
     if (value) {
-      if (!value.includes("http")) {
-        setServerUrlError("Server URL must start with 'http/s'");
+      if (!validateUrl(value)) {
+        setServerUrlError("Server URL must be a valide url");
       }
     } else {
       setServerUrlError("Server URL is required");
@@ -157,7 +163,7 @@ function CreateEditAccount({
         <ActionPanel title="Manage Accounts">
           <Action.SubmitForm
             title={initialValue ? "Edit Account" : "Create Account"}
-            onSubmit={(values: LinkdingForm) => submitForm(values)}
+            onSubmit={(values: LinkdingAccountForm) => submitForm(values)}
           />
         </ActionPanel>
       }

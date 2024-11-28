@@ -5,6 +5,9 @@
   "description": "search and connect databases in Sequel Ace",
   "icon": "icon.png",
   "author": "nagauta",
+  "contributors": [
+    "macbookandrew"
+  ],
   "categories": [
     "Productivity",
     "Data"
