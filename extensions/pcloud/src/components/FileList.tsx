@@ -50,11 +50,7 @@ function FileListItem(props: { file: IFile; pcloudBasePath: string }) {
               target={file.path.replace(file.path.substring(file.path.lastIndexOf("/")), "")}
             />
             <Action.CopyToClipboard title={"Copy Path to Clipboard"} content={file.path} />
-            <Action
-              title={"Open Extension Preferences"}
-              onAction={openExtensionPreferences}
-              icon={Icon.Gear}
-            />
+            <Action title={"Open Extension Preferences"} onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel.Section>
         </ActionPanel>
       }
