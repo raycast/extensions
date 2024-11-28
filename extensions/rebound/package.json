@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "rebound",
   "title": "Rebound",
   "description": "A simple HTTP request manager",

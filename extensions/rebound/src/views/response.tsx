@@ -4,7 +4,7 @@ import { HeadersDetails } from "../components/headersDetails";
 import { HttpStatusDetails } from "../components/httpStatusDetails";
 import { RequestDetails } from "../components/requestDetails";
 import { Rebound, ReboundResponse } from "../types/rebound";
-import { isJson } from "../utils/storage";
+import { getRenderer } from "../utils/response";
 
 export type ResponseViewProps = {
   rebound: Rebound;
@@ -14,13 +14,11 @@ export type ResponseViewProps = {
 export function ResponseView(props: ResponseViewProps) {
   const { rebound, response } = props;
 
-  const body = isJson(response.body)
-    ? `\`\`\`json\n${JSON.stringify(JSON.parse(response.body), null, 2)}\n\`\`\``
-    : response.body;
+  const renderer = getRenderer(response.headers["content-type"] || "");
 
   const markdown = `
 # Response
-${body}
+${renderer(rebound, response)}
 `;
 
   return (
