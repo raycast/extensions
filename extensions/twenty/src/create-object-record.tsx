@@ -5,6 +5,7 @@ import twenty from "./services/TwentySDK";
 import { ObjectIcons } from "./enum/icons";
 import { OpenCreateObjectRecordForm } from "./pages";
 import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 
 export default function CreateObjectRecord() {
   const {
@@ -21,6 +22,7 @@ export default function CreateObjectRecord() {
     return activeDataModels;
   });
 
+  const [isOpenView, setIsOpenView] = useState(false);
   const { push } = useNavigation();
 
   if (error) {
@@ -41,23 +43,29 @@ export default function CreateObjectRecord() {
               title={labelPlural}
               subtitle={description ?? ""}
               actions={
-                <ActionPanel>
-                  <Action
-                    title="Create Record"
-                    icon={Icon.List}
-                    onAction={async () => {
-                      const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                      if (typeof objectRecordMetadata === "string") {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: objectRecordMetadata,
-                        });
-                      } else {
-                        push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
-                      }
-                    }}
-                  />
-                </ActionPanel>
+                !isOpenView ? (
+                  <ActionPanel>
+                    <Action
+                      title="Create Record"
+                      icon={Icon.List}
+                      onAction={async () => {
+                        const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
+                        if (typeof objectRecordMetadata === "string") {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: objectRecordMetadata,
+                          });
+                        } else {
+                          setIsOpenView(true);
+                          push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                          setIsOpenView(false);
+                        }
+                      }}
+                    />
+                  </ActionPanel>
+                ) : (
+                  <></>
+                )
               }
               icon={icon ? (ObjectIcons[icon] ?? Icon.BulletPoints) : Icon.BulletPoints}
               key={randomUUID().toString()}
@@ -75,23 +83,29 @@ export default function CreateObjectRecord() {
               subtitle={description ?? ""}
               icon={Icon.BulletPoints}
               actions={
-                <ActionPanel>
-                  <Action
-                    title="Create Record"
-                    icon={Icon.List}
-                    onAction={async () => {
-                      const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                      if (typeof objectRecordMetadata === "string") {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: objectRecordMetadata,
-                        });
-                      } else {
-                        push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
-                      }
-                    }}
-                  />
-                </ActionPanel>
+                !isOpenView ? (
+                  <ActionPanel>
+                    <Action
+                      title="Create Record"
+                      icon={Icon.List}
+                      onAction={async () => {
+                        const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
+                        if (typeof objectRecordMetadata === "string") {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: objectRecordMetadata,
+                          });
+                        } else {
+                          setIsOpenView(true);
+                          push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                          setIsOpenView(false);
+                        }
+                      }}
+                    />
+                  </ActionPanel>
+                ) : (
+                  <></>
+                )
               }
               key={randomUUID().toString()}
             />
