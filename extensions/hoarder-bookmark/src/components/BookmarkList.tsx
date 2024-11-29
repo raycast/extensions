@@ -9,6 +9,7 @@ import { BookmarkItem } from "./BookmarkItem";
 
 interface BookmarkListProps {
   bookmarks: Bookmark[] | undefined;
+  hasMore?: boolean;
   isLoading: boolean;
   error?: Error;
   onRefresh?: () => void;
@@ -17,6 +18,7 @@ interface BookmarkListProps {
   emptyViewDescription?: string;
   filterFn?: (bookmark: Bookmark) => boolean;
   onSearch?: (text: string) => void;
+  loadMore?: () => void;
 }
 
 function SearchBookmarkList({ searchText }: { searchText: string }) {
@@ -25,6 +27,7 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
   return (
     <BookmarkList
       bookmarks={bookmarks}
+      hasMore={false}
       isLoading={isLoadingBookmarks}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
@@ -36,12 +39,14 @@ function SearchBookmarkList({ searchText }: { searchText: string }) {
 
 export function BookmarkList({
   bookmarks,
+  hasMore,
   isLoading,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
   emptyViewDescription,
   onSearch,
+  loadMore,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
@@ -65,7 +70,11 @@ export function BookmarkList({
     onSearch?.(text);
   };
 
-  if (isLoading || !bookmarks) {
+  const onLoadMore = () => {
+    loadMore?.();
+  };
+
+  if (!bookmarks) {
     return (
       <List>
         <List.EmptyView
@@ -82,15 +91,24 @@ export function BookmarkList({
     ? t("bookmarkList.filterResults", { searchText, count: displayBookmarks.length })
     : t("bookmarkList.title", { count: displayBookmarks.length });
 
+  const hasMoreNotice = hasMore ? "..." : "";
+
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={displayBookmarks.length > 0}
       searchBarPlaceholder={searchBarPlaceholder || defaultSearchBarPlaceholder}
       onSearchTextChange={handleSearchTextChange}
+      pagination={{
+        onLoadMore,
+        hasMore: hasMore || false,
+        pageSize: 20,
+      }}
+      navigationTitle={t("bookmarkList.title", { count: displayBookmarks.length })}
     >
       {searchText && (
         <List.Item
+          id="search-item"
           icon={Icon.Globe}
           title={t("bookmarkList.onlineSearch.title", { searchText })}
           actions={
@@ -104,10 +122,10 @@ export function BookmarkList({
           }
         />
       )}
-      <List.Section title={listTitle}>
+      <List.Section title={`${listTitle}${hasMoreNotice}`}>
         {displayBookmarks.map((bookmark: Bookmark) => (
           <BookmarkItem
-            key={bookmark.id}
+            key={`${bookmark.id}-list-item`}
             bookmark={bookmark}
             config={config}
             onRefresh={onRefresh || (() => {})}

@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { URL } from "url";
+import { GetBookmarksParams } from "../types";
 import { getApiConfig } from "../utils/config";
 
 interface FetchOptions {
@@ -54,8 +55,15 @@ export async function fetchSummarizeBookmark(bookmarkId: string) {
     },
   });
 }
-export async function fetchGetAllBookmarks() {
-  return fetchWithAuth("/api/v1/bookmarks");
+
+export async function fetchGetAllBookmarks({ cursor, favourited, archived }: GetBookmarksParams = {}) {
+  const params = new URLSearchParams();
+  if (cursor) params.append("cursor", cursor);
+  if (favourited) params.append("favourited", favourited.toString());
+  if (archived) params.append("archived", archived.toString());
+
+  const queryString = params.toString();
+  return fetchWithAuth(`/api/v1/bookmarks${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function fetchCreateBookmark(payload: object) {
@@ -90,8 +98,8 @@ export async function fetchGetSingleList(id: string) {
   return fetchWithAuth(`/api/v1/lists/${id}`);
 }
 
-export async function fetchGetSingleListBookmarks(id: string) {
-  return fetchWithAuth(`/api/v1/lists/${id}/bookmarks`);
+export async function fetchGetSingleListBookmarks(id: string, cursor?: string) {
+  return fetchWithAuth(`/api/v1/lists/${id}/bookmarks${cursor ? `?cursor=${cursor}` : ""}`);
 }
 
 export async function fetchDeleteList(id: string) {
@@ -104,8 +112,8 @@ export async function fetchGetAllTags() {
   return fetchWithAuth("/api/v1/tags");
 }
 
-export async function fetchGetSingleTagBookmarks(id: string) {
-  return fetchWithAuth(`/api/v1/tags/${id}/bookmarks`);
+export async function fetchGetSingleTagBookmarks(id: string, cursor?: string) {
+  return fetchWithAuth(`/api/v1/tags/${id}/bookmarks${cursor ? `?cursor=${cursor}` : ""}`);
 }
 
 export async function fetchDeleteTag(id: string) {

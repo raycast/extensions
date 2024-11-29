@@ -37,14 +37,25 @@ function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
 }
 
 function ListBookmarks({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, revalidate } = useGetListsBookmarks(listId);
+  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
+
+  const handleRefresh = async () => {
+    const toast = await showToast({
+      title: "Refreshing lists",
+      message: "Please wait...",
+    });
+    await revalidate();
+    toast.title = "Lists refreshed";
+  };
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
+      hasMore={hasMore}
       isLoading={isLoading}
-      onRefresh={revalidate}
+      onRefresh={handleRefresh}
+      loadMore={loadNextPage}
       searchBarPlaceholder={t("list.searchInList").replace("{name}", listName)}
       emptyViewTitle={t("list.noBookmarks.title")}
       emptyViewDescription={t("list.noBookmarks.description")}
@@ -52,17 +63,41 @@ function ListBookmarks({ listId, listName }: { listId: string; listName: string 
   );
 }
 
-function FavoritedBookmarks() {
-  const { bookmarks, isLoading, revalidate } = useGetAllBookmarks();
+function ArchivedBookmarks() {
+  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+    archived: true,
+  });
   const { t } = useTranslation();
+  const archivedBookmarks = bookmarks?.filter((bookmark) => bookmark.archived);
 
+  return (
+    <BookmarkList
+      bookmarks={archivedBookmarks}
+      isLoading={isLoading}
+      hasMore={hasMore}
+      onRefresh={revalidate}
+      loadMore={loadNextPage}
+      searchBarPlaceholder={t("list.searchInArchived")}
+      emptyViewTitle={t("list.noArchived.title")}
+      emptyViewDescription={t("list.noArchived.description")}
+      filterFn={(bookmark) => bookmark.archived}
+    />
+  );
+}
+
+function FavoritedBookmarks() {
+  const { bookmarks, isLoading, hasMore, revalidate, loadNextPage } = useGetAllBookmarks({
+    favourited: true,
+  });
+  const { t } = useTranslation();
   const favoriteBookmarks = bookmarks?.filter((bookmark) => bookmark.favourited);
-
   return (
     <BookmarkList
       bookmarks={favoriteBookmarks}
       isLoading={isLoading}
+      hasMore={hasMore}
       onRefresh={revalidate}
+      loadMore={loadNextPage}
       searchBarPlaceholder={t("list.searchInFavorites")}
       emptyViewTitle={t("list.noFavorites.title")}
       emptyViewDescription={t("list.noFavorites.description")}
@@ -70,6 +105,7 @@ function FavoritedBookmarks() {
     />
   );
 }
+
 const dashboardListsPage = (listId: string) => {
   const { config } = useConfig();
   const { host } = config;
@@ -118,6 +154,10 @@ export default function Lists() {
 
   const handleShowFavoritedBookmarks = useCallback(() => {
     push(<FavoritedBookmarks />);
+  }, [push]);
+
+  const handleShowArchivedBookmarks = useCallback(() => {
+    push(<ArchivedBookmarks />);
   }, [push]);
 
   const ListItemComponent = useCallback(
@@ -175,6 +215,16 @@ export default function Lists() {
           <ActionPanel>
             <Action title={t("list.openFavorites")} onAction={handleShowFavoritedBookmarks} icon={Icon.List} />
             <Action.OpenInBrowser url={`${host}/dashboard/favourites`} title={t("common.viewInBrowser")} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        icon="📦"
+        title={t("list.archived")}
+        actions={
+          <ActionPanel>
+            <Action title={t("list.openArchived")} onAction={handleShowArchivedBookmarks} icon={Icon.List} />
+            <Action.OpenInBrowser url={`${host}/dashboard/archive`} title={t("common.viewInBrowser")} />
           </ActionPanel>
         }
       />

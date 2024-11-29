@@ -7,6 +7,7 @@ interface SearchResult {
       data: {
         json: {
           bookmarks: [];
+          nextCursor: string | null;
         };
       };
     };
@@ -14,15 +15,14 @@ interface SearchResult {
 }
 
 export function useSearchBookmarks(searchText: string) {
-  const {
-    isLoading,
-    data: bookmarks,
-    error,
-    revalidate,
-  } = usePromise(
+  const { isLoading, data, error, revalidate } = usePromise(
     async () => {
       const result = await fetchSearchBookmarks(searchText);
-      return (result as SearchResult)[0].result.data.json.bookmarks;
+      const hasMore = (result as SearchResult)[0].result.data.json.nextCursor !== null;
+      return {
+        bookmarks: (result as SearchResult)[0].result.data.json.bookmarks,
+        hasMore,
+      };
     },
     [],
     {
@@ -30,5 +30,5 @@ export function useSearchBookmarks(searchText: string) {
     },
   );
 
-  return { isLoading, bookmarks: bookmarks || [], error, revalidate };
+  return { isLoading, bookmarks: data?.bookmarks || [], hasMore: data?.hasMore || false, error, revalidate };
 }

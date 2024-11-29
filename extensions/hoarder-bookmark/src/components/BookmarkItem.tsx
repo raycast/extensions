@@ -248,6 +248,7 @@ export function BookmarkItem({ bookmark, config, onRefresh, onCleanCache }: Book
     <List.Item
       title={content.title}
       icon={content.icon}
+      id={bookmark.id}
       detail={
         <List.Item.Detail
           markdown={

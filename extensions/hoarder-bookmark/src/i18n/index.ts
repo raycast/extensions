@@ -97,6 +97,9 @@ export const translations = {
         title: "No bookmarks found",
         description: "No bookmarks in favorites",
       },
+      archived: "Archived",
+      openArchived: "Open Archived",
+      searchInArchived: "Search in Archived...",
       openList: "Open List",
       deleteList: "Delete List",
       deleteConfirm: "Are you sure you want to delete list {name}?",
@@ -104,6 +107,10 @@ export const translations = {
       noBookmarks: {
         title: "No bookmarks found",
         description: "No bookmarks in this list",
+      },
+      noArchived: {
+        title: "No archived bookmarks",
+        description: "No archived bookmarks found",
       },
     },
     tags: {
@@ -276,6 +283,9 @@ export const translations = {
       favorites: "收藏夹",
       openFavorites: "打开收藏夹",
       searchInFavorites: "在收藏夹中搜索...",
+      archived: "已归档",
+      openArchived: "打开已归档",
+      searchInArchived: "在已归档中搜索...",
       noFavorites: {
         title: "没有找到书签",
         description: "收藏夹中暂无书签",
@@ -287,6 +297,10 @@ export const translations = {
       noBookmarks: {
         title: "没有找到书签",
         description: "该列表中暂无书签",
+      },
+      noArchived: {
+        title: "没有已归档书签",
+        description: "没有找到已归档书签",
       },
     },
     tags: {

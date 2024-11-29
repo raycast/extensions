@@ -55,16 +55,21 @@ export interface Bookmark {
 export interface List {
   id: string;
   name: string;
-  // ... 其他 list 相关字段
 }
 
 export interface ListDetails {
   bookmarks: Bookmark[];
-  // ... 其他 list 详情相关字段
 }
 
 export interface ApiResponse<T> {
   lists?: T[];
   tags?: T[];
   bookmarks?: Bookmark[];
+  nextCursor?: string | null;
+}
+
+export interface GetBookmarksParams {
+  cursor?: string;
+  favourited?: boolean;
+  archived?: boolean;
 }
