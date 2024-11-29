@@ -45,7 +45,7 @@ function CreateObjectRecordForm({
       if (isSuccess) {
         handleClearFormState();
 
-        if (object_creation_form_behaviour) {
+        if (!object_creation_form_behaviour) {
           await showHUD(`${objectRecordMetadata.labelSingular} Created 🎉`, {
             popToRootType: PopToRootType.Suspended,
             clearRootSearch: false,
@@ -53,7 +53,7 @@ function CreateObjectRecordForm({
 
           popToRoot();
           return;
-        }
+        } 
 
         await showToast({
           style: Toast.Style.Success,
