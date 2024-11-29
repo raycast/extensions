@@ -1,10 +1,10 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import common = require("oci-common");
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
-import { useState } from "react";
+import { mapObjectToMarkdownTable } from "./utils";
 
 const provider: common.ConfigFileAuthenticationDetailsProvider = new common.ConfigFileAuthenticationDetailsProvider();
 const computeClient = new core.ComputeClient({  authenticationDetailsProvider: provider });
@@ -15,7 +15,7 @@ const onError = (error: Error) => {
   showFailureToast(message, {title});
 }
 export default function Core() {
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-instance-details", false);
 
   const { isLoading, data: instances } = useCachedPromise(
     async () => {
@@ -41,10 +41,7 @@ return <List isLoading={isLoading} isShowingDetail={isShowingDetail} searchBarPl
     const accessories: List.Item.Accessory[] = [];
     if (instance.systemTags && instance.systemTags["orcl-cloud"]["free-tier-retained"]==="true") accessories.push({tag: "Always Free"});
 
-    const markdown = `## Shape Config \n\n
-| - | - |
-|---|---|
-${Object.entries(instance.shapeConfig ?? {}).map(([key, val]) => `| ${key} | ${val} |`).join(`\n`)}`;
+    const markdown = mapObjectToMarkdownTable("## Shape Config", instance.shapeConfig);
 
     return <List.Item key={instance.id} icon={{ source: Icon.CircleFilled, tintColor: getInstanceColor(instance.lifecycleState) }} title={instance.displayName ?? ""} subtitle={isShowingDetail ? undefined : instance.shape} accessories={isShowingDetail ? undefined : accessories} detail={<List.Item.Detail markdown={markdown} metadata={<List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Availability Domain" text={instance.availabilityDomain} />
@@ -84,11 +81,8 @@ function ViewVnic({vnicId}: {vnicId: string}) {
     return res.vnic;
   }, [], {onError})
 
-  const vnicMarkdown = `
-| - | - |
-|---|---|
-${Object.entries(vnic ?? {}).map(([key, val]) => `| ${key} | ${val} |`).join(`\n`)}`;
-  return <Detail navigationTitle="Core > Instances > VNIC Attachment > VNIC" isLoading={isLoading} markdown={`VNIC: ${vnicId} \n\n ${vnicMarkdown}`} actions={<ActionPanel>
+  const markdown = mapObjectToMarkdownTable(`VNIC: ${vnicId}`, vnic);
+  return <Detail navigationTitle="Core > Instances > VNIC Attachment > VNIC" isLoading={isLoading} markdown={markdown} actions={<ActionPanel>
       {vnic?.privateIp && <Action.CopyToClipboard title="Copy Private IP to Clipboard" content={vnic.privateIp} />}
       {vnic?.publicIp && <Action.CopyToClipboard title="Copy Public IP to Clipboard" content={vnic.publicIp} />}
   </ActionPanel>} />
