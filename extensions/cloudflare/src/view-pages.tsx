@@ -46,7 +46,7 @@ function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && Object.keys(pages).length && (
+      {!isLoading && !Object.keys(pages).length && (
         <List.EmptyView
           icon="no-pages.svg"
           title="Create by importing an existing Git repository"
