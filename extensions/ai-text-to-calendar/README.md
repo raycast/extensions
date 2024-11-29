@@ -1,5 +1,10 @@
 # AI Text to Calendar
 
+<p align="center">
+  <img src="assets/extension-icon.png" height="128">
+  <h1 align="center">AI Text to Calendar</h1>
+</p>
+
 ## Overview
 
 AI Text to Calendar is a [Raycast](https://raycast.com/) extension that converts selected text into a Google Calendar registration URL using OpenAI's API and automatically opens it in your browser.
