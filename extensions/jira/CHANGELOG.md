@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Added Parent Issue support] - 2024-11-21
+## [Added Parent Issue support] - 2024-11-29
 
 - Implemented the ability to open the parent issue from a child issue.
 
