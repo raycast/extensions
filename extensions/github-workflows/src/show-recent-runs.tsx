@@ -32,6 +32,8 @@ export default function Command() {
           return { source: Icon.XMarkCircle, tintColor: Color.Red };
         case "cancelled":
           return { source: Icon.Circle, tintColor: Color.SecondaryText };
+        case "skipped":
+          return { source: Icon.Circle, tintColor: Color.Yellow };
         default:
           return { source: Icon.Circle, tintColor: Color.Blue };
       }
@@ -46,12 +48,15 @@ export default function Command() {
       return { source: Icon.CircleProgress, tintColor: Color.Blue };
     }
 
-    if (runs.some((run) => run.conclusion === "failure")) {
-      return { source: Icon.XMarkCircle, tintColor: Color.Red };
-    }
+    const allCompleted = runs.every((run) => run.status === "completed");
+    if (allCompleted) {
+      if (runs.some((run) => run.conclusion === "failure")) {
+        return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      }
 
-    if (runs.every((run) => run.conclusion === "success")) {
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
+      if (runs.every((run) => run.conclusion === "success" || run.conclusion === "skipped")) {
+        return { source: Icon.CheckCircle, tintColor: Color.Green };
+      }
     }
 
     return { source: Icon.Circle, tintColor: Color.SecondaryText };
