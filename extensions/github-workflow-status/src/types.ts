@@ -1,9 +1,10 @@
 export interface WorkflowRun {
   id: number;
-  name: string | null;
-  status: string | undefined;
+  name: string;
+  status: string;
   conclusion: string | null;
-  html_url: string;
+  repository: string;
   created_at: string;
-  repository?: string;
+  html_url: string;
+  workflow_id: number;
 }

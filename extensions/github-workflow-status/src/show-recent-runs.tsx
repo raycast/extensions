@@ -107,7 +107,7 @@ export default function Command() {
             key={run.id}
             title={formatRepository(run.repository)}
             icon={getStatusIcon(run.status, run.conclusion)}
-            subtitle={`${run.name || run.display_title} • ${formatDistanceToNow(new Date(run.created_at), { addSuffix: true })}`}
+            subtitle={`${run.name} • ${formatDistanceToNow(new Date(run.created_at), { addSuffix: true })}`}
             onAction={() => openInBrowser(run.html_url)}
           />
         ))
