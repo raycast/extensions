@@ -5,6 +5,9 @@
   "description": "Grant and revoke admin permission with SAP Privileges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
   "icon": "privileges.png",
   "author": "ph00lt0",
+  "contributors": [
+    "riesinger"
+  ],
   "categories": [
     "Security"
   ],
