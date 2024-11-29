@@ -53,7 +53,7 @@ function CreateObjectRecordForm({
 
           popToRoot();
           return;
-        } 
+        }
 
         await showToast({
           style: Toast.Style.Success,
