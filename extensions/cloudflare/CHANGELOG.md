@@ -1,10 +1,13 @@
 # Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Cache Enhancements] - {PR_MERGE_DATE}
 
 - `Action` to `openExtensionPreferences` on invalid token error
-- `EmptyView` when no **Pages**
+- `EmptyView` when no **Pages** or **Sites**
 - `Cache` **DNS Records** through `useCachedPromise`
+- `Cache` **Zone Details** through `useCachedPromise` & show more
+- `Cache` **Members** through `useCachedPromise`
+- `Cache` **Pages** through `useCachedPromise`
 - Changed status icons to be `...Cirle` for consistency
 
 ## [Add copy actions] - 2024-02-28

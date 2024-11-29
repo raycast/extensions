@@ -54,6 +54,9 @@ function Command() {
 
   return (
     <List isLoading={isLoading}>
+      {!isLoading && !Object.keys(sites).length && <List.EmptyView icon='no-sites.svg' title='Add your website or application to Cloudflare' description="Connect your domain to start sending web traffic through Cloudflare." actions={<ActionPanel>
+      <Action.OpenInBrowser url='https://dash.cloudflare.com/' />
+    </ActionPanel>} />}
       {Object.entries(sites)
         .filter((entry) => entry[1].length > 0)
         .map((entry) => {
@@ -142,23 +145,9 @@ export interface SiteProps {
 function SiteView(props: SiteProps) {
   const { accountId, id } = props;
 
-  const [site, setSite] = useState<Zone | null>(null);
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchSite() {
-      try {
-        const site = await service.getZone(id);
-        setSite(site);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    fetchSite();
-  }, []);
+  const { isLoading, data: site } = useCachedPromise(async () => service.getZone(id), [], {
+    onError: handleNetworkError
+  });
 
   if (!site) {
     return <Detail isLoading={isLoading} markdown="" />;
@@ -177,7 +166,7 @@ function SiteView(props: SiteProps) {
 
   ## Name servers
 
-  ${site.nameServers.map((server) => `* ${server}`).join('\n\n')}
+  ${site.name_servers.map((server) => `* ${server}`).join('\n\n')}
   `;
   return (
     <Detail
@@ -207,6 +196,15 @@ function SiteView(props: SiteProps) {
       }
       isLoading={isLoading}
       markdown={markdown}
+      metadata={<Detail.Metadata>
+        <Detail.Metadata.Label title='Modified' text={site.modified_on} />
+        <Detail.Metadata.Label title='Created' text={site.created_on} />
+        <Detail.Metadata.Label title='Activated' text={site.activated_on} />
+        <Detail.Metadata.Separator />
+        <Detail.Metadata.TagList title='Permissions'>
+          {site.permissions.map(permission => <Detail.Metadata.TagList.Item key={permission} text={permission} />)}
+        </Detail.Metadata.TagList>
+      </Detail.Metadata>}
     />
   );
 }
