@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  PopToRootType,
+  Toast,
+  getPreferenceValues,
+  popToRoot,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { Fragment } from "react";
 
 import { FailureToast } from "./enum/api";
@@ -19,8 +30,10 @@ function CreateObjectRecordForm({
 }) {
   const { namePlural, labelSingular } = objectRecordMetadata;
   const { primary, rest } = fields;
-  const { handleSubmit, itemProps } = useForm({
+
+  const { handleSubmit, itemProps, reset } = useForm({
     async onSubmit(values) {
+      const { object_creation_form_behaviour } = getPreferenceValues<Preferences>();
       await showToast({
         style: Toast.Style.Animated,
         title: "Creating Object Record",
@@ -30,9 +43,21 @@ function CreateObjectRecordForm({
       const isSuccess = await twenty.createObjectRecord(namePlural, formattedValues);
 
       if (isSuccess) {
-        await showHUD(`${objectRecordMetadata.labelSingular} Created 🎉`, {
-          popToRootType: PopToRootType.Immediate,
-          clearRootSearch: true,
+        handleClearFormState();
+
+        if (object_creation_form_behaviour) {
+          await showHUD(`${objectRecordMetadata.labelSingular} Created 🎉`, {
+            popToRootType: PopToRootType.Suspended,
+            clearRootSearch: false,
+          });
+
+          popToRoot();
+          return;
+        }
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${objectRecordMetadata.labelSingular} Created 🎉`,
         });
 
         return;
@@ -48,6 +73,10 @@ function CreateObjectRecordForm({
       ...createValidationsForRest(rest),
     },
   });
+
+  function handleClearFormState() {
+    reset();
+  }
 
   return (
     <Fragment>
