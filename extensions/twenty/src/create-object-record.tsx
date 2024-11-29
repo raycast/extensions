@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { randomUUID } from "crypto";
 
 import twenty from "./services/TwentySDK";
@@ -24,7 +24,7 @@ export default function CreateObjectRecord() {
   const { push } = useNavigation();
 
   if (error) {
-    return <></>;
+    return <Detail markdown={` # ERROR \n\n ${error.message}`} />;
   }
 
   const standardActiveModel = activeDataModels?.filter((model) => !model.isCustom);
