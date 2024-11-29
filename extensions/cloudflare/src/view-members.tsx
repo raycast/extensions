@@ -7,25 +7,32 @@ import { useCachedPromise } from '@raycast/utils';
 const service = new Service(getToken());
 
 function Command() {
-  const { isLoading, data: { accounts, members } } = useCachedPromise(async () => {
-    const accounts = await service.listAccounts();
-    const members: Record<string, Member[]> = {};
-    for (let i = 0; i < accounts.length; i++) {
+  const {
+    isLoading,
+    data: { accounts, members },
+  } = useCachedPromise(
+    async () => {
+      const accounts = await service.listAccounts();
+      const members: Record<string, Member[]> = {};
+      for (let i = 0; i < accounts.length; i++) {
         const account = accounts[i];
         const accountMembers = await service.listMembers(account.id);
         members[account.id] = accountMembers;
-    }
-    return {
-      accounts,
-      members
-    }
-  }, [], {
-    initialData: {
-      accounts: [],
-      members: []
+      }
+      return {
+        accounts,
+        members,
+      };
     },
-    onError: handleNetworkError
-  })
+    [],
+    {
+      initialData: {
+        accounts: [],
+        members: [],
+      },
+      onError: handleNetworkError,
+    },
+  );
 
   return (
     <List isLoading={isLoading}>

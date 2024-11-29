@@ -1,4 +1,8 @@
-import { getPreferenceValues, Icon, openExtensionPreferences } from '@raycast/api';
+import {
+  getPreferenceValues,
+  Icon,
+  openExtensionPreferences,
+} from '@raycast/api';
 import { AxiosError } from 'axios';
 import {
   DeploymentStatus,
@@ -106,15 +110,15 @@ function handleNetworkError(e: unknown): void {
     showFailureToast('Please make sure that your API token is valid.', {
       title: 'Failed to authorize',
       message: 'Please make sure that your API token is valid.',
-    primaryAction: {
-      title: "Open Extension Preferences",
-      onAction: openExtensionPreferences
-    }}
-  );
+      primaryAction: {
+        title: 'Open Extension Preferences',
+        onAction: openExtensionPreferences,
+      },
+    });
   } else {
     showFailureToast('Please try again later.', {
-      title: 'Network error'
-    })
+      title: 'Network error',
+    });
   }
 }
 

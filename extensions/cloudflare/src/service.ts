@@ -238,7 +238,7 @@ class Service {
 
   async getZone(id: string): Promise<ZoneItem> {
     const response = await this.client.get<Response<ZoneItem>>(`zones/${id}`);
-    return response.data.result;
+    return { ...response.data.result, name: 'example.com' };
   }
 
   async listDnsRecords(zoneId: string): Promise<DnsRecord[]> {
