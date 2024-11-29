@@ -39,6 +39,15 @@
       "required": false,
       "default": "https://api.twenty.com",
       "placeholder": "https://api.twenty.com (default)"
+    },
+    {
+      "name": "object_creation_form_behaviour",
+      "description": "Keep the object form view or return to the root view after creation.",
+      "title": "object creation behavior",
+      "label": "keep previous object form view",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
