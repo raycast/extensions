@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Cache,
+  Clipboard,
   Detail,
   Form,
   Icon,
@@ -17,7 +18,7 @@ import { FormValidation, useForm, usePromise, withAccessToken } from "@raycast/u
 import { fetch } from "undici";
 
 import { getAvatarIcon, OAuthService, useCachedPromise } from "@raycast/utils";
-import { Fragment, useEffect, useId, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import * as databaseFunctions from "./database.js";
 import { getRequestsCount, incrementRequestsCount, notifyError } from "./raycast";
@@ -39,11 +40,12 @@ import {
 import dedent from "string-dedent";
 import { createClient } from "./generated/client-database";
 
+import { writeFileSync } from "fs";
 import React from "react";
 import { SQLStatement } from "sql-template-strings";
 import { renderColumnValue } from "./database.js";
 import { useGlobalState } from "./state";
-import { CustomQueryList, CustomQueryType, GraphData, Json, StoredDatabase, TableInfo, TimeSeriesItem } from "./types";
+import { CustomQuery, CustomQueryType, GraphData, Json, StoredDatabase, TableInfo, TimeSeriesItem } from "./types";
 
 const pageSize = 20;
 const freeRequestsCount = 10;
@@ -181,7 +183,12 @@ function SearchTable({ table }: { table: string }) {
       onSearchTextChange={setSearchText}
       isShowingDetail
       searchBarAccessory={dropdown}
-      actions={<RunTransactionQueries />}
+      actions={
+        <ActionPanel>
+          <NoRowsActions revalidate={() => rows.revalidate()} tableInfo={tableInfo!} />
+          <RunTransactionQueries />
+        </ActionPanel>
+      }
       searchBarPlaceholder="Search rows..."
     >
       {rows.data?.map((row, index) => {
@@ -196,6 +203,7 @@ function SearchTable({ table }: { table: string }) {
                 {tableInfo && (
                   <RowUpdatesActions revalidate={() => rows.revalidate()} tableInfo={tableInfo} row={row} />
                 )}
+                <CountAction table={table} />
                 <RunTransactionQueries />
               </ActionPanel>
             }
@@ -203,6 +211,33 @@ function SearchTable({ table }: { table: string }) {
         );
       })}
     </List>
+  );
+}
+function CountAction({ table, query }: { table?: string; query?: string }) {
+  const handleCount = async () => {
+    try {
+      const result = await databaseFunctions.countRows({ table, query });
+      showToast({ style: Toast.Style.Success, title: `Row Count: ${result}` });
+    } catch (error) {
+      console.error("Error counting rows:", error);
+      showToast({ style: Toast.Style.Failure, title: "Failed to count rows", message: String(error) });
+    }
+  };
+
+  return <Action title="Count Rows" icon={Icon.List} onAction={handleCount} />;
+}
+
+function NoRowsActions({ revalidate, tableInfo }: { revalidate: () => void; tableInfo: TableInfo }) {
+  const { push } = useNavigation();
+  return (
+    <Action
+      title="Insert New Row"
+      icon={Icon.NewDocument}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      onAction={() => {
+        push(<EditRow type="insert" revalidate={revalidate} tableInfo={tableInfo} />);
+      }}
+    />
   );
 }
 
@@ -246,14 +281,7 @@ function RowUpdatesActions({
         }}
       />
 
-      <Action
-        title="Insert New Row"
-        icon={Icon.NewDocument}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
-        onAction={() => {
-          push(<EditRow type="insert" revalidate={revalidate} tableInfo={tableInfo} />);
-        }}
-      />
+      <NoRowsActions revalidate={revalidate} tableInfo={tableInfo} />
       <Action
         title="Duplicate Row"
         icon={Icon.Duplicate}
@@ -265,61 +293,112 @@ function RowUpdatesActions({
     </>
   );
 }
+const Graph = React.memo(function Graph(args: { rows: TimeSeriesItem[]; query: CustomQuery }) {
+  const { push } = useNavigation();
+  const graphUrl = useCachedPromise(
+    async (rows: TimeSeriesItem[]) => {
+      const categoriesWithCount: Map<string | undefined, number> = new Map();
+      for (const row of rows) {
+        const category = row.category;
+        const count = categoriesWithCount.get(category) || 0;
+        categoriesWithCount.set(category, count + row.count);
+      }
 
-const Graph = React.memo(function Graph(args: { rows: TimeSeriesItem[] }) {
-  const hash = useId();
+      const sortedCategories = Array.from(categoriesWithCount.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([category]) => category);
+
+      const maxCategories = 10;
+      const topCategories = sortedCategories.slice(0, maxCategories);
+      const removedCategories = new Set(sortedCategories.slice(maxCategories));
+
+      const categories = [...topCategories, ...(removedCategories.size > 0 ? ["others"] : [])];
+      const timeBuckets = [...new Set(rows.map((x) => x.time_bucket))];
+
+      const data: GraphData = {
+        labels: timeBuckets as string[],
+        datasets: categories.map((category) => {
+          const categoryRows = rows.filter(
+            (x) => x.category === category || (category === "others" && removedCategories.has(x.category || "others")),
+          );
+          const data = timeBuckets.map((timeBucket) => {
+            const row = categoryRows.find((x) => x.time_bucket === timeBucket);
+            return row ? Number(row.count) : 0;
+          });
+          return {
+            label: category || "",
+            data,
+            backgroundColor: getStringColor(category || ""),
+          };
+        }),
+      };
+
+      const res = await apiClient.spiceblow.api.generateGraphUrl.post({
+        rowsData: data,
+      });
+      if (res.error) {
+        throw res.error;
+      }
+      return res.data?.url;
+    },
+    [args.rows],
+    { keepPreviousData: true, execute: args.rows != null },
+  );
+
+  if (graphUrl.isLoading) {
+    return <Detail isLoading />;
+  }
   if (!args.rows) {
     return <Detail isLoading />;
   }
 
-  const categoriesWithCount: Map<string | undefined, number> = new Map();
-  for (const row of args.rows) {
-    const category = row.category;
-    const count = categoriesWithCount.get(category) || 0;
-    categoriesWithCount.set(category, count + row.count);
-  }
+  const url = graphUrl.data;
 
-  const sortedCategories = Array.from(categoriesWithCount.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([category]) => category);
-
-  const max = 10;
-  const topCategories = sortedCategories.slice(0, max);
-  const removedCategories = new Set(sortedCategories.slice(max));
-
-  const categories = [...topCategories, ...(removedCategories.size > 0 ? ["others"] : [])];
-  const timeBuckets = [...new Set(args.rows.map((x) => x.time_bucket))];
-
-  const data: GraphData = {
-    labels: timeBuckets,
-
-    datasets: categories.map((category) => {
-      const rows = args.rows.filter(
-        (x) => x.category === category || (category === "others" && removedCategories.has(x.category || "others")),
-      );
-      const data = timeBuckets.map((timeBucket) => {
-        const row = rows.find((x) => x.time_bucket === timeBucket);
-        return row ? Number(row.count) : 0;
-      });
-      return {
-        label: category || "",
-        data,
-        backgroundColor: getStringColor(category || ""),
-      };
-    }),
-  };
-
-  const imageUrl = new URL(`/spiceblow/api/graph`, apiUrl);
-  const json = JSON.stringify(data);
-  imageUrl.searchParams.set("hash", hash);
-  imageUrl.searchParams.set("rows", encodeURIComponent(json));
-
-  const u = imageUrl.toString();
-
-  return <Detail markdown={`![Graph](${u})\n\n[Open Graph Image](${u})`} />;
+  return (
+    <Detail
+      markdown={`![Graph](${url})\n\n`}
+      actions={
+        <ActionPanel>
+          {url && (
+            <Action
+              title="Copy Image to Clipboard"
+              onAction={async () => {
+                const tempPath = `/tmp/graph-${Date.now()}.png`;
+                await fetch(url)
+                  .then((res) => res.arrayBuffer())
+                  .then((buffer) => {
+                    const uint8Array = new Uint8Array(buffer);
+                    writeFileSync(tempPath, uint8Array);
+                  });
+                await Clipboard.copy({ file: tempPath });
+                showToast({ title: "Image copied to clipboard", style: Toast.Style.Success });
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          )}
+          <Action
+            title="Update Query"
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+            icon={Icon.Pencil}
+            onAction={() => {
+              push(
+                <GenerateCustomQueryForm
+                  type={"time-series"}
+                  revalidate={() => {
+                    graphUrl.revalidate();
+                  }}
+                  existingQuery={args.query}
+                />,
+              );
+            }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 });
 
-function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
+function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
   const { query, schemas, tableInfo, id, bestField } = args;
   const { push } = useNavigation();
   const { searchText, setSearchText } = useSearchFilter(id);
@@ -365,7 +444,7 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
   );
 
   if (args.type === "time-series") {
-    return <Graph rows={rows.data} {...args} />;
+    return <Graph query={args} rows={rows.data} />;
   }
 
   return (
@@ -376,7 +455,12 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
       onSearchTextChange={setSearchText}
       isShowingDetail
       searchBarAccessory={dropdown}
-      actions={<RunTransactionQueries />}
+      actions={
+        <ActionPanel>
+          <NoRowsActions revalidate={() => rows.revalidate()} tableInfo={tableInfo} />
+          <RunTransactionQueries />
+        </ActionPanel>
+      }
       searchBarPlaceholder={searchPlaceholder}
     >
       {rows.data?.map((row, index) => {
@@ -400,6 +484,7 @@ function SearchCustomQuery(args: CustomQueryList & { revalidate: () => void }) {
                   tableInfo={tableInfo}
                   row={row}
                 />
+                <CountAction query={query} />
                 {tables.map((tableName) => (
                   <Action
                     key={tableName}
@@ -471,7 +556,7 @@ function RowMetadata({ tableInfo, row }: { tableInfo: TableInfo; row: Json }) {
                 // text={getHostname(text)}
               />
             );
-          } else if (value.startsWith("http://") || value.startsWith("https://")) {
+          } else if (value?.startsWith("http://") || value?.startsWith("https://")) {
             item = (
               <List.Item.Detail.Metadata.Link
                 key={idx}
@@ -502,7 +587,7 @@ function GenerateCustomQueryForm({
   revalidate,
   type,
 }: {
-  existingQuery?: CustomQueryList;
+  existingQuery?: CustomQuery;
   revalidate: () => void;
   type: CustomQueryType;
 }) {
@@ -568,50 +653,66 @@ function GenerateCustomQueryForm({
     reset();
 
     lastSubmittedPrompt.current = prompt;
+    const previousOutputs = [] as { output: string; error: string }[];
     try {
       setIsLoading(true);
 
-      if (abortController) {
-        abortController.abort();
-      }
-      abortController = new AbortController();
+      while (previousOutputs.length <= 3) {
+        if (abortController) {
+          abortController.abort();
+        }
+        abortController = new AbortController();
 
-      const { data, error } = await apiClient.spiceblow.api.generateSqlQuery.post({
-        prompt,
-        schema: schema.data!,
-        type,
-        previousQuery: query
-          .split("\n")
-          .filter((x) => !x.includes("```"))
-          .join("\n"),
-        databaseType: getDatabaseConnectionType(currentConnectionString)!,
-      });
-      if (error) {
-        throw error;
-      }
-      let sqlCode = "";
-      for await (const chunk of data) {
-        sqlCode = chunk.sqlCode;
-        if (sqlCode) {
-          setQuery("```\n" + sqlCode + "\n```");
+        const { data, error } = await apiClient.spiceblow.api.generateSqlQuery.post({
+          prompt,
+          schema: schema.data!,
+          type,
+          previousOutputs,
+          previousQuery: query
+            .split("\n")
+            .filter((x) => !x.includes("```"))
+            .join("\n"),
+          databaseType: getDatabaseConnectionType(currentConnectionString)!,
+        });
+        if (error) {
+          throw error;
+        }
+        let sqlCode = "";
+        for await (const chunk of data) {
+          sqlCode = chunk.sqlCode;
+          if (sqlCode) {
+            setQuery("```\n" + sqlCode + "\n```");
+          }
+        }
+        console.log("finished generating sql", sqlCode);
+
+        try {
+          const { fieldsCount, bestField, tableInfo } = await databaseFunctions.testGeneratedQuery(sqlCode);
+
+          setTableInfo(tableInfo);
+          setBestField(bestField);
+          setQueryDescription(`${fieldsCount} fields, using '${bestField}' as primary field`);
+          return;
+        } catch (error) {
+          previousOutputs.push({ output: sqlCode, error: String(error) });
+          // console.log("error", sqlCode);
+          console.log(error);
+          showToast({
+            title: `Sql error ${previousOutputs.length + 1}, retrying...`,
+            message: String(error),
+
+            style: Toast.Style.Failure,
+          });
         }
       }
-      console.log("finished generating sql", sqlCode);
-
-      const { rowsCount, fieldsCount, bestField, tableInfo } = await databaseFunctions.runGeneratedQuery(sqlCode);
-
-      setTableInfo(tableInfo);
-
-      setBestField(bestField);
-
-      showToast({ title: `Query returned ${rowsCount} rows` });
-      setQueryDescription(`${rowsCount} rows, ${fieldsCount} fields, using '${bestField}' as primary field`);
-    } catch (error) {
-      setQueryHasError(true);
-      notifyError(error);
     } finally {
       setIsLoading(false);
     }
+    showToast({
+      title: `Sql error`,
+      message: String(previousOutputs[previousOutputs.length - 1].error),
+      style: Toast.Style.Failure,
+    });
   };
 
   const { push } = useNavigation();
@@ -624,7 +725,7 @@ function GenerateCustomQueryForm({
       if (!bestField) {
         throw new Error("Best field could not be found");
       }
-      const queryProps: CustomQueryList = {
+      const queryProps: CustomQuery = {
         type,
         query: query
           .split("\n")
@@ -639,7 +740,7 @@ function GenerateCustomQueryForm({
       };
 
       if (existingQuery) {
-        const index = storedQueries.findIndex((q: CustomQueryList) => q.id === existingQuery.id);
+        const index = storedQueries.findIndex((q: CustomQuery) => q.id === existingQuery.id);
         if (index !== -1) {
           storedQueries[index] = queryProps;
         }
@@ -648,6 +749,7 @@ function GenerateCustomQueryForm({
       }
 
       await LocalStorage.setItem("queries", JSON.stringify(storedQueries));
+      putFirstInTablesOrder(queryProps.id);
       showToast({ style: Toast.Style.Success, title: "Query saved successfully" });
       await revalidate();
       push(<SearchCustomQuery {...queryProps} revalidate={revalidate} />);
@@ -712,7 +814,9 @@ function GenerateCustomQueryForm({
       <Form.TagPicker
         info="The LLM will only use these database schemas to generate the query"
         id="schemas"
-        title="Select Schemas"
+        title={
+          getDatabaseConnectionType(currentConnectionString) === "mysql" ? "Databases Involved" : "Schemas Involved"
+        }
         value={selectedSchemas}
         onChange={setSelectedSchemas}
       >
@@ -760,6 +864,7 @@ function RowInfo({ tableInfo, row }: { tableInfo?: TableInfo; row: Json }) {
             subtitle={value}
             actions={
               <ActionPanel>
+                <Action.CopyToClipboard title="Copy Column Value" content={value} />
                 <Action
                   title="View"
                   icon={Icon.Goal}
@@ -767,7 +872,6 @@ function RowInfo({ tableInfo, row }: { tableInfo?: TableInfo; row: Json }) {
                     push(<RowColumnAsMarkdown value={value} />);
                   }}
                 />
-                <Action.CopyToClipboard title="Copy Column Value" content={value} />
               </ActionPanel>
             }
           />
@@ -855,6 +959,14 @@ function RunTransactionQueries() {
   );
 }
 
+const orderCache = new Cache({ namespace: "items-order" });
+
+function putFirstInTablesOrder(id: string) {
+  const cachedOrder = orderCache.get("itemOrder") ? JSON.parse(orderCache.get("itemOrder")!) : [];
+  const newOrder = [id, ...cachedOrder.filter((item: string) => item !== id)];
+  orderCache.set("itemOrder", JSON.stringify(newOrder));
+}
+
 function SearchTables() {
   const { push } = useNavigation();
   const currentConnectionString = useGlobalState((x) => x.connectionString);
@@ -869,64 +981,23 @@ function SearchTables() {
 
   const savedQueries = useCachedPromise(
     async (_connectionString) => {
-      const storedQueries = JSON.parse((await LocalStorage.getItem("queries")) || "[]") as CustomQueryList[];
+      const storedQueries = JSON.parse((await LocalStorage.getItem("queries")) || "[]") as CustomQuery[];
       return storedQueries.filter((query) => query.connectionString === currentConnectionString);
     },
     [currentConnectionString],
     { keepPreviousData: true },
   );
 
-  return (
-    <List actions={<RunTransactionQueries />} searchBarAccessory={<DatabasesDropdown />} isLoading={tables.isLoading}>
-      <List.Item
-        title="Add New Query"
-        icon={Icon.NewDocument}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Add"
-              onAction={() => {
-                push(
-                  <GenerateCustomQueryForm
-                    type="list"
-                    revalidate={() => {
-                      savedQueries.revalidate();
-                      tables.revalidate();
-                    }}
-                  />,
-                );
-              }}
-            />
-            <RunTransactionQueries />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        title="Add New Graph"
-        icon={Icon.LineChart}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Add"
-              onAction={() => {
-                push(
-                  <GenerateCustomQueryForm
-                    type="time-series"
-                    revalidate={() => {
-                      savedQueries.revalidate();
-                      tables.revalidate();
-                    }}
-                  />,
-                );
-              }}
-            />
-            <RunTransactionQueries />
-          </ActionPanel>
-        }
-      />
-      {savedQueries.data?.map((query, index) => {
-        const queryColor = getStringColor(query.prompt);
-        return (
+  const cachedOrder = useMemo(() => {
+    return orderCache.get("itemOrder") ? JSON.parse(orderCache.get("itemOrder")!) : [];
+  }, []);
+
+  const items = [
+    ...(savedQueries.data?.map((query, index) => {
+      const queryColor = getStringColor(query.prompt);
+      return {
+        orderIndex: cachedOrder.findIndex((item: string) => item === query.id),
+        node: (
           <List.Item
             key={`saved-query-${index}`}
             title={query.prompt}
@@ -948,6 +1019,7 @@ function SearchTables() {
                   title="Run Query"
                   icon={Icon.Play}
                   onAction={() => {
+                    putFirstInTablesOrder(query.id);
                     push(
                       <SearchCustomQuery
                         {...query}
@@ -959,7 +1031,6 @@ function SearchTables() {
                   }}
                 />
                 <RunTransactionQueries />
-
                 <Action.CopyToClipboard title="Copy Query" content={query.query} />
                 <Action
                   title="Update Query"
@@ -992,24 +1063,26 @@ function SearchTables() {
               </ActionPanel>
             }
           />
-        );
-      })}
-      {tables.data?.map((table) => {
-        if (!table.schemaTable) {
-          return null;
-        }
-        const [schema, tableName] = table.schemaTable.split(".");
-        const schemaColor = getStringColor(schema || "", { saturation: 0.2 });
-        const tableColor = getStringColor(table.schemaTable);
+        ),
+      };
+    }) || []),
+    ...(tables.data?.map((table) => {
+      if (!table.schemaTable) {
+        return null;
+      }
+      const [schema, tableName] = table.schemaTable.split(".");
+      const schemaColor = getStringColor(schema || "", { saturation: 0.2 });
+      const tableColor = getStringColor(table.schemaTable);
 
-        return (
+      return {
+        orderIndex: cachedOrder.findIndex((item: string) => item === table.schemaTable),
+        node: (
           <List.Item
             key={table.schemaTable}
             title={tableName}
             subtitle={`about ${table.estimatedRowCount} rows`}
             icon={{
               source: Icon.Document,
-              // mask: Image.Mask.RoundedRectangle,
               tintColor: tableColor,
             }}
             keywords={[schema]}
@@ -1023,6 +1096,7 @@ function SearchTables() {
                 <Action
                   title="View Rows"
                   onAction={() => {
+                    putFirstInTablesOrder(table.schemaTable);
                     push(<SearchTable table={table.schemaTable} />);
                   }}
                 />
@@ -1030,8 +1104,74 @@ function SearchTables() {
               </ActionPanel>
             }
           />
-        );
-      })}
+        ),
+      };
+    }) || []),
+  ];
+
+  const sortedItems = items
+    .filter((item): item is { orderIndex: number; node: JSX.Element } => item !== null)
+    .sort((a, b) => {
+      if (a.orderIndex === -1 && b.orderIndex === -1) return 0;
+      if (a.orderIndex === -1) return 1;
+      if (b.orderIndex === -1) return -1;
+      return a.orderIndex - b.orderIndex;
+    })
+    .map((item) => item.node);
+
+  return (
+    <List actions={<RunTransactionQueries />} searchBarAccessory={<DatabasesDropdown />} isLoading={tables.isLoading}>
+      <List.Item
+        key="add-new-query"
+        title="Add New Query"
+        subtitle={"Generate a list for a custom Sql query"}
+        icon={Icon.NewDocument}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Add"
+              onAction={() => {
+                push(
+                  <GenerateCustomQueryForm
+                    type="list"
+                    revalidate={() => {
+                      savedQueries.revalidate();
+                      tables.revalidate();
+                    }}
+                  />,
+                );
+              }}
+            />
+            <RunTransactionQueries />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        key="add-new-graph"
+        title="Add New Graph"
+        subtitle={"Generate a bar chart for an Sql query"}
+        icon={Icon.LineChart}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Add"
+              onAction={() => {
+                push(
+                  <GenerateCustomQueryForm
+                    type="time-series"
+                    revalidate={() => {
+                      savedQueries.revalidate();
+                      tables.revalidate();
+                    }}
+                  />,
+                );
+              }}
+            />
+            <RunTransactionQueries />
+          </ActionPanel>
+        }
+      />
+      {sortedItems}
     </List>
   );
 }
