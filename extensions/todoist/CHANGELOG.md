@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Quick Add Task Improvement] - {PR_MERGE_DATE}
+
+Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.
+
 ## [Menu Bar Command Fixes] - 2024-08-05
 
 Changed Menu bar icon color contrast issue with certain wallpapers in light mode.
