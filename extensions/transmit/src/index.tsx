@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { run } from "@jxa/run";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import "@jxa/global-type";
 
 export interface ConnectionEntry {
@@ -99,7 +99,7 @@ function ListItem(props: { entry: ConnectionEntry }) {
               }}
             />
             <Action
-              title="Connect in Transmit (+Tab)"
+              title="Connect in Transmit (+tab)"
               icon={Icon.Plus}
               onAction={() => {
                 showToast({
