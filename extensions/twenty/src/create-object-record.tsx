@@ -60,6 +60,9 @@ export default function CreateObjectRecord() {
                             style: Toast.Style.Failure,
                             title: objectRecordMetadata,
                           });
+                          setTimeout(() => {
+                            setIsOpenView(false);
+                          }, 500);
                         } else {
                           push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
                           setIsOpenView(false);
@@ -100,6 +103,9 @@ export default function CreateObjectRecord() {
                             style: Toast.Style.Failure,
                             title: objectRecordMetadata,
                           });
+                          setTimeout(() => {
+                            setIsOpenView(false);
+                          }, 500);
                         } else {
                           push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
                           setIsOpenView(false);
