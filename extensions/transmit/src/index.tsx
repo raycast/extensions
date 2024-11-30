@@ -1,53 +1,37 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { run } from "@jxa/run";
-import { runAppleScript } from "@raycast/utils";
-import "@jxa/global-type";
+import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open, getApplications } from "@raycast/api";
+import { runAppleScript, usePromise } from "@raycast/utils";
 
 export interface ConnectionEntry {
-  id: number;
+  id: string;
   identifier: string;
   name: string;
   address: string;
-  port: number;
+  port: string;
   protocol: string;
-  username: number;
+  username: string;
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [servers, setServers] = useState<ConnectionEntry[]>([]);
-
-  async function init() {
-    getServers()
-      .then((servers) => {
-        setServers(servers);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  if (error) {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
-      title: "Failed to load servers",
-      message: "Download from https://panic.com/transmit/",
-      primaryAction: {
-        title: "Download Transmit",
-        onAction: (toast) => {
-          open("https://panic.com/transmit/");
-          toast.hide();
+  const { isLoading, data: servers } = usePromise(
+    async () => {
+      const apps = await getApplications();
+      const transmit = apps.find(app => app.name==="Transmit");
+      if (!transmit) throw new Error();
+      return await getServers();
+    }, [], {
+      failureToastOptions: {
+        title: "Failed to load servers",
+        message: "Download from https://panic.com/transmit/",
+        primaryAction: {
+          title: "Download Transmit",
+          onAction: (toast) => {
+            open("https://panic.com/transmit/");
+            toast.hide();
+          },
         },
-      },
-    };
-
-    showToast(options);
-  }
+      }
+    }
+  )
 
   return (
     <List searchBarPlaceholder="Search servers..." isLoading={isLoading}>
@@ -63,7 +47,7 @@ function ListItem(props: { entry: ConnectionEntry }) {
     <List.Item
       title={props.entry.name}
       subtitle={props.entry.address}
-      accessoryTitle={props.entry.protocol}
+      accessories={[{text: props.entry.protocol}]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -137,30 +121,31 @@ function ListItem(props: { entry: ConnectionEntry }) {
   );
 }
 
-export async function getServers(): Promise<ConnectionEntry[]> {
-  return run(() => {
-    const Transmit = Application("Transmit");
-
-    return Transmit.favorites().map(
-      (
-        item: {
-          identifier: { get: () => any };
-          name: { get: () => any };
-          address: { get: () => any };
-          port: { get: () => any };
-          protocol: { get: () => any };
-        },
-        index: number
-      ) => {
-        return {
-          id: index + 1,
-          identifier: item.identifier.get(),
-          name: item.name.get(),
-          address: item.address.get(),
-          port: item.port.get(),
-          protocol: item.protocol.get(),
-        };
-      }
-    );
+async function getServers(): Promise<ConnectionEntry[]> {
+  const res = await runAppleScript(`
+    set _output to ""
+    tell application "Transmit"
+      set _id to 1
+      repeat with f in favorites
+        set _identifier to get identifier of f
+        set _name to get name of f
+        set _address to get address of f
+        set _port to get port of f
+        set _protocol to get protocol of f
+        
+        set _output to (_output & _identifier & "," & _name & "," & _address & "," & _port & "," & _protocol & "," & _id & "\n")
+        
+        set _id to _id + 1
+      end repeat
+    end tell
+    return _output
+    `
+  );
+  const servers = res.split("\n").slice(0,-1).map(server => {
+    const [identifier, name="", address, port, protocol, username, id] = server.split(",");
+    return {
+      identifier, name, address, port, protocol, username, id
+    }
   });
+  return servers;
 }
