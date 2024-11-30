@@ -33,7 +33,11 @@ export default function CreateObjectRecord() {
   const customActiveModel = activeDataModels?.filter((model) => model.isCustom);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Create Object Record" searchBarPlaceholder="Search Object Record">
+    <List
+      isLoading={isLoading || isOpenView}
+      navigationTitle="Create Object Record"
+      searchBarPlaceholder="Search Object Record"
+    >
       <List.Section title="Standard Objects">
         {standardActiveModel?.map((model) => {
           const { id, description, labelPlural, icon } = model;
@@ -49,6 +53,7 @@ export default function CreateObjectRecord() {
                       title="Create Record"
                       icon={Icon.List}
                       onAction={async () => {
+                        setIsOpenView(true);
                         const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
                         if (typeof objectRecordMetadata === "string") {
                           await showToast({
@@ -56,7 +61,6 @@ export default function CreateObjectRecord() {
                             title: objectRecordMetadata,
                           });
                         } else {
-                          setIsOpenView(true);
                           push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
                           setIsOpenView(false);
                         }
@@ -89,6 +93,7 @@ export default function CreateObjectRecord() {
                       title="Create Record"
                       icon={Icon.List}
                       onAction={async () => {
+                        setIsOpenView(true);
                         const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
                         if (typeof objectRecordMetadata === "string") {
                           await showToast({
@@ -96,7 +101,6 @@ export default function CreateObjectRecord() {
                             title: objectRecordMetadata,
                           });
                         } else {
-                          setIsOpenView(true);
                           push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
                           setIsOpenView(false);
                         }
