@@ -19,7 +19,7 @@ export interface ConnectionEntry {
   identifier: string;
   name: string;
   address: string;
-  port: string;
+  port: number;
   protocol: string;
   username: string;
 }
@@ -98,7 +98,8 @@ function ListItem(props: { entry: ConnectionEntry }) {
               }}
             />
             <Action
-              title="Connect in Transmit (+tab)"
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Connect in Transmit (+Tab)"
               icon={Icon.Plus}
               onAction={() => {
                 showToast({
@@ -146,7 +147,7 @@ async function getServers(): Promise<ConnectionEntry[]> {
           identifier: { get: () => string };
           name: { get: () => string };
           address: { get: () => string };
-          port: { get: () => string };
+          port: { get: () => number };
           protocol: { get: () => string };
         },
         index: number
