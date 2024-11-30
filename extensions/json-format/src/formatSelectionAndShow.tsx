@@ -1,20 +1,9 @@
-import { getSelectedText, useNavigation } from "@raycast/api";
-import { formatJS } from "./utils";
+import { getSelectedText } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { FormattedJsonDetail } from "./formattedJsonDetail";
-import { useEffect } from "react";
+import { formatJS } from "./utils";
 
 export default function Command() {
-  const { push } = useNavigation();
-
-  useEffect(() => {
-    async function format() {
-      const output = await formatJS(await getSelectedText());
-      if (output) {
-        push(<FormattedJsonDetail json={output} />);
-      }
-    }
-    format();
-  }, [push]);
-
-  return null;
+  const { data: output } = usePromise(async () => await formatJS(await getSelectedText()));
+  return <FormattedJsonDetail json={output || []} />;
 }

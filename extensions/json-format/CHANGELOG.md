@@ -1,6 +1,6 @@
 # Changelog
 
-## [Adds formatSelectionAndShow] - 2024-11-26
+## [Adds formatSelectionAndShow] - {PR_MERGE_DATE}
 
 - Add a new command to format JSON selected in the foremost editor and show it in the viewer
 
