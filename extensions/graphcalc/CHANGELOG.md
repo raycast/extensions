@@ -14,3 +14,11 @@
 
 - Add logic to handle both expressions and equations
 - Add a history panel to view previous actions
+
+## [🔍Zoom, 🧭panning navigation and 🐛bugfixes] - 2024-11-30
+
+- Along with the ability to zoom and pan, the graph now has a reset button
+- Color toggle for the graph
+- Fix rendering for infinite values so -Infinity and Infinity are not connected by a line
+- Use MathMl in the formula representation
+- Refactoring and cleanup
