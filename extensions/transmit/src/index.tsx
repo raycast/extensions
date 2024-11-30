@@ -1,8 +1,21 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open, getApplications } from "@raycast/api";
+import { run } from "@jxa/run";
+import "@jxa/global-type";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  clearSearchBar,
+  closeMainWindow,
+  open,
+  getApplications,
+} from "@raycast/api";
 import { runAppleScript, usePromise } from "@raycast/utils";
 
 export interface ConnectionEntry {
-  id: string;
+  id: number;
   identifier: string;
   name: string;
   address: string;
@@ -15,10 +28,12 @@ export default function Command() {
   const { isLoading, data: servers } = usePromise(
     async () => {
       const apps = await getApplications();
-      const transmit = apps.find(app => app.name==="Transmit");
+      const transmit = apps.find((app) => app.name === "Transmit");
       if (!transmit) throw new Error();
       return await getServers();
-    }, [], {
+    },
+    [],
+    {
       failureToastOptions: {
         title: "Failed to load servers",
         message: "Download from https://panic.com/transmit/",
@@ -29,9 +44,9 @@ export default function Command() {
             toast.hide();
           },
         },
-      }
+      },
     }
-  )
+  );
 
   return (
     <List searchBarPlaceholder="Search servers..." isLoading={isLoading}>
@@ -47,7 +62,7 @@ function ListItem(props: { entry: ConnectionEntry }) {
     <List.Item
       title={props.entry.name}
       subtitle={props.entry.address}
-      accessories={[{text: props.entry.protocol}]}
+      accessories={[{ text: props.entry.protocol }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -122,30 +137,29 @@ function ListItem(props: { entry: ConnectionEntry }) {
 }
 
 async function getServers(): Promise<ConnectionEntry[]> {
-  const res = await runAppleScript(`
-    set _output to ""
-    tell application "Transmit"
-      set _id to 1
-      repeat with f in favorites
-        set _identifier to get identifier of f
-        set _name to get name of f
-        set _address to get address of f
-        set _port to get port of f
-        set _protocol to get protocol of f
-        
-        set _output to (_output & _identifier & "," & _name & "," & _address & "," & _port & "," & _protocol & "," & _id & "\n")
-        
-        set _id to _id + 1
-      end repeat
-    end tell
-    return _output
-    `
-  );
-  const servers = res.split("\n").slice(0,-1).map(server => {
-    const [identifier, name="", address, port, protocol, username, id] = server.split(",");
-    return {
-      identifier, name, address, port, protocol, username, id
-    }
+  return run(() => {
+    const Transmit = Application("Transmit");
+
+    return Transmit.favorites().map(
+      (
+        item: {
+          identifier: { get: () => string };
+          name: { get: () => string };
+          address: { get: () => string };
+          port: { get: () => string };
+          protocol: { get: () => string };
+        },
+        index: number
+      ) => {
+        return {
+          id: index + 1,
+          identifier: item.identifier.get(),
+          name: item.name.get() ?? "",
+          address: item.address.get(),
+          port: item.port.get(),
+          protocol: item.protocol.get(),
+        };
+      }
+    );
   });
-  return servers;
 }

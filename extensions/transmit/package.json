@@ -23,6 +23,9 @@
     }
   ],
   "dependencies": {
+    "@jxa/global-type": "^1.3.5",
+    "@jxa/run": "^1.3.5",
+    "@jxa/types": "^1.3.6",
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.18.1"
   },
