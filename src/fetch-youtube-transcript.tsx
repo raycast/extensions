@@ -14,19 +14,36 @@ interface Preferences {
   defaultDownloadFolder: string;
 }
 
-// Fetches the transcript for a given YouTube video ID
-async function getVideoTranscript(videoId: string): Promise<string> {
+// Interface to return both transcript and title
+interface TranscriptResult {
+  transcript: string;
+  title: string;
+}
+
+// Sanitize filename to remove invalid characters
+function sanitizeFilename(filename: string): string {
+  return filename.replace(/[<>:"/\\|?*]/g, '_').trim();
+}
+
+// Fetches the transcript and title for a given YouTube video ID
+async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
   try {
     const fetch = (await import("node-fetch")).default;
-    const transcript = await ytdl.getInfo(videoId);
+    const videoInfo = await ytdl.getInfo(videoId);
 
-    if (transcript.player_response.captions && transcript.player_response.captions.playerCaptionsTracklistRenderer) {
-      const captions = transcript.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
+    // Extract video title
+    const videoTitle = videoInfo.videoDetails.title;
+
+    if (videoInfo.player_response.captions && videoInfo.player_response.captions.playerCaptionsTracklistRenderer) {
+      const captions = videoInfo.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
       if (captions && captions.length) {
         const transcriptUrl = captions[0].baseUrl;
         const transcriptResponse = await fetch(transcriptUrl);
         const transcriptText = await transcriptResponse.text();
-        return processTranscript(transcriptText);
+        return {
+          transcript: processTranscript(transcriptText),
+          title: videoTitle
+        };
       }
     }
     throw new Error("No captions available for this video.");
@@ -66,11 +83,14 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     await showToast({ style: Toast.Style.Animated, title: "Fetching transcript..." });
 
-    const transcript = await getVideoTranscript(videoId);
+    // Get both transcript and title
+    const { transcript, title } = await getVideoTranscript(videoId);
 
     const preferences = getPreferenceValues<Preferences>();
     const downloadsFolder = preferences.defaultDownloadFolder || path.join(os.homedir(), "Downloads");
-    const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
+    
+    // Use sanitized video title in filename
+    const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
 
     await fs.writeFile(filename, transcript);
 
