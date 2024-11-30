@@ -23,7 +23,7 @@ if you are selfhost user navigate to `<self-host-url>/settings/developers`, once
 
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/3dc621b5-8d47-41a4-a86c-7129fd5bf5e8" alt="Raycast Settings"/></td>
+    <td><img src="https://github.com/user-attachments/assets/191dc74b-4856-49ba-8656-fc5668de98fb" alt="Raycast Settings"/></td>
   </tr>
 </table>
 
