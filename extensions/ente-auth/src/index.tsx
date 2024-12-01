@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { getProgressIcon, useFrecencySorting } from "@raycast/utils";
+import { getFavicon, getProgressIcon, useFrecencySorting } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getJsonFormatFromStore } from "./helpers";
 import { JsonFormat } from "./helpers/types";
-import { getIcon } from "./helpers/icons";
 
 // Ente colors - purple #A400B6, orange #FF9800
 const getProgressColor = (remainingTime: number) => {
@@ -76,7 +75,7 @@ export default function Command() {
             key={index}
             title={item.service_name}
             subtitle={item.username}
-            icon={{ source: getIcon(item.service_name), fallback: "icon.png" }}
+            icon={item.notes && /^https?:\/\//.test(item.notes) ? getFavicon(item.notes) : Icon.Key}
             keywords={[item.service_name, item.username ?? "", ...item.tags]}
             detail={
               <>
