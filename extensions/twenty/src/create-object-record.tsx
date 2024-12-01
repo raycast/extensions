@@ -53,18 +53,18 @@ export default function CreateObjectRecord() {
                       title="Create Record"
                       icon={Icon.List}
                       onAction={async () => {
-                        setIsOpenView(true);
-                        const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                        if (typeof objectRecordMetadata === "string") {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: objectRecordMetadata,
-                          });
-                          setTimeout(() => {
-                            setIsOpenView(false);
-                          }, 500);
-                        } else {
-                          push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                        try {
+                          setIsOpenView(true);
+                          const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
+                          if (typeof objectRecordMetadata === "string") {
+                            await showToast({
+                              style: Toast.Style.Failure,
+                              title: objectRecordMetadata,
+                            });
+                          } else {
+                            push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                          }
+                        } finally {
                           setIsOpenView(false);
                         }
                       }}
@@ -96,18 +96,18 @@ export default function CreateObjectRecord() {
                       title="Create Record"
                       icon={Icon.List}
                       onAction={async () => {
-                        setIsOpenView(true);
-                        const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
-                        if (typeof objectRecordMetadata === "string") {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: objectRecordMetadata,
-                          });
-                          setTimeout(() => {
-                            setIsOpenView(false);
-                          }, 500);
-                        } else {
-                          push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                        try {
+                          setIsOpenView(true);
+                          const objectRecordMetadata = await twenty.getRecordFieldsForDataModel(id);
+                          if (typeof objectRecordMetadata === "string") {
+                            await showToast({
+                              style: Toast.Style.Failure,
+                              title: objectRecordMetadata,
+                            });
+                          } else {
+                            push(OpenCreateObjectRecordForm({ objectRecordMetadata }));
+                          }
+                        } finally {
                           setIsOpenView(false);
                         }
                       }}
