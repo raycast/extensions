@@ -19,7 +19,7 @@ Surf Check is a Raycast extension that provides quick access to surf conditions 
   - Temperature (°F/°C)
 
 ## Screenshots
-
+![Configuration](./metadata/surf-check-3.png)
 ![List View](./metadata/surf-check-1.png)
 ![Detailed View](./metadata/surf-check-2.png)
 
@@ -31,9 +31,11 @@ Surf Check is a Raycast extension that provides quick access to surf conditions 
 2. Set your preferred spot ID in the extension preferences
 3. example: https://www.surfline.com/surf-report/lower-trestles/${spotId} | spotId is the numbers at the end of the url
 4. Configure your preferred measurement units in the extension preferences:
-   - Choose between feet (ft) or meters (m) for wave heights
-   - Select wind speed units (knots, km/h, or m/s)
-   - Pick temperature scale (Fahrenheit or Celsius)
+   - Choose between feet (ft) or meters (m) for surf heights
+   - Choose between feet (ft) or meters (m) for swell heights
+   - Choose between feet (ft) or meters (m) for tide heights
+   - Choose between knots (kts), km/h, or m/s for wind speed
+   - Choose between Fahrenheit (F) or Celsius (C) for temperature
 
 ### Checking Surf Conditions
 
