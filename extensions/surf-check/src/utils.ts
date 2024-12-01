@@ -12,7 +12,7 @@ export interface UnitPreferences {
 
 export function convertHeight(value: number, from: HeightUnit, to: HeightUnit): number {
   if (from === to) return value;
-  return from === "ft" ? Math.round(value * 0.3048 * 10) / 10 : Math.round(value / 0.3048 * 10) / 10;
+  return from === "ft" ? Math.round(value * 0.3048 * 10) / 10 : Math.round((value / 0.3048) * 10) / 10;
 }
 
 export function convertTemp(value: number, from: TemperatureUnit, to: TemperatureUnit): number {
@@ -26,7 +26,7 @@ export function convertWindSpeed(value: number, from: WindSpeedUnit, to: WindSpe
   let kts = value;
   if (from === "kph") kts = value / 1.852;
   if (from === "ms") kts = value / 0.514444;
-  
+
   // Convert from knots to target unit
   switch (to) {
     case "kts":
@@ -72,4 +72,4 @@ export function formatTemp(value: number, unit: TemperatureUnit, fromUnit: Tempe
 export function formatWindSpeed(value: number, unit: WindSpeedUnit, fromUnit: WindSpeedUnit = "kts"): string {
   const converted = fromUnit === unit ? value : convertWindSpeed(value, fromUnit, unit);
   return `${converted}${getUnitLabel(unit)}`;
-} 
+}

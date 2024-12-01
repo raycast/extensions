@@ -104,12 +104,7 @@ function formatUrlName(name: string): string {
 export default function Command() {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { 
-    spotId, 
-    surfHeightUnit,
-    windSpeedUnit,
-    temperatureUnit 
-  } = getPreferenceValues<Preferences>();
+  const { spotId, surfHeightUnit, windSpeedUnit, temperatureUnit } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     fetchSurfData();
@@ -140,12 +135,18 @@ export default function Command() {
             subtitle={`${formatString(spot.rating.key)} (${formatSurfHeight(spot.waveHeight.min, spot.waveHeight.max, surfHeightUnit)})`}
             accessories={[
               { text: formatString(spot.waveHeight.humanRelation) },
-              { icon: Icon.Wind, text: `${getWindDescription(spot.wind.speed)} ${formatWindSpeed(spot.wind.speed, windSpeedUnit)}` },
+              {
+                icon: Icon.Wind,
+                text: `${getWindDescription(spot.wind.speed)} ${formatWindSpeed(spot.wind.speed, windSpeedUnit)}`,
+              },
               { icon: Icon.Temperature, text: formatTemp(spot.waterTemp.max, temperatureUnit) },
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<SpotDetails spot={spot} preferences={{ surfHeightUnit, windSpeedUnit, temperatureUnit }} />} />
+                <Action.Push
+                  title="Show Details"
+                  target={<SpotDetails spot={spot} preferences={{ surfHeightUnit, windSpeedUnit, temperatureUnit }} />}
+                />
                 <Action.OpenInBrowser title="Open Surfline Report" url={surflineUrl} />
               </ActionPanel>
             }
@@ -233,7 +234,7 @@ function SpotDetails({ spot, preferences }: SpotDetailsProps) {
 ${detailedSpot.forecast.swells
   .map(
     (swell, index) =>
-      `${index + 1}. Height: ${formatHeight(swell.height, surfHeightUnit)}, Period: ${swell.period}s, Direction: ${swell.direction}°`
+      `${index + 1}. Height: ${formatHeight(swell.height, surfHeightUnit)}, Period: ${swell.period}s, Direction: ${swell.direction}°`,
   )
   .join("\n")}
 
@@ -265,7 +266,11 @@ _Data provided by Surfline_
           />
           <Detail.Metadata.Label
             title="Wave Height"
-            text={formatSurfHeight(detailedSpot.forecast.waveHeight.min, detailedSpot.forecast.waveHeight.max, surfHeightUnit)}
+            text={formatSurfHeight(
+              detailedSpot.forecast.waveHeight.min,
+              detailedSpot.forecast.waveHeight.max,
+              surfHeightUnit,
+            )}
           />
           <Detail.Metadata.Label
             title="Wind"
