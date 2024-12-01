@@ -33,6 +33,7 @@
       "name": "export",
       "title": "Export Secrets",
       "description": "Export Ente Auth secrets to a JSON file",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -45,6 +46,7 @@
       "name": "delete",
       "title": "Delete Export",
       "description": "Delete Ente Auth Exported file",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],
