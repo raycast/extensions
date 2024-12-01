@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "memberstack",
   "title": "Memberstack",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "List, Update or Delete Members",
+  "icon": "memberstack.png",
   "author": "xmok",
   "categories": [
     "Other"
@@ -21,10 +21,10 @@
   ],
   "commands": [
     {
-      "name": "list-members",
-      "title": "List Members",
+      "name": "manage-members",
+      "title": "Manage Members",
       "subtitle": "Memberstack",
-      "description": "",
+      "description": "List, Update or Delete Members",
       "mode": "view"
     }
   ],
