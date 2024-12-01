@@ -27,7 +27,7 @@
     "parser"
   ],
   "dependencies": {
-    "@raycast/api": "^1.85.2",
+    "@raycast/api": "^1.86.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
