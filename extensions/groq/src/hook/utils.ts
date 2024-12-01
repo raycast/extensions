@@ -9,7 +9,7 @@ export const allModels = [
   { name: "Mixtral 8x7B 32k", id: "mixtral-8x7b-32768" },
   { name: "Gemma 7B 8k", id: "gemma-7b-it" },
   { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
-  {name: "Llama3.2 90B 128k", id: "llama-3.2-90b-vision-preview"},
+  { name: "Llama3.2 90B 128k", id: "llama-3.2-90b-vision-preview" },
 ];
 
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
