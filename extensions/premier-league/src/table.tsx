@@ -109,7 +109,7 @@ export default function EPLTables() {
                 <List.Item
                   key={position}
                   title={position.toString()}
-                  subtitle={team.name}
+                  subtitle={team.name.length > 20 ? team.shortName : team.name}
                   keywords={[team.name, team.shortName, team.club.abbr]}
                   icon={{
                     source: getClubLogo(team.altIds.opta),
