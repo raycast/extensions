@@ -68,7 +68,7 @@
       "placeholder": "Export Path"
     },
     {
-      "name": "action",
+      "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
       "description": "Choose whether the primary action should copy or paste the output.",
