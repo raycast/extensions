@@ -84,6 +84,20 @@
       ],
       "default": "paste",
       "required": false
+    },
+    {
+      "name": "overwriteAction",
+      "type": "checkbox",
+      "title": "Overwrite Current Export",
+      "description": "Choose whether the export should overwrite on runs.",
+      "required": false
+    },
+    {
+      "name": "deleteExport",
+      "type": "checkbox",
+      "title": "Delete Export File After Import",
+      "description": "Choose whether the export should be deleted after import.",
+      "required": false
     }
   ],
   "dependencies": {
