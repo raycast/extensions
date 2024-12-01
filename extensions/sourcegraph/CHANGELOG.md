@@ -1,6 +1,6 @@
 # Changelog
 
-## Search improvements, pattern selector, and proxy support - Unreleased
+## [Search improvements, pattern selector, and proxy support](https://github.com/raycast/extensions/pull/15625) - 2024-11-30
 
 - **search**: The search pattern selector is now enabled by default, allowing you to easily toggle between standard, literal, regexp, and other search patterns. This can be disabled in the extension preferences if you find the dropdown takes up too much space in the search bar.
 - **search**: For search results that have associated file paths, you can now easily copy the path of the file associated with a result or open it in the browser with the new `Copy File Path` and `Open File in Browser` actions.
