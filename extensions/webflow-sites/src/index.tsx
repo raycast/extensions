@@ -14,7 +14,11 @@ import {
 } from "@raycast/api";
 
 import { pathToFileURL } from "url";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { getAccessToken, getFavicon, showFailureToast, useCachedPromise, useFetch, withAccessToken } from "@raycast/utils";
+import { provider } from "./oauth";
+import { WebflowClient, WebflowError } from "webflow-api";
+import "cross-fetch/polyfill";
+import { Site } from "webflow-api/api";
 
 const imageApiError = pathToFileURL(`${environment.assetsPath}/peeks-api-incorrect.png`).href;
 
@@ -28,23 +32,18 @@ type SiteV1 = {
   previewUrl?: string;
 };
 
-export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+export default withAccessToken(provider)(Command);
 
-  const { isLoading, data, error } = useFetch("https://api.webflow.com/sites", {
-    method: "GET",
-    headers: {
-      "Accept-Version": "1.0.0",
-      Authorization: `Bearer ${preferences.webflowToken}`,
-    },
+function Command() {
+  const { token } = getAccessToken();
+  const webflow = new WebflowClient({ accessToken: token });
+  const { isLoading, data, error } = useCachedPromise(async () => {
+    const result = await webflow.sites.list();
+    const sorted = sortByLastPublished(result.sites ?? []);
+    return sorted;
+  }, [], {
     async onWillExecute() {
       await showToast({ title: "Fetching", message: "Loading", style: Toast.Style.Animated });
-    },
-    mapResult(result: SiteV1[]) {
-      const sorted = sortByLastPublished(result);
-      return {
-        data: sorted,
-      };
     },
     async onData(data) {
       await showToast({
@@ -53,14 +52,11 @@ export default function Command() {
         style: Toast.Style.Success,
       });
     },
-    async onError() {
-      await showToast({
-        title: "Error",
-        message: "Check your API token",
-        style: Toast.Style.Failure,
-      });
+    async onError(error: Error | WebflowError) {
+      const message = ("body" in error) ? (error.body as Error).message : error.message;
+      showFailureToast(message);
     },
-    initialData: [],
+    initialData: []
   });
 
   if (error) {
@@ -97,27 +93,27 @@ export default function Command() {
   );
 }
 
-function returnItem(site: SiteV1) {
+function returnItem(site: Site) {
   return (
     <Grid.Item
-      key={site._id}
-      title={site.name}
+      key={site.id}
+      title={site.displayName}
       content={site.previewUrl || "site-empty-thumbnail.svg"}
       subtitle={site.shortName}
-      keywords={[site.shortName]}
+      keywords={[`${site.shortName}`]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             icon={{ source: "wf-logo-circle.svg" }}
             title="Open in Webflow Designer"
             url={`https://webflow.com/design/${site.shortName}`}
-            onOpen={() => showHUD(`Opened ${site.name} in Designer`)}
+            onOpen={() => showHUD(`Opened ${site.displayName} in Designer`)}
           />
           <Action.OpenInBrowser
             icon={getFavicon(`https://${site.shortName}.webflow.io`, { fallback: Icon.Globe })}
             title={`Open Site in Browser`}
             url={`https://${site.shortName}.webflow.io`}
-            onOpen={() => showHUD(`Opened ${site.name} in Browser`)}
+            onOpen={() => showHUD(`Opened ${site.displayName} in Browser`)}
           />
           <Action.OpenInBrowser
             icon={Icon.Cog}
@@ -157,17 +153,17 @@ function returnItem(site: SiteV1) {
   );
 }
 
-function returnSection(data: SiteV1[]) {
+function returnSection(data: Site[]) {
   if (data.length > 8) {
     return (
       <Grid.Section columns={5} title="All Sites">
-        {data.slice(8).map((site: SiteV1) => returnItem(site))}
+        {data.slice(8).map((site) => returnItem(site))}
       </Grid.Section>
     );
   }
 }
 
-function sortByLastPublished(data: SiteV1[]) {
+function sortByLastPublished(data: Site[]) {
   return data.sort((a, b) => {
     if (a.lastPublished && b.lastPublished) {
       return new Date(b.lastPublished).getTime() - new Date(a.lastPublished).getTime();
