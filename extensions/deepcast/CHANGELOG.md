@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Formality] - {PR_MERGE_DATE}
+## [Formality] - 2024-12-02
 - Better icon for switch languages action
 - Added support for formality
 - Added preference to show/hide transliteration
