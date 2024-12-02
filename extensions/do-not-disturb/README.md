@@ -19,6 +19,8 @@ This extension follows [Raycast Cross-Extension Conventions][raycast-cross-exten
 
 You can use `crossLaunchCommand` or built-in `launchCommand` to use its features.
 
+The `toggle` and `status` has a `dndStatus` callback payload. Possible values are `true` | `false` | `undefined`, the `undefined` means the DND shortcut is not found.
+
 ### Examples
 
 ```typescript
