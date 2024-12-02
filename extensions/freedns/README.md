@@ -4,7 +4,7 @@
 
 # FreeDNS
 
-This is a Raycast extension for FreeDNS (https://freedns.afraid.org/). It uses the **ASCII** API (not **XML**) to fetch your records and allows you to change the assciated addresses.
+This is a Raycast extension for FreeDNS (https://freedns.afraid.org/). It uses the **ASCII** API (not **XML**) to fetch your records and allows you to change the associated addresses.
 
 ## 🚀 Getting Started
 
