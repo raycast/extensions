@@ -1,11 +1,19 @@
 # Search Documate Changelog
 
+## [New Commands] - 2024-11-25
+
+- Added the **Manage Favorites** command to manage your favorite items and groups.
+- Introduced the **Explore Navigation Menu** command to browse the navigation menu's applications and modules.
+- New **Explore Navigation History** command to view the instance elements you've previously visited.
+- Favorites now appear in search results for easier access.
+- Added limited and full options, defined at the profile level.
+
 ## [Fixes & Bits] - 2024-10-23
 
 - Documate pages now open directly in the editor
 - Improved search results filtering
-- Added `Login to Selected Instance` command
-- Added `Search Resources` command to help find ServiceNow resources
+- Added **Login to Selected Instance** command
+- Added **Search Resources** command to help find ServiceNow resources
 - Removed unnecessary tooltips in the Instance Profile Form for a cleaner interface
 
 ## [Initial Version] - 2024-10-17

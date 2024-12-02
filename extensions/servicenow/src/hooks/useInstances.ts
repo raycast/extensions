@@ -1,6 +1,12 @@
+import { useEffect } from "react";
+
 import { useCachedState } from "@raycast/utils";
-import { useLocalStorage } from "./useLocalStorage";
 import { LocalStorage } from "@raycast/api";
+
+import fetch from "node-fetch";
+
+import { useLocalStorage } from "./useLocalStorage";
+
 import { Instance } from "../types";
 
 const compareInstances = (a: Instance, b: Instance): number => {
@@ -11,6 +17,7 @@ const compareInstances = (a: Instance, b: Instance): number => {
 
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const [userId, setUserId] = useCachedState<string>("user-id");
 
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>("saved-instances", []);
 
@@ -39,6 +46,32 @@ export default function useInstances() {
     }
   }
 
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!selectedInstance) {
+        return "";
+      }
+
+      const { name: instanceName = "", username = "", password = "" } = selectedInstance;
+      const response = await fetch(
+        `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        return "";
+      }
+
+      const jsonData = (await response.json()) as { result: { sys_id: string }[] };
+      return jsonData.result[0].sys_id;
+    };
+    fetchUserId().then((userId) => setUserId(userId));
+  }, [selectedInstance]);
+
   return {
     instances: value.sort((a, b) => compareInstances(a, b)),
     addInstance,
@@ -46,5 +79,8 @@ export default function useInstances() {
     deleteInstance,
     mutate,
     isLoading,
+    selectedInstance,
+    setSelectedInstance,
+    userId,
   };
 }

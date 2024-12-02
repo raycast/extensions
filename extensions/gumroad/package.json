@@ -5,6 +5,9 @@
   "description": "View your sales and products from Gumroad",
   "icon": "icon.png",
   "author": "eddiesigner",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Finance"
   ],
@@ -29,9 +32,10 @@
     {
       "name": "token",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Gumroad Token",
-      "description": "You must provide an access token so that you can interact with the API."
+      "description": "Provide an access token instead of using OAuth to interact with the API.",
+      "placeholder": "OPTIONAL"
     }
   ],
   "dependencies": {
