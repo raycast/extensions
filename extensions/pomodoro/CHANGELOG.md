@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-12-02
 
 - Fix command launch sequence
 - Regenerate `package-lock.json` file

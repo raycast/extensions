@@ -1,6 +1,6 @@
 # Do Not Disturb Changelog
 
-## [API Update] - {PR_MERGE_DATE}
+## [API Update] - 2024-12-02
 
 - Add support for callback launch
 - Add `dndStatus` to callback payload
