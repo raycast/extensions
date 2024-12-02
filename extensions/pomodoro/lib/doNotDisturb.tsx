@@ -1,5 +1,5 @@
 import { confirmAlert, LaunchType, open, getPreferenceValues } from "@raycast/api";
-import { crossLaunchCommand } from "raycast-cross-extension";
+import { crossLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 
 const { enableFocusWhileFocused } = getPreferenceValues<ExtensionPreferences>();
 
@@ -9,7 +9,7 @@ export const dndLaunchOptions = {
   ownerOrAuthorName: "yakitrak",
 };
 
-export async function setDND(enabled: boolean) {
+export async function setDND(enabled: boolean, callbackOptions?: Partial<LaunchOptions>) {
   if (!enableFocusWhileFocused) return;
   return crossLaunchCommand(
     {
@@ -17,19 +17,22 @@ export async function setDND(enabled: boolean) {
       name: enabled ? "on" : "off",
       context: { supressHUD: !enabled },
     },
-    false,
+    callbackOptions ? callbackOptions : false,
   ).catch(() => {
     // Do nothing here because we're going to check when mounting the extension
   });
 }
 
-export async function checkDNDExtensionInstall() {
+export async function checkDNDExtensionInstall(callbackOptions?: Partial<LaunchOptions>) {
   if (!enableFocusWhileFocused) return;
-  await crossLaunchCommand({
-    ...dndLaunchOptions,
-    name: "status",
-    context: { suppressHUD: true },
-  }).catch(async () => {
+  await crossLaunchCommand(
+    {
+      ...dndLaunchOptions,
+      name: "status",
+      context: { suppressHUD: true },
+    },
+    callbackOptions ? callbackOptions : false,
+  ).catch(async () => {
     const installDND = await confirmAlert({
       title: "Need to Install Additional Extension",
       message:
