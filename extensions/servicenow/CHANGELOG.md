@@ -1,6 +1,6 @@
 # Search Documate Changelog
 
-## [Navigation History Command Fix] - {PR_MERGE_DATE}
+## [Navigation History Command Fix] - 2024-12-02
 
 - Fixed an issue with the Explore Navigation History command that was failing when the instance had a different date format from the Out-of-the-Box (OOTB) format.
 - Applied minor fixes and aesthetic improvements for a smoother user experience.
