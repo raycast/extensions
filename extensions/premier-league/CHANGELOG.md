@@ -1,6 +1,6 @@
 # Premier League Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-12-02
 
 - Fixed standings to show points for teams with long names. Teams with names greater than 20 characters use short names.
 - Updated the dependencies and removed critical security vulnerabilities, plus unnecessary dependencies.
