@@ -2,6 +2,16 @@ import { CurrencyFormat } from '@srcTypes';
 import { utils } from 'ynab';
 import { isNumberLike } from './validation';
 
+/**
+ * Format a YNAB currency amount with its symbol based on placement rules.
+ * @see https://api.ynab.com/#formats
+ * @param amount - The formatted amount in milliunits (e.g. "1,234.56")
+ * @param symbol - The currency symbol (e.g. "$")
+ * @param symbol_first - Whether the symbol should appear before the amount
+ * @param shouldPrefixSymbol - Whether to place the negative sign before the symbol for negative amounts
+ * @returns The formatted string with proper symbol placement (e.g. "$1,234.56" or "-$1,234.56")
+ */
+
 export function formatToReadablePrice({
   amount,
   currency,
@@ -55,5 +65,34 @@ function formatCurrencyPlacement(amount: string, symbol: string, symbol_first: b
     return shouldPrefixSymbol ? `-${symbol}${amount.substring(1)}` : `${symbol}${amount}`;
   } else {
     return `${amount}${symbol}`;
+  }
+}
+
+/**
+ * Distributes a total amount evenly across a specified number of items, handling rounding to cents.
+ * If the rounded distributions don't sum exactly to the total amount, the difference is added to
+ * the first item to ensure the total remains accurate.
+ *
+ * @param amount - The total amount to distribute (e.g., 100 for $100)
+ * @param dividend - The number of items to distribute the amount across
+ * @returns An array of numbers representing the distributed amounts, rounded to 2 decimal places
+ *
+ * @example
+ * // Distributing $100 across 3 items
+ * autoDistribute(100, 3) // Returns [33.34, 33.33, 33.33]
+ */
+
+export function autoDistribute(amount: number, dividend: number): number[] {
+  const baseAmount = amount / dividend;
+  const roundedAmount = Math.round(baseAmount * 100) / 100;
+  const total = roundedAmount * dividend;
+  const difference = amount - total;
+
+  if (difference === 0) {
+    return Array(dividend).fill(roundedAmount);
+  } else {
+    const newAmounts = Array(dividend).fill(roundedAmount);
+    newAmounts[0] = Math.round((newAmounts[0] + difference) * 100) / 100;
+    return newAmounts;
   }
 }

@@ -5,6 +5,7 @@ import type {
   Category as ynabCategory,
   CategoryGroupWithCategories as ynabCategoryGroupWithCategories,
   BudgetDetail as ynabBudgetDetail,
+  SaveSubTransaction,
 } from 'ynab';
 
 export interface Preferences {
@@ -34,6 +35,10 @@ export type Period = 'day' | 'week' | 'month' | 'quarter' | 'year';
 export type FlagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
 
 export type CurrencyFormat = ynabCurrencyFormat | null | undefined;
+
+export interface SaveSubTransactionWithReadableAmounts extends Omit<SaveSubTransaction, 'amount'> {
+  amount: string;
+}
 
 export interface BudgetSummary {
   id: string;

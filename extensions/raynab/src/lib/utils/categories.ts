@@ -10,9 +10,9 @@
 */
 
 import { Color, Icon } from '@raycast/api';
-import { Category as ynabCategory } from 'ynab';
+import { CategoryGroupWithCategories, TransactionDetail, Category as ynabCategory } from 'ynab';
 import { formatToReadablePrice } from './transactions';
-import type { Category, CurrencyFormat } from '@srcTypes';
+import type { Category, CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 
 type GoalShape = 'underfunded' | 'funded' | 'overspent' | 'neutral';
 
@@ -106,4 +106,15 @@ export function formatGoalType(category: Category, currency: CurrencyFormat): st
     default:
       return 'Goal Unknown';
   }
+}
+
+export function isSplitTransaction(transaction: TransactionDetail): boolean {
+  return transaction.category_name === 'Split' && transaction.subtransactions.length > 0;
+}
+
+export function getSubtransacionCategoryname(
+  categories: Category[] | undefined,
+  subtransaction: SaveSubTransactionWithReadableAmounts
+): string {
+  return categories?.find((c) => c.id === subtransaction.category_id)?.name ?? '';
 }

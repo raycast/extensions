@@ -1,26 +1,30 @@
 import { updateTransaction } from '@lib/api';
-import { easyGetColorFromId, formatToReadablePrice, formatToYnabAmount, isNumberLike } from '@lib/utils';
+import {
+  autoDistribute,
+  easyGetColorFromId,
+  formatToReadablePrice,
+  formatToYnabAmount,
+  getSubtransacionCategoryname,
+  isNumberLike,
+  isSplitTransaction,
+} from '@lib/utils';
 import { Action, ActionPanel, Alert, confirmAlert, Color, Form, Icon, showToast, Toast } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
-import { CategoryGroupWithCategories, CurrencyFormat, TransactionDetail } from '@srcTypes';
+import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
 
-import { SaveSubTransaction, SaveTransaction } from 'ynab';
+import { SaveTransaction } from 'ynab';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { usePayees } from '@hooks/usePayees';
-
-interface SaveSubTransactionWithReadableAmounts extends Omit<SaveSubTransaction, 'amount'> {
-  amount: string;
-}
 
 interface FormValues {
   date: Date | null;
   amount: string;
   payee_id: string;
   memo?: string;
-  category?: string[];
+  categoryList?: string[];
   flag_color?: string;
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
 }
@@ -31,6 +35,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
 
   const { data: payees, isValidating: isPayeesLoading } = usePayees(activeBudgetId);
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
+  const categories = categoryGroups?.flatMap((group) => group.categories);
 
   const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
@@ -39,7 +44,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       amount: formatToReadablePrice({ amount: s.amount, locale: false }),
     }));
   });
-  const [category, setCategory] = useState(() => {
+  const [categoryList, setCategoryList] = useState(() => {
     if (isSplitTransaction(transaction)) {
       return subtransactions.map((s) => s.category_id ?? '');
     }
@@ -55,13 +60,11 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       payee_id: transaction.payee_id ?? undefined,
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
-      category: category.length > 0 && !!category[0] ? category : subtransactions.map((s) => s.category_id ?? ''),
+      categoryList:
+        categoryList.length > 0 && !!categoryList[0] ? categoryList : subtransactions.map((s) => s.category_id ?? ''),
     },
     onSubmit: async (values) => {
-      // Make sure to match the subtransactions amounts if they exist against the total amount
-      // If they don't match ask the user to make sure they understand the consequences
-
-      const submittedValues = {
+      const transactionData = {
         ...transaction,
         date: (values.date ?? new Date()).toISOString(),
         flag_color: values.flag_color
@@ -70,7 +73,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         amount: formatToYnabAmount(values.amount),
         payee_id: values.payee_id,
         memo: values.memo || null,
-        category_id: values.category?.[0] || undefined,
+        category_id: values.categoryList?.[0] || undefined,
       };
 
       /**
@@ -78,10 +81,10 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
        * That validation makes sense to keep at this level
        * */
       if (subtransactions.length > 0) {
-        submittedValues.category_id = undefined;
+        transactionData.category_id = undefined;
 
         /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        submittedValues.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
+        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
 
         const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
         const difference = subtransactionsTotal - +values.amount;
@@ -113,7 +116,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       }
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
-      updateTransaction(activeBudgetId, transaction.id, submittedValues)
+      updateTransaction(activeBudgetId, transaction.id, transactionData)
         .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
@@ -131,9 +134,12 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         if (isNumberLike(value) === false) return `${value} is not a valid number`;
       },
       payee_id: FormValidation.Required,
-      category: (value) => {
-        if (value?.length === 0 && subtransactions.length === 0)
-          return 'Please add one or more categories to this transaction';
+      categoryList: (value) => {
+        const errorMessage = 'Please add one or more categories to this transaction';
+        if (!value) {
+          return errorMessage;
+        }
+        if (value?.length === 0 && subtransactions.length === 0) return errorMessage;
       },
     },
   });
@@ -190,9 +196,9 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         them with two different states.
       */}
       <Form.TagPicker
-        {...itemProps.category}
+        {...itemProps.categoryList}
         title="Category"
-        value={category}
+        value={categoryList}
         /* At the moment the API doesn't support updating existing split transactions' subtransactions */
         onChange={
           !isSplitTransaction(transaction)
@@ -201,29 +207,27 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
                   const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
                     amount.toString()
                   );
-                  setCategory(newCategories);
+                  setCategoryList(newCategories);
                   setSubtransactions(
                     newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
                   );
                 } else {
-                  setCategory(newCategories);
+                  setCategoryList(newCategories);
                   setSubtransactions([]);
                 }
               }
             : undefined
         }
       >
-        {categoryGroups ? (
-          categoryGroups
-            .flatMap((g) => g.categories)
-            .map((category, idx) => (
-              <Form.TagPicker.Item
-                key={category.id}
-                value={category.id}
-                title={category.name}
-                icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
-              />
-            ))
+        {categories ? (
+          categories.map((category, idx) => (
+            <Form.TagPicker.Item
+              key={category.id}
+              value={category.id}
+              title={category.name}
+              icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
+            />
+          ))
         ) : (
           <Form.TagPicker.Item value="" title="" />
         )}
@@ -237,7 +241,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
             <Form.TextField
               id={`subtransaction-${idx}`}
               key={transaction.category_id}
-              title={getSubtransacionCategoryname(categoryGroups || [], transaction)}
+              title={getSubtransacionCategoryname(categories, transaction)}
               value={transaction.amount}
               onChange={onSubcategoryAmountChange(transaction)}
             />
@@ -259,44 +263,4 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       </Form.Dropdown>
     </Form>
   );
-}
-
-/**
- * Distributes a total amount evenly across a specified number of items, handling rounding to cents.
- * If the rounded distributions don't sum exactly to the total amount, the difference is added to
- * the first item to ensure the total remains accurate.
- *
- * @param amount - The total amount to distribute (e.g., 100 for $100)
- * @param dividend - The number of items to distribute the amount across
- * @returns An array of numbers representing the distributed amounts, rounded to 2 decimal places
- *
- * @example
- * // Distributing $100 across 3 items
- * autoDistribute(100, 3) // Returns [33.34, 33.33, 33.33]
- */
-
-function autoDistribute(amount: number, dividend: number): number[] {
-  const baseAmount = amount / dividend;
-  const roundedAmount = Math.round(baseAmount * 100) / 100;
-  const total = roundedAmount * dividend;
-  const difference = amount - total;
-
-  if (difference === 0) {
-    return Array(dividend).fill(roundedAmount);
-  } else {
-    const newAmounts = Array(dividend).fill(roundedAmount);
-    newAmounts[0] = Math.round((newAmounts[0] + difference) * 100) / 100;
-    return newAmounts;
-  }
-}
-
-function isSplitTransaction(transaction: TransactionDetail): boolean {
-  return transaction.category_name === 'Split' && transaction.subtransactions.length > 0;
-}
-
-function getSubtransacionCategoryname(
-  categoryGroups: CategoryGroupWithCategories[],
-  subtransaction: SaveSubTransactionWithReadableAmounts
-): string {
-  return categoryGroups?.flatMap((g) => g.categories).find((c) => c.id === subtransaction.category_id)?.name ?? '';
 }

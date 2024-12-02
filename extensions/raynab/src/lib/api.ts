@@ -167,7 +167,7 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
   }
 }
 
-type TransactionCreation = Omit<TransactionDetail, 'account_name' | 'id' | 'deleted' | 'subtransactions'>;
+type TransactionCreation = SaveTransaction;
 
 export async function createTransaction(selectedBudgetId: string, transactionData: TransactionCreation) {
   try {
