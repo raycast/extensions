@@ -81,34 +81,32 @@ export default function Command() {
   };
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm title="Replace" icon={Icon.Pencil} onSubmit={renameFiles} />
-          </ActionPanel>
-        }
-      >
-        {files.length > 0 && (
-          <>
-            <Form.TextField
-              id="replaceCharacter"
-              title="Character to Replace"
-              value={replaceCharacter}
-              onChange={setReplaceCharacter}
-              placeholder="Enter character to replace"
-            />
-            <Form.TextField
-              id="newCharacter"
-              title="New Character"
-              value={newCharacter}
-              onChange={setNewCharacter}
-              placeholder="Enter new character"
-            />
-          </>
-        )}
-        <Form.Separator />
-      </Form>
-    </>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Replace" icon={Icon.Pencil} onSubmit={renameFiles} />
+        </ActionPanel>
+      }
+    >
+      {files.length > 0 && (
+        <>
+          <Form.TextField
+            id="replaceCharacter"
+            title="Character to Replace"
+            value={replaceCharacter}
+            onChange={setReplaceCharacter}
+            placeholder="Enter character to replace"
+          />
+          <Form.TextField
+            id="newCharacter"
+            title="New Character"
+            value={newCharacter}
+            onChange={setNewCharacter}
+            placeholder="Enter new character"
+          />
+        </>
+      )}
+      <Form.Separator />
+    </Form>
   );
 }
