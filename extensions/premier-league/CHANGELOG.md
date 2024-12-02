@@ -4,6 +4,7 @@
 
 - Fixed standings to show points for teams with long names. Teams with names greater than 20 characters use short names.
 - Updated the dependencies and removed critical security vulnerabilities, plus unnecessary dependencies.
+- Changed qualification metadata position and fixed description map lookup.
 
 ## [Awards & Match Day Essentials] - 2024-09-28
 - Added live match commentary and line-up information for each fixture, providing a more immersive experience.
