@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Quick Add Task Improvement] - {PR_MERGE_DATE}
+## [Quick Add Task Improvement] - 2024-12-02
 
 Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.
 
