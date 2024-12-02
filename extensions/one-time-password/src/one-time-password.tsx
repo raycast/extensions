@@ -36,7 +36,7 @@ export default () => {
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
 
-const { appearance } = environment;
+  const { appearance } = environment;
 
   async function loadAccounts() {
     if (accounts.length === 0) setLoading(true);
