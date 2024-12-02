@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [New feature] - {PR_MERGE_DATE}
+## [New feature] - 2024-12-02
 
 - Add a new `Replace File(s) Characters` command to change characters in file names.
 
