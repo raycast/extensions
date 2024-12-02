@@ -13,7 +13,6 @@ import {
   Toast,
 } from "@raycast/api";
 import {
-  capitalizeWords,
   checkZsh,
   errorRegex,
   getSignInStatus,
