@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Add new features] - 2024-12-02
+
+- Add `netcheck` command
+
 ## [Improvement] - 2024-11-08
 
 - Provide UI indicator, and HUD message on `connect (tailscale up)` and `disconnect (tailscale down)` commands
