@@ -61,6 +61,7 @@ export default function Command() {
                     <Action title="View Cards" icon="cards.png" onAction={() => setSelectedPack(pack.Name)} />
                   </ActionPanel>
                 }
+                
               />
             )),
           ]
@@ -73,6 +74,7 @@ export default function Command() {
               detail={
                 <List.Item.Detail markdown={`<img src="${card.Img}" alt="${card.Name}" width="250" height="348" />`} />
               }
+              
               actions={
                 <ActionPanel>
                   <Action

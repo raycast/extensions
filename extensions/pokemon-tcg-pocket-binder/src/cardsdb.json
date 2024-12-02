@@ -2062,7 +2062,7 @@
     "ID": "PA 010",
     "Pack": "Promo Pack A Series Vol. 1",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-010-mewtwo.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Premium Ticket"
   },
   {
     "Name": "Chansey",
@@ -2086,67 +2086,67 @@
     "Rarity": "Chansey Pick"
   },
   {
-    "Name": "Lapras ex",
+    "Name": "Lapras EX",
     "ID": "PA 014",
     "Pack": "Promo Pack A Series Vol. 1",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-014-lapras-ex.png",
-    "Rarity": "Chansey Pick"
+    "Rarity": "Event"
   },
   {
     "Name": "Pikachu",
     "ID": "PA 015",
     "Pack": "Promo Pack A Series Vol. 1",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-015-pikachu.png",
-    "Rarity": "Chansey Pick"
+    "Rarity": "Event"
   },
   {
     "Name": "Clefairy",
     "ID": "PA 016",
     "Pack": "Promo Pack A Series Vol. 1",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-016-clefairy.png",
-    "Rarity": "Chansey Pick"
+    "Rarity": "Event"
   },
   {
     "Name": "Mankey",
     "ID": "PA 017",
     "Pack": "Promo Pack A Series Vol. 1",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-017-mankey.png",
-    "Rarity": "Chansey Pick"
+    "Rarity": "Event"
   },
   {
     "Name": "Venusaur",
     "ID": "PA 018",
     "Pack": "Promo Pack A Series Vol. 2",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-018-venusaur.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Event"
   },
   {
     "Name": "Greninja",
     "ID": "PA 019",
     "Pack": "Promo Pack A Series Vol. 2",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-019-greninja.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Event"
   },
   {
     "Name": "Haunter",
     "ID": "PA 020",
     "Pack": "Promo Pack A Series Vol. 2",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-020-haunter.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Event"
   },
   {
     "Name": "Onix",
     "ID": "PA 021",
     "Pack": "Promo Pack A Series Vol. 2",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-021-onix.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Event"
   },
   {
     "Name": "Jigglypuff",
     "ID": "PA 022",
     "Pack": "Promo Pack A Series Vol. 2",
     "Img": "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/11/pokemon-tcg-pocket-pa-022-jigglypuff.png",
-    "Rarity": "Unreleased"
+    "Rarity": "Event"
   },
   {
     "Name": "Bulbasaur",
