@@ -2,8 +2,17 @@ import { ActionPanel, Detail, List, Action, Icon, Color, useNavigation } from "@
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
+import {
+  HeightUnit,
+  WindSpeedUnit,
+  TemperatureUnit,
+  UnitPreferences,
+  formatHeight,
+  formatTemp,
+  formatWindSpeed,
+} from "./utils";
 
-interface Preferences {
+interface Preferences extends UnitPreferences {
   spotId: string;
 }
 
@@ -53,8 +62,8 @@ function formatString(str: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatSurfHeight(min: number, max: number): string {
-  return `${Math.round(min)}-${Math.round(max)}ft`;
+function formatSurfHeight(min: number, max: number, unit: HeightUnit): string {
+  return `${formatHeight(min, unit)}-${formatHeight(max, unit)}`;
 }
 
 function getRatingIcon(rating: string): { icon: Icon; tintColor: Color } {
@@ -95,7 +104,7 @@ function formatUrlName(name: string): string {
 export default function Command() {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { spotId } = getPreferenceValues<Preferences>();
+  const { spotId, surfHeightUnit, windSpeedUnit, temperatureUnit } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     fetchSurfData();
@@ -123,15 +132,21 @@ export default function Command() {
             key={spot._id}
             icon={{ source: icon, tintColor }}
             title={spot.name}
-            subtitle={`${formatString(spot.rating.key)} (${formatSurfHeight(spot.waveHeight.min, spot.waveHeight.max)})`}
+            subtitle={`${formatString(spot.rating.key)} (${formatSurfHeight(spot.waveHeight.min, spot.waveHeight.max, surfHeightUnit)})`}
             accessories={[
               { text: formatString(spot.waveHeight.humanRelation) },
-              { icon: Icon.Wind, text: `${getWindDescription(spot.wind.speed)} ${spot.wind.speed}kts` },
-              { icon: Icon.Temperature, text: `${spot.waterTemp.max}°F` },
+              {
+                icon: Icon.Wind,
+                text: `${getWindDescription(spot.wind.speed)} ${formatWindSpeed(spot.wind.speed, windSpeedUnit)}`,
+              },
+              { icon: Icon.Temperature, text: formatTemp(spot.waterTemp.max, temperatureUnit) },
             ]}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<SpotDetails spot={spot} />} />
+                <Action.Push
+                  title="Show Details"
+                  target={<SpotDetails spot={spot} preferences={{ surfHeightUnit, windSpeedUnit, temperatureUnit }} />}
+                />
                 <Action.OpenInBrowser title="Open Surfline Report" url={surflineUrl} />
               </ActionPanel>
             }
@@ -142,7 +157,17 @@ export default function Command() {
   );
 }
 
-function SpotDetails({ spot }: { spot: Spot }) {
+interface SpotDetailsProps {
+  spot: Spot;
+  preferences: {
+    surfHeightUnit: HeightUnit;
+    windSpeedUnit: WindSpeedUnit;
+    temperatureUnit: TemperatureUnit;
+  };
+}
+
+function SpotDetails({ spot, preferences }: SpotDetailsProps) {
+  const { surfHeightUnit, windSpeedUnit, temperatureUnit } = preferences;
   const { pop } = useNavigation();
   const [detailedSpot, setDetailedSpot] = useState<DetailedSpot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -191,26 +216,25 @@ function SpotDetails({ spot }: { spot: Spot }) {
   const detailsMarkdown = `
 # ${detailedSpot.spot.name}
 
-<img src="${icon}" width="32" height="32" style="vertical-align: middle; margin-right: 8px;" /> ${formatString(detailedSpot.forecast.conditions.value)} (${formatSurfHeight(detailedSpot.forecast.waveHeight.min, detailedSpot.forecast.waveHeight.max)})
+<img src="${icon}" width="32" height="32" style="vertical-align: middle; margin-right: 8px;" /> ${formatString(detailedSpot.forecast.conditions.value)} (${formatSurfHeight(detailedSpot.forecast.waveHeight.min, detailedSpot.forecast.waveHeight.max, surfHeightUnit)})
 
 ## Surf Conditions
 - Wave Height: ${detailedSpot.forecast.waveHeight.humanRelation}
-- Wind: ${getWindDescription(detailedSpot.forecast.wind.speed)} ${detailedSpot.forecast.wind.speed}kts ${detailedSpot.forecast.wind.directionType} (${detailedSpot.forecast.wind.direction}°)
-- Water Temperature: ${detailedSpot.forecast.waterTemp.min}°F - ${detailedSpot.forecast.waterTemp.max}°F
-
+- Wind: ${getWindDescription(detailedSpot.forecast.wind.speed)} ${formatWindSpeed(detailedSpot.forecast.wind.speed, windSpeedUnit)} ${detailedSpot.forecast.wind.directionType} (${detailedSpot.forecast.wind.direction}°)
+- Water Temperature: ${formatTemp(detailedSpot.forecast.waterTemp.min, temperatureUnit)} - ${formatTemp(detailedSpot.forecast.waterTemp.max, temperatureUnit)}
 
 ## Tide Details
 | Type | Height | Time |
 |------|--------|------|
-| Previous | ${detailedSpot.forecast.tide.previous.type} ${detailedSpot.forecast.tide.previous.height}ft | ${formatTime(detailedSpot.forecast.tide.previous.timestamp)} |
-| Current | ${detailedSpot.forecast.tide.current.type} ${detailedSpot.forecast.tide.current.height}ft | ${formatTime(detailedSpot.forecast.tide.current.timestamp)} |
-| Next | ${detailedSpot.forecast.tide.next.type} ${detailedSpot.forecast.tide.next.height}ft | ${formatTime(detailedSpot.forecast.tide.next.timestamp)} |
+| Previous | ${detailedSpot.forecast.tide.previous.type} ${formatHeight(detailedSpot.forecast.tide.previous.height, surfHeightUnit)} | ${formatTime(detailedSpot.forecast.tide.previous.timestamp)} |
+| Current | ${detailedSpot.forecast.tide.current.type} ${formatHeight(detailedSpot.forecast.tide.current.height, surfHeightUnit)} | ${formatTime(detailedSpot.forecast.tide.current.timestamp)} |
+| Next | ${detailedSpot.forecast.tide.next.type} ${formatHeight(detailedSpot.forecast.tide.next.height, surfHeightUnit)} | ${formatTime(detailedSpot.forecast.tide.next.timestamp)} |
 
 ## Swells
 ${detailedSpot.forecast.swells
   .map(
     (swell, index) =>
-      `${index + 1}. Height: ${swell.height}ft, Period: ${swell.period}s, Direction: ${swell.direction}°`,
+      `${index + 1}. Height: ${formatHeight(swell.height, surfHeightUnit)}, Period: ${swell.period}s, Direction: ${swell.direction}°`,
   )
   .join("\n")}
 
@@ -242,24 +266,27 @@ _Data provided by Surfline_
           />
           <Detail.Metadata.Label
             title="Wave Height"
-            text={formatSurfHeight(detailedSpot.forecast.waveHeight.min, detailedSpot.forecast.waveHeight.max)}
-            // Removed the waveform icon here
+            text={formatSurfHeight(
+              detailedSpot.forecast.waveHeight.min,
+              detailedSpot.forecast.waveHeight.max,
+              surfHeightUnit,
+            )}
           />
           <Detail.Metadata.Label
             title="Wind"
-            text={`${getWindDescription(detailedSpot.forecast.wind.speed)} ${detailedSpot.forecast.wind.speed}kts`}
+            text={`${getWindDescription(detailedSpot.forecast.wind.speed)} ${formatWindSpeed(detailedSpot.forecast.wind.speed, windSpeedUnit)}`}
             icon={Icon.Wind}
           />
           <Detail.Metadata.Label
-            title="Water Temp"
-            text={`${detailedSpot.forecast.waterTemp.min}°-${detailedSpot.forecast.waterTemp.max}°F`}
+            title="Water Temperature"
+            text={`${formatTemp(detailedSpot.forecast.waterTemp.min, temperatureUnit)} - ${formatTemp(detailedSpot.forecast.waterTemp.max, temperatureUnit)}`}
             icon={Icon.Temperature}
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <Action title="Go Back" icon={Icon.ArrowLeft} onAction={pop} />
+          <Action title="Go Back" onAction={pop} />
           <Action.OpenInBrowser title="Open Surfline Report" url={surflineUrl} />
         </ActionPanel>
       }
