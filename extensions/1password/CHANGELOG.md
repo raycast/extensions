@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2024-12-02
 
 - Add readme & FAQ
 - Bump all dependencies to the latest
