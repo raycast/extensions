@@ -36,15 +36,16 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
     // Proceed with the existing AppleScript if ImageMagick is installed
     await showHUD("Please select a location to save the image...");
 
-    const formattedId = formatIdForFilename(id);
-    const fileExtension = getFileExtension(url);
+    const formattedId = formatIdForFilename(id || "image"); // Use a default if id is not provided
+    const fileExtension = getFileExtension(url) || "jpg"; // Default to jpg if no extension found
+    const quotedUrl = url.replace(/"/g, '\\"'); // Escape double quotes in the URL
 
     const appleScript = `
       set outputFolder to choose folder with prompt "Please select an output folder:"
       set temp_folder to (POSIX path of outputFolder) & "${formattedId}.${fileExtension}"
       set q_temp_folder to quoted form of temp_folder
 
-      set cmd to "curl -o " & q_temp_folder & " " & "${url}"
+      set cmd to "curl -o " & q_temp_folder & " \\"${quotedUrl}\\""
       do shell script cmd
 
       if (do shell script "test -e " & q_temp_folder & " && echo true") is "true" then
@@ -63,6 +64,9 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
           set q_output_file to quoted form of outputFile
           set crop_cmd to "PATH=/usr/local/bin:/opt/homebrew/bin:$PATH magick " & q_temp_folder & " " & resize_cmd & " " & q_output_file
           do shell script crop_cmd
+
+          -- Delete the original downloaded file after resizing
+          do shell script "rm " & q_temp_folder
         end if
       else
         error "Image file not found for processing."
@@ -81,16 +85,17 @@ export const saveImage = async ({ url, id, mode }: SaveImageProps) => {
 
 const formatIdForFilename = (id: string) => {
   return id
-    .replace(/[<>:"/\\|?*]+/g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/\.{2,}/g, ".")
-    .replace(/^-+|-+$/g, "")
+    .replace(/[<>:"/\\|?*]+/g, "-") // Replace invalid filename characters
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/\.{2,}/g, ".") // Replace multiple dots with a single dot
+    .replace(/^-+|-+$/g, "") // Trim dashes from the start and end
     .toLowerCase();
 };
 
 const getFileExtension = (url: string) => {
-  const parts = url.split(".");
-  return parts.length > 1 ? parts.pop() : "jpg";
+  const urlParams = new URLSearchParams(url.split("?")[1]);
+  const format = urlParams.get("fm");
+  return format || "jpg"; // Default to 'jpg' if no format is specified
 };
 
 export default saveImage;
