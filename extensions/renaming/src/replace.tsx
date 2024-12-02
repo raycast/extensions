@@ -9,6 +9,7 @@ import {
   showToast,
   Toast,
   getSelectedFinderItems,
+  icon,
 } from "@raycast/api";
 
 export default function Command() {
@@ -84,7 +85,7 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Replace" onSubmit={renameFiles} />
+            <Action.SubmitForm title="Replace" icon={Icon.Pencil} onSubmit={renameFiles} />
           </ActionPanel>
         }
       >
