@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
   getSelectedFinderItems,
-  icon,
+  Icon,
 } from "@raycast/api";
 
 export default function Command() {
