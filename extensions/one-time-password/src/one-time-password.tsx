@@ -13,6 +13,7 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  environment,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -34,6 +35,8 @@ export default () => {
   const [timer, setTimer] = useState(0);
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
+
+const { appearance } = environment;
 
   async function loadAccounts() {
     if (accounts.length === 0) setLoading(true);
@@ -189,7 +192,9 @@ export default () => {
           <List.Item
             key={account.id}
             icon={{
-              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}`,
+              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}/${
+                appearance === 'dark' ? 'white' : 'black'
+              }`,
               fallback: Icon.Key,
             }}
             title={account.name}

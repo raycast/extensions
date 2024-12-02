@@ -1,5 +1,15 @@
 # One Time Password Changelog
 
+## 2024-12-02
+
+### Added
+
+- Black and white icons now adapt to the system's appearance settings.
+
+### Changed
+
+- Removed color from the icons to make them more consistent with the system's appearance settings.
+
 ## 2024-11-07
 
 ### Added
