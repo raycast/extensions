@@ -30,7 +30,7 @@
     {
       "name": "search-links-menu-bar",
       "icon": "search-link-icon.png",
-      "title": "Menubar Links",
+      "title": "Menu Bar Links",
       "subtitle": "Short.io",
       "description": "Search short links with your own domain from menu bar.",
       "mode": "menu-bar"
