@@ -1,6 +1,6 @@
 # Short.io Changelog
 
-## [Fix crash] - {PR_MERGE_DATE}
+## [Fix crash] - 2024-12-02
 
 - Fix potential crash issues in Search Links command
 
