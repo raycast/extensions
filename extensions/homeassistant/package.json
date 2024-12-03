@@ -192,22 +192,22 @@
     {
       "name": "notificationmenu",
       "title": "Notifications Menu",
-      "description": "Display Persistent Notifications, Low Batteries and Update in the menu bar",
+      "description": "Display persistent notifications, low batteries and updates in the menu bar",
       "mode": "menu-bar",
       "subtitle": "Home Assistant",
       "interval": "1m",
       "preferences": [
         {
           "name": "showcount",
-          "description": "Show Notification Count in Menu",
+          "description": "Show notification count in menu",
           "type": "checkbox",
-          "label": "Show Notification Count in Menubar",
+          "label": "Show notification count in the menu bar",
           "required": false,
           "default": false
         },
         {
           "name": "indicatorUpdates",
-          "description": "Pending Updates will activate the Indicator",
+          "description": "Pending updates will activate the indicator",
           "type": "checkbox",
           "required": false,
           "title": "Indicator",
@@ -219,7 +219,7 @@
     {
       "name": "zones",
       "title": "Zones",
-      "description": "Get states about Zones",
+      "description": "Get states about zones",
       "mode": "view",
       "subtitle": "Home Assistant"
     },
@@ -232,7 +232,7 @@
       "preferences": [
         {
           "name": "entity",
-          "description": "Weather Entity ID which will be shown",
+          "description": "Weather Entity ID which will be shown.",
           "type": "textfield",
           "required": false,
           "title": "Weather Entity",
@@ -240,7 +240,7 @@
         },
         {
           "name": "temperatureEntity",
-          "description": "Temperature Sensor which is used instead of the weather entity.",
+          "description": "Temperature sensor which is used instead of the weather entity.",
           "type": "textfield",
           "required": false,
           "title": "Temperature Sensor",
@@ -248,7 +248,7 @@
         },
         {
           "name": "humidityEntity",
-          "description": "Humidity Sensor which is used instead of the weather entity.",
+          "description": "Humidity sensor which is used instead of the weather entity.",
           "type": "textfield",
           "required": false,
           "title": "Humidity Sensor",
@@ -256,7 +256,7 @@
         },
         {
           "name": "maxHourlyForecastItems",
-          "description": "Max Hourly Forecast Items. 0 will disable the hourly forecast.",
+          "description": "Max hourly forecast items. 0 will disable the hourly forecast.",
           "type": "textfield",
           "required": false,
           "title": "Max Hourly Forecast Items",
@@ -264,7 +264,7 @@
         },
         {
           "name": "maxDailyForecastItems",
-          "description": "Max Daily Forecast Items. 0 will disable the daily forecast.",
+          "description": "Max daily forecast items. 0 will disable the daily forecast.",
           "type": "textfield",
           "required": false,
           "title": "Max Daily Forecast Items",
@@ -387,7 +387,7 @@
         },
         {
           "name": "excludeHigher",
-          "description": "Exclude Battery with a Level higher then the given value. Keep empty to disable the filter",
+          "description": "Exclude battery with a level higher then the given value. Keep empty to disable the filter",
           "type": "textfield",
           "required": false,
           "title": "Exclude Higher then",
@@ -500,7 +500,7 @@
       "preferences": [
         {
           "name": "maxRootTextLength",
-          "description": "Maximum Root Text Length. 0 disable the feature.",
+          "description": "Maximum root text length. 0 disables the feature.",
           "type": "textfield",
           "required": false,
           "title": "Maximum Root Text Length",
@@ -597,12 +597,12 @@
       "required": false,
       "default": "3000",
       "title": "Camera Refresh Interval (ms)",
-      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 means no auto refresh at all",
       "placeholder": "3000"
     },
     {
       "name": "preferredapp",
-      "description": "Preferred Application to Open",
+      "description": "Preferred application to open",
       "type": "dropdown",
       "required": false,
       "title": "Preferred Application",
