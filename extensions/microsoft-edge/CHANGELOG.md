@@ -1,6 +1,6 @@
 # Microsoft Edge Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-03
 
 - Replace `run-applescript` with Raycast's own
 - Hide "Install with Homebrew" `Action` during installation otherwise it is possible to run the Action multiple times
