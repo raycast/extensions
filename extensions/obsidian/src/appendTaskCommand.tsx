@@ -24,6 +24,8 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const { text } = props.arguments;
   const { dueDate } = props.arguments;
   const dateContent = dueDate ? " 📅 " + dueDate : "";
+  const currentDate = new Date().toISOString().split("T")[0];
+  const creationDate = " ➕ " + currentDate;
 
   const { appendTemplate, heading, notePath, noteTag, vaultName, silent } =
     getPreferenceValues<appendTaskPreferences>();
@@ -79,7 +81,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         type: ObsidianTargetType.AppendTask,
         path: notePathExpanded,
         vault: vaultToUse,
-        text: "- [ ] " + tag + content + dateContent,
+        text: "- [ ] " + tag + content + dateContent + creationDate,
         heading: heading,
         silent: silent,
       });
@@ -113,7 +115,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
                   type: ObsidianTargetType.AppendTask,
                   path: notePath,
                   vault: vault,
-                  text: "- [ ] #task " + content + dateContent,
+                  text: "- [ ] #task " + content + dateContent + creationDate,
                   heading: heading,
                 })}
               />
