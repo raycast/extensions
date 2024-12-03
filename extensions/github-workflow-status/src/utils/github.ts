@@ -68,40 +68,92 @@ export async function getRecentWorkflowRuns() {
     const octokit = await getGitHubClient();
     const { historyHours } = getPreferenceValues<Preferences>();
 
-    const { data: repos } = await octokit.repos.listForAuthenticatedUser({
-      sort: "updated",
-      per_page: 10,
-    });
+    let repos: Awaited<ReturnType<typeof octokit.repos.listForAuthenticatedUser>>["data"] = [];
+    let page = 1;
+    let hasMoreRepos = true;
+    while (hasMoreRepos) {
+      const { data: repoPage } = await octokit.repos.listForAuthenticatedUser({
+        sort: "pushed",
+        direction: "desc",
+        per_page: 100,
+        page,
+      });
+
+      if (repoPage.length === 0) {
+        hasMoreRepos = false;
+      } else {
+        repos = repos.concat(repoPage);
+        page++;
+      }
+
+      const runsCount = (
+        await Promise.all(
+          repos.map(async (repo) => {
+            try {
+              const { data } = await octokit.actions.listWorkflowRunsForRepo({
+                owner: repo.owner.login,
+                repo: repo.name,
+                per_page: 1,
+                created: `>=${new Date(Date.now() - parseInt(historyHours || "24", 10) * 60 * 60 * 1000).toISOString()}`,
+              });
+              return data.total_count;
+            } catch {
+              return 0;
+            }
+          }),
+        )
+      ).reduce((sum, count) => sum + count, 0);
+
+      if (runsCount >= 10) {
+        hasMoreRepos = false;
+      }
+    }
 
     const cutoffTime = new Date();
     cutoffTime.setHours(cutoffTime.getHours() - parseInt(historyHours || "24", 10));
+    const cutoffTimeString = cutoffTime.toISOString();
 
     const runs = await Promise.all(
       repos.map(async (repo) => {
         try {
-          const { data } = await octokit.actions.listWorkflowRunsForRepo({
-            owner: repo.owner.login,
-            repo: repo.name,
-            per_page: 10,
-          });
+          let allWorkflowRuns: Awaited<
+            ReturnType<typeof octokit.actions.listWorkflowRunsForRepo>
+          >["data"]["workflow_runs"] = [];
+          page = 1;
+          let hasMoreRuns = true;
+
+          while (hasMoreRuns) {
+            const { data } = await octokit.actions.listWorkflowRunsForRepo({
+              owner: repo.owner.login,
+              repo: repo.name,
+              per_page: 100,
+              page,
+              created: `>=${cutoffTimeString}`,
+            });
+
+            if (data.workflow_runs.length === 0) {
+              hasMoreRuns = false;
+            } else {
+              allWorkflowRuns = allWorkflowRuns.concat(data.workflow_runs);
+              page++;
+            }
+          }
 
           const latestRuns = new Map();
-          data.workflow_runs
-            .filter((run) => new Date(run.created_at) > cutoffTime) // Only include runs from last 24h
-            .forEach((run) => {
-              const key = `${repo.full_name}:${run.workflow_id}`;
-              if (!latestRuns.has(key) || new Date(run.created_at) > new Date(latestRuns.get(key).created_at)) {
-                latestRuns.set(key, {
-                  id: run.id,
-                  name: run.name,
-                  status: run.status || "unknown",
-                  conclusion: run.conclusion,
-                  created_at: run.created_at,
-                  html_url: run.html_url,
-                  repository: repo.full_name,
-                });
-              }
-            });
+          allWorkflowRuns.forEach((run) => {
+            const key = `${repo.full_name}:${run.workflow_id}`;
+            if (!latestRuns.has(key) || new Date(run.created_at) > new Date(latestRuns.get(key).created_at)) {
+              latestRuns.set(key, {
+                id: run.id,
+                name: run.name,
+                status: run.status || "unknown",
+                conclusion: run.conclusion,
+                created_at: run.created_at,
+                html_url: run.html_url,
+                repository: repo.full_name,
+              });
+            }
+          });
 
           return Array.from(latestRuns.values());
         } catch (error) {
