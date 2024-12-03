@@ -58,14 +58,14 @@ function processTranscript(transcriptText: string): string {
 function sanitizeFilename(filename: string): string {
   // Remove or replace characters that are not allowed in filenames
   return filename
-    .replace(/[/\\?%*:|"<>]/g, '-')  // Replace invalid characters with hyphen
-    .replace(/\s+/g, ' ')  // Replace multiple whitespaces with single space
-    .trim()  // Remove leading/trailing whitespace
-    .substring(0, 255);  // Limit filename length
+    .replace(/[/\\?%*:|"<>]/g, "-") // Replace invalid characters with hyphen
+    .replace(/\s+/g, " ") // Replace multiple whitespaces with single space
+    .trim() // Remove leading/trailing whitespace
+    .substring(0, 255); // Limit filename length
 }
 
 // Main function for the command
-export default async function Command(props: { arguments: { videoUrl: string; }; }) {
+export default async function Command(props: { arguments: { videoUrl: string } }) {
   const { videoUrl } = props.arguments;
 
   if (!videoUrl) {
