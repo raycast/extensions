@@ -9,8 +9,9 @@ import { gameStates, timeStrings } from "../utils/translations";
 import GameDetail from "./gameDetail";
 import GameActions from "./gameActions";
 
-const preferences = getPreferenceValues();
-const language = preferences.language as "default" | "fr";
+// const preferences = getPreferenceValues();
+//const language = preferences.language as "default" | "fr";
+const language = "default";
 const languageKey = getLanguageKey();
 
 function gameAccessories(game: Game) {
