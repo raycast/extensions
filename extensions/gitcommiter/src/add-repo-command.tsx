@@ -10,7 +10,7 @@ export default function AddRepoCommand() {
       return;
     }
 
-    const storedPaths = await LocalStorage.getItem<string[]>("gitPaths");
+    const storedPaths = await LocalStorage.getItem<string>("gitPaths");
     const savedPaths = storedPaths ? JSON.parse(storedPaths) : [];
 
     if (savedPaths.includes(repoPath)) {

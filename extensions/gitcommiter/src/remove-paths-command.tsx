@@ -6,7 +6,7 @@ export default function RemovePathsCommand() {
 
   useEffect(() => {
     async function fetchPaths() {
-      const paths = await LocalStorage.getItem<string[]>("gitPaths");
+      const paths = await LocalStorage.getItem<string>("gitPaths");
       if (paths) {
         setSavedPaths(JSON.parse(paths));
       }

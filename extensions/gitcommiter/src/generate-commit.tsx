@@ -10,9 +10,13 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchPaths() {
-      const paths = await LocalStorage.getItem<string[]>("gitPaths");
-      if (paths) {
-        setSavedPaths(JSON.parse(paths));
+      const pathsString = (await LocalStorage.getItem<string>("gitPaths")) || "[]";
+      try {
+        const paths = JSON.parse(pathsString) as string[];
+        setSavedPaths(paths);
+      } catch (error) {
+        console.error("Error parsing saved paths:", error);
+        setSavedPaths([]);
       }
     }
     fetchPaths();
