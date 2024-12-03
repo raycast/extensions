@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Auto-convert Unix <> Human Time",
+      "title": "Auto-Convert Unix <> Human Time",
       "description": "Making it easier for humans and computers to understand each other. Given an input, this command tries to smartly detect a unix (epoch) time or human time and convert it to the other.",
       "mode": "view"
     }

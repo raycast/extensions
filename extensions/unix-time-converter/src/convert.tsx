@@ -12,9 +12,9 @@ enum InputType {
 
 export default function Command() {
   const [inputType, setInputType] = useState<InputType>(InputType.JS_TIMESTAMP);
-  const [unixTime, setUnixTime] = useState<number>();
-  const [humanDate, setHumanDate] = useState<string>();
-  const [relativeTime, setRelativeTime] = useState<string>();
+  const [unixTime, setUnixTime] = useState<number>(0);
+  const [humanDate, setHumanDate] = useState<string>("");
+  const [relativeTime, setRelativeTime] = useState<string>("");
 
   const isNumeric = (str: string): boolean => {
     // Do not allow slashes since they can be used for human date inputs
@@ -89,10 +89,10 @@ export default function Command() {
         storeValue
       />
       <Form.Separator />
-      <Form.Description title="Detected input" text={`${inputType}`} />
+      <Form.Description title="Detected input" text={inputType} />
       <Form.Description title="Unix time" text={`${unixTime}`} />
-      <Form.Description title="Human time" text={`${humanDate}`} />
-      <Form.Description title="Relative time" text={`${relativeTime}`} />
+      <Form.Description title="Human time" text={humanDate} />
+      <Form.Description title="Relative time" text={relativeTime} />
     </Form>
   );
 }
