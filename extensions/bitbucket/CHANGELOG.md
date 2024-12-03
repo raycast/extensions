@@ -9,3 +9,7 @@
 ## [Update] - 2023-01-03
 
 Changed the SearchList implementation to work with workspaces with large number of repositories
+
+## [Update] - 2024-12-02
+
+Added Prettier to the project as newly required by Raycast
