@@ -1,5 +1,11 @@
 # Home Assistant Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.
+- Updated action icons for the `Stop` action in `Vacuum Cleaners` and `Mediaplayers` commands.
+- Updated shortcuts that were removed because they are reserved by Raycast.
+
 ## [Update] - 2024-09-19
 
 - Corrected typos and improved the overall readability of the extension documentation and interface.

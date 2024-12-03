@@ -65,7 +65,7 @@
     },
     {
       "name": "mediaplayers",
-      "title": "Mediaplayers",
+      "title": "Media Players",
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant mediaplayers",
       "mode": "view"
@@ -282,15 +282,15 @@
     {
       "name": "connection",
       "title": "Connection Check",
-      "description": "Check the Connection to Home Assistant",
+      "description": "Check the connection to Home Assistant",
       "mode": "view",
       "subtitle": "Home Assistant",
       "disabledByDefault": true
     },
     {
       "name": "mediaplayermenu",
-      "title": "Mediaplayer Menu",
-      "description": "Display Media Players in the Menu Bar",
+      "title": "Media Player Menu",
+      "description": "Display media players in the Menu Bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
@@ -315,7 +315,7 @@
     {
       "name": "lightsmenu",
       "title": "Lights Menu",
-      "description": "Display Lights in the Menu Bar",
+      "description": "Display lights in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
@@ -340,7 +340,7 @@
     {
       "name": "coversmenu",
       "title": "Covers Menu",
-      "description": "Display Covers in the Menu Bar",
+      "description": "Display covers in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -365,7 +365,7 @@
     {
       "name": "batteriesmenu",
       "title": "Batteries Menu",
-      "description": "Display Batteries in the Menu Bar",
+      "description": "Display batteries in the menu bar",
       "mode": "menu-bar",
       "interval": "30m",
       "preferences": [
@@ -398,7 +398,7 @@
     {
       "name": "entitiesmenu",
       "title": "Entities Menu",
-      "description": "Show given entities in the Menu Bar",
+      "description": "Show given entities in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -423,7 +423,7 @@
     {
       "name": "entitymenu01",
       "title": "Entity Menu 1",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "preferences": [
@@ -440,7 +440,7 @@
     {
       "name": "entitymenu02",
       "title": "Entity Menu 2",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "disabledByDefault": true,
@@ -458,7 +458,7 @@
     {
       "name": "entitymenu03",
       "title": "Entity Menu 3",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "disabledByDefault": true,
@@ -476,7 +476,7 @@
     {
       "name": "services",
       "title": "Services",
-      "description": "Interact with Home Assistant Services",
+      "description": "Interact with Home Assistant services",
       "mode": "view"
     },
     {
@@ -488,7 +488,7 @@
     {
       "name": "calendar",
       "title": "Calendar",
-      "description": "Query Calendars",
+      "description": "Query calendars",
       "mode": "view"
     },
     {
