@@ -192,7 +192,7 @@
     {
       "name": "notificationmenu",
       "title": "Notifications Menu",
-      "description": "Display Persistent Notifications, Low Batteries and Update in the Menu Bar",
+      "description": "Display Persistent Notifications, Low Batteries and Update in the menu bar",
       "mode": "menu-bar",
       "subtitle": "Home Assistant",
       "interval": "1m",
@@ -226,7 +226,7 @@
     {
       "name": "weathermenu",
       "title": "Weather Menu",
-      "description": "Display Weather entity in the Menu Bar",
+      "description": "Display Weather entity in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -290,7 +290,7 @@
     {
       "name": "mediaplayermenu",
       "title": "Media Player Menu",
-      "description": "Display media players in the Menu Bar",
+      "description": "Display media players in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
