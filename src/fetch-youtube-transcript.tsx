@@ -9,8 +9,14 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
+// Define an interface for the transcript result
+interface TranscriptResult {
+  transcript: string;
+  title: string;
+}
+
 // Fetches the transcript for a given YouTube video ID
-async function getVideoTranscript(videoId: string): Promise<string> {
+async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
   try {
     const fetch = (await import("node-fetch")).default;
     const videoInfo = await ytdl.getInfo(videoId);
@@ -48,8 +54,18 @@ function processTranscript(transcriptText: string): string {
   return lines.join(" ");
 }
 
+// Sanitize filename to remove invalid characters
+function sanitizeFilename(filename: string): string {
+  // Remove or replace characters that are not allowed in filenames
+  return filename
+    .replace(/[/\\?%*:|"<>]/g, '-')  // Replace invalid characters with hyphen
+    .replace(/\s+/g, ' ')  // Replace multiple whitespaces with single space
+    .trim()  // Remove leading/trailing whitespace
+    .substring(0, 255);  // Limit filename length
+}
+
 // Main function for the command
-export default async function Command(props: { arguments: { videoUrl: string } }) {
+export default async function Command(props: { arguments: { videoUrl: string; }; }) {
   const { videoUrl } = props.arguments;
 
   if (!videoUrl) {
@@ -72,7 +88,9 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
     const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
-    const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
+
+    // Use sanitized video title for filename
+    const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
 
     await fs.writeFile(filename, transcript);
 
