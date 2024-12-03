@@ -6,8 +6,8 @@ TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 export const getSectionTitle = (dateTime: string) => {
-  const creationDate = new Date(dateTime);
-  const diffInMinutes = differenceInMinutes(new Date(), creationDate);
+  const utcDate = new Date(dateTime + " UTC");
+  const diffInMinutes = differenceInMinutes(new Date(), utcDate);
 
   if (diffInMinutes < 1) {
     return "Just now";
@@ -28,6 +28,6 @@ export const getSectionTitle = (dateTime: string) => {
   } else if (diffInMinutes < 60) {
     return "50 minutes ago";
   } else {
-    return timeAgo.format(creationDate);
+    return timeAgo.format(utcDate);
   }
 };

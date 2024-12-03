@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { open, showHUD, closeMainWindow } from "@raycast/api";
-import { LaunchOptions } from "raycast-cross-extension";
+import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
 
 export type LaunchContext = {
   suppressHUD?: boolean;
@@ -67,6 +67,7 @@ export async function statusDND(suppressHUD?: boolean) {
   if (!suppressHUD) {
     await showHUD(`Do Not Disturb is ${isOn ? "on" : "off"}`);
   }
+  return isOn;
 }
 
 export async function toggleDND(suppressHUD?: boolean) {
@@ -77,5 +78,12 @@ export async function toggleDND(suppressHUD?: boolean) {
     await turnOffDND(suppressHUD);
   } else {
     await turnOnDND(suppressHUD);
+  }
+  return !isOn;
+}
+
+export async function handleCrossLaunch(callbackLaunchOptions?: LaunchOptions, payload?: LaunchOptions["context"]) {
+  if (callbackLaunchOptions) {
+    await callbackLaunchCommand(callbackLaunchOptions, payload);
   }
 }

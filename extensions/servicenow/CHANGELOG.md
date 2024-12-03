@@ -1,5 +1,10 @@
 # Search Documate Changelog
 
+## [Navigation History Command Fix] - 2024-12-02
+
+- Fixed an issue with the Explore Navigation History command that was failing when the instance had a different date format from the Out-of-the-Box (OOTB) format.
+- Applied minor fixes and aesthetic improvements for a smoother user experience.
+
 ## [New Commands] - 2024-11-25
 
 - Added the **Manage Favorites** command to manage your favorite items and groups.
