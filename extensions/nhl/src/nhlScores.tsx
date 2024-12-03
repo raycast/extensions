@@ -1,4 +1,3 @@
-import React from "react";
 import { List } from "@raycast/api";
 import { getNHL } from "./utils/nhlData";
 import { ScoreboardResponse } from "./utils/types";
@@ -19,14 +18,12 @@ interface today {
 export default function Command() {
   const scoreboard = getNHL("scoreboard/now") as today;
 
-  if (scoreboard.isLoading) return <List isLoading={true} />;
-
   if (!scoreboard?.data) return <Unresponsive />;
 
   const games = sortGames(scoreboard.data);
 
   return (
-    <List>
+    <List isLoading={scoreboard.isLoading}>
       <GameList title={gameTitles.favorite[languageKey]} games={games.todayGames} favTeam={true} />
       <GameList title={gameTitles.today[languageKey]} games={games.todayGames} favTeam={false} />
       <GameList title={gameTitles.past[languageKey]} games={games.pastGames} favTeam={false} />

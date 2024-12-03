@@ -2,7 +2,7 @@ import React from "react";
 import { PlayerOnIce } from "../utils/types";
 import { convertInchesToFeetAndInches, getFlagEmoji, getLanguageKey, teamLogo } from "../utils/helpers";
 import { gameActions, timeStrings } from "../utils/translations";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import PlayerDetail from "./playerDetail";
 import { PlayerAction } from "./gameActions";
 
@@ -124,6 +124,7 @@ export default function PlayerListItem({ player }: { player: PlayerOnIce }) {
           <Action.Push
             title={`${gameActions.view[lang]} ${getPlayerName(player)}`}
             target={<PlayerDetail id={playerId} />}
+            icon={Icon.Person}
           />
           <PlayerAction name={getPlayerName(player)} slug={player.playerId as string} />
         </ActionPanel>
