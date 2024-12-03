@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitcommiter",
+  "title": "Gitcommiter",
+  "description": "AI-powered tool that generates meaningful Git commit messages by analyzing repository changes",
+  "icon": "extension-icon.png",
+  "author": "chihkang_lin",
+  "version": "1.0.0",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-repo-command",
+      "title": "Add Repository Path",
+      "description": "Add a new Git repository path.",
+      "mode": "view",
+      "subtitle": "Git Commiter",
+      "keywords": [
+        "git",
+        "repository",
+        "add",
+        "path",
+        "new"
+      ]
+    },
+    {
+      "name": "remove-paths-command",
+      "title": "Remove Repository Paths",
+      "description": "Remove paths from your repository list",
+      "mode": "view",
+      "subtitle": "Git Commiter",
+      "keywords": [
+        "git",
+        "repository",
+        "remove",
+        "path"
+      ]
+    },
+    {
+      "name": "generate-commit",
+      "title": "Generate Commit Message",
+      "description": "Generate AI-powered commit messages from your repository changes",
+      "mode": "view",
+      "subtitle": "Git Commiter",
+      "keywords": [
+        "git",
+        "commit",
+        "message",
+        "ai",
+        "generator"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "requiresPro",
+      "type": "checkbox",
+      "required": true,
+      "title": "Requires Raycast Pro",
+      "description": "This extension requires a Raycast Pro subscription with AI features enabled",
+      "default": true,
+      "label": "Raycast Pro Required"
+    },
+    {
+      "name": "gitPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Git Installation Path",
+      "description": "Custom Git executable path (optional, uses system Git by default)",
+      "placeholder": "/usr/local/bin/git"
+    },
+    {
+      "name": "defaultBranch",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Branch",
+      "description": "Default branch name for your repositories",
+      "placeholder": "main",
+      "default": "main"
+    },
+    {
+      "name": "commitStyle",
+      "type": "dropdown",
+      "required": false,
+      "title": "Commit Message Style",
+      "description": "Choose your preferred commit message style",
+      "data": [
+        {
+          "title": "Conventional Commits",
+          "value": "conventional"
+        },
+        {
+          "title": "Detailed Description",
+          "value": "detailed"
+        },
+        {
+          "title": "Simple Summary",
+          "value": "simple"
+        }
+      ],
+      "default": "conventional"
+    }
+  ]
+}
