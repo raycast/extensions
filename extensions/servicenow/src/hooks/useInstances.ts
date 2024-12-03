@@ -1,6 +1,12 @@
+import { useEffect } from "react";
+
 import { useCachedState } from "@raycast/utils";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+
+import fetch from "node-fetch";
+
 import { useLocalStorage } from "./useLocalStorage";
-import { LocalStorage } from "@raycast/api";
+
 import { Instance } from "../types";
 
 const compareInstances = (a: Instance, b: Instance): number => {
@@ -11,6 +17,7 @@ const compareInstances = (a: Instance, b: Instance): number => {
 
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
+  const [userId, setUserId] = useCachedState<string>("user-id");
 
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>("saved-instances", []);
 
@@ -39,6 +46,56 @@ export default function useInstances() {
     }
   }
 
+  useEffect(() => {
+    if (!selectedInstance) {
+      return;
+    }
+
+    const fetchUserId = async () => {
+      const { name: instanceName = "", username = "", password = "" } = selectedInstance;
+
+      try {
+        const response = await fetch(
+          `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            },
+          },
+        );
+
+        const jsonData = (await response.json()) as {
+          result?: { sys_id: string }[];
+          error?: { message: string };
+        };
+
+        if (!jsonData.result) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: `Could not connect to ${instanceName}`,
+            message: jsonData.error?.message,
+          });
+
+          return "";
+        }
+
+        return jsonData.result[0].sys_id;
+      } catch (error) {
+        console.error(error);
+
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Could not connect to ${instanceName}`,
+          message: error instanceof Error ? error.message : "",
+        });
+      }
+    };
+    fetchUserId().then((userId) => {
+      if (userId) setUserId(userId);
+    });
+  }, [selectedInstance]);
+
   return {
     instances: value.sort((a, b) => compareInstances(a, b)),
     addInstance,
@@ -46,5 +103,8 @@ export default function useInstances() {
     deleteInstance,
     mutate,
     isLoading,
+    selectedInstance,
+    setSelectedInstance,
+    userId,
   };
 }

@@ -14,12 +14,12 @@ const BASE_URLS = {
 const FILE_PATHS = {
   ports: {
     main: "/main/resources/ports.yml",
-    fallback: "/6eeafba3f426d72b5d47ab8e843845612e3b7947/resources/ports.yml",
+    fallback: "/a1ce9a7c29c6aa323f43caa88f21bf51faa91c3a/resources/ports.yml",
     schema: "/main/resources/ports.schema.json",
   },
   styles: {
     main: "/main/scripts/userstyles.yml",
-    fallback: "/061ac554c1bed32db3b627f83ab402c0b2b26ee0/scripts/userstyles.yml",
+    fallback: "/4ee2fffe0492ec2be6d744f770a1cdaa98226d44/scripts/userstyles.yml",
     schema: "/main/scripts/userstyles.schema.json",
   },
 };

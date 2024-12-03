@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { copyFileSync, createWriteStream, existsSync } from "fs";
 import fetch from "node-fetch";
 import { homedir } from "os";
@@ -5,7 +6,8 @@ import { getGifFromCache } from "./cachedGifs";
 import { getHideFilename } from "../preferences";
 import path from "path";
 
-const basePath = `${homedir()}/Downloads`;
+const { downloadPath } = getPreferenceValues();
+const basePath = downloadPath || `${homedir()}/Downloads`;
 
 export default async function downloadFile(url: string, name: string) {
   const hideFilename = getHideFilename();

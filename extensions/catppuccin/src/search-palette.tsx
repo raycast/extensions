@@ -1,57 +1,51 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { useState, useMemo } from "react";
-import { Grid, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { flavors } from "@catppuccin/palette";
-import { Preferences, ColorDetails } from "./types";
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+import { Grid, ActionPanel, Action } from "@raycast/api";
+import type { CatppuccinFlavor, FlavorName } from "@catppuccin/palette";
+import { getGridSize } from "./utils/preferences.util";
+import { getAllFlavors, getFlavorColors, capitalize } from "./utils/palette.util";
 
 export default function SearchPalette() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>("");
 
-  const flavorOptions = Object.keys(flavors);
-  const [selectedFlavor, setSelectedFlavor] = useState<string>(flavorOptions[0] || "mocha");
+  const flavorOptions = getAllFlavors();
+  const [selectedFlavor, setSelectedFlavor] = useState<FlavorName>(flavorOptions[0] || "mocha");
 
-  const flavorColors = useMemo<Record<string, ColorDetails>>(() => {
-    const flavor = flavors[selectedFlavor];
-    return flavor ? flavor.colors : {};
+  const flavorColors = useMemo<CatppuccinFlavor>(() => {
+    return getFlavorColors(selectedFlavor);
   }, [selectedFlavor]);
 
-  const colorEntries = useMemo(() => Object.entries(flavorColors), [flavorColors]);
-
   const filteredColors = useMemo(() => {
-    if (!searchText) return colorEntries;
+    if (!searchText) return flavorColors.colorEntries;
 
     const lowerSearchText = searchText.toLowerCase();
-    return colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
-  }, [searchText, colorEntries]);
+    return flavorColors.colorEntries.filter(([name]) => name.toLowerCase().includes(lowerSearchText));
+  }, [searchText, flavorColors.colorEntries]);
 
-  const gridSize = parseInt(preferences.gridSize, 10);
-  const columns = isNaN(gridSize) || gridSize <= 0 ? 8 : gridSize;
+  const columns = getGridSize();
+
+  const handleFlavorChange = (newValue: string) => {
+    setSelectedFlavor(newValue as FlavorName);
+  };
 
   return (
     <Grid
       columns={columns}
-      inset={Grid.Inset.Large}
       searchBarPlaceholder="Search colors..."
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Flavor" storeValue onChange={setSelectedFlavor}>
+        <Grid.Dropdown tooltip="Select Flavor" storeValue onChange={handleFlavorChange}>
           {flavorOptions.map((flavor) => (
             <Grid.Dropdown.Item key={flavor} value={flavor} title={capitalize(flavor)} />
           ))}
         </Grid.Dropdown>
       }
     >
-      {filteredColors.map(([colorName, colorDetails]) => {
-        const hex = colorDetails.hex ?? "#000000";
-        const { r = 0, g = 0, b = 0 } = colorDetails.rgb || {};
-        const { h = 0, s = 0, l = 0 } = colorDetails.hsl || {};
-
+      {filteredColors.map(([identifier, { rgb, hsl, hex, name }]) => {
         return (
           <Grid.Item
-            key={colorName}
-            title={colorName}
+            key={identifier}
+            title={name}
             subtitle={hex}
             content={{
               color: {
@@ -63,11 +57,13 @@ export default function SearchPalette() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={hex} title="Copy HEX" />
-                <Action.CopyToClipboard content={`rgb(${r}, ${g}, ${b})`} title="Copy RGB" />
+                <Action.CopyToClipboard content={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`} title="Copy RGB" />
                 <Action.CopyToClipboard
-                  content={`hsl(${h.toFixed(2)}, ${(s * 100).toFixed(2)}%, ${(l * 100).toFixed(2)}%)`}
+                  content={`hsl(${hsl.h.toFixed(2)}, ${(hsl.s * 100).toFixed(2)}%, ${(hsl.l * 100).toFixed(2)}%)`}
                   title="Copy HSL"
                 />
+                <Action.CopyToClipboard content={name} title="Copy Name" />
+                <Action.CopyToClipboard content={identifier} title="Copy Identifier" />
               </ActionPanel>
             }
           />

@@ -7,55 +7,70 @@ import shortcut from "./config/shortcut";
 import config from "./config";
 
 interface Profile {
-  baseUrl: string;
-  avatar: string;
+  baseUrl?: string;
+  avatar?: string;
 }
 
 interface User {
   _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  profile: Profile;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  profile?: Profile;
 }
 
 interface OncallInfo {
   _id: string;
-  name: string;
+  name?: string;
 }
 
 interface Shift {
   _id: string;
-  name: string;
-  user: User;
-  oncall: OncallInfo;
+  name?: string;
+  user?: User;
+  oncall?: OncallInfo;
+}
+
+function getFullName(user?: User): string {
+  if (!user) return "Unknown User";
+  return [user.firstName, user.lastName].filter(Boolean).join(" ") || "Unknown User";
+}
+
+function getAvatarSource(profile?: Profile): string | Icon {
+  if (!profile?.baseUrl || !profile.avatar) return Icon.Person;
+  return `${profile.baseUrl}${profile.avatar}`;
 }
 
 function ShiftListItem({ shift }: { shift: Shift }) {
-  const avatarSource = shift.user.profile?.avatar
-    ? `${shift.user.profile.baseUrl}${shift.user.profile.avatar}`
-    : Icon.Person;
+  if (!shift.user || !shift.oncall) return null;
+
+  const avatarSource = getAvatarSource(shift.user.profile);
+  const fullName = getFullName(shift.user);
 
   return (
     <List.Item
       icon={{ source: avatarSource }}
-      title={`${shift.user.firstName} ${shift.user.lastName}`}
-      subtitle={shift.user.email}
-      accessories={[{ text: shift.oncall.name || "Unknown" }]}
-      keywords={[`${shift.user.firstName} ${shift.user.lastName}`, shift.user.email, shift.oncall.name]}
+      title={fullName}
+      subtitle={shift.user.email || "No email"}
+      accessories={[{ text: shift?.oncall?.name || "Unknown" }]}
+      keywords={[fullName, shift.user.email, shift?.oncall?.name].filter((keyword): keyword is string =>
+        Boolean(keyword),
+      )}
       actions={
         <ActionPanel>
           <Action.Push title="Show Details" icon={Icon.Info} target={<OncallViewPage oncallId={shift.oncall._id} />} />
-          <Action.Open
-            icon={Icon.Globe}
-            title="Open in Spike"
-            target={`${config!.spike}/on-calls/${shift.oncall._id}`}
-          />
+          {config?.spike && (
+            <Action.Open
+              icon={Icon.Globe}
+              title="Open in Spike"
+              target={`${config.spike}/on-calls/${shift?.oncall?._id}`}
+            />
+          )}
           <Action.Push
             shortcut={shortcut.ADD_OVERRIDE}
             title="Add Override"
             icon={Icon.Person}
-            target={<AddOverride oncallId={shift.oncall._id} />}
+            target={<AddOverride oncallId={shift?.oncall?._id} />}
           />
         </ActionPanel>
       }
@@ -65,14 +80,14 @@ function ShiftListItem({ shift }: { shift: Shift }) {
 
 export default function WhoIsOncall() {
   const {
-    data: activeShifts,
+    data: activeShifts = [],
     isLoading,
     error,
   } = useCachedPromise(
     async () => {
       try {
         const response = await api.oncall.getActiveSchedules();
-        return response as Shift[];
+        return (response || []) as Shift[];
       } catch (err) {
         const error = err instanceof Error ? err : new Error("An unknown error occurred");
         await showToast({
@@ -104,14 +119,17 @@ export default function WhoIsOncall() {
       </List>
     );
   }
+  const validShifts = activeShifts.filter((shift) => shift?.user && shift?.oncall);
 
   return (
     <List navigationTitle="Current On-Call Members" searchBarPlaceholder="Search by on-call name" isLoading={isLoading}>
       <List.Section
         title="Current On-Call Members"
-        subtitle={activeShifts && activeShifts.length > 0 ? `${activeShifts.length} members` : undefined}
+        subtitle={validShifts.length > 0 ? `${validShifts.length} members` : undefined}
       >
-        {activeShifts && activeShifts.map((shift: Shift) => <ShiftListItem key={shift._id} shift={shift} />)}
+        {validShifts.map((shift: Shift) => (
+          <ShiftListItem key={shift._id} shift={shift} />
+        ))}
       </List.Section>
     </List>
   );

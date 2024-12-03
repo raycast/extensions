@@ -19,7 +19,7 @@ export type ColumnInfo = {
   isPrimaryKey: boolean;
 };
 
-export type CustomQueryList = {
+export type CustomQuery = {
   type: CustomQueryType;
   connectionString: string;
   query: string;

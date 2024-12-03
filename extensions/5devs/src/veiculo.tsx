@@ -62,36 +62,71 @@ export default function Command() {
             subtitle="License Plate"
             icon={Icon.BarCode}
             actions={actions(vehicle.placa)}
+            keywords={["license plate", "placa"]}
           />
           <List.Item
             title={mask ? vehicle.renavam : vehicle.renavam.replaceAll(/\D/g, "")}
             subtitle="Renavam"
             actions={actions(vehicle.renavam)}
             icon={Icon.Receipt}
+            keywords={["renavam", "registro"]}
           />
-          <List.Item title={vehicle.marca} subtitle="Brand" actions={actions(vehicle.marca)} icon={Icon.Lowercase} />
+          <List.Item
+            title={vehicle.marca}
+            subtitle="Brand"
+            actions={actions(vehicle.marca)}
+            icon={Icon.Lowercase}
+            keywords={["brand", "marca"]}
+          />
           <List.Item
             title={vehicle.modelo}
             subtitle="Model"
             actions={actions(vehicle.modelo)}
             icon={vehicle.tipo === "Carro" ? Icon.Car : Icon.Bike}
+            keywords={["model", "modelo"]}
           />
           <List.Item
             title={vehicle.tipo}
             subtitle="Type"
             actions={actions(vehicle.tipo)}
             icon={vehicle.tipo === "Carro" ? Icon.Car : Icon.Bike}
+            keywords={["type", "tipo"]}
           />
-          <List.Item title={vehicle.ano} subtitle="Year" actions={actions(vehicle.ano)} icon={Icon.Calendar} />
-          <List.Item title={vehicle.cor} subtitle="Color" actions={actions(vehicle.cor)} icon={Icon.EyeDropper} />
+          <List.Item
+            title={vehicle.ano}
+            subtitle="Year"
+            actions={actions(vehicle.ano)}
+            icon={Icon.Calendar}
+            keywords={["year", "ano"]}
+          />
+          <List.Item
+            title={vehicle.cor}
+            subtitle="Color"
+            actions={actions(vehicle.cor)}
+            icon={Icon.EyeDropper}
+            keywords={["color", "cor"]}
+          />
           <List.Item
             title={vehicle.combustivel}
             subtitle="Fuel"
             actions={actions(vehicle.combustivel)}
             icon={Icon.Raindrop}
+            keywords={["fuel", "combustível"]}
           />
-          <List.Item title={vehicle.municipio} subtitle="City" actions={actions(vehicle.municipio)} icon={Icon.Pin} />
-          <List.Item title={vehicle.uf} subtitle="State" actions={actions(vehicle.uf)} icon={Icon.AirplaneTakeoff} />
+          <List.Item
+            title={vehicle.municipio}
+            subtitle="City"
+            actions={actions(vehicle.municipio)}
+            icon={Icon.Pin}
+            keywords={["city", "cidade"]}
+          />
+          <List.Item
+            title={vehicle.uf}
+            subtitle="State"
+            actions={actions(vehicle.uf)}
+            icon={Icon.AirplaneTakeoff}
+            keywords={["state", "estado"]}
+          />
         </List.Section>
       </List>
     </>

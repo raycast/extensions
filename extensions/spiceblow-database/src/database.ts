@@ -148,14 +148,18 @@ export function renderColumnValue(col: ColumnInfo, value: Json) {
       col.typeId === mysql.Types.MEDIUM_BLOB ||
       col.typeId === mysql.Types.LONG_BLOB
     ) {
-      text = "bytes";
+      if (typeof value === "string") {
+        text = value;
+      } else {
+        text = "bytes";
+      }
     } else if (col.typeId === mysql.Types.JSON) {
       text = JSON.stringify(value, ellipsisReviver);
     } else {
       text = String(value);
     }
   }
-  if (text.startsWith("[object Object]")) {
+  if (text?.startsWith("[object Object]")) {
     text = JSON.stringify(text, null, 2);
   }
   return text;
@@ -213,8 +217,10 @@ export type GenerateSearchConditionParams = {
   schema?: string;
   query?: string;
   namespace: string;
+  previousOutputs: Array<{ output: Json; error: string }>;
 };
 let timesAborted = 0;
+
 async function generateSearchCondition({
   searchField,
   searchText,
@@ -223,6 +229,7 @@ async function generateSearchCondition({
   query,
   namespace,
   signal,
+  previousOutputs,
 }: GenerateSearchConditionParams) {
   if (!searchText) {
     return "";
@@ -233,6 +240,9 @@ async function generateSearchCondition({
   if (signal.aborted) {
     timesAborted += 1;
     return "";
+  }
+  if (!tableInfo) {
+    return;
   }
 
   if (searchField === NATURAL_LANGUAGE_SEARCH) {
@@ -246,6 +256,7 @@ async function generateSearchCondition({
         databaseType: databaseType,
         query: query || "",
         namespace,
+        previousOutputs,
       },
       { fetch: { signal } },
     );
@@ -322,7 +333,10 @@ async function generateSearchCondition({
   }
 }
 
-export type SearchTableRowsOrCustomQueryParams = Omit<GenerateSearchConditionParams, "namespace"> & {
+export type SearchTableRowsOrCustomQueryParams = Omit<
+  GenerateSearchConditionParams,
+  "namespace" | "previousOutputs"
+> & {
   table?: string;
   page: number;
   pageSize?: number;
@@ -341,109 +355,115 @@ export async function searchTableRowsOrCustomQuery({
   data: Json[];
   totalCount: number;
 }> {
-  let searchCondition: string | undefined;
   const id = generateRandomId();
 
-  try {
-    const offset = page * pageSize;
+  const previousOutputs = [] as GenerateSearchConditionParams["previousOutputs"];
 
+  while (previousOutputs.length <= 3) {
     let finalQuery: string;
-    if (query) {
-      query = query.trim().replace(/;$/, "");
-      finalQuery = dedent`
-        SELECT *
-        FROM (
-          ${query}
-        ) ${databaseType === "postgres" ? "AS subquery" : "as subquery"}
-      `;
-    } else if (table) {
-      const [schema, tableName] = table.split(".");
-      if (!schema || !tableName) {
-        throw new Error('Invalid table format. Expected "{schema}.{tableName}"');
+    try {
+      const offset = page * pageSize;
+
+      if (query) {
+        query = query.trim().replace(/;$/, "");
+        finalQuery = dedent`
+          SELECT *
+          FROM (
+            ${query}
+          ) ${databaseType === "postgres" ? "AS subquery" : "as subquery"}
+        `;
+      } else if (table) {
+        const [schema, tableName] = table.split(".");
+        if (!schema || !tableName) {
+          throw new Error('Invalid table format. Expected "{schema}.{tableName}"');
+        }
+
+        finalQuery = dedent`
+          SELECT *
+          FROM ${databaseType === "postgres" ? `"${schema}"."${tableName}"` : `\`${schema}\`.\`${tableName}\``}
+        `;
+      } else {
+        throw new Error("Either 'table' or 'query' must be defined.");
       }
 
-      finalQuery = dedent`
-        SELECT *
-        FROM ${databaseType === "postgres" ? `"${schema}"."${tableName}"` : `\`${schema}\`.\`${tableName}\``}
-      `;
-    } else {
-      throw new Error("Either 'table' or 'query' must be defined.");
-    }
+      const searchCondition = await generateSearchCondition({
+        ...rest,
+        previousOutputs,
+        signal,
+        namespace: query ? "subquery" : "",
+        query: finalQuery,
+      });
 
-    searchCondition = await generateSearchCondition({
-      ...rest,
-      signal,
-      namespace: query ? "subquery" : "",
-      query: finalQuery,
-    });
+      if (searchCondition) {
+        finalQuery += ` ${searchCondition}`;
+      }
 
-    if (searchCondition) {
-      finalQuery += ` ${searchCondition}`;
-    }
+      finalQuery += databaseType === "postgres" ? ` LIMIT $1 OFFSET $2;` : ` LIMIT ? OFFSET ?;`;
 
-    finalQuery += databaseType === "postgres" ? ` LIMIT $1 OFFSET $2;` : ` LIMIT ? OFFSET ?;`;
-
-    if (signal.aborted) {
-      return {
-        hasMore: false,
-        data: [],
-        totalCount: 0,
-      };
-    }
-
-    let result;
-    console.time(`query ${id}`);
-    if (databaseType === "postgres") {
-      const client = await postgresPool.connect();
-      try {
-        result = await client.query(finalQuery, [pageSize + 1, offset]);
-        const totalCount = offset + result.rows.length;
-        const hasMore = result.rows.length > pageSize;
-        const data = result.rows.slice(0, pageSize);
-        console.timeEnd(`query ${id}`);
+      if (signal.aborted) {
         return {
-          hasMore,
-          data,
-          totalCount,
+          hasMore: false,
+          data: [],
+          totalCount: 0,
         };
-      } finally {
-        client.release();
       }
-    } else {
-      const connection = await mysqlPool.getConnection();
-      try {
-        // allow GROUP BY without aggregate functions for current connection
-        await connection.query(`SET SESSION sql_mode='';`);
-        const [rows] = await connection.query<RowDataPacket[]>(finalQuery, [pageSize + 1, offset]);
-        const totalCount = offset + rows.length;
-        const hasMore = rows.length > pageSize;
-        const data = rows.slice(0, pageSize);
-        console.timeEnd(`query ${id}`);
-        return {
-          hasMore,
-          data,
-          totalCount,
-        };
-      } finally {
-        connection.release();
+
+      let result;
+      console.time(`query ${id}`);
+      if (databaseType === "postgres") {
+        const client = await postgresPool.connect();
+        try {
+          result = await client.query(finalQuery, [pageSize + 1, offset]);
+          const totalCount = offset + result.rows.length;
+          const hasMore = result.rows.length > pageSize;
+          const data = result.rows.slice(0, pageSize);
+          console.timeEnd(`query ${id}`);
+          return {
+            hasMore,
+            data,
+            totalCount,
+          };
+        } finally {
+          client.release();
+        }
+      } else {
+        const connection = await mysqlPool.getConnection();
+        try {
+          // allow GROUP BY without aggregate functions for current connection
+          await connection.query(`SET SESSION sql_mode='';`);
+          const [rows] = await connection.query<RowDataPacket[]>(finalQuery, [pageSize + 1, offset]);
+          const totalCount = offset + rows.length;
+          const hasMore = rows.length > pageSize;
+          const data = rows.slice(0, pageSize);
+          console.timeEnd(`query ${id}`);
+          return {
+            hasMore,
+            data,
+            totalCount,
+          };
+        } finally {
+          connection.release();
+        }
+      }
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.log("Query was aborted");
+        throw error;
+      } else {
+        console.error("Error in searchTableRowsOrCustomQuery:", error);
+        if (rest.searchField !== NATURAL_LANGUAGE_SEARCH) {
+          throw error;
+        }
+        showToast({
+          title: `Sql error ${previousOutputs.length + 1}, retrying...`,
+          message: error.message,
+          style: Toast.Style.Failure,
+        });
+        previousOutputs.push({ output: finalQuery!, error: error.message });
       }
     }
-  } catch (error) {
-    if (error.name === "AbortError") {
-      console.log("Query was aborted");
-    } else {
-      console.error("Error in searchTableRowsOrCustomQuery:", error);
-    }
-    if (query) {
-      notifyError(new Error(`${searchCondition} failed: ${error.message}`));
-      return {
-        hasMore: false,
-        data: [],
-        totalCount: 0,
-      };
-    }
-    throw error;
   }
+  throw new Error(previousOutputs[previousOutputs.length - 1].error);
 }
 
 let connectionOk = false;
@@ -705,12 +725,18 @@ function getBestField(tableInfo: TableInfo) {
   return tableInfo.columns[0].columnName;
 }
 
-export async function runGeneratedQuery(sqlCode: string) {
+export async function testGeneratedQuery(sqlCode: string) {
+  // Remove the last semicolon from sqlCode if present
+  sqlCode = sqlCode.trim().replace(/;$/, "");
+
+  const hasLimit = /\bLIMIT\s+\d+/i.test(sqlCode);
+  const limitedSqlCode = hasLimit ? sqlCode : `${sqlCode} LIMIT 5;`;
+
   if (databaseType === "postgres") {
     const client = await postgresPool.connect();
     await client.query("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY;");
     try {
-      const result = await client.query(sqlCode);
+      const result = await client.query(limitedSqlCode);
 
       const names = await getTableAndColumnNamesForPostgres(result.fields);
 
@@ -734,7 +760,7 @@ export async function runGeneratedQuery(sqlCode: string) {
         }),
       });
       const bestField = getBestField(tableInfo);
-
+      // console.log('tableInfo', tableInfo)
       const rows = result.rows;
       return {
         rows,
@@ -742,7 +768,11 @@ export async function runGeneratedQuery(sqlCode: string) {
         fieldsCount: result.fields.length,
         bestField,
         rowsCount: rows.length,
+        originalQuery: sqlCode,
       };
+    } catch (e) {
+      console.log("sql had error\n", limitedSqlCode);
+      throw e;
     } finally {
       await client.query("SET SESSION CHARACTERISTICS AS TRANSACTION READ WRITE;");
       client.release();
@@ -753,9 +783,10 @@ export async function runGeneratedQuery(sqlCode: string) {
     await connection.query(`SET SESSION TRANSACTION READ ONLY;`);
     await connection.query(`SET SESSION sql_mode='';`);
     try {
-      const [rows, fields] = await connection.query<RowDataPacket[]>(`${sqlCode}`);
+      const [rows, fields] = await connection.query<RowDataPacket[]>(`${limitedSqlCode}`);
       const tableInfo = validateTableInfo({
         columns: fields.map((field) => {
+          console.log("field", field);
           const res: ColumnInfo = {
             columnName: field.name,
             schemaName: field.schema || "",
@@ -778,6 +809,7 @@ export async function runGeneratedQuery(sqlCode: string) {
         fieldsCount: fields.length,
         bestField,
         rowsCount: rows.length,
+        originalQuery: sqlCode,
       };
     } finally {
       await connection.query(`SET SESSION TRANSACTION READ WRITE`);
@@ -785,7 +817,6 @@ export async function runGeneratedQuery(sqlCode: string) {
     }
   }
 }
-
 export async function getDatabaseSchema({
   schemas = [],
   tables: filterTables = [],
@@ -842,10 +873,10 @@ export async function getDatabaseSchema({
           const foreignKeyResult = await postgresPool.query(foreignKeyQuery, [table, schema]);
 
           // Construct CREATE TABLE statement
-          let createTableStatement = `CREATE TABLE ${schema}.${table} (\n`;
+          let createTableStatement = `CREATE TABLE ${quote(schema)}.${quote(table)} (\n`;
 
           columnResult.rows.forEach((column, index) => {
-            createTableStatement += `  ${column.column_name} ${column.data_type}`;
+            createTableStatement += `  ${quote(column.column_name)} ${column.data_type}`;
 
             if (column.character_maximum_length) {
               createTableStatement += `(${column.character_maximum_length})`;
@@ -868,7 +899,7 @@ export async function getDatabaseSchema({
 
           // Add foreign key constraints
           foreignKeyResult.rows.forEach((fk) => {
-            createTableStatement += `,  FOREIGN KEY (${fk.column_name}) REFERENCES ${fk.foreign_table_schema}.${fk.foreign_table_name}(${fk.foreign_column_name})\n`;
+            createTableStatement += `,  FOREIGN KEY (${quote(fk.column_name)}) REFERENCES ${quote(fk.foreign_table_schema)}.${quote(fk.foreign_table_name)}(${quote(fk.foreign_column_name)})\n`;
           });
 
           createTableStatement += ");";
@@ -920,10 +951,10 @@ export async function getDatabaseSchema({
           `;
           const [foreignKeys] = await mysqlPool.query<RowDataPacket[]>(foreignKeyQuery, [schema, table]);
 
-          let createTableStatement = `CREATE TABLE ${schema}.${table} (\n`;
+          let createTableStatement = `CREATE TABLE ${quote(schema)}.${quote(table)} (\n`;
 
           columns.forEach((column, index) => {
-            createTableStatement += `  ${column.column_name} ${column.data_type}`;
+            createTableStatement += `  ${quote(column.column_name)} ${column.data_type}`;
 
             if (column.character_maximum_length) {
               createTableStatement += `(${column.character_maximum_length})`;
@@ -945,7 +976,7 @@ export async function getDatabaseSchema({
           });
 
           foreignKeys.forEach((fk) => {
-            createTableStatement += `,  FOREIGN KEY (${fk.column_name}) REFERENCES ${fk.foreign_table_schema}.${fk.foreign_table_name}(${fk.foreign_column_name})\n`;
+            createTableStatement += `,  FOREIGN KEY (${quote(fk.column_name)}) REFERENCES ${quote(fk.foreign_table_schema)}.${quote(fk.foreign_table_name)}(${quote(fk.foreign_column_name)})\n`;
           });
 
           createTableStatement += ");";
@@ -1050,7 +1081,7 @@ export type TableRowDeleteParams = {
 
 export async function prepareTableRowDelete(params: TableRowDeleteParams) {
   const findResults = await findRowsForUpdate(params);
-  const finalDeleteQueries = [];
+  const finalDeleteQueries = [] as SQLStatement[];
 
   for (const result of findResults) {
     if (result.error !== undefined) {
@@ -1210,7 +1241,7 @@ export async function findRowsForUpdate({ allValues }: TableRowDeleteParams) {
 
 export async function prepareTableRowUpdate(params: TableRowUpdateParams) {
   const findResults = await findRowsForUpdate(params);
-  const finalUpdateQueries = [];
+  const finalUpdateQueries = [] as SQLStatement[];
 
   for (const result of findResults) {
     const { schema, table, whereClause } = result;
@@ -1319,7 +1350,7 @@ export async function prepareTableRowInsert({ allValues }: { allValues: TableRow
     tableGroups.get(key)!.push(field);
   }
 
-  const finalInsertQueries = [];
+  const finalInsertQueries = [] as SQLStatement[];
 
   for (const [tableName, fields] of tableGroups) {
     const [schema, table] = tableName.split(".");
@@ -1366,4 +1397,43 @@ export function fixDatabaseUri(connectionString: string) {
   } catch {
     return connectionString;
   }
+}
+export async function countRows({ table, query }: { table?: string; query?: string }): Promise<number> {
+  let countQuery: string;
+
+  if (query) {
+    query = query.trim().replace(/;$/, "");
+    countQuery = `SELECT COUNT(*) as count FROM (${query}) as subquery`;
+  } else if (table) {
+    const [schema, tableName] = table.split(".");
+    if (databaseType === "postgres") {
+      countQuery = `SELECT COUNT(*) as count FROM "${schema}"."${tableName}"`;
+    } else {
+      countQuery = `SELECT COUNT(*) as count FROM \`${schema}\`.\`${tableName}\``;
+    }
+  } else {
+    throw new Error("Either table or query must be provided");
+  }
+
+  try {
+    if (databaseType === "postgres") {
+      const result = await postgresPool.query(countQuery);
+      return parseInt(result.rows[0].count, 10);
+    } else {
+      const [rows] = await mysqlPool.query<RowDataPacket[]>(countQuery);
+      return parseInt(rows[0].count.toString(), 10);
+    }
+  } catch (error) {
+    console.error("Error counting rows:", error);
+    throw error;
+  }
+}
+
+function quote(columnName: string) {
+  if (databaseType === "postgres") {
+    return `"${columnName}"`;
+  } else if (databaseType === "mysql") {
+    return `\`${columnName}\``;
+  }
+  return columnName;
 }

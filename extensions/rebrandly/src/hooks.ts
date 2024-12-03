@@ -1,6 +1,19 @@
 import { useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL, MAX_PAGE_SIZE } from "./config";
-import { BrandedLink } from "./types";
+import { BrandedLink, ErrorResponse } from "./interfaces";
+
+export const parseResponse = async (response: Response) => {
+  const result = await response.json();
+  if (!response.ok) {
+    const res = result as ErrorResponse;
+    if (res.errors?.length) {
+      const err = res.errors[0];
+      throw new Error(`${err.property} - ${err.message}`);
+    }
+    throw new Error(res.message);
+  }
+  return result;
+};
 
 export const useGetLinks = () =>
   useFetch(
@@ -15,6 +28,7 @@ export const useGetLinks = () =>
       }).toString(),
     {
       headers: API_HEADERS,
+      parseResponse,
       mapResult(result: BrandedLink[]) {
         return {
           data: result,
