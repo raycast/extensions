@@ -3,12 +3,13 @@
 // retrieves the video's transcript, processes it, and saves it to a local file.
 // The script uses the YouTube Data API and handles user preferences for download locations.
 
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 import ytdl from "ytdl-core";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
+<<<<<<< HEAD
 // User Preferences Structure
 interface Preferences {
   defaultDownloadFolder: string;
@@ -27,6 +28,10 @@ function sanitizeFilename(filename: string): string {
 
 // Fetches the transcript and title for a given YouTube video ID
 async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
+=======
+// Fetches the transcript for a given YouTube video ID
+async function getVideoTranscript(videoId: string): Promise<string> {
+>>>>>>> contributions/merge-1733214743467820000
   try {
     const fetch = (await import("node-fetch")).default;
     const videoInfo = await ytdl.getInfo(videoId);
@@ -86,11 +91,17 @@ export default async function Command(props: { arguments: { videoUrl: string } }
     // Get both transcript and title
     const { transcript, title } = await getVideoTranscript(videoId);
 
+<<<<<<< HEAD
     const preferences = getPreferenceValues<Preferences>();
     const downloadsFolder = preferences.defaultDownloadFolder || path.join(os.homedir(), "Downloads");
 
     // Use sanitized video title in filename
     const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
+=======
+    const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
+    const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
+    const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
+>>>>>>> contributions/merge-1733214743467820000
 
     await fs.writeFile(filename, transcript);
 
@@ -98,6 +109,14 @@ export default async function Command(props: { arguments: { videoUrl: string } }
       style: Toast.Style.Success,
       title: "Transcript fetched and saved",
       message: `Saved to: ${filename}`,
+      primaryAction: {
+        title: "Open File",
+        onAction: () => open(filename),
+      },
+      secondaryAction: {
+        title: "Open Folder",
+        onAction: () => open(downloadsFolder),
+      },
     });
   } catch (error) {
     await showToast({
