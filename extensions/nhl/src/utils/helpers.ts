@@ -454,7 +454,6 @@ export function getScoreColor(game: Game, team: "Home" | "Away"): Color.Green | 
 }
 
 export function getLanguageKey() {
-  
   //const language = preferences.language as "default" | "fr";
   //const languageKey = language === "fr" ? "fr" : "default";
   //return languageKey;
