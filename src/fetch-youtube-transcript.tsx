@@ -22,7 +22,7 @@ interface TranscriptResult {
 
 // Sanitize filename to remove invalid characters
 function sanitizeFilename(filename: string): string {
-  return filename.replace(/[<>:"/\\|?*]/g, '_').trim();
+  return filename.replace(/[<>:"/\\|?*]/g, "_").trim();
 }
 
 // Fetches the transcript and title for a given YouTube video ID
@@ -42,7 +42,7 @@ async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
         const transcriptText = await transcriptResponse.text();
         return {
           transcript: processTranscript(transcriptText),
-          title: videoTitle
+          title: videoTitle,
         };
       }
     }
@@ -88,7 +88,7 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     const preferences = getPreferenceValues<Preferences>();
     const downloadsFolder = preferences.defaultDownloadFolder || path.join(os.homedir(), "Downloads");
-    
+
     // Use sanitized video title in filename
     const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
 
