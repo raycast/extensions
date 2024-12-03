@@ -1,4 +1,13 @@
-# Upload to Cloudinary Changelog
+# Cloudinary Changelog
+
+## [Cache Enhancements] - {PR_MERGE_DATE}
+
+- View more than 30 results at a time in "Search" via `Pagination`
+- `Cache` "Search" through `useCachedPromise`
+- `Cache` "View Item" through `useCachedPromise`
+- Add placeholders to `Preferences`
+- cloudinaryApiSecret is now of type `password`
+- Various `type` and `argument` refactor
 
 ## [Update] - 2023-11-14
 

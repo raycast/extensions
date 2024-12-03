@@ -26,7 +26,7 @@ export default function main(props: LaunchProps<{ arguments: Arguments }>) {
         const resource = await uploadImage(props.arguments.url);
         setAsset(resource as Asset);
       } catch (e) {
-        displayError("Failed to upload clipboard data to Cloudinary");
+        displayError("Failed to upload url data to Cloudinary");
       }
 
       setLoading(false);
