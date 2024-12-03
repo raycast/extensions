@@ -35,7 +35,6 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
     <Action
       title="Start"
       onAction={() => callVacuumStartService(s)}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
       icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
     />
   );
