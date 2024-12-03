@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { captureException } from "@raycast/api";
 import { buildException } from "./buildException";
+import { collectMetric, METRIC_TYPE } from "./metrics";
 
 const ntfyCurlCommand = (
   reminderTopic: string,
@@ -32,6 +33,8 @@ export async function sendPushNotificationWithNtfy(
         return;
       }
     });
+
+    await collectMetric(METRIC_TYPE.MOBILE_NOTIFICATION_TRIGGERED);
   } catch (error) {
     captureException(
       buildException(error as Error, "Error sending push notification with NTFY", {

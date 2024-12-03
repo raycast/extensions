@@ -1,5 +1,16 @@
 # Simple Reminder Changelog
 
+## [Anonymous metric collection] - 2024-12-04
+
+- Add anonymous metric collection to better understand how the extension is being used
+- No tracking is performed on the user, only on the usage of the extension
+- The metrics collected are:
+  - Number of reminders triggered
+  - Number of reminders deleted
+  - Number of reminders copied
+  - Number of reminders set as recurrent
+  - Number of reminders sent to mobile
+
 ## [Mobile notifications] - 2024-11-29
 
 - Add new configuration for self-hosted ntfy servers

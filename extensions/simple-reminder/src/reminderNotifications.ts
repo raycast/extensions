@@ -9,18 +9,24 @@ import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotificati
 import { SimpleReminderPreferences } from "./types/preferences";
 import { Frequency } from "./types/frequency";
 import { buildException } from "./utils/buildException";
+import { collectMetric, METRIC_CLIENT_ID_STORAGE_KEY, METRIC_TYPE } from "./utils/metrics";
 
 export default async function Command() {
   const storedRemindersObject = await LocalStorage.allItems<Record<string, string>>();
   if (!Object.keys(storedRemindersObject).length) return;
 
   for (const key in storedRemindersObject) {
+    if (key === METRIC_CLIENT_ID_STORAGE_KEY.toString()) {
+      continue;
+    }
+
     const reminder: Reminder = JSON.parse(storedRemindersObject[key]);
     if (isReminderInThePast(reminder)) {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
       await sendPushNotificationToMacOS(cleanTopic);
       await sendMobileNotification(cleanTopic);
+      await collectMetric(METRIC_TYPE.REMINDER_TRIGGERED);
 
       if (reminder.frequency) {
         const newDate = updateReminderDateForRecurrence(reminder);

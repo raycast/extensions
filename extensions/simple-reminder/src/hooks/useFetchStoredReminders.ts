@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Reminder } from "../types/reminder";
 import { dateSortPredicate } from "../utils/dateSortPredicate";
 import { buildException } from "../utils/buildException";
+import { METRIC_CLIENT_ID_STORAGE_KEY } from "../utils/metrics";
 
 export function useFetchStoredReminders(
   setReminders: (reminders: Reminder[]) => void,
@@ -18,6 +19,10 @@ export function useFetchStoredReminders(
       }
       const storedReminders: Reminder[] = [];
       for (const key in storedRemindersObject) {
+        if (key === METRIC_CLIENT_ID_STORAGE_KEY.toString()) {
+          continue;
+        }
+
         try {
           const storedReminder: Reminder = JSON.parse(storedRemindersObject[key]);
           storedReminder.date = new Date(storedReminder.date);

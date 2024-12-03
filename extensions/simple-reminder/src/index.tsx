@@ -12,6 +12,7 @@ import { Frequency } from "./types/frequency";
 import { setRecurrenceForReminder } from "./handlers/setRecurrenceForReminder";
 import { hasFrequencyPredicate, hasNoFrequencyPredicate } from "./utils/arrayPredicates";
 import { ListActionPanel } from "./components/listActionPanel";
+import { collectMetric, METRIC_TYPE } from "./utils/metrics";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -42,6 +43,7 @@ export default function Command() {
   const onCopyReminderTopicAction = async (reminderTopic: string) => {
     try {
       await copyExistingReminder(reminderTopic);
+      await collectMetric(METRIC_TYPE.REMINDER_COPIED);
     } catch (e) {
       await showError("Reminder not copied");
     }
@@ -54,6 +56,7 @@ export default function Command() {
         existingReminders: reminders,
         setReminders,
       });
+      await collectMetric(METRIC_TYPE.REMINDER_DELETED);
     } catch (e) {
       await showError("Reminder not deleted");
     }
@@ -67,6 +70,7 @@ export default function Command() {
         existingReminders: reminders,
         setReminders,
       });
+      await collectMetric(METRIC_TYPE.REMINDER_FREQUENCY_CHANGED);
     } catch (e) {
       await showError("Couldn't set recurrence for reminder");
     }
