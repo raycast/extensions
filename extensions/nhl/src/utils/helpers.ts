@@ -454,9 +454,12 @@ export function getScoreColor(game: Game, team: "Home" | "Away"): Color.Green | 
 }
 
 export function getLanguageKey() {
-  const language = preferences.language as "default" | "fr";
-  const languageKey = language === "fr" ? "fr" : "default";
-  return languageKey;
+  
+  //const language = preferences.language as "default" | "fr";
+  //const languageKey = language === "fr" ? "fr" : "default";
+  //return languageKey;
+  // Raycast does not support i18n yet, so we'll just return the default language for now
+  return "default" as "default" | "fr";
 }
 
 export function formatSeason(season: number): string {

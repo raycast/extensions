@@ -60,24 +60,6 @@
   ],
   "preferences": [
     {
-      "name": "language",
-      "title": "Language Preference",
-      "description": "Choose between English and French",
-      "type": "dropdown",
-      "required": false,
-      "default": "default",
-      "data": [
-        {
-          "title": "English",
-          "value": "default"
-        },
-        {
-          "title": "French",
-          "value": "fr"
-        }
-      ]
-    },
-    {
       "name": "timezone",
       "title": "Timezone",
       "description": "Choose your timezone",
