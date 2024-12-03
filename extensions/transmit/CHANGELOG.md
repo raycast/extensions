@@ -1,6 +1,6 @@
 # Transmit Changelog
 
-## [Empty Name Fix] - {PR_MERGE_DATE}
+## [Empty Name Fix] - 2024-12-03
 
 - use Raycast's own `run-applescript`
 - pass an empty title if there is none
