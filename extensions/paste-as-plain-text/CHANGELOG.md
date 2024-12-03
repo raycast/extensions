@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Fix Paste as Number] - :{PR_MERGE_DATE}
+## [Fix Paste as Number] - :2024-12-03
 
 -  Fix Paste as Number
 
