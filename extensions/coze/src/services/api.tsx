@@ -49,7 +49,7 @@ const replaceAPIBaseURLToPageURL = (baseURL: string): string => {
 };
 
 const initAPI = async () => {
-  const { api_base: baseURL, debug } = await getConfig();
+  const { api_base: baseURL, debug } = getConfig();
   const clientId = await getClientId(baseURL);
   const defaultPKCEClient = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,

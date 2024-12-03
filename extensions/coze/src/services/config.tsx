@@ -1,13 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  api_base: string;
-  debug: boolean;
-}
-
-export const getConfig = async (): Promise<Preferences> => {
-  const preferences = await getPreferenceValues<Preferences>();
-  return preferences;
+export const getConfig = (): Preferences => {
+  return getPreferenceValues<Preferences>();
 };
 
 export const DEFAULT_CN_COZE_CLIENT_ID = "30367348905137699749500653976611.app.coze";
