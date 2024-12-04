@@ -1,4 +1,4 @@
-# raycast-jq
+# jq extension
 
 Raycast extension to run jq queries on JSON documents from a clipboard or a file.
 
