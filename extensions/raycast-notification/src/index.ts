@@ -3,7 +3,7 @@ import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
 import { NotifyOptions, notificationCenter, preparePrebuilds } from "raycast-notifier";
 
 type LaunchContext = {
-  notificationCenterOptions?: NotifyOptions;
+  notifyOptions?: NotifyOptions;
   callbackLaunchOptions?: LaunchOptions;
 };
 
@@ -13,7 +13,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     launchType,
     launchContext = {},
   } = props;
-  const { notificationCenterOptions, callbackLaunchOptions } = launchContext;
+  const { notifyOptions, callbackLaunchOptions } = launchContext;
 
   let notificationType = type ?? "standard";
   if (launchType === LaunchType.UserInitiated) {
@@ -23,15 +23,15 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     notificationType = "standard";
   }
 
-  if (notificationCenterOptions) {
+  if (notifyOptions) {
     await preparePrebuilds();
-    const result = await notificationCenter({
+    const notifyResult = await notificationCenter({
       title: title,
       message: message || " ",
-      ...notificationCenterOptions,
+      ...notifyOptions,
     });
     if (callbackLaunchOptions) {
-      callbackLaunchCommand(callbackLaunchOptions, { result });
+      callbackLaunchCommand(callbackLaunchOptions, { notifyResult });
     }
     return;
   }

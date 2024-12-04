@@ -32,37 +32,55 @@ Even more! With this extension you can also call the system built-in Notificatio
 
 ![](./assets/notification-center-with-reply.png)
 
-This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link]. So that you can use `crossLaunchCommand` or built-in `launchCommand` to use its features.
+This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link]. So that you can receive the reply value through its callback launch.
 
 ### Examples
 
 ```typescript
 import { crossLaunchCommand } from "raycast-cross-extension";
 
-crossLaunchCommand({
-  name: "index",
-  type: LaunchType.Background,
-  extensionName: "raycast-notification",
-  ownerOrAuthorName: "maxnyby",
-  context: {
-    notificationCenterOptions: {
-      title: "Raycast Notification",
-      subtitle: "Notification Center",
-      message: "Hello from Raycast",
-      reply: "Send your greetings",
+crossLaunchCommand(
+  {
+    name: "index",
+    type: LaunchType.Background,
+    extensionName: "raycast-notification",
+    ownerOrAuthorName: "maxnyby",
+    context: {
+      notifyOptions: {
+        title: "Raycast Notification",
+        subtitle: "Notification Center",
+        message: "Hello from Raycast",
+        reply: "Send your greetings",
+      },
     },
   },
-});
+  // Set `false` to disable callback launch from `raycast-cross-extension`
+  false,
+);
 ```
 
 For full API instructions please refer to the [`notifyOptions`](https://github.com/LitoMore/raycast-notifier#notifyoptions).
 
-All `notifyOptions` options are appliable to `notificationCenterOptions`.
+### Receive reply value
+
+```typescript
+import { NotifyResult } from "raycast-notifier";
+
+type LaunchContex = {
+  notifyResult?: NotifyResult;
+};
+
+export default function Command({ launchContext = {} }: { launchContext: LaunchContext }) {
+  const { notifyResult } = launchContext;
+  const greetigns = notifyResult?.metadata?.activationValue;
+  console.log(greetings);
+}
+```
 
 #### Deeplink Example
 
 ```shell
-context='{"notificationCenterOptions":{"title":"Raycast Notification","subtitle":"Notification Center","message": "Hello from Raycast"}}'
+context='{"notifyOptions":{"title":"Raycast Notification","subtitle":"Notification Center","message":"Hello from Raycast","reply":"Send your greetings"}}'
 deeplink="raycast://extensions/maxnyby/raycast-notification/index?launchType=background&context=$(jq -rR @uri <<< $context)"
 open $deeplink
 ```
