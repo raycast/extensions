@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2024-12-04
 
 - Update API Search key retrieval (search was showing empty results)
 
