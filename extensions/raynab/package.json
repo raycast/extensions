@@ -48,9 +48,9 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.5",
-    "@raycast/utils": "^1.4.18",
-    "dayjs": "^1.10.7",
+    "@raycast/api": "^1.87.2",
+    "@raycast/utils": "^1.18.1",
+    "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
     "nanoid": "^3.2.0",
     "node-fetch": "^3.0.0",
@@ -67,7 +67,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^6.0.1",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.9.3"
   },
   "preferences": [

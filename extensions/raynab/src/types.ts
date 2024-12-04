@@ -1,15 +1,16 @@
-import {
-  type TransactionDetail as ynabTransactionDetail,
-  type Account as ynabAccount,
-  type CurrencyFormat as ynabCurrencyFormat,
-  type Category as ynabCategory,
-  type CategoryGroupWithCategories as ynabCategoryGroupWithCategories,
-  type BudgetDetail as ynabBudgetDetail,
-  type SaveSubTransaction,
-  type SaveTransactionWithOptionalFields,
+import type { ManipulateType } from 'dayjs';
+import type {
+  TransactionDetail as ynabTransactionDetail,
+  Account as ynabAccount,
+  CurrencyFormat as ynabCurrencyFormat,
+  Category as ynabCategory,
+  CategoryGroupWithCategories as ynabCategoryGroupWithCategories,
+  BudgetDetail as ynabBudgetDetail,
+  SaveSubTransaction,
+  SaveTransactionWithOptionalFields,
 } from 'ynab';
 
-export { type NewTransaction } from 'ynab';
+export type { NewTransaction } from 'ynab';
 
 export interface Preferences {
   apiToken: string;

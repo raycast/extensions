@@ -121,7 +121,9 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
   try {
     const transactionsResponse = await client.transactions.getTransactions(
       selectedBudgetId,
-      dayjs().subtract(1, period).toISOString() // Show one month before by default
+      dayjs()
+        .subtract(1, period as dayjs.ManipulateType)
+        .toISOString()
     );
     const transactions = transactionsResponse.data.transactions;
 
