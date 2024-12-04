@@ -1,5 +1,7 @@
 # Raycast Notification
 
+This extension makes it easy to display system built-in Notification Center and Raycast HUD via a quicklink or cross-extension launch, making the Raycast interface accessible to other applications or scripts.
+
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
 ## Raycast HUD
