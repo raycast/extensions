@@ -1,5 +1,11 @@
 # Do Not Disturb Changelog
 
+## [API Update] - 2024-12-02
+
+- Add support for callback launch
+- Add `dndStatus` to callback payload
+- Update documentation
+
 ## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest
