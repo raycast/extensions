@@ -8,12 +8,10 @@ import { ListContainer, withEnvContext } from "./components";
 
 type ConnectedAccount = {
   id: string;
-  email: string;
-  created_at: string;
+  created: string;
   first_name: string;
   last_name: string;
-  cancelled_at: string;
-  currency: string;
+  email: string;
   capabilities: string;
   default_currency: string;
   company_address: string;
@@ -40,16 +38,14 @@ const resolveConnectedAccount = (connectedAccount: Stripe.Account): ConnectedAcc
 
   const resolvedConnectedAccount: ConnectedAccount = {
     ...connectedAccount,
-    currency: connectedAccount.currency.toUpperCase(),
-    default_currency: connectedAccount.default_currency.toUpperCase(),
-    created_at: convertTimestampToDate(connectedAccount.created),
-    cancelled_at: convertTimestampToDate(connectedAccount.cancelled_at),
+    default_currency: connectedAccount.default_currency?.toUpperCase() ?? "",
+    created: connectedAccount.created ? convertTimestampToDate(connectedAccount.created) : "",
     dob: createDateOfBirth(connectedAccount),
     company_address: companyAddress,
     capabilities: Object.keys(connectedAccount.capabilities ?? {}).join(", "),
     first_name: titleCase(connectedAccount.individual?.first_name ?? ""),
     last_name: titleCase(connectedAccount.individual?.last_name ?? ""),
-    email: connectedAccount?.email ?? "",
+    email: connectedAccount.email ?? "",
   };
 
   return resolvedConnectedAccount;
