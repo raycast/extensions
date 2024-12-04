@@ -1,10 +1,10 @@
 import { Color } from '@raycast/api';
-import { TransactionDetail } from 'ynab';
+import { TransactionFlagColor } from 'ynab';
 
 /**
  * Match YNAB flag colors with Raycast colors
  */
-export function getFlagColor(color: TransactionDetail.FlagColorEnum | null | undefined) {
+export function getFlagColor(color: TransactionFlagColor | null | undefined) {
   const stringColor = color?.toString();
   switch (stringColor) {
     case 'red':

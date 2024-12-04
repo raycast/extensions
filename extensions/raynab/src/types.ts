@@ -1,12 +1,15 @@
-import type {
-  TransactionDetail as ynabTransactionDetail,
-  Account as ynabAccount,
-  CurrencyFormat as ynabCurrencyFormat,
-  Category as ynabCategory,
-  CategoryGroupWithCategories as ynabCategoryGroupWithCategories,
-  BudgetDetail as ynabBudgetDetail,
-  SaveSubTransaction,
+import {
+  type TransactionDetail as ynabTransactionDetail,
+  type Account as ynabAccount,
+  type CurrencyFormat as ynabCurrencyFormat,
+  type Category as ynabCategory,
+  type CategoryGroupWithCategories as ynabCategoryGroupWithCategories,
+  type BudgetDetail as ynabBudgetDetail,
+  type SaveSubTransaction,
+  type SaveTransactionWithOptionalFields,
 } from 'ynab';
+
+export { type NewTransaction } from 'ynab';
 
 export interface Preferences {
   apiToken: string;
@@ -36,6 +39,7 @@ export type FlagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple
 
 export type CurrencyFormat = ynabCurrencyFormat | null | undefined;
 
+export type SaveTransaction = SaveTransactionWithOptionalFields;
 export interface SaveSubTransactionWithReadableAmounts extends Omit<SaveSubTransaction, 'amount'> {
   amount: string;
 }

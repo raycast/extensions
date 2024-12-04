@@ -4,8 +4,7 @@ import { displayError, isYnabError } from './errors';
 import dayjs from 'dayjs';
 
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import { Preferences, Period, BudgetSummary, TransactionDetail } from '@srcTypes';
-import { SaveTransaction } from 'ynab';
+import type { Preferences, Period, BudgetSummary, SaveTransaction, NewTransaction } from '@srcTypes';
 dayjs.extend(quarterOfYear);
 
 const { apiToken } = getPreferenceValues<Preferences>();
@@ -167,9 +166,7 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
   }
 }
 
-type TransactionCreation = SaveTransaction;
-
-export async function createTransaction(selectedBudgetId: string, transactionData: TransactionCreation) {
+export async function createTransaction(selectedBudgetId: string, transactionData: NewTransaction) {
   try {
     const transactionCreationResponse = await client.transactions.createTransaction(selectedBudgetId || 'last-used', {
       transaction: transactionData,

@@ -7,7 +7,8 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-import { SaveTransaction, type TransactionDetail } from 'ynab';
+import { TransactionDetail } from '@srcTypes';
+import { TransactionClearedStatus } from 'ynab';
 import { useTransaction } from './transactionContext';
 import { easyGetColorFromId, formatToReadablePrice, getFlagColor } from '@lib/utils';
 
@@ -43,7 +44,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
   const hasSubtransactions = transaction.subtransactions.length > 0;
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;
-  const hasCleared = transaction.cleared === SaveTransaction.ClearedEnum.Cleared;
+  const hasCleared = transaction.cleared === TransactionClearedStatus.Cleared;
 
   return (
     <List.Item

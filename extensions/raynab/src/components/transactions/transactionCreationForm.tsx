@@ -5,7 +5,7 @@ import { useAccounts } from '@hooks/useAccounts';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
-import { SaveTransaction } from 'ynab';
+import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { useState } from 'react';
@@ -52,9 +52,9 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
         amount: formatToYnabAmount(values.amount),
         category_id: values.categoryList?.[0] || undefined,
         approved: true,
-        cleared: values.cleared ? SaveTransaction.ClearedEnum.Cleared : SaveTransaction.ClearedEnum.Uncleared,
+        cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
         flag_color: values.flag_color
-          ? SaveTransaction.FlagColorEnum[values.flag_color as keyof typeof SaveTransaction.FlagColorEnum]
+          ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
           : null,
         subtransactions: undefined,
       };
@@ -225,32 +225,32 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
       <Form.Dropdown {...itemProps.flag_color} title="Flag Color">
         <Form.Dropdown.Item value="" title="No Flag" icon={{ source: Icon.Dot }} />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Red.toString()}
+          value={TransactionFlagColor.Red.toString()}
           title="Red"
           icon={{ source: Icon.Dot, tintColor: Color.Red }}
         />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Orange.toString()}
+          value={TransactionFlagColor.Orange.toString()}
           title="Orange"
           icon={{ source: Icon.Dot, tintColor: Color.Orange }}
         />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Yellow.toString()}
+          value={TransactionFlagColor.Yellow.toString()}
           title="Yellow"
           icon={{ source: Icon.Dot, tintColor: Color.Yellow }}
         />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Green.toString()}
+          value={TransactionFlagColor.Green.toString()}
           title="Green"
           icon={{ source: Icon.Dot, tintColor: Color.Green }}
         />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Blue.toString()}
+          value={TransactionFlagColor.Blue.toString()}
           title="Blue"
           icon={{ source: Icon.Dot, tintColor: Color.Blue }}
         />
         <Form.Dropdown.Item
-          value={SaveTransaction.FlagColorEnum.Purple.toString()}
+          value={TransactionFlagColor.Purple.toString()}
           title="Purple"
           icon={{ source: Icon.Dot, tintColor: Color.Purple }}
         />

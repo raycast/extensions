@@ -10,9 +10,9 @@
 */
 
 import { Color, Icon } from '@raycast/api';
-import { CategoryGroupWithCategories, TransactionDetail, Category as ynabCategory } from 'ynab';
+import { CategoryGoalTypeEnum } from 'ynab';
 import { formatToReadablePrice } from './transactions';
-import type { Category, CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
+import type { Category, CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 
 type GoalShape = 'underfunded' | 'funded' | 'overspent' | 'neutral';
 
@@ -24,16 +24,16 @@ export function assessGoalShape(category: Category): GoalShape {
   if (category.balance < 0) return 'overspent';
 
   switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB:
+    case CategoryGoalTypeEnum.Tb:
       return category.goal_percentage_complete === 100
         ? 'funded'
         : Number(category.goal_percentage_complete) > 0
         ? 'underfunded'
         : 'neutral';
-    case ynabCategory.GoalTypeEnum.TBD:
-    case ynabCategory.GoalTypeEnum.NEED:
-    case ynabCategory.GoalTypeEnum.MF:
-    case ynabCategory.GoalTypeEnum.DEBT:
+    case CategoryGoalTypeEnum.Tbd:
+    case CategoryGoalTypeEnum.Need:
+    case CategoryGoalTypeEnum.Mf:
+    case CategoryGoalTypeEnum.Debt:
       return category.goal_percentage_complete === 100 || category.goal_under_funded === 0 ? 'funded' : 'underfunded';
     default:
       break;
@@ -63,15 +63,15 @@ export function displayGoalColor(goalShape: GoalShape) {
  */
 export function displayGoalType(category: Category) {
   switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB:
+    case CategoryGoalTypeEnum.Tb:
       return Icon.BullsEye;
-    case ynabCategory.GoalTypeEnum.TBD:
+    case CategoryGoalTypeEnum.Tbd:
       return Icon.Calendar;
-    case ynabCategory.GoalTypeEnum.NEED:
+    case CategoryGoalTypeEnum.Need:
       return Icon.Cart;
-    case ynabCategory.GoalTypeEnum.MF:
+    case CategoryGoalTypeEnum.Mf:
       return Icon.Goal;
-    case ynabCategory.GoalTypeEnum.DEBT:
+    case CategoryGoalTypeEnum.Debt:
       return Icon.BankNote;
     default:
       return Icon.XMarkCircle;
@@ -88,20 +88,20 @@ export function formatGoalType(category: Category, currency: CurrencyFormat): st
   const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
 
   switch (category.goal_type) {
-    case ynabCategory.GoalTypeEnum.TB: {
+    case CategoryGoalTypeEnum.Tb: {
       return `Budget ${target} anytime`;
     }
-    case ynabCategory.GoalTypeEnum.TBD: {
+    case CategoryGoalTypeEnum.Tbd: {
       const deadline = new Intl.DateTimeFormat('en-us', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
         new Date(String(category.goal_target_month))
       );
       return `Budget ${target} by ${deadline}`;
     }
-    case ynabCategory.GoalTypeEnum.NEED:
+    case CategoryGoalTypeEnum.Need:
       return `Save and spend ${target}`;
-    case ynabCategory.GoalTypeEnum.MF:
+    case CategoryGoalTypeEnum.Mf:
       return `Budget ${target} monthly`;
-    case ynabCategory.GoalTypeEnum.DEBT:
+    case CategoryGoalTypeEnum.Debt:
       return 'Pay down ${target} monthly';
     default:
       return 'Goal Unknown';

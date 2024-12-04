@@ -8,12 +8,11 @@ import {
   isNumberLike,
   isSplitTransaction,
 } from '@lib/utils';
+import { TransactionFlagColor } from 'ynab';
 import { Action, ActionPanel, Alert, confirmAlert, Color, Form, Icon, showToast, Toast } from '@raycast/api';
 import { FormValidation, useForm } from '@raycast/utils';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
-
-import { SaveTransaction } from 'ynab';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { useLocalStorage } from '@hooks/useLocalStorage';
@@ -68,7 +67,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         ...transaction,
         date: (values.date ?? new Date()).toISOString(),
         flag_color: values.flag_color
-          ? SaveTransaction.FlagColorEnum[values.flag_color as keyof typeof SaveTransaction.FlagColorEnum]
+          ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
           : null,
         amount: formatToYnabAmount(values.amount),
         payee_id: values.payee_id,
