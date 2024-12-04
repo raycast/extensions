@@ -30,8 +30,14 @@ async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
         const transcriptUrl = captions[0].baseUrl;
         const transcriptResponse = await fetch(transcriptUrl);
         const transcriptText = await transcriptResponse.text();
+
+        // Add debug logging
+        console.log("Raw transcript:", transcriptText);
+        const processed = processTranscript(transcriptText);
+        console.log("Processed transcript:", processed);
+
         return {
-          transcript: processTranscript(transcriptText),
+          transcript: processed,
           title: videoTitle,
         };
       }
@@ -45,13 +51,35 @@ async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
 
 // Cleans up raw transcript text
 function processTranscript(transcriptText: string): string {
-  const textOnly = transcriptText.replace(/<[^>]+>/g, "");
+  // Remove XML tags
+  const textOnly = transcriptText.replace(/<[^>]+>/g, " "); // Replace tags with space instead of empty string
+
+  // Decode HTML entities
   const decodedText = textOnly
     .replace(/&amp;#39;/g, "'")
     .replace(/&amp;quot;/g, '"')
     .replace(/&amp;/g, "&");
-  const lines = decodedText.split("\n").filter((line) => line.trim() !== "");
-  return lines.join(" ");
+
+  // Split into segments and process each line
+  const segments = decodedText
+    .split("\n")
+    .filter((segment) => segment.trim() !== "")
+    .map((segment) => {
+      // Ensure proper word spacing within each segment
+      return segment
+        .replace(/\s+/g, " ") // Normalize spaces
+        .trim(); // Remove leading/trailing spaces
+    });
+
+  // Join segments with double newlines and ensure proper word spacing
+  return segments.reduce((acc, current, index) => {
+    // Add space at the end of each line except the last one
+    if (index === segments.length - 1) {
+      return acc + current;
+    }
+    // Add a period and double newline between segments
+    return acc + current + ".\n\n";
+  }, "");
 }
 
 // Sanitize filename to remove invalid characters

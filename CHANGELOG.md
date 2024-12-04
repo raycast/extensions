@@ -1,11 +1,14 @@
 # Fetch Youtube Transcript Changelog
 
-## [1.1.2] - 2024-01-02
+## [0.1.2] - 2024-01-04
 
 ### Changed
 
 - Improved transcript filename generation to use video title instead of video ID
 - Added filename sanitization to handle special characters in video titles
+- Fixed issue where words from adjacent transcript lines were incorrectly joined together
+- Improved transcript formatting with proper line spacing and word boundaries
+- Added debug logging for better troubleshooting
 
 ## [1.1.1] - 2024-11-26
 
