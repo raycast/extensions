@@ -23,7 +23,7 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     notificationType = "standard";
   }
 
-  if (notifyOptions) {
+  if (notifyOptions || notificationType === "notification-center") {
     await preparePrebuilds();
     const notifyResult = await notificationCenter({
       title: title,
@@ -43,9 +43,6 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     case "failure":
       await showToast(Toast.Style.Failure, title);
       break;
-    case "notification-center": {
-      break;
-    }
     default:
       await showHUD(title);
   }
