@@ -25,9 +25,23 @@
       "required": true,
       "description": "",
       "placeholder": ""
+    },
+    {
+      "name": "max_num_as_unmetered",
+      "label": "Replace '999999' with 'Unmetered'",
+      "type": "checkbox",
+      "required": false,
+      "description": "",
+      "default": false
     }
   ],
   "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "",
+      "mode": "view"
+    },
     {
       "name": "providers",
       "title": "Providers",
@@ -35,15 +49,34 @@
       "mode": "view"
     },
     {
-      "name": "resellers",
-      "title": "Resellers",
+      "name": "hosting",
+      "title": "Hosting",
       "description": "",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hosting_type",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Reseller",
+              "value": "reseller"
+            },
+            {
+              "title": "Shared",
+              "value": "shared"
+            }
+          ],
+          "placeholder": "Hosting Type"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "dayjs": "^1.11.13"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

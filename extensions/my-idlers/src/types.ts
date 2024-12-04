@@ -5,6 +5,8 @@ type Provider = {
     updated_at: string | null;
 }
 type Location = Provider;
+
+export type Term = 1 | 2 | 3 | 4 | 5 | 6;
 type Pricing = {
     id: number
     service_id: string
@@ -12,7 +14,7 @@ type Pricing = {
     active: number
     currency: "USD",
     price: string
-    term: number
+    term: Term;
     as_usd: string
     usd_per_month: string
     next_due_date: string
@@ -20,13 +22,10 @@ type Pricing = {
     updated_at: string
 }
 
-export type ResellerType = "Direct Admin";
-export type Reseller = {
+type CommonHosting = {
     id: string
     active: number
     main_domain: string;
-    accounts: number
-    reseller_type: ResellerType;
     provider_id: number
     location_id: number
     bandwidth: number
@@ -45,6 +44,14 @@ export type Reseller = {
     location: Location;
     provider: Provider;
     price: Pricing;
-    // "ips": [],
-    // "labels": []
-  }
+    ips: string[];
+    labels: [];
+}
+export type HostingType = "Direct Admin";
+export type Reseller = CommonHosting & {
+    accounts: number;
+    reseller_type: HostingType;
+}
+export type Shared = CommonHosting & {
+    shared_type: HostingType;
+}
