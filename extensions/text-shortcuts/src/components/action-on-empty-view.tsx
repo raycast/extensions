@@ -1,5 +1,5 @@
-import React from "react";
 import { Action, ActionPanel, Icon } from "@raycast/api";
+import React from "react";
 import CreateShortcut from "../create-shortcut";
 import { ActionOpenPreferences } from "./action-open-preferences";
 
