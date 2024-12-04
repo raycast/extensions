@@ -5,9 +5,9 @@
 ### ✨ New
 
 - **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
-  - https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt → All the docs
-  - https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt → The API docs
-  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.tx](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt)[t](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) - The utils docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) - The utils docs
 
 ### 🐞 Fixes
 
