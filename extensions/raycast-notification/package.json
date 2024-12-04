@@ -62,7 +62,7 @@
   "dependencies": {
     "@raycast/api": "^1.87.0",
     "raycast-cross-extension": "^0.2.3",
-    "raycast-notifier": "^0.1.0"
+    "raycast-notifier": "^0.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

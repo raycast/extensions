@@ -34,9 +34,36 @@ Even more! With this extension you can also call the system built-in Notificatio
 
 This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link]. So that you can receive the reply value through its callback launch.
 
-If you want a better async/await experience, I recommend using [raycast-notifier](https://github.com/LitoMore/raycast-notifier) directly.
+If you want a better async/await experience, we recommend using [raycast-notifier](https://github.com/LitoMore/raycast-notifier) directly.
 
-### Examples
+### Use with `raycast-notifier`
+
+```typescript
+import { confirmAlert } from "@raycast/api";
+import { findRaycastNotificationCenterPath, notificationCenter } from "raycast-notifier";
+
+const found = await findRaycastNotificationCenterPath();
+if (found) {
+  await notificationCenter(
+    {
+      title: "AI Assitant",
+      message: "Hi, what can I help you today?",
+      reply: "Ask me anything!",
+    },
+    {
+      customPath: found,
+    },
+  );
+} else {
+  const yes = await confirmAlert({
+    title: "Notification Center Not Found",
+    message: "Please install Raycast Notification extension. Do you want to install it right now?",
+  });
+  if (yes) await open("raycast://extensions/maxnyby/raycast-notification");
+}
+```
+
+### Use with Cross-Extension
 
 ```typescript
 import { crossLaunchCommand } from "raycast-cross-extension";
@@ -63,7 +90,7 @@ crossLaunchCommand(
 
 For full API instructions please refer to the [`notifyOptions`](https://github.com/LitoMore/raycast-notifier#notifyoptions).
 
-### Receive reply value
+#### Receive Reply Value from Cross-Extension
 
 ```typescript
 import { NotifyResult } from "raycast-notifier";
@@ -82,7 +109,7 @@ export default function Command({ launchContext = {} }: { launchContext: LaunchC
 #### Deeplink Example
 
 ```shell
-context='{"notifyOptions":{"title":"Raycast Notification","subtitle":"Notification Center","message":"Hello from Raycast","reply":"Send your greetings"}}'
+context='{"notifyOptions":{"title":"Raycast AI","subtitle":"Image generated!","message":"How would you like to adjust this image?","reply":"Just imagine! I can do it!"}}'
 deeplink="raycast://extensions/maxnyby/raycast-notification/index?launchType=background&context=$(jq -rR @uri <<< $context)"
 open $deeplink
 ```
