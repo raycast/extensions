@@ -1,10 +1,10 @@
-<h1 align="left"> 🔥 Twenty Raycast Integration </h1>
+<h1 align="left"> 🔥 Twenty Raycast Extension </h1>
 
-Twenty simplifies CRM management, empowering businesses to enhance productivity and drive growth. With this Raycast integration, record creation across standard and custom objects is now at your fingertips, making your workflow effortless and efficient. Experience how easy it is to use this Raycast for seamless record creation!
+Twenty simplifies CRM management, empowering businesses to enhance productivity and drive growth. With this Raycast extension, record creation across standard and custom objects is now at your fingertips, making your workflow effortless and efficient. Experience how easy it is to use this Raycast for seamless record creation!
 
-## $\{\textcolor{#39FF14}{\textbf{🤝 Create records instantly across Standard and Custom Objects!}}}$
+## ⚡️ Create records instantly across Standard and Custom Objects!
 
-## Command Descriptions
+## 📝 Command Descriptions
 
 ### <i>Create Object Record</i>
 
@@ -12,7 +12,7 @@ With `Create Object Record` command, effortlessly create records in any standard
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 Get your API Keys from [twenty developer settings](https://twenty.com/settings/developers) , navigate to Raycast Command settings or try to access command which will open up view to provide your API key.
 
@@ -22,7 +22,7 @@ Get your API Keys from [twenty developer settings](https://twenty.com/settings/d
   </tr>
 </table>
 
-if you are selfhost user navigate to `<self-host-url>/settings/developers`, once you have your key, go to Raycast Command Settings to provide your `selfhost api url` and `API key`. If you don't provide selfhost url, Integration will assume [https://api.twenty.com](https://api.twenty.com) as your instance.
+if you are selfhost user navigate to `<self-host-url>/settings/developers`, once you have your key, go to Raycast Command Settings to provide your `selfhost api url` and `API key`. If you don't provide selfhost url, extension will assume [https://api.twenty.com](https://api.twenty.com) as your instance.
 
 <table>
   <tr>
@@ -32,13 +32,13 @@ if you are selfhost user navigate to `<self-host-url>/settings/developers`, once
 
 ---
 
-## User Guide
+## 📘 User Guide
 
-To use the integration, search for the `Create Object Record` command, which will display all your `active` standard and custom objects currently in your twentyCRM. Its very flexible - if you create new objects or deactivate existing ones, this will automatically reflect those changes.
+To use the extension, search for the `Create Object Record` command, which will display all your `active` standard and custom objects currently in your twentyCRM. Its very flexible - if you create new objects or deactivate existing ones, this will automatically reflect those changes.
 
 https://github.com/user-attachments/assets/fca0f71d-3c04-43ad-afb4-4e5b0a9d4d13
 
-When you deactivate any standard or custom object, it will no longer appear, ensuring you only see the information and objects you want to access. This makes the integration extensible and enhances your productivity.
+When you deactivate any standard or custom object, it will no longer appear, ensuring you only see the information and objects you want to access. This makes the extension extensible and enhances your productivity.
 
 https://github.com/user-attachments/assets/f357b91b-dd2e-4043-af8c-9328235c0aa8
 
@@ -63,7 +63,6 @@ If you want to create multiple records for the same object without closing the f
 </table>
 
 https://github.com/user-attachments/assets/8d87ca8e-c7b2-4962-b427-947220bcbb86
-
 
 It's much more flexible—similar to objects, if you deactivate any fields, they will no longer appear in your object schema during record creation.
 
@@ -97,11 +96,11 @@ Don't forget to give the project a star! Thanks again!
 
 </div>
 
-## Support my work
+## 🤝 Support my work
 
 If you love my work and would like to support me, consider becoming a [GitHub sponsor](https://github.com/sponsors/Nabhag8848)
 
-## Roadmap
+## 🛣️ Roadmap
 
 - [x] Currently we support `FULL_NAME`, `TEXT`, `LINKS`, `EMAILS`, `SELECT`.
 - [x] Supporting other fields are easy as we have build the foundation and its quite similar to what we have already build.
