@@ -6,7 +6,7 @@ import {
   getCurrentInterval,
   intervalDurations,
   pauseInterval,
-  resetInterval
+  resetInterval,
 } from "../intervals";
 import { Interval, IntervalType } from "../types";
 import { clearStatus, endSnooze, setSnooze, setStatus } from "./slackAPI";
