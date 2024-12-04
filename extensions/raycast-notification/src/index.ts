@@ -1,10 +1,19 @@
 import { closeMainWindow, LaunchProps, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
+import { NotifyOptions, notificationCenter, preparePrebuilds } from "raycast-notifier";
 
-export default async function main(props: LaunchProps<{ arguments: Arguments.Index }>) {
+type LaunchContext = {
+  notificationCenterOptions?: NotifyOptions;
+  callbackLaunchOptions?: LaunchOptions;
+};
+
+export default async function main(props: LaunchProps<{ arguments: Arguments.Index; launchContext: LaunchContext }>) {
   const {
-    arguments: { title, type },
+    arguments: { title, message, type },
     launchType,
+    launchContext = {},
   } = props;
+  const { notificationCenterOptions, callbackLaunchOptions } = launchContext;
 
   let notificationType = type ?? "standard";
   if (launchType === LaunchType.UserInitiated) {
@@ -14,6 +23,19 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     notificationType = "standard";
   }
 
+  if (notificationCenterOptions) {
+    await preparePrebuilds();
+    const result = await notificationCenter({
+      title: title,
+      message: message || " ",
+      ...notificationCenterOptions,
+    });
+    if (callbackLaunchOptions) {
+      callbackLaunchCommand(callbackLaunchOptions, { result });
+    }
+    return;
+  }
+
   switch (notificationType) {
     case "success":
       await showToast(Toast.Style.Success, title);
@@ -21,6 +43,9 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Ind
     case "failure":
       await showToast(Toast.Style.Failure, title);
       break;
+    case "notification-center": {
+      break;
+    }
     default:
       await showHUD(title);
   }
