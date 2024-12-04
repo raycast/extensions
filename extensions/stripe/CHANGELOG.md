@@ -1,6 +1,6 @@
 # Stripe Changelog
 
-## [Fill Checkout] - {PR_MERGE_DATE}
+## [Fill Checkout] - 2024-12-04
 
 Added the `Fill Checkout` command that uses Stripe's test cards to automatically fill in a checkout form.
 
