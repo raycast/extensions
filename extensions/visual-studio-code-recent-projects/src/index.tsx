@@ -12,6 +12,7 @@ import {
   closeOtherWindows,
   terminalApp,
   showGitBranch,
+  gitBranchColor,
   layout,
 } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
@@ -23,6 +24,7 @@ import {
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isWorkspaceEntry,
+  isValidHexColor,
 } from "./utils";
 import {
   ListOrGrid,
@@ -192,8 +194,12 @@ function LocalItem(
 
   const accessories = [];
   if (showGitBranch && gitBranch) {
+    const branchColor = gitBranchColor && isValidHexColor(gitBranchColor) ? { source: gitBranchColor } : Color.Green;
     accessories.push({
-      tag: { value: gitBranch, color: Color.Green },
+      tag: { 
+        value: gitBranch, 
+        color: branchColor
+      },
       tooltip: `Git Branch: ${gitBranch}`,
     });
   }
