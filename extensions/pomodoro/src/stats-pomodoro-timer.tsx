@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
-import { getIntervalHistory } from "../lib/intervals";
+import { getIntervalHistory } from "./lib/intervals";
 import { usePromise } from "@raycast/utils";
-import { Interval } from "../lib/types";
+import { Interval } from "./lib/types";
 
 function calculateStats(intervals: Interval[]) {
   const focusIntervales = intervals.filter((interval) => interval.type === "focus");

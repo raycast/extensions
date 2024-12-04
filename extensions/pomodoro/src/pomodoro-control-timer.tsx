@@ -12,10 +12,10 @@ import {
   preferences,
   resetInterval,
   restartInterval,
-} from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Interval, Quote } from "../lib/types";
-import { checkDNDExtensionInstall } from "../lib/doNotDisturb";
+} from "./lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { GiphyResponse, Interval, Quote } from "./lib/types";
+import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
 
 const createAction = (action: () => void) => () => {
   action();
