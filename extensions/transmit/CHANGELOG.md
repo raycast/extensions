@@ -1,6 +1,6 @@
 # Transmit Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2024-12-04
 
 - fix: extension would ask to install "Transmit" even if installed (ref: [#15684](https://github.com/raycast/extensions/issues/15684))
 
