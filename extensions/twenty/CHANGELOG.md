@@ -1,4 +1,8 @@
-# Twenty - The #1 Open-Source CRM Changelog
+# Twenty Changelog
+
+## [Enhancements] - 2024-12-04
+
+- Updated entire twenty extension to be flexible
 
 ## [Enhancements] - 2024-11-13
 
@@ -10,4 +14,3 @@
 - Supports Twenty.com cloud version
 - Create a person in your CRM
 - Create a company in your CRM
-
