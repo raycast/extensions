@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Enhancements] - 2024-11-17
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Updated entire twenty extension to be flexible
 
