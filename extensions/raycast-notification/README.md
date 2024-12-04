@@ -34,6 +34,8 @@ Even more! With this extension you can also call the system built-in Notificatio
 
 This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link]. So that you can receive the reply value through its callback launch.
 
+If you want a better async/await experience, I recommend using [raycast-notifier](https://github.com/LitoMore/raycast-notifier) directly.
+
 ### Examples
 
 ```typescript
