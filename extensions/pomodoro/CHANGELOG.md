@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2024-12-04
 
 - Fix the issue where the prompt does not pop up when the timer is completed
 - Move all `lib` source files to `src/lib` since Raycast dev command cannot watch other file in other places
