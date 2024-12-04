@@ -1,17 +1,6 @@
 import { run } from "@jxa/run";
 import "@jxa/global-type";
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  clearSearchBar,
-  closeMainWindow,
-  open,
-  getApplications,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, clearSearchBar, closeMainWindow, open } from "@raycast/api";
 import { runAppleScript, usePromise } from "@raycast/utils";
 
 export interface ConnectionEntry {
@@ -25,28 +14,19 @@ export interface ConnectionEntry {
 }
 
 export default function Command() {
-  const { isLoading, data: servers } = usePromise(
-    async () => {
-      const apps = await getApplications();
-      const transmit = apps.find((app) => app.name === "Transmit");
-      if (!transmit) throw new Error();
-      return await getServers();
-    },
-    [],
-    {
-      failureToastOptions: {
-        title: "Failed to load servers",
-        message: "Download from https://panic.com/transmit/",
-        primaryAction: {
-          title: "Download Transmit",
-          onAction: (toast) => {
-            open("https://panic.com/transmit/");
-            toast.hide();
-          },
+  const { isLoading, data: servers } = usePromise(getServers, [], {
+    failureToastOptions: {
+      title: "Failed to load servers",
+      message: "Download from https://panic.com/transmit/",
+      primaryAction: {
+        title: "Download Transmit",
+        onAction: (toast) => {
+          open("https://panic.com/transmit/");
+          toast.hide();
         },
       },
-    }
-  );
+    },
+  });
 
   return (
     <List searchBarPlaceholder="Search servers..." isLoading={isLoading}>
