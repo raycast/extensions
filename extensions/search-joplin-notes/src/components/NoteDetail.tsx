@@ -14,7 +14,7 @@ export const NoteDetail = (props: Props) => {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={url} title="Open note" />
+          <Action.OpenInBrowser url={url} title="Open Note" />
         </ActionPanel>
       }
     />
