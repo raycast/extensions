@@ -1,5 +1,10 @@
 # Changelog
 
+## [Only My Issues Preference] - 2024-11-27
+
+- Added a new preference `Only My Issues` to filter issues assigned to the provided Jira username.
+- Updated `getIssues` functionality to use the `username` preference for filtering.
+
 ## [Jira Server Support] - 2024-06-17
 
 - Now supports both Jira Server and Jira Cloud instances.
