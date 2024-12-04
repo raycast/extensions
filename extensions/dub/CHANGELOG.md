@@ -1,6 +1,6 @@
 # Dub Link Shortener Changelog
 
-## [Typeahead Support] - {PR_MERGE_DATE}
+## [Typeahead Support] - 2024-12-04
 
 - Add typeahead support for short links to load more that 100 links [#14198](https://github.com/raycast/extensions/issues/14198)
 - Bump dependencies to resolve critical vulnerabilities
