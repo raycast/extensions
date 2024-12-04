@@ -1,0 +1,3247 @@
+# Functions
+
+
+# `createDeeplink`
+
+Function that creates a deeplink for an extension or script command.
+
+## Signature
+
+There are three ways to use the function.
+
+The first one is for creating a deeplink to a command inside the current extension:
+
+```ts
+function createDeeplink(options: {
+  type?: DeeplinkType.Extension,
+  command: string,
+  launchType?: LaunchType,
+  arguments?: LaunchProps["arguments"],
+  fallbackText?: string,
+}): string;
+```
+
+The second one is for creating a deeplink to an extension that is not the current extension:
+
+```ts
+function createDeeplink(options: {
+  type?: DeeplinkType.Extension,
+  ownerOrAuthorName: string,
+  extensionName: string,
+  command: string,
+  launchType?: LaunchType,
+  arguments?: LaunchProps["arguments"],
+  fallbackText?: string,
+}): string;
+```
+
+The third one is for creating a deeplink to a script command:
+
+```ts
+function createDeeplink(options: {
+  type: DeeplinkType.ScriptCommand,
+  command: string,
+  arguments?: string[],
+}): string;
+```
+
+### Arguments
+
+#### Extension
+
+- `type` is the type of the deeplink. It must be `DeeplinkType.Extension`.
+- `command` is the name of the command to deeplink to.
+- `launchType` is the type of the launch.
+- `arguments` is an object that contains the arguments to pass to the command.
+- `fallbackText` is the text to show if the command is not available.
+- For intra-extension deeplinks:
+  - `ownerOrAuthorName` is the name of the owner or author of the extension.
+  - `extensionName` is the name of the extension.
+
+#### Script command
+
+- `type` is the type of the deeplink. It must be `DeeplinkType.ScriptCommand`.
+- `command` is the name of the script command to deeplink to.
+- `arguments` is an array of strings to be passed as arguments to the script command.
+
+### Return
+
+Returns a string.
+
+## Example
+
+```tsx
+import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
+import { createDeeplink, DeeplinkType } from "@raycast/utils";
+
+export default function Command(props: LaunchProps<{ launchContext: { message: string } }>) {
+  console.log(props.launchContext?.message);
+
+  return (
+    <List>
+      <List.Item
+        title="Extension Deeplink"
+        actions={
+          <ActionPanel>
+            <Action.CreateQuicklink
+              title="Create Deeplink"
+              quicklink={{
+                name: "Extension Deeplink",
+                link: createDeeplink({
+                  command: "create-deeplink",
+                  context: {
+                    message: "Hello, world!",
+                  },
+                }),
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="External Extension Deeplink"
+        actions={
+          <ActionPanel>
+            <Action.CreateQuicklink
+              title="Create Deeplink"
+              quicklink={{
+                name: "Create Triage Issue for Myself",
+                link: createDeeplink({
+                  ownerOrAuthorName: "linear",
+                  extensionName: "linear",
+                  command: "create-issue-for-myself",
+                  arguments: {
+                    title: "Triage new issues",
+                  },
+                }),
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Script Command Deeplink"
+        actions={
+          <ActionPanel>
+            <Action.CreateQuicklink
+              title="Create Deeplink"
+              quicklink={{
+                name: "Deeplink with Arguments",
+                link: createDeeplink({
+                  type: DeeplinkType.ScriptCommand,
+                  command: "count-chars",
+                  arguments: ["a b+c%20d"],
+                }),
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+## Types
+
+### DeeplinkType
+
+A type to denote whether the deeplink is for a script command or an extension.
+
+```ts
+export enum DeeplinkType {
+  /** A script command */
+  ScriptCommand = "script-command",
+  /** An extension command */
+  Extension = "extension",
+}
+```
+
+
+# `executeSQL`
+
+A function that executes a SQL query on a local SQLite database and returns the query result in JSON format.
+
+## Signature
+
+```ts
+function executeSQL<T = unknown>(databasePath: string, query: string): Promise<T[]>
+```
+
+### Arguments
+
+- `databasePath` is the path to the local SQL database.
+- `query` is the SQL query to run on the database.
+
+### Return
+
+Returns a `Promise` that resolves to an array of objects representing the query results.
+
+## Example
+
+```typescript
+import { closeMainWindow, Clipboard } from "@raycast/api";
+import { executeSQL } from "@raycast/utils";
+
+type Message = { body: string; code: string };
+
+const DB_PATH = "/path/to/chat.db";
+
+export default async function Command() {
+  const query = `
+    SELECT body, code
+    FROM message
+    ORDER BY date DESC
+    LIMIT 1;
+  `;
+
+  const messages = await executeSQL<Message>(DB_PATH, query);
+
+  if (messages.length > 0) {
+    const latestCode = messages[0].code;
+    await Clipboard.paste(latestCode);
+    await closeMainWindow();
+  }
+}
+```
+
+# `runAppleScript`
+
+Function that executes an AppleScript script.
+
+## Signature
+
+There are two ways to use the function.
+
+The first one should be preferred when executing a static script.
+
+```ts
+function runAppleScript<T>(
+  script: string,
+  options?: {
+    humanReadableOutput?: boolean;
+    language?: "AppleScript" | "JavaScript";
+    signal?: AbortSignal;
+    timeout?: number;
+    parseOutput?: ParseExecOutputHandler<T>;
+  },
+): Promise<T>;
+```
+
+The second one can be used to pass arguments to a script.
+
+```ts
+function runAppleScript<T>(
+  script: string,
+  arguments: string[],
+  options?: {
+    humanReadableOutput?: boolean;
+    language?: "AppleScript" | "JavaScript";
+    signal?: AbortSignal;
+    timeout?: number;
+    parseOutput?: ParseExecOutputHandler<T>;
+  },
+): Promise<T>;
+```
+
+### Arguments
+
+- `script` is the script to execute.
+- `arguments` is an array of strings to pass as arguments to the script.
+
+With a few options:
+
+- `options.humanReadableOutput` is a boolean to tell the script what form to output. By default, `runAppleScript` returns its results in human-readable form: strings do not have quotes around them, characters are not escaped, braces for lists and records are omitted, etc. This is generally more useful, but can introduce ambiguities. For example, the lists `{"foo", "bar"}` and `{{"foo", {"bar"}}}` would both be displayed as ‘foo, bar’. To see the results in an unambiguous form that could be recompiled into the same value, set `humanReadableOutput` to `false`.
+- `options.language` is a string to specify whether the script is using [`AppleScript`](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html#//apple_ref/doc/uid/TP40000983) or [`JavaScript`](https://developer.apple.com/library/archive/releasenotes/InterapplicationCommunication/RN-JavaScriptForAutomation/Articles/Introduction.html#//apple_ref/doc/uid/TP40014508-CH111-SW1). By default, it will assume that it's using `AppleScript`.
+- `options.signal` is a Signal object that allows you to abort the request if required via an AbortController object.
+- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the script runs longer than timeout milliseconds. By default, the execution will timeout after 10000ms (eg. 10s).
+- `options.parseOutput` is a function that accepts the output of the script as an argument and returns the data the hooks will return - see ParseExecOutputHandler. By default, the function will return `stdout` as a string.
+
+### Return
+
+Returns a Promise which resolves to a string by default. You can control what it returns by passing `options.parseOutput`.
+
+## Example
+
+```tsx
+import { showHUD } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+
+export default async function () {
+  const res = await runAppleScript(
+    `
+on run argv
+  return "hello, " & item 1 of argv & "."
+end run
+`,
+    ["world"],
+  );
+  await showHUD(res);
+}
+```
+
+## Types
+
+### ParseExecOutputHandler
+
+A function that accepts the output of the script as an argument and returns the data the function will return.
+
+```ts
+export type ParseExecOutputHandler<T> = (args: {
+  /** The output of the script on stdout. */
+  stdout: string;
+  /** The output of the script on stderr. */
+  stderr: string;
+  error?: Error | undefined;
+  /** The numeric exit code of the process that was run. */
+  exitCode: number | null;
+  /** The name of the signal that was used to terminate the process. For example, SIGFPE. */
+  signal: NodeJS.Signals | null;
+  /** Whether the process timed out. */
+  timedOut: boolean;
+  /** The command that was run, for logging purposes. */
+  command: string;
+  /** The options passed to the script, for logging purposes. */
+  options?: ExecOptions | undefined;
+}) => T;
+```
+
+
+# `showFailureToast`
+
+Function that shows a failure Toast for a given Error.
+
+## Signature
+
+```ts
+function showFailureToast(
+  error: unknown,
+  options?: {
+    title?: string;
+    primaryAction?: Toast.ActionOptions;
+  },
+): Promise<T>;
+```
+
+### Arguments
+
+- `error` is the error to report.
+
+With a few options:
+
+- `options.title` is a string describing the action that failed. By default, `"Something went wrong"`
+- `options.primaryAction` is a Toast Action.
+
+### Return
+
+Returns a Toast.
+
+## Example
+
+```tsx
+import { showHUD } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+
+export default async function () {
+  try {
+    const res = await runAppleScript(
+      `
+      on run argv
+        return "hello, " & item 1 of argv & "."
+      end run
+      `,
+      ["world"],
+    );
+    await showHUD(res);
+  } catch (error) {
+    showFailureToast(error, { title: "Could not run AppleScript" });
+  }
+}
+```
+
+
+# Icons
+
+
+# `getAvatarIcon`
+
+Icon to represent an avatar when you don't have one. The generated avatar will be generated from the initials of the name and have a colorful but consistent background.
+
+
+
+## Signature
+
+```ts
+function getAvatarIcon(
+  name: string,
+  options?: {
+    background?: string;
+    gradient?: boolean;
+  },
+): Image.Asset;
+```
+
+- `name` is a string of the subject's name.
+- `options.background` is a hexadecimal representation of a color to be used as the background color. By default, the hook will pick a random but consistent (eg. the same name will the same color) color from a set handpicked to nicely match Raycast.
+- `options.gradient` is a boolean to choose whether the background should have a slight gradient or not. By default, it will.
+
+Returns an Image.Asset that can be used where Raycast expects them.
+
+## Example
+
+```tsx
+import { List } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item icon={getAvatarIcon("John Doe")} title="John Doe" />
+    </List>
+  );
+}
+```
+
+
+# `getFavicon`
+
+Icon showing the favicon of a website.
+
+A favicon (favorite icon) is a tiny icon included along with a website, which is displayed in places like the browser's address bar, page tabs, and bookmarks menu.
+
+
+
+## Signature
+
+```ts
+function getFavicon(
+  url: string | URL,
+  options?: {
+    fallback?: Image.Fallback;
+    size?: boolean;
+    mask?: Image.Mask;
+  },
+): Image.ImageLike;
+```
+
+- `name` is a string of the subject's name.
+- `options.fallback` is a Image.Fallback icon in case the Favicon is not found. By default, the fallback will be `Icon.Link`.
+- `options.size` is the size of the returned favicon. By default, it is 64 pixels.
+- `options.mask` is the size of the Image.Mask to apply to the favicon.
+
+Returns an Image.ImageLike that can be used where Raycast expects them.
+
+## Example
+
+```tsx
+import { List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item icon={getFavicon("https://raycast.com")} title="Raycast Website" />
+    </List>
+  );
+}
+```
+
+
+# `getProgressIcon`
+
+Icon to represent the progress of a task, a project, _something_.
+
+
+
+## Signature
+
+```ts
+function getProgressIcon(
+  progress: number,
+  color?: Color | string,
+  options?: {
+    background?: Color | string;
+    backgroundOpacity?: number;
+  },
+): Image.Asset;
+```
+
+- `progress` is a number between 0 and 1 (0 meaning not started, 1 meaning finished).
+- `color` is a Raycast `Color` or a hexadecimal representation of a color. By default it will be `Color.Red`.
+- `options.background` is a Raycast `Color` or a hexadecimal representation of a color for the background of the progress icon. By default, it will be `white` if the Raycast's appearance is `dark`, and `black` if the appearance is `light`.
+- `options.backgroundOpacity` is the opacity of the background of the progress icon. By default, it will be `0.1`.
+
+Returns an Image.Asset that can be used where Raycast expects them.
+
+## Example
+
+```tsx
+import { List } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item icon={getProgressIcon(0.1)} title="Project" />
+    </List>
+  );
+}
+```
+
+
+# `OAuthService`
+
+The `OAuthService` class is designed to abstract the OAuth authorization process using the PKCE (Proof Key for Code Exchange) flow, simplifying the integration with various OAuth providers such as Asana, GitHub, and others.
+
+Use OAuthServiceOptions to configure the `OAuthService` class.
+
+## Example
+
+```ts
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "GitHub",
+  providerIcon: "extension_icon.png",
+  providerId: "github",
+  description: "Connect your GitHub account",
+});
+
+const github = new OAuthService({
+  client,
+  clientId: "7235fe8d42157f1f38c0",
+  scope: "notifications repo read:org read:user read:project",
+  authorizeUrl: "https://github.oauth.raycast.com/authorize",
+  tokenUrl: "https://github.oauth.raycast.com/token",
+});
+```
+
+## Signature
+
+```ts
+constructor(options: OAuthServiceOptions): OAuthService
+```
+
+### Methods
+
+#### `authorize`
+
+Initiates the OAuth authorization process or refreshes existing tokens if necessary. Returns a promise that resolves with the access token from the authorization flow.
+
+##### Signature
+
+```ts
+OAuthService.authorize(): Promise<string>;
+```
+
+##### Example
+
+```typescript
+const accessToken = await oauthService.authorize();
+```
+
+### Built-in Services
+
+Some services are exposed as static properties in `OAuthService` to make it easy to authenticate with them:
+
+- Asana
+- GitHub
+- Google
+- Jira
+- Linear
+- Slack
+- Zoom
+
+Asana, GitHub, Linear, and Slack already have an OAuth app configured by Raycast so that you can use them right of the box by specifing only the permission scopes. You are still free to create an OAuth app for them if you want.
+
+Google, Jira and Zoom don't have an OAuth app configured by Raycast so you'll have to create one if you want to use them.
+
+Use ProviderOptions to configure these built-in services.
+
+#### Asana
+
+##### Signature
+
+```ts
+OAuthService.asana: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const asana = OAuthService.asana({ scope: "default" });
+```
+
+#### GitHub
+
+##### Signature
+
+```ts
+OAuthService.github: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const github = OAuthService.github({ scope: "repo user" });
+```
+
+#### Google
+
+Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
+
+{% hint style="info" %}
+Creating your own Google client ID is more tedious than other processes, so we’ve created a page to assist you: Getting a Google client ID
+{% endhint %}
+
+
+##### Signature
+
+```ts
+OAuthService.google: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const google = OAuthService.google({
+  clientId: "custom-client-id",
+  scope: "https://www.googleapis.com/auth/drive.readonly",
+});
+```
+
+#### Jira
+
+Jira requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
+
+##### Signature
+
+```ts
+OAuthService.jira: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const jira = OAuthService.jira({
+  clientId: "custom-client-id",
+  scope: "read:jira-user read:jira-work offline_access",
+});
+```
+
+#### Linear
+
+##### Signature
+
+```ts
+OAuthService.linear: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const linear = OAuthService.linear({ scope: "read write" });
+```
+
+#### Slack
+
+##### Signature
+
+```ts
+OAuthService.slack: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const slack = OAuthService.slack({ scope: "emoji:read" });
+```
+
+#### Zoom
+
+Zoom requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
+
+##### Signature
+
+```ts
+OAuthService.zoom: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const zoom = OAuthService.zoom({
+  clientId: "custom-client-id",
+  scope: "meeting:write",
+});
+```
+
+## Types
+
+### OAuthServiceOptions
+
+| Property Name                                  | Description                                                                                                                        | Type                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| client<mark style="color:red;">\*</mark>       | The PKCE Client defined using `OAuth.PKCEClient` from `@raycast/api`                                                               | `OAuth.PKCEClient`                           |
+| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
+| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| extraParameters                                | The extra parameters you may need for the authorization request                                                                    | `Record<string, string>`                     |
+| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+
+### ProviderOptions
+
+| Property Name                                  | Description                                                                                                                        | Type                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
+| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+
+### ProviderWithDefaultClientOptions
+
+| Property Name                           | Description                                                                                                                        | Type                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| scope<mark style="color:red;">\*</mark> | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| clientId                                | The app's client ID                                                                                                                | `string`                                     |
+| authorizeUrl                            | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl                                | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                         | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                     | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                             | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| bodyEncoding                            | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                     | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser              | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+
+
+# OAuth
+
+Dealing with OAuth can be tedious. So we've built a set of utilities to make that task way easier. There are two part to our utilities:
+
+1. Authenticating with a service using OAuthService
+2. Bringing authentication to Raycast commands using withAccessToken
+
+`OAuthService`, `withAccessToken`, and `getAccessToken` are designed to work together. You'll find below different use cases for which you can use these utils.
+
+## Using a built-in provider
+
+We provide built-in providers that you can use out of the box, such as GitHub or Linear. You don't need to configure anything for them apart from the scope your extension requires.
+
+```tsx
+import { Detail, LaunchProps } from "@raycast/api";
+import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils";
+
+const github = OAuthService.github({
+  scope: "notifications repo read:org read:user read:project",
+});
+
+function AuthorizedComponent(props: LaunchProps) {
+  const { token } = getAccessToken();
+  return <Detail markdown={`Access token: ${token}`} />;
+}
+
+export default withAccessToken(github)(AuthorizedComponent);
+```
+
+You can see our different providers on the following page: OAuthService
+
+## Using your own client
+
+```tsx
+import { OAuth, Detail, LaunchProps } from "@raycast/api";
+import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils";
+
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "Your Provider Name",
+  providerIcon: "provider_icon.png",
+  providerId: "yourProviderId",
+  description: "Connect your {PROVIDER_NAME} account",
+});
+
+const provider = new OAuthService({
+  client,
+  clientId: "YOUR_CLIENT_ID",
+  scope: "YOUR_SCOPES",
+  authorizeUrl: "YOUR_AUTHORIZE_URL",
+  tokenUrl: "YOUR_TOKEN_URL",
+});
+
+function AuthorizedComponent(props: LaunchProps) {
+  const { token } = getAccessToken();
+  return <Detail markdown={`Access token: ${token}`} />;
+}
+
+export default withAccessToken(provider)(AuthorizedComponent);
+```
+
+## Using `onAuthorize` to initialize an SDK or similar
+
+This example is useful in cases where you want to initialize a third-party client and share it throughout your codebase.
+
+```tsx
+import { OAuthService } from "@raycast/utils";
+import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+
+let linearClient: LinearClient | null = null;
+
+export const linear = OAuthService.linear({
+  scope: "read write",
+  onAuthorize({ token }) {
+    linearClient = new LinearClient({ accessToken: token });
+  },
+});
+
+export function withLinearClient<T>(Component: React.ComponentType<T>) {
+  return withAccessToken<T>(linear)(Component);
+}
+
+export function getLinearClient(): { linearClient: LinearClient; graphQLClient: LinearGraphQLClient } {
+  if (!linearClient) {
+    throw new Error("No linear client initialized");
+  }
+
+  return { linearClient, graphQLClient: linearClient.client };
+}
+```
+
+
+# `getAccessToken`
+
+Utility function designed for retrieving authorization tokens within a component. It ensures that your React components have the necessary authentication state, either through OAuth or a personal access token.
+
+{% hint style="info" %}
+`getAccessToken` **must** be used within components that are nested inside a component wrapped with `withAccessToken`. Otherwise, the function will fail with an error.
+{% endhint %}
+
+## Signature
+
+```tsx
+function getAccessToken(): {
+  token: string;
+  type: "oauth" | "personal";
+};
+```
+
+### Return
+
+The function returns an object containing the following properties:
+
+- `token`: A string representing the access token.
+- `type`: An optional string that indicates the type of token retrieved. It can either be `oauth` for OAuth tokens or `personal` for personal access tokens.
+
+## Example
+
+```tsx
+import { Detail } from "@raycast/api";
+import { authorize } from "./oauth";
+
+function AuthorizedComponent() {
+  const { token } = getAccessToken();
+  return <Detail markdown={`Access token: ${token}`} />;
+}
+
+export default withAccessToken({ authorize })(AuthorizedComponent);
+```
+
+
+# Getting a Google Client ID
+
+Follow these steps to get a Google client ID:
+
+## Step 1: Access Google Cloud Console
+
+Navigate to the [Google Cloud Console](https://console.developers.google.com/apis/credentials).
+
+## Step 2: Create a Project (if needed)
+
+1. Click **Create Project**.
+2. Provide a **Project Name**.
+3. Select an optional **Organization**.
+4. Click **Create**.
+
+## Step 3: Enable Required APIs
+
+1. Go to **Enabled APIs & services**.
+2. Click **ENABLE APIS AND SERVICES**.
+3. Search for and enable the required API (e.g., Google Drive API).
+
+## Step 4: Configure OAuth Consent Screen
+
+1. Click on **OAuth consent screen**.
+2. Choose **Internal** or **External** (choose **External** if you intend to publish the extension in the Raycast store).
+3. Enter these details:
+   - **App name**: Raycast (Your Extension Name)
+   - **User support email**: your-email@example.com
+   - **Logo**: Paste Raycast's logo over there ([Link to Raycast logo](https://raycastapp.notion.site/Raycast-Press-Kit-ce1ccf8306b14ac8b8d47b3276bf34e0#29cbc2f3841444fdbdcb1fdff2ea2abf))
+   - **Application home page**: https://www.raycast.com
+   - **Application privacy policy link**: https://www.raycast.com/privacy
+   - **Application terms of service link**: https://www.raycast.com/terms-of-service
+   - **Authorized domains**: Click **ADD DOMAIN** then add `raycast.com`
+   - **Developer contact**: your-email@example.com
+4. Add the necessary scopes for your app (visit the [Google OAuth scopes docs](https://developers.google.com/identity/protocols/oauth2/scopes) if you manually need to add scopes)
+5. Add your own email as a test user and others if needed
+6. Review and go back to the dashboard
+
+## Step 5: Create an OAuth Client ID
+
+1. Go to **Credentials**, click **CREATE CREDENTIALS**, then **OAuth client ID**
+2. Choose **iOS** as the application type
+3. Set the **Bundle ID** to `com.raycast`.
+4. Copy your **Client ID**
+
+## Step 6: Use Your New Client ID 🎉
+
+{% hint style="info" %}
+You'll need to publish the app in the **OAuth consent screen** so that everyone can use it (and not only test users). The process can be more or less complex depending on whether you use sensitive or restrictive scopes.
+{% endhint %}
+
+
+
+# `withAccessToken`
+
+Higher-order function fetching an authorization token to then access it. This makes it easier to handle OAuth in your different commands whether they're `view` commands, `no-view` commands, or `menu-bar` commands.
+
+## Signature
+
+```tsx
+function withAccessToken<T = any>(
+  options: WithAccessTokenParameters,
+): <U extends WithAccessTokenComponentOrFn<T>>(
+  fnOrComponent: U,
+) => U extends (props: T) => Promise<void> | void ? Promise<void> : React.FunctionComponent<T>;
+```
+
+### Arguments
+
+`options` is an object containing:
+
+- `options.authorize`: a function that initiates the OAuth token retrieval process. It returns a promise that resolves to an access token.
+- `options.personalAccessToken`: an optional string that represents an already obtained personal access token. When `options.personalAccessToken` is provided, it uses that token. Otherwise, it calls `options.authorize` to fetch an OAuth token asynchronously.
+- `options.client`: an optional instance of a PKCE Client that you can create using Raycast API. This client is used to return the `idToken` as part of the `onAuthorize` callback below.
+- `options.onAuthorize`: an optional callback function that is called once the user has been properly logged in through OAuth. This function is called with the `token`, its type (`oauth` if it comes from an OAuth flow or `personal` if it's a personal access token), and `idToken` if it's returned from `options.client`'s initial token set.
+
+### Return
+
+Returns the wrapped component if used in a `view` command or the wrapped function if used in a `no-view` command.
+
+{% hint style="info" %}
+Note that the access token isn't injected into the wrapped component props. Instead, it's been set as a global variable that you can get with getAccessToken.
+{% endhint %}
+
+## Example
+
+{% tabs %}
+{% tab title="view.tsx" %}
+
+```tsx
+import { List } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./oauth";
+
+function AuthorizedComponent(props) {
+  return; // ...
+}
+
+export default withAccessToken({ authorize })(AuthorizedComponent);
+```
+
+{% endtab %}
+
+{% tab title="no-view.tsx" %}
+
+```tsx
+import { showHUD } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { authorize } from "./oauth";
+
+async function AuthorizedCommand() {
+  await showHUD("Authorized");
+}
+
+export default withAccessToken({ authorize })(AuthorizedCommand);
+```
+
+{% endtab %}
+
+{% tab title="onAuthorize.tsx" %}
+
+```tsx
+import { OAuthService } from "@raycast/utils";
+import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+
+let linearClient: LinearClient | null = null;
+
+const linear = OAuthService.linear({
+  scope: "read write",
+  onAuthorize({ token }) {
+    linearClient = new LinearClient({ accessToken: token });
+  },
+});
+
+function MyIssues() {
+  return; // ...
+}
+
+export default withAccessToken(linear)(View);
+```
+
+{% endtab %}
+{% endtabs %}
+
+## Types
+
+### WithAccessTokenParameters
+
+```ts
+type OAuthType = "oauth" | "personal";
+
+type OnAuthorizeParams = {
+  token: string;
+  type: OAuthType;
+  idToken: string | null; // only present if `options.client` has been provided
+};
+
+type WithAccessTokenParameters = {
+  client?: OAuth.PKCEClient;
+  authorize: () => Promise<string>;
+  personalAccessToken?: string;
+  onAuthorize?: (params: OnAuthorizeParams) => void;
+};
+```
+
+### WithAccessTokenComponentOrFn
+
+```ts
+type WithAccessTokenComponentOrFn<T = any> = ((params: T) => Promise<void> | void) | React.ComponentType<T>;
+```
+
+
+# React Hooks
+
+
+# `useAI`
+
+Hook which asks the AI to answer a prompt and returns the AsyncState corresponding to the execution of the query.
+
+## Signature
+
+```ts
+function useAI(
+  prompt: string,
+  options?: {
+    creativity?: AI.Creativity;
+    model?: AI.Model;
+    stream?: boolean;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: Parameters<T>) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  }
+): AsyncState<String> & {
+  revalidate: () => void;
+};
+```
+
+### Arguments
+
+- `prompt` is the prompt to ask the AI.
+
+With a few options:
+
+- `options.creativity` is a number between 0 and 2 to control the creativity of the answer. Concrete tasks, such as fixing grammar, require less creativity while open-ended questions, such as generating ideas, require more.
+- `options.model` is a string determining which AI model will be used to answer.
+- `options.stream` is a boolean controlling whether to stream the answer or only update the data when the entire answer has been received. By default, the `data` will be streamed.
+
+Including the usePromise's options:
+
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the function as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `revalidate` is a method to manually call the function with the same arguments again.
+
+## Example
+
+```tsx
+import { Detail } from "@raycast/api";
+import { useAI } from "@raycast/utils";
+
+export default function Command() {
+  const { data, isLoading } = useAI("Suggest 5 jazz songs");
+
+  return <Detail isLoading={isLoading} markdown={data} />;
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: string,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: string | undefined,
+  error: Error | undefined
+}
+```
+
+
+# `useCachedPromise`
+
+Hook which wraps an asynchronous function or a function that returns a Promise and returns the AsyncState corresponding to the execution of the function.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useCachedPromise` first returns the data from cache (stale), then executes the promise (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
+
+{% hint style="info" %}
+The value needs to be JSON serializable.
+The function is assumed to be constant (eg. changing it won't trigger a revalidation).
+{% endhint %}
+
+## Signature
+
+```ts
+type Result<T> = `type of the returned value of the returned Promise`;
+
+function useCachedPromise<T, U>(
+  fn: T,
+  args?: Parameters<T>,
+  options?: {
+    initialData?: U;
+    keepPreviousData?: boolean;
+    abortable?: MutableRefObject<AbortController | null | undefined>;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: Result<T>) => void;
+    onWillExecute?: (args: Parameters<T>) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
+): AsyncState<Result<T>> & {
+  revalidate: () => void;
+  mutate: MutatePromise<Result<T> | U>;
+};
+```
+
+### Arguments
+
+- `fn` is an asynchronous function or a function that returns a Promise.
+- `args` is the array of arguments to pass to the function. Every time they change, the function will be executed again. You can omit the array if the function doesn't require any argument.
+
+With a few options:
+
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See Promise Argument dependent on List search text for more information.
+
+Including the useCachedState's options:
+
+- `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+
+Including the usePromise's options:
+
+- `options.abortable` is a reference to an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to cancel a previous call when triggering a new one.
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the function as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useCachedPromise`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```tsx
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+export default function Command() {
+  const abortable = useRef<AbortController>();
+  const { isLoading, data, revalidate } = useCachedPromise(
+    async (url: string) => {
+      const response = await fetch(url, { signal: abortable.current?.signal });
+      const result = await response.text();
+      return result;
+    },
+    ["https://api.example"],
+    {
+      initialData: "Some Text",
+      abortable,
+    },
+  );
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Reload" onAction={() => revalidate()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Promise Argument dependent on List search text
+
+By default, when an argument passed to the hook changes, the function will be executed again and the cache's value for those arguments will be returned immediately. This means that in the case of new arguments that haven't been used yet, the initial data will be returned.
+
+This behaviour can cause some flickering (initial data -> fetched data -> arguments change -> initial data -> fetched data, etc.). To avoid that, we can set `keepPreviousData` to `true` and the hook will keep the latest fetched data if the cache is empty for the new arguments (initial data -> fetched data -> arguments change -> fetched data).
+
+```tsx
+import { useState } from "react";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data } = useCachedPromise(
+    async (url: string) => {
+      const response = await fetch(url);
+      const result = await response.json();
+      return result;
+    },
+    [`https://api.example?q=${searchText}`],
+    {
+      // to make sure the screen isn't flickering when the searchText changes
+      keepPreviousData: true,
+    },
+  );
+
+  return (
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
+      {(data || []).map((item) => (
+        <List.Item key={item.id} title={item.title} />
+      ))}
+    </List>
+  );
+}
+```
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data, mutate } = useCachedPromise(
+    async (url: string) => {
+      const response = await fetch(url);
+      const result = await response.text();
+      return result;
+    },
+    ["https://api.example"],
+  );
+
+  const appendFoo = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Appending Foo" });
+    try {
+      await mutate(
+        // we are calling an API to do something
+        fetch("https://api.example/append-foo"),
+        {
+          // but we are going to do it on our local data right away,
+          // without waiting for the call to return
+          optimisticUpdate(data) {
+            return data + "foo";
+          },
+        },
+      );
+      // yay, the API call worked!
+      toast.style = Toast.Style.Success;
+      toast.title = "Foo appended";
+    } catch (err) {
+      // oh, the API call didn't work :(
+      // the data will automatically be rolled back to its previous value
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not append Foo";
+      toast.message = err.message;
+    }
+  };
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Append Foo" onAction={() => appendFoo()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Pagination
+
+{% hint style="info" %}
+When paginating, the hook will only cache the result of the first page.
+{% endhint %}
+
+The hook has built-in support for pagination. In order to enable pagination, `fn`'s type needs to change from
+
+> an asynchronous function or a function that returns a Promise
+
+to
+
+> a function that returns an asynchronous function or a function that returns a Promise
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = useCachedPromise(
+  async (searchText: string) => {
+    const response = await fetch(`https://api.example?q=${searchText}`);
+    const data = await response.json();
+    return data;
+  },
+  [searchText],
+  {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  },
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = useCachedPromise(
+  (searchText: string) => async (options) => {
+    const response = await fetch(`https://api.example?q=${searchText}&page=${options.page}`);
+    const { data } = await response.json();
+    const hasMore = options.page < 50;
+    return { data, hasMore };
+  },
+  [searchText],
+  {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  },
+);
+```
+
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = useCachedPromise(
+  (searchText: string) => async (options) => {
+    const response = await fetch(`https://api.example?q=${searchText}&cursor=${options.cursor}`);
+    const { data, nextCursor } = await response.json();
+    const hasMore = nextCursor !== undefined;
+    return { data, hasMore, cursor: nextCursor };
+  },
+  [searchText],
+  {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  },
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that the async function receives a PaginationOptions argument, and returns a specific data format:
+
+```ts
+{
+  data: any[];
+  hasMore: boolean;
+  cursor?: any;
+}
+```
+
+Every time the promise resolves, the hook needs to figure out if it should paginate further, or if it should stop, and it uses `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been loaded so far.
+
+### Full Example
+
+```tsx
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = useCachedPromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({
+        index,
+        page: options.page,
+        text: searchText,
+      }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText],
+  );
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+### MutatePromise
+
+A method to wrap an asynchronous update and gives some control about how the `useCachedPromise`'s data should be updated while the update is going through.
+
+```ts
+export type MutatePromise<T> = (
+  asyncUpdate?: Promise<any>,
+  options?: {
+    optimisticUpdate?: (data: T) => T;
+    rollbackOnError?: boolean | ((data: T) => T);
+    shouldRevalidateAfter?: boolean;
+  },
+) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedPromise`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+  cursor?: any;
+};
+```
+
+
+# `useCachedState`
+
+Hook which returns a stateful value, and a function to update it. It is similar to React's `useState` but the value will be kept between command runs.
+
+{% hint style="info" %}
+The value needs to be JSON serializable.
+{% endhint %}
+
+## Signature
+
+```ts
+function useCachedState<T>(
+  key: string,
+  initialState?: T,
+  config?: {
+    cacheNamespace?: string;
+  },
+): [T, (newState: T | ((prevState: T) => T)) => void];
+```
+
+### Arguments
+
+- `key` is the unique identifier of the state. This can be used to share the state across components and/or commands (hooks using the same key will share the same state, eg. updating one will update the others).
+
+With a few options:
+
+- `initialState` is the initial value of the state if there aren't any in the Cache yet.
+- `config.cacheNamespace` is a string that can be used to namespace the key.
+
+## Example
+
+```tsx
+import { List, ActionPanel, Action } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+
+export default function Command() {
+  const [showDetails, setShowDetails] = useCachedState("show-details", false);
+
+  return (
+    <List
+      isShowingDetail={showDetails}
+      actions={
+        <ActionPanel>
+          <Action title={showDetails ? "Hide Details" : "Show Details"} onAction={() => setShowDetails((x) => !x)} />
+        </ActionPanel>
+      }
+    >
+      ...
+    </List>
+  );
+}
+```
+
+
+# `useExec`
+
+Hook that executes a command and returns the AsyncState corresponding to the execution of the command.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useExec` first returns the data from cache (stale), then executes the command (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
+
+## Signature
+
+There are two ways to use the hook.
+
+The first one should be preferred when executing a single file. The file and its arguments don't have to be escaped.
+
+```ts
+function useExec<T, U>(
+  file: string,
+  arguments: string[],
+  options?: {
+    shell?: boolean | string;
+    stripFinalNewline?: boolean;
+    cwd?: string;
+    env?: NodeJS.ProcessEnv;
+    encoding?: BufferEncoding | "buffer";
+    input?: string | Buffer;
+    timeout?: number;
+    parseOutput?: ParseExecOutputHandler<T>;
+    initialData?: U;
+    keepPreviousData?: boolean;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  }
+): AsyncState<T> & {
+  revalidate: () => void;
+  mutate: MutatePromise<T | U | undefined>;
+};
+```
+
+The second one can be used to execute more complex commands. The file and arguments are specified in a single `command` string. For example, `useExec('echo', ['Raycast'])` is the same as `useExec('echo Raycast')`.
+
+If the file or an argument contains spaces, they must be escaped with backslashes. This matters especially if `command` is not a constant but a variable, for example with `environment.supportPath` or `process.cwd()`. Except for spaces, no escaping/quoting is needed.
+
+The `shell` option must be used if the command uses shell-specific features (for example, `&&` or `||`), as opposed to being a simple file followed by its arguments.
+
+```ts
+function useExec<T, U>(
+  command: string,
+  options?: {
+    shell?: boolean | string;
+    stripFinalNewline?: boolean;
+    cwd?: string;
+    env?: NodeJS.ProcessEnv;
+    encoding?: BufferEncoding | "buffer";
+    input?: string | Buffer;
+    timeout?: number;
+    parseOutput?: ParseExecOutputHandler<T>;
+    initialData?: U;
+    keepPreviousData?: boolean;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  }
+): AsyncState<T> & {
+  revalidate: () => void;
+  mutate: MutatePromise<T | U | undefined>;
+};
+```
+
+### Arguments
+
+- `file` is the path to the file to execute.
+- `arguments` is an array of strings to pass as arguments to the file.
+
+or
+
+- `command` is the string to execute.
+
+With a few options:
+
+- `options.shell` is a boolean or a string to tell whether to run the command inside of a shell or not. If `true`, uses `/bin/sh`. A different shell can be specified as a string. The shell should understand the `-c` switch.
+
+  We recommend against using this option since it is:
+
+  - not cross-platform, encouraging shell-specific syntax.
+  - slower, because of the additional shell interpretation.
+  - unsafe, potentially allowing command injection.
+
+- `options.stripFinalNewline` is a boolean to tell the hook to strip the final newline character from the output. By default, it will.
+- `options.cwd` is a string to specify the current working directory of the child process. By default, it will be `process.cwd()`.
+- `options.env` is a key-value pairs to set as the environment of the child process. It will extend automatically from `process.env`.
+- `options.encoding` is a string to specify the character encoding used to decode the `stdout` and `stderr` output. If set to `"buffer"`, then `stdout` and `stderr` will be a `Buffer` instead of a string.
+- `options.input` is a string or a Buffer to write to the `stdin` of the file.
+- `options.timeout` is a number. If greater than `0`, the parent will send the signal `SIGTERM` if the child runs longer than timeout milliseconds. By default, the execution will timeout after 10000ms (eg. 10s).
+- `options.parseOutput` is a function that accepts the output of the child process as an argument and returns the data the hooks will return - see ParseExecOutputHandler. By default, the hook will return `stdout`.
+
+Including the useCachedPromise's options:
+
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See Argument dependent on user input for more information.
+
+Including the useCachedState's options:
+
+- `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+
+Including the usePromise's options:
+
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the command as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useFetch`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```tsx
+import { List } from "@raycast/api";
+import { useExec } from "@raycast/utils";
+import { cpus } from "os";
+import { useMemo } from "react";
+
+const brewPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
+
+export default function Command() {
+  const { isLoading, data } = useExec(brewPath, ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "{}").formulae || [], [data]);
+
+  return (
+    <List isLoading={isLoading}>
+      {results.map((item) => (
+        <List.Item key={item.id} title={item.name} />
+      ))}
+    </List>
+  );
+}
+```
+
+## Argument dependent on user input
+
+By default, when an argument passed to the hook changes, the function will be executed again and the cache's value for those arguments will be returned immediately. This means that in the case of new arguments that haven't been used yet, the initial data will be returned.
+
+This behaviour can cause some flickering (initial data -> fetched data -> arguments change -> initial data -> fetched data, etc.). To avoid that, we can set `keepPreviousData` to `true` and the hook will keep the latest fetched data if the cache is empty for the new arguments (initial data -> fetched data -> arguments change -> fetched data).
+
+```tsx
+import { useState } from "react";
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data } = useExec("brew", ["info", searchText]);
+
+  return <Detail isLoading={isLoading} markdown={data} />;
+}
+```
+
+{% hint style="info" %}
+When passing a user input to a command, be very careful about using the `shell` option as it could be potentially dangerous.
+{% endhint %}
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
+  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+
+  const installFoo = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Installing Foo" });
+    try {
+      await mutate(
+        // we are calling an API to do something
+        installBrewCask("foo"),
+        {
+          // but we are going to do it on our local data right away,
+          // without waiting for the call to return
+          optimisticUpdate(data) {
+            return data?.concat({ name: "foo", id: "foo" });
+          },
+        },
+      );
+      // yay, the API call worked!
+      toast.style = Toast.Style.Success;
+      toast.title = "Foo installed";
+    } catch (err) {
+      // oh, the API call didn't work :(
+      // the data will automatically be rolled back to its previous value
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not install Foo";
+      toast.message = err.message;
+    }
+  };
+
+  return (
+    <List isLoading={isLoading}>
+      {(data || []).map((item) => (
+        <List.Item
+          key={item.id}
+          title={item.name}
+          actions={
+            <ActionPanel>
+              <Action title="Install Foo" onAction={() => installFoo()} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+### MutatePromise
+
+A method to wrap an asynchronous update and gives some control about how the `useFetch`'s data should be updated while the update is going through.
+
+```ts
+export type MutatePromise<T> = (
+  asyncUpdate?: Promise<any>,
+  options?: {
+    optimisticUpdate?: (data: T) => T;
+    rollbackOnError?: boolean | ((data: T) => T);
+    shouldRevalidateAfter?: boolean;
+  },
+) => Promise<any>;
+```
+
+### ParseExecOutputHandler
+
+A function that accepts the output of the child process as an argument and returns the data the hooks will return.
+
+```ts
+export type ParseExecOutputHandler<T> = (args: {
+  /** The output of the process on stdout. */
+  stdout: string | Buffer; // depends on the encoding option
+  /** The output of the process on stderr. */
+  stderr: string | Buffer; // depends on the encoding option
+  error?: Error | undefined;
+  /** The numeric exit code of the process that was run. */
+  exitCode: number | null;
+  /** The name of the signal that was used to terminate the process. For example, SIGFPE. */
+  signal: NodeJS.Signals | null;
+  /** Whether the process timed out. */
+  timedOut: boolean;
+  /** The command that was run, for logging purposes. */
+  command: string;
+  /** The options passed to the child process, for logging purposes. */
+  options?: ExecOptions | undefined;
+}) => T;
+```
+
+
+# `useFetch`
+
+Hook which fetches the URL and returns the AsyncState corresponding to the execution of the fetch.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useFetch` first returns the data from cache (stale), then sends the request (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
+
+## Signature
+
+```ts
+export function useFetch<V, U, T = V>(
+  url: RequestInfo,
+  options?: RequestInit & {
+    parseResponse?: (response: Response) => Promise<V>;
+    mapResult?: (result: V) => { data: T };
+    initialData?: U;
+    keepPreviousData?: boolean;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: [string, RequestInit]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
+): AsyncState<T> & {
+  revalidate: () => void;
+  mutate: MutatePromise<T | U | undefined>;
+};
+```
+
+### Arguments
+
+- `url` is the string representation of the URL to fetch.
+
+With a few options:
+
+- `options` extends [`RequestInit`](https://github.com/nodejs/undici/blob/v5.7.0/types/fetch.d.ts#L103-L117) allowing you to specify a body, headers, etc. to apply to the request.
+- `options.parseResponse` is a function that accepts the Response as an argument and returns the data the hook will return. By default, the hook will return `response.json()` if the response has a JSON `Content-Type` header or `response.text()` otherwise.
+- `options.mapResult` is an optional function that accepts whatever `options.parseResponse` returns as an argument, processes the response, and returns an object wrapping the result, i.e. `(response) => { return { data: response> } };`.
+
+Including the useCachedPromise's options:
+
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See Argument dependent on List search text for more information.
+
+Including the useCachedState's options:
+
+- `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+
+Including the usePromise's options:
+
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the fetch as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useFetch`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```tsx
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data, revalidate } = useFetch("https://api.example");
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Reload" onAction={() => revalidate()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Argument dependent on List search text
+
+By default, when an argument passed to the hook changes, the function will be executed again and the cache's value for those arguments will be returned immediately. This means that in the case of new arguments that haven't been used yet, the initial data will be returned.
+
+This behaviour can cause some flickering (initial data -> fetched data -> arguments change -> initial data -> fetched data, etc.). To avoid that, we can set `keepPreviousData` to `true` and the hook will keep the latest fetched data if the cache is empty for the new arguments (initial data -> fetched data -> arguments change -> fetched data).
+
+```tsx
+import { useState } from "react";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data } = useFetch(`https://api.example?q=${searchText}`, {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  });
+
+  return (
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
+      {(data || []).map((item) => (
+        <List.Item key={item.id} title={item.title} />
+      ))}
+    </List>
+  );
+}
+```
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data, mutate } = useFetch("https://api.example");
+
+  const appendFoo = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Appending Foo" });
+    try {
+      await mutate(
+        // we are calling an API to do something
+        fetch("https://api.example/append-foo"),
+        {
+          // but we are going to do it on our local data right away,
+          // without waiting for the call to return
+          optimisticUpdate(data) {
+            return data + "foo";
+          },
+        },
+      );
+      // yay, the API call worked!
+      toast.style = Toast.Style.Success;
+      toast.title = "Foo appended";
+    } catch (err) {
+      // oh, the API call didn't work :(
+      // the data will automatically be rolled back to its previous value
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not append Foo";
+      toast.message = err.message;
+    }
+  };
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Append Foo" onAction={() => appendFoo()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Pagination
+
+{% hint style="info" %}
+When paginating, the hook will only cache the result of the first page.
+{% endhint %}
+
+The hook has built-in support for pagination. In order to enable pagination, `url`s type needs to change from `RequestInfo` to a function that receives a PaginationOptions argument, and returns a `RequestInfo`.
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = useFetch(
+  "https://api.ycombinator.com/v0.1/companies?" + new URLSearchParams({ q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      return {
+        data: result.companies,
+      };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = useFetch(
+  (options) =>
+    "https://api.ycombinator.com/v0.1/companies?" +
+    new URLSearchParams({ page: String(options.page + 1), q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      return {
+        data: result.companies,
+        hasMore: result.page < result.totalPages,
+      };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = useFetch(
+  (options) =>
+    "https://api.ycombinator.com/v0.1/companies?" +
+    new URLSearchParams({ cursor: options.cursor, q: searchText }).toString(),
+  {
+    mapResult(result: SearchResult) {
+      const { companies, nextCursor } = result;
+      const hasMore = nextCursor !== undefined;
+      return { data: companies, hasMore, cursor: nextCursor, };
+    },
+    keepPreviousData: true,
+    initialData: [],
+  },
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that `mapResult`, which is normally optional, is actually required when using pagination. Furthermore, its return type is
+
+```ts
+{
+  data: any[],
+  hasMore?: boolean;
+  cursor?: any;
+}
+```
+
+Every time the URL is fetched, the hook needs to figure out if it should paginate further, or if it should stop, and it uses the `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been fetched so far.
+
+### Full Example
+
+```tsx
+import { Icon, Image, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+
+type SearchResult = { companies: Company[]; page: number; totalPages: number };
+type Company = { id: number; name: string; smallLogoUrl?: string };
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data, pagination } = useFetch(
+    (options) =>
+      "https://api.ycombinator.com/v0.1/companies?" +
+      new URLSearchParams({ page: String(options.page + 1), q: searchText }).toString(),
+    {
+      mapResult(result: SearchResult) {
+        return {
+          data: result.companies,
+          hasMore: result.page < result.totalPages,
+        };
+      },
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
+
+  return (
+    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setSearchText}>
+      {data.map((company) => (
+        <List.Item
+          key={company.id}
+          icon={{ source: company.smallLogoUrl ?? Icon.MinusCircle, mask: Image.Mask.RoundedRectangle }}
+          title={company.name}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+### MutatePromise
+
+A method to wrap an asynchronous update and gives some control about how the `useFetch`'s data should be updated while the update is going through.
+
+```ts
+export type MutatePromise<T> = (
+  asyncUpdate?: Promise<any>,
+  options?: {
+    optimisticUpdate?: (data: T) => T;
+    rollbackOnError?: boolean | ((data: T) => T);
+    shouldRevalidateAfter?: boolean;
+  },
+) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedRequestInfo`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+  cursor?: any;
+};
+```
+
+
+# `useForm`
+
+Hook that provides a high-level interface to work with Forms, and more particularly, with Form validations. It incorporates all the good practices to provide a great User Experience for your Forms.
+
+## Signature
+
+```ts
+function useForm<T extends Form.Values>(props: {
+  onSubmit: (values: T) => void | boolean | Promise<void | boolean>;
+  initialValues?: Partial<T>;
+  validation?: {
+    [id in keyof T]?: ((value: T[id]) => string | undefined | null) | FormValidation;
+  };
+}): {
+  handleSubmit: (values: T) => void | boolean | Promise<void | boolean>;
+  itemProps: {
+    [id in keyof T]: Partial<Form.ItemProps<T[id]>> & {
+      id: string;
+    };
+  };
+  setValidationError: (id: keyof T, error: ValidationError) => void;
+  setValue: <K extends keyof T>(id: K, value: T[K]) => void;
+  values: T;
+  focus: (id: keyof T) => void;
+  reset: (initialValues?: Partial<T>) => void;
+};
+```
+
+### Arguments
+
+- `onSubmit` is a callback that will be called when the form is submitted and all validations pass.
+
+With a few options:
+
+- `initialValues` are the initial values to set when the Form is first rendered.
+- `validation` are the validation rules for the Form. A validation for a Form item is a function that takes the current value of the item as an argument and must return a string when the validation is failing. We also provide some shorthands for common cases, see FormValidation.
+
+### Return
+
+Returns an object which contains the necessary methods and props to provide a good User Experience in your Form.
+
+- `handleSubmit` is a function to pass to the `onSubmit` prop of the `<Action.SubmitForm>` element. It wraps the initial `onSubmit` argument with some goodies related to the validation.
+- `itemProps` are the props that must be passed to the `<Form.Item>` elements to handle the validations.
+
+It also contains some additions for easy manipulation of the Form's data.
+
+- `values` is the current values of the Form.
+- `setValue` is a function that can be used to programmatically set the value of a specific field.
+- `setValidationError` is a function that can be used to programmatically set the validation of a specific field.
+- `focus` is a function that can be used to programmatically focus a specific field.
+- `reset` is a function that can be used to reset the values of the Form. Optionally, you can specify the values to set when the Form is reset.
+
+## Example
+
+```tsx
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+
+interface SignUpFormValues {
+  firstName: string;
+  lastName: string;
+  birthday: Date | null;
+  password: string;
+  number: string;
+  hobbies: string[];
+}
+
+export default function Command() {
+  const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
+    onSubmit(values) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Yay!",
+        message: `${values.firstName} ${values.lastName} account created`,
+      });
+    },
+    validation: {
+      firstName: FormValidation.Required,
+      lastName: FormValidation.Required,
+      password: (value) => {
+        if (value && value.length < 8) {
+          return "Password must be at least 8 symbols";
+        } else if (!value) {
+          return "The item is required";
+        }
+      },
+      number: (value) => {
+        if (value && value !== "2") {
+          return "Please select '2'";
+        }
+      },
+    },
+  });
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="First Name" placeholder="Enter first name" {...itemProps.firstName} />
+      <Form.TextField title="Last Name" placeholder="Enter last name" {...itemProps.lastName} />
+      <Form.DatePicker title="Date of Birth" {...itemProps.birthday} />
+      <Form.PasswordField
+        title="Password"
+        placeholder="Enter password at least 8 characters long"
+        {...itemProps.password}
+      />
+      <Form.Dropdown title="Your Favorite Number" {...itemProps.number}>
+        {[1, 2, 3, 4, 5, 6, 7].map((num) => {
+          return <Form.Dropdown.Item value={String(num)} title={String(num)} key={num} />;
+        })}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+```
+
+## Types
+
+### FormValidation
+
+Shorthands for common validation cases
+
+#### Enumeration members
+
+| Name     | Description                                       |
+| :------- | :------------------------------------------------ |
+| Required | Show an error when the value of the item is empty |
+
+
+# `useFrecencySorting`
+
+Hook to sort an array by its frecency and provide methods to update the frecency of its items.
+
+Frecency is a measure that combines frequency and recency. The more often an item is visited, and the more recently an item is visited, the higher it will rank.
+
+## Signature
+
+```ts
+function useFrecencySorting<T>(
+  data?: T[],
+  options?: {
+    namespace?: string;
+    key?: (item: T) => string;
+    sortUnvisited?: (a: T, b: T) => number;
+  },
+): {
+  data: T[];
+  visitItem: (item: T) => Promise<void>;
+  resetRanking: (item: T) => Promise<void>;
+};
+```
+
+### Arguments
+
+- `data` is the array to sort
+
+With a few options:
+
+- `options.namespace` is a string that can be used to namespace the frecency data (if you have multiple arrays that you want to sort in the same extension).
+- `options.key` is a function that should return a unique string for each item of the array to sort. By default, it will use `item.id`. If the items do not have an `id` field, this option is required.
+- `options.sortUnvisited` is a function to sort the items that have never been visited. By default, the order of the input will be preserved.
+
+### Return
+
+Returns an object with the sorted array and some methods to update the frecency of the items.
+
+- `data` is the sorted array. The order will be preserved for items that have never been visited
+- `visitItem` is a method to use when an item is visited/used. It will increase its frecency.
+- `resetRanking` is a method that can be used to reset the frecency of an item.
+
+## Example
+
+```tsx
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data } = useFetch("https://api.example");
+  const { data: sortedData, visitItem, resetRanking } = useFrecencySorting(data);
+
+  return (
+    <List isLoading={isLoading}>
+      {sortedData.map((item) => (
+        <List.Item
+          key={item.id}
+          title={item.title}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={item.url} onOpen={() => visitItem(item)} />
+              <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => visitItem(item)} />
+              <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(item)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+
+# `useLocalStorage`
+
+A hook to manage a value in the local storage.
+
+## Signature
+
+```ts
+function useLocalStorage<T>(key: string, initialValue?: T): {
+  value: T | undefined;
+  setValue: (value: T) => Promise<void>;
+  removeValue: () => Promise<void>;
+  isLoading: boolean;
+}
+```
+
+### Arguments
+
+- `key` - The key to use for the value in the local storage.
+- `initialValue` - The initial value to use if the key doesn't exist in the local storage.
+
+### Return
+
+Returns an object with the following properties:
+
+- `value` - The value from the local storage or the initial value if the key doesn't exist.
+- `setValue` - A function to update the value in the local storage.
+- `removeValue` - A function to remove the value from the local storage.
+- `isLoading` - A boolean indicating if the value is loading.
+
+## Example
+
+```tsx
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
+
+const exampleTodos = [
+  { id: "1", title: "Buy milk", done: false },
+  { id: "2", title: "Walk the dog", done: false },
+  { id: "3", title: "Call mom", done: false },
+];
+
+export default function Command() {
+  const { value: todos, setValue: setTodos, isLoading } = useLocalStorage("todos", exampleTodos);
+
+  async function toggleTodo(id: string) {
+    const newTodos = todos?.map((todo) => (todo.id === id ? { ...todo, done: !todo.done } : todo)) ?? [];
+    await setTodos(newTodos);
+  }
+
+  return (
+    <List isLoading={isLoading}>
+      {todos?.map((todo) => (
+        <List.Item
+          icon={todo.done ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+          key={todo.id}
+          title={todo.title}
+          actions={
+            <ActionPanel>
+              <Action title={todo.done ? "Uncomplete" : "Complete"} onAction={() => toggleTodo(todo.id)} />
+              <Action title="Delete" style={Action.Style.Destructive} onAction={() => toggleTodo(todo.id)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+
+# `usePromise`
+
+Hook which wraps an asynchronous function or a function that returns a Promise and returns the AsyncState corresponding to the execution of the function.
+
+{% hint style="info" %}
+The function is assumed to be constant (eg. changing it won't trigger a revalidation).
+{% endhint %}
+
+## Signature
+
+```ts
+type Result<T> = `type of the returned value of the returned Promise`;
+
+function usePromise<T>(
+  fn: T,
+  args?: Parameters<T>,
+  options?: {
+    abortable?: MutableRefObject<AbortController | null | undefined>;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: Result<T>) => void;
+    onWillExecute?: (args: Parameters<T>) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
+): AsyncState<Result<T>> & {
+  revalidate: () => void;
+  mutate: MutatePromise<Result<T> | undefined>;
+};
+```
+
+### Arguments
+
+- `fn` is an asynchronous function or a function that returns a Promise.
+- `args` is the array of arguments to pass to the function. Every time they change, the function will be executed again. You can omit the array if the function doesn't require any argument.
+
+With a few options:
+
+- `options.abortable` is a reference to an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to cancel a previous call when triggering a new one.
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Returns
+
+Returns an object with the AsyncState corresponding to the execution of the function as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control about how the `usePromise`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```tsx
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const abortable = useRef<AbortController>();
+  const { isLoading, data, revalidate } = usePromise(
+    async (url: string) => {
+      const response = await fetch(url, { signal: abortable.current?.signal });
+      const result = await response.text();
+      return result;
+    },
+    ["https://api.example"],
+    {
+      abortable,
+    },
+  );
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Reload" onAction={() => revalidate()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const { isLoading, data, mutate } = usePromise(
+    async (url: string) => {
+      const response = await fetch(url);
+      const result = await response.text();
+      return result;
+    },
+    ["https://api.example"],
+  );
+
+  const appendFoo = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Appending Foo" });
+    try {
+      await mutate(
+        // we are calling an API to do something
+        fetch("https://api.example/append-foo"),
+        {
+          // but we are going to do it on our local data right away,
+          // without waiting for the call to return
+          optimisticUpdate(data) {
+            return data + "foo";
+          },
+        },
+      );
+      // yay, the API call worked!
+      toast.style = Toast.Style.Success;
+      toast.title = "Foo appended";
+    } catch (err) {
+      // oh, the API call didn't work :(
+      // the data will automatically be rolled back to its previous value
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not append Foo";
+      toast.message = err.message;
+    }
+  };
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <Action title="Append Foo" onAction={() => appendFoo()} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+## Pagination
+
+The hook has built-in support for pagination. In order to enable pagination, `fn`'s type needs to change from
+
+> an asynchronous function or a function that returns a Promise
+
+to
+
+> a function that returns an asynchronous function or a function that returns a Promise
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = usePromise(
+  async (searchText: string) => {
+    const data = await getUser(); // or any asynchronous logic you need to perform
+    return data;
+  },
+  [searchText],
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = usePromise(
+  (searchText: string) =>
+    async ({ page, lastItem, cursor }) => {
+      const { data } = await getUsers(page); // or any other asynchronous logic you need to perform
+      const hasMore = page < 50;
+      return { data, hasMore };
+    },
+  [searchText],
+);
+```
+
+or, if your data source uses cursor-based pagination, you can return a `cursor` alongside `data` and `hasMore`, and the cursor will be passed as an argument the next time the function gets called:
+
+```ts
+const { isLoading, data, pagination } = usePromise(
+  (searchText: string) =>
+    async ({ page, lastItem, cursor }) => {
+      const { data, nextCursor } = await getUsers(cursor); // or any other asynchronous logic you need to perform
+      const hasMore = nextCursor !== undefined;
+      return { data, hasMore, cursor: nextCursor };
+    },
+  [searchText],
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that the async function receives a PaginationOptions argument, and returns a specific data format:
+
+```ts
+{
+  data: any[];
+  hasMore: boolean;
+  cursor?: any;
+}
+```
+
+Every time the promise resolves, the hook needs to figure out if it should paginate further, or if it should stop, and it uses `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been loaded so far.
+Additionally, you can also pass a `cursor` property, which will be included along with `page` and `lastItem` in the next pagination call.
+
+### Full Example
+
+```tsx
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = usePromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({
+        index,
+        page: options.page,
+        text: searchText,
+      }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText],
+  );
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+### MutatePromise
+
+A method to wrap an asynchronous update and gives some control about how the `usePromise`'s data should be updated while the update is going through.
+
+```ts
+export type MutatePromise<T> = (
+  asyncUpdate?: Promise<any>,
+  options?: {
+    optimisticUpdate?: (data: T) => T;
+    rollbackOnError?: boolean | ((data: T) => T);
+    shouldRevalidateAfter?: boolean;
+  },
+) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedPromise`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+  cursor?: any;
+};
+```
+
+
+# `useSQL`
+
+Hook which executes a query on a local SQL database and returns the AsyncState corresponding to the execution of the query.
+
+## Signature
+
+```ts
+function useSQL<T>(
+  databasePath: string,
+  query: string,
+  options?: {
+    permissionPriming?: string;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: string[]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  }
+): AsyncState<T> & {
+  revalidate: () => void;
+  mutate: MutatePromise<T | U | undefined>;
+  permissionView: React.ReactNode | undefined;
+};
+```
+
+### Arguments
+
+- `databasePath` is the path to the local SQL database.
+- `query` is the SQL query to run on the database.
+
+With a few options:
+
+- `options.permissionPriming` is a string explaining why the extension needs full disk access. For example, the Apple Notes extension uses `"This is required to search your Apple Notes."`. While it is optional, we recommend setting it to help users understand.
+
+Including the usePromise's options:
+
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the function as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `permissionView` is a React Node that should be returned when present. It will prompt users to grant full disk access (which is required for the hook to work).
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the `useSQL`'s data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```tsx
+import { useSQL } from "@raycast/utils";
+import { resolve } from "path";
+import { homedir } from "os";
+
+const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
+const notesQuery = `SELECT id, title FROM ...`;
+type NoteItem = {
+  id: string;
+  title: string;
+};
+
+export default function Command() {
+  const { isLoading, data, permissionView } = useSQL<NoteItem>(NOTES_DB, notesQuery);
+
+  if (permissionView) {
+    return permissionView;
+  }
+
+  return (
+    <List isLoading={isLoading}>
+      {(data || []).map((item) => (
+        <List.Item key={item.id} title={item.title} />
+      ))}
+    </List>
+  );
+}
+```
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
+
+const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
+const notesQuery = `SELECT id, title FROM ...`;
+type NoteItem = {
+  id: string;
+  title: string;
+};
+
+export default function Command() {
+  const { isLoading, data, mutate, permissionView } = useFetch("https://api.example");
+
+  if (permissionView) {
+    return permissionView;
+  }
+
+  const createNewNote = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating new Note" });
+    try {
+      await mutate(
+        // we are calling an API to do something
+        somehowCreateANewNote(),
+        {
+          // but we are going to do it on our local data right away,
+          // without waiting for the call to return
+          optimisticUpdate(data) {
+            return data?.concat([{ id: "" + Math.random(), title: "New Title" }]);
+          },
+        },
+      );
+      // yay, the API call worked!
+      toast.style = Toast.Style.Success;
+      toast.title = "Note created";
+    } catch (err) {
+      // oh, the API call didn't work :(
+      // the data will automatically be rolled back to its previous value
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not create Note";
+      toast.message = err.message;
+    }
+  };
+
+  return (
+    <List isLoading={isLoading}>
+      {(data || []).map((item) => (
+        <List.Item
+          key={item.id}
+          title={item.title}
+          actions={
+            <ActionPanel>
+              <Action title="Create new Note" onAction={() => createNewNote()} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+### MutatePromise
+
+A method to wrap an asynchronous update and gives some control about how the `useSQL`'s data should be updated while the update is going through.
+
+```ts
+export type MutatePromise<T> = (
+  asyncUpdate?: Promise<any>,
+  options?: {
+    optimisticUpdate?: (data: T) => T;
+    rollbackOnError?: boolean | ((data: T) => T);
+    shouldRevalidateAfter?: boolean;
+  },
+) => Promise<any>;
+```
+
+
+# `useStreamJSON`
+
+Hook which takes a `http://`, `https://` or `file:///` URL pointing to a JSON resource, caches it to the command's support folder, and streams through its content. Useful when dealing with large JSON arrays which would be too big to fit in the command's memory.
+
+## Signature
+
+```ts
+export function useStreamJSON<T, U>(
+  url: RequestInfo,
+  options: RequestInit & {
+    filter?: (item: T) => boolean;
+    transform?: (item: any) => T;
+    pageSize?: number;
+    initialData?: U;
+    keepPreviousData?: boolean;
+    execute?: boolean;
+    onError?: (error: Error) => void;
+    onData?: (data: T) => void;
+    onWillExecute?: (args: [string, RequestInit]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
+  },
+): AsyncState<Result<T>> & {
+  revalidate: () => void;
+};
+```
+
+### Arguments
+
+- `url` - The [`RequestInfo`](https://github.com/nodejs/undici/blob/v5.7.0/types/fetch.d.ts#L12) describing the resource that needs to be fetched. Strings starting with `http://`, `https://` and `Request` objects will use `fetch`, while strings starting with `file:///` will be copied to the cache folder.
+
+With a few options:
+
+- `options` extends [`RequestInit`](https://github.com/nodejs/undici/blob/v5.7.0/types/fetch.d.ts#L103-L117) allowing you to specify a body, headers, etc. to apply to the request.
+- `options.pageSize` the amount of items to fetch at a time. By default, 20 will be used
+- `options.dataPath` is a string or regular expression informing the hook that the array (or arrays) of data you want to stream through is wrapped inside one or multiple objects, and it indicates the path it needs to take to get to it.
+- `options.transform` is a function called with each top-level object encountered while streaming. If the function returns an array, the hook will end up streaming through its children, and each array item will be passed to `options.filter`. If the function returns something other than an array, _it_ will be passed to `options.filter`. Note that the hook will revalidate every time the filter function changes, so you need to use [useCallback](https://react.dev/reference/react/useCallback) to make sure it only changes when it needs to.
+- `options.filter` is a function called with each object encountered while streaming. If it returns `true`, the object will be kept, otherwise it will be discarded. Note that the hook will revalidate every time the filter function changes, so you need to use [useCallback](https://react.dev/reference/react/useCallback) to make sure it only changes when it needs to.
+
+Including the useCachedPromise's options:
+
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+
+Including the useCachedState's options:
+
+- `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+
+Including the usePromise's options:
+
+- `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
+- `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
+- `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
+
+### Return
+
+Returns an object with the AsyncState corresponding to the execution of the fetch as well as a couple of methods to manipulate it.
+
+- `data`, `error`, `isLoading` - see AsyncState.
+- `pagination` - the pagination object that Raycast [`List`s](https://developers.raycast.com/api-reference/user-interface/list#props) and [`Grid`s](https://developers.raycast.com/api-reference/user-interface/grid#props) expect.
+- `revalidate` is a method to manually call the function with the same arguments again.
+- `mutate` is a method to wrap an asynchronous update and gives some control over how the hook's data should be updated while the update is going through. By default, the data will be revalidated (eg. the function will be called again) after the update is done. See Mutation and Optimistic Updates for more information.
+
+## Example
+
+```ts
+import { Action, ActionPanel, List, environment } from "@raycast/api";
+import { useStreamJSON } from "@raycast/utils";
+import { join } from "path";
+import { useCallback, useState } from "react";
+
+type Formula = { name: string; desc?: string };
+
+export default function Main(): JSX.Element {
+  const [searchText, setSearchText] = useState("");
+
+  const formulaFilter = useCallback(
+    (item: Formula) => {
+      if (!searchText) return true;
+      return item.name.toLocaleLowerCase().includes(searchText);
+    },
+    [searchText],
+  );
+
+  const formulaTransform = useCallback((item: any): Formula => {
+    return { name: item.name, desc: item.desc };
+  }, []);
+
+  const { data, isLoading, pagination } = useStreamJSON("https://formulae.brew.sh/api/formula.json", {
+    initialData: [] as Formula[],
+    pageSize: 20,
+    filter: formulaFilter,
+    transform: formulaTransform
+  });
+
+  return (
+    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setSearchText}>
+      <List.Section title="Formulae">
+        {data.map((d) => (
+          <List.Item key={d.name} title={d.name} subtitle={d.desc} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+```
+
+## Mutation and Optimistic Updates
+
+In an optimistic update, the UI behaves as though a change was successfully completed before receiving confirmation from the server that it was - it is being optimistic that it will eventually get the confirmation rather than an error. This allows for a more responsive user experience.
+
+You can specify an `optimisticUpdate` function to mutate the data in order to reflect the change introduced by the asynchronous update.
+
+When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
+
+```tsx
+import { Action, ActionPanel, List, environment } from "@raycast/api";
+import { useStreamJSON } from "@raycast/utils";
+import { join } from "path";
+import { useCallback, useState } from "react";
+import { setTimeout } from "timers/promises";
+
+type Formula = { name: string; desc?: string };
+
+export default function Main(): JSX.Element {
+  const [searchText, setSearchText] = useState("");
+
+  const formulaFilter = useCallback(
+    (item: Formula) => {
+      if (!searchText) return true;
+      return item.name.toLocaleLowerCase().includes(searchText);
+    },
+    [searchText],
+  );
+
+  const formulaTransform = useCallback((item: any): Formula => {
+    return { name: item.name, desc: item.desc };
+  }, []);
+
+  const { data, isLoading, mutate, pagination } = useStreamJSON("https://formulae.brew.sh/api/formula.json", {
+    initialData: [] as Formula[],
+    pageSize: 20,
+    filter: formulaFilter,
+    transform: formulaTransform,
+  });
+
+  return (
+    <List isLoading={isLoading} pagination={pagination} onSearchTextChange={setSearchText}>
+      <List.Section title="Formulae">
+        {data.map((d) => (
+          <List.Item
+            key={d.name}
+            title={d.name}
+            subtitle={d.desc}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Delete All Items But This One"
+                  onAction={async () => {
+                    mutate(setTimeout(1000), {
+                      optimisticUpdate: () => {
+                        return [d];
+                      },
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+```
+
+## Types
+
+### AsyncState
+
+An object corresponding to the execution state of the function.
+
+```ts
+// Initial State
+{
+  isLoading: true, // or `false` if `options.execute` is `false`
+  data: undefined,
+  error: undefined
+}
+
+// Success State
+{
+  isLoading: false,
+  data: T,
+  error: undefined
+}
+
+// Error State
+{
+  isLoading: false,
+  data: undefined,
+  error: Error
+}
+
+// Reloading State
+{
+  isLoading: true,
+  data: T | undefined,
+  error: Error | undefined
+}
+```
+
+
