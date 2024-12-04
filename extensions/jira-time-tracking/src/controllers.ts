@@ -4,9 +4,11 @@ import { issuesValidator, paginationValidator, projectsValidator } from "./valid
 import { getPreferenceValues } from "@raycast/api";
 import { Project } from "./types";
 
-// Helper to define the structure for isJiraCloud
+// Helpers to define the structure for preferences
 type UserPreferences = {
-  isJiraCloud: string; // Changed from boolean to string
+  isJiraCloud: string;
+  onlyMyIssues: boolean;
+  username: string;
 };
 
 const userPrefs = getPreferenceValues<UserPreferences>();
@@ -42,10 +44,26 @@ export const getProjects = async (begin: number) => {
 };
 
 export const getIssues = async (begin: number, projectId?: string) => {
-  const jql = projectId ? `&jql=project=${projectId}` : "";
+  const jqlParts = [];
+
+  // Add project ID filter if provided
+  if (projectId) {
+    jqlParts.push(`project=${projectId}`);
+  }
+
+  // Add assignee filter using the username from preferences
+  if (userPrefs.onlyMyIssues && userPrefs.username) {
+    jqlParts.push(`assignee="${userPrefs.username}"`);
+  }
+
+  // Construct JQL query dynamically
+  const jql = jqlParts.length > 0 ? `&jql=${jqlParts.join(" AND ")}` : "";
   const basePath = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=${begin}${jql}`;
   const apiPath = getApiPath(basePath);
+
+  console.log(`Fetching issues from: ${apiPath}`); // Debugging log
   const response = await jiraRequest(apiPath);
+
   return {
     total: handlePaginationResp(response),
     data: handleIssueResp(response),
