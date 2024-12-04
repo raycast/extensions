@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2024-12-02
+
+- Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
+
 ## [Update] - 2024-11-17
 
 - Adds support for Windsurf as an option in the extension settings.

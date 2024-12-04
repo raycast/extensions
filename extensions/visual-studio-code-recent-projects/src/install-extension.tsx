@@ -32,7 +32,7 @@ export interface GalleryQueryResult {
 
 export interface Result {
   extensions: GalleryExtension[];
-  pagingToken: any;
+  pagingToken: string | null;
   resultMetadata: ResultMetadaum[];
 }
 

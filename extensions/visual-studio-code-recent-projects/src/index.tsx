@@ -1,11 +1,19 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences, Color } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { RemoveMethods, useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
-import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
+import {
+  bundleIdentifier,
+  build,
+  keepSectionOrder,
+  closeOtherWindows,
+  terminalApp,
+  showGitBranch,
+  layout,
+} from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
 import {
   filterEntriesByType,
@@ -27,6 +35,7 @@ import {
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
+import { getGitBranch } from "./utils/git";
 
 export default function Command() {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -130,12 +139,35 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & 
   }
 }
 
-function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods & RemoveMethods) {
+function LocalItem(
+  props: { entry: EntryLike; uri: string; pinned?: boolean; gridView?: boolean } & PinMethods & RemoveMethods
+) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
+  const [gitBranch, setGitBranch] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchGitBranch() {
+      try {
+        const branch = await getGitBranch(path);
+        if (mounted) {
+          setGitBranch(branch);
+        }
+      } catch (error) {
+        // Silently handle errors - they're already handled in getGitBranch
+      }
+    }
+
+    fetchGitBranch();
+    return () => {
+      mounted = false;
+    };
+  }, [path, name]);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
@@ -158,14 +190,25 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
     };
   };
 
+  const accessories = [];
+  if (showGitBranch && gitBranch) {
+    accessories.push({
+      tag: { value: gitBranch, color: Color.Green },
+      tooltip: `Git Branch: ${gitBranch}`,
+    });
+  }
+
+  const displaySubtitle = showGitBranch && gitBranch && layout === "grid" ? `${gitBranch} • ${subtitle}` : subtitle;
+
   return (
     <ListOrGridItem
       id={props.pinned ? path : undefined}
       title={name}
-      subtitle={subtitle}
+      subtitle={displaySubtitle}
       icon={{ fileIcon: path }}
       content={{ fileIcon: path }}
       keywords={keywords}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -346,7 +389,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
     <ActionPanel.Section>
       <Action
         icon={Icon.Trash}
-        title="Remove from Recent Projects"
+        title="Remove From Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
