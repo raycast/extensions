@@ -1,7 +1,7 @@
-import { Cache, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Cache, LaunchType, LocalStorage, getPreferenceValues, launchCommand } from "@raycast/api";
 import { FocusText, LongBreakText, ShortBreakText } from "./constants";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
-import { setDND } from "./doNotDisturb";
+import { enableFocusWhileFocused, setDND } from "./doNotDisturb";
 
 const cache = new Cache();
 
@@ -135,6 +135,12 @@ export function endOfInterval(currentInterval: Interval) {
         context: { currentInterval },
       });
     }
+    if (enableFocusWhileFocused) return;
+    launchCommand({
+      name: "pomodoro-control-timer",
+      type: LaunchType.UserInitiated,
+      context: { currentInterval },
+    });
   } catch (error) {
     console.error(error);
   }

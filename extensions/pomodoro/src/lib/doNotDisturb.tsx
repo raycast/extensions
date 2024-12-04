@@ -1,7 +1,7 @@
 import { confirmAlert, LaunchType, open, getPreferenceValues } from "@raycast/api";
 import { crossLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 
-const { enableFocusWhileFocused } = getPreferenceValues<ExtensionPreferences>();
+export const { enableFocusWhileFocused } = getPreferenceValues<ExtensionPreferences>();
 
 export const dndLaunchOptions = {
   type: LaunchType.Background,
