@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2024-12-04
+
+- Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).
+
 ## [Update] - 2024-12-02
 
 - Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
