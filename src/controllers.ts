@@ -74,30 +74,31 @@ const handlePaginationResp = (resp: unknown) => {
   return paginationValidator(resp) ? resp.total : 0;
 };
 
-const handleProjectResp = (resp: any): Project[] => {
-  // Validate the response and determine the structure
+const handleProjectResp = (resp: unknown): Project[] => {
+  // Validate the response using the updated `projectsValidator`
   if (!projectsValidator(resp)) {
-    console.error("Invalid project response format:", resp);
-    return []; // Return an empty array if validation fails
+    console.error("Invalid project response structure:", resp);
+    return [];
   }
-  // If the validator passed, handle both potential response structures
+
+  // Handle the validated response
   if (Array.isArray(resp)) {
-    // Handle the array structure (v2 response)
+    // Handle API v2 structure (Jira Server)
     return resp.map((project) => ({
       key: project.key,
       name: project.name.trim(),
     }));
   } else if (resp.values) {
-    // Handle the object with 'values' property (v3 response)
+    // Handle API v3 structure (Jira Cloud)
     return resp.values.map((project) => ({
       key: project.key,
-      name: project.name,
+      name: project.name.trim(),
     }));
-  } else {
-    // This case should not occur since the validator has passed, but it's safe to handle it
-    console.error("Unexpected project response structure:", resp);
-    return [];
   }
+
+  // This point should not be reached due to validation, but add a fallback
+  console.error("Unexpected project response format after validation:", resp);
+  return [];
 };
 
 const handleIssueResp = (resp: unknown) => {
