@@ -220,7 +220,7 @@ export default function Command() {
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
               {project.gitRemotes().map((remote, i) => {
                 const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as Keyboard.Shortcut) : undefined;
