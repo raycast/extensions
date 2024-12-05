@@ -41,9 +41,8 @@
           "description": "If checked, copies the newly created issue URL to the clipboard.",
           "type": "checkbox",
           "required": false,
-          "title": "Copy Created Issue URL",
           "default": false,
-          "label": "Copy Created Issue URL to Clipboard"
+          "label": "Copy created issue URL to clipboard"
         }
       ]
     },
