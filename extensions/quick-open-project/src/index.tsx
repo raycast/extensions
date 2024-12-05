@@ -259,7 +259,7 @@ export default function Command() {
                 key="clipboard"
                 onCopy={() => updateFrecency(searchQuery, project)}
                 content={project.fullPath}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             </ActionPanel>
           }
