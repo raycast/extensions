@@ -1,6 +1,6 @@
 # Chess.com Changelog
 
-## [Add more time controls] - {PR_MERGE_DATE}
+## [Add more time controls] - 2024-12-05
 
 - Added time controls 10|5, 15|10, 20 min, 60 min.
 
