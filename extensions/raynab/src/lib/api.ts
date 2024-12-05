@@ -4,7 +4,7 @@ import { displayError, isYnabError } from './errors';
 import dayjs from 'dayjs';
 
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
-import type { Preferences, Period, BudgetSummary, SaveTransaction, NewTransaction } from '@srcTypes';
+import type { Period, BudgetSummary, SaveTransaction, NewTransaction, Preferences } from '@srcTypes';
 dayjs.extend(quarterOfYear);
 
 const { apiToken } = getPreferenceValues<Preferences>();

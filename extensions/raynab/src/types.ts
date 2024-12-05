@@ -1,4 +1,3 @@
-import type { ManipulateType } from 'dayjs';
 import type {
   TransactionDetail as ynabTransactionDetail,
   Account as ynabAccount,
