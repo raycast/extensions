@@ -114,7 +114,7 @@ function searchProjects(query?: string): {
           statSync(path)?.isDirectory() ||
           (getPreferenceValues<Preferences>().includeWorkspaces &&
             statSync(path)?.isFile() &&
-            path.endsWith(".code-workspace"))
+            path.endsWith(".code-workspace")),
       )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
