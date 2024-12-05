@@ -62,7 +62,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         toast.title = t("bookmark.updateSuccess");
 
         if (onRefresh) {
-          onRefresh();
+          await onRefresh();
         }
         pop();
       } catch (error) {
