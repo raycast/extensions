@@ -6,6 +6,7 @@
 - Added a new Custom JQL Query preference to allow flexible issue filtering.
 - Added a Default Project Key preference to preselect a default project.
 - Enhanced getIssues and getProjects to utilize new preferences.
+- Fixed handleProjectResp by integrating projectsValidator to ensure type safety and proper handling of Jira API response versions.
 
 ## [Only My Issues Preference] - 2024-11-27
 
