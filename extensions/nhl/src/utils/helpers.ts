@@ -53,7 +53,7 @@ export function getFlagEmoji(countryCode: string): string {
 
   let countryFlag = String.fromCodePoint(...codePoints);
 
-  if(countryCode === "SWE") countryFlag = "🇸🇪"
+  if (countryCode === "SWE") countryFlag = "🇸🇪";
 
   return countryFlag;
 }
@@ -207,7 +207,7 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
   const todayGames: Game[] = [];
   const futureGames: Game[] = [];
 
-  if(!apiResponse) return { pastGames, todayGames, futureGames };
+  if (!apiResponse) return { pastGames, todayGames, futureGames };
 
   apiResponse.gamesByDate.forEach((dateEntry) => {
     dateEntry.games.forEach((game) => {
