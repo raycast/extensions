@@ -1,8 +1,12 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2024-12-04
+
+- Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).
+
 ## [Fix] - 2024-12-05
 
-- improve error handling for ambiguous git HEAD argument.
+- Improved error handling for ambiguous git HEAD argument.
 
 ## [Update] - 2024-12-02
 
