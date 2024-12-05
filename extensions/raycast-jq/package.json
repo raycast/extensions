@@ -17,7 +17,7 @@
       "title": "Query Json",
       "description": "Run a jq query on Json data from file or clipboard.",
       "mode": "view",
-      "icon": "icon-64.png"
+      "icon": "icon-512-large.png"
     }
   ],
   "dependencies": {
