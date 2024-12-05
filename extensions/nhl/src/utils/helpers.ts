@@ -51,7 +51,11 @@ export function getFlagEmoji(countryCode: string): string {
     .slice(0, 2)
     .map((char) => 127397 + char.charCodeAt(0));
 
-  return String.fromCodePoint(...codePoints);
+  let countryFlag = String.fromCodePoint(...codePoints);
+
+  if(countryCode === "SWE") countryFlag = "🇸🇪"
+
+  return countryFlag;
 }
 
 export function calculateAge(birthdateString: string): number {
@@ -202,6 +206,8 @@ export function sortGames(apiResponse: ScoreboardResponse): SortedGames {
   const pastGames: Game[] = [];
   const todayGames: Game[] = [];
   const futureGames: Game[] = [];
+
+  if(!apiResponse) return { pastGames, todayGames, futureGames };
 
   apiResponse.gamesByDate.forEach((dateEntry) => {
     dateEntry.games.forEach((game) => {
