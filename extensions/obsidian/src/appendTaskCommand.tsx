@@ -24,10 +24,8 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const { text } = props.arguments;
   const { dueDate } = props.arguments;
   const dateContent = dueDate ? " 📅 " + dueDate : "";
-  const currentDate = new Date().toISOString().split("T")[0];
-  const creationDate = " ➕ " + currentDate;
 
-  const { appendTemplate, heading, notePath, noteTag, vaultName, silent } =
+  const { appendTemplate, heading, notePath, noteTag, vaultName, silent, creationDate } =
     getPreferenceValues<appendTaskPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState<string | null>(null);
@@ -71,6 +69,8 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
 
   const tag = noteTag ? noteTag + " " : "";
 
+  const creationDateString = creationDate ? " ➕ " + new Date().toISOString().split("T")[0] : "";
+
   const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
   // If there's a configured vault or only one vault, use that
   if (selectedVault || vaultsWithPlugin.length === 1) {
@@ -81,7 +81,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         type: ObsidianTargetType.AppendTask,
         path: notePathExpanded,
         vault: vaultToUse,
-        text: "- [ ] " + tag + content + dateContent + creationDate,
+        text: "- [ ] " + tag + content + dateContent + creationDateString,
         heading: heading,
         silent: silent,
       });
@@ -115,7 +115,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
                   type: ObsidianTargetType.AppendTask,
                   path: notePath,
                   vault: vault,
-                  text: "- [ ] #task " + content + dateContent + creationDate,
+                  text: "- [ ] #task " + content + dateContent + creationDateString,
                   heading: heading,
                 })}
               />

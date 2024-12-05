@@ -552,6 +552,15 @@
           "default": "#task"
         },
         {
+          "name": "creationDate",
+          "type": "checkbox",
+          "title": "Creation Date",
+          "label": "Append creation date to the task",
+          "required": false,
+          "description": "➕ YYYY-MM-DD (Current date)",
+          "default": false
+        },
+        {
           "description": "Name of Obsidian vault where note is",
           "name": "vaultName",
           "required": false,
