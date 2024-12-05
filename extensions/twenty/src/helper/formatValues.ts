@@ -30,6 +30,11 @@ export function formatValues(values: Record<string, any>, objectRecordMetadata: 
           }
           break;
         }
+        case "RATING": {
+          if (formattedValues[key] === "") {
+            formattedValues[key] = null;
+          }
+        }
         default:
           break;
       }
