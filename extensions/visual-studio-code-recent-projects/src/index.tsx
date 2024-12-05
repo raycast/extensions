@@ -196,9 +196,9 @@ function LocalItem(
   if (showGitBranch && gitBranch) {
     const branchColor = gitBranchColor && isValidHexColor(gitBranchColor) ? { source: gitBranchColor } : Color.Green;
     accessories.push({
-      tag: { 
-        value: gitBranch, 
-        color: branchColor
+      tag: {
+        value: gitBranch,
+        color: branchColor,
       },
       tooltip: `Git Branch: ${gitBranch}`,
     });
@@ -345,7 +345,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       )}
       {movements.includes("up") && (
         <Action
-          title="Move Up in Pinned Entries"
+          title="Move up in Pinned Entries"
           shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
           icon={Icon.ArrowUp}
           onAction={async () => {
@@ -395,7 +395,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
     <ActionPanel.Section>
       <Action
         icon={Icon.Trash}
-        title="Remove From Recent Projects"
+        title="Remove from Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
