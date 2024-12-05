@@ -4,11 +4,7 @@ export const projectsValidator = (body: unknown): body is ProjectBody => {
   if (Array.isArray(body)) {
     // API v2 structure: an array of project objects
     const isValid = body.every(
-      (project) =>
-        typeof project === "object" &&
-        project !== null &&
-        "key" in project &&
-        "name" in project,
+      (project) => typeof project === "object" && project !== null && "key" in project && "name" in project,
     );
     if (!isValid) {
       console.error("Invalid API v2 project response format:", body);
@@ -20,11 +16,7 @@ export const projectsValidator = (body: unknown): body is ProjectBody => {
     const isValid =
       Array.isArray(partial.values) &&
       partial.values.every(
-        (project) =>
-          typeof project === "object" &&
-          project !== null &&
-          "key" in project &&
-          "name" in project,
+        (project) => typeof project === "object" && project !== null && "key" in project && "name" in project,
       );
     if (!isValid) {
       console.error("Invalid API v3 project response format:", body);
