@@ -1,17 +1,16 @@
 # Hide My Email
 
-Tired of endlessly navigating through System Settings to create a new Hide My Email address? Then this extension might be exactly what you need!
+Tired of endlessly navigating through System Settings to create a new iCloud Hide My Email address? This extension might be exactly what you need!
 
 ## Commands
 
 ### List Emails
 
-Provides an interface for managing all generated Hide My Email addresses.
+Provides an interface for managing all generated iCloud Hide My Email addresses.
 
 ### Create New Mail
 
-A quick way to generate a new Hide My Email address.
-
+A quick way to generate a new iCloud Hide My Email address.
 
 ## Screenshots
 
