@@ -14,7 +14,7 @@ export interface Config {
 
 export interface Asset {
   id: string;
-  assetType: "screenshot" | "image";
+  assetType: "screenshot" | "image" | "pdf" | undefined;
 }
 
 export interface Tag {
@@ -33,7 +33,7 @@ export interface BookmarkContent {
   url?: string;
   title?: string;
   text?: string;
-  assetType?: "image";
+  assetType?: Asset["assetType"];
   assetId?: string;
   fileName?: string;
   favicon?: string;
@@ -42,6 +42,7 @@ export interface BookmarkContent {
 
 export interface Bookmark {
   id: string;
+  title?: string;
   content: BookmarkContent;
   summary?: string;
   note?: string;

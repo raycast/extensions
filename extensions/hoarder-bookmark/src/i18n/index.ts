@@ -42,6 +42,7 @@ export const translations = {
       title: "Bookmark Detail",
       untitled: "Untitled",
       untitledImage: "Untitled Image",
+      originalTitle: "Original Title",
       sections: {
         summary: "📝 Summary",
         note: "📒 Note",
@@ -57,6 +58,7 @@ export const translations = {
         archive: "Archive",
         unarchive: "Unarchive",
         delete: "Delete",
+        edit: "Edit",
       },
       metadata: {
         status: "Status",
@@ -88,6 +90,12 @@ export const translations = {
           success: "Deleted bookmark successfully",
         },
       },
+      update: "Update Bookmark",
+      updating: "Updating bookmark...",
+      updateSuccess: "Bookmark updated successfully",
+      updateFailed: "Bookmark update failed",
+      customTitle: " Custom Title",
+      titlePlaceholder: "Enter title",
     },
     list: {
       favorites: "Favorites",
@@ -232,6 +240,7 @@ export const translations = {
       title: "书签详情",
       untitled: "无标题",
       untitledImage: "无标题图片",
+      originalTitle: "原始标题",
       sections: {
         summary: "📝 摘要",
         note: "📒 笔记",
@@ -246,7 +255,8 @@ export const translations = {
         unfavorite: "取消收藏",
         archive: "归档",
         unarchive: "取消归档",
-        delete: "��除",
+        delete: "删除",
+        edit: "编辑",
       },
       metadata: {
         status: "状态",
@@ -278,6 +288,12 @@ export const translations = {
           success: "删除书签成功",
         },
       },
+      update: "更新书签",
+      updating: "正在更新书签...",
+      updateSuccess: "书签更新成功",
+      updateFailed: "书签更新失败",
+      customTitle: "自定义标题",
+      titlePlaceholder: "输入标题",
     },
     list: {
       favorites: "收藏夹",

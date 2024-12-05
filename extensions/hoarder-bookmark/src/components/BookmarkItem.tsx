@@ -22,11 +22,13 @@ function renderBookmarkContent(
   handleDeleteBookmark: (id: string) => void,
   t: (key: string) => string,
 ) {
+  const customTitle = bookmark.title ? true : false;
+
   switch (bookmark.content.type) {
     case "text":
       return {
-        title: bookmark.content.text?.slice(0, 50) || t("bookmarkItem.untitled"),
-        icon: Icon.Pencil,
+        title: customTitle ? bookmark.title : bookmark.content.text?.slice(0, 50) || t("bookmarkItem.untitled"),
+        icon: Icon.Text,
         metadata: (
           <Metadata>
             <Metadata.Label title={t("bookmarkItem.metadata.content")} text={bookmark.content.text || ""} />
@@ -75,14 +77,18 @@ function renderBookmarkContent(
         ),
       };
 
-    case "asset":
-      if (bookmark.content.assetType === "image") {
+    case "asset": {
+      const assetType = bookmark.content.assetType;
+      const assetFileName = bookmark.content.fileName;
+      const displayTitle = bookmark.title ? bookmark.title : assetFileName;
+
+      if (assetType === "image") {
         return {
-          title: bookmark.content.fileName || t("bookmarkItem.untitledImage"),
+          title: displayTitle || t("bookmarkItem.untitledImage"),
           icon: Icon.Image,
           metadata: (
             <Metadata>
-              <Metadata.Label title={t("bookmarkItem.metadata.filename")} text={bookmark.content.fileName || ""} />
+              <Metadata.Label title={t("bookmarkItem.metadata.filename")} text={assetFileName || ""} />
               <Metadata.Label
                 title={t("bookmarkItem.metadata.createdAt")}
                 text={new Date(bookmark.createdAt).toLocaleDateString()}
@@ -127,11 +133,61 @@ function renderBookmarkContent(
           ),
         };
       }
-      return null;
 
+      if (assetType === "pdf") {
+        return {
+          title: displayTitle || t("bookmarkItem.untitledImage"),
+          icon: Icon.Document,
+          metadata: (
+            <Metadata>
+              <Metadata.Label title={t("bookmarkItem.metadata.filename")} text={bookmark.content.fileName || ""} />
+              <Metadata.Label
+                title={t("bookmarkItem.metadata.createdAt")}
+                text={new Date(bookmark.createdAt).toLocaleDateString()}
+              />
+              {bookmark.tags.length > 0 && (
+                <Metadata.TagList title={t("bookmarkItem.metadata.tags")}>
+                  {bookmark.tags.map((tag) => (
+                    <Metadata.TagList.Item
+                      key={tag.id}
+                      text={tag.name}
+                      color={tag.attachedBy === "ai" ? TAG_AI_COLOR : TAG_HUMAN_COLOR}
+                    />
+                  ))}
+                </Metadata.TagList>
+              )}
+            </Metadata>
+          ),
+          imageUrl: assetImageUrl,
+          actions: (onRefresh: () => void, onCleanCache?: () => void) => (
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action.Push
+                  icon={Icon.Sidebar}
+                  target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
+                  title={t("bookmarkItem.actions.viewDetail")}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action icon={Icon.ArrowClockwise} title={t("bookmarkItem.actions.refresh")} onAction={onRefresh} />
+                <Action icon={Icon.Trash} title={t("bookmarkItem.actions.clearCache")} onAction={onCleanCache} />
+              </ActionPanel.Section>
+              <Action
+                icon={Icon.Trash}
+                title={t("bookmarkItem.actions.delete")}
+                onAction={() => handleDeleteBookmark(bookmark.id)}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              />
+            </ActionPanel>
+          ),
+        };
+      }
+
+      return null;
+    }
     case "link":
       return {
-        title: bookmark.content.title || t("bookmarkItem.untitled"),
+        title: customTitle ? bookmark.title : bookmark.content.title || t("bookmarkItem.untitled"),
         icon: showWebsitePreview
           ? bookmark.content.favicon
             ? { source: bookmark.content.favicon, mask: Image.Mask.Circle }
@@ -246,13 +302,14 @@ export function BookmarkItem({ bookmark, config, onRefresh, onCleanCache }: Book
 
   return (
     <List.Item
-      title={content.title}
+      title={content.title || t("bookmarkItem.untitled")}
       icon={content.icon}
       id={bookmark.id}
       detail={
         <List.Item.Detail
           markdown={
-            bookmark.content.type === "text"
+            bookmark.content.type === "text" ||
+            (bookmark.content.type === "asset" && bookmark.content.assetType === "pdf")
               ? ""
               : content.imageUrl
                 ? `<img src="${content.imageUrl}" center width="300"  />`

@@ -72,6 +72,7 @@ Here's how to make the most of the Raycast Hoarder extension:
 - **Search Content**: Utilize full-text search across all bookmarked content
 - **AI Tagging**: Automatically categorize bookmarks using AI
 - **Create New Bookmarks**: Add new bookmarks with ease
+- **Edit Bookmarks**: Edit bookmark title and notes
 
 ## 🔧 Troubleshooting
 

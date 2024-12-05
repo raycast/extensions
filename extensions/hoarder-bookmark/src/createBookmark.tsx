@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Form, FormDropdownProps, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation, FormDropdownProps } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { fetchCreateBookmark } from "./apis";
-import { validUrl } from "./utils/url";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useTranslation } from "./hooks/useTranslation";
 import { Bookmark } from "./types";
+import { validUrl } from "./utils/url";
 
 interface FormValues {
   type: "text" | "link";
