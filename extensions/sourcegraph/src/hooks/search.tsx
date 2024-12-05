@@ -33,6 +33,10 @@ export interface SearchState {
    * The previously executed search
    */
   previousSearch?: string;
+  /**
+   * The previously used pattern type
+   */
+  previousPatternType?: PatternType;
 }
 
 const emptyState: SearchState = {
@@ -42,6 +46,7 @@ const emptyState: SearchState = {
   summaryDetail: undefined,
   isLoading: false,
   previousSearch: undefined,
+  previousPatternType: undefined,
 };
 
 /**
@@ -63,7 +68,7 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     }
 
     // Do not repeat searches that are essentially the same
-    if ((state.previousSearch || "").trim() === searchText.trim()) {
+    if ((state.previousSearch || "").trim() === searchText.trim() && state.previousPatternType === pattern) {
       return;
     }
 

@@ -16,7 +16,7 @@ export default function DotComCommand({
 }) {
   const src = sourcegraphDotCom();
 
-  useEffect(checkAuthEffect(src));
+  useEffect(checkAuthEffect(src), []);
 
   return <Command src={src} props={props} />;
 }
