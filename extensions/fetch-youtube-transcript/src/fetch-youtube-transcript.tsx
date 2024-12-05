@@ -9,19 +9,37 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
+// Define an interface for the transcript result
+interface TranscriptResult {
+  transcript: string;
+  title: string;
+}
+
 // Fetches the transcript for a given YouTube video ID
-async function getVideoTranscript(videoId: string): Promise<string> {
+async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
   try {
     const fetch = (await import("node-fetch")).default;
-    const transcript = await ytdl.getInfo(videoId);
+    const videoInfo = await ytdl.getInfo(videoId);
 
-    if (transcript.player_response.captions && transcript.player_response.captions.playerCaptionsTracklistRenderer) {
-      const captions = transcript.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
+    // Extract video title
+    const videoTitle = videoInfo.videoDetails.title;
+
+    if (videoInfo.player_response.captions && videoInfo.player_response.captions.playerCaptionsTracklistRenderer) {
+      const captions = videoInfo.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
       if (captions && captions.length) {
         const transcriptUrl = captions[0].baseUrl;
         const transcriptResponse = await fetch(transcriptUrl);
         const transcriptText = await transcriptResponse.text();
-        return processTranscript(transcriptText);
+
+        // Add debug logging
+        console.log("Raw transcript:", transcriptText);
+        const processed = processTranscript(transcriptText);
+        console.log("Processed transcript:", processed);
+
+        return {
+          transcript: processed,
+          title: videoTitle,
+        };
       }
     }
     throw new Error("No captions available for this video.");
@@ -33,13 +51,45 @@ async function getVideoTranscript(videoId: string): Promise<string> {
 
 // Cleans up raw transcript text
 function processTranscript(transcriptText: string): string {
-  const textOnly = transcriptText.replace(/<[^>]+>/g, "");
+  // Remove XML tags
+  const textOnly = transcriptText.replace(/<[^>]+>/g, " "); // Replace tags with space instead of empty string
+
+  // Decode HTML entities
   const decodedText = textOnly
     .replace(/&amp;#39;/g, "'")
     .replace(/&amp;quot;/g, '"')
     .replace(/&amp;/g, "&");
-  const lines = decodedText.split("\n").filter((line) => line.trim() !== "");
-  return lines.join(" ");
+
+  // Split into segments and process each line
+  const segments = decodedText
+    .split("\n")
+    .filter((segment) => segment.trim() !== "")
+    .map((segment) => {
+      // Ensure proper word spacing within each segment
+      return segment
+        .replace(/\s+/g, " ") // Normalize spaces
+        .trim(); // Remove leading/trailing spaces
+    });
+
+  // Join segments with double newlines and ensure proper word spacing
+  return segments.reduce((acc, current, index) => {
+    // Add space at the end of each line except the last one
+    if (index === segments.length - 1) {
+      return acc + current;
+    }
+    // Add a period and double newline between segments
+    return acc + current + ".\n\n";
+  }, "");
+}
+
+// Sanitize filename to remove invalid characters
+function sanitizeFilename(filename: string): string {
+  // Remove or replace characters that are not allowed in filenames
+  return filename
+    .replace(/[/\\?%*:|"<>]/g, "-") // Replace invalid characters with hyphen
+    .replace(/\s+/g, " ") // Replace multiple whitespaces with single space
+    .trim() // Remove leading/trailing whitespace
+    .substring(0, 255); // Limit filename length
 }
 
 // Main function for the command
@@ -61,11 +111,14 @@ export default async function Command(props: { arguments: { videoUrl: string } }
 
     await showToast({ style: Toast.Style.Animated, title: "Fetching transcript..." });
 
-    const transcript = await getVideoTranscript(videoId);
+    // Get both transcript and title
+    const { transcript, title } = await getVideoTranscript(videoId);
 
     const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
     const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
-    const filename = path.join(downloadsFolder, `${videoId}_transcript.txt`);
+
+    // Use sanitized video title for filename
+    const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
 
     await fs.writeFile(filename, transcript);
 
