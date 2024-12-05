@@ -160,7 +160,7 @@
     {
       "name": "gitBranchColor",
       "type": "textfield",
-      "title": "Git Integration",
+      "title": "Git Integration Color",
       "required": false,
       "label": "Git Branch Color",
       "default": "",
