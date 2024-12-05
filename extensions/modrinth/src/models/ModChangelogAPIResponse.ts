@@ -1,22 +1,3 @@
-export interface VersionFile {
-  hashes: {
-    sha1: string;
-    sha512: string;
-  };
-  url: string;
-  filename: string;
-  primary: boolean;
-  size: number;
-  file_type: string | null;
-}
-
-export interface Dependency {
-  version_id: string | null;
-  project_id: string;
-  file_name: string | null;
-  dependency_type: string;
-}
-
 export default interface ModChangelogAPIResponse {
   game_versions: string[];
   loaders: string[];
@@ -35,4 +16,23 @@ export default interface ModChangelogAPIResponse {
   requested_status: string | null;
   files: VersionFile[];
   dependencies: Dependency[];
+}
+
+export interface VersionFile {
+  hashes: {
+    sha1: string;
+    sha512: string;
+  };
+  url: string;
+  filename: string;
+  primary: boolean;
+  size: number;
+  file_type: string | null;
+}
+
+export interface Dependency {
+  version_id: string | null;
+  project_id: string;
+  file_name: string | null;
+  dependency_type: string;
 }

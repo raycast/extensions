@@ -1,5 +1,8 @@
 import DropdownType from "../models/DropdownType";
 
+export const MODRINTH_BASE_URL = "https://modrinth.com/" as const;
+export const MODRINTH_API_URL = "https://api.modrinth.com/v2/" as const;
+
 export const modrinthColors: Map<string, string> = new Map([
   ["fabric", "#DBB69C"],
   ["quilt", "#C696F9"],
@@ -48,3 +51,13 @@ export const projectDropdown: DropdownType[] = [
 ];
 
 export const newlinePlaceholder = "!NEWLINEPLACEHOLDER!";
+
+export const SortingTypes = {
+  relevance: { value: "relevance", label: "Best Matches" },
+  downloads: { value: "downloads", label: "Most Downloaded" },
+  follows: { value: "follows", label: "Most Popular" },
+  newest: { value: "newest", label: "Recently Added" },
+  updated: { value: "updated", label: "Recently Updated" },
+} as const;
+
+export type SortingType = keyof typeof SortingTypes;

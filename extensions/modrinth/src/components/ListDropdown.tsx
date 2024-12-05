@@ -1,8 +1,17 @@
-import { List } from "@raycast/api";
 import DropdownType from "../models/DropdownType";
+import { List } from "@raycast/api";
 import { ReactElement } from "react";
 
-export default function ListDropdown(props: {
+export default function ListDropdown({
+  dropdownChoiceTypes,
+  onDropdownChange,
+  tooltip,
+  defaultValue,
+  storeValue,
+  title,
+  showAll,
+  customSection,
+}: {
   dropdownChoiceTypes: DropdownType[];
   onDropdownChange: (newVal: string) => void;
   tooltip: string;
@@ -14,24 +23,22 @@ export default function ListDropdown(props: {
 }) {
   return (
     <List.Dropdown
-      tooltip={props.tooltip}
-      onChange={props.onDropdownChange}
-      defaultValue={props.defaultValue}
-      storeValue={props.storeValue ?? false}
+      tooltip={tooltip}
+      onChange={onDropdownChange}
+      defaultValue={defaultValue}
+      storeValue={storeValue ?? false}
     >
-      {props.showAll ? (
+      {showAll && (
         <List.Dropdown.Section>
           <List.Dropdown.Item key={"all"} title={"Show All"} value={"all-loaders"} />
         </List.Dropdown.Section>
-      ) : (
-        <></>
       )}
-      <List.Dropdown.Section title={props.title}>
-        {props.dropdownChoiceTypes.map((choiceType) => (
-          <List.Dropdown.Item key={choiceType.id} value={choiceType.id} title={choiceType.name} />
+      <List.Dropdown.Section title={title}>
+        {dropdownChoiceTypes.map((choiceType) => (
+          <List.Dropdown.Item key={choiceType.id} title={choiceType.name} value={choiceType.id} />
         ))}
       </List.Dropdown.Section>
-      {props.customSection ?? <></>}
+      {customSection}
     </List.Dropdown>
   );
 }

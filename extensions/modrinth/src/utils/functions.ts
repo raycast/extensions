@@ -152,3 +152,7 @@ export function formatMinecraftVersions(versions: string[]): string[] {
       return getVersionNum(b) - getVersionNum(a);
     });
 }
+
+export function capitalize(str: string): string {
+  return str.length == 1 ? str.toUpperCase() : str.charAt(0).toUpperCase() + str.slice(1);
+}

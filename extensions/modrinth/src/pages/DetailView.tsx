@@ -1,25 +1,29 @@
 import { Detail } from "@raycast/api";
-import { modrinthColors, newlinePlaceholder } from "../utils/constants";
-import ProjectAPIResponseType from "../models/ProjectAPIResponseType";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import { formatMinecraftVersions } from "../utils/functions";
+import { MODRINTH_BASE_URL, modrinthColors, newlinePlaceholder } from "../utils/constants";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import ProjectAPIResponseType from "../models/ProjectAPIResponseType";
 import ProjectInteractionMenu from "../components/ProjectInteractionMenu";
 
-export default function DetailView(props: {
+export default function DetailView({
+  itemData,
+  nhm,
+  projectType,
+}: {
   itemData: ProjectAPIResponseType | null;
   nhm: NodeHtmlMarkdown;
   projectType: string;
 }) {
   return (
     <Detail
-      isLoading={props.itemData == null}
-      navigationTitle={`Details for ${props.itemData?.title ?? "Undefined"}`}
-      actions={<ProjectInteractionMenu itemData={props.itemData} projectType={props.projectType} />}
+      isLoading={itemData == null}
+      navigationTitle={`Details for ${itemData?.title ?? "Undefined"}`}
+      actions={<ProjectInteractionMenu itemData={itemData} projectType={projectType} />}
       markdown={
-        !props.itemData || !props.itemData.body
+        !itemData || !itemData.body
           ? ""
-          : props.nhm
-              .translate(props.itemData!.body.replaceAll("\n", newlinePlaceholder))
+          : nhm
+              .translate(itemData!.body.replaceAll("\n", newlinePlaceholder))
               .replaceAll(newlinePlaceholder, "\n")
               .replace(/\\/g, "")
       }
@@ -27,13 +31,13 @@ export default function DetailView(props: {
         <Detail.Metadata>
           <Detail.Metadata.TagList
             title={"Compatible Versions"}
-            children={formatMinecraftVersions(props.itemData?.game_versions ?? []).map((curr) => {
+            children={formatMinecraftVersions(itemData?.game_versions ?? []).map((curr) => {
               return <Detail.Metadata.TagList.Item text={curr} color={modrinthColors.get("default")} key={curr} />;
             })}
           />
           <Detail.Metadata.TagList
             title={"Platforms"}
-            children={props.itemData?.loaders.map((curr) => {
+            children={itemData?.loaders.map((curr) => {
               return (
                 <Detail.Metadata.TagList.Item
                   text={curr.charAt(0).toUpperCase() + curr.slice(1)}
@@ -45,14 +49,14 @@ export default function DetailView(props: {
             })}
           />
           <Detail.Metadata.TagList title="Supported Environments">
-            {props.itemData?.client_side !== "unsupported" && props.itemData?.client_side !== "unknown" && (
+            {itemData?.client_side !== "unsupported" && itemData?.client_side !== "unknown" && (
               <Detail.Metadata.TagList.Item
                 text="Client-side"
                 icon={{ source: "client-side.svg", tintColor: modrinthColors.get("default") }}
                 color={modrinthColors.get("default")}
               />
             )}
-            {props.itemData?.server_side !== "unsupported" && props.itemData?.client_side !== "unknown" && (
+            {itemData?.server_side !== "unsupported" && itemData?.client_side !== "unknown" && (
               <Detail.Metadata.TagList.Item
                 text="Server-side"
                 icon={{ source: "server-side.svg", tintColor: modrinthColors.get("default") }}
@@ -61,15 +65,15 @@ export default function DetailView(props: {
             )}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title={"Downloads"} text={(props.itemData?.downloads ?? -1).toLocaleString()} />
-          <Detail.Metadata.Label title={"Followers"} text={(props.itemData?.followers ?? -1).toLocaleString()} />
+          <Detail.Metadata.Label title={"Downloads"} text={(itemData?.downloads ?? -1).toLocaleString()} />
+          <Detail.Metadata.Label title={"Followers"} text={(itemData?.followers ?? -1).toLocaleString()} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title={""} text={"Report Issues"} target={props.itemData?.issues_url ?? ""} />
-          <Detail.Metadata.Link title={""} text={"View Source"} target={props.itemData?.source_url ?? ""} />
+          <Detail.Metadata.Link title={""} text={"Report Issues"} target={itemData?.issues_url ?? MODRINTH_BASE_URL} />
+          <Detail.Metadata.Link title={""} text={"View Source"} target={itemData?.source_url ?? MODRINTH_BASE_URL} />
           <Detail.Metadata.Link
             title={""}
             text={"Join the Discord Server"}
-            target={props.itemData?.discord_url ?? ""}
+            target={itemData?.discord_url ?? MODRINTH_BASE_URL}
           />
         </Detail.Metadata>
       }

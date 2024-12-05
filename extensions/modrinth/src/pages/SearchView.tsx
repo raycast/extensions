@@ -1,6 +1,14 @@
 import { List } from "@raycast/api";
 import SearchAPIResponseType from "../models/SearchAPIResponseType";
-import { modrinthColors, newlinePlaceholder, projectDropdown } from "../utils/constants";
+import {
+  MODRINTH_API_URL,
+  MODRINTH_BASE_URL,
+  modrinthColors,
+  newlinePlaceholder,
+  projectDropdown,
+  SortingType,
+  SortingTypes,
+} from "../utils/constants";
 import { timeAgo } from "../utils/functions";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
@@ -15,11 +23,13 @@ export default function SearchView() {
   const nhm = new NodeHtmlMarkdown();
   const [searchText, setSearchText] = useState("");
   const [itemId, setItemId] = useState("");
+  const [sortingType, setSortingType] = useState<SortingType>("relevance");
   const [projectType, setProjectType] = useState("mod");
 
   const listDataSearchParams = new URLSearchParams({
     query: searchText,
     facets: `[["project_type:${projectType}"]]`,
+    index: SortingTypes[sortingType].value,
     limit: "50",
   });
 
@@ -27,21 +37,20 @@ export default function SearchView() {
     data: listData,
     isLoading: listDataIsLoading,
     revalidate: revalidateList,
-  } = useFetch<ListAPIResponse>(`https://api.modrinth.com/v2/search?${listDataSearchParams}`);
+  } = useFetch<ListAPIResponse>(`${MODRINTH_API_URL}search?${listDataSearchParams}`);
 
   const {
     data: itemData,
     isLoading: itemDataIsLoading,
     error: itemDataError,
     revalidate: revalidateItem,
-  } = useFetch<ProjectAPIResponseType>(`https://api.modrinth.com/v2/project/${itemId}`);
+  } = useFetch<ProjectAPIResponseType>(`${MODRINTH_API_URL}project/${itemId}`);
 
   return (
     <List
-      navigationTitle={`${projectDropdown.find((curr) => curr.id == projectType)?.name ?? "Search"} on Modrinth`}
       isShowingDetail
       searchText={searchText}
-      searchBarPlaceholder={`Search for ${projectDropdown.find((curr) => curr.id == projectType)?.name ?? "undefined"}...`}
+      searchBarPlaceholder={`Search for ${projectDropdown.find((curr) => curr.id == projectType)?.name ?? "Projects"}...`}
       throttle={true}
       onSearchTextChange={(text) => {
         setSearchText(text);
@@ -63,7 +72,10 @@ export default function SearchView() {
         />
       }
     >
-      <List.Section title={"Results"} subtitle={listData?.hits.length.toString()}>
+      <List.Section
+        title={SortingTypes[sortingType].label}
+        subtitle={`${listData?.hits.length.toString()}${listData?.hits && listData.hits.length >= 50 ? "+" : ""} results`}
+      >
         {listData?.hits?.map((item: SearchAPIResponseType) => (
           <List.Item
             key={item.project_id}
@@ -74,6 +86,7 @@ export default function SearchView() {
             actions={
               <ProjectInteractionMenu
                 itemData={itemData ?? null}
+                setSortingType={setSortingType}
                 projectType={projectType}
                 detailsTarget={<DetailView itemData={itemData ?? null} nhm={nhm} projectType={projectType} />}
               />
@@ -94,7 +107,7 @@ export default function SearchView() {
                     <List.Item.Detail.Metadata.Link
                       title={"Author"}
                       text={item.author}
-                      target={`https://modrinth.com/user/${item.author}`}
+                      target={`${MODRINTH_BASE_URL}user/${item.author}`}
                     />
                     <List.Item.Detail.Metadata.Label title={"Description"} text={item.description} />
                     <List.Item.Detail.Metadata.Label title={"Downloads"} text={item.downloads.toLocaleString()} />

@@ -1,37 +1,41 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import ModChangelogAPIResponse from "../models/ModChangelogAPIResponse";
+import { MODRINTH_BASE_URL } from "../utils/constants";
 import VersionsDetailView from "../pages/VersionsDetailView";
 
-export default function VersionInteractionMenu(props: {
+export default function VersionInteractionMenu({
+  data,
+  slug,
+  projectType,
+  showDetails,
+}: {
   data: ModChangelogAPIResponse;
   slug: string;
+  projectType: string;
   showDetails?: boolean;
 }) {
   return (
-    <ActionPanel title={`Options for ${props.data.name}`}>
-      {props.showDetails ? (
+    <ActionPanel title={`Options for ${data.name}`}>
+      {showDetails && (
         <Action.Push
           title={"View Details"}
           icon={Icon.Info}
-          target={<VersionsDetailView data={props.data} slug={props.slug} />}
+          target={<VersionsDetailView data={data} slug={slug} projectType={projectType} />}
         />
-      ) : (
-        <></>
       )}
-      <Action.OpenInBrowser url={`https://modrinth.com/mod/${props.slug}/version/${props.data.id}`} />
+      <Action.OpenInBrowser url={`${MODRINTH_BASE_URL}${projectType}/${slug}/version/${data.id}`} />
       <Action.OpenInBrowser
         title={"Download File"}
         shortcut={{ key: "d", modifiers: ["cmd"] }}
         url={
-          props.data.files.find((curr) => curr.primary)?.url ??
-          `https://modrinth.com/mod/${props.slug}/version/${props.data.id}`
+          data.files.find((curr) => curr.primary)?.url ?? `${MODRINTH_BASE_URL}${projectType}${slug}/version/${data.id}`
         }
         icon={Icon.Download}
       />
       <Action.CopyToClipboard
         title={"Copy URL to Clipboard"}
         shortcut={{ key: "c", modifiers: ["cmd"] }}
-        content={`https://modrinth.com/mod/${props.slug}/version/${props.data.id}`}
+        content={`${MODRINTH_BASE_URL}${projectType}/${slug}/version/${data.id}`}
       />
     </ActionPanel>
   );
