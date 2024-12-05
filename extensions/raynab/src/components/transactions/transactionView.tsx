@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { List, showToast, Toast } from '@raycast/api';
+import { LaunchProps, List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
@@ -9,7 +9,7 @@ import { useTransactions } from '@hooks/useTransactions';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { formatToReadablePrice } from '@lib/utils';
 
-export function TransactionView() {
+export function TransactionView({ search = '' }: { search?: string }) {
   const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
@@ -21,7 +21,7 @@ export function TransactionView() {
       filter: null,
       group: null,
       sort: 'date_desc', // Default to newest transactions first
-      search: '',
+      search: search,
       collection: transactions,
       isShowingDetails: false,
       initialCollection: transactions,
@@ -89,6 +89,7 @@ export function TransactionView() {
         isLoading={isValidating}
         isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
+        searchText={state.search}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
       >
         {!Array.isArray(collection)

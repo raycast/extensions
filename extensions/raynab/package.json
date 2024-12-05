@@ -45,6 +45,14 @@
       "subtitle": "YNAB",
       "description": "View and Edit Active Budget Information for the current month.",
       "mode": "view"
+    },
+    {
+      "name": "unreviewed",
+      "title": "Unreviewed transactions",
+      "subtitle": "YNAB",
+      "description": "Easily track unapproved or uncategorized transactions.",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "keywords": [
