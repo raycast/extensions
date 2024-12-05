@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2024-12-05
+
+- improve error handling for ambiguous git HEAD argument.
+
 ## [Update] - 2024-12-02
 
 - Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
