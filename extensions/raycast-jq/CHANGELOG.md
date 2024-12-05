@@ -1,6 +1,6 @@
 # jq Changelog
 
-## [Updated README] - {PR_MERGE_DATE}
+## [Updated README] - 2024-12-05
 
 ## [Initial Version] - 2024-12-02
 
