@@ -68,13 +68,13 @@ export function useGetListsBookmarks(listId: string) {
     }));
   }, [data, isLoading]);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setState({
       allBookmarks: [],
       isInitialLoad: true,
       cursor: undefined,
     });
-    revalidate();
+    await revalidate();
   }, [revalidate]);
 
   return {

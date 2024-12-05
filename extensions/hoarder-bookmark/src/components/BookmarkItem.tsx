@@ -255,6 +255,7 @@ export function BookmarkItem({ bookmark, config, onRefresh, onCleanCache }: Book
   const [screenshotUrl, setScreenshotUrl] = useState<string>(DEFAULT_SCREENSHOT_FILENAME);
   const [assetImageUrl, setAssetImageUrl] = useState<string>(DEFAULT_SCREENSHOT_FILENAME);
   const showWebsitePreview = config?.showWebsitePreview;
+
   const handleDeleteBookmark = async (id: string) => {
     const toast = await showToast({
       title: t("bookmarkItem.toast.delete.title"),
@@ -264,7 +265,7 @@ export function BookmarkItem({ bookmark, config, onRefresh, onCleanCache }: Book
     try {
       await fetchDeleteBookmark(id);
       toast.title = t("bookmarkItem.toast.delete.success");
-      onRefresh();
+      await onRefresh();
     } catch (error) {
       toast.title = t("bookmarkItem.toast.delete.error");
     } finally {

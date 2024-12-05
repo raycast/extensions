@@ -1,4 +1,4 @@
-import { Icon, List, showToast } from "@raycast/api";
+import { Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { BookmarkList } from "./components/BookmarkList";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
@@ -20,10 +20,15 @@ export default function BookmarksList() {
       title: t("refreshingBookmarks"),
       message: t("pleaseWait"),
     });
-    await revalidate();
-    toast.title = t("bookmarksRefreshed");
-  };
 
+    try {
+      await revalidate();
+      toast.title = t("bookmarksRefreshed");
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = t("refreshError");
+    }
+  };
   if (isInitialLoading) {
     return (
       <List>
