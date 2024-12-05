@@ -194,7 +194,10 @@ function LocalItem(
 
   const accessories = [];
   if (showGitBranch && gitBranch) {
-    const branchColor = gitBranchColor && isValidHexColor(gitBranchColor) ? { source: gitBranchColor } : Color.Green;
+    const branchColor =
+      gitBranchColor && isValidHexColor(gitBranchColor)
+        ? { light: gitBranchColor, dark: gitBranchColor, adjustContrast: true }
+        : Color.Green;
     accessories.push({
       tag: {
         value: gitBranch,
@@ -300,6 +303,12 @@ function RemoteItem(
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
+          <Action
+            title="Open Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+            shortcut={{ modifiers: ["cmd"], key: "," }}
+          />
         </ActionPanel>
       }
     />
