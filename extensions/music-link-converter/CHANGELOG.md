@@ -1,6 +1,6 @@
 # Music Link Converter Changelog
 
-## [Add tidal url]
+## [Add tidal url] - {PR_MERGE_DATE}
 - Add Tidal URL support for the `https://tidal.com/` format.
 - Add a toast for unsupported music links.
 
