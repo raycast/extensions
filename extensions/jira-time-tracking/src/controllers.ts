@@ -7,15 +7,15 @@ import { Project } from "./types";
 // Helpers to define the structure for preferences
 type UserPreferences = {
   isJiraCloud: string;
-  onlyMyIssues: boolean;
   username: string;
+  customJQL: string;
 };
 
 const userPrefs = getPreferenceValues<UserPreferences>();
 
 // Helper function to determine the correct API path based on Jira type
 function getApiPath(path: string): string {
-  const isJiraCloud = userPrefs.isJiraCloud === "cloud"; //
+  const isJiraCloud = userPrefs.isJiraCloud === "cloud";
   const version = isJiraCloud ? "3" : "2";
 
   // Customize endpoint paths for version compatibility
@@ -51,9 +51,9 @@ export const getIssues = async (begin: number, projectId?: string) => {
     jqlParts.push(`project=${projectId}`);
   }
 
-  // Add assignee filter using the username from preferences
-  if (userPrefs.onlyMyIssues && userPrefs.username) {
-    jqlParts.push(`assignee="${userPrefs.username}"`);
+  // Add custom JQL query from preferences
+  if (userPrefs.customJQL) {
+    jqlParts.push(`(${userPrefs.customJQL})`);
   }
 
   // Construct JQL query dynamically
