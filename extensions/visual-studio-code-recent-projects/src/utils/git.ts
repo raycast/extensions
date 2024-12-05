@@ -41,7 +41,11 @@ export async function getGitBranch(directoryPath: string): Promise<string | null
     return branch || null;
   } catch (error) {
     // Only show error if it's not the common "not a git repository" error and not the "ambiguous argument 'HEAD'" error
-    if (error instanceof Error && !error.message.includes("not a git repository") && !error.message.includes("ambiguous argument 'HEAD'")) {
+    if (
+      error instanceof Error &&
+      !error.message.includes("not a git repository") &&
+      !error.message.includes("ambiguous argument 'HEAD'")
+    ) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Git Error",
