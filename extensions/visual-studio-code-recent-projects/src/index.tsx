@@ -196,7 +196,7 @@ function LocalItem(
   if (showGitBranch && gitBranch) {
     const branchColor =
       gitBranchColor && isValidHexColor(gitBranchColor)
-        ? { light: gitBranchColor, dark: gitBranchColor, adjustContrast: true }
+        ? { light: gitBranchColor, dark: gitBranchColor, adjustContrast: false }
         : Color.Green;
     accessories.push({
       tag: {
