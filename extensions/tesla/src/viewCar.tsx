@@ -135,7 +135,7 @@ export default function ViewCar(props: ViewCarProps) {
     if (VIN) runCommand();
   }, [VIN]);
 
-  if (isLoading) return <Detail isLoading={true} />;
+  if (isLoading && !data) return <Detail isLoading={true} />;
 
   if (!data) return <Detail markdown="Failed to fetch your car data" />;
 
