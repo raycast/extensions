@@ -1,6 +1,6 @@
 # Ethereum Gas Tracker Changelog
 
-## [API Change] - {PR_MERGE_DATE}
+## [API Change] - 2024-12-06
 
 - Extension now uses the Etherscan API
 - ❗ API Key is now required (get one for free)
