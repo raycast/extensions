@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-06
 
 - Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.
 - Updated action icons for the `Stop` action in `Vacuum Cleaners` and `Mediaplayers` commands.
