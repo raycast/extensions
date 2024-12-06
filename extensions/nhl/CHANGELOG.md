@@ -1,6 +1,6 @@
 # NHL Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-12-06
 
 - Adds NHL extension
   - NHL Scores command - Track live scores, upcoming games, and recent results
