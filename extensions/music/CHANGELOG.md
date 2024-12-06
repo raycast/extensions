@@ -1,8 +1,12 @@
 # Apple Music Changelog
 
+## [Update Currently Playing] - 2024-12-06
+
+- Update Currently Playing command to update the subtitle with the currently playing track.
+
 ## [New Command] - 2024-02-10
 
-- Added a new command that removes the currently playing track from the current playlist and skips to the next track. 
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track.
 
 ## [Update] - 2023-10-12
 
