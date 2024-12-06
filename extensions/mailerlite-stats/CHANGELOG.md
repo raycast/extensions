@@ -1,6 +1,6 @@
 # MailerLite Stats Changelog
 
-## [Add `Subscribers` command] - {PR_MERGE_DATE}
+## [Add `Subscribers` command] - 2024-12-06
 
 - `Subscribers` command allows you to see your subcribers filtered by Status
 
