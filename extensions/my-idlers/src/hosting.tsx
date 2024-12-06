@@ -15,7 +15,7 @@ export default function Hosting(props: LaunchProps<{arguments: Arguments.Hosting
         execute: type==="shared"
     });
 
-    return <List isLoading={isLoadingReseller || isLoadingShared} isShowingDetail searchBarAccessory={<List.Dropdown tooltip="Hosting Type" onChange={setType}>
+    return <List isLoading={isLoadingReseller || isLoadingShared} isShowingDetail searchBarAccessory={<List.Dropdown tooltip="Hosting Type" value={type} onChange={setType}>
         <List.Dropdown.Item icon={Icon.TwoPeople} title="Reseller" value="reseller" />
         <List.Dropdown.Item icon={Icon.Person} title="Shared" value="shared" />
     </List.Dropdown>}>

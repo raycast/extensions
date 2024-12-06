@@ -1,13 +1,12 @@
-type Provider = {
+export type Item = {
     id: number;
     name: string;
     created_at: string | null;
     updated_at: string | null;
 }
-type Location = Provider;
 
 export type Term = 1 | 2 | 3 | 4 | 5 | 6;
-type Pricing = {
+export type Pricing = {
     id: number
     service_id: string
     service_type: number
@@ -41,17 +40,69 @@ type CommonHosting = {
     owned_since: string
     created_at: string
     updated_at: string
-    location: Location;
-    provider: Provider;
+    location: Item;
+    provider: Item;
     price: Pricing;
     ips: string[];
     labels: [];
 }
-export type HostingType = "Direct Admin";
+export type HostingType = "Direct Admin" | "cPanel";
 export type Reseller = CommonHosting & {
     accounts: number;
     reseller_type: HostingType;
 }
 export type Shared = CommonHosting & {
     shared_type: HostingType;
+}
+
+type IP = {
+    id: string;
+    service_id: string;
+    address: string;
+    is_ipv4: 0 | 1,
+    active: 0 | 1,
+    created_at: string;
+    updated_at: string;
+}
+export enum ServerType {
+    KVM=1,
+    OVZ=2,
+    DEDI=3,
+    LXC=4,
+    "SEMI-DEDI"=5,
+    VMware=6,
+    NAT=7
+}
+export type Server = {
+    id: string;
+    active: 0 | 1,
+    show_public: 0 | 1,
+    hostname: string
+    ns1: string | null,
+    ns2: string | null,
+    server_type: ServerType;
+    os_id: number
+    provider_id: number
+    location_id: number
+    ssh: number
+    bandwidth: number
+    ram: number
+    ram_type: "MB" | "GB";
+    ram_as_mb: number
+    disk: number
+    disk_type: "GB" | "TB",
+    disk_as_gb: number
+    cpu: number
+    has_yabs: 0 | 1
+    was_promo: 0 | 1
+    owned_since: string
+    created_at: string;
+    updated_at: string;
+    location: Item;
+    provider: Item;
+    os: Item;
+    price: Pricing;
+    ips: IP[];
+    yabs: string[];
+    labels: string[];
 }

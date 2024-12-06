@@ -27,8 +27,8 @@
       "placeholder": ""
     },
     {
-      "name": "max_num_as_unmetered",
-      "label": "Replace '999999' with 'Unmetered'",
+      "name": "max_num_as_unlimited",
+      "label": "Replace '999999' with 'Unlimited'",
       "type": "checkbox",
       "required": false,
       "description": "",
