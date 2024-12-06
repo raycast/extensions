@@ -5,6 +5,11 @@ export type Item = {
     updated_at: string | null;
 }
 
+type Label = {
+    label_id: string;
+    service_id: string;
+}
+
 export type Term = 1 | 2 | 3 | 4 | 5 | 6;
 export type Pricing = {
     id: number
@@ -44,7 +49,7 @@ type CommonHosting = {
     provider: Item;
     price: Pricing;
     ips: string[];
-    labels: [];
+    labels: Label[];
 }
 export type HostingType = "Direct Admin" | "cPanel";
 export type Reseller = CommonHosting & {
@@ -104,5 +109,30 @@ export type Server = {
     price: Pricing;
     ips: IP[];
     yabs: string[];
-    labels: string[];
+    labels: Label[];
 }
+
+export type Domain = {
+    id: string;
+    domain: string;
+    active: 0 | 1;
+    extension: string;
+    ns1: string | null;
+    ns2: string | null;
+    ns3: string|  null;
+    provider_id: number;
+    owned_since: string;
+    created_at: string;
+    updated_at: string;
+    provider: Item;
+    price: Pricing;
+    labels: Label[];
+}
+
+export type Misc = Item & {
+    active: 0 | 1;
+    owned_since: string;
+    price: Pricing;
+}
+
+// export type DNS
