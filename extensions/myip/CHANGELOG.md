@@ -1,5 +1,9 @@
 # MyIP Changelog
 
+## [Update] - 2024-12-06
+
+- Updated metadata images
+
 ## [Update] - 2024-11-25
 
 - Add display multiple local IPs with index in accessories
