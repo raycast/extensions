@@ -40,6 +40,7 @@ npm install && npm run dev
 - **One-Click Actions**:Open bookmarks in your browser, copy links, or delete instantly.
 - **Preview Support**: View bookmark details and screenshots without leaving Raycast
 - **Keyboard Navigation**: Fully keyboard-accessible for maximum efficiency
+- **Customizable Display**:Set up your preferred information display for bookmarks
 
 All powered by Hoarder's robust API, bringing your bookmark management right into Raycast's streamlined interface.
 

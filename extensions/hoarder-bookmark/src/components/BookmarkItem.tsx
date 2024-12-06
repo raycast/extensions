@@ -92,11 +92,15 @@ function useBookmarkHandlers({
         await operation();
         toast.style = Toast.Style.Success;
         toast.title = t(`bookmark.toast.${action}.success`);
-        await fetchLatestBookmark();
+        if (action !== "delete") {
+          await fetchLatestBookmark();
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.message = String(error);
-        await fetchLatestBookmark();
+        if (action !== "delete") {
+          await fetchLatestBookmark();
+        }
         throw error;
       }
     },
