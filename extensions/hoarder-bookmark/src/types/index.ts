@@ -1,43 +1,76 @@
-export interface Preferences {
-  host: string;
-  apiKey: string;
-  showWebsitePreview: boolean;
-  language: string;
+// Action types
+export type linkMainActionType = "openInBrowser" | "viewDetail" | "edit" | "copy";
+export type textMainActionType = "viewDetail" | "edit" | "copy";
+
+// Common display preferences for internal use
+interface DisplayOptions {
+  displayBookmarkPreview: boolean;
+  displayTags: boolean;
+  displayCreatedAt: boolean;
+  displayDescription: boolean;
+  displayNote: boolean;
+  displayBookmarkStatus: boolean;
+  displaySummary: boolean;
 }
 
-export interface Config {
+// Base configuration options for internal use
+interface BaseConfig {
   host: string;
   apiKey: string;
-  showWebsitePreview: boolean;
   language: string;
+  showWebsitePreview: boolean;
+  linkMainAction: linkMainActionType;
+  textMainAction: textMainActionType;
 }
 
+export interface Preferences extends Partial<DisplayOptions> {
+  host: string;
+  apiKey: string;
+  language?: string;
+  showWebsitePreview: boolean;
+  linkMainAction?: linkMainActionType;
+  textMainAction?: textMainActionType;
+}
+
+export interface Config extends BaseConfig, DisplayOptions {}
+
+// Asset types
 export interface Asset {
   id: string;
   assetType: "screenshot" | "image" | "pdf" | undefined;
 }
 
-export interface Tag {
-  id: string;
-  name: string;
+// Tag related types
+type AttachmentSource = "ai" | "human";
+
+interface TagMetrics {
   numBookmarks: number;
   numBookmarksByAttachedType: {
     ai: number;
     human: number;
   };
-  attachedBy?: "ai" | "human";
 }
 
-export interface BookmarkContent {
+export interface Tag extends TagMetrics {
+  id: string;
+  name: string;
+  attachedBy?: AttachmentSource;
+}
+
+// Bookmark content types
+interface BaseContent {
+  title?: string;
+  description?: string;
+}
+
+export interface BookmarkContent extends BaseContent {
   type: "link" | "text" | "asset";
   url?: string;
-  title?: string;
   text?: string;
   assetType?: Asset["assetType"];
   assetId?: string;
   fileName?: string;
   favicon?: string;
-  description?: string;
 }
 
 export interface Bookmark {
@@ -62,7 +95,7 @@ export interface ListDetails {
   bookmarks: Bookmark[];
 }
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T extends List | Tag | Bookmark = List | Tag | Bookmark> {
   lists?: T[];
   tags?: T[];
   bookmarks?: Bookmark[];

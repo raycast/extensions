@@ -10,6 +10,15 @@ const getConfig = (): Config => {
       apiKey: preferences.apiKey,
       language: preferences.language || "en",
       showWebsitePreview: preferences.showWebsitePreview,
+      linkMainAction: preferences.linkMainAction || "openInBrowser",
+      textMainAction: preferences.textMainAction || "viewDetail",
+      displayBookmarkPreview: preferences.displayBookmarkPreview ?? true,
+      displayTags: preferences.displayTags ?? true,
+      displayCreatedAt: preferences.displayCreatedAt ?? true,
+      displayDescription: preferences.displayDescription ?? true,
+      displayNote: preferences.displayNote ?? false,
+      displayBookmarkStatus: preferences.displayBookmarkStatus ?? false,
+      displaySummary: preferences.displaySummary ?? false,
     };
   } catch (error) {
     console.error("Config load failed:", error);
@@ -18,6 +27,15 @@ const getConfig = (): Config => {
       apiKey: "",
       language: "en",
       showWebsitePreview: true,
+      linkMainAction: "viewDetail",
+      textMainAction: "viewDetail",
+      displayBookmarkPreview: true,
+      displayTags: true,
+      displayCreatedAt: true,
+      displayDescription: true,
+      displayNote: false,
+      displayBookmarkStatus: false,
+      displaySummary: false,
     };
   }
 };

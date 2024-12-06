@@ -110,6 +110,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
     await handleToast("summarize", async () => {
       await fetchSummarizeBookmark(bookmark.id);
       await fetchLatestBookmark();
+      await onRefresh?.();
     });
   };
 
@@ -117,13 +118,14 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
     await handleToast("update", async () => {
       await fetchUpdateBookmark(bookmark.id, options);
       await fetchLatestBookmark();
+      await onRefresh?.();
     });
   };
 
   const handleDelete = async () => {
     await handleToast("delete", async () => {
       await fetchDeleteBookmark(bookmark.id);
-      onRefresh?.();
+      await onRefresh?.();
       pop();
     });
   };

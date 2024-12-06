@@ -80,15 +80,6 @@
       "default": "en"
     },
     {
-      "label": "Show Website Preview Icon",
-      "name": "showWebsitePreview",
-      "title": "Show Website Preview Icon",
-      "description": "Display website preview icon in the list",
-      "type": "checkbox",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "host",
       "type": "textfield",
       "required": true,
@@ -105,6 +96,116 @@
       "description": "Enter your API key",
       "placeholder": "Enter your Hoarder API key",
       "default": ""
+    },
+    {
+      "name": "linkMainAction",
+      "type": "dropdown",
+      "label": "default link action",
+      "title": "Default Link Action",
+      "required": false,
+      "description": "Select the default action when you click on a link",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
+        },
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "name": "textMainAction",
+      "type": "dropdown",
+      "label": "default text action",
+      "title": "Default Text Action",
+      "required": false,
+      "description": "Select the default action when you click on a text",
+      "data": [
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Copy Content",
+          "value": "copy"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "label": "Show Website Icon",
+      "name": "showWebsitePreview",
+      "title": "Show Website Icon",
+      "description": "Display website icon in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkPreview",
+      "type": "checkbox",
+      "label": "Preview Image",
+      "title": "Custom display elements in list view",
+      "description": "Display bookmark preview in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayTags",
+      "type": "checkbox",
+      "label": "Tags",
+      "description": "Display tags in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayCreatedAt",
+      "type": "checkbox",
+      "label": "Created At",
+      "description": "Display created at in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayDescription",
+      "type": "checkbox",
+      "label": "Description",
+      "description": "Display description in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayNote",
+      "type": "checkbox",
+      "label": "Note",
+      "description": "Display note in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkStatus",
+      "type": "checkbox",
+      "label": "Status",
+      "description": "Display bookmark status in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displaySummary",
+      "type": "checkbox",
+      "label": "Summary",
+      "description": "Display summary in the list",
+      "default": false,
+      "required": false
     }
   ]
 }
