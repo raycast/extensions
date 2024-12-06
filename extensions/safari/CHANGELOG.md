@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Improve] - {PR_MERGE_DATE}
+
+- Add a preference for `Search Reading List` to hide items that have already been read.
+
 ## [Update] - 2024-12-03
 
 - Added `pinyin` support for searching tab
