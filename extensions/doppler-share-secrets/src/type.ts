@@ -5,9 +5,9 @@ export interface Body {
   success: boolean;
 }
 export enum SecretVisibility {
-  MASKED="masked",
-  UNMASKED="unmasked",
-  RESTRICTED="restricted"
+  MASKED = "masked",
+  UNMASKED = "unmasked",
+  RESTRICTED = "restricted",
 }
 export interface DopplerSecret {
   raw: string;
@@ -21,4 +21,4 @@ export interface DopplerSecret {
   computedValueType: {
     type_: string;
   };
-};
+}

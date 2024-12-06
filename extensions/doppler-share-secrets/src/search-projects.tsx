@@ -1,8 +1,7 @@
 import { useCachedPromise, useForm, usePromise } from "@raycast/utils";
 import { doppler } from "./lib/doppler";
-import { Action, ActionPanel, Clipboard, Form, Icon, List, useNavigation } from "@raycast/api";
-import { BaseHTTPError } from "@dopplerhq/node-sdk";
-import { handleError } from "./lib/utils";
+import { Action, ActionPanel, Clipboard, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { onError } from "./lib/utils";
 import { DopplerSecret, SecretVisibility } from "./type";
 import { useState } from "react";
 
@@ -14,9 +13,7 @@ export default function SearchProjects() {
     },
     [],
     {
-      async onError(error: Error | BaseHTTPError) {
-        await handleError(error);
-      },
+      onError,
     },
   );
 
@@ -51,31 +48,19 @@ export default function SearchProjects() {
 }
 
 function ViewConfigs({ project }: { project: string }) {
-  const { isLoading: isFetchingEnvironments, data: environments = [] } = useCachedPromise(
+  const { isLoading, data: { environments = [], configs = [] } = {} } = useCachedPromise(
     async () => {
-      const res = await doppler.environments.list(project);
-      return res.environments;
+      const [resEnv, resCon] = await Promise.all([doppler.environments.list(project), doppler.configs.list(project)]);
+      return {
+        environments: resEnv.environments,
+        configs: resCon.configs,
+      };
     },
     [],
     {
-      async onError(error) {
-        await handleError(error);
-      },
+      onError,
     },
   );
-  const { isLoading: isFetchingConfigs, data: configs = [] } = useCachedPromise(
-    async () => {
-      const res = await doppler.configs.list(project);
-      return res.configs;
-    },
-    [],
-    {
-      async onError(error) {
-        await handleError(error);
-      },
-    },
-  );
-  const isLoading = isFetchingEnvironments || isFetchingConfigs;
 
   return (
     <List
@@ -124,9 +109,7 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
     },
     [],
     {
-      async onError(error) {
-        await handleError(error);
-      },
+      onError,
     },
   );
 
@@ -141,17 +124,27 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
     }
   }
 
-  const { isLoading: isDownloading, revalidate: download } = usePromise(
+  const [execute, setDownload] = useState(false);
+  const { isLoading: isDownloading } = usePromise(
     async () => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading secrets" });
       const res = await doppler.secrets.download(project, config);
       const downloaded = res as { [secret: string]: string };
       await Clipboard.copy(JSON.stringify(downloaded));
+      toast.style = Toast.Style.Success;
+      toast.title = "Downloaded secrets";
+      toast.message = "Copied JSON to Clipboard";
       return;
     },
     [],
     {
+      execute,
+      onData() {
+        setDownload(false);
+      },
       async onError(error) {
-        await handleError(error);
+        await onError(error);
+        setDownload(false);
       },
     },
   );
@@ -195,7 +188,7 @@ function ViewSecrets({ project, config }: { project: string; config: string }) {
                       icon={Icon.Download}
                       // eslint-disable-next-line @raycast/prefer-title-case
                       title="Download (Copy) Secrets"
-                      onAction={download}
+                      onAction={() => setDownload(true)}
                       shortcut={{ modifiers: ["cmd"], key: "s" }}
                     />
                   </ActionPanel.Section>
@@ -249,7 +242,7 @@ function UpdateNote({
     {
       execute,
       async onError(error) {
-        await handleError(error);
+        await onError(error);
         setExecute(false);
       },
     },

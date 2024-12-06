@@ -1,8 +1,8 @@
 import { BaseHTTPError } from "@dopplerhq/node-sdk";
-import { openExtensionPreferences } from "@raycast/api";
+import { openCommandPreferences, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-export async function handleError(error: Error | BaseHTTPError) {
+export async function onError(error: Error | BaseHTTPError) {
   let title = "Doppler Error";
   let message = error.message === "[object Object]" ? "Something went wrong" : error.message;
 
@@ -21,8 +21,11 @@ export async function handleError(error: Error | BaseHTTPError) {
       title !== "Unauthorized"
         ? undefined
         : {
-            title: "Open Extension Preferences",
-            onAction: openExtensionPreferences,
+            title: "Open Command Preferences",
+            async onAction() {
+              await openCommandPreferences();
+              await popToRoot();
+            },
           },
   });
 }
