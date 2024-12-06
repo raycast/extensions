@@ -4,7 +4,6 @@
 
 - Updated the rendering logic of grid items to show non-added items only when the user enters a search term.
 - Added items are now grouped by categories or left ungrouped based on the user's preference set in the mobile app.
-- Changed icons for the grid items to better represent the command actions for adding and removing items.
 - Changed the action panel title from the extension name to the list name.
 - Introduced an empty view for when the shopping list is empty.
 
