@@ -41,7 +41,7 @@ const CampaignList = () => {
     },
     initialData: [],
     async onError(error) {
-      await handleError(error, "Failed to fetch campaigns")
+      await handleError(error, "Failed to fetch campaigns");
     },
   });
 
