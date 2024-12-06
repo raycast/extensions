@@ -1,5 +1,9 @@
 # Docker Hub Changelog
 
+## [Fix images search] - {PR_MERGE_DATE}
+
+- Fixed docker hub images search
+
 ## [Fix] - 2023-07-28
 
 - Fixed Pull Image Shortcut ⌘+⇧+p instead of ⌘+p

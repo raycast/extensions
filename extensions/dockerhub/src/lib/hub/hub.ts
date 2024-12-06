@@ -12,7 +12,7 @@ import {
   ExtensionsResponse,
   ExtensionMetadata,
   SearchParams,
-  SourceType
+  SourceType,
 } from "./types";
 import { formatDate, formatSize, generateRepoURL } from "./utils";
 import { ListAccessTokensResponse, AccessToken } from "./types";

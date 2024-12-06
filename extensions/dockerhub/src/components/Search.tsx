@@ -2,11 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { useCallback, useState, useEffect } from "react";
 import { Hub } from "../lib/hub/hub";
 import SearchTags from "./SearchTags";
-import {
-  SearchTypeEnum,
-  ImageSearchResult,
-  ItemAccessory,
-} from "../lib/hub/types";
+import { SearchTypeEnum, ImageSearchResult, ItemAccessory } from "../lib/hub/types";
 import { mapFromToIcon } from "../lib/hub/utils";
 import { pullImage, checkImageExists } from "../lib/hub/docker";
 
@@ -22,7 +18,7 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
       try {
         const hub = new Hub();
         const response = await hub.search({ query: text, size: 100, type: props.searchType }, abortCtrl.signal);
-        setImages((response.results ?? []));
+        setImages(response.results ?? []);
       } catch (err) {
         showToast({
           style: Toast.Style.Failure,
