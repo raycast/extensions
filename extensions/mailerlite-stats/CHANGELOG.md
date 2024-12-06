@@ -1,5 +1,9 @@
 # MailerLite Stats Changelog
 
+## [Add `Subscribers` command] - {PR_MERGE_DATE}
+
+- `Subscribers` command allows you to see your subcribers filtered by Status
+
 ## [Enhancements] - 2024-11-27
 
 - `Cache` Responses through `useFetch`

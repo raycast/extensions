@@ -1,27 +1,23 @@
-import MailerLite, {  } from "@mailerlite/mailerlite-nodejs";
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { getProgressIcon, useCachedPromise, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { getProgressIcon, useCachedState, useFetch } from "@raycast/utils";
 import { useState } from "react";
+import { API_BASE_URL, handleError, headers } from "./config";
+import { SubscriberListResponse } from "./interfaces";
 
-const { mailerliteApiKey } = getPreferenceValues<Preferences>();
-const mailerlite = new MailerLite({
-  api_key: mailerliteApiKey
-});
 const SubscriberList = () => {
   const [status, setStatus] = useState("active");
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-subscriber-details", false);
 
-  const { isLoading, data: subscribers } = useCachedPromise(async (filterStatus) => {
-    const res = await mailerlite.subscribers.get({
-      filter: {
-        status: filterStatus as "active" | "unsubscribed" | "unconfirmed" | "bounced" | "junk"
-      }
-    });
-    return res.data.data;
-  }, [status], {
+  const { isLoading, data: subscribers } = useFetch(`${API_BASE_URL}/subscribers?filter[status]=${status}`, {
+    headers,
+    mapResult(result: SubscriberListResponse) {
+      return {
+        data: result.data
+      };
+    },
     initialData: [],
-    failureToastOptions: {
-      title: "Failed to fetch subscribers"
+    async onError(error) {
+      await handleError(error, "Failed to fetch subscribers");
     }
   });
 

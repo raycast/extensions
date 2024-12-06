@@ -15,8 +15,8 @@
   "commands": [
     {
       "name": "mailerlite",
-      "title": "MailerLite",
-      "description": "MailerLite Stats Raycast extension",
+      "title": "Campaigns",
+      "description": "MailerLite Stats for Campaigns",
       "mode": "view"
     },
     {
@@ -37,7 +37,6 @@
     }
   ],
   "dependencies": {
-    "@mailerlite/mailerlite-nodejs": "^1.3.1",
     "@raycast/api": "^1.87.2",
     "@raycast/utils": "^1.18.1"
   },
