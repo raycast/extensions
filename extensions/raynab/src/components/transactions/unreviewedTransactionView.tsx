@@ -2,13 +2,13 @@ import { LaunchType } from '@raycast/api';
 
 import { launchCommand } from '@raycast/api';
 
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useTransactions } from '@hooks/useTransactions';
 import { MenuBarExtra } from '@raycast/api';
 import { Fragment } from 'react';
+import { useLocalStorage } from '@raycast/utils';
 
 export function UnreviewedTransactionView() {
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
   const { isLoading, data: transactions } = useTransactions(activeBudgetId, 'month');
 
   const unreviewedTransactions = transactions?.filter((tx) => tx.approved !== true) ?? [];

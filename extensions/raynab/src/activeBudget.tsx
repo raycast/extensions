@@ -4,7 +4,7 @@ import { SWRConfig } from 'swr';
 import { cacheConfig } from '@lib/cache';
 import { BudgetSummary, CurrencyFormat } from '@srcTypes';
 import { useBudgets } from '@hooks/useBudgets';
-import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useLocalStorage } from '@raycast/utils';
 
 export default function Command() {
   return (
@@ -17,9 +17,9 @@ export default function Command() {
 function BudgetList() {
   const { data: budgets, isValidating } = useBudgets();
 
-  const [activeBudgetId, setActiveBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId, setValue: setActiveBudgetId } = useLocalStorage('activeBudgetId', '');
 
-  const [, setActiveBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { setValue: setActiveBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   const selectActiveBudget = (budget: BudgetSummary) => () => {
     setActiveBudgetId(budget.id ?? '');
@@ -68,7 +68,7 @@ function BudgetItem({
       icon={Icon.Document}
       title={budget.name}
       accessories={[
-        { icon: budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle }
+        { icon: budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle },
       ]}
       actions={
         <ActionPanel title="Inspect Budget">

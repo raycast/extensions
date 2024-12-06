@@ -1,12 +1,12 @@
 import { useBudget } from '@hooks/useBudget';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { getCurrentMonth } from '@lib/utils';
 import { List } from '@raycast/api';
 import { CategoryGroupSection } from './categoryGroupSection';
+import { useLocalStorage } from '@raycast/utils';
 
 export function BudgetView() {
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const { data: budget, isValidating: isLoadingBudget } = useBudget(activeBudgetId);
 

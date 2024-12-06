@@ -1,4 +1,4 @@
-import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useLocalStorage } from '@raycast/utils';
 import {
   CurrencyFormat,
   Filter,
@@ -44,7 +44,7 @@ export function TransactionProvider({
 
   const flags = useState(false);
 
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   return (
     <TransactionContext.Provider

@@ -6,10 +6,9 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { useState } from 'react';
-import { FormValidation, useForm } from '@raycast/utils';
+import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 
 interface FormValues {
   date: Date | null;
@@ -24,8 +23,8 @@ interface FormValues {
 }
 
 export function TransactionCreationForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
   const { data: accounts = [], isValidating: isLoadingAccounts } = useAccounts(activeBudgetId);
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);

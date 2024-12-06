@@ -21,9 +21,9 @@ import {
 } from '@components/actions';
 import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { CurrencyFormat } from '@srcTypes';
 import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
+import { useLocalStorage } from '@raycast/utils';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
@@ -40,7 +40,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
     currency,
   } = useTransaction();
 
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const hasSubtransactions = transaction.subtransactions.length > 0;
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;

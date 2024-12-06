@@ -10,12 +10,11 @@ import {
 } from '@lib/utils';
 import { TransactionFlagColor } from 'ynab';
 import { Action, ActionPanel, Alert, confirmAlert, Color, Form, Icon, showToast, Toast } from '@raycast/api';
-import { FormValidation, useForm } from '@raycast/utils';
+import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { usePayees } from '@hooks/usePayees';
 
 interface FormValues {
@@ -29,8 +28,8 @@ interface FormValues {
 }
 
 export function TransactionEditForm({ transaction }: { transaction: TransactionDetail }) {
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
 
   const { data: payees, isValidating: isPayeesLoading } = usePayees(activeBudgetId);
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);

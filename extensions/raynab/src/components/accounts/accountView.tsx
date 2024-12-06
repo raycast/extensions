@@ -1,15 +1,15 @@
 import { OpenInYnabAction } from '@components/actions';
 import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
 import { useAccounts } from '@hooks/useAccounts';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { formatToReadablePrice } from '@lib/utils';
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat } from '@srcTypes';
 
 export function AccountView() {
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
   const { data: accounts, isValidating } = useAccounts(activeBudgetId);
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   return (
     <List isLoading={isValidating}>
@@ -22,8 +22,8 @@ export function AccountView() {
             {
               text: formatToReadablePrice({
                 amount: account.balance,
-                currency: activeBudgetCurrency
-              })
+                currency: activeBudgetCurrency,
+              }),
             },
             {
               icon: {
@@ -33,8 +33,8 @@ export function AccountView() {
                     ? Color.Red
                     : Color.Green
                   : Color.SecondaryText,
-              }
-            }
+              },
+            },
           ]}
           actions={
             <ActionPanel>

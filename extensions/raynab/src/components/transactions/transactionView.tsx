@@ -6,16 +6,16 @@ import { initView, transactionViewReducer } from './viewReducer';
 import { TransactionProvider } from './transactionContext';
 import { CurrencyFormat, type Period } from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { formatToReadablePrice } from '@lib/utils';
+import { useLocalStorage } from '@raycast/utils';
 
 interface TransactionViewProps {
   search?: string;
 }
 
 export function TransactionView({ search = '' }: TransactionViewProps) {
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
   const { data: transactions = [], isValidating } = useTransactions(activeBudgetId, timeline ?? 'month');
 
