@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { LaunchProps, List, showToast, Toast } from '@raycast/api';
+import { List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
@@ -9,7 +9,11 @@ import { useTransactions } from '@hooks/useTransactions';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { formatToReadablePrice } from '@lib/utils';
 
-export function TransactionView({ search = '' }: { search?: string }) {
+interface TransactionViewProps {
+  search?: string;
+}
+
+export function TransactionView({ search = '' }: TransactionViewProps) {
   const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
@@ -79,6 +83,14 @@ export function TransactionView({ search = '' }: { search?: string }) {
     }
   }, [timeline, transactions]);
 
+  const onDropdownFilterChange = (newValue: string) => {
+    if (newValue === 'all') {
+      dispatch({ type: 'filter', filterBy: null });
+    } else if (newValue === 'unreviewed') {
+      dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
+    }
+  };
+
   return (
     <TransactionProvider
       dispatch={dispatch}
@@ -91,6 +103,7 @@ export function TransactionView({ search = '' }: { search?: string }) {
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
+        searchBarAccessory={<TransactionViewDropdown onSelectionChange={onDropdownFilterChange} />}
       >
         {!Array.isArray(collection)
           ? Array.from(collection).map(([, group]) => (
@@ -109,5 +122,18 @@ export function TransactionView({ search = '' }: { search?: string }) {
           : collection.map((t) => <TransactionItem transaction={t} key={t.id} />)}
       </List>
     </TransactionProvider>
+  );
+}
+
+interface TransactionViewDropdownProps {
+  onSelectionChange: (newValue: string) => void;
+}
+
+function TransactionViewDropdown(props: TransactionViewDropdownProps) {
+  return (
+    <List.Dropdown tooltip="Select Transaction type" onChange={props.onSelectionChange}>
+      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Item title="Unreviewed" value="unreviewed" />
+    </List.Dropdown>
   );
 }

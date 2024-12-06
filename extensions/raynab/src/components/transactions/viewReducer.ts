@@ -227,6 +227,10 @@ function filterCollectionBy(newFilter: Filter) {
       else if (newFilter.value == 'outflow') return item.amount < 0;
     }
 
+    if (newFilter.key === 'unreviewed') {
+      return !item.approved;
+    }
+
     return item[newFilter.key] === newFilter.value;
   };
 }

@@ -28,7 +28,7 @@ export type GroupTypes = 'category' | 'payee' | 'account';
 export type GroupNames = `${GroupTypes}_name`;
 
 export type FilterTypes = 'category' | 'account';
-export type FilterNames = `${FilterTypes}_name` | 'amount';
+export type FilterNames = `${FilterTypes}_name` | 'amount' | 'unreviewed';
 
 export type SortTypes = 'amount' | 'date';
 export type sortOrder = 'asc' | 'desc';
