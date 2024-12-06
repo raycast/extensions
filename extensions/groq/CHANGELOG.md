@@ -1,5 +1,8 @@
 # Groq Changelog
 
+## [New Models] - 2024-12-06
+- Added `Llama 3.3 70B`
+
 ## [New Models] - 2024-07-26
 
 - Added `Llama 3.1 8B` and `Llama 3.1 70B`
