@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
-
-const API_BASE_URL = "https://connect.mailerlite.com/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { API_BASE_URL, handleError, headers } from "./config";
 
 interface CampaignStats {
   sent: number;
@@ -33,14 +32,8 @@ interface CampaignDetailResponse {
 }
 
 const CampaignList = () => {
-  const { mailerliteApiKey } = getPreferenceValues<Preferences>();
-
   const { isLoading, data: campaigns } = useFetch(`${API_BASE_URL}/campaigns?filter[status]=sent`, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${mailerliteApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     mapResult(result: CampaignListResponse) {
       return {
         data: result.data,
@@ -48,15 +41,7 @@ const CampaignList = () => {
     },
     initialData: [],
     async onError(error) {
-      let title = "Failed to fetch campaigns";
-      let message = `HTTP error! status: ${error.message}`;
-
-      if (error.message.includes("401")) {
-        title = "Invalid API Key";
-        message = "Please check your MailerLite API key in preferences.";
-      }
-
-      await showFailureToast(message, { title });
+      await handleError(error, "Failed to fetch campaigns");
     },
   });
 
@@ -99,29 +84,15 @@ const CampaignList = () => {
 };
 
 const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
-  const { mailerliteApiKey } = getPreferenceValues<Preferences>();
-
   const { isLoading, data: campaign } = useFetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${mailerliteApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     mapResult(result: CampaignDetailResponse) {
       return {
         data: result.data,
       };
     },
     async onError(error) {
-      let title = "Failed to fetch campaign details";
-      let message = `HTTP error! status: ${error.message}`;
-
-      if (error.message.includes("401")) {
-        title = "Invalid API Key";
-        message = "Please check your MailerLite API key in preferences.";
-      }
-
-      await showFailureToast(message, { title });
+      await handleError(error, "Failed to fetch campaign details");
     },
   });
 
