@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [Cache Enhancements] - {PR_MERGE_DATE}
+## [Cache Enhancements] - 2024-12-06
 
 - `Action` to `openExtensionPreferences` on invalid token error
 - `EmptyView` when no **Pages** or **Sites**
