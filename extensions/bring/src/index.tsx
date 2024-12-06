@@ -11,7 +11,7 @@ export default function Command() {
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
-  const [purchaseStyle, setPurchaseStyle] = useState<string | null>(null);
+  const [purchaseStyle, setPurchaseStyle] = useState<string>("ungrouped");
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
     const bringApi = await getBringApi();
@@ -144,7 +144,7 @@ export default function Command() {
     return addNewItemToSectionBasedOnSearch(sections, search, translations);
   }, [catalog, listDetail, customItems, translations, search]);
 
-  if (!selectedList || purchaseStyle === null) {
+  if (!selectedList) {
     return <Grid isLoading={true}></Grid>;
   } else {
     return (

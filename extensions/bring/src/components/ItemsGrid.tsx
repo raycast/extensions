@@ -16,6 +16,9 @@ export interface Item {
   specification?: string;
 }
 
+const ColorBringRed = "rgb(238, 82, 79)";
+const ColorBringGreen = "rgb(79, 171, 162)";
+
 export const ItemsGrid = ({
   list,
   sections,
@@ -49,7 +52,9 @@ export const ItemsGrid = ({
         keywords={keywords}
         title={name}
         subtitle={specification}
-        accessory={{ icon: isInPurchaseList ? Icon.MinusCircleFilled : Icon.PlusCircleFilled }}
+        accessory={{
+          icon: { source: Icon.CircleFilled, tintColor: isInPurchaseList ? ColorBringRed : ColorBringGreen },
+        }}
         actions={
           <ActionPanel title={list.name}>
             {!isInPurchaseList ? (
@@ -109,7 +114,7 @@ export const ItemsGrid = ({
       ) : (
         sections.map(({ sectionId, name: sectionName, items }) => (
           <Grid.Section key={sectionId} title={sectionName}>
-            {items.filter((item) => !item.isInPurchaseList).map((item) => getGridItem(item, [sectionName]))}
+            {items.map((item) => getGridItem(item, [sectionName]))}
           </Grid.Section>
         ))
       )}
