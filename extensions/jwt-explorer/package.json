@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jwt-explorer",
+  "title": "Jwt Explorer",
+  "description": "Decode JWT tokens and explore its content.",
+  "icon": "jwt.png",
+  "author": "alex925",
+  "contributors": [],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "decode-jwt",
+      "title": "Decode Selected / Copied Jwt",
+      "description": "Decode selected or copied JWT token",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sortJwtContent",
+      "title": "Content View",
+      "label": "Sort By Alphabet",
+      "description": "Sort keys in JWT payload and header by alphabet",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.1",
+    "@types/react-dom": "^17.0.25",
+    "csv-parse": "^5.5.6",
+    "jose": "^5.4.1",
+    "json-keys-sort": "^2.1.0",
+    "node-fetch": "^3.3.2",
+    "raycast-hooks": "^1.0.4",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "~20.14.7",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
