@@ -5,6 +5,9 @@
   "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -48,6 +51,14 @@
       "required": false,
       "label": "Show Tab Title",
       "description": "Show the tab title of the browser when copying the URL of the current browser tab.",
+      "default": false
+    },
+    {
+      "name": "useTildeForHome",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Tilde for Home Directory",
+      "description": "Replace the home directory in copied paths with '~' for a cleaner look.",
       "default": false
     },
     {

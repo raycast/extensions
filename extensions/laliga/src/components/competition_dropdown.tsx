@@ -1,4 +1,4 @@
-import { Grid, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
 const decades = [
   {
@@ -38,7 +38,8 @@ const decades = [
   },
 ];
 
-const seasons: { [key: string]: { title: string; value: string }[] } = {};
+const seasons: Record<string, { title: string; value: string }[]> = {};
+
 decades.forEach(({ from, to, competitions }) => {
   if (!to) {
     const date = new Date();
@@ -59,27 +60,24 @@ decades.forEach(({ from, to, competitions }) => {
 });
 
 export default function CompetitionDropdown(props: {
-  type?: string;
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const DropdownComponent = props.type === "grid" ? Grid.Dropdown : List.Dropdown;
-
   return (
-    <DropdownComponent tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
+    <List.Dropdown tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
       {Object.entries(seasons)
         .reverse()
         .map(([year, competitions]) => {
           return (
-            <DropdownComponent.Section key={year} title={year}>
+            <List.Dropdown.Section key={year} title={year}>
               {competitions.map((competition) => {
                 return (
-                  <DropdownComponent.Item key={competition.value} value={competition.value} title={competition.title} />
+                  <List.Dropdown.Item key={competition.value} value={competition.value} title={competition.title} />
                 );
               })}
-            </DropdownComponent.Section>
+            </List.Dropdown.Section>
           );
         })}
-    </DropdownComponent>
+    </List.Dropdown>
   );
 }

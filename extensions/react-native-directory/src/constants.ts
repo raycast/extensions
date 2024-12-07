@@ -58,18 +58,19 @@ export const sortDropdownItems = [
 ];
 
 export const compatibilityColors: { [key: string]: Color } = {
-  "Development Tool": Color.Blue,
-  Template: Color.Purple,
-  "New Architecture": Color.Green,
-  "Expo Go": Color.Orange,
+  "Development Tool": Color.Purple,
+  Template: Color.Magenta,
+  "New Architecture": Color.Blue,
+  "Old Architecture": Color.Yellow,
+  "Expo Go": Color.PrimaryText,
 };
 
 export const platformColors: { [key: string]: Color } = {
   Android: Color.Green,
-  iOS: Color.Blue,
-  Web: Color.Orange,
-  Windows: Color.Purple,
-  macOS: Color.Red,
-  tvOS: Color.Yellow,
-  visionOS: Color.Magenta,
+  iOS: Color.PrimaryText,
+  Web: Color.Magenta,
+  Windows: Color.Blue,
+  macOS: Color.PrimaryText,
+  tvOS: Color.PrimaryText,
+  visionOS: Color.PrimaryText,
 };

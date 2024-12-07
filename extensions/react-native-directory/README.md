@@ -27,7 +27,7 @@ A searchable and filterable directory of React Native libraries for Raycast.
 5. Use the Action Panel to:
    - Open documentation in browser
    - Toggle detail view
-   - Copy installation commands (npm, yarn, pnpm, bun)
+   - Copy installation commands (expo, npm, yarn, pnpm, bun)
    - View on GitHub or NPM
    - Copy library name
 

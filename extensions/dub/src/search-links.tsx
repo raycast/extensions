@@ -1,20 +1,33 @@
 import "@/polyfills/fetch";
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useShortLinks } from "@hooks/use-short-links";
+import { ShortLinksResponse, useShortLinks } from "@hooks/use-short-links";
 import { DUB_CO_URL } from "@utils/constants";
 import { deleteShortLink } from "@/api";
 import { MutatePromise, showFailureToast } from "@raycast/utils";
-import type { LinkSchema } from "dub/dist/commonjs/models/components";
 import { withDubClient } from "./with-dub-client";
+import { useState } from "react";
 
 export function SearchLinks() {
-  const { shortLinks, error: linksError, isLoading: isLoadingLinks, mutate } = useShortLinks();
+  const [query, setQuery] = useState<string | undefined>(undefined);
+  const {
+    shortLinks,
+    supportsLinksTypeahead,
+    error: linksError,
+    isLoading: isLoadingLinks,
+    mutate,
+  } = useShortLinks(query);
 
   return (
     <List
       isLoading={isLoadingLinks}
+      {...(!supportsLinksTypeahead
+        ? { searchBarPlaceholder: "Search links by domain, url, key, comments, tags" }
+        : {
+            onSearchTextChange: setQuery,
+            searchBarPlaceholder: "Search links by short link slug or destination url",
+            throttle: true,
+          })}
       isShowingDetail={!isLoadingLinks && !linksError && shortLinks?.length !== 0}
-      searchBarPlaceholder={"Search links by domain, url, key, comments, tags..."}
       filtering
     >
       {linksError && (
@@ -164,7 +177,7 @@ export function SearchLinks() {
   );
 }
 
-const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
+const deleteLink = (linkId: string, mutate: MutatePromise<ShortLinksResponse | undefined>) =>
   confirmAlert({
     title: "Delete Link",
     message: "Are you sure you want to delete this link?",
@@ -175,10 +188,17 @@ const deleteLink = (linkId: string, mutate: MutatePromise<LinkSchema[]>) =>
     },
   });
 
-const tryDeleteLink = async (linkId: string, mutate: MutatePromise<LinkSchema[]>) => {
+const tryDeleteLink = async (linkId: string, mutate: MutatePromise<ShortLinksResponse | undefined>) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting link..." });
   await mutate(deleteShortLink(linkId), {
-    optimisticUpdate: (data) => data?.filter((l) => l.id !== linkId),
+    optimisticUpdate: (data) => {
+      if (!data) return undefined;
+
+      return {
+        ...data,
+        links: data.shortLinks.filter((l) => l.id !== linkId),
+      };
+    },
   })
     .then(async ({ id }) => {
       toast.style = Toast.Style.Success;

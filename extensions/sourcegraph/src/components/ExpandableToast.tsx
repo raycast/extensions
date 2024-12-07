@@ -13,7 +13,7 @@ export default function ExpandableToast(
   push: (details: ReactNode) => void,
   navigationTitle: string,
   title: string,
-  description: string
+  description: string,
 ) {
   return new Toast({
     style: Toast.Style.Failure, // default

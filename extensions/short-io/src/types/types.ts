@@ -1,3 +1,7 @@
+export interface SimpleDomain {
+  id: number;
+  hostname: string;
+}
 export interface Domain {
   id: number;
   TeamId: null;

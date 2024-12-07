@@ -99,6 +99,7 @@ export default function main() {
     }
   }
 
+
   function formatTime(time: string, formats: Record<string, string>) {
     let dTime: Dayjs;
     if (!isNaN(Number(time))) {
@@ -134,7 +135,6 @@ export default function main() {
       </ActionPanel>
     );
   }
-
   return (
     <List
       onSearchTextChange={(text) => timeConverter(text)}
@@ -168,6 +168,17 @@ export default function main() {
                 <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
               </ActionPanel>
             )
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="No Date Time Format is selected in preferences"
+          description="press ↵ to Open Extension Preferences"
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+            </ActionPanel>
           }
         />
       )}

@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0",
+  "version": "3.2.1",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-norwegian-public-transport",
   "title": "Norwegian Public Transport",
@@ -29,24 +29,51 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Departures",
-      "subtitle": "Norwegian Public Transport",
+      "title": "Departures",
       "description": "Search for public transport departures from any stop place in Norway",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "web-planner",
+      "title": "Travel Planner for Quick Access",
+      "description": "Choose your preferred web travel planner to use for quick access.",
+      "data": [
+        {
+          "title": "Reis Nordland",
+          "value": "reis"
+        },
+        {
+          "title": "FRAM",
+          "value": "fram"
+        },
+        {
+          "title": "Svipper",
+          "value": "svipper"
+        },
+        {
+          "title": "AtB (Beta)",
+          "value": "atb"
+        }
+      ],
+      "default": "reis",
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.15.0",
+    "@raycast/api": "^1.84.7",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.12.8",
-    "@types/react": "18.3.1",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.8.4",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",

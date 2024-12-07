@@ -1,5 +1,10 @@
 # Contentful Changelog
 
+## [Fixes] - 2024-11-17
+
+- Fix: `Assets` crashing when an item has no _file_
+- Fix: `Content` displaying incorrect _status_ `tag`
+
 ## [`View Roles` in `Users`] - 2024-10-23
 
 - Add `tooltip` to Date accessories

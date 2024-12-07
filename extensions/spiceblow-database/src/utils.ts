@@ -61,6 +61,7 @@ export function createBuyLink({ googleEmail }: { googleEmail: string }) {
 }
 
 export function isImageUrl(url: string) {
+  if (!url) return false;
   const isUrl = url.startsWith("http://") || url.startsWith("https://");
   if (!isUrl) {
     return false;

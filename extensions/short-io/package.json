@@ -29,16 +29,16 @@
     },
     {
       "name": "search-links-menu-bar",
-      "icon": "search-link-icon-menu-bar.png",
-      "title": "Search Links",
+      "icon": "search-link-icon.png",
+      "title": "Menu Bar Links",
       "subtitle": "Short.io",
-      "description": "Search short links with your own domain.",
+      "description": "Search short links with your own domain from menu bar.",
       "mode": "menu-bar"
     },
     {
       "name": "shorten-link-with-domain",
       "icon": "shorten-link-with-domain-icon.png",
-      "title": "Shorten Link With Domain",
+      "title": "Shorten Link with Domain",
       "subtitle": "Short.io",
       "description": "Shorten links using your own domain and set default domain of other commands.",
       "mode": "view"
@@ -63,16 +63,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "axios": "1.6.0"
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "axios": "1.7.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "prettier": "^3.4.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

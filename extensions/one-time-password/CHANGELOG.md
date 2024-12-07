@@ -1,5 +1,15 @@
 # One Time Password Changelog
 
+## 2024-12-04
+
+- Icons will now be displayed black or white depending on the system appearance.
+
+## 2024-11-07
+
+### Added
+
+- Added service provider icons for each account.
+
 ## 2024-07-25
 
 ### Added

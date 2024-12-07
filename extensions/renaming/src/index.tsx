@@ -18,6 +18,8 @@ export default function Command() {
   const [suffix, setSuffix] = useState<string>("");
   const [preserveName, setPreserveName] = useCachedState<boolean>("preserveName", false);
   const [preview, setPreview] = useState<string>("");
+  const [separator, setSeparator] = useState<string>("_");
+  const [indexSeparator, setIndexSeparator] = useState<string>("-");
 
   const getSelectedFiles = async () => {
     try {
@@ -46,6 +48,28 @@ export default function Command() {
     }
   };
 
+  const handleSeparatorChange = async (separatorType: "separator" | "indexSeparator", value: string) => {
+    if (value.includes("/")) {
+      if (separatorType === "separator") {
+        setSeparator("");
+      } else {
+        setIndexSeparator("");
+      }
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid separator",
+        message: "The separator cannot be a forward slash (/)",
+      });
+    } else {
+      if (separatorType === "separator") {
+        setSeparator(value);
+      } else {
+        setIndexSeparator(value);
+      }
+    }
+  };
+
   useEffect(() => {
     getSelectedFiles();
   }, []);
@@ -60,11 +84,11 @@ export default function Command() {
     const lastDotIndex = selectedFile.lastIndexOf(".");
     const baseName = selectedFile.substring(lastSlashIndex + 1, lastDotIndex);
     const extension = lastDotIndex >= 0 ? selectedFile.substring(lastDotIndex + 1) : "";
-    const prefixWithUnderscore = prefix ? `${prefix}_` : "";
-    const suffixWithUnderscore = suffix ? `_${suffix}` : "";
+    const prefixWithUnderscore = prefix ? `${prefix}${separator}` : "";
+    const suffixWithUnderscore = suffix ? `${separator}${suffix}` : "";
     return preserveName
       ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}.${extension}`
-      : `${prefixWithUnderscore}${newName}-${index + 1}${suffixWithUnderscore}.${extension}`;
+      : `${prefixWithUnderscore}${newName}${indexSeparator}${index + 1}${suffixWithUnderscore}.${extension}`;
   };
 
   const renameFiles = async () => {
@@ -98,7 +122,7 @@ export default function Command() {
 
   useEffect(() => {
     setPreview(generateNewName(0));
-  }, [newName, prefix, suffix, preserveName, files]);
+  }, [newName, prefix, suffix, preserveName, files, separator, indexSeparator]);
 
   return (
     <>
@@ -128,6 +152,22 @@ export default function Command() {
             )}
             <Form.TextField id="prefix" title="Prefix" value={prefix} onChange={setPrefix} placeholder="Enter prefix" />
             <Form.TextField id="suffix" title="Suffix" value={suffix} onChange={setSuffix} placeholder="Enter suffix" />
+            <Form.TextField
+              id="separator"
+              title="Separator"
+              value={separator}
+              onChange={(newValue) => handleSeparatorChange("separator", newValue)}
+              placeholder="Enter separator"
+            />
+            {!preserveName && (
+              <Form.TextField
+                id="indexSeparator"
+                title="Index Separator"
+                value={indexSeparator}
+                onChange={(newValue) => handleSeparatorChange("indexSeparator", newValue)}
+                placeholder="Enter Index separator"
+              />
+            )}
             <Form.Description title="Preview" text={preview} />
           </>
         )}

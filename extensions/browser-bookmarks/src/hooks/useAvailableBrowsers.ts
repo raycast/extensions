@@ -16,7 +16,9 @@ export const BROWSERS_BUNDLE_ID = {
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
   edgeCanary: "com.microsoft.edgemac.canary",
+  prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
+  zen: "org.mozilla.com.zen.browser",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

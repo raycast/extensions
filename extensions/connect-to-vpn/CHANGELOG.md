@@ -1,5 +1,9 @@
 # Connect to VPN Changelog
 
+## [New Additions] - 2024-11-13
+
+- Menu bar icon updates in the background
+
 ## [New Additions] - 2024-06-30
 
 - Menu bar icon reflects current connection status

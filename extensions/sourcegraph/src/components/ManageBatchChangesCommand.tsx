@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, showToast, Form } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { useState, Fragment, useMemo } from "react";
+import { useState, Fragment, useMemo, useEffect } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 
@@ -20,6 +20,7 @@ import ExpandableToast from "./ExpandableToast";
 import { propsToKeywords } from "./keywords";
 
 import { sentenceCase } from "../text";
+import { useTelemetry } from "../hooks/telemetry";
 
 const link = new LinkBuilder("batch-changes");
 
@@ -27,6 +28,9 @@ const link = new LinkBuilder("batch-changes");
  * ManageBatchChanges is the shared batch changes command implementation.
  */
 export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
+  const { recorder } = useTelemetry(src);
+  useEffect(() => recorder.recordEvent("manageBatchChanges", "start"), []);
+
   const srcName = instanceName(src);
 
   /**
