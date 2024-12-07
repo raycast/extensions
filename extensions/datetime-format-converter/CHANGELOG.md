@@ -1,5 +1,9 @@
 # Datetime formatter Changelog
 
+## [Update] - 2024-12-07
+
+- Added `Insert Natural Language Date` command to convert natural language into a specified date format.
+
 ## [Update] - 2024-05-21
 
 - Added customization for displayed date and time formats based on user preferences.
