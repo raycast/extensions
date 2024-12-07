@@ -43,17 +43,59 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
     [],
   );
 
-  useEffect(() => {
-    if (data?.bookmarks) {
-      setState((prev) => ({
-        ...prev,
-        allBookmarks: prev.isInitialLoad
-          ? removeDuplicates(data.bookmarks)
-          : removeDuplicates([...prev.allBookmarks, ...data.bookmarks]),
-        isInitialLoad: false,
-      }));
+  const shouldResetCache = useCallback((newBookmarks: Bookmark[], cachedBookmarks: Bookmark[]) => {
+    if (cachedBookmarks.length === 0) return false;
+
+    const newIds = new Set(newBookmarks.map((b) => b.id));
+    const cachedIds = new Set(cachedBookmarks.slice(0, newBookmarks.length).map((b) => b.id));
+
+    if (newIds.size !== cachedIds.size) return true;
+
+    for (const id of newIds) {
+      if (!cachedIds.has(id)) return true;
     }
-  }, [data, removeDuplicates]);
+    for (const id of cachedIds) {
+      if (!newIds.has(id)) return true;
+    }
+
+    const cachedFirstPage = cachedBookmarks.slice(0, newBookmarks.length);
+    return !newBookmarks.every((bookmark, index) => bookmark.id === cachedFirstPage[index]?.id);
+  }, []);
+
+  useEffect(() => {
+    if (!data?.bookmarks) return;
+
+    setState((prev) => {
+      if (prev.isInitialLoad) {
+        return {
+          allBookmarks: data.bookmarks,
+          isInitialLoad: false,
+          cursor: undefined,
+        };
+      }
+
+      if (!state.cursor) {
+        const needsReset = shouldResetCache(data.bookmarks, prev.allBookmarks);
+        if (needsReset) {
+          return {
+            allBookmarks: data.bookmarks,
+            isInitialLoad: false,
+            cursor: undefined,
+          };
+        }
+      }
+
+      if (state.cursor) {
+        return {
+          allBookmarks: removeDuplicates([...prev.allBookmarks, ...data.bookmarks]),
+          isInitialLoad: false,
+          cursor: state.cursor,
+        };
+      }
+
+      return prev;
+    });
+  }, [data, removeDuplicates, shouldResetCache]);
 
   useEffect(() => {
     if (error) {
@@ -63,6 +105,7 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
 
   const loadNextPage = useCallback(() => {
     if (!data?.nextCursor || isLoading || !data.hasMore) return;
+
     setState((prev) => ({
       ...prev,
       cursor: data.nextCursor ?? undefined,

@@ -98,6 +98,12 @@ export async function fetchGetSingleList(id: string) {
   return fetchWithAuth(`/api/v1/lists/${id}`);
 }
 
+export async function fetchAddBookmarkToList(listId: string, bookmarkId: string) {
+  return fetchWithAuth(`/api/v1/lists/${listId}/bookmarks/${bookmarkId}`, {
+    method: "PUT",
+  });
+}
+
 export async function fetchGetSingleListBookmarks(id: string, cursor?: string) {
   return fetchWithAuth(`/api/v1/lists/${id}/bookmarks${cursor ? `?cursor=${cursor}` : ""}`);
 }

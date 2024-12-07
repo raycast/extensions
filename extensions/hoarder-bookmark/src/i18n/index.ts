@@ -55,7 +55,8 @@ export const translations = {
       originalTitle: "Original Title",
       customTitle: "Custom Title",
       titlePlaceholder: "Enter title",
-
+      list: "List",
+      defaultListPlaceholder: "Default",
       // Sections
       sections: {
         summary: "📝 Summary",
@@ -290,6 +291,9 @@ export const translations = {
       originalTitle: "原标题",
       customTitle: "自定义标题",
       titlePlaceholder: "输入标题",
+
+      list: "列表",
+      defaultListPlaceholder: "默认",
 
       // 分区
       sections: {

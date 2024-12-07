@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation, FormDropdownProps } from "@raycast/api";
+import { Action, ActionPanel, Form, FormDropdownProps, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { fetchCreateBookmark } from "./apis";
+import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
+import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { Bookmark } from "./types";
 import { validUrl } from "./utils/url";
@@ -10,11 +11,13 @@ interface FormValues {
   type: "text" | "link";
   url?: string;
   content?: string;
+  list?: string;
 }
 
 export default function CreateBookmarkView() {
   const { push, pop } = useNavigation();
   const { t } = useTranslation();
+  const { lists } = useGetAllLists();
 
   const { handleSubmit, itemProps, values } = useForm<FormValues>({
     validation: {
@@ -40,24 +43,32 @@ export default function CreateBookmarkView() {
         style: Toast.Style.Animated,
       });
 
-      const basePayload = {
-        createdAt: new Date().toISOString(),
-      };
-
-      const content =
-        values.type === "text" ? { type: "text", text: values.content } : { type: "link", url: values.url };
-
       try {
+        const basePayload = {
+          createdAt: new Date().toISOString(),
+        };
+
+        const content =
+          values.type === "text" ? { type: "text", text: values.content } : { type: "link", url: values.url };
+
         const payload = {
           ...basePayload,
           ...content,
         };
-        const bookmark = await fetchCreateBookmark(payload);
+        const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
+
+        if (values.list) {
+          if (bookmark) {
+            await fetchAddBookmarkToList(values.list, bookmark?.id);
+          }
+        }
+
         if (values.type === "text") {
           push(<BookmarkDetail bookmark={bookmark as Bookmark} />);
         } else {
           pop();
         }
+
         toast.style = Toast.Style.Success;
         toast.title = t("bookmark.createSuccess");
       } catch (error) {
@@ -90,6 +101,13 @@ export default function CreateBookmarkView() {
       ) : (
         <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
       )}
+
+      <Form.Dropdown title={t("bookmark.list")} {...itemProps.list}>
+        <Form.Dropdown.Item value="" title={t("bookmark.defaultListPlaceholder")} />
+        {lists.map((list) => (
+          <Form.Dropdown.Item key={list.id} value={list.id} title={list.name} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

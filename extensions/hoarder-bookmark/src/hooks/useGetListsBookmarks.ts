@@ -50,15 +50,51 @@ export function useGetListsBookmarks(listId: string) {
 
   useEffect(() => {
     if (data?.bookmarks) {
-      setState((prev) => ({
-        ...prev,
-        allBookmarks: prev.isInitialLoad
-          ? removeDuplicates(data.bookmarks || [])
-          : removeDuplicates([...prev.allBookmarks, ...(data.bookmarks || [])]),
-        isInitialLoad: false,
-      }));
+      setState((prev) => {
+        if (prev.isInitialLoad) {
+          return {
+            allBookmarks: removeDuplicates(data.bookmarks || []),
+            isInitialLoad: false,
+            cursor: data.nextCursor || null,
+          };
+        }
+
+        const needsReset = shouldResetCache(data.bookmarks || [], prev.allBookmarks);
+        if (needsReset) {
+          return {
+            allBookmarks: removeDuplicates(data.bookmarks || []),
+            isInitialLoad: false,
+            cursor: data.nextCursor || null,
+          };
+        }
+
+        return {
+          allBookmarks: removeDuplicates([...prev.allBookmarks, ...(data.bookmarks || [])]),
+          isInitialLoad: false,
+          cursor: data.nextCursor || null,
+        };
+      });
     }
   }, [data, removeDuplicates]);
+
+  const shouldResetCache = useCallback((newBookmarks: Bookmark[], cachedBookmarks: Bookmark[]) => {
+    if (cachedBookmarks.length === 0) return false;
+
+    const newIds = new Set(newBookmarks.map((b) => b.id));
+    const cachedIds = new Set(cachedBookmarks.slice(0, newBookmarks.length).map((b) => b.id));
+
+    if (newIds.size !== cachedIds.size) return true;
+
+    for (const id of newIds) {
+      if (!cachedIds.has(id)) return true;
+    }
+    for (const id of cachedIds) {
+      if (!newIds.has(id)) return true;
+    }
+
+    const cachedFirstPage = cachedBookmarks.slice(0, newBookmarks.length);
+    return !newBookmarks.every((bookmark, index) => bookmark.id === cachedFirstPage[index]?.id);
+  }, []);
 
   const loadNextPage = useCallback(() => {
     if (!data?.nextCursor || isLoading || !data.hasMore) return;

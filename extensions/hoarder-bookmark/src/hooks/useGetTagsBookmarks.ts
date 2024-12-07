@@ -22,8 +22,11 @@ export function useGetTagsBookmarks(tagId: string) {
   );
 
   const { isLoading, data, error, revalidate } = useCachedPromise(
-    async (tagId: string, cursor) => {
-      const result = (await fetchGetSingleTagBookmarks(tagId, cursor || undefined)) as ApiResponse<Bookmark>;
+    async (tagId, cursor) => {
+      const result = (await fetchGetSingleTagBookmarks(
+        tagId,
+        cursor === "initial" ? undefined : cursor,
+      )) as ApiResponse<Bookmark>;
       return {
         bookmarks: result.bookmarks,
         hasMore: result.nextCursor !== null,
@@ -33,7 +36,7 @@ export function useGetTagsBookmarks(tagId: string) {
     [tagId, state.cursor],
     {
       execute: true,
-      keepPreviousData: false,
+      keepPreviousData: true,
     },
   );
 
@@ -47,21 +50,58 @@ export function useGetTagsBookmarks(tagId: string) {
 
   useEffect(() => {
     if (data?.bookmarks) {
-      setState((prev) => ({
-        ...prev,
-        allBookmarks: prev.isInitialLoad
-          ? removeDuplicates(data.bookmarks || [])
-          : removeDuplicates([...prev.allBookmarks, ...(data.bookmarks || [])]),
-        isInitialLoad: false,
-      }));
+      setState((prev) => {
+        if (prev.isInitialLoad) {
+          return {
+            allBookmarks: removeDuplicates(data.bookmarks || []),
+            isInitialLoad: false,
+            cursor: data.nextCursor || null,
+          };
+        }
+
+        const needsReset = shouldResetCache(data.bookmarks || [], prev.allBookmarks);
+        if (needsReset) {
+          return {
+            allBookmarks: removeDuplicates(data.bookmarks || []),
+            isInitialLoad: false,
+            cursor: data.nextCursor || null,
+          };
+        }
+
+        // 处理分页加载
+        return {
+          allBookmarks: removeDuplicates([...prev.allBookmarks, ...(data.bookmarks || [])]),
+          isInitialLoad: false,
+          cursor: data.nextCursor || null,
+        };
+      });
     }
   }, [data, removeDuplicates]);
+
+  const shouldResetCache = useCallback((newBookmarks: Bookmark[], cachedBookmarks: Bookmark[]) => {
+    if (cachedBookmarks.length === 0) return false;
+
+    const newIds = new Set(newBookmarks.map((b) => b.id));
+    const cachedIds = new Set(cachedBookmarks.slice(0, newBookmarks.length).map((b) => b.id));
+
+    if (newIds.size !== cachedIds.size) return true;
+
+    for (const id of newIds) {
+      if (!cachedIds.has(id)) return true;
+    }
+    for (const id of cachedIds) {
+      if (!newIds.has(id)) return true;
+    }
+
+    const cachedFirstPage = cachedBookmarks.slice(0, newBookmarks.length);
+    return !newBookmarks.every((bookmark, index) => bookmark.id === cachedFirstPage[index]?.id);
+  }, []);
 
   const loadNextPage = useCallback(() => {
     if (!data?.nextCursor || isLoading || !data.hasMore) return;
     setState((prev) => ({
       ...prev,
-      cursor: data.nextCursor,
+      cursor: data.nextCursor ?? undefined,
     }));
   }, [data, isLoading]);
 
