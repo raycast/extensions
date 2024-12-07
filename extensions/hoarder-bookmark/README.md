@@ -65,6 +65,10 @@ After installation, set up the extension with your Hoarder instance details:
 3. Find "Hoarder" in the list of installed extensions
 4. Enter your Hoarder API URL and authentication credentials
 
+![Raycast Hoarder Configuration](./docs/images/raycast-hoarder-configuration.png)
+
+You can also customize the default main operations and the bookmark details you want to display.
+
 ## 🎯 Usage
 
 Here's how to make the most of the Raycast Hoarder extension:

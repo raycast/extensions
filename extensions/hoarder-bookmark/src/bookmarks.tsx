@@ -1,5 +1,4 @@
 import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { BookmarkList } from "./components/BookmarkList";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
@@ -7,13 +6,6 @@ import { useTranslation } from "./hooks/useTranslation";
 export default function BookmarksList() {
   const { t } = useTranslation();
   const { isLoading, bookmarks, hasMore, revalidate, loadNextPage } = useGetAllBookmarks();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isLoading && isInitialLoading) {
-      setIsInitialLoading(false);
-    }
-  }, [isLoading]);
 
   const handleRefresh = async () => {
     const toast = await showToast({
@@ -29,7 +21,8 @@ export default function BookmarksList() {
       toast.title = t("refreshError");
     }
   };
-  if (isInitialLoading) {
+
+  if (isLoading && bookmarks.length === 0) {
     return (
       <List>
         <List.EmptyView title={t("loading")} icon={Icon.Airplane} description={t("pleaseWait")} />

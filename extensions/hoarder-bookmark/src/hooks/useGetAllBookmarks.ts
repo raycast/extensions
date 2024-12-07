@@ -17,7 +17,7 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
   });
 
   const { isLoading, data, error, revalidate } = useCachedPromise(
-    async (cursor: string | undefined) => {
+    async (cursor: string | undefined, favourited, archived) => {
       const result = (await fetchGetAllBookmarks({
         cursor,
         favourited,
@@ -31,7 +31,7 @@ export function useGetAllBookmarks({ favourited, archived }: GetBookmarksParams 
         nextCursor,
       };
     },
-    [state.cursor],
+    [state.cursor, favourited, archived],
     {
       execute: true,
       keepPreviousData: true,

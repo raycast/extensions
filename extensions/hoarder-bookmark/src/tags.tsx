@@ -1,13 +1,10 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { fetchDeleteTag } from "./apis";
 import { BookmarkList } from "./components/BookmarkList";
-import { TAG_AI_COLOR, TAG_HUMAN_COLOR } from "./constants";
 import { useConfig } from "./hooks/useConfig";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useGetTagsBookmarks } from "./hooks/useGetTagsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
-
-const { Metadata } = List.Item.Detail;
 
 export default function Tags() {
   const { push } = useNavigation();
@@ -71,29 +68,6 @@ export default function Tags() {
           key={tag.id}
           icon={Icon.Hashtag}
           title={`${tag.name} (${tag.numBookmarks})`}
-          detail={
-            <List.Item.Detail
-              metadata={
-                <Metadata>
-                  <Metadata.Label title={t("tags.detail.name")} text={tag.name} />
-                  <Metadata.Label title={t("tags.detail.id")} text={tag.id} icon={Icon.Tag} />
-                  <Metadata.Separator />
-                  <Metadata.Label
-                    title={t("tags.detail.totalBookmarks")}
-                    text={String(tag.numBookmarks)}
-                    icon={Icon.Tag}
-                  />
-                  <Metadata.TagList title={t("tags.detail.source")}>
-                    <Metadata.TagList.Item text={`AI: ${tag.numBookmarksByAttachedType.ai}`} color={TAG_AI_COLOR} />
-                    <Metadata.TagList.Item
-                      text={`Human: ${tag.numBookmarksByAttachedType.human}`}
-                      color={TAG_HUMAN_COLOR}
-                    />
-                  </Metadata.TagList>
-                </Metadata>
-              }
-            />
-          }
           actions={
             <ActionPanel>
               <ActionPanel.Section>

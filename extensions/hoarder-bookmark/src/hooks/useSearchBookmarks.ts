@@ -26,7 +26,7 @@ export function useSearchBookmarks(searchText: string) {
     },
     [],
     {
-      execute: !!searchText,
+      execute: true,
     },
   );
 
