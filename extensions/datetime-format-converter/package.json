@@ -17,6 +17,12 @@
       "title": "Format Date",
       "description": "Convert timestamps and datetime strings into various formats.",
       "mode": "view"
+    },
+    {
+      "name": "addCustomFormats",
+      "title": "Create Custom Date Time Format",
+      "description": "Create Custom Date Time Format",
+      "mode": "view"
     }
   ],
   "preferences": [
