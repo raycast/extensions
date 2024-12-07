@@ -1,6 +1,10 @@
 # Datetime formatter Changelog
 
-## [Update] - 2024-05-21
+## [Update] - 2024-12-07
+
+- Users can now add their cusom date time formats.
+
+## [Update] - 2024-11-01
 
 - Added customization for displayed date and time formats based on user preferences.
 
