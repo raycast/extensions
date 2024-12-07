@@ -36,20 +36,21 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isLoading} // Pass isLoading to Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Directory" onSubmit={handleSubmit} isLoading={isLoading} />
+          <Action.SubmitForm title="Add Directory" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.FilePicker
         title="Directory Path"
-        allowMultipleSelection={false} // 使用正确的属性名
+        allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles={false}
         onChange={(paths: string[]) => {
           if (paths.length > 0) {
-            setValue("path", paths); // path 为 string[]
+            setValue("path", paths);
           }
         }}
         {...itemProps.path}

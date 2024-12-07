@@ -5,10 +5,10 @@ import { getDirectories, Directory } from "./utils/storage";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { exec } from "child_process"; // 使用 ES6 的 import 语法
+import { exec } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec); // 将 exec 转换为基于 Promise 的函数
+const execAsync = promisify(exec); // Convert exec to a Promise-based function
 
 interface Application {
   name: string;
@@ -27,7 +27,11 @@ export default function Command() {
         const dirs = await getDirectories();
         setDirectories(dirs);
       } catch (error) {
-        await showToast(Toast.Style.Failure, "Failed to Load Directories", (error as Error).message);
+        if (error instanceof Error) {
+          await showToast(Toast.Style.Failure, "Failed to Load Directories", error.message);
+        } else {
+          await showToast(Toast.Style.Failure, "Failed to Load Directories", "An unknown error occurred.");
+        }
       } finally {
         setLoading(false);
       }
@@ -119,8 +123,12 @@ export default function Command() {
       await execAsync(`sips -s format png "${icnsPath}" --out "${pngPath}"`);
       return pngPath;
     } catch (error: unknown) {
-      // 明确类型为 Error
-      console.error(`Error converting icon for ${appName}:`, error.message);
+      // Use unknown type
+      if (error instanceof Error) {
+        console.error(`Error converting icon for ${appName}:`, error.message);
+      } else {
+        console.error(`Error converting icon for ${appName}:`, error);
+      }
       return undefined;
     }
   };
@@ -132,8 +140,13 @@ export default function Command() {
       const command = `open -a "${app.appPath}" "${dirPath}"`;
       await execShellCommand(command);
       await showToast(Toast.Style.Success, "Directory Opened", `Opened ${dirPath} with ${app.name}.`);
-    } catch (error) {
-      await showToast(Toast.Style.Failure, "Failed to Open Directory", (error as Error).message);
+    } catch (error: unknown) {
+      // Handle unknown type
+      if (error instanceof Error) {
+        await showToast(Toast.Style.Failure, "Failed to Open Directory", error.message);
+      } else {
+        await showToast(Toast.Style.Failure, "Failed to Open Directory", "An unknown error occurred.");
+      }
     }
   };
 
@@ -142,8 +155,12 @@ export default function Command() {
     try {
       await execAsync(cmd);
     } catch (error: unknown) {
-      // 明确类型为 Error
-      throw new Error(error.message || "Unknown error");
+      // Handle unknown type
+      if (error instanceof Error) {
+        throw new Error(error.message || "Unknown error");
+      } else {
+        throw new Error("An unknown error occurred");
+      }
     }
   };
 
@@ -175,7 +192,7 @@ export default function Command() {
                     />
                   ))
                 ) : (
-                  <Action title="No Applications Found" onAction={() => {}} icon={Icon.ExclamationMark} disabled />
+                  <Action title="No Applications Found" onAction={() => {}} icon={Icon.ExclamationMark} />
                 )}
               </ActionPanel.Submenu>
               <Action.CopyToClipboard title="Copy Path" content={dir.path} />
