@@ -7,6 +7,7 @@ import {
   Color,
   getPreferenceValues,
   openCommandPreferences,
+  LocalStorage,
 } from "@raycast/api";
 import React, { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -20,11 +21,17 @@ dayjs.extend(localizedFormat);
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
+interface Values {
+  format: string;
+}
+
 export default function main() {
   const [clipboardText, setClipboardText] = useState("");
   const [input, setInput] = useState<string>(clipboardText);
   const [resultList, setResultList] = useState([] as string[]);
+  const [customResultList, setCustomResultList] = useState([] as string[]);
   const [validFormat, setValidFormat] = useState<boolean>(false);
+  const [customDatetimeFormats, setCustomDatetimeFormats] = useState<Record<string, string>>({});
 
   const dateTimeFormats = {
     isoDate: "YYYY-MM-DD",
@@ -49,7 +56,20 @@ export default function main() {
     Clipboard.readText().then((text) => {
       setClipboardText(text?.toString() || "");
     });
-  });
+
+    const loadFormats = async () => {
+      const items = await LocalStorage.allItems<Values>();
+
+      const savedFormatsObject = Object.fromEntries(
+        Object.entries(items)
+          .sort(([keyA], [keyB]) => Number(keyA.split("_")[1]) - Number(keyB.split("_")[1]))
+          .map(([key, value]) => [key, String(value)])
+      ) as Record<string, string>;
+
+      setCustomDatetimeFormats(savedFormatsObject);
+    };
+    loadFormats();
+  }, []);
 
   React.useEffect(() => {
     const _input = input || clipboardText;
@@ -64,19 +84,22 @@ export default function main() {
     setInput(time);
     setValidFormat(true);
     if (!time || time === "now") {
-      setResultList(formatTime(new Date().toString()));
+      setResultList(formatTime(new Date().toString(), dateTimeFormats));
+      setCustomResultList(formatTime(new Date().toString(), customDatetimeFormats));
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
-        setResultList(formatTime(time));
+        setResultList(formatTime(time, dateTimeFormats));
+        setCustomResultList(formatTime(time, customDatetimeFormats));
       } else {
         setValidFormat(false);
         setResultList([]);
+        setCustomResultList([]);
       }
     }
   }
 
-  function formatTime(time: string) {
+  function formatTime(time: string, formats: Record<string, string>) {
     let dTime: Dayjs;
     if (!isNaN(Number(time))) {
       if (time.length == 10) {
@@ -92,9 +115,9 @@ export default function main() {
       dTime = dayjs(time);
     }
 
-    return Object.entries(dateTimeFormats)
-      .filter(([key]) => preferences[key])
-      .map(([_, value]) => dTime.format(value).toString());
+    return Object.entries(formats)
+      .filter(([key]) => preferences[key] !== false)
+      .map(([, value]) => dTime.format(value).toString());
   }
 
   type ActionItem = {
@@ -118,25 +141,33 @@ export default function main() {
       searchText={input}
       searchBarPlaceholder="Enter a time or date"
     >
-      {resultList && resultList.length > 0 ? (
-        resultList.map((time, index) => (
-          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
-        ))
-      ) : !validFormat ? (
+      {customResultList && customResultList.length > 0 && (
+        <List.Section title="Custom Formats">
+          {customResultList.map((time, index) => (
+            <List.Item key={`custom-${index}`} title={time.toString()} actions={<Actions item={{ content: time }} />} />
+          ))}
+        </List.Section>
+      )}
+
+      {resultList && resultList.length > 0 && (
+        <List.Section title="Default Formats">
+          {resultList.map((time, index) => (
+            <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />} />
+          ))}
+        </List.Section>
+      )}
+
+      {(!validFormat || (!customResultList?.length && !resultList?.length)) && (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
-          title="An error occurred"
-          description="This is not a time format."
-        />
-      ) : (
-        <List.EmptyView
-          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
-          title="No Date Time Format is selected in preferences"
-          description="press ↵ to Open Extension Preferences"
+          title={!validFormat ? "An error occurred" : "No Date Time Format is selected in preferences"}
+          description={!validFormat ? "This is not a time format." : "Press ↵ to Open Extension Preferences"}
           actions={
-            <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
-            </ActionPanel>
+            !validFormat ? undefined : (
+              <ActionPanel>
+                <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+              </ActionPanel>
+            )
           }
         />
       )}
