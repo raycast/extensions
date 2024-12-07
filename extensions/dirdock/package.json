@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/exension.json",
+  "name": "dirdock",
+  "title": "DirDock",
+  "description": "Add your most commonly used directories to one place and quickly reopen them.",
+  "icon": "extension-icon.png",
+  "author": "bao_yuxiang",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-dirdock",
+      "title": "Open DirDock",
+      "subtitle": "DirDock",
+      "description": "find out your added directories in DirDock",
+      "mode": "view"
+    },
+    {
+      "name": "add-directory",
+      "title": "Add Directory",
+      "subtitle": "DirDock",
+      "description": "Add a new directory to your DirDock",
+      "mode": "view"
+    },
+    {
+      "name": "remove-directory",
+      "title": "Remove Directory",
+      "subtitle": "DirDock",
+      "description": "Remove specific or all directories from DirDock",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.17.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "^19.0.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
