@@ -2,7 +2,7 @@
 
 ## [Update Currently Playing] - 2024-12-06
 
-- Update Currently Playing command to update the subtitle with the currently playing track.
+- Update `Currently Playing` command to show the currently playing track in the subtitle instead of the toast.
 
 ## [New Command] - 2024-02-10
 
