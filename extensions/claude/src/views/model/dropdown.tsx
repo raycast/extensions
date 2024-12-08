@@ -10,9 +10,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
       tooltip="Select Model"
       storeValue={true}
       defaultValue={selectedModel}
-      onChange={(id) => {
-        onModelChange(id);
-      }}
+      onChange={onModelChange}
     >
       {defaultModel && <List.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
       <List.Dropdown.Section title="Custom Models">

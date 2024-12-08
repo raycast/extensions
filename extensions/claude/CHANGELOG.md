@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] -  2024-12-08
+
+- Fix: Models dropdown not displaying all models correctly
+
 ## [Update] - 2024-11-05
 
 - Feature: Added new [Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)
