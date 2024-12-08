@@ -7,36 +7,20 @@ import {
   showToast,
   Toast,
   Icon,
-  getPreferenceValues,
   openExtensionPreferences,
-  environment,
   Keyboard,
 } from "@raycast/api";
 
-import { pathToFileURL } from "url";
-import { getAccessToken, getFavicon, showFailureToast, useCachedPromise, useFetch, withAccessToken } from "@raycast/utils";
-import { provider } from "./oauth";
-import { WebflowClient, WebflowError } from "webflow-api";
-import "cross-fetch/polyfill";
+import { getFavicon, useCachedPromise, withAccessToken } from "@raycast/utils";
+import { getWebflowClient, provider } from "./oauth";
 import { Site } from "webflow-api/api";
-
-const imageApiError = pathToFileURL(`${environment.assetsPath}/peeks-api-incorrect.png`).href;
-
-type SiteV1 = {
-  _id: string;
-  createdOn: string;
-  name: string;
-  shortName: string;
-  timezone: string;
-  lastPublished?: string;
-  previewUrl?: string;
-};
+import { onError } from "./utils";
+import Assets from "./components/assets";
 
 export default withAccessToken(provider)(Command);
 
 function Command() {
-  const { token } = getAccessToken();
-  const webflow = new WebflowClient({ accessToken: token });
+  const webflow = getWebflowClient();
   const { isLoading, data, error } = useCachedPromise(async () => {
     const result = await webflow.sites.list();
     const sorted = sortByLastPublished(result.sites ?? []);
@@ -52,17 +36,14 @@ function Command() {
         style: Toast.Style.Success,
       });
     },
-    async onError(error: Error | WebflowError) {
-      const message = ("body" in error) ? (error.body as Error).message : error.message;
-      showFailureToast(message);
-    },
+    onError,
     initialData: []
   });
 
   if (error) {
     const markdown = `**Weblow API Key Incorrect**  
     Please update it in Settings (see screenshot) and try again. Press _Enter_ to open. 
-    ![Image Title](${imageApiError})
+    ![Image Title](peeks-api-incorrect.png)
     
     Still having issues contact us at raycast@peeks.co`;
 
@@ -71,7 +52,7 @@ function Command() {
         markdown={markdown}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -121,6 +102,7 @@ function returnItem(site: Site) {
             url={`https://webflow.com/dashboard/sites/${site.shortName}`}
             shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
           />
+          <Action.Push icon={Icon.Image} title="View Site Assets" target={<Assets siteId={site.id} />} />
           <ActionPanel.Section title="General">
             <Action.OpenInBrowser
               icon={{ source: "wf-logo-circle.svg" }}
@@ -143,7 +125,8 @@ function returnItem(site: Site) {
             />
             <Action
               icon={{ source: "wf-logo-circle.svg" }}
-              title="Change Api Token"
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Change API Token"
               onAction={openExtensionPreferences}
             />
           </ActionPanel.Section>

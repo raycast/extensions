@@ -25,3 +25,7 @@ Now you should be able to access Webflow with Raycast 🚀.
 Find this extension on the [Raycast store](https://www.raycast.com/peeks/webflow-sites "Raycast store"). Released under the MIT license. PRs welcome!
 
 More info at [www.peeks.co/raycast](http://peeks.co/raycast)
+
+OAuth Scopes:
+- sites:read
+- assets:read
