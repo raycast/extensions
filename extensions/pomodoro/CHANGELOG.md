@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-12-08
 
 - Fix short break timer
 
