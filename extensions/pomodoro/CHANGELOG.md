@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Fixes] - 2024-12-08
+
+- Fix short break timer
+
 ## [Chore & Fixes] - 2024-12-04
 
 - Fix the issue where the prompt does not pop up when the timer is completed
