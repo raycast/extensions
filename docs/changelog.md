@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.87.0 - 2024-12-04
+
+### ✨ New
+
+- **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) → The utils docs
+
+### 🐞 Fixes
+
+- **CLI**: Fix a couple of issues when trying to publish an extension or pull contributions
+
 ## 1.86.0 - 2024-11-20
 
 ### 💎 Improvements

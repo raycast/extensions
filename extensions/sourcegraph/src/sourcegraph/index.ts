@@ -21,18 +21,23 @@ export interface Sourcegraph {
   client: ApolloClient<NormalizedCacheObject>;
 
   /**
+   * Address of the proxy server to use for requests to the custom Sourcegraph instance.
+   */
+  proxy?: string;
+
+  /**
    * Feature flags for the extension.
    */
   featureFlags: ExtensionFeatureFlags;
 }
 
-const cloudURL = "https://sourcegraph.com";
+const dotComURL = "https://sourcegraph.com";
 
 /**
  * isSourcegraphDotCom returns true if this instance URL points to Sourcegraph.com.
  */
 export function isSourcegraphDotCom(instance: string) {
-  return instance === cloudURL;
+  return instance === dotComURL;
 }
 
 /**
@@ -42,36 +47,19 @@ export function instanceName(src: Sourcegraph) {
   return `${isSourcegraphDotCom(src.instance) ? "Sourcegraph.com" : new URL(src.instance).hostname}`;
 }
 
-interface Preferences {
-  // Preferences for Sourcegraph.com - it's still called Cloud to avoid breaking existing
-  // configuration.
-
-  cloudToken?: string;
-  cloudDefaultContext?: string;
-
-  // Configuration for custom instance commands.
-
-  customInstance?: string;
-  customInstanceToken?: string;
-  customInstanceDefaultContext?: string;
-
-  // Feature flags
-
-  featureSearchPatternDropdown?: boolean;
-}
-
 /**
  * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
 export function sourcegraphDotCom(): Sourcegraph {
-  const prefs: Preferences = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
+  const searchPrefs = getPreferenceValues<Preferences.SearchDotCom>();
   const connect = {
-    instance: cloudURL,
+    instance: dotComURL,
     token: prefs.cloudToken,
   };
   return {
     ...connect,
-    defaultContext: prefs.cloudDefaultContext,
+    defaultContext: searchPrefs.cloudDefaultContext,
     client: newApolloClient(connect),
     featureFlags: newFeatureFlags(prefs),
   };
@@ -81,17 +69,19 @@ export function sourcegraphDotCom(): Sourcegraph {
  * sourcegraphSelfHosted returns the configured Sourcegraph instance.
  */
 export function sourcegraphInstance(): Sourcegraph | null {
-  const prefs: Preferences = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   if (!prefs.customInstance) {
     return null;
   }
+  const searchPrefs = getPreferenceValues<Preferences.SearchInstance>();
   const connect = {
     instance: prefs.customInstance.replace(/\/$/, ""),
     token: prefs.customInstanceToken,
+    proxy: prefs.customInstanceProxy,
   };
   return {
     ...connect,
-    defaultContext: prefs.customInstanceDefaultContext,
+    defaultContext: searchPrefs.customInstanceDefaultContext,
     client: newApolloClient(connect),
     featureFlags: newFeatureFlags(prefs),
   };
@@ -121,10 +111,12 @@ export class LinkBuilder {
 
 interface ExtensionFeatureFlags {
   searchPatternDropdown: boolean;
+  disableTelemetry: boolean;
 }
 
 function newFeatureFlags(prefs: Preferences): ExtensionFeatureFlags {
   return {
-    searchPatternDropdown: !!prefs.featureSearchPatternDropdown,
+    searchPatternDropdown: prefs.featureSearchPatternDropdown !== false, // default true
+    disableTelemetry: !!prefs.featureDisableTelemetry,
   };
 }

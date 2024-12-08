@@ -60,6 +60,15 @@
       "required": true,
       "title": "API Token",
       "description": "Jira API token"
+    },
+    {
+      "name": "onlyMyIssues",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Only My Issues",
+      "label": "Filter to My Issues",
+      "description": "Filter to only show issues assigned to you.",
+      "default": false
     }
   ],
   "dependencies": {
