@@ -1,6 +1,11 @@
 module.exports = {
-  extends: ["@raycast"],
-  rules: {
-    // Add any custom rules here
+  root: true,
+  extends: "@raycast",
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: "module",
+    ecmaFeatures: {
+      jsx: true
+    }
   }
 }; 
