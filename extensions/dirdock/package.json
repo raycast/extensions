@@ -15,7 +15,7 @@
       "name": "open-dirdock",
       "title": "Open DirDock",
       "subtitle": "DirDock",
-      "description": "find out your added directories in DirDock",
+      "description": "Find your added directories in DirDock",
       "mode": "view"
     },
     {
@@ -30,6 +30,20 @@
       "title": "Remove Directory",
       "subtitle": "DirDock",
       "description": "Remove specific or all directories from DirDock",
+      "mode": "view"
+    },
+    {
+      "name": "add-tag",
+      "title": "Add Tag",
+      "subtitle": "DirDock",
+      "description": "Add a new tag to categorize directories",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tags",
+      "title": "Manage Tags",
+      "subtitle": "DirDock",
+      "description": "Manage your tags for organizing directories",
       "mode": "view"
     }
   ],
