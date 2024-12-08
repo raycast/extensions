@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "author": "strongeron",
   "icon": "icon.png",
-  "categories": ["Developer Tools"],
+  "categories": ["Design Tools"],
   "license": "MIT",
   "commands": [
     {
