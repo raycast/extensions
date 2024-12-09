@@ -3,7 +3,7 @@
   "name": "remove-paywall",
   "title": "Remove Paywall",
   "description": "Remove the paywall from the selected, clipboard, or current browser tab URL.",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "tegola",
   "contributors": [
     "Whitespace",
