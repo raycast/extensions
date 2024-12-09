@@ -1,5 +1,11 @@
 import * as glideBase from "@glideapps/tables";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getGlideProps(obj: any) {
+  // just a small hack to get the props because its private in the lib class
+  return obj.props as { description: string };
+}
+
 export async function getApps(apiKey: string) {
   const glide = glideBase.withConfig({
     token: apiKey,
@@ -10,7 +16,7 @@ export async function getApps(apiKey: string) {
   }
   console.log(
     "apps",
-    apps.map((e) => e.props).filter((e) => e?.description),
+    apps.map((e) => getGlideProps(e)).filter((e) => e?.description),
   );
   if (!apps) {
     throw new Error("No apps found");
@@ -18,7 +24,7 @@ export async function getApps(apiKey: string) {
   const enhancedApps = await Promise.all(
     apps.map(async (app) => {
       const manifest = await app.getManifest();
-      return { name: app.name, id: app.id, description: app.props?.description, manifest };
+      return { name: app.name, id: app.id, description: getGlideProps(app)?.description, manifest };
     }),
   );
   return enhancedApps;

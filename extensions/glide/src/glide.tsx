@@ -74,7 +74,7 @@ export default function Command() {
 
   const { isLoading, data } = usePromise(() => cacheHelper(() => getApps(preferences.apiKey), "apps"));
   // const { isLoading, data, revalidate } = usePromise(() => getApps());
-  const favoritesLocalStorage = useLocalStorage("favorites", []);
+  const favoritesLocalStorage = useLocalStorage<string[]>("favorites", []);
 
   const [authorFilter, authorSetFilter] = useState<string>("all");
 
