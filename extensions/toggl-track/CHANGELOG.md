@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [New Feature] - 2024-11-29
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add "Update Time Entry" command to update time entries
 - Add ability to update time entry action from the list
