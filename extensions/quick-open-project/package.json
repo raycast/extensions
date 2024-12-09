@@ -79,10 +79,7 @@
     "@types/parse-git-config": "^3.0.1",
     "@types/parse-github-url": "^1.0.0",
     "@types/react": "18.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^8.3.0",
     "typescript": "^5.4.5",
     "@raycast/eslint-config": "1.0.11",
     "prettier": "^3.3.3"
