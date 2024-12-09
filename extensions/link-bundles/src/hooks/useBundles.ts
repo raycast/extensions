@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { Bundle } from "../types";
 import { loadBundles, saveBundles } from "../utils/storage";
 
@@ -55,15 +55,30 @@ export function useBundles() {
     return true;
   };
 
-  const deleteBundle = (index: number) => {
-    const updatedBundles = bundles.filter((_, i) => i !== index);
-    setBundles(updatedBundles);
-    saveBundles(updatedBundles);
-    showToast({
-      style: Toast.Style.Success,
-      title: "Success",
-      message: "Bundle deleted successfully",
+  const deleteBundle = async (index: number) => {
+    await confirmAlert({
+      title: "Are you sure?",
+      message: "This will remove the bundle.",
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          const updatedBundles = bundles.filter((_, i) => i !== index);
+          setBundles(updatedBundles);
+          saveBundles(updatedBundles);
+          showToast({
+            style: Toast.Style.Success,
+            title: "Success",
+            message: "Bundle deleted successfully",
+          });
+        },
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
+      rememberUserChoice: true,
     });
+
     return true;
   };
 
