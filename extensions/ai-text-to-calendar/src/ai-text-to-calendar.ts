@@ -1,11 +1,6 @@
 import { showHUD, Toast, showToast, getSelectedText, getPreferenceValues, Clipboard, open } from "@raycast/api";
 import OpenAI from "openai";
 
-interface Preferences {
-  openAiApiKey: string;
-  language: string;
-}
-
 interface CalendarEvent {
   title: string;
   start_date: string;
