@@ -13,12 +13,11 @@ interface CalendarEvent {
 
 export default async function main() {
   try {
-    const openaiKey = getPreferenceValues<Preferences>().openAiApiKey;
-    const language = getPreferenceValues<Preferences>().language;
+    const { openAiApiKey, language } = getPreferenceValues<Preferences.AiTextToCalendar>();
 
     showToast({ style: Toast.Style.Animated, title: "Extracting..." });
     const selectedText = await getSelectedText();
-    const json = await ai(selectedText, openaiKey, language);
+    const json = await ai(selectedText, openAiApiKey, language);
     if (!json) {
       throw new Error("Extraction failed");
     }
