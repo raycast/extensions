@@ -25,6 +25,9 @@ export {
   createTimeEntry,
   stopTimeEntry,
   getRunningTimeEntry,
+  updateTimeEntry,
+  removeTimeEntry,
   type TimeEntry,
   type TimeEntryMetaData,
+  type UpdateTimeEntryParams,
 } from "@/api/timeEntries";
