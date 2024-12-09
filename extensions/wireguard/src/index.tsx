@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import getVPN from "./getVPN";
 import toggle from "./toggle";
@@ -36,10 +36,27 @@ export default function Command() {
                   onAction={() => toggle(VPN)}
                 />
               </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.CreateQuicklink
+                  quicklink={{
+                    link: createToggleQuicklink({ sn: VPN.sn }),
+                  }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Quicklink"
+                  content={createToggleQuicklink({ sn: VPN.sn })}
+                  shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
+}
+
+function createToggleQuicklink(args: Arguments.ToggleWireguardConnection) {
+  const encoded = encodeURIComponent(JSON.stringify(args));
+  return `raycast://extensions/sbugzhu/wireguard/toggleWireguardConnection?arguments=${encoded}`;
 }

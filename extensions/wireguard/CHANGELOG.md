@@ -1,5 +1,9 @@
 # Wireguard Changelog
 
+## [Add Quicklinks Support] - {PR_MERGE_DATE}
+
+- Add action to save a connection as a Quicklink
+
 ## [Add Toasts and Huds] - 2024-12-03
 
 - `showToast` then `showHud` on **toggle**

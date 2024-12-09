@@ -6,7 +6,8 @@
   "icon": "wireguard.png",
   "author": "sbugzhu",
   "contributors": [
-    "xmok"
+    "xmok",
+    "TimoBechtel"
   ],
   "categories": [
     "Applications",
@@ -20,6 +21,22 @@
       "subtitle": "Control Wireguard",
       "description": "Control Wireguard connections.",
       "mode": "view"
+    },
+    {
+      "name": "toggleWireguardConnection",
+      "title": "Toggle Connection",
+      "subtitle": "Wireguard",
+      "description": "Toggle a Wireguard connection by its service name. This is useful for quicklinks.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "sn",
+          "description": "Service name of the Wireguard connection.",
+          "required": true,
+          "placeholder": "Service name"
+        }
+      ]
     },
     {
       "name": "disconnectAllWireguardConnections",
