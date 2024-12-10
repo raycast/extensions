@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add the weekly and daily statistics to the `View Pomodoro Stats` command
+
 ## [Fixes] - 2024-12-08
 
 - Fix short break timer
