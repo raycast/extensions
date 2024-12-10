@@ -21,9 +21,9 @@ import {
 } from '@components/actions';
 import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
-import { CurrencyFormat } from '@srcTypes';
 import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
 import { useLocalStorage } from '@raycast/utils';
+import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
@@ -40,7 +40,6 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
     currency,
   } = useTransaction();
 
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const hasSubtransactions = transaction.subtransactions.length > 0;
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;
@@ -78,7 +77,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               <List.Item.Detail.Metadata.Label title="Account" text={transaction.account_name} />
               <List.Item.Detail.Metadata.Label
                 title="Amount"
-                text={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
+                text={formatToReadablePrice({ amount: transaction.amount, currency })}
               />
               <List.Item.Detail.Metadata.Label title="Date" text={dayjs(transaction.date).format('LL')} />
               <List.Item.Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
@@ -154,6 +153,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
             />
             <OpenInYnabAction accounts accountId={transaction.account_id} />
             <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
+            {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Modify List View">
             <GroupBySubmenu onGroup={onGroup} currentGroup={state.group} />

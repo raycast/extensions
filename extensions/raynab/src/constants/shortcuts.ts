@@ -1,6 +1,7 @@
 import { type Keyboard } from '@raycast/api';
 
 interface Constants {
+  ApproveTransaction: Keyboard.Shortcut;
   ViewInBrowser: Keyboard.Shortcut;
   ToggleFlags: Keyboard.Shortcut;
   Group: Keyboard.Shortcut;
@@ -11,6 +12,7 @@ interface Constants {
 }
 
 export const Shortcuts: Constants = {
+  ApproveTransaction: { modifiers: ['opt'], key: 'a' },
   ViewInBrowser: {
     modifiers: ['cmd'],
     key: 'o',
