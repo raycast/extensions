@@ -23,7 +23,7 @@ export default function FieldComponent({ values }: FieldComponentProps) {
       return <Select values={{ field }} />;
     }
     case "RATING": {
-      return <Rating values={{ field }} {...itemProps}/>;
+      return <Rating values={{ field }} {...itemProps} />;
     }
     default:
       return <></>;
