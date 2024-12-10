@@ -1,0 +1,184 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "packageManager": "yarn@4.5.1",
+  "private": true,
+  "name": "badger",
+  "title": "Badger",
+  "description": "Show Dock notification badges in the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "robbiehobby",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Communication",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add",
+      "title": "Create New Badge",
+      "description": "Create a new menu badge.",
+      "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "Search Badges",
+      "description": "Search and manage the active menu badges.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Badger",
+      "description": "Show badger in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "total",
+      "label": "Enable Total Count",
+      "description": "Choose whether to show the total badge count in the menu bar.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "disableInactive",
+      "label": "Disable Closed Applications",
+      "description": "Choose whether to hide applications that are not currently opened.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "attn",
+      "label": "Enable Attention Dots",
+      "description": "Choose whether to show attention dot badges.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "attnDot",
+      "title": "Attention Dot",
+      "description": "Choose a character to use as the attention dot.",
+      "type": "textfield",
+      "default": "•",
+      "required": false
+    },
+    {
+      "name": "color",
+      "title": "Idle Color",
+      "description": "Choose the color to use when no badges are present in the Dock.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Primary Text",
+          "value": ""
+        },
+        {
+          "title": "Secondary Text",
+          "value": "raycast-secondary-text"
+        },
+        {
+          "title": "Blue",
+          "value": "raycast-blue"
+        },
+        {
+          "title": "Green",
+          "value": "raycast-green"
+        },
+        {
+          "title": "Magenta",
+          "value": "raycast-magenta"
+        },
+        {
+          "title": "Orange",
+          "value": "raycast-orange"
+        },
+        {
+          "title": "Purple",
+          "value": "raycast-purple"
+        },
+        {
+          "title": "Red",
+          "value": "raycast-red"
+        },
+        {
+          "title": "Yellow",
+          "value": "raycast-yellow"
+        }
+      ],
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "activeColor",
+      "title": "Activated Color",
+      "description": "Choose the color used when one or more badges are present in the Dock.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Primary Text",
+          "value": ""
+        },
+        {
+          "title": "Secondary Text",
+          "value": "raycast-secondary-text"
+        },
+        {
+          "title": "Blue",
+          "value": "raycast-blue"
+        },
+        {
+          "title": "Green",
+          "value": "raycast-green"
+        },
+        {
+          "title": "Magenta",
+          "value": "raycast-magenta"
+        },
+        {
+          "title": "Orange",
+          "value": "raycast-orange"
+        },
+        {
+          "title": "Purple",
+          "value": "raycast-purple"
+        },
+        {
+          "title": "Red",
+          "value": "raycast-red"
+        },
+        {
+          "title": "Yellow",
+          "value": "raycast-yellow"
+        }
+      ],
+      "default": "raycast-orange",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.18.1",
+    "shell-quote": "^1.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.1",
+    "@types/react": "19.0.1",
+    "@types/shell-quote": "^1.7.5",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
