@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ModuleDoc, GenericType } from "./types";
 import { List } from "@raycast/api";
 import { MODULES } from "./utils";
@@ -40,13 +40,26 @@ const ModuleSection = ({
 
 export default function Command() {
   const [types, setTypes] = useState(Object.values(GenericType));
+  const [modules, setModules] = useState<ModuleDoc[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadModules() {
+      const loadedModules = await Promise.all(MODULES);
+      setModules(loadedModules);
+      setIsLoading(false);
+    }
+
+    loadModules();
+  }, []);
 
   return (
     <List
       searchBarPlaceholder="Search function"
       searchBarAccessory={<TypeDropdown onChange={setTypes} />}
+      isLoading={isLoading}
     >
-      {MODULES.map((module: ModuleDoc) => (
+      {modules.map((module: ModuleDoc) => (
         <ModuleSection
           module={module}
           types={types}
