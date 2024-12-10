@@ -1,10 +1,8 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { convertVideo } from "../utils/converter";
+import { Form, ActionPanel, Action, showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { useState, useEffect } from "react";
 import path from "path";
-import { convertImage } from "../utils/converter";
+import { convertVideo, convertImage, convertAudio } from "../utils/converter";
 import { execPromise } from "../utils/exec";
-import { convertAudio } from "../utils/converter";
-import { useState } from "react";
 
 const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg"];
 const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp"];
@@ -12,12 +10,36 @@ const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
+  const [finderFiles, setFinderFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchFinderItems = async () => {
+      try {
+        const items = await getSelectedFinderItems();
+        const validFiles = items
+          .filter((item) => {
+            const ext = path.extname(item.path).toLowerCase();
+            return (
+              ALLOWED_EXTENSIONS.includes(ext) ||
+              ALLOWED_IMAGE_EXTENSIONS.includes(ext) ||
+              ALLOWED_AUDIO_EXTENSIONS.includes(ext)
+            );
+          })
+          .map((item) => item.path);
+
+        setFinderFiles(validFiles);
+        if (validFiles.length > 0) handleFileSelect(validFiles);
+      } catch (error) {
+        console.error("Error fetching Finder items:", error);
+      }
+    };
+    fetchFinderItems();
+  }, []);
 
   const handleFileSelect = (files: string[]) => {
-    // Reset selectedFileType if no files are selected
-    if (!files || files.length === 0) {
+    if (files.length === 0) {
       setSelectedFileType(null);
-      return true; // Return true to prevent form error state
+      return true;
     }
 
     try {
@@ -26,18 +48,12 @@ export function ConverterForm() {
       const isFirstFileImage = ALLOWED_IMAGE_EXTENSIONS.includes(firstFileExtension);
       const isFirstFileAudio = ALLOWED_AUDIO_EXTENSIONS.includes(firstFileExtension);
 
-      // Check if all files are of the same type
       const hasInvalidSelection = files.some((file) => {
-        try {
-          const extension = path.extname(file)?.toLowerCase() || "";
-          if (isFirstFileVideo) return !ALLOWED_EXTENSIONS.includes(extension);
-          if (isFirstFileImage) return !ALLOWED_IMAGE_EXTENSIONS.includes(extension);
-          if (isFirstFileAudio) return !ALLOWED_AUDIO_EXTENSIONS.includes(extension);
-          return true;
-        } catch (error) {
-          console.error("Error processing file:", file, error);
-          return true; // Consider invalid if there's an error
-        }
+        const extension = path.extname(file)?.toLowerCase() || "";
+        if (isFirstFileVideo) return !ALLOWED_EXTENSIONS.includes(extension);
+        if (isFirstFileImage) return !ALLOWED_IMAGE_EXTENSIONS.includes(extension);
+        if (isFirstFileAudio) return !ALLOWED_AUDIO_EXTENSIONS.includes(extension);
+        return true;
       });
 
       if (hasInvalidSelection) {
@@ -103,7 +119,7 @@ export function ConverterForm() {
       title: "Converting file...",
     });
 
-    values.videoFile.forEach(async (item) => {
+    for (const item of values.videoFile) {
       try {
         let outputPath = "";
         if (isInputImage) {
@@ -135,7 +151,7 @@ export function ConverterForm() {
           message: String(error),
         });
       }
-    });
+    }
   };
 
   return (
@@ -146,7 +162,13 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="videoFile" title="Select files" allowMultipleSelection={true} onChange={handleFileSelect} />
+      <Form.FilePicker
+        id="videoFile"
+        title="Select files"
+        allowMultipleSelection={true}
+        value={finderFiles}
+        onChange={handleFileSelect}
+      />
       {selectedFileType && (
         <Form.Dropdown
           id="format"
