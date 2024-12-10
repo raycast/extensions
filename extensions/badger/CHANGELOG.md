@@ -2,4 +2,4 @@
 
 ## [Added Badger] - 2024-12-10
 
-Initial version code
+Initial version

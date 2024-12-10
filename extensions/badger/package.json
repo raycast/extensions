@@ -163,15 +163,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.87.4",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/utils": "^1.17.0",
     "shell-quote": "^1.8.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.10.1",
-    "@types/react": "19.0.1",
-    "@types/shell-quote": "^1.7.5",
-    "typescript": "^5.7.2"
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build",
