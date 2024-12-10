@@ -1,6 +1,6 @@
 # Fetch Youtube Transcript Changelog
 
-## [0.1.2] - 2024-01-04
+## [1.1.2] - 2024-12-04
 
 ### Changed
 

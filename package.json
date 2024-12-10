@@ -41,8 +41,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.82.5",
-    "ytdl-core": "^4.11.5",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "youtube-captions-scraper": "^2.0.3",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
