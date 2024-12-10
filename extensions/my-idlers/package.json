@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myidlers",
   "title": "MyIdlers",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "View Summary and details of your idlers",
+  "icon": "my-idlers.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
@@ -15,7 +15,7 @@
       "title": "URL",
       "type": "textfield",
       "required": true,
-      "description": "",
+      "description": "MyIdlers instance URL",
       "placeholder": "https://demo.myidlers.com"
     },
     {
@@ -23,15 +23,15 @@
       "title": "API Key",
       "type": "password",
       "required": true,
-      "description": "",
-      "placeholder": ""
+      "description": "API Key from Account",
+      "placeholder": "xxx...xXX"
     },
     {
       "name": "max_num_as_unlimited",
       "label": "Replace '999999' with 'Unlimited'",
       "type": "checkbox",
       "required": false,
-      "description": "",
+      "description": "This will replace '999999' with the word 'Unlimited'",
       "default": false
     }
   ],
@@ -39,26 +39,24 @@
     {
       "name": "dashboard",
       "title": "Dashboard",
-      "description": "",
+      "description": "Tally, Costings and Averages",
       "mode": "view"
     },
     {
-      "name": "providers",
-      "title": "Providers",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "hosting",
-      "title": "Hosting",
-      "description": "",
+      "name": "items",
+      "title": "Items",
+      "description": "Servers, Resellers, Shared, Locations, OS, Providers",
       "mode": "view",
       "arguments": [
         {
-          "name": "hosting_type",
+          "name": "item",
           "type": "dropdown",
-          "required": false,
+          "required": true,
           "data": [
+            {
+              "title": "Servers",
+              "value": "servers"
+            },
             {
               "title": "Reseller",
               "value": "reseller"
@@ -66,9 +64,29 @@
             {
               "title": "Shared",
               "value": "shared"
+            },
+            {
+              "title": "Domains",
+              "value": "domains"
+            },
+            {
+              "title": "Labels",
+              "value": "labels"
+            },
+            {
+              "title": "Locations",
+              "value": "locations"
+            },
+            {
+              "title": "OS",
+              "value": "os"
+            },
+            {
+              "title": "Providers",
+              "value": "providers"
             }
           ],
-          "placeholder": "Hosting Type"
+          "placeholder": "Item"
         }
       ]
     }
