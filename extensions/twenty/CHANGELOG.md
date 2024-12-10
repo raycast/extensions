@@ -1,5 +1,9 @@
 # Twenty Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added support for rating field type
+
 ## [Enhancements] - 2024-12-04
 
 - Updated entire twenty extension to be flexible
