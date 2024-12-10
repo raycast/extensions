@@ -53,7 +53,13 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
                   <Detail.Metadata.TagList.Item
                     key={transaction.id}
                     text={transaction.category_name ?? 'Not Specified'}
-                    color={transaction.category_name ? easyGetColorFromId(idx) : Color.Red}
+                    color={
+                      transaction.category_name
+                        ? transaction.category_name === 'Uncategorized'
+                          ? null
+                          : easyGetColorFromId(idx)
+                        : Color.Red
+                    }
                   />
                 ))
             ) : (
