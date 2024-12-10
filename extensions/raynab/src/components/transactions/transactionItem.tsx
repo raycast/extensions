@@ -53,8 +53,12 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       title={transaction.payee_name ?? transaction.id}
       subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
       accessories={
+        /* Accessories should be absent when showing details @see https://developers.raycast.com/api-reference/user-interface/list#list.item.detail */
         !state.isShowingDetails
           ? [
+              !transaction.approved
+                ? { icon: { source: Icon.MagnifyingGlass, tintColor: Color.Orange }, tooltip: 'Unreviewed transaction' }
+                : {},
               transaction.transfer_account_id ? { icon: Icon.Switch, tooltip: 'Transfer' } : {},
               transaction.subtransactions.length > 0 ? { icon: Icon.Coins, tooltip: 'Split Transaction' } : {},
               {
