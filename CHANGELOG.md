@@ -1,5 +1,11 @@
 # Fetch Youtube Transcript Changelog
 
+## [1.1.3] - 2024-12-10
+
+### Fixed
+
+- Fixed issue due to ytdl-core
+
 ## [1.1.2] - 2024-12-04
 
 ### Changed
