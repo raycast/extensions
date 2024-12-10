@@ -34,6 +34,7 @@ export function formatValues(values: Record<string, any>, objectRecordMetadata: 
           if (formattedValues[key] === "") {
             formattedValues[key] = null;
           }
+          break;
         }
         default:
           break;
