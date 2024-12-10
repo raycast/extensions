@@ -44,7 +44,7 @@ export function requestRecommendFeed(
         const data = res.data as RecommendFeedRespDto;
         if (data.err_no !== 0 || !data.data) {
           console.log(`request juejin recommend feed error: ${data.err_msg}`);
-          onError("请求失败");
+          onError("request error");
         } else {
           console.log(data.data);
 
@@ -61,7 +61,7 @@ export function requestRecommendFeed(
         }
       } catch (error) {
         console.log(`request juejin recommend feed error: ${error}`);
-        onError("请求失败");
+        onError("request error");
       }
     });
 

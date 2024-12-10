@@ -8,7 +8,7 @@ export default function RecommendFeedCategoryDropdown({
 }) {
   return (
     <List.Dropdown
-      tooltip="选择分类"
+      tooltip="Choose category"
       defaultValue={RecommendFeedCategory.iOS}
       storeValue={true}
       onChange={(value) => {

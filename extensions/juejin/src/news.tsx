@@ -26,7 +26,7 @@ export default function Command() {
       (err: string) => {
         setIsLoading(false);
         showToast({
-          title: "获取推荐列表失败",
+          title: "Get recommend list failed",
           message: err,
           style: Toast.Style.Failure,
         });

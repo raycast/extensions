@@ -6,7 +6,7 @@ export function RecommendFeedAction({ articleId }: { articleId: string }) {
       {articleId && <Action.OpenInBrowser url={`https://juejin.cn/post/${articleId}`} title="打开文章" />}
       {articleId && (
         <Action.CopyToClipboard
-          title="复制链接"
+          title="Copy Link"
           content={`https://juejin.cn/post/${articleId}`}
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />

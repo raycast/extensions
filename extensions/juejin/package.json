@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jue-jin",
-  "title": "掘金",
-  "description": "展示掘金各个分类下的推荐文章，支持选择切换不同类型的文章",
+  "title": "juejin",
+  "description": "Display recommended articles under each category of Nuggets, and support the selection and switching of different types of articles",
   "icon": "icon.png",
   "author": "sharker_alice_sharker",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "news",
       "title": "News Articles",
-      "description": "展示掘金推荐文章，根据类型请求不同类型的推荐文章",
+      "description": "Display Nuggets recommended articles and request different types of recommended articles by type",
       "mode": "view"
     }
   ],
