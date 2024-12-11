@@ -1,6 +1,6 @@
 # Datetime formatter Changelog
 
-## [Update] - 2024-12-07
+## [Update] - {PR_MERGE_DATE}
 
 - Added `Insert Natural Language Date` command to convert natural language into a specified date format.
 
