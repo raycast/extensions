@@ -1,5 +1,11 @@
 # Pomodoro Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Show time left in menubar submenu when time left is hidden in menubar
+- Fixes focus not turning off when manually ending session
+- Reorders preferences
+
 ## [Enhancement] - 2024-12-11
 
 - Add the weekly and daily statistics to the `View Pomodoro Stats` command
