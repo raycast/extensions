@@ -114,7 +114,8 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
       }
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
-      updateTransaction(activeBudgetId, transaction.id, transactionData)
+      /* The transaction should be approved at this point */
+      updateTransaction(activeBudgetId, transaction.id, { ...transactionData, approved: true })
         .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
