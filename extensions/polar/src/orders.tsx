@@ -146,7 +146,7 @@ const OrdersView = () => {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter orders..."
+      searchBarPlaceholder="Filter Orders..."
       filtering={true}
       pagination={{
         pageSize: 20,
