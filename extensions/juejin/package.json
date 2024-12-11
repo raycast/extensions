@@ -1,12 +1,18 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jue-jin",
-  "title": "juejin",
+  "title": "Juejin",
   "description": "Display recommended articles under each category of Nuggets, and support the selection and switching of different types of articles",
   "icon": "icon.png",
   "author": "sharker_alice_sharker",
   "categories": [
     "News"
+  ],
+  "keywords": [
+    "掘金",
+    "Juejin",
+    "Juejin - juejin.cn",
+    "Juejin.cn"
   ],
   "license": "MIT",
   "commands": [

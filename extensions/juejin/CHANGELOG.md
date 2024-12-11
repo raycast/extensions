@@ -1,3 +1,3 @@
-# 掘金 Changelog
+# Juejin Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}

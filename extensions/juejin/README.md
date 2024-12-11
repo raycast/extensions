@@ -1,3 +1,3 @@
-# 掘金
+# Juejin
 
-展示掘金各个分类下的推荐文章
+Display recommended articles under each category of Juejin, and support the selection and switching of different types of articles
