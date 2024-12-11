@@ -59,7 +59,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
     }
     case 'filter': {
       const { filterBy: newFilter } = action;
-      const { collection, filter: currentFilter, group, initialCollection } = state;
+      const { filter: currentFilter, group, initialCollection } = state;
 
       if (newFilter === null || isSameFilter(newFilter, currentFilter)) {
         const collection = group ? initialCollection.reduce(groupToMap(group), new Map()) : initialCollection;
@@ -70,10 +70,7 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
         };
       }
 
-      const filteredCollection = Array.isArray(collection)
-        ? initialCollection.filter(filterCollectionBy(newFilter))
-        : // TODO improve performance. Most .reduce calls could be replaced by for loops (?)
-          initialCollection.filter(filterCollectionBy(newFilter)).reduce(groupToMap(group), new Map());
+      const filteredCollection = filterCollectionAndGroup(initialCollection, newFilter, group);
 
       return {
         ...state,
@@ -103,15 +100,21 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
     }
     case 'search': {
       const { query } = action;
-      const { initialCollection } = state;
+      const { initialCollection, group } = state;
 
       // Do not bother matching empty queries
-      if (query === '') return { ...state, collection: initialCollection, search: '' };
+      if (query === '') {
+        return {
+          ...state,
+          search: '',
+          collection: filterCollectionAndGroup(initialCollection, state.filter, group),
+        };
+      }
 
       // Find the position of a match if it exists
       const modifiersPosition = query.search(MODIFIERS_REGEX);
 
-      // Loacte the part of the query which isn't a modifier
+      // Locate the part of the query which isn't a modifier
       // This assumes that part to be at the beginning of the query
       // TODO Other methods could be used but they are either slower, or require more complex regex
       const nonModifierString = modifiersPosition == -1 ? query : query.substring(0, modifiersPosition).trim();
@@ -136,10 +139,12 @@ export function transactionViewReducer(state: ViewState, action: ViewAction): Vi
 
       const newCollection = fuse.search(nonModifierString).flatMap((result) => result.item);
 
+      // Apply previous grouping and filtering to the new collection
+
       return {
         ...state,
         search: query,
-        collection: newCollection,
+        collection: filterCollectionAndGroup(newCollection, state.filter, group),
       };
     }
     case 'toggleDetails': {
@@ -218,6 +223,12 @@ function sortCollectionBy(sortOrder: SortNames) {
   };
 }
 
+/**
+ * Returns a filter function that evaluates transactions based on the provided filter criteria.
+ *
+ * @param newFilter - Filter object containing key and optional value to filter by.
+ * @returns A predicate function that returns true if the transaction matches the filter criteria
+ */
 function filterCollectionBy(newFilter: Filter) {
   return (item: TransactionDetail) => {
     if (!newFilter) return true;
@@ -233,6 +244,20 @@ function filterCollectionBy(newFilter: Filter) {
 
     return item[newFilter.key] === newFilter.value;
   };
+}
+
+/**
+ * Filters a collection of transactions based on a filter and optional grouping.
+ *
+ * @param collection - Array of transaction details to filter
+ * @param filter - Filter criteria to apply to the collection
+ * @param group - Optional grouping to apply after filtering
+ * @returns Either a filtered array of transactions or a grouped map of filtered transactions
+ */
+function filterCollectionAndGroup(collection: TransactionDetail[], filter: Filter, group: ViewState['group']) {
+  return group
+    ? (collection.filter(filterCollectionBy(filter)).reduce(groupToMap(group), new Map()) as TransactionDetailMap)
+    : collection.filter(filterCollectionBy(filter));
 }
 
 /**
