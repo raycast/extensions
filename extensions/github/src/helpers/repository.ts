@@ -55,7 +55,7 @@ export const WEB_IDES = [
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
-  const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
   const applicationPath = application?.path.replaceAll(" ", "\\ ");
   const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
@@ -67,8 +67,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   });
 
   if (!existsSync(clonePath.replace("~", homedir()))) {
-    const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
-    const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
+    const cloneCommand = buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol);
 
     try {
       execSync(cloneCommand);
