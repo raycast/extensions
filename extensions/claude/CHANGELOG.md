@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - 2024-12-09
+
+- Feature: Added copy question actions
+
 ## [Update] - 2024-11-05
 
 - Feature: Added new [Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)

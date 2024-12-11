@@ -1,8 +1,13 @@
 # Datetime formatter Changelog
 
+
 ## [Update] - {PR_MERGE_DATE}
 
 - Added `Insert Natural Language Date` command to convert natural language into a specified date format.
+
+## [Fix] - 2024-12-11
+
+- Fixed image path issure in README.md.
 
 ## [Update] - 2024-05-21
 

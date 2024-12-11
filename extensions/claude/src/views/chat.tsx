@@ -1,4 +1,4 @@
-import { ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { DestructiveAction, PrimaryAction } from "../actions";
 import { CopyActionSection } from "../actions/copy";
@@ -43,30 +43,40 @@ export const ChatView = ({
         onModelChange={onModelChange}
       />
       {use.chats.data.length > 0 && (
-        <ActionPanel.Section title="Restart">
-          <DestructiveAction
-            title="Start New Conversation"
-            icon={Icon.RotateAntiClockwise}
-            dialog={{
-              title: "Are you sure you want to start a new conversation?",
-              primaryButton: "Start New",
-            }}
-            onAction={() => {
-              setConversation({
-                id: uuidv4(),
-                chats: [],
-                model: model,
-                pinned: false,
-                updated_at: "",
-                created_at: new Date().toISOString(),
-              });
-              use.chats.clear();
-              clearSearchBar();
-              use.chats.setLoading(false);
-            }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-          />
-        </ActionPanel.Section>
+        <>
+          <ActionPanel.Section title="Question">
+            <Action.CopyToClipboard
+              title="Copy Question"
+              icon={Icon.CopyClipboard}
+              content={selectedChat.question}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Restart">
+            <DestructiveAction
+              title="Start New Conversation"
+              icon={Icon.RotateAntiClockwise}
+              dialog={{
+                title: "Are you sure you want to start a new conversation?",
+                primaryButton: "Start New",
+              }}
+              onAction={() => {
+                setConversation({
+                  id: uuidv4(),
+                  chats: [],
+                  model: model,
+                  pinned: false,
+                  updated_at: "",
+                  created_at: new Date().toISOString(),
+                });
+                use.chats.clear();
+                clearSearchBar();
+                use.chats.setLoading(false);
+              }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            />
+          </ActionPanel.Section>
+        </>
       )}
       <PreferencesActionSection />
     </ActionPanel>

@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Update GraphQL generated types] - 2024-12-09
+
+- Updated auto-generated GraphQL codes with the latest schema.
+
 ## [Handle notification icon retrieval error] - 2024-11-08
 
 - Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.

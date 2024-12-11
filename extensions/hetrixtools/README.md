@@ -18,7 +18,9 @@ This is a Raycast extension for [HetrixTools](https://hetrixtools.com/).
 
 ## 🗒️ NOTES
 
-1. As of `Initial Version` the extension allows you to:
+1. The extension allows you to:
     - View Uptime Monitors and their Details
-2. For your API Key, if you don't want the Key to have all permissions, `follow` instruction from https://docs.hetrixtools.com/api-keys-access/ and `grant` the Key following permisisons:
+    - View Blacklist Monitors and their Details
+2. For your API Key, if you don't want the Key to have *all* permissions, `follow` instruction from https://docs.hetrixtools.com/api-keys-access/ and `grant` the Key following permisisons:
     - v3 GET Uptime Monitors
+    - v3 GET Blacklist Monitors

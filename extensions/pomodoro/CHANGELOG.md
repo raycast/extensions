@@ -1,5 +1,13 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-12-11
+
+- Add the weekly and daily statistics to the `View Pomodoro Stats` command
+
+## [Fixes] - 2024-12-08
+
+- Fix short break timer
+
 ## [Chore & Fixes] - 2024-12-04
 
 - Fix the issue where the prompt does not pop up when the timer is completed
