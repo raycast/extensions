@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Update Logo] - {PR_MERGE_DATE}
+
+- Updated to latest logo since rebrand.
+
 ## [Support Zen Browser] - 2024-11-26
 
 - Added support for Zen Browser Desktop.
