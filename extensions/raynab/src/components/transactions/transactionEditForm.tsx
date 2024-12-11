@@ -9,7 +9,18 @@ import {
   isSplitTransaction,
 } from '@lib/utils';
 import { TransactionFlagColor } from 'ynab';
-import { Action, ActionPanel, Alert, confirmAlert, Color, Form, Icon, showToast, Toast } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Color,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useState } from 'react';
@@ -27,7 +38,14 @@ interface FormValues {
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
 }
 
-export function TransactionEditForm({ transaction }: { transaction: TransactionDetail }) {
+interface TransactionEditFormProps {
+  transaction: TransactionDetail;
+  forApproval?: boolean;
+}
+
+export function TransactionEditForm({ transaction, forApproval = false }: TransactionEditFormProps) {
+  const { pop } = useNavigation();
+
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
 
@@ -119,6 +137,10 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
+
+          if (forApproval) {
+            pop();
+          }
         })
         .catch(() => {
           toast.style = Toast.Style.Failure;

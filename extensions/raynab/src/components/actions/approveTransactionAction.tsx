@@ -1,3 +1,4 @@
+import { TransactionEditForm } from '@components/transactions/transactionEditForm';
 import { Shortcuts } from '@constants';
 import { updateTransaction } from '@lib/api';
 import { formatToReadablePrice } from '@lib/utils';
@@ -48,11 +49,8 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
               });
             return;
           }
-        } else {
-          // If not -> redirect to the transaction edit form
-          //        -> Once the user submits the form there, pop and come back to this view
-          console.log('complicated transaction');
-          return;
+        } else if (!transaction.category_id) {
+          push(<TransactionEditForm transaction={transaction} forApproval />);
         }
       }}
       shortcut={Shortcuts.ApproveTransaction}

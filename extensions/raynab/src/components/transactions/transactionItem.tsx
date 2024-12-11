@@ -22,7 +22,6 @@ import {
 import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
 import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
-import { useLocalStorage } from '@raycast/utils';
 import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
