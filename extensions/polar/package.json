@@ -11,9 +11,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "orders",
       "title": "View Recent Orders",
       "description": "View your last incoming orders",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "subscriptions",
+      "title": "View Subscriptions",
+      "description": "View your active subscriptions",
       "mode": "view",
       "icon": "command-icon.png"
     }
