@@ -1,6 +1,7 @@
 # Datetime formatter Changelog
 
-## [Fix] - 2024-12-11
+## [Fix] - {PR_MERGE_DATE}
+
 - Fixed image path issure in README.md.
 
 ## [Update] - 2024-05-21
