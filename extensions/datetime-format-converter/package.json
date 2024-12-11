@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "format-date",
+      "name": "index",
       "title": "Format Date",
       "description": "Convert timestamps and datetime strings into various formats.",
       "mode": "view"
