@@ -1,5 +1,8 @@
 # Datetime formatter Changelog
 
+## [Fix] - 2024-12-11
+- Fixed image path issure in README.md.
+
 ## [Update] - 2024-05-21
 
 - Added customization for displayed date and time formats based on user preferences.
