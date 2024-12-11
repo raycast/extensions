@@ -1,19 +1,20 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
 import { TransactionProvider } from './transactionContext';
-import { CurrencyFormat, type Period } from '@srcTypes';
+import { CurrencyFormat, Filter, type Period } from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
 import { formatToReadablePrice } from '@lib/utils';
 import { useLocalStorage } from '@raycast/utils';
 
 interface TransactionViewProps {
   search?: string;
+  filter?: Filter;
 }
 
-export function TransactionView({ search = '' }: TransactionViewProps) {
+export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
@@ -22,7 +23,7 @@ export function TransactionView({ search = '' }: TransactionViewProps) {
   const [state, dispatch] = useReducer(
     transactionViewReducer,
     {
-      filter: null,
+      filter: defaultFilter,
       group: null,
       sort: 'date_desc', // Default to newest transactions first
       search: search,
@@ -71,8 +72,12 @@ export function TransactionView({ search = '' }: TransactionViewProps) {
 
     dispatch({ type: 'reset', initialCollection: transactions });
 
-    // Keep the current query in sync with the new collection to filter
+    // Keep the current query and previous filter state in sync with the new collection to filter
     dispatch({ type: 'search', query });
+
+    if (filter?.key === 'unreviewed') {
+      dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
+    }
 
     // Prevents success toast from overriding a failure
     if (errorToastPromise.current) {
@@ -90,6 +95,7 @@ export function TransactionView({ search = '' }: TransactionViewProps) {
       dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
     }
   };
+  const dropDownValue = state.filter?.key === 'unreviewed' ? 'unreviewed' : 'all';
 
   return (
     <TransactionProvider
@@ -103,7 +109,9 @@ export function TransactionView({ search = '' }: TransactionViewProps) {
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
-        searchBarAccessory={<TransactionViewDropdown onSelectionChange={onDropdownFilterChange} />}
+        searchBarAccessory={
+          <TransactionViewDropdown selection={dropDownValue} onSelectionChange={onDropdownFilterChange} />
+        }
       >
         {!Array.isArray(collection)
           ? Array.from(collection).map(([, group]) => (
@@ -127,11 +135,12 @@ export function TransactionView({ search = '' }: TransactionViewProps) {
 
 interface TransactionViewDropdownProps {
   onSelectionChange: (newValue: string) => void;
+  selection: string;
 }
 
 function TransactionViewDropdown(props: TransactionViewDropdownProps) {
   return (
-    <List.Dropdown tooltip="Select Transaction type" onChange={props.onSelectionChange}>
+    <List.Dropdown value={props.selection} tooltip="Select Transaction type" onChange={props.onSelectionChange}>
       <List.Dropdown.Item title="All" value="all" />
       <List.Dropdown.Item title="Unreviewed" value="unreviewed" />
     </List.Dropdown>

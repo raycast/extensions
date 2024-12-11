@@ -7,7 +7,7 @@ import { LaunchProps } from '@raycast/api';
 export default function Command(props: LaunchProps) {
   return (
     <SWRConfig value={cacheConfig}>
-      <TransactionView search={props.launchContext?.search ?? ''} />
+      <TransactionView search={props.launchContext?.search ?? ''} filter={props.launchContext?.filter} />
     </SWRConfig>
   );
 }

@@ -39,7 +39,11 @@ export function UnreviewedTransactionView() {
       <MenuBarExtra.Item
         title="Review all transactions"
         onAction={() =>
-          launchCommand({ name: 'transactions', type: LaunchType.UserInitiated, context: { search: `is:unapproved` } })
+          launchCommand({
+            name: 'transactions',
+            type: LaunchType.UserInitiated,
+            context: { filter: { key: 'unreviewed' } },
+          })
         }
       />
       <MenuBarExtra.Section>
@@ -53,7 +57,10 @@ export function UnreviewedTransactionView() {
                 launchCommand({
                   name: 'transactions',
                   type: LaunchType.UserInitiated,
-                  context: { search: `account:${accountName.split(' ').join('-').toLowerCase()} is:unapproved` },
+                  context: {
+                    search: `account:${accountName.split(' ').join('-').toLowerCase()}`,
+                    filter: { key: 'unreviewed' },
+                  },
                 })
               }
             />
