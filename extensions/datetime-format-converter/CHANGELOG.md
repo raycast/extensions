@@ -1,8 +1,12 @@
 # Datetime formatter Changelog
 
-## [Update] - 2024-12-07
+## [Update] - {PR_MERGE_DATE}
 
 - Users can now add their cusom date time formats.
+
+## [Fix] - 2024-12-11
+
+- Fixed image path issure in README.md.
 
 ## [Update] - 2024-05-21
 

@@ -129,18 +129,18 @@ export function endOfInterval(currentInterval: Interval) {
   try {
     currentInterval.parts[currentInterval.parts.length - 1].endAt = currentTimestamp();
     saveIntervalHistory(currentInterval).then();
-    if (currentInterval.type === "focus") {
+    if (currentInterval.type === "focus" && enableFocusWhileFocused) {
       setDND(false, {
         name: "pomodoro-control-timer",
         context: { currentInterval },
       });
+    } else {
+      launchCommand({
+        name: "pomodoro-control-timer",
+        type: LaunchType.UserInitiated,
+        context: { currentInterval },
+      });
     }
-    if (enableFocusWhileFocused) return;
-    launchCommand({
-      name: "pomodoro-control-timer",
-      type: LaunchType.UserInitiated,
-      context: { currentInterval },
-    });
   } catch (error) {
     console.error(error);
   }
