@@ -13,7 +13,6 @@
     {
       "name": "toggle-grayscale",
       "title": "Toggle Grayscale",
-      "subtitle": "Change Color Filters",
       "description": "Quickly toggle macOS Color Filters. Perfect for users who frequently switch between color modes for accessibility, screen reading, or working in low-light conditions. Saves time by eliminating the need to navigate through System Settings menus.",
       "mode": "no-view"
     }
