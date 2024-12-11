@@ -23,7 +23,7 @@
           "type": "textfield",
           "required": true,
           "title": "Paths to index",
-          "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'. Wildcards allowed, e.g. '~/go/src/*/*'",
+          "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'. Wildcards (*) allowed",
           "placeholder": "~/work,~/projects",
           "default": ""
         },
