@@ -1,6 +1,6 @@
 # HetrixTools Changelog
 
-## [View Blacklist Monitors] - {PR_MERGE_DATE}
+## [View Blacklist Monitors] - 2024-12-11
 
 ## [Fix: Crash when Nameservers are null] - 2024-10-25
 
