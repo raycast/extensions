@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-11
 
 - Added support for rating field type
 
