@@ -1,5 +1,9 @@
 # Twenty Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Updated select field type with preference
+
 ## [Enhancements] - 2024-12-04
 
 - Updated entire twenty extension to be flexible
