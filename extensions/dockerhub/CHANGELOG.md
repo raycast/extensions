@@ -1,6 +1,6 @@
 # Docker Hub Changelog
 
-## [Fix images search] - {PR_MERGE_DATE}
+## [Fix images search] - 2024-12-11
 
 - Fixed docker hub images search
 
