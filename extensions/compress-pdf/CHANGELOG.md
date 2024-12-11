@@ -1,6 +1,6 @@
 # Compress PDF Changelog
 
-## [Fix Outdated SDK] - {PR_MERGE_DATE}
+## [Fix Outdated SDK] - 2024-12-11
 
 - fix: CloudConvert not compressing due to outdated SDK ([Issue #15762](https://github.com/raycast/extensions/issues/15762))
 - add Icon to `SubmitForm`
