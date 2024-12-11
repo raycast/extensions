@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Update Logo] - {PR_MERGE_DATE}
+## [Update Logo] - 2024-12-11
 
 - Updated to latest logo since rebrand.
 
