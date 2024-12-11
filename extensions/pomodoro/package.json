@@ -49,7 +49,27 @@
       "name": "stats-pomodoro-timer",
       "title": "View Pomodoro Stats",
       "mode": "view",
-      "description": "Shows the stats of the Pomodoro timer"
+      "description": "Shows the stats of the Pomodoro timer",
+      "preferences": [
+        {
+          "name": "showWeeklyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Weekly Stats",
+          "label": "Show weekly stats",
+          "description": "Shows the weekly stats of the Pomodoro timer",
+          "default": false
+        },
+        {
+          "name": "showDailyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Daily Stats",
+          "label": "Show Daily stats",
+          "description": "Shows the daily stats of the Pomodoro timer",
+          "default": false
+        }
+      ]
     },
     {
       "name": "slack-pomodoro-menu-bar",
