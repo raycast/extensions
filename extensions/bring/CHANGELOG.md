@@ -1,6 +1,6 @@
 # Bring Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-11
 
 - Updated the rendering logic of grid items to show non-added items only when the user enters a search term.
 - Added items are now grouped by categories or left ungrouped based on the user's preference set in the mobile app.
