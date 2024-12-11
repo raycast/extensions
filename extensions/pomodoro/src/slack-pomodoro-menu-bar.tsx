@@ -1,8 +1,15 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "./lib/constants";
-import { getCurrentInterval, isPaused, duration, preferences, progress } from "./lib/intervals";
-import { secondsToTime } from "./lib/secondsToTime";
+import {
+  endOfInterval,
+  getCurrentInterval,
+  getCurrentIntervalName,
+  isPaused,
+  preferences,
+  progress,
+} from "./lib/intervals";
+import getTimeLeft from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
 import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 import {
@@ -23,10 +30,15 @@ const slackClient = OAuthService.slack({
   scope: "users.profile:write dnd:write",
 });
 
-export default withAccessToken(slackClient)(TogglePomodoroTimer);
+export default withAccessToken(slackClient)(ToggleMenuPomodoroTimer);
 
-export function TogglePomodoroTimer() {
-  const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
+export function ToggleMenuPomodoroTimer() {
+  const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(() => {
+    const interval = getCurrentInterval();
+    return interval;
+  });
+  const [timeLeft, setTimeLeft] = useState<string>(getTimeLeft());
+
   const { token } = getAccessToken();
 
   if (currentInterval && progress(currentInterval) >= 100) {
@@ -40,6 +52,20 @@ export function TogglePomodoroTimer() {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    if (currentInterval && progress(currentInterval) >= 100) {
+      endOfInterval(currentInterval);
+    }
+  }, [currentInterval]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [currentInterval]);
 
   async function onStart(type: IntervalType) {
     const interval = await slackCreateInterval(type, token);
@@ -66,23 +92,25 @@ export function TogglePomodoroTimer() {
     setCurrentInterval(getCurrentInterval());
   }
 
-  let icon: Image.ImageLike;
-  icon = { source: "tomato-0.png", tintColor: IconTint };
+  let icon: Image.ImageLike = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
     const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = preferences.enableTimeOnMenuBar
-    ? currentInterval
-      ? secondsToTime(currentInterval.length - duration(currentInterval))
-      : "--:--"
-    : undefined;
+  const title = preferences.enableTimeOnMenuBar ? timeLeft : undefined;
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+    <MenuBarExtra
+      icon={icon}
+      title={title}
+      tooltip={`Pomodoro | ${getCurrentIntervalName()}${!preferences.enableTimeOnMenuBar ? ": " + getTimeLeft() : ""}`}
+    >
       {currentInterval ? (
         <>
+          {!title ? (
+            <MenuBarExtra.Section title={`${getCurrentIntervalName()} ${getTimeLeft()}`}></MenuBarExtra.Section>
+          ) : null}
           {isPaused(currentInterval) ? (
             <MenuBarExtra.Item
               title="Continue"

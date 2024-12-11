@@ -2,7 +2,14 @@ import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Ic
 import { ActionPanel, Action } from "@raycast/api";
 import { OAuthService, getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { exec } from "child_process";
-import { getCurrentInterval, isPaused, preferences } from "./lib/intervals";
+import {
+  endOfInterval,
+  getCurrentInterval,
+  getCurrentIntervalName,
+  isPaused,
+  preferences,
+  progress,
+} from "./lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
 import { GiphyResponse, Interval } from "./lib/types";
 import {
@@ -13,6 +20,9 @@ import {
   slackResetInterval,
   slackRestartInterval,
 } from "./lib/slack/slackIntervals";
+import getTimeLeft from "./lib/secondsToTime";
+import { useEffect, useState } from "react";
+import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
   await action();
@@ -32,11 +42,31 @@ const createAction = (action: () => Promise<void> | Promise<Interval | undefined
 
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
+
+  const [timeLeft, setTimeLeft] = useState<string>(getTimeLeft());
+
+  useEffect(() => {
+    if (currentInterval && progress(currentInterval) >= 100) {
+      endOfInterval(currentInterval);
+    }
+  }, [currentInterval]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [currentInterval]);
+
   const { token } = getAccessToken();
+
+  checkDNDExtensionInstall();
+
   return (
     <List navigationTitle="Control Pomodoro Timers">
       {currentInterval ? (
-        <>
+        <List.Section title={`${getCurrentIntervalName()} ${timeLeft}`}>
           {isPaused(currentInterval) ? (
             <List.Item
               title="Continue"
@@ -76,7 +106,7 @@ const ActionsList = () => {
               </ActionPanel>
             }
           />
-        </>
+        </List.Section>
       ) : (
         <>
           <List.Item

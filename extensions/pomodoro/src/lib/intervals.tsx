@@ -107,6 +107,7 @@ export function continueInterval(): Interval | undefined {
 
 export function resetInterval() {
   cache.remove(CURRENT_INTERVAL_CACHE_KEY);
+  setDND(false);
 }
 
 export function restartInterval() {
@@ -187,7 +188,16 @@ export function getNextIntervalExecutor(): IntervalExecutor {
   return executor;
 }
 
-export const preferences = getPreferenceValues<Preferences>();
+export const getCurrentIntervalName = () => {
+  const currentInterval = getCurrentInterval();
+  return (
+    currentInterval?.type
+      .replace(currentInterval.type.charAt(0), currentInterval.type.charAt(0).toUpperCase())
+      .replace("-", " ") || ""
+  );
+};
+
+export const preferences = getPreferenceValues<Preferences.PomodoroMenuBar>();
 export const intervalDurations: Record<IntervalType, number> = {
   focus: parseFloat(preferences.focusIntervalDuration) * 60,
   "short-break": parseFloat(preferences.shortBreakIntervalDuration) * 60,

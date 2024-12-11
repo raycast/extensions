@@ -5,17 +5,22 @@ import { useFetch } from "@raycast/utils";
 import {
   continueInterval,
   createInterval,
+  endOfInterval,
   getCurrentInterval,
+  getCurrentIntervalName,
   getNextIntervalExecutor,
   isPaused,
   pauseInterval,
   preferences,
+  progress,
   resetInterval,
   restartInterval,
 } from "./lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
 import { GiphyResponse, Interval, Quote } from "./lib/types";
 import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
+import getTimeLeft from "./lib/secondsToTime";
+import { useEffect, useState } from "react";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -35,12 +40,29 @@ const createAction = (action: () => void) => () => {
 
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
+
+  const [timeLeft, setTimeLeft] = useState<string>(getTimeLeft());
+
+  useEffect(() => {
+    if (currentInterval && progress(currentInterval) >= 100) {
+      endOfInterval(currentInterval);
+    }
+  }, [currentInterval]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [currentInterval]);
+
   checkDNDExtensionInstall();
 
   return (
     <List navigationTitle="Control Pomodoro Timers">
       {currentInterval ? (
-        <>
+        <List.Section title={`${getCurrentIntervalName()} ${timeLeft}`}>
           {isPaused(currentInterval) ? (
             <List.Item
               title="Continue"
@@ -80,7 +102,7 @@ const ActionsList = () => {
               </ActionPanel>
             }
           />
-        </>
+        </List.Section>
       ) : (
         <>
           <List.Item
@@ -181,7 +203,7 @@ const EndOfInterval = () => {
   }
 
   if (usingGiphy) {
-    markdownContent = `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n\n` + markdownContent;
+    markdownContent += `\n\n ![powered by GIPHY](Poweredby_100px-White_VertLogo.png)`;
   }
 
   const executor = getNextIntervalExecutor();

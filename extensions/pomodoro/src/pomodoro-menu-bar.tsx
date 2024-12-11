@@ -1,5 +1,5 @@
 import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "./lib/constants";
 import {
   createInterval,
@@ -9,12 +9,12 @@ import {
   pauseInterval,
   continueInterval,
   isPaused,
-  duration,
   preferences,
   progress,
   endOfInterval,
+  getCurrentIntervalName,
 } from "./lib/intervals";
-import { secondsToTime } from "./lib/secondsToTime";
+import getTimeLeft from "./lib/secondsToTime";
 import { Interval, IntervalType } from "./lib/types";
 import { checkDNDExtensionInstall, setDND } from "./lib/doNotDisturb";
 
@@ -24,12 +24,27 @@ const IconTint: Color.Dynamic = {
   adjustContrast: false,
 };
 
-export default function TogglePomodoroTimer() {
-  const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
+export default function ToggleMenuPomodoroTimer() {
+  const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(() => {
+    const interval = getCurrentInterval();
+    return interval;
+  });
 
-  if (currentInterval && progress(currentInterval) >= 100) {
-    endOfInterval(currentInterval);
-  }
+  const [timeLeft, setTimeLeft] = useState<string>(getTimeLeft());
+
+  useEffect(() => {
+    if (currentInterval && progress(currentInterval) >= 100) {
+      endOfInterval(currentInterval);
+    }
+  }, [currentInterval]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [currentInterval]);
 
   async function onStart(type: IntervalType) {
     await checkDNDExtensionInstall();
@@ -54,24 +69,25 @@ export default function TogglePomodoroTimer() {
     restartInterval();
     setCurrentInterval(getCurrentInterval());
   }
+  // get title to rerender every second from getTimeLeft
+  const title = preferences.enableTimeOnMenuBar ? getTimeLeft() : undefined;
 
-  let icon: Image.ImageLike;
-  icon = { source: "tomato-0.png", tintColor: IconTint };
+  let icon: Image.ImageLike = { source: "tomato-0.png", tintColor: IconTint };
+
   if (currentInterval) {
     const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
     icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = preferences.enableTimeOnMenuBar
-    ? currentInterval
-      ? secondsToTime(currentInterval.length - duration(currentInterval))
-      : "--:--"
-    : undefined;
-
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+    <MenuBarExtra
+      icon={icon}
+      title={title}
+      tooltip={`Pomodoro ${!preferences.enableTimeOnMenuBar && currentInterval ? " | " + getCurrentIntervalName() + ": " + timeLeft : ""}`}
+    >
       {currentInterval ? (
         <>
+          {!title ? <MenuBarExtra.Section title={`${getCurrentIntervalName()} ${getTimeLeft()}`} /> : null}
           {isPaused(currentInterval) ? (
             <MenuBarExtra.Item
               title="Continue"
