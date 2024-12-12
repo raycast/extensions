@@ -3,7 +3,7 @@
 ## [Support specifying git clone protocol] - 2024-12-12
 
 - Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.
-- `copy clone command` and `clone and open` now respect the clone protocol from the preferences.
+- `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
 
 ## [Update GraphQL generated types] - 2024-12-09
 
