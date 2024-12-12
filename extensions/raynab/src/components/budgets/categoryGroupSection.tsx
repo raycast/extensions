@@ -8,6 +8,7 @@ import { BudgetDetails } from './budgetDetails';
 import { CategoryDetails } from './categoryDetails';
 import { CategoryEditForm } from './categoryEditForm';
 import { useLocalStorage } from '@raycast/utils';
+import { Shortcuts } from '@constants';
 
 export function CategoryGroupSection({
   categoryGroups,
@@ -66,7 +67,7 @@ export function CategoryGroupSection({
                           icon={Icon.Binoculars}
                           title={`${showProgress ? 'Hide' : 'Show'} Progress`}
                           onAction={() => setshowProgress((s) => !s)}
-                          shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                          shortcut={Shortcuts.ShowBudgetProgress}
                         />
                       </ActionPanel.Section>
                       <ActionPanel.Section title="Modify List View">
@@ -74,13 +75,13 @@ export function CategoryGroupSection({
                           title="Edit Category"
                           icon={Icon.Pencil}
                           target={<CategoryEditForm category={category} />}
-                          shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                          shortcut={Shortcuts.EditBudgetCategory}
                         />
                         <Action.Push
                           title="Create New Transaction"
                           icon={Icon.Plus}
                           target={<TransactionCreationForm categoryId={category.id} />}
-                          shortcut={{ modifiers: ['opt'], key: 'c' }}
+                          shortcut={Shortcuts.CreateNewTransaction}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

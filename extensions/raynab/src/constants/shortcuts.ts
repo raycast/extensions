@@ -9,6 +9,9 @@ interface Constants {
   Timeline: Keyboard.Shortcut;
   Filter: Keyboard.Shortcut;
   Edit: Keyboard.Shortcut;
+  ShowBudgetProgress: Keyboard.Shortcut;
+  EditBudgetCategory: Keyboard.Shortcut;
+  CreateNewTransaction: Keyboard.Shortcut;
 }
 
 export const Shortcuts: Constants = {
@@ -23,4 +26,7 @@ export const Shortcuts: Constants = {
   Timeline: { modifiers: ['cmd'], key: 't' },
   Filter: { modifiers: ['cmd'], key: 'f' },
   Edit: { modifiers: ['cmd'], key: 'e' },
+  ShowBudgetProgress: { modifiers: ['cmd', 'shift'], key: 'p' },
+  EditBudgetCategory: { modifiers: ['cmd'], key: 'e' },
+  CreateNewTransaction: { modifiers: ['opt'], key: 'c' },
 };
