@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added a parser for GitHub repository URL in the open repository action
+
 ## [Updates] - 2024-10-07
 
 - Hide history list when `historyCount` is zero

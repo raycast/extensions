@@ -72,11 +72,16 @@ export const PackageListItem = ({
     handleFaveChange?.()
   }
 
+  const extractGithubUrl = (repositoryUrl: string): string => {
+    const match = repositoryUrl.match(/github\.com\/[^\s]+/)
+    return match ? `https://${match[0].replace(/\.git$/, '')}` : repositoryUrl
+  }
+
   const openActions = {
     openRepository: pkg.links?.repository ? (
       <Action.OpenInBrowser
         key="openRepository"
-        url={pkg.links.repository}
+        url={extractGithubUrl(pkg.links.repository)}
         title="Open Repository"
         onOpen={handleAddToHistory}
       />
