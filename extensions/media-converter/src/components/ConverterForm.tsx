@@ -10,6 +10,31 @@ const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
+  const [finderFiles, setFinderFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchFinderItems = async () => {
+      try {
+        const items = await getSelectedFinderItems();
+        const validFiles = items
+          .filter((item) => {
+            const ext = path.extname(item.path).toLowerCase();
+            return (
+              ALLOWED_EXTENSIONS.includes(ext) ||
+              ALLOWED_IMAGE_EXTENSIONS.includes(ext) ||
+              ALLOWED_AUDIO_EXTENSIONS.includes(ext)
+            );
+          })
+          .map((item) => item.path);
+
+        setFinderFiles(validFiles);
+        if (validFiles.length > 0) handleFileSelect(validFiles);
+      } catch (error) {
+        console.error("Error fetching Finder items:", error);
+      }
+    };
+    fetchFinderItems();
+  }, []);
 
   const handleFileSelect = (files: string[]) => {
     if (files.length === 0) {
@@ -137,7 +162,13 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker id="videoFile" title="Select files" allowMultipleSelection={true} onChange={handleFileSelect} />
+      <Form.FilePicker
+        id="videoFile"
+        title="Select files"
+        allowMultipleSelection={true}
+        value={finderFiles}
+        onChange={handleFileSelect}
+      />
       {selectedFileType && (
         <Form.Dropdown
           id="format"
