@@ -1,5 +1,10 @@
 # Media Converter Changelog
 
+## [Enhancement] - 2024-12-11
+
+- Added support for HEIC file format.
+- Fixed bug where the Convert Media command was not working as expected, preventing the user from selecting a file to convert.
+
 ## [Enhancement] - 2024-12-10
 
 - Added a new **Quick Convert** command that allows users to select a file in Finder, choose the desired format from a list, and convert it instantly.
