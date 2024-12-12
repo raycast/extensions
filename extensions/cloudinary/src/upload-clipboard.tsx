@@ -1,51 +1,30 @@
-import { useEffect, useState } from "react";
-import { showToast, Toast, Clipboard } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 import fileUriToPath from "file-uri-to-path";
 
 import { uploadImage } from "./lib/cloudinary";
 import type { Asset } from "./types/asset";
 
 import ViewResource from "./components/ViewResource";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 export default function main() {
-  const [asset, setAsset] = useState<Asset>();
-  const [loading, setLoading] = useState(false);
+  const { isLoading, data: asset } = usePromise(async () => {
+    const { file } = await Clipboard.read();
 
-  useEffect(() => {
-    (async function run() {
-      setLoading(true);
+    if (typeof file === "undefined") {
+      throw new Error("Missing image data.");
+    }
 
-      try {
-        const { file } = await Clipboard.read();
+    const filePath = fileUriToPath(file);
 
-        if (typeof file === "undefined") {
-          throw new Error("Missing image data.");
-        }
+    const resource = await uploadImage(filePath);
+    return resource as Asset;
+  }, [], {
+    onError(error) {
+      const message = typeof error.message === "string" ? error.message : "Failed to upload clipboard data to Cloudinary";
+      showFailureToast(message, { title: "Error" });
+    },
+  })
 
-        const filePath = fileUriToPath(file);
-
-        const resource = await uploadImage(filePath);
-        setAsset(resource as Asset);
-      } catch (e) {
-        console.log(e);
-        displayError("Failed to upload clipboard data to Cloudinary");
-      }
-
-      setLoading(false);
-    })();
-  }, []);
-
-  /**
-   * displayError
-   */
-
-  function displayError(message: string) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error",
-      message: message,
-    });
-  }
-
-  return <ViewResource resource={asset} isLoading={loading} />;
+  return <ViewResource resource={asset} isLoading={isLoading} />;
 }

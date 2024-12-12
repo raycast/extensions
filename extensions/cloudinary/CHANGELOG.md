@@ -6,8 +6,9 @@
 - `Cache` "Search" through `useCachedPromise`
 - `Cache` "View Item" through `useCachedPromise`
 - Add placeholders to `Preferences`
-- cloudinaryApiSecret is now of type `password`
+- _cloudinaryApiSecret_ is now of type `password`
 - Various `type` and `argument` refactor
+- Use Raycast Hooks where possible
 
 ## [Update] - 2023-11-14
 

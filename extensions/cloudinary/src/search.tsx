@@ -8,7 +8,7 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 export default function main(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const {
-    isLoading: loading,
+    isLoading,
     data: assets,
     pagination,
   } = useCachedPromise(
@@ -34,5 +34,5 @@ export default function main(props: LaunchProps<{ arguments: Arguments.Search }>
     },
   );
 
-  return <ViewResources resources={assets} isLoading={loading} pagination={pagination} />;
+  return <ViewResources resources={assets} isLoading={isLoading} pagination={pagination} />;
 }
