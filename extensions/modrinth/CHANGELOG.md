@@ -1,5 +1,5 @@
 # Modrinth Search Changelog
 
-## [Added Modrinth] - {PR_MERGE_DATE}
+## [Added Modrinth] - 2024-12-12
 
 Initial version code
