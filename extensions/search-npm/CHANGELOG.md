@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Added a parser for GitHub repository URL in the open repository action
+- Added a Git URL parser for the repository URL in the open repository action
 
 ## [Updates] - 2024-10-07
 

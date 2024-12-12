@@ -22,6 +22,7 @@ import {
   removeItemFromFavorites,
 } from '../utils/favorite-storage'
 import Favorites from '../favorites'
+import gitUrlParse from 'git-url-parse';
 
 interface PackageListItemProps {
   result: Package
@@ -72,16 +73,11 @@ export const PackageListItem = ({
     handleFaveChange?.()
   }
 
-  const extractGithubUrl = (repositoryUrl: string): string => {
-    const match = repositoryUrl.match(/github\.com\/[^\s]+/)
-    return match ? `https://${match[0].replace(/\.git$/, '')}` : repositoryUrl
-  }
-
   const openActions = {
     openRepository: pkg.links?.repository ? (
       <Action.OpenInBrowser
         key="openRepository"
-        url={extractGithubUrl(pkg.links.repository)}
+        url={gitUrlParse(pkg.links.repository).toString("https")}
         title="Open Repository"
         onOpen={handleAddToHistory}
       />
