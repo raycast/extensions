@@ -133,7 +133,6 @@
   "dependencies": {
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
-    "@types/git-url-parse": "^9.0.3",
     "dedupe": "^4.0.3",
     "git-url-parse": "^16.0.0",
     "gitlab-url-parse": "^1.0.0",
@@ -143,6 +142,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/git-url-parse": "^9.0.3",
     "@types/node": "^22.7.4",
     "@types/parse-github-url": "^1.0.3",
     "@types/react": "^18.3.11",
