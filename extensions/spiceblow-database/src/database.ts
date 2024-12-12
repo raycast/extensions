@@ -10,18 +10,42 @@ import { useGlobalState } from "./state";
 import { ColumnInfo, Json, TableInfo } from "./types";
 import { ellipsisReviver, generateRandomId, getDatabaseConnectionType, sleep } from "./utils";
 
+// process.title = "Spiceblow";
+
 // Override parsing of DATE, TIMESTAMP, and TIMESTAMPTZ types
-[pgTypes.builtins.DATE, pgTypes.builtins.TIMESTAMP, pgTypes.builtins.TIMESTAMPTZ].forEach((type) => {
+void [pgTypes.builtins.DATE, pgTypes.builtins.TIMESTAMP, pgTypes.builtins.TIMESTAMPTZ].forEach((type) => {
   pgTypes.setTypeParser(type, (val) => val);
 });
 
 // Override parsing of TIME and TIMETZ types
-[pgTypes.builtins.TIME, pgTypes.builtins.TIMETZ].forEach((type) => {
+void [pgTypes.builtins.TIME, pgTypes.builtins.TIMETZ].forEach((type) => {
   pgTypes.setTypeParser(type, (val) => val);
 });
 
 let postgresPool = new Pool({
   connectionString: useGlobalState.getState().connectionString,
+  max: 3,
+});
+
+// Ensure connections are released on process exit
+process.on("exit", () => {
+  console.log("Received exit, exiting gracefully");
+  postgresPool.end();
+  mysqlPool.end();
+});
+
+// Handle other termination signals
+process.on("SIGINT", () => {
+  console.log("Received SIGINT, exiting gracefully");
+  postgresPool.end();
+  mysqlPool.end();
+  process.exit();
+});
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM, exiting gracefully");
+  postgresPool.end();
+  mysqlPool.end();
+  process.exit();
 });
 
 const typeCast: TypeCast = function (field, next) {
@@ -40,23 +64,27 @@ const typeCast: TypeCast = function (field, next) {
 let mysqlPool = mysql.createPool({
   uri: useGlobalState.getState().connectionString,
   typeCast,
+  connectionLimit: 3,
 });
 
 let databaseType: "postgres" | "mysql" =
   getDatabaseConnectionType(useGlobalState.getState().connectionString) || "postgres";
-
 useGlobalState.subscribe((state) => {
   const type = getDatabaseConnectionType(state.connectionString);
   if (type === "postgres") {
     databaseType = "postgres";
+    postgresPool.end();
     postgresPool = new Pool({
       connectionString: state.connectionString,
+      max: 3,
     });
   } else if (type === "mysql") {
     databaseType = "mysql";
+    mysqlPool.end();
     mysqlPool = mysql.createPool({
       uri: state.connectionString,
       typeCast,
+      connectionLimit: 3,
     });
   }
 });
@@ -120,7 +148,7 @@ export async function checkConnection(connectionString: string, databaseType: "p
   }
 }
 export function renderColumnValue(col: ColumnInfo, value: Json) {
-  if (value === null) {
+  if (value == null) {
     return "";
   }
   let text = String(value);
@@ -217,7 +245,10 @@ export type GenerateSearchConditionParams = {
   schema?: string;
   query?: string;
   namespace: string;
-  previousOutputs: Array<{ output: Json; error: string }>;
+  previousOutputs: Array<{
+    output: { whereClause: string; orderByClause: string | null; groupBy: string | null };
+    error: string;
+  }>;
 };
 let timesAborted = 0;
 
@@ -230,16 +261,16 @@ async function generateSearchCondition({
   namespace,
   signal,
   previousOutputs,
-}: GenerateSearchConditionParams) {
+}: GenerateSearchConditionParams): Promise<undefined | { data?: Json; sql: string }> {
   if (!searchText) {
-    return "";
+    return;
   }
   // throttle search slower than default Raycast throttle
   // if user types fast (less than 200ms on each keystroke) you only wait 200ms for the query, otherwise wait more
   await sleep(timesAborted ? 400 : 200);
   if (signal.aborted) {
     timesAborted += 1;
-    return "";
+    return;
   }
   if (!tableInfo) {
     return;
@@ -269,10 +300,10 @@ async function generateSearchCondition({
       showToast({ title: sqlClause, style: Toast.Style.Success });
     }
 
-    return sqlClause || "";
+    return { sql: sqlClause || "", data };
   }
   if (!tableInfo) {
-    return "";
+    return;
   }
 
   const textColumns = tableInfo.columns
@@ -326,10 +357,10 @@ async function generateSearchCondition({
   if (textColumns) {
     const whereClause = `WHERE ${textColumns}`;
 
-    return whereClause;
+    return { sql: whereClause };
   } else {
     notifyError(new Error("No searchable columns found"));
-    return "";
+    return;
   }
 }
 
@@ -342,6 +373,43 @@ export type SearchTableRowsOrCustomQueryParams = Omit<
   pageSize?: number;
   signal: AbortSignal;
 };
+
+interface GenerateOrderByParams {
+  tableInfo?: TableInfo;
+  tableName: string;
+  schema: string;
+}
+
+function generateOrderByClause({ tableInfo, tableName, schema }: GenerateOrderByParams): string {
+  const creationDateColumns = [
+    "created_at",
+    "createdAt",
+    "createdat",
+    "creation_date",
+    "creationdate",
+    "date_created",
+    "datecreated",
+    "timestamp",
+    "updated_at",
+    "updatedAt",
+    "updatedat",
+    "modified_at",
+    "modifiedAt",
+    "modification_date",
+  ];
+
+  const column = tableInfo?.columns.find((col) => creationDateColumns.includes(col.columnName.toLowerCase()));
+
+  if (!column) {
+    return "";
+  }
+
+  if (databaseType === "postgres") {
+    return `ORDER BY "${schema}"."${tableName}"."${column.columnName}" DESC`;
+  } else {
+    return `ORDER BY \`${schema}\`.\`${tableName}\`.\`${column.columnName}\` DESC`;
+  }
+}
 
 export async function searchTableRowsOrCustomQuery({
   table,
@@ -358,7 +426,7 @@ export async function searchTableRowsOrCustomQuery({
   const id = generateRandomId();
 
   const previousOutputs = [] as GenerateSearchConditionParams["previousOutputs"];
-
+  let output;
   while (previousOutputs.length <= 3) {
     let finalQuery: string;
     try {
@@ -379,8 +447,7 @@ export async function searchTableRowsOrCustomQuery({
         }
 
         finalQuery = dedent`
-          SELECT *
-          FROM ${databaseType === "postgres" ? `"${schema}"."${tableName}"` : `\`${schema}\`.\`${tableName}\``}
+          SELECT * FROM ${databaseType === "postgres" ? `"${schema}"."${tableName}"` : `\`${schema}\`.\`${tableName}\``}
         `;
       } else {
         throw new Error("Either 'table' or 'query' must be defined.");
@@ -394,8 +461,13 @@ export async function searchTableRowsOrCustomQuery({
         query: finalQuery,
       });
 
-      if (searchCondition) {
-        finalQuery += ` ${searchCondition}`;
+      if (searchCondition?.sql) {
+        output = searchCondition?.data;
+        finalQuery += ` ${searchCondition.sql}`;
+      } else if (table) {
+        const [schema, tableName] = table.split(".");
+        const orderBy = generateOrderByClause({ schema, tableName, tableInfo: rest.tableInfo });
+        finalQuery += " " + orderBy;
       }
 
       finalQuery += databaseType === "postgres" ? ` LIMIT $1 OFFSET $2;` : ` LIMIT ? OFFSET ?;`;
@@ -454,12 +526,12 @@ export async function searchTableRowsOrCustomQuery({
         if (rest.searchField !== NATURAL_LANGUAGE_SEARCH) {
           throw error;
         }
+        previousOutputs.push({ output, error: error.message });
         showToast({
           title: `Sql error ${previousOutputs.length + 1}, retrying...`,
           message: error.message,
           style: Toast.Style.Failure,
         });
-        previousOutputs.push({ output: finalQuery!, error: error.message });
       }
     }
   }
@@ -467,39 +539,48 @@ export async function searchTableRowsOrCustomQuery({
 }
 
 let connectionOk = false;
-
 export async function getAllTablesInfo() {
   try {
     if (databaseType === "postgres") {
       const query = `
+        WITH table_columns AS (
+          SELECT 
+            table_schema || '.' || table_name AS schema_table,
+            array_agg(column_name ORDER BY ordinal_position)::text[] as columns
+          FROM information_schema.columns
+          GROUP BY table_schema, table_name
+        )
         SELECT 
-          table_schema || '.' || table_name AS schema_table,
-          table_schema,
+          t.table_schema || '.' || t.table_name AS schema_table,
+          t.table_schema,
+          tc.columns,
           (SELECT reltuples::bigint AS estimate
            FROM pg_class c
            JOIN pg_namespace n ON n.oid = c.relnamespace
-           WHERE n.nspname = tables.table_schema AND c.relname = tables.table_name) AS estimated_row_count,
+           WHERE n.nspname = t.table_schema AND c.relname = t.table_name) AS estimated_row_count,
           (SELECT GREATEST(last_vacuum, last_autovacuum, last_analyze, last_autoanalyze)
            FROM pg_stat_user_tables
-           WHERE schemaname = tables.table_schema AND relname = tables.table_name) AS last_updated
-        FROM information_schema.tables
-        WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+           WHERE schemaname = t.table_schema AND relname = t.table_name) AS last_updated
+        FROM information_schema.tables t
+        LEFT JOIN table_columns tc ON tc.schema_table = t.table_schema || '.' || t.table_name
+        WHERE t.table_schema NOT IN ('pg_catalog', 'information_schema')
         ORDER BY 
-          CASE WHEN table_schema = 'public' THEN 0 ELSE 1 END,
-          table_schema,
+          CASE WHEN t.table_schema = 'public' THEN 0 ELSE 1 END,
+          t.table_schema,
           last_updated DESC NULLS LAST;
       `;
       const result = await postgresPool.query(query);
 
       const tables = result.rows.map((row) => ({
         schemaTable: row.schema_table,
+        columns: row.columns || [],
         estimatedRowCount: Math.max(parseInt(row.estimated_row_count), 0),
         lastUpdated: row.last_updated ? new Date(row.last_updated) : null,
       }));
 
       return tables;
     } else {
-      const query = `
+      const tablesQuery = `
         SELECT 
           table_schema AS database_name,
           table_name as table_name,
@@ -512,10 +593,12 @@ export async function getAllTablesInfo() {
           table_schema,
           update_time DESC;
       `;
-      const [rows] = await mysqlPool.query<RowDataPacket[]>(query);
+
+      const [rows] = await mysqlPool.query<RowDataPacket[]>(tablesQuery);
 
       const tables = rows.map((row) => ({
         schemaTable: row.schema_table,
+        columns: row.columns ? row.columns.split(",") : [],
         estimatedRowCount: Math.max(parseInt(row.estimated_row_count), 0),
         lastUpdated: row.last_updated ? new Date(row.last_updated) : null,
       }));
@@ -565,7 +648,7 @@ export async function getTableInfo({ table }: { table: string }) {
   if (databaseType === "postgres") {
     const [schemaName, tableName] = table.split(".");
 
-    // Get column information
+    // Get column information including enum types
     const columnQuery = `
       SELECT 
         a.attname AS column_name,
@@ -576,10 +659,17 @@ export async function getTableInfo({ table }: { table: string }) {
          FROM pg_catalog.pg_attrdef d
          WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum AND a.atthasdef) AS column_default,
         CASE WHEN p.contype = 'p' THEN true ELSE false END AS is_primary_key,
-        CASE WHEN i.indisunique AND i.indisprimary IS NOT TRUE THEN true ELSE false END AS is_unique
+        CASE WHEN i.indisunique AND i.indisprimary IS NOT TRUE THEN true ELSE false END AS is_unique,
+        CASE 
+          WHEN t.typtype = 'e' THEN 
+            (SELECT array_agg(e.enumlabel)::text[]
+             FROM pg_enum e 
+             WHERE e.enumtypid = a.atttypid)
+        END AS enum_values
       FROM pg_catalog.pg_attribute a
       LEFT JOIN pg_catalog.pg_constraint p ON p.conrelid = a.attrelid AND a.attnum = ANY(p.conkey) AND p.contype = 'p'
       LEFT JOIN pg_catalog.pg_index i ON i.indrelid = a.attrelid AND a.attnum = ANY(i.indkey)
+      LEFT JOIN pg_catalog.pg_type t ON t.oid = a.atttypid
       WHERE a.attrelid = $1::regclass
         AND a.attnum > 0 AND NOT a.attisdropped
       ORDER BY a.attnum;
@@ -601,6 +691,7 @@ export async function getTableInfo({ table }: { table: string }) {
           defaultValue: col.column_default,
           isPrimaryKey: col.is_primary_key,
           isUnique: col.is_unique,
+          enumValues: col.enum_values || null,
         };
       }),
     });
@@ -609,21 +700,34 @@ export async function getTableInfo({ table }: { table: string }) {
   } else {
     const [databaseName, tableName] = table.split(".");
 
+    // First query to get basic column info
     const columnQuery = `
       SELECT 
-        column_name as column_name,
-        data_type as data_type,
-        is_nullable as is_nullable,
-        column_default as column_default,
-        table_schema as table_schema,
-        CASE WHEN column_key IN ('PRI', 'UNI') THEN 1 ELSE 0 END AS is_primary_key
-      FROM information_schema.columns
-      WHERE table_schema = ? AND table_name = ?
-      ORDER BY ordinal_position;
+        c.column_name as column_name,
+        c.data_type as data_type,
+        c.is_nullable as is_nullable,
+        c.column_default as column_default,
+        c.table_schema as table_schema,
+        c.column_type as column_type,
+        CASE WHEN c.column_key IN ('PRI', 'UNI') THEN 1 ELSE 0 END AS is_primary_key
+      FROM information_schema.columns c
+      WHERE c.table_schema = ? AND c.table_name = ?
+      ORDER BY c.ordinal_position;
     `;
+
     const [columns] = await mysqlPool.query<RowDataPacket[]>(columnQuery, [databaseName, tableName]);
+
     const tableInfo = validateTableInfo({
       columns: columns.map((col) => {
+        // Parse enum values directly from column_type if it's an enum
+        const enumValues =
+          col.data_type === "enum" && col.column_type
+            ? col.column_type
+                .substring(5, col.column_type.length - 1)
+                .split(",")
+                .map((v: string) => v.replace(/^'|'$/g, "").trim())
+            : null;
+
         return {
           columnName: col.column_name,
           originalColumnName: col.column_name || tableName,
@@ -634,6 +738,7 @@ export async function getTableInfo({ table }: { table: string }) {
           isNullable: col.is_nullable === "YES",
           defaultValue: col.column_default,
           isPrimaryKey: col.is_primary_key,
+          enumValues,
         };
       }),
     });
