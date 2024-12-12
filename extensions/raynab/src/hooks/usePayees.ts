@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { fetchPayees } from '@lib/api';
 
-export function usePayees(budgetId = 'last-used') {
-  return useSWR([budgetId, 'payees'], ([budgetId]) => fetchPayees(budgetId));
+export function usePayees(budgetId: string | undefined) {
+  return useSWR(budgetId ? [budgetId, 'payees'] : null, ([budgetId]) => fetchPayees(budgetId));
 }

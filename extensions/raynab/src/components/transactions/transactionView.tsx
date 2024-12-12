@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
@@ -16,9 +16,9 @@ interface TransactionViewProps {
 
 export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
-  const { data: transactions = [], isValidating } = useTransactions(activeBudgetId, timeline ?? 'month');
+  const { data: transactions = [], isLoading, isValidating } = useTransactions(activeBudgetId, timeline);
 
   const [state, dispatch] = useReducer(
     transactionViewReducer,
@@ -44,7 +44,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     // This might cause problems for budgets with no transactions in the past year
     // TODO add a view for > 1 year, change to a different fallback model?
 
-    if (transactions.length == 0) {
+    if (!isLoadingBudget && !isLoading && transactions.length == 0) {
       let fallbackTimeline: Period;
       switch (timeline) {
         case 'day':
@@ -86,7 +86,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     } else {
       showToast({ style: Toast.Style.Success, title: `Showing transactions for the past ${timeline}` });
     }
-  }, [timeline, transactions]);
+  }, [timeline, transactions, isLoadingBudget, isLoading]);
 
   const onDropdownFilterChange = (newValue: string) => {
     if (newValue === 'all') {
