@@ -1,6 +1,6 @@
 # Doppler Changelog
 
-## [New Logo + View Projects] - {PR_MERGE_DATE}
+## [New Logo + View Projects] - 2024-12-12
 
 - New Logo!
 - Added command to View Projects, Environments, Configs, Secrets
