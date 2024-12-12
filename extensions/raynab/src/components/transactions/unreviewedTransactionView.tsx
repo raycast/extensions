@@ -34,7 +34,7 @@ export function UnreviewedTransactionView() {
     <MenuBarExtra
       isLoading={isLoading}
       tooltip={`You have ${nTransactions} unreviewed transaction${rule === 'one' ? '' : 's'}`}
-      icon="ynab-tree.png"
+      icon={{ source: { light: 'ynab-tree-light.png', dark: 'ynab-tree-dark.png' } }}
     >
       <MenuBarExtra.Item
         title="Review all transactions"
