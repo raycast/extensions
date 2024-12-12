@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Add ability to copy newly created issue url to clipboard as an optional config] - {PR_MERGE_DATE}
+## [Add ability to copy newly created issue url to clipboard as an optional config] - 2024-12-12
 - If you want to copy the newly created issue URL to the clipboard, you can now enable this feature in the extension settings.
 
 ## [Added Parent Issue support] - 2024-12-02
