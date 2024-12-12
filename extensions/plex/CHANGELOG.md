@@ -1,5 +1,10 @@
 # Plex Changelog
 
+## [Sort Library Items] - {PR_MERGE_DATE}
+
+- Sort items by various common metadata fields such as "Title" and "Progress"
+- Add some missing icons to `Action`s
+
 ## [New Features] - 2024-07-16
 
  - Refactored filtering for a snappier, faster experience
