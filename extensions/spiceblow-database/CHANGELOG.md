@@ -1,6 +1,6 @@
 # Search Database Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-12
 
 - Add select inputs for enum columns during update
 - Fix retry logic for filter AI generation
