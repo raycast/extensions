@@ -1,5 +1,10 @@
 # Datetime formatter Changelog
 
+
+## [Update] - 2024-12-12
+
+- Added `Insert Natural Language Date` command to convert natural language into a specified date format.
+
 ## [Fix] - 2024-12-11
 
 - Fixed image path issure in README.md.
