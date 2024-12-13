@@ -1,5 +1,12 @@
 # Jetbrains Changelog
 
+## [Better Toolbox Integrations] - 2024-12-12
+
+- Better integration with toolbox configs
+- Remove Toolbox V1 support
+- Add optional frecency sorting
+- Hook into toolbox hidden project feature
+
 ## [Shell Script Fixes] - 2024-01-23
 
 - Use correct script name from config

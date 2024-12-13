@@ -1,15 +1,15 @@
 import {
-  List,
-  ActionPanel,
   Action,
+  ActionPanel,
   Clipboard,
-  Icon,
   Color,
   getPreferenceValues,
+  Icon,
+  List,
   openCommandPreferences,
 } from "@raycast/api";
-import React, { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import React, { useState } from "react";
 
 import advancedFormat from "dayjs/plugin/advancedFormat";
 dayjs.extend(advancedFormat);

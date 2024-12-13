@@ -114,7 +114,7 @@ function searchProjects(query?: string): {
           statSync(path)?.isDirectory() ||
           (getPreferenceValues<Preferences>().includeWorkspaces &&
             statSync(path)?.isFile() &&
-            path.endsWith(".code-workspace"))
+            path.endsWith(".code-workspace")),
       )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
@@ -220,7 +220,7 @@ export default function Command() {
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
               {project.gitRemotes().map((remote, i) => {
                 const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as Keyboard.Shortcut) : undefined;
@@ -259,7 +259,7 @@ export default function Command() {
                 key="clipboard"
                 onCopy={() => updateFrecency(searchQuery, project)}
                 content={project.fullPath}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             </ActionPanel>
           }

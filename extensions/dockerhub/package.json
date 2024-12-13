@@ -8,7 +8,8 @@
   "license": "MIT",
   "contributors": [
     "tonka3000",
-    "BalliAsghar"
+    "BalliAsghar",
+    "imposibrus"
   ],
   "commands": [
     {
@@ -92,6 +93,7 @@
     "@typescript-eslint/parser": "^5.29.0",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
+    "prettier": "^3.3.3",
     "react-devtools": "^4.24.7",
     "typescript": "^4.7.4"
   },
