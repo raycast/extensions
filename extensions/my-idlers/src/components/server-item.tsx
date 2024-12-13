@@ -2,6 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { Server, ServerType } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
+import { numOrUnlimited } from "../utils";
 
 export default function ServerItem({ server }: { server: Server }) {
   return (
@@ -22,7 +23,10 @@ export default function ServerItem({ server }: { server: Server }) {
               <List.Item.Detail.Metadata.Label title="CPU" text={server.cpu.toString()} />
               <List.Item.Detail.Metadata.Label title="RAM" text={`${server.ram} ${server.ram_type}`} />
               <List.Item.Detail.Metadata.Label title="Disk" text={`${server.disk} ${server.disk_type}`} />
-              <List.Item.Detail.Metadata.Label title="Bandwidth" text={`${server.bandwidth} GB`} />
+              <List.Item.Detail.Metadata.Label
+                title="Bandwidth"
+                text={`${numOrUnlimited(server.bandwidth, "Unmetered")} GB`}
+              />
               <List.Item.Detail.Metadata.TagList title="IPv4">
                 {server.ips
                   .filter((ip) => ip.is_ipv4)

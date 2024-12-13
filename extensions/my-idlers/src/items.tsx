@@ -6,6 +6,7 @@ import HostingItem from "./components/hosting-item";
 import ServerItem from "./components/server-item";
 import ItemsSection from "./components/items-section";
 import DomainItem from "./components/domain-item";
+import { capitalizeFirst } from "./utils";
 
 export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>) {
   const [item, setItem] = useState<string>(props.arguments.item);
@@ -32,8 +33,9 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
     execute: item === "shared",
   });
 
-  const isLoading = isLoadingItems || isLoadingDomains || isLoadingLabels || isLoadingServers || isLoadingReseller || isLoadingShared;
-  
+  const isLoading =
+    isLoadingItems || isLoadingDomains || isLoadingLabels || isLoadingServers || isLoadingReseller || isLoadingShared;
+
   const icons: { [item: string]: Icon } = {
     servers: Icon.HardDrive,
     reseller: Icon.TwoPeople,
@@ -50,7 +52,7 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={!isItem && item !== "labels"}
       searchBarAccessory={
         <List.Dropdown tooltip="Item" onChange={setItem} value={item}>
           <List.Dropdown.Item icon={icons.servers} title="Servers" value="servers" />
@@ -64,13 +66,17 @@ export default function Items(props: LaunchProps<{ arguments: Arguments.Items }>
         </List.Dropdown>
       }
     >
-      {isItem && <ItemsSection title={item} icon={icon} items={items} />}
+      {isItem && <ItemsSection title={item === "os" ? "OS" : capitalizeFirst(item)} icon={icon} items={items} />}
       {item === "labels" && (
         <ItemsSection title="Labels" icon={icon} items={labels.map((label) => ({ ...label, name: label.label }))} />
       )}
-      {item==="domains" && <List.Section title="Domains" subtitle={domains.length.toString()}>
-{domains.map(domain => <DomainItem key={domain.id} domain={domain} />)}
-        </List.Section>}
+      {item === "domains" && (
+        <List.Section title="Domains" subtitle={domains.length.toString()}>
+          {domains.map((domain) => (
+            <DomainItem key={domain.id} domain={domain} />
+          ))}
+        </List.Section>
+      )}
       {item === "servers" && (
         <List.Section title="Servers" subtitle={servers.length.toString()}>
           {servers.map((server) => (

@@ -1,13 +1,10 @@
 import { Icon, List } from "@raycast/api";
 import { Reseller } from "../types";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { numOrUnlimited } from "../utils";
 import { HostingType, Shared } from "../types";
 import { getFavicon } from "@raycast/utils";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
-dayjs.extend(relativeTime);
 
 export default function HostingItem({ host }: { host: Reseller | Shared }) {
   function getIconByType(type: HostingType) {
@@ -43,7 +40,7 @@ export default function HostingItem({ host }: { host: Reseller | Shared }) {
               <List.Item.Detail.Metadata.Label title="Location" text={host.location.name} />
               <List.Item.Detail.Metadata.Label title="Provider" text={host.provider.name} />
               <List.Item.Detail.Metadata.Label title="Disk" text={`${host.disk} ${host.disk_type}`} />
-              <List.Item.Detail.Metadata.Label title="Domains" text={host.domains_limit.toString()} />
+              <List.Item.Detail.Metadata.Label title="Domains" text={numOrUnlimited(host.domains_limit)} />
               <PriceListItem price={host.price} />
               <NextDueDate date={host.price.next_due_date} />
               <List.Item.Detail.Metadata.Label title="Had Since" text={host.owned_since} />

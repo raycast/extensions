@@ -4,12 +4,18 @@ import { Pricing, Term } from "../types";
 export default function PriceListItem({ price }: { price: Pricing }) {
   function getTermChar(term: Term) {
     switch (term) {
-      case Term.Monthly: return "m"
-      case Term.Quarterly: return ""
-      case Term["Half Annual"]: return ""
-      case Term.Annual: return "y"
-      case Term.Biennal: return "2y"
-      case Term.Triennial: return "3y"
+      case Term.Monthly:
+        return "m";
+      case Term.Quarterly:
+        return "qtr";
+      case Term["Half Annual"]:
+        return "hy";
+      case Term.Annual:
+        return "y";
+      case Term.Biennal:
+        return "2y";
+      case Term.Triennial:
+        return "3y";
     }
   }
 

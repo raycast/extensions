@@ -12,26 +12,35 @@ type AttachedLabel = {
 };
 
 export enum Term {
-    Monthly=1,
-    Quarterly=2,
-    "Half Annual"=3,
-    Annual=4,
-    Biennal=5,
-    Triennial=6
+  Monthly = 1,
+  Quarterly = 2,
+  "Half Annual" = 3,
+  Annual = 4,
+  Biennal = 5,
+  Triennial = 6,
 }
 
-// export type Term = 1 | 2 | 3 | 4 | 5 | 6;
 export type Pricing = {
   id: number;
   service_id: string;
   service_type: number;
   active: number;
-  currency: "USD";
+  currency: string;
   price: string;
   term: Term;
   as_usd: string;
   usd_per_month: string;
   next_due_date: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type IP = {
+  id: string;
+  service_id: string;
+  address: string;
+  is_ipv4: 0 | 1;
+  active: 0 | 1;
   created_at: string;
   updated_at: string;
 };
@@ -58,10 +67,21 @@ type CommonHosting = {
   location: Item;
   provider: Item;
   price: Pricing;
-  ips: string[];
+  ips: IP[];
   labels: AttachedLabel[];
 };
-export type HostingType = "Direct Admin" | "cPanel";
+export type HostingType =
+  | "ApisCP"
+  | "Centos"
+  | "cPanel"
+  | "Direct Admin"
+  | "Webmin"
+  | "Moss"
+  | "Other"
+  | "Plesk"
+  | "Run cloud"
+  | "Vesta CP"
+  | "Virtual min";
 export type Reseller = CommonHosting & {
   accounts: number;
   reseller_type: HostingType;
@@ -70,15 +90,6 @@ export type Shared = CommonHosting & {
   shared_type: HostingType;
 };
 
-type IP = {
-  id: string;
-  service_id: string;
-  address: string;
-  is_ipv4: 0 | 1;
-  active: 0 | 1;
-  created_at: string;
-  updated_at: string;
-};
 export enum ServerType {
   KVM = 1,
   OVZ = 2,
@@ -144,5 +155,3 @@ export type Misc = Item & {
   owned_since: string;
   price: Pricing;
 };
-
-// export type DNS

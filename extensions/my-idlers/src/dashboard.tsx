@@ -57,7 +57,7 @@ export default function Dashboard() {
   const isLoading =
     isLoadingServers || isLoadingShared || isLoadingReseller || isLoadingDomains || isLoadingMisc || isLoadingPricing;
 
-  const actions = (
+  const actions = isLoading ? undefined : (
     <ActionPanel>
       <Action icon={Icon.Redo} title="Revalidate" onAction={() => setLastFetched(emptyState)} />
     </ActionPanel>
