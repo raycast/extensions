@@ -8,6 +8,7 @@ import RunningTimeEntry from "@/components/RunningTimeEntry";
 import UpdateTimeEntryForm from "@/components/UpdateTimeEntryForm";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import Shortcut from "@/helpers/shortcuts";
 import { Verb, withToast } from "@/helpers/withToast";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
 import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
@@ -97,6 +98,7 @@ function ListView() {
                   <Action.Push
                     title="Create Similar Time Entry"
                     icon={{ source: Icon.Plus }}
+                    shortcut={Shortcut.Duplicate}
                     target={
                       <ExtensionContextProvider>
                         <TimeEntryForm
