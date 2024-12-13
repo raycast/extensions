@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2024-12-13
 
 - ✨ Added MD5 Hash action
 - ✨ Added Decode URL component action
