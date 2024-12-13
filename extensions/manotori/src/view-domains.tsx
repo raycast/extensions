@@ -1,6 +1,6 @@
 import { getFavicon, useFetch } from "@raycast/utils";
 import { API_HEADERS, API_URL } from "./config";
-import { Domain, DomainDetails, DomainEvent, SuccessResult, TRANSFER_LOCK } from "./types";
+import { Domain, DomainDetails, DomainEvent, ErrorResponse, SuccessResult, TRANSFER_LOCK } from "./types";
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 
 function getStatusColor(status: string) {
@@ -12,9 +12,16 @@ function getStatusColor(status: string) {
   }
 }
 
+async function parseResponse(response: Response) {
+  const res = await response.json();
+  if (!response.ok) throw new Error((res as ErrorResponse).msg);
+  return res;
+}
+
 export default function ViewDomains() {
   const { isLoading, data } = useFetch(API_URL + "domain", {
     headers: API_HEADERS,
+    parseResponse,
     mapResult(result: SuccessResult<Domain[]>) {
       return {
         data: result.data,
@@ -57,6 +64,7 @@ export default function ViewDomains() {
 function ViewDomainDetails({ domain }: { domain: string }) {
   const { isLoading, data } = useFetch(API_URL + "domain/" + domain, {
     headers: API_HEADERS,
+    parseResponse,
     mapResult(result: SuccessResult<DomainDetails>) {
       return {
         data: result.data,
@@ -71,6 +79,7 @@ function ViewDomainDetails({ domain }: { domain: string }) {
 |---|---|
 | Registered | ${data.registered_at ?? "-"} |
 | Transferred | ${data.transferred_at ?? "-"} |
+| Renewal | ${data.renewal_at} |
 | Expire | ${data.expire_at} |
 `;
 
@@ -116,6 +125,7 @@ function ViewDomainDetails({ domain }: { domain: string }) {
 function ViewDomainEvents({ domain }: { domain: string }) {
   const { isLoading, data } = useFetch(API_URL + "domain/log/" + domain, {
     headers: API_HEADERS,
+    parseResponse,
     mapResult(result: SuccessResult<DomainEvent[]>) {
       return {
         data: result.data,
@@ -124,15 +134,31 @@ function ViewDomainEvents({ domain }: { domain: string }) {
     initialData: [],
   });
 
+  function getEventDetails(code: number) {
+    switch (code) {
+      case 3001:
+        return "The domain was successfully transferred from the previous provider to manotori."
+      case 2015:
+        return "The system will now check the validity of the auth code and if the domain is authorized for the transfer. You can then confirm or reject the transfer at your previous provider."
+      case 1001:
+        return "The transfer of the domain has been requested."
+      default:
+        return "";
+    }
+  }
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search event">
+    <List isLoading={isLoading} searchBarPlaceholder="Search event" isShowingDetail>
       <List.Section title={domain}>
         {data.map((event, index) => (
           <List.Item
             key={index}
             title={event.status}
-            subtitle={event.notification_code.toString()}
             accessories={[{ date: new Date(event.created_at) }]}
+            detail={<List.Item.Detail markdown={getEventDetails(event.notification_code)} metadata={<List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Code" text={event.notification_code.toString()} />
+              <List.Item.Detail.Metadata.Label title="Date" text={event.created_at.toString()} />
+            </List.Item.Detail.Metadata>} />}
           />
         ))}
       </List.Section>

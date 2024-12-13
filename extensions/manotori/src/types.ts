@@ -39,8 +39,17 @@ export type DomainEvent = {
   created_at: string;
 };
 
+export type ErrorResponse = {
+  data: [] | {
+    code: number;
+    file: string;
+    line: number;
+  }
+  msg: string;
+  msg_key: null;
+}
 export type SuccessResult<T> = {
   data: T;
-  msg: string;
+  msg: string | null;
   msg_key: null;
 };
