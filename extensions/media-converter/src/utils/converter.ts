@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import { getFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
+import { execSync } from "child_process";
 
 const config = {
   ffmpegOptions: {
@@ -46,6 +47,9 @@ const imageConfig = {
     fileExtension: ".webp",
     quality: "100",
   },
+  heic: {
+    fileExtension: ".heic",
+  },
 };
 
 const audioConfig = {
@@ -67,21 +71,27 @@ const audioConfig = {
   },
 };
 
+function getUniqueOutputPath(filePath: string, extension: string): string {
+  const outputFilePath = filePath.replace(path.extname(filePath), extension);
+  let finalOutputPath = outputFilePath;
+  let counter = 1;
+
+  while (fs.existsSync(finalOutputPath)) {
+    const fileName = path.basename(outputFilePath, extension);
+    const dirName = path.dirname(outputFilePath);
+    finalOutputPath = path.join(dirName, `${fileName}(${counter})${extension}`);
+    counter++;
+  }
+
+  return finalOutputPath;
+}
+
 export async function convertVideo(
   filePath: string,
   outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg",
 ): Promise<string> {
   const formatOptions = config.ffmpegOptions[outputFormat];
-  const outputFilePath = filePath.replace(path.extname(filePath), formatOptions.fileExtension);
-  let finalOutputPath = outputFilePath;
-  let counter = 1;
-
-  while (fs.existsSync(finalOutputPath)) {
-    const fileName = path.basename(outputFilePath, formatOptions.fileExtension);
-    const dirName = path.dirname(outputFilePath);
-    finalOutputPath = path.join(dirName, `${fileName}(${counter})${formatOptions.fileExtension}`);
-    counter++;
-  }
+  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
 
   const ffmpegPath = await getFFmpegPath();
   const command = `"${ffmpegPath}" -i "${filePath}" -vcodec ${formatOptions.videoCodec} -acodec ${formatOptions.audioCodec} "${finalOutputPath}"`;
@@ -91,19 +101,17 @@ export async function convertVideo(
   return finalOutputPath;
 }
 
-export async function convertImage(filePath: string, outputFormat: "jpg" | "png" | "webp") {
+export async function convertImage(filePath: string, outputFormat: "jpg" | "png" | "webp" | "heic"): Promise<string> {
   const formatOptions = imageConfig[outputFormat];
-  const outputFilePath = filePath.replace(path.extname(filePath), formatOptions.fileExtension);
-  let finalOutputPath = outputFilePath;
-  let counter = 1;
+  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
 
-  while (fs.existsSync(finalOutputPath)) {
-    const fileName = path.basename(outputFilePath, formatOptions.fileExtension);
-    const dirName = path.dirname(outputFilePath);
-    finalOutputPath = path.join(dirName, `${fileName}(${counter})${formatOptions.fileExtension}`);
-    counter++;
+  if (outputFormat === "heic") {
+    // Use sips for HEIC conversion
+    execSync(`sips --setProperty format heic "${filePath}" --out "${finalOutputPath}"`);
+    return finalOutputPath;
   }
 
+  // Use FFmpeg for other image formats
   const ffmpegPath = await getFFmpegPath();
   let command;
 
@@ -128,16 +136,7 @@ export async function convertImage(filePath: string, outputFormat: "jpg" | "png"
 
 export async function convertAudio(filePath: string, outputFormat: "mp3" | "aac" | "wav" | "flac"): Promise<string> {
   const formatOptions = audioConfig[outputFormat];
-  const outputFilePath = filePath.replace(path.extname(filePath), formatOptions.fileExtension);
-  let finalOutputPath = outputFilePath;
-  let counter = 1;
-
-  while (fs.existsSync(finalOutputPath)) {
-    const fileName = path.basename(outputFilePath, formatOptions.fileExtension);
-    const dirName = path.dirname(outputFilePath);
-    finalOutputPath = path.join(dirName, `${fileName}(${counter})${formatOptions.fileExtension}`);
-    counter++;
-  }
+  const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);
 
   const ffmpegPath = await getFFmpegPath();
   const command = `"${ffmpegPath}" -i "${filePath}" -c:a ${formatOptions.audioCodec} "${finalOutputPath}"`;

@@ -7,14 +7,14 @@ import { execPromise } from "./utils/exec";
 // Comprehensive list of allowed file extensions
 const FILE_TYPE_EXTENSIONS = {
   video: [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".m4v"],
-  image: [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff"],
+  image: [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff", ".heic"],
   audio: [".mp3", ".aac", ".wav", ".m4a", ".flac", ".ogg", ".wma"],
 };
 
 // Mapping of file types to conversion formats
 const CONVERSION_FORMATS = {
   video: ["mp4", "avi", "mkv", "mov", "mpg"],
-  image: ["jpg", "png", "webp"],
+  image: ["jpg", "png", "webp", "heic"],
   audio: ["mp3", "aac", "wav", "flac"],
 };
 
@@ -104,7 +104,7 @@ export default function QuickConvert() {
       let outputPath = "";
       switch (fileType) {
         case "image":
-          outputPath = await convertImage(selectedFile, format as "jpg" | "png" | "webp");
+          outputPath = await convertImage(selectedFile, format as "jpg" | "png" | "webp" | "heic");
           break;
         case "audio":
           outputPath = await convertAudio(selectedFile, format as "mp3" | "aac" | "wav" | "flac");
