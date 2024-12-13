@@ -31,4 +31,5 @@ export const annotations = [
     tactions: [{ type: "Live Template", content: ["$STATISTICS$"] }],
   },
 ];
+
 export const ANNOTATIONS_SHORTCUTS = JSON.stringify(annotations);
