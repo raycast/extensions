@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Keyboard } from "@raycast/api";
 import CreatePromptForm from "./components/CreatePromptForm";
 import PromptDetail from "./components/PromptDetail";
 import { useLocalPrompts, usePrompt } from "./hooks";
@@ -69,6 +69,8 @@ export default function Command() {
               <Action
                 icon={Icon.Trash}
                 title="Delete Prompt"
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                style={Action.Style.Destructive}
                 onAction={async () => await destroy(prompt.id, async () => await loadPrompts())}
               />
             </ActionPanel>
