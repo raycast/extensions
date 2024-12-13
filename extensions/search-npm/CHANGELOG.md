@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Update] - 2024-12-13
+
+- Added a Git URL parser for the repository URL in the open repository action
+
 ## [Updates] - 2024-10-07
 
 - Hide history list when `historyCount` is zero
