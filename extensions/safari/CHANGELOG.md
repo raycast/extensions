@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2024-12-13
 
 - Add a preference for `Search Reading List` to hide items that have already been read.
 
