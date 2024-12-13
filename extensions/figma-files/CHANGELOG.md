@@ -1,5 +1,9 @@
 # Figma Files Changelog
 
+## [Adds last edited timestamp] - 2024-12-12
+
+- You can now see when was the Figma file last edited ("last edited 2 days ago"), to better understand how stale the file is.
+
 ## [Adds support for OAuth] - 2024-04-15
 
 - The extension now has OAuth support, so you don't have to create personal access tokens for giving Raycast access to Figma.
