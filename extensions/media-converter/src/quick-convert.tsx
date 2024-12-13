@@ -14,7 +14,7 @@ const FILE_TYPE_EXTENSIONS = {
 // Mapping of file types to conversion formats
 const CONVERSION_FORMATS = {
   video: ["mp4", "avi", "mkv", "mov", "mpg"],
-  image: ["jpg", "png", "webp", "heic"],
+  image: ["jpg", "png", "webp", "heic", "tiff"],
   audio: ["mp3", "aac", "wav", "flac"],
 };
 
@@ -104,7 +104,7 @@ export default function QuickConvert() {
       let outputPath = "";
       switch (fileType) {
         case "image":
-          outputPath = await convertImage(selectedFile, format as "jpg" | "png" | "webp" | "heic");
+          outputPath = await convertImage(selectedFile, format as "jpg" | "png" | "webp" | "heic" | "tiff");
           break;
         case "audio":
           outputPath = await convertAudio(selectedFile, format as "mp3" | "aac" | "wav" | "flac");
