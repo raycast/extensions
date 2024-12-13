@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "application-shortcuts",
-  "title": "Application Shortcuts",
-  "description": "Easily launch command-line applications, including Android Emulator, Scrcpy and React DevTools",
-  "icon": "extension-icon.png",
+  "name": "react-devtools",
+  "title": "React DevTools",
+  "description": "Easily launch React DevTools command-line application",
+  "icon": "ReactDevTools.png",
   "author": "gutenye",
   "license": "MIT",
   "categories": [
@@ -11,20 +11,6 @@
     "Productivity"
   ],
   "commands": [
-    {
-      "name": "scrcpy",
-      "title": "Android Scrcpy",
-      "description": "Open Android Scrcpy app",
-      "mode": "no-view",
-      "icon": "AndroidMirror.png"
-    },
-    {
-      "name": "android-emulator",
-      "title": "Android Emulator",
-      "description": "Open Android Emulator app",
-      "mode": "view",
-      "icon": "AndroidEmulator.png"
-    },
     {
       "name": "react-devtools",
       "title": "React Devtools",
