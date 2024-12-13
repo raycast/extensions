@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-13
 
 - Added a Git URL parser for the repository URL in the open repository action
 
