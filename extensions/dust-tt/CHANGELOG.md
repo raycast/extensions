@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [fixes] - 2024-12-11
+
+- Upgrade dust-tt/client to allow more flexibility in the api response.
+
 ## [fixes] - 2024-11-21
 
 - Use the proper oauth audience and add scopes to limit api access.
