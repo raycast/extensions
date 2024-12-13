@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "bbc-news",
-      "title": "BBC News",
-      "subtitle": "Latest Headlines",
+      "title": "Show Latest Headlines",
+      "subtitle": "BBC News",
       "description": "Display the latest headlines from the BBC News RSS feed.",
       "mode": "view"
     }
