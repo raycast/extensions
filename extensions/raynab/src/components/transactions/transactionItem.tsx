@@ -23,6 +23,8 @@ import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
 import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
 import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
+import { TransactionCreationForm } from './transactionCreationForm';
+import { Shortcuts } from '@constants';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
@@ -152,6 +154,12 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
             />
             <OpenInYnabAction accounts accountId={transaction.account_id} />
             <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
+            <Action.Push
+              title="Create New Transaction"
+              icon={Icon.Plus}
+              target={<TransactionCreationForm categoryId={transaction.category_id ?? undefined} />}
+              shortcut={Shortcuts.CreateNewTransaction}
+            />
             {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Modify List View">
