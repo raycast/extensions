@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "useUnknownInCatchVariables": false,
+    "noEmit": true,
     "resolveJsonModule": true
   }
 }
