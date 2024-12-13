@@ -1,41 +1,15 @@
-import { Form, ActionPanel, Action, showToast, Toast, getSelectedFinderItems } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import path from "path";
 import { convertVideo, convertImage, convertAudio } from "../utils/converter";
 import { execPromise } from "../utils/exec";
 
-const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp"];
+const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".heic"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic"];
 const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
-  const [finderFiles, setFinderFiles] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchFinderItems = async () => {
-      try {
-        const items = await getSelectedFinderItems();
-        const validFiles = items
-          .filter((item) => {
-            const ext = path.extname(item.path).toLowerCase();
-            return (
-              ALLOWED_EXTENSIONS.includes(ext) ||
-              ALLOWED_IMAGE_EXTENSIONS.includes(ext) ||
-              ALLOWED_AUDIO_EXTENSIONS.includes(ext)
-            );
-          })
-          .map((item) => item.path);
-
-        setFinderFiles(validFiles);
-        if (validFiles.length > 0) handleFileSelect(validFiles);
-      } catch (error) {
-        console.error("Error fetching Finder items:", error);
-      }
-    };
-    fetchFinderItems();
-  }, []);
-
   const handleFileSelect = (files: string[]) => {
     if (files.length === 0) {
       setSelectedFileType(null);
@@ -94,7 +68,7 @@ export function ConverterForm() {
     const isInputImage = ALLOWED_IMAGE_EXTENSIONS.includes(fileExtension);
     const isInputAudio = ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension);
     const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg"].includes(values.format);
-    const isOutputImage = ["jpg", "png", "webp"].includes(values.format);
+    const isOutputImage = ["jpg", "png", "webp", "heic"].includes(values.format);
 
     if (!isInputVideo && !isInputImage && !isInputAudio) {
       await showToast({
@@ -123,7 +97,7 @@ export function ConverterForm() {
       try {
         let outputPath = "";
         if (isInputImage) {
-          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp");
+          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic");
         } else if (isInputAudio) {
           outputPath = await convertAudio(item, values.format as "mp3" | "aac" | "wav" | "flac");
         } else {
@@ -162,13 +136,7 @@ export function ConverterForm() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker
-        id="videoFile"
-        title="Select files"
-        allowMultipleSelection={true}
-        value={finderFiles}
-        onChange={handleFileSelect}
-      />
+      <Form.FilePicker id="videoFile" title="Select files" allowMultipleSelection={true} onChange={handleFileSelect} />
       {selectedFileType && (
         <Form.Dropdown
           id="format"
@@ -180,6 +148,7 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="jpg" title=".jpg" />
               <Form.Dropdown.Item value="png" title=".png" />
               <Form.Dropdown.Item value="webp" title=".webp" />
+              <Form.Dropdown.Item value="heic" title=".heic" />
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">
