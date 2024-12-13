@@ -1,5 +1,9 @@
 # BinTools Changelog
 
+## [Update] - 2024-12-13
+
+- Add copy action
+
 ## [Update] - 2024-04-29
 
 - Clean up some of the code warnings

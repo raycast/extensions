@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { InputType, parseInputNumber } from "./calculator";
+import { Clipboard } from "@raycast/api";
 
 export interface State {
   inputType: string;
@@ -31,6 +32,17 @@ export interface doublePrecFloat {
   floatDecimal: string;
 }
 
+function copy(str: string) {
+  return async () => {
+    try {
+      await Clipboard.copy({ text: str })
+      await showToast({ style: Toast.Style.Success, title: "Copy successful." });
+    } catch(e) {
+      await showToast({ style: Toast.Style.Failure, title: "Copy failed." });
+    }
+  }
+}
+
 export default function Command() {
   const [state, setState] = useState<State>({
     binNumber: "",
@@ -42,9 +54,21 @@ export default function Command() {
 
   const normalListItems = [
     <List.Item title={"Detected Input"} accessories={[{ text: state.inputType }]} />,
-    <List.Item title={"Binary Representation"} accessories={[{ text: state.binNumber }]} />,
-    <List.Item title={"Decimal Representation"} accessories={[{ text: state.decNumber }]} />,
-    <List.Item title={"Hexadecimal Representation"} accessories={[{ text: state.hexNumber }]} />,
+    <List.Item title={"Binary Representation"} accessories={[{ text: state.binNumber }]}  actions={
+      <ActionPanel>
+        <Action title="Copy" onAction={copy(state.binNumber)} />
+      </ActionPanel>
+    }/>,
+    <List.Item title={"Decimal Representation"} accessories={[{ text: state.decNumber }]} actions={
+      <ActionPanel>
+        <Action title="Copy" onAction={copy(state.decNumber)} />
+      </ActionPanel>
+    }/>,
+    <List.Item title={"Hexadecimal Representation"} accessories={[{ text: state.hexNumber }]} actions={
+      <ActionPanel>
+        <Action title="Copy" onAction={copy(state.hexNumber)} />
+      </ActionPanel>
+    }/>,
   ];
 
   const commaListItems = [
