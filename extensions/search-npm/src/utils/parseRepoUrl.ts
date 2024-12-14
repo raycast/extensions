@@ -1,12 +1,12 @@
-import type { Result } from 'parse-github-url'
-import parsedGithubRepoUrl from 'parse-github-url'
-import type { ParseGitlabUrl } from 'gitlab-url-parse'
-import parsedGitlabRepoUrl from 'gitlab-url-parse'
+import parseGithubRepoUrl from 'parse-github-url'
+import parseGitlabRepoUrl from 'gitlab-url-parse'
+import { cleanGitUrl } from './cleanGitUrl'
 
 interface ParseRepoUrlResponse {
   owner: string | null | undefined
   name: string | null | undefined
   type?: 'github' | 'gitlab'
+  repoUrl?: string
 }
 
 export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
@@ -15,28 +15,36 @@ export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
       owner: null,
       name: null,
       type: undefined,
+      repoUrl: undefined,
     }
   }
 
-  const isGithubRepo = repoUrl.includes('github.com')
-  const isGitlabRepo = repoUrl.includes('gitlab.com')
-  const parsedRepo = isGithubRepo
-    ? parsedGithubRepoUrl(repoUrl)
-    : isGitlabRepo
-      ? parsedGitlabRepoUrl(repoUrl)
-      : null
+  const cleanedUrl = cleanGitUrl(repoUrl)
+  const isGithubRepo = cleanedUrl.includes('github.com')
+  const isGitlabRepo = cleanedUrl.includes('gitlab.com')
+
+  if (isGithubRepo) {
+    const parsedRepo = parseGithubRepoUrl(repoUrl)
+    return {
+      owner: parsedRepo?.owner,
+      name: parsedRepo?.name,
+      type: 'github',
+      repoUrl: cleanedUrl,
+    }
+  } else if (isGitlabRepo) {
+    const parsedRepo = parseGitlabRepoUrl(repoUrl)
+    return {
+      owner: parsedRepo.user,
+      name: parsedRepo.project,
+      type: 'gitlab',
+      repoUrl: cleanedUrl,
+    }
+  }
 
   return {
-    owner: isGithubRepo
-      ? (parsedRepo as Result).owner
-      : isGitlabRepo
-        ? (parsedRepo as ParseGitlabUrl).user
-        : null,
-    name: isGithubRepo
-      ? (parsedRepo as Result).name
-      : isGitlabRepo
-        ? (parsedRepo as ParseGitlabUrl).project
-        : null,
-    type: isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined,
+    owner: null,
+    name: null,
+    type: undefined,
+    repoUrl: cleanedUrl,
   }
 }
