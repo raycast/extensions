@@ -1,14 +1,11 @@
 # Fetch Youtube Transcript Changelog
 
-## [1.1.3] - 2024-12-14
-
-### Fixed
-
-- Fixed issue due to ytdl-core
+## [1.1.4] - 2024-12-14
 
 ### Added
 
 - Added support for all major languages:
+
 1. Arabic (ar)
 2. Bengali (bn)
 3. Chinese (zh)
@@ -25,6 +22,12 @@
 14. Spanish (es)
 15. Tamil (ta)
 16. Urdu (ur)
+
+## [1.1.3] - 2024-12-10
+
+### Fixed
+
+- Fixed issue due to ytdl-core
 
 ## [1.1.2] - 2024-12-04
 
