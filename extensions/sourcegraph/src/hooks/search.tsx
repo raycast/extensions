@@ -63,6 +63,7 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
   async function search(searchText: string, pattern: PatternType) {
     // Do not execute empty search - simply reset state
     if (!searchText.trim()) {
+      cancelRef.current?.abort(); // reset state, cancel any active search
       setState(emptyState);
       return;
     }
@@ -72,6 +73,10 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
       return;
     }
 
+    // We're starting a new search - cancel the previous one
+    cancelRef.current?.abort();
+    cancelRef.current = new AbortController();
+
     // Reset state for new search
     setState({
       ...emptyState,
@@ -80,26 +85,39 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     });
 
     try {
-      // Cancel previous search
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-
       // Update search history
       await SearchHistory.addSearch(src, searchText);
 
+      const noResultsTimeoutSeconds = 10;
+      setTimeout(() => {
+        if (state.results.length === 0) {
+          setState((oldState) => {
+            // Cancel search if there are no results yet after a timeout
+            if (oldState.results.length === 0) {
+              cancelRef.current?.abort();
+              return {
+                ...oldState,
+                isLoading: false,
+                summary: `No results found in ${noResultsTimeoutSeconds} seconds`,
+              };
+            }
+            return oldState;
+          });
+        }
+      }, noResultsTimeoutSeconds * 1000);
+
       // Do the search
-      await performSearch(cancelRef.current.signal, src, searchText, pattern, {
+      await performSearch(cancelRef.current, src, searchText, pattern, {
         onResults: (results) => {
           setState((oldState) => {
             if (oldState.results.length > maxResults) {
-              return {
-                ...oldState,
-                summaryDetail: `${maxResults} results shown`,
-              };
+              return oldState; // do nothing
             }
+            const newResults = oldState.results.concat(results);
             return {
               ...oldState,
-              results: oldState.results.concat(results),
+              results: newResults,
+              summaryDetail: `${newResults.length} results shown`,
             };
           });
         },
@@ -126,7 +144,8 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
             .shiftTo(durationMs > 1000 ? "seconds" : "milliseconds")
             .toHuman({ unitDisplay: "narrow" });
 
-          const results = `${Intl.NumberFormat().format(matchCount)}${skipped ? "+" : ""}`;
+          const results =
+            matchCount === 0 ? `${matchCount}` : `${Intl.NumberFormat().format(matchCount)}${skipped ? "+" : ""}`;
 
           setState((oldState) => ({
             ...oldState,
@@ -139,7 +158,8 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     } finally {
       setState((oldState) => ({
         ...oldState,
-        isLoading: false,
+        // Another search may be in-flight already.
+        isLoading: !cancelRef.current?.signal.aborted,
       }));
     }
   }
