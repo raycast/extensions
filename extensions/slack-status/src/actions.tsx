@@ -19,7 +19,7 @@ import { getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
-import { setStatusToPreset, showToastWithPromise } from "./utils";
+import { setStatusToPreset, setStatusToValues, showToastWithPromise } from "./utils";
 import { nanoid } from "nanoid";
 
 // Status Actions
@@ -31,21 +31,23 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
       title="Clear Status"
       icon={Icon.XMarkCircle}
       onAction={async () => {
-        await showToastWithPromise(
-          props.mutate(
-            slack.users.profile.set({
-              profile: JSON.stringify({
-                status_text: "",
-                status_expiration: 0,
-                status_emoji: "",
-              }),
+        const promises = Promise.all([
+          slack.users.profile.set({
+            profile: JSON.stringify({
+              status_text: "",
+              status_expiration: 0,
+              status_emoji: "",
             }),
-            {
-              optimisticUpdate() {
-                return {};
-              },
+          }),
+          slack.dnd.endSnooze(),
+        ]);
+
+        await showToastWithPromise(
+          props.mutate(promises, {
+            optimisticUpdate() {
+              return {};
             },
-          ),
+          }),
           {
             loading: "Clearing status...",
             success: "Cleared status",
@@ -70,7 +72,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               `You help a Slack user set their status.
               
               **Respond with a JSON object with the following attributes:**
-              - "text": a string value for status text, should be short and sweet, with no punctuation, e.g. "Working out", "Listening to Drake's new album", "Coffe break". It should not include the status duration for example "Working out" instead of "Working out for 2 hours" or "Working out until tomorrow".
+              - "text": a string value for status text, should be short and sweet, with no punctuation, e.g. "Working out", "Listening to Drake's new album", "Coffee break". It should not include the status duration for example "Working out" instead of "Working out for 2 hours" or "Working out until tomorrow".
               - "emoji": a Slack-compatible string for single emoji matching the text of the status. Emojis should be in the form: :<emoji identifier>:
 
               **If the user has specified a time or the end of status in their description then add the following attribute:**
@@ -166,33 +168,18 @@ export function SetStatusWithDuration(props: {
             title={title}
             icon={Icon.Clock}
             onAction={async () => {
+              const parsedDuration = parseInt(duration);
+
               showToastWithPromise(
                 async () => {
-                  const parsedDuration = parseInt(duration);
-
-                  let expiration = 0;
-                  if (parsedDuration > 0) {
-                    const expirationDate = new Date();
-                    expirationDate.setMinutes(expirationDate.getMinutes() + parsedDuration);
-                    expiration = Math.floor(expirationDate.getTime() / 1000);
-                  }
-
-                  const profile: Profile = {
-                    status_emoji: props.preset.emojiCode,
-                    status_text: props.preset.title,
-                    status_expiration: expiration,
-                  };
-
-                  await props.mutate(
-                    slack.users.profile.set({
-                      profile: JSON.stringify(profile),
-                    }),
-                    {
-                      optimisticUpdate() {
-                        return profile;
-                      },
-                    },
-                  );
+                  await setStatusToValues({
+                    slack: slack,
+                    mutate: props.mutate,
+                    duration: parsedDuration,
+                    emojiCode: props.preset.emojiCode,
+                    statusText: props.preset.title,
+                    pauseNotifications: props.preset.pauseNotifications,
+                  });
                 },
                 {
                   loading: "Setting status with duration...",
@@ -225,29 +212,14 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
               async () => {
                 const duration = parseInt(values.duration);
 
-                let expiration = 0;
-                if (duration > 0) {
-                  const expirationDate = new Date();
-                  expirationDate.setMinutes(expirationDate.getMinutes() + duration);
-                  expiration = Math.floor(expirationDate.getTime() / 1000);
-                }
-
-                const profile: Profile = {
-                  status_emoji: values.emoji,
-                  status_text: values.statusText,
-                  status_expiration: expiration,
-                };
-
-                await props.mutate(
-                  slack.users.profile.set({
-                    profile: JSON.stringify(profile),
-                  }),
-                  {
-                    optimisticUpdate() {
-                      return profile;
-                    },
-                  },
-                );
+                await setStatusToValues({
+                  slack: slack,
+                  mutate: props.mutate,
+                  duration: duration,
+                  emojiCode: values.emoji,
+                  statusText: values.statusText,
+                  pauseNotifications: values.pauseNotifications,
+                });
 
                 pop();
               },
@@ -282,6 +254,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              pauseNotifications: values.pauseNotifications,
               id: nanoid(),
             });
 
@@ -369,16 +342,18 @@ export function EditStatusPresetAction(props: {
       target={
         <StatusForm
           actionTitle="Update Preset"
-          initalValues={{
+          initialValues={{
             emoji: props.preset.emojiCode,
             statusText: props.preset.title,
             duration: props.preset.defaultDuration.toString(),
+            pauseNotifications: props.preset.pauseNotifications,
           }}
           onSubmit={async (values) => {
             props.onEdit({
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              pauseNotifications: values.pauseNotifications,
               id: props.preset.id ?? nanoid(),
             });
 
