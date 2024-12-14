@@ -16,6 +16,7 @@ export type ColumnInfo = {
   typeId: number;
   isNullable: boolean;
   defaultValue: string | null;
+  enumValues?: string[];
   isPrimaryKey: boolean;
 };
 

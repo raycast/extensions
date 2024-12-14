@@ -32,7 +32,8 @@
     "stelo",
     "vlasischar",
     "javalangruntimeexception",
-    "shyaka"
+    "shyaka",
+    "sushichan044"
   ],
   "categories": [
     "Developer Tools",
@@ -432,6 +433,25 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "name": "repositoryCloneProtocol",
+      "title": "Repository Clone Protocol",
+      "label": "Protocol for Cloning Repositories",
+      "description": "The protocol to use when cloning a repository.",
+      "type": "dropdown",
+      "required": false,
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ]
     },
     {
       "type": "checkbox",

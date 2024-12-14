@@ -12,7 +12,7 @@ In this example we use a form to collect inputs from a user. To make it interest
 
 ![Example: Safely share secrets with Doppler](../.gitbook/assets/example-doppler-share-secrets.webp)
 
-The extension has one command. The command is a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
+The extension has multiple commands. In this example we're using a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
 
 ## Add form items
 
