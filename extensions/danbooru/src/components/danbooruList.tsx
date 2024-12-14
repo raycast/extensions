@@ -1,8 +1,9 @@
-import { showToast, Grid, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { getPreferenceValues, Grid, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { DanbooruListProps, PostDetailsProps, PostProps } from "../types/types";
 import { ListActions } from "./listActions";
+import Style = Toast.Style;
 
 export default function DanbooruList(props: DanbooruListProps) {
   const [posts, setPosts] = useState<PostProps[]>([]);
@@ -32,9 +33,13 @@ export default function DanbooruList(props: DanbooruListProps) {
       setPosts(posts);
     } catch (error) {
       if (error instanceof Error) {
-        showToast({ title: "Error", message: error.message + ". Did you correctly set up your API Key ?" });
+        showToast({
+          title: "Error",
+          style: Style.Failure,
+          message: error.message + ". Did you correctly set up your API Key ?",
+        });
       } else {
-        showToast({ title: "Error", message: "An unknown error occurred" });
+        showToast({ title: "Error", style: Style.Failure, message: "An unknown error occurred" });
       }
     }
     setIsLoading(false);

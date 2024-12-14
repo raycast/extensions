@@ -29,7 +29,7 @@
         }, {
           "name": "apiKey",
           "description": "An API key is needed in order to perform requests. It is found in your Danbooru profile page. This extensions needs at least the following permissions: posts:index, posts:show and posts:show_seq",
-          "type": "textfield",
+          "type": "password",
           "required": true,
           "title": "Danbooru API Key",
           "placeholder": "API Key"
