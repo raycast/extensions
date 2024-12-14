@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deloitte",
+  "title": "Deloitte",
+  "description": "Compress and extract selected items in Finder with Deloitte password via Raycast.",
+  "icon": "deloitte-icon.png",
+  "author": "koinzhang",
+  "contributors": [
+    "oleksandr_reshetko"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compress-with-deloitte",
+      "title": "Deloitte-Zip Files",
+      "subtitle": "Deloitte",
+      "description": "Compress selected files with Deloitte.",
+      "mode": "no-view"
+    },
+    {
+      "name": "extract-with-deloitte",
+      "title": "UnDeloitte-Unzip Files",
+      "subtitle": "Deloitte",
+      "description": "Extract selected archives with Deloitte.",
+      "mode": "no-view"
+    }],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
