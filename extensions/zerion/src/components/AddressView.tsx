@@ -1,5 +1,5 @@
 import { List, Color, Icon, Image, ActionPanel, Action } from "@raycast/api";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 import { useMemo, useState } from "react";
 import type { AggregatedPosition, Position } from "../shared/types";
 import {

@@ -1,4 +1,4 @@
-import { groupBy } from "lodash";
+import groupBy from "lodash/groupBy";
 import type { AggregatedPosition, Position } from "./types";
 import { ellipsis } from "./typography";
 import { LocalStorage } from "@raycast/api";
