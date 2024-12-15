@@ -6,4 +6,4 @@
 - View wallet portfolio
 - Search tokens, addresses or domains
 - Show Wallet total value in the menu bar
-- Safe multiple address for quick access
+- Safe multiple addresses for quick access
