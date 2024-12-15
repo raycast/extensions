@@ -1,5 +1,10 @@
-import { LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { getThreadsVideoURL, handleDownload } from "./utils";
+import {
+  LaunchProps,
+  Toast,
+  showToast,
+  getPreferenceValues,
+} from "@raycast/api";
+import { getThreadsVideoURL, handleDownload } from "./lib/download-video";
 import { homedir } from "os";
 
 export default async function Command({
@@ -42,7 +47,8 @@ export default async function Command({
   } catch (error) {
     await showToast({
       title: "Error",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
       style: Toast.Style.Failure,
     });
   }

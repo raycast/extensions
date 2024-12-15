@@ -4,12 +4,15 @@ import { showToast, Toast } from "@raycast/api";
 
 export async function getThreadsVideoURL(threadsUrl: string) {
   try {
-    const response = await axios.get(`https://api.threadsphotodownloader.com/v2/media?url=${threadsUrl}`, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    const response = await axios.get(
+      `https://api.threadsphotodownloader.com/v2/media?url=${threadsUrl}`,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+        },
       },
-    });
+    );
 
     const videoUrls = response.data["video_urls"];
 
@@ -24,7 +27,11 @@ export async function getThreadsVideoURL(threadsUrl: string) {
   }
 }
 
-export async function handleDownload(videoUrl: string, videoId: string, downloadFolder: string) {
+export async function handleDownload(
+  videoUrl: string,
+  videoId: string,
+  downloadFolder: string,
+) {
   let filePath = `${downloadFolder}/${videoId.substring(0, 100)}.mp4`;
   let counter = 1;
 
@@ -67,7 +74,8 @@ export async function handleDownload(videoUrl: string, videoId: string, download
   } catch (error) {
     await showToast({
       title: "Error While Downloading Video",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
       style: Toast.Style.Failure,
     });
   }
