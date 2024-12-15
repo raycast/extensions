@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## Chore - {PR_MERGE_DATE}
+## [Chore] - {PR_MERGE_DATE}
 
 - Update preferences organization
 
