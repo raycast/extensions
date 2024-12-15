@@ -78,7 +78,7 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
           icon={getStatusIcon(profile)}
           title={getStatusTitle(profile)}
           subtitle={getStatusSubtitle(profile)}
-          accessories={accessories(getStatusPausedNotifications(dnd))}
+          accessories={accessories(!!getStatusPausedNotifications(dnd))}
           actions={
             <ActionPanel>
               {profile?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}

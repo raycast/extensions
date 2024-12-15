@@ -1,10 +1,9 @@
 import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import { DndInfoResponse } from "@slack/web-api/dist/response/DndInfoResponse";
 import moment from "moment";
 import pluralize from "pluralize";
-import { SlackStatusPreset } from "./types";
+import { SlackStatusPreset, SlackMutatePromise } from "./types";
 import { getEmojiForCode } from "./emojis";
 import { WebClient } from "@slack/web-api";
 
@@ -147,7 +146,7 @@ export function setStatusToPreset({
 }: {
   slack: WebClient;
   preset: SlackStatusPreset;
-  mutate: MutatePromise<Profile | undefined>;
+  mutate: SlackMutatePromise;
 }) {
   return showToastWithPromise(
     async () => {
@@ -177,7 +176,11 @@ export async function setStatusToValues({
   pauseNotifications,
 }: {
   slack: WebClient;
-  mutate: MutatePromise<Profile | undefined>;
+  mutate: SlackMutatePromise;
+  duration: number;
+  emojiCode: string;
+  statusText: string;
+  pauseNotifications: boolean;
 }) {
   let expiration = 0;
   if (duration > 0) {
@@ -212,7 +215,14 @@ export async function setStatusToValues({
 
   await mutate(Promise.all(promises), {
     optimisticUpdate() {
-      return profile;
+      return {
+        profile,
+
+        dnd: {
+          ok: true,
+          snooze_enabled: pauseNotifications,
+        },
+      };
     },
   });
 }

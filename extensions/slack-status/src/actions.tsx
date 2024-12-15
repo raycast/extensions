@@ -12,32 +12,33 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import { durationTitleMap } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
-import { SlackStatusPreset } from "./types";
+import { SlackStatusPreset, SlackMutatePromise } from "./types";
 import { setStatusToPreset, setStatusToValues, showToastWithPromise } from "./utils";
 import { nanoid } from "nanoid";
 
 // Status Actions
 
-export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function ClearStatusAction(props: { mutate: SlackMutatePromise }) {
   const slack = useSlack();
   return (
     <Action
       title="Clear Status"
       icon={Icon.XMarkCircle}
       onAction={async () => {
+        const blankProfile = {
+          status_text: "",
+          status_expiration: 0,
+          status_emoji: "",
+        };
+
         const promises = Promise.all([
           slack.users.profile.set({
-            profile: JSON.stringify({
-              status_text: "",
-              status_expiration: 0,
-              status_emoji: "",
-            }),
+            profile: JSON.stringify(blankProfile),
           }),
           slack.dnd.endSnooze(),
         ]);
@@ -45,7 +46,10 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
         await showToastWithPromise(
           props.mutate(promises, {
             optimisticUpdate() {
-              return {};
+              return {
+                profile: blankProfile,
+                dnd: undefined,
+              };
             },
           }),
           {
@@ -59,7 +63,7 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
   );
 }
 
-export function SetStatusWithAIAction(props: { statusText: string; mutate: MutatePromise<Profile | undefined> }) {
+export function SetStatusWithAIAction(props: { statusText: string; mutate: SlackMutatePromise }) {
   const slack = useSlack();
   return (
     <Action
@@ -116,7 +120,10 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               }),
               {
                 optimisticUpdate() {
-                  return profile;
+                  return {
+                    profile,
+                    dnd: undefined,
+                  };
                 },
               },
             );
@@ -137,7 +144,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
   );
 }
 
-export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: MutatePromise<Profile | undefined> }) {
+export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: SlackMutatePromise }) {
   const slack = useSlack();
   return (
     <Action
@@ -153,10 +160,7 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
   );
 }
 
-export function SetStatusWithDuration(props: {
-  preset: SlackStatusPreset;
-  mutate: MutatePromise<Profile | undefined>;
-}) {
+export function SetStatusWithDuration(props: { preset: SlackStatusPreset; mutate: SlackMutatePromise }) {
   const slack = useSlack();
 
   return (
@@ -195,7 +199,7 @@ export function SetStatusWithDuration(props: {
   );
 }
 
-export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function SetCustomStatusAction(props: { mutate: SlackMutatePromise }) {
   const slack = useSlack();
   const { pop } = useNavigation();
 

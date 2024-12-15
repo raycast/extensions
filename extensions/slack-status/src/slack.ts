@@ -1,4 +1,4 @@
-import { getAccessToken, usePromise } from "@raycast/utils";
+import { getAccessToken, usePromise, OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { confirmAlert } from "@raycast/api";
 
@@ -10,7 +10,7 @@ export function useSlack() {
   return webClient;
 }
 
-export function useSlackProfileAndDndInfo(slackAuth) {
+export function useSlackProfileAndDndInfo(slackAuth: OAuthService) {
   const slack = useSlack();
 
   return usePromise(async () => {
@@ -29,9 +29,12 @@ export function useSlackProfileAndDndInfo(slackAuth) {
         if (!dndResponse.ok) {
           throw Error("Failed to fetch DND info");
         }
-      } catch (error) {
+      } catch (error: unknown) {
         // We added new scopes for DND. Old installs don't automatically upgrade scopes.
-        if (!error.message.includes("missing_scope")) throw error;
+        // The `instanceof` is a type guard.
+        if (!(error instanceof Error) || !error.message.includes("missing_scope")) {
+          throw error;
+        }
 
         // We don't care about the response. The user *needs* to reconnect.
         // There's no option for a cancel-less alert AFAIK.
