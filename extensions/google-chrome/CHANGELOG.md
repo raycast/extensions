@@ -1,4 +1,6 @@
 # Google Chrome Changelog
+ ## [Allow to configure profile path] - 2024-12-14
+- The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
 ## [Add Search All Command] - 2024-08-01
 
