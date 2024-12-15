@@ -93,6 +93,8 @@ WHERE
     UserFlight.isRandom = 0
     AND
     UserFlight.importSource IS NOT "CONNECTED_FRIEND"
+    AND
+    Flight.isCancelled = 0
 `
 
 function useFlightQuery(): AsyncState<Flight[]> {
