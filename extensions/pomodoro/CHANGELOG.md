@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## Chore - {PR_MERGE_DATE}
+
+- Update preferences organization
+
 ## [Update] - 2024-12-12
 
 - Move timer to dropdown menu if it's hidden

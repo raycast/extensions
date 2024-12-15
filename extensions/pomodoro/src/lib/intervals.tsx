@@ -186,8 +186,7 @@ export function getNextIntervalExecutor(): IntervalExecutor {
 
   return executor;
 }
-
-export const preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues<Preferences.PomodoroMenuBar>();
 export const intervalDurations: Record<IntervalType, number> = {
   focus: parseFloat(preferences.focusIntervalDuration) * 60,
   "short-break": parseFloat(preferences.shortBreakIntervalDuration) * 60,
