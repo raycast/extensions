@@ -145,7 +145,11 @@ class Api {
     return data;
   }
 
-  async getSites(query: string, team?: string, page=1): Promise<{ data: Site[], hasMore: boolean }> {
+  async getSites(
+    query: string,
+    team?: string,
+    page = 1,
+  ): Promise<{ data: Site[]; hasMore: boolean }> {
     const params = [
       `name=${query}`,
       `filter=all`,
