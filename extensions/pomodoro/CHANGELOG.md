@@ -1,10 +1,12 @@
 # Pomodoro Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## Chore - {PR_MERGE_DATE}
 
-- Show time left in menubar submenu when time left is hidden in menubar
-- Fixes focus not turning off when manually ending session
-- Reorders preferences
+- Update preferences organization
+
+## [Update] - 2024-12-12
+
+- Move timer to dropdown menu if it's hidden
 
 ## [Enhancement] - 2024-12-11
 

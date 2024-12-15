@@ -398,7 +398,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Image",
-      "description": "Shows the image configured above when interval finishes",
+      "description": "Shows the image configured below when interval finishes",
       "default": true,
       "label": "Shows image when interval finishes"
     },
