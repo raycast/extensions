@@ -1,4 +1,4 @@
-import { LaunchProps, closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
+import { closeMainWindow, getSelectedText, LaunchProps, showToast, Toast } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
 import { newLittleArcPreferences } from "./preferences";
 import { NewTabSearchConfigs, URLArguments } from "./types";
@@ -21,7 +21,7 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   let newTabUrl = url || selectedText;
 
   if (newTabUrl) {
-    const newTabUrlAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(newTabUrl)}`;
+    const newTabUrlAsSearch = `${config[newLittleArcPreferences.engine as keyof NewTabSearchConfigs]}${encodeURIComponent(newTabUrl)}`;
     newTabUrl = isURL(newTabUrl) ? newTabUrl : newTabUrlAsSearch;
   } else {
     newTabUrl = fallbackText || newLittleArcPreferences.url;
@@ -37,6 +37,9 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
     }
   } catch (e) {
     console.error(e);
-    await showHUD("❌ Failed opening a new little arc window.");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new Little Arc window.",
+    });
   }
 }

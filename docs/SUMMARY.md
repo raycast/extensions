@@ -28,19 +28,20 @@
 
 ## Information
 
-- [Best Practices](information/best-practices.md)
-- [Tools](information/tools/README.md)
-  - [CLI](information/tools/cli.md)
-  - [ESLint](information/tools/eslint.md)
-  - [VS Code (community tool)](information/tools/vscode.md)
+- [Terminology](information/terminology.md)
 - [File Structure](information/file-structure.md)
+- [Manifest](information/manifest.md)
 - [Lifecycle](information/lifecycle/README.md)
   - [Arguments](information/lifecycle/arguments.md)
   - [Background Refresh](information/lifecycle/background-refresh.md)
   - [Deeplinks](information/lifecycle/deeplinks.md)
-- [Manifest](information/manifest.md)
+- [Best Practices](information/best-practices.md)
+- [Developer Tools](information/developer-tools/README.md)
+  - [Manage Extensions Command](information/developer-tools/manage-extensions-command.md)
+  - [CLI](information/developer-tools/cli.md)
+  - [ESLint](information/developer-tools/eslint.md)
+  - [VS Code (community tool)](information/developer-tools/vscode.md)
 - [Security](information/security.md)
-- [Terminology](information/terminology.md)
 - [Versioning](information/versioning.md)
 
 ## API Reference

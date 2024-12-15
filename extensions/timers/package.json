@@ -317,14 +317,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1"
+    "@raycast/api": "^1.78.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "~20.11.5",
-    "@types/react": "^18.2.48",
+    "@types/node": "~20.14.10",
+    "@types/react": "^18.3.3",
     "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

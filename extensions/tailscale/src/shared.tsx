@@ -60,8 +60,8 @@ export type StatusResponse = {
   >;
 };
 
-export function getStatus() {
-  const resp = tailscale(`status --json`);
+export function getStatus(peers = true) {
+  const resp = tailscale(`status --json --peers=${peers}`);
   const data = JSON.parse(resp) as StatusResponse;
   if (!data || !data.Self.Online) {
     throw new NotConnectedError();
@@ -207,4 +207,8 @@ export function getErrorDetails(err: unknown, fallbackMessage: string): ErrorDet
     title: "Something went wrong",
     description: fallbackMessage,
   };
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

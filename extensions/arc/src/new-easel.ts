@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function runAppleScriptAction() {
@@ -26,6 +26,10 @@ export default async function command() {
   try {
     await runAppleScriptAction();
   } catch {
-    await showHUD("❌ Failed opening a new easel");
+    await closeMainWindow();
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new Easel",
+    });
   }
 }

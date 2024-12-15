@@ -5,6 +5,9 @@
   "description": "Use the Google Gemini from the comfort of Raycast.",
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -393,6 +396,45 @@
       "icon": "shorten-icon.png",
       "description": "Make selected text shorter",
       "mode": "view",
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "icon": "translate-icon.png",
+      "description": "Translate selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "TranslateLanguage",
+          "placeholder": "Translate Language",
+          "type": "text",
+          "required": true
+        }
+      ],
       "preferences": [
         {
           "description": "Which model this command uses.",

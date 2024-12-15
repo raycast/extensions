@@ -1,4 +1,4 @@
-export const EUDIC_BUNDLE_ID = "com.eusoft.eudic";
+export const EUDIC_BUNDLE_IDS = ["com.eusoft.eudic", "com.eusoft.freeeudic"];
 
 export const EUDIC_SCRIPT = {
   DIC: "show dic with word",

@@ -1,25 +1,20 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { ReadingListItemAction } from "./components/reading-list-action";
-import { getReadingList } from "./hooks/hooks";
-import { getArticleMarkdown } from "./utils/functions";
+import { getArticleMarkdown, getReadingList } from "./hooks/hooks";
 
 export default function SearchReadingList() {
-  const { readingList, loading } = getReadingList("/readinglist");
-  console.log("articles", readingList);
-  const [bodyMarkdown, setBodyMarkdown] = useState<string>("");
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
+  const [articleId, setArticleId] = useState(0);
+  const { data: readingList, isLoading, pagination } = getReadingList();
+  const { data: bodyMarkdown, isLoading: detailLoading } = getArticleMarkdown(articleId);
 
   return (
     <List
       isShowingDetail
-      isLoading={loading || detailLoading}
-      onSelectionChange={async (id) => {
-        setDetailLoading(true);
-        setBodyMarkdown(await getArticleMarkdown(Number(id)));
-        setDetailLoading(false);
-      }}
+      isLoading={isLoading || detailLoading}
+      onSelectionChange={(id) => setArticleId(Number(id))}
       searchBarPlaceholder="Search your reading list from dev.to"
+      pagination={pagination}
     >
       <List.EmptyView title={""} description={"No article found"} />
 
@@ -45,13 +40,17 @@ export default function SearchReadingList() {
             id={String(id)}
             key={"article" + todoIndex}
             title={{ value: title, tooltip: title }}
-            accessories={[{ text: tags.length === 0 ? "" : tags }]}
             detail={
               <List.Item.Detail
                 markdown={`![Illustration](${cover_image})`}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Article" />
+                    <List.Item.Detail.Metadata.TagList title="Tags">
+                      {tags.split(",").map((tag) => (
+                        <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
+                      ))}
+                    </List.Item.Detail.Metadata.TagList>
                     <List.Item.Detail.Metadata.Label
                       title="Comments"
                       text={String(comments_count)}

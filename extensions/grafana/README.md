@@ -40,15 +40,17 @@ Raycast extension to search dashboards, go to the explore view, create saved que
 
 ## Getting started
 
-- Go to to your Grafana instance (cloud or self-hosted) e.g. `https://<organization>.grafana.net/org/apikeys`
-- Click on `Add API key`
-- Give your key a name e.g. `Raycast`, select the viewer role (recommended), and set an expiration date (recommended
-- Store in a secure location the given access token
+- Go to to your Grafana instance (cloud or self-hosted) and add a new Service Account (e.g. `https://<organization>.grafana.net/org/serviceaccounts/create`)
+- Give your Service Account a name e.g. `Raycast` & select the editor role (recommended)
+- Click on `Add service account token` & store in a secure location the given access token
 - Start a grafana command and fill the required fields
-  - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud, it is like `https://<organization>.grafana.net`
-  - API-key with your access token previsouly generated.
+  - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud: `https://<organization>.grafana.net`
+  - Service Account token: your access token previously generated
 
 Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
+
+> [!TIP]
+> Set `CTRL + CMD + G` as a shortcut to open your dashboards from anywhere!
 
 ## Showcases
 
@@ -78,4 +80,5 @@ Open saved queries directly in your grafana Explore page
 
 ---
 
-_Extension built & tested for Grafana Cloud v10_
+> [!NOTE]  
+> Extension built & tested for Grafana Cloud v11

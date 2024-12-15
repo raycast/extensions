@@ -15,6 +15,14 @@ import Fuse from "fuse.js";
 import Style = Toast.Style;
 import { Home as iconParkHome } from "@icon-park/svg/lib/map";
 
+const svgValue = (icon: IconInfo, dark?: boolean) => {
+  const svg = icon?.svgCode || "";
+  if (dark) {
+    return toBase64(svg.replaceAll("#333", "#fff"));
+  }
+  return toBase64(svg.replaceAll("#333", "#000"));
+};
+
 export default function SearchIcons() {
   iconParkHome({ theme: "multi-color" });
   const { data: iconConfigData, isLoading, mutate } = useIconConfig();
@@ -101,7 +109,12 @@ export default function SearchIcons() {
           <Grid.Item
             key={value.id + ""}
             keywords={[...value.tag, ...value.category.toLowerCase(), ...value.categoryCN]}
-            content={{ value: toBase64(value?.svgCode), tooltip: value.title }}
+            content={{
+              source: {
+                dark: svgValue(value, true),
+                light: svgValue(value, false),
+              },
+            }}
             title={kebabToOtherCase(value.name, " ")}
             actions={
               <ActionPanel>

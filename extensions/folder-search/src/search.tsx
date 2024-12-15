@@ -17,6 +17,7 @@ import {
   confirmAlert,
   open,
   getSelectedFinderItems,
+  Keyboard,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -225,6 +226,22 @@ export default function Command() {
     setSelectedItemId(`result-${resultIndex.toString()}`);
   };
 
+  const movePinUp = (result: SpotlightSearchResult, resultIndex: number) => {
+    const newIndex = resultIndex - 1;
+
+    [pinnedResults[resultIndex], pinnedResults[newIndex]] = [pinnedResults[newIndex], pinnedResults[resultIndex]];
+
+    setPinnedResults([...pinnedResults]);
+  };
+
+  const movePinDown = (result: SpotlightSearchResult, resultIndex: number) => {
+    const newIndex = resultIndex + 1;
+
+    [pinnedResults[resultIndex], pinnedResults[newIndex]] = [pinnedResults[newIndex], pinnedResults[resultIndex]];
+
+    setPinnedResults([...pinnedResults]);
+  };
+
   // re-usable for results and 'pinned/favourites'
   const ListSection = (props: { title: string; results: SpotlightSearchResult[] }) => {
     return (
@@ -364,6 +381,26 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   onAction={() => toggleResultPinnedStatus(result, resultIndex)}
                 />
+                {props.title === "Pinned" && (
+                  <>
+                    {resultIndex > 0 && (
+                      <Action
+                        title="Move Pin Up"
+                        icon={Icon.ArrowUpCircle}
+                        shortcut={Keyboard.Shortcut.Common.MoveUp}
+                        onAction={() => movePinUp(result, resultIndex)}
+                      />
+                    )}
+                    {resultIndex < props.results.length - 1 && (
+                      <Action
+                        title="Move Pin Down"
+                        icon={Icon.ArrowDownCircle}
+                        shortcut={Keyboard.Shortcut.Common.MoveDown}
+                        onAction={() => movePinDown(result, resultIndex)}
+                      />
+                    )}
+                  </>
+                )}
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy Folder"

@@ -100,6 +100,10 @@ ${examples || ""}
       <Action
         title="Send Query"
         onAction={async () => {
+          if (searchText === "reload") {
+            // Set env to null to trigger a reload on useEffect.
+            setEnv(null);
+          }
           await open(buildTrovuUrl(searchText));
         }}
       />
@@ -145,7 +149,6 @@ ${examples || ""}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Enter a shortcut query here. Type a letter to get suggestions..."
       isShowingDetail={isShowingDetail}
-      throttle
     >
       {!searchText ? (
         <List.Section>
@@ -194,7 +197,7 @@ ${examples || ""}
                           <>
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Link
-                              title="Needs userscript"
+                              title="🧩 Needs userscript"
                               text="yes"
                               target="https://trovu.net/docs/shortcuts/tags/#needs-userscript"
                             />
@@ -204,7 +207,7 @@ ${examples || ""}
                           <>
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Link
-                              title="Affiliate shortcut"
+                              title="🤝 Affiliate shortcut"
                               text="yes"
                               target="https://trovu.net/docs/shortcuts/tags/#is-affiliate"
                             />

@@ -1,12 +1,13 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
-import { getSortHumanReadable, getTintColor } from "../utils/utils";
-import { Sort, sortArr, tagsAtom } from "../services/atoms";
+import { clearNoteSummary, getSortHumanReadable, getTintColor, setNoteSummary } from "../utils/utils";
+import { notesAtom, Sort, sortArr, tagsAtom } from "../services/atoms";
 import { useAtom } from "jotai";
 import DeleteTags from "./deleteTags";
 import { useCachedState } from "@raycast/utils";
+import { useResetAtom } from "jotai/utils";
 
 const Actions = ({
   noNotes,
@@ -30,6 +31,26 @@ const Actions = ({
   const [allTags] = useAtom(tagsAtom);
   const [, setMenu] = useCachedState("menu", false);
   const [sort, setSort] = useCachedState<Sort>("sort", "updated");
+
+  const resetNotes = useResetAtom(notesAtom);
+
+  const askAI = async () => {
+    let allData = "";
+    const answer = AI.ask(
+      note
+        ? `Summarize the note here: ${note}. Be concise and informative. Avoid any conversational tone and DO NOT include the original text in the summary. The output will be displayed at the top of the note. Do NOT put any headings or titles in the summary, including something like "summary:".`
+        : "",
+    );
+    answer.on("data", async (data) => {
+      allData += data;
+      setNoteSummary(allData, createdAt);
+      resetNotes();
+    });
+
+    await answer;
+
+    await showToast({ title: "AI Summary Generated" });
+  };
 
   return (
     <ActionPanel>
@@ -69,6 +90,31 @@ const Actions = ({
         />
         {!noNotes && <DeleteNoteAction createdAt={createdAt} />}
       </ActionPanel.Section>
+      {environment.canAccess(AI) && (
+        <ActionPanel.Section>
+          <Action
+            title="Summarize with AI"
+            icon={{
+              source: Icon.SpeechBubbleActive,
+              tintColor: getTintColor("sky"),
+            }}
+            onAction={async () => await askAI()}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+          />
+          <Action
+            title="Clear AI Summary"
+            icon={{
+              source: Icon.MinusCircle,
+              tintColor: getTintColor("sky"),
+            }}
+            onAction={() => {
+              clearNoteSummary(createdAt);
+              resetNotes();
+            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         {allTags && allTags.length > 0 ? (
           <ActionPanel.Submenu

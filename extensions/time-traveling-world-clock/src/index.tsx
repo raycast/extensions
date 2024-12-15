@@ -1,15 +1,30 @@
-import { ActionPanel, List, Action, LocalStorage, useNavigation, Clipboard, closeMainWindow, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  LocalStorage,
+  useNavigation,
+  Clipboard,
+  closeMainWindow,
+  Icon,
+  getPreferenceValues,
+} from "@raycast/api";
 import { CityData, findFromCityStateProvince } from "city-timezones";
+import getUnicodeFlagIcon from "country-flag-icons/unicode";
 import { useEffect, useState, useMemo } from "react";
 
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-});
+interface Preferences {
+  showUtc: boolean;
+  twentyFourFormat: boolean;
+}
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
+});
+
+const dayOfWeekFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
 });
 
 function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onAdd: (c: CityData) => void }) {
@@ -38,10 +53,6 @@ function AddCityView({ initialCityName, onAdd }: { initialCityName?: string; onA
             <ActionPanel>
               <Action
                 title="Add"
-                shortcut={{
-                  modifiers: [],
-                  key: "enter",
-                }}
                 onAction={() => {
                   onAdd(city);
                   pop();
@@ -61,6 +72,13 @@ export default function Command() {
   const [offsetHrs, setOffsetHrs] = useState(0);
   const [, _forceUpdate] = useState({});
   const forceUpdate = () => _forceUpdate({});
+  const preferences = getPreferenceValues<Preferences>();
+
+  const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+    hourCycle: preferences.twentyFourFormat ? "h23" : "h12",
+  });
 
   useEffect(() => {
     (async () => {
@@ -77,7 +95,7 @@ export default function Command() {
   const addCityAction = (
     <Action.Push
       icon={Icon.Building}
-      title="Add a city"
+      title="Add a City"
       shortcut={{
         modifiers: ["cmd", "shift"],
         key: "=",
@@ -99,11 +117,7 @@ export default function Command() {
     <ActionPanel>
       <Action
         icon={Icon.CopyClipboard}
-        title="Copy time"
-        shortcut={{
-          modifiers: [],
-          key: "enter",
-        }}
+        title="Copy Time"
         onAction={() => {
           Clipboard.copy(time);
           closeMainWindow();
@@ -111,7 +125,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Plus}
-        title="Add 1 hour"
+        title="Add 1 Hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowRight",
@@ -120,7 +134,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Minus}
-        title="Subtract 1 hour"
+        title="Subtract 1 Hour"
         shortcut={{
           modifiers: ["cmd"],
           key: "arrowLeft",
@@ -129,7 +143,7 @@ export default function Command() {
       />
       <Action
         icon={Icon.Clock}
-        title="Clear hours offset"
+        title="Clear Hours Offset"
         shortcut={{
           modifiers: ["cmd"],
           key: "0",
@@ -140,11 +154,11 @@ export default function Command() {
       {city ? (
         <Action
           icon={Icon.XMarkCircle}
-          title="Remove city"
+          title="Remove City"
           style={Action.Style.Destructive}
           shortcut={{
             modifiers: ["cmd"],
-            key: "delete",
+            key: "d",
           }}
           onAction={() => {
             const _cities = cities.filter((_city) => _city !== city);
@@ -160,9 +174,9 @@ export default function Command() {
   localDate.setTime(localDate.getTime() + offsetHrs * 60 * 60 * 1000);
   const localTime = timeFormatter.format(localDate);
   const localDateString = dateFormatter.format(localDate);
-  const todayDateString = dateFormatter.format(new Date());
+  const localDayOfWeek = dayOfWeekFormatter.format(localDate);
 
-  const subtitle = localTime + " " + (offsetHrs && localDateString !== todayDateString ? localDateString : "");
+  const subtitle = localDayOfWeek + ", " + localDateString + ", " + localTime;
 
   const local = (
     <List.Item
@@ -182,18 +196,38 @@ export default function Command() {
         actions={<ActionPanel>{addCityAction}</ActionPanel>}
       ></List.EmptyView>
       {local}
+      {preferences.showUtc &&
+        (() => {
+          const _date = new Date();
+          _date.setTime(_date.getTime() + offsetHrs * 60 * 60 * 1000);
+          const date = new Date(_date.toLocaleString("en-US", { timeZone: "UTC" }));
+          const timeString = timeFormatter.format(date);
+          const dateString = dateFormatter.format(date);
+          const dayOfWeek = dayOfWeekFormatter.format(date);
+          const subtitle = `${dayOfWeek}, ${dateString}, ${timeString}`;
+          return (
+            <List.Item
+              key={"utc"}
+              title={"UTC"}
+              subtitle={subtitle}
+              icon={getIconForTime(date)}
+              actions={actions({ time: subtitle })}
+            />
+          );
+        })()}
       {cities.map((c) => {
         const _date = new Date();
         _date.setTime(_date.getTime() + offsetHrs * 60 * 60 * 1000);
         const date = new Date(_date.toLocaleString("en-US", { timeZone: c.timezone }));
         const timeString = timeFormatter.format(date);
         const dateString = dateFormatter.format(date);
-        const subtitle = `${timeString} ${todayDateString === dateString ? "" : dateString}`;
+        const dayOfWeek = dayOfWeekFormatter.format(date);
+        const subtitle = `${dayOfWeek}, ${dateString}, ${timeString}`;
 
         return (
           <List.Item
             key={c.city}
-            title={c.city}
+            title={c.city + " " + getUnicodeFlagIcon(c.iso2)}
             subtitle={subtitle}
             icon={getIconForTime(date)}
             actions={actions({ time: subtitle, city: c })}

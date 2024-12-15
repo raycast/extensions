@@ -1,10 +1,36 @@
 # Claude Changelog
 
+## [Update] - 2024-12-12
+
+- Fix: Remove duplicated "Copy Question" action, use existing with tweaked conditions
+- Fix: Use Claude 3.5 Haiku as default fallback modal
+
+## [Update] - 2024-12-09
+
+- Feature: Added copy question actions
+
+## [Update] - 2024-11-05
+
+- Feature: Added new [Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)
+
+## [Update] - 2024-10-24
+
+- Feature: Added new [Claude 3.5 Sonnet](https://www.anthropic.com/news/3-5-models-and-computer-use)
+
+## [Update] - 2024-08-22
+
+- Feature: 8192 token limit for Claude 3.5 Sonnet [out ot Beta](https://x.com/alexalbert__/status/1825920737326281184)
+
+## [Update] - 2024-08-08
+
+- Feature: Enabled Beta [8192 tokens output limit](https://x.com/alexalbert__/status/1812921642143900036) for Claude 3.5 Sonnet
+
 ## [Update] - 2024-07-10
 
 - Fix: Restarting a conversation will retain the currently selected model
 
 ## [Update] - 2024-06-20
+
 - Feature: Added new [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet)
 
 ## [Update] - 2024-06-19

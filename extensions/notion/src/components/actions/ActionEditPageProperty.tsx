@@ -9,7 +9,7 @@ import {
   PageProperty,
   DatabaseProperty,
   PropertyConfig,
-  getPropertyConfig,
+  ReadablePropertyType,
 } from "../../utils/notion";
 
 type EditPropertyOptions = PropertyConfig<"select" | "multi_select">["options"][number] & {
@@ -34,7 +34,6 @@ export function ActionEditPageProperty({
   options?: EditPropertyOptions[];
 }) {
   if (!icon) icon = getPropertyIcon(databaseProperty);
-  if (!options) options = getPropertyConfig(databaseProperty, ["select", "multi_select"])?.options;
 
   const { data: users } = useUsers();
 
@@ -54,9 +53,10 @@ export function ActionEditPageProperty({
     }
   }
 
-  switch (databaseProperty.type) {
-    case "checkbox": {
-      const value = !!pageProperty && "checkbox" in pageProperty && pageProperty.checkbox;
+  const { type, config, value } = propertyHelper(databaseProperty, pageProperty);
+
+  switch (type) {
+    case "checkbox":
       return (
         <Action
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
@@ -65,10 +65,9 @@ export function ActionEditPageProperty({
           onAction={() => setPageProperty({ [databaseProperty.id]: { checkbox: !value } })}
         />
       );
-    }
 
     case "select": {
-      const value = pageProperty && "select" in pageProperty ? pageProperty.select?.id : null;
+      if (!options) options = config.options;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           {options?.map((opt) => (
@@ -77,12 +76,12 @@ export function ActionEditPageProperty({
               icon={
                 (opt.icon ? opt.icon : opt.id !== "_select_null_")
                   ? {
-                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      source: opt.icon ? opt.icon : value?.id === opt.id ? Icon.Checkmark : Icon.Circle,
                       tintColor: notionColorToTintColor(opt.color),
                     }
                   : undefined
               }
-              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value?.id === opt.id ? "  ✓" : "")}
               onAction={() => {
                 if (opt.id && opt.id !== "_select_null_") {
                   setPageProperty({ [databaseProperty.id]: { select: { id: opt.id } } });
@@ -97,7 +96,7 @@ export function ActionEditPageProperty({
     }
 
     case "status": {
-      const value = pageProperty && "status" in pageProperty ? pageProperty.status?.id : null;
+      if (!options) options = config.options;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           {options?.map((opt) => (
@@ -106,12 +105,12 @@ export function ActionEditPageProperty({
               icon={
                 (opt.icon ? opt.icon : opt.id !== "_select_null_")
                   ? {
-                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      source: opt.icon ? opt.icon : value?.id === opt.id ? Icon.Checkmark : Icon.Circle,
                       tintColor: notionColorToTintColor(opt.color),
                     }
                   : undefined
               }
-              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value?.id === opt.id ? "  ✓" : "")}
               onAction={() => {
                 if (opt.id && opt.id !== "_select_null_") {
                   setPageProperty({ [databaseProperty.id]: { status: { id: opt.id } } });
@@ -126,7 +125,6 @@ export function ActionEditPageProperty({
     }
 
     case "date": {
-      const value = pageProperty && "date" in pageProperty ? pageProperty.date : null;
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Submenu
@@ -162,8 +160,8 @@ export function ActionEditPageProperty({
     }
 
     case "multi_select": {
-      const value = pageProperty && "multi_select" in pageProperty ? pageProperty.multi_select : [];
-      const multiSelectIds = value.map((selection) => selection.id);
+      if (!options) options = config.options;
+      const multiSelectIds = value?.map((selection) => selection.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           {options?.map((opt) => {
@@ -174,15 +172,15 @@ export function ActionEditPageProperty({
               <Action
                 key={opt.id}
                 icon={{
-                  source: opt.id && multiSelectIds.includes(opt.id) ? Icon.Checkmark : Icon.Circle,
+                  source: opt.id && multiSelectIds?.includes(opt.id) ? Icon.Checkmark : Icon.Circle,
                   tintColor: notionColorToTintColor(opt.color),
                 }}
                 title={opt.name}
                 onAction={() => {
-                  if (!opt.id) {
+                  if (!value || !opt.id) {
                     return null;
                   }
-                  if (opt.id && multiSelectIds.includes(opt.id)) {
+                  if (opt.id && multiSelectIds?.includes(opt.id)) {
                     setPageProperty({
                       [databaseProperty.id]: {
                         multi_select: value.filter((o) => o.id !== opt.id),
@@ -204,12 +202,11 @@ export function ActionEditPageProperty({
     }
 
     case "people": {
-      const value = pageProperty && "people" in pageProperty ? pageProperty.people : [];
-      const peopleIds = value.map((user) => user.id);
+      const peopleIds = value?.map((user) => user.id);
       return (
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Section>
-            {value.map((user) => (
+            {value?.map((user) => (
               <Action
                 key={user.id}
                 icon={
@@ -230,7 +227,7 @@ export function ActionEditPageProperty({
           </ActionPanel.Section>
           <ActionPanel.Section>
             {users
-              .filter((user) => !peopleIds.includes(user.id))
+              .filter((user) => !peopleIds?.includes(user.id))
               .map((user) => (
                 <Action
                   key={user.id}
@@ -239,7 +236,7 @@ export function ActionEditPageProperty({
                   onAction={() =>
                     setPageProperty({
                       [databaseProperty.id]: {
-                        people: [...value, { id: user.id }],
+                        people: [...(value || []), { id: user.id }],
                       },
                     })
                   }
@@ -254,3 +251,17 @@ export function ActionEditPageProperty({
       return null;
   }
 }
+
+// This isn't great code, but this component will be replaced soon.
+const propertyHelper = (databaseProperty: DatabaseProperty, pageProperty?: PageProperty) =>
+  ({
+    type: databaseProperty.type,
+    config: databaseProperty.config,
+    value: pageProperty?.value,
+  }) as {
+    [PP in Extract<PageProperty, { type: ReadablePropertyType }> as PP["type"]]: {
+      type: PP["type"];
+      config: PropertyConfig<PP["type"]>;
+      value?: PP["value"];
+    };
+  }[ReadablePropertyType];

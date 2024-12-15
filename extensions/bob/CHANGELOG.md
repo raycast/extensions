@@ -1,5 +1,9 @@
 # Bob Changelog
 
+## [New commands] - 2024-07-31
+- Show result window (Translate & OCR)
+- Translate input text
+
 ## [Bug fixes, minor improvemnets] - 2024-06-13
 
 ## [New commands] - 2024-03-07

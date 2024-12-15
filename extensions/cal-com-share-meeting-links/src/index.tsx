@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, openCommandPreferences } from "@raycast/api";
-import { useCurrentUser, useEventTypes } from "@api/cal.com";
+import { formatCurrency, useCurrentUser, useEventTypes } from "@api/cal.com";
 
 export default function Command() {
   const { data: user, error: userError, isLoading: isLoadingUser } = useCurrentUser();
@@ -24,6 +24,14 @@ export default function Command() {
           key={item.id}
           title={item.title}
           accessories={[
+            ...(item.price
+              ? [
+                  {
+                    icon: { source: Icon.CreditCard, tintColor: Color.Green },
+                    text: formatCurrency(item.price, item.currency),
+                  },
+                ]
+              : []),
             ...(item.hidden
               ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.Orange }, tooltip: "Hidden" }]
               : []),

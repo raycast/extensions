@@ -1,207 +1,122 @@
-import { useEffect, useRef, useState } from "react";
-import { MenuBarExtra, showToast, Toast } from "@raycast/api";
-import { useCachedState, useCachedPromise } from "@raycast/utils";
-import useRates from "./hooks/useRates";
-import { fetchDollarRates, fetchBtcPrice, fetchEthPrice } from "./api";
+import { environment, LaunchType, MenuBarExtra } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useState } from "react";
+import axios, { AxiosResponse } from "axios";
+import MenuItems from "./components/MenuItems";
+import { CRYPTO_RATES as crypto, DOLLAR_RATES as dollar } from "./constants/currency-types";
+import { DollarResponse, CryptoPriceResponse, StablePriceResponse } from "./types/types";
+
+type AllCurrencyData = {
+  dollar: DollarResponse;
+  btc: CryptoPriceResponse;
+  eth: CryptoPriceResponse;
+  usdt: StablePriceResponse;
+};
 
 export default function Command() {
-  const [selectedCurrency, setSelectedCurrency] = useCachedState<string>("selected-currency", "");
-  const { dollar, crypto } = useRates();
-  const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useCachedState<string>("selected-currency", "Blue");
+  const [currencyData, setCurrencyData] = useCachedState<AllCurrencyData | null>("currency-data", null);
+  const [lastFetchTime, setLastFetchTime] = useCachedState<number>("last-fetch-time", 0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  const dollarAbortControllerRef = useRef<AbortController | null>(null);
-  const btcAbortControllerRef = useRef<AbortController | null>(null);
-  const ethAbortControllerRef = useRef<AbortController | null>(null);
+  const fetchData = async () => {
+    if (isFetching) return;
 
-  const fetchDollarRatesWrapper = async () => {
-    if (dollarAbortControllerRef.current) {
-      dollarAbortControllerRef.current.abort();
-    }
-    dollarAbortControllerRef.current = new AbortController();
+    setIsFetching(true);
+    setIsLoading(true);
 
     try {
-      return await fetchDollarRates(dollarAbortControllerRef.current.signal);
+      const dollarResponse: AxiosResponse<DollarResponse> = await axios.get("https://criptoya.com/api/dolar");
+      const btcResponse: AxiosResponse<CryptoPriceResponse> = await axios.get(
+        "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD",
+      );
+      const ethResponse: AxiosResponse<CryptoPriceResponse> = await axios.get(
+        "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD",
+      );
+      const usdtResponse: AxiosResponse<StablePriceResponse> = await axios.get(
+        "https://criptoya.com/api/binancep2p/usdt/ars/0.1",
+      );
+
+      const newCurrencyData: AllCurrencyData = {
+        dollar: dollarResponse.data,
+        btc: btcResponse.data,
+        eth: ethResponse.data,
+        usdt: usdtResponse.data,
+      };
+
+      setCurrencyData(newCurrencyData);
+      setLastFetchTime(Date.now());
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch dollar rates",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch dollar rates",
-          message: "An unknown error occurred.",
-        });
-      }
-      throw error;
+      console.error("Failed to fetch currency data:", error);
+      setCurrencyData(null);
+    } finally {
+      setIsLoading(false);
+      setIsFetching(false);
     }
   };
 
-  const fetchBtcPriceWrapper = async () => {
-    if (btcAbortControllerRef.current) {
-      btcAbortControllerRef.current.abort();
-    }
-    btcAbortControllerRef.current = new AbortController();
+  const getTitle = (): string => {
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTime;
 
-    try {
-      return await fetchBtcPrice(btcAbortControllerRef.current.signal);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch BTC price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch BTC price",
-          message: "An unknown error occurred.",
-        });
+    // Skip fetching if this is a user-initiated launch
+    if (environment.launchType === LaunchType.UserInitiated) {
+      if (!currencyData) {
+        fetchData();
+        return "Cargando...";
       }
-      throw error;
+      return formatTitle();
     }
-  };
 
-  const fetchEthPriceWrapper = async () => {
-    if (ethAbortControllerRef.current) {
-      ethAbortControllerRef.current.abort();
-    }
-    ethAbortControllerRef.current = new AbortController();
-
-    try {
-      return await fetchEthPrice(ethAbortControllerRef.current.signal);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name !== "AbortError") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fetch ETH price",
-            message: error.message,
-          });
-        }
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch ETH price",
-          message: "An unknown error occurred.",
-        });
-      }
-      throw error;
-    }
-  };
-
-  const {
-    data: dollarData,
-    isLoading: isDollarFetching,
-    revalidate: revalidateDollar,
-  } = useCachedPromise(fetchDollarRatesWrapper, [], {
-    initialData: null,
-  });
-
-  const {
-    data: btcData,
-    isLoading: isBtcFetching,
-    revalidate: revalidateBtc,
-  } = useCachedPromise(fetchBtcPriceWrapper, [], {
-    initialData: null,
-  });
-
-  const {
-    data: ethData,
-    isLoading: isEthFetching,
-    revalidate: revalidateEth,
-  } = useCachedPromise(fetchEthPriceWrapper, [], {
-    initialData: null,
-  });
-
-  useEffect(() => {
-    if (dollarData && btcData && ethData) {
-      setInitialFetchDone(true);
-      if (!selectedCurrency) {
-        setSelectedCurrency("Blue");
-      }
-    }
-  }, [dollarData, btcData, ethData]);
-
-  const blueDollarPrice = dollarData?.blue?.ask;
-  const mepDollarPrice = dollarData?.mep?.al30["24hs"]?.price;
-  const cclDollarPrice = dollarData?.ccl?.al30["24hs"]?.price;
-  const btcPrice = btcData?.USD;
-  const ethPrice = ethData?.USD;
-
-  const formatPrice = (price: number | undefined) => {
-    return price ? `$${Math.floor(price)}` : "";
-  };
-
-  const getTitle = () => {
-    if (!initialFetchDone || !selectedCurrency) {
+    // If the data is outdated or missing, fetch new data
+    if (!currencyData || timeSinceLastFetch > 180000) {
+      fetchData();
       return "Cargando...";
     }
 
-    if (selectedCurrency === "Blue" && blueDollarPrice !== undefined) {
-      return formatPrice(blueDollarPrice);
-    }
-    if (selectedCurrency === "MEP" && mepDollarPrice !== undefined) {
-      return formatPrice(mepDollarPrice);
-    }
-    if (selectedCurrency === "CCL" && cclDollarPrice !== undefined) {
-      return formatPrice(cclDollarPrice);
-    }
-    if (selectedCurrency === "BTC" && btcPrice !== undefined) {
-      return `${formatPrice(btcPrice)}`;
-    }
-    if (selectedCurrency === "ETH" && ethPrice !== undefined) {
-      return `${formatPrice(ethPrice)}`;
-    }
-    return selectedCurrency;
+    return formatTitle();
   };
 
-  useEffect(() => {
-    revalidateDollar();
-    revalidateBtc();
-    revalidateEth();
-  }, [selectedCurrency, revalidateDollar, revalidateBtc, revalidateEth]);
+  const formatPrice = (price: number) => `$${Math.floor(price)}`;
 
-  useEffect(() => {
-    return () => {
-      if (dollarAbortControllerRef.current) {
-        dollarAbortControllerRef.current.abort();
-      }
-      if (btcAbortControllerRef.current) {
-        btcAbortControllerRef.current.abort();
-      }
-      if (ethAbortControllerRef.current) {
-        ethAbortControllerRef.current.abort();
-      }
-    };
-  }, []);
+  const formatTitle = (): string => {
+    if (!currencyData) {
+      return "Cargando...";
+    }
+    console.log("paso a esta parte");
+    switch (selectedCurrency) {
+      case "Blue":
+        return currencyData.dollar?.blue?.ask !== undefined ? formatPrice(currencyData.dollar.blue.ask) : "N/A";
+      case "MEP":
+        return currencyData.dollar?.mep?.al30["24hs"]?.price !== undefined
+          ? formatPrice(currencyData.dollar.mep.al30["24hs"].price)
+          : "N/A";
+      case "CCL":
+        return currencyData.dollar?.ccl?.al30["24hs"]?.price !== undefined
+          ? formatPrice(currencyData.dollar.ccl.al30["24hs"].price)
+          : "N/A";
+      case "BTC":
+        return currencyData.btc?.USD !== undefined ? formatPrice(currencyData.btc.USD) : "N/A";
+      case "ETH":
+        return currencyData.eth?.USD !== undefined ? formatPrice(currencyData.eth.USD) : "N/A";
+      case "USDT":
+        return currencyData.usdt?.ask !== undefined ? formatPrice(currencyData.usdt.ask) : "N/A";
+      default:
+        return "N/A";
+    }
+  };
+
+  const title = getTitle();
 
   return (
-    <MenuBarExtra title={getTitle()} isLoading={isDollarFetching || isBtcFetching || isEthFetching}>
-      <MenuBarExtra.Item title="Dólar" />
-      {dollar.map((dollar) => (
-        <MenuBarExtra.Item
-          key={dollar.name}
-          title={`${dollar.name} ${selectedCurrency === dollar.name ? "✓" : ""}`}
-          onAction={() => setSelectedCurrency(dollar.name)}
-        />
-      ))}
-
-      <MenuBarExtra.Item title="Criptos" />
-      {crypto.map((crypto) => (
-        <MenuBarExtra.Item
-          key={crypto.name}
-          title={`${crypto.name} ${selectedCurrency === crypto.name ? "✓" : ""}`}
-          onAction={() => setSelectedCurrency(crypto.name)}
-        />
-      ))}
+    <MenuBarExtra title={title} isLoading={isLoading}>
+      <MenuItems
+        dollar={dollar}
+        crypto={crypto}
+        selectedCurrency={selectedCurrency}
+        setSelectedCurrency={setSelectedCurrency}
+      />
     </MenuBarExtra>
   );
 }

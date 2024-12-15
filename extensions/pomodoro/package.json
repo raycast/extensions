@@ -4,6 +4,9 @@
   "title": "Pomodoro",
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
@@ -13,7 +16,10 @@
     "MartinGonzalez",
     "nathanjms",
     "cchalop1",
-    "hayden_barnes"
+    "hayden_barnes",
+    "j3lte",
+    "litomore",
+    "ridemountainpig"
   ],
   "keywords": [
     "pomodoro",
@@ -43,7 +49,27 @@
       "name": "stats-pomodoro-timer",
       "title": "View Pomodoro Stats",
       "mode": "view",
-      "description": "Shows the stats of the Pomodoro timer"
+      "description": "Shows the stats of the Pomodoro timer",
+      "preferences": [
+        {
+          "name": "showWeeklyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Weekly Stats",
+          "label": "Show weekly stats",
+          "description": "Shows the weekly stats of the Pomodoro timer",
+          "default": false
+        },
+        {
+          "name": "showDailyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Daily Stats",
+          "label": "Show Daily stats",
+          "description": "Shows the daily stats of the Pomodoro timer",
+          "default": false
+        }
+      ]
     },
     {
       "name": "slack-pomodoro-menu-bar",
@@ -305,6 +331,14 @@
       ]
     },
     {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
+    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,
@@ -392,7 +426,7 @@
       "name": "enableConfetti",
       "type": "checkbox",
       "required": false,
-      "title": "Show Confetti",
+      "title": "Show Confetti (Deprecated)",
       "description": "Shows confetti when interval finishes",
       "default": false,
       "label": "Shows confetti when interval finishes"
@@ -402,7 +436,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Show Quote",
-      "description": "Shows a random quote from quotable.io when interval finishes",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
       "default": false,
       "label": "Shows quote when interval finishes"
     },
@@ -417,18 +451,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.12.4",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.1",
+    "react": "^18.3.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

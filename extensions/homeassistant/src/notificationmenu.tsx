@@ -1,5 +1,4 @@
 import { useHAStates } from "@components/hooks";
-import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAPersistentNotifications } from "@components/persistentnotification/hooks";
 import { PersistentNotificationsMenubarSection } from "@components/persistentnotification/list";
 import { HAPersistentNotification } from "@components/persistentnotification/utils";
@@ -7,20 +6,21 @@ import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
 import { State } from "@lib/haapi";
 import { getErrorMessage } from "@lib/utils";
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, getPreferenceValues, MenuBarExtra } from "@raycast/api";
 
-function showCountInMenu(): boolean {
+function showCountInMenu() {
   const prefs = getPreferenceValues();
   return (prefs.showcount as boolean) === true;
 }
 
-function updatesIndicatorPreference(): boolean {
+function updatesIndicatorPreference() {
   const prefs = getPreferenceValues();
   const val = prefs.indicatorUpdates as boolean | undefined;
   return val === false ? false : true;
 }
 
-export default function MenuCommand(): JSX.Element {
+export default function MenuCommand() {
   const { notifications, states, error, isLoading } = useNotifications();
   const updates = states?.filter((s) => s.entity_id.startsWith("update.") && s.state === "on");
 
@@ -41,7 +41,9 @@ export default function MenuCommand(): JSX.Element {
     }
     return `${messageCount} Notifications`;
   };
-  const icon = valid ? "home-assistant-orange.png" : "home-assistant.png";
+  const icon = valid
+    ? { source: "home-assistant.svg", tintColor: Color.Orange }
+    : { source: "home-assistant.svg", tintColor: Color.PrimaryText };
   const header = error ? getErrorMessage(error) : undefined;
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>
@@ -49,7 +51,7 @@ export default function MenuCommand(): JSX.Element {
       <PersistentNotificationsMenubarSection notifications={notifications} />
       <UpdatesMenubarSection updates={updates} hacs={hacs} />
       <MenuBarExtra.Section>
-        <MenuBarItemConfigureCommand />
+        <RUIMenuBarExtra.ConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

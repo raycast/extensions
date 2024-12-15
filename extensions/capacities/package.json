@@ -5,6 +5,9 @@
   "description": "Interact with Capacities from your command bar. Search your notes, capture content & more.",
   "icon": "capacities.png",
   "author": "steffenble",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -53,14 +56,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.4",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "axios": "^1.6.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.4.5"

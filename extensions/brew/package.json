@@ -11,7 +11,9 @@
     "ashokbaruaakas",
     "millerapps",
     "pernielsentikaer",
-    "vyacheslav"
+    "stelo",
+    "vyacheslav",
+    "j3lte"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -75,19 +77,36 @@
       "name": "terminalApp",
       "type": "dropdown",
       "required": false,
+      "default": "terminal",
       "title": "Terminal Application",
       "data": [
         {
-          "title": "Terminal",
-          "value": "terminal"
+          "title": "Alacritty",
+          "value": "alacritty"
+        },
+        {
+          "title": "Hyper",
+          "value": "hyper"
         },
         {
           "title": "iTerm",
           "value": "iterm"
         },
         {
+          "title": "kitty",
+          "value": "kitty"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        },
+        {
           "title": "Warp",
           "value": "warp"
+        },
+        {
+          "title": "WezTerm",
+          "value": "wezterm"
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."

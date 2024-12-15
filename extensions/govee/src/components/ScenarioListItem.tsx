@@ -5,14 +5,18 @@ import type { Scenario, ScenariosHook } from "@/types";
 import ScenarioDebug from "@/components/ScenarioDebug";
 import ScenarioForm from "@/components/ScenarioForm";
 
-import { wait } from "@/utils";
-
 export type ScenarioListItemProps = {
   scenario: Scenario;
   scenariosHook: ScenariosHook;
   availableDeviceNames: Record<string, string>;
   execute: () => void;
 };
+
+function getQuickLinkForApp(scenarioId: string): string {
+  const context = JSON.stringify({ scenario: scenarioId });
+  const encodedContext = encodeURIComponent(context);
+  return `raycast://extensions/j3lte/govee/control-govee-lights?context=${encodedContext}`;
+}
 
 const ScenarioListItem = ({ scenario, scenariosHook, availableDeviceNames, execute }: ScenarioListItemProps) => {
   const howManyDevicesOnline = scenario.devices.filter(({ id }) => id in availableDeviceNames).length;
@@ -51,8 +55,6 @@ const ScenarioListItem = ({ scenario, scenariosHook, availableDeviceNames, execu
               icon={Icon.Duplicate}
               onAction={async () => {
                 scenariosHook.duplicateScenario(scenario.id);
-                await wait(100); // Wait for the new scenario to be created
-                await scenariosHook.revalidate();
               }}
               shortcut={{ key: "d", modifiers: ["cmd"] }}
             />
@@ -65,6 +67,12 @@ const ScenarioListItem = ({ scenario, scenariosHook, availableDeviceNames, execu
                 }
               }}
               shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Quicklinks">
+            <Action.CreateQuicklink
+              title="Create Quicklink"
+              quicklink={{ link: getQuickLinkForApp(scenario.id), name: `Execute Govee Scenario: "${scenario.title}"` }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Scenarios">

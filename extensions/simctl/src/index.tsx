@@ -107,6 +107,12 @@ export default function Command() {
     );
   };
 
+  function getIcon(name: string) {
+    if (name.includes("iPhone")) return Icon.Mobile;
+    if (name.includes("iPad")) return Icon.Desktop;
+    return Icon.Devices;
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by name or runtime...">
       {state
@@ -122,7 +128,7 @@ export default function Command() {
           return (
             <List.Item
               id={device.udid}
-              icon="list-icon.png"
+              icon={getIcon(device.name)}
               title={device.name}
               keywords={device.runtime.split(" ")}
               subtitle={device.runtime}
@@ -135,20 +141,8 @@ export default function Command() {
                   {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
-                  <Action
-                    title="Show Data"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.dataPath}`);
-                    }}
-                  />
-                  <Action
-                    title="Show Logs"
-                    icon={Icon.Folder}
-                    onAction={() => {
-                      exec(`open ${device.logPath}`);
-                    }}
-                  />
+                  <Action.Open title="Open Data Folder" icon={Icon.Folder} target={device.dataPath} />
+                  <Action.Open title="Open Logs Folder" icon={Icon.Folder} target={device.logPath} />
                 </ActionPanel>
               }
             />

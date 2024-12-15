@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Alert, confirmAlert, Icon, showToast, Toast, open } from "@raycast/api";
 import { cache, deleteCache, downloadPicture } from "../utils/common-utils";
 import PreviewRaycastWallpaper from "../preview-raycast-wallpaper";
 import { CacheKey, RAYCAST_WALLPAPER } from "../utils/constants";
@@ -6,6 +6,8 @@ import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
 import { RaycastWallpaperWithInfo } from "../types/types";
 import { setWallpaper } from "../utils/applescript-utils";
+import ActionStyle = Alert.ActionStyle;
+import { picturesDirectory } from "../types/preferences";
 
 export function ActionOnRaycastWallpaper(props: {
   index: number;
@@ -29,6 +31,14 @@ export function ActionOnRaycastWallpaper(props: {
         title={"Download Wallpaper"}
         onAction={async () => {
           await downloadPicture(raycastWallpaper);
+        }}
+      />
+      <Action
+        icon={Icon.Finder}
+        title={"Open Wallpaper Folder"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+        onAction={async () => {
+          await open(picturesDirectory);
         }}
       />
 
@@ -70,7 +80,7 @@ export function ActionOnRaycastWallpaper(props: {
         {!raycastWallpaper.exclude && (
           <Action
             icon={Icon.XMarkTopRightSquare}
-            title={"Exclude From Auto Switch"}
+            title={"Exclude from Auto Switch"}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
@@ -105,6 +115,7 @@ export function ActionOnRaycastWallpaper(props: {
         <Action
           icon={Icon.Trash}
           title={"Clear Picture Cache"}
+          style={Action.Style.Destructive}
           shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
           onAction={async () => {
             const options: Alert.Options = {
@@ -113,6 +124,7 @@ export function ActionOnRaycastWallpaper(props: {
               message: "Next time you enter the command, the pictures will be re-cached.",
               primaryAction: {
                 title: "Confirm",
+                style: ActionStyle.Destructive,
                 onAction: () => {
                   deleteCache();
                   showToast(Toast.Style.Success, "Clear cache success!");

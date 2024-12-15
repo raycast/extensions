@@ -99,8 +99,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.14.1",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.3",
     "axios": "^0.24.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
@@ -110,11 +110,10 @@
     "@types/node": "^20.8.10",
     "@types/parse-git-config": "^3.0.1",
     "@types/parse-github-url": "^1.0.0",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^5.2.2"
   },
   "scripts": {

@@ -1,5 +1,7 @@
-export const today = () => {
+export const getDate = (dayOffset: number = 0) => {
   const now: Date = new Date();
+  now.setDate(now.getDate() + dayOffset); // Add or subtract days
+
   const year: number = now.getFullYear();
   const month: number = now.getMonth() + 1;
   const day: number = now.getDate();
@@ -7,21 +9,8 @@ export const today = () => {
   const formattedMonth: string = month.toString().padStart(2, "0");
   const formattedDay: string = day.toString().padStart(2, "0");
 
-  const currentDate: string = `${year}-${formattedMonth}-${formattedDay}`;
-  return currentDate;
-};
-
-export const tomorrow = () => {
-  const now: Date = new Date();
-  const year: number = now.getFullYear();
-  const month: number = now.getMonth() + 1;
-  const day: number = now.getDate() + 1;
-
-  const formattedMonth: string = month.toString().padStart(2, "0");
-  const formattedDay: string = day.toString().padStart(2, "0");
-
-  const currentDate: string = `${year}-${formattedMonth}-${formattedDay}`;
-  return currentDate;
+  const date: string = `${year}-${formattedMonth}-${formattedDay}`;
+  return date;
 };
 
 export function getTimeDifference(startDateTime: string, endDateTime: string): number {

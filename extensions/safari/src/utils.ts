@@ -1,10 +1,10 @@
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import Fuse, { FuseOptionKey } from "fuse.js";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
-
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-
-import { HistoryItem, Tab } from "./types";
+import { langAdaptor, PinyinHandler } from "./lang-adaptor";
+import { HistoryItem, LooseTab } from "./types";
 
 type Preferences = {
   safariAppIdentifier: string;
@@ -14,19 +14,18 @@ export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
-    const result = await osascript.jxa({ parse: true })`${script}`;
-    return result;
+    return await osascript.jxa({ parse: true })`${script}`;
   } catch (err: unknown) {
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Application not found",
           message: "Things must be running",
         });
       } else {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
           title: "Something went wrong",
           message: message,
@@ -69,20 +68,43 @@ export const formatDate = (date: string) =>
     day: "numeric",
   });
 
-export const getTitle = (tab: Tab) => _.truncate(tab.title, { length: 75 });
+export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
-const normalizeText = (text: string) =>
-  (text || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+function installLangHandlers() {
+  langAdaptor.registerLang(PinyinHandler.name, new PinyinHandler());
+}
 
-export const search = (collection: object[], keys: string[], searchText: string) =>
-  _.filter(collection, (item) =>
-    _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText))),
-  );
+export const search = function (collection: LooseTab[], keys: Array<FuseOptionKey<object>>, searchText: string) {
+  installLangHandlers();
+
+  if (!searchText) {
+    return collection;
+  }
+
+  const _formatPerf = performance.now();
+  const formattedCollection = collection.map((item) => {
+    return {
+      ...item,
+      title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid }),
+    };
+  });
+  const _formatCost = performance.now() - _formatPerf;
+
+  const _searchPerf = performance.now();
+  const result = new Fuse(formattedCollection, { keys, threshold: 0.35 }).search(searchText).map((x) => x.item);
+  const _searchCost = performance.now() - _searchPerf;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("searchText", searchText);
+    console.log(`format cost ${_formatCost}ms`);
+    console.log(`search cost ${_searchCost}ms`);
+    // console.log('formatted collection', formattedCollection);
+    console.log("result size", result.length);
+  }
+  return result;
+};
 
 const dtf = new Intl.DateTimeFormat(undefined, {
   weekday: "long",
@@ -101,15 +123,4 @@ export const groupHistoryByDay = (groups: Map<string, HistoryItem[]>, entry: His
   group.push(entry);
   groups.set(date, group);
   return groups;
-};
-
-export class PermissionError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PermissionError";
-  }
-}
-
-export const isPermissionError = (error: unknown) => {
-  return error instanceof Error && error.name === "PermissionError";
 };

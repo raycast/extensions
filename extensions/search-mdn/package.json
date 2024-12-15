@@ -24,7 +24,31 @@
       "title": "Search Web Docs",
       "subtitle": "MDN",
       "description": "Search MDN Web Docs",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Preferred Action",
+          "data": [
+            {
+              "title": "Read Document",
+              "value": "read"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "required": false,
+          "default": "read",
+          "name": "preferredAction",
+          "description": "Choose what you want to do with the result first"
+        }
+      ]
     }
   ],
   "dependencies": {

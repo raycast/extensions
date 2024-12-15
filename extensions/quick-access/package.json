@@ -22,7 +22,6 @@
     {
       "name": "search-pins",
       "title": "Search Pins",
-      "icon": "search-pins.png",
       "subtitle": "Quick Access",
       "description": "Quick access, drag and drop the files or folders pinned in Finder.",
       "mode": "view",
@@ -207,7 +206,6 @@
     {
       "name": "search-pins-menu-bar",
       "title": "Menubar Pins",
-      "icon": "search-pins.png",
       "subtitle": "Quick Access",
       "description": "Quick access the files or folders pinned in Finder from menu bar.",
       "mode": "menu-bar",
@@ -244,26 +242,25 @@
     {
       "name": "pin",
       "title": "Pin",
-      "icon": "pin.png",
       "subtitle": "Quick Access",
       "description": "Pin files or folders that can be accessed quickly.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.78.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.2",
     "file-url": "^4.0.0",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "20.14.9",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "20.14.12",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

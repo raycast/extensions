@@ -1,5 +1,13 @@
 # iLovePDF Changelog
 
+## [Add a feature to select files from Finder] - 2024-11-21
+
+## [Add Validate PDF/A Command] - 2024-07-18
+
+## [Add PDF to PDF/A Command] - 2024-07-18
+
+## [Add User Friendly Error Messages] - 2024-07-16
+
 ## [Add Repair PDF Command] - 2024-07-09
 
 ## [Add Page Number Command] - 2024-07-06

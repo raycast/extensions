@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Add Hyper Support] - 2024-09-07
+
+- Added support for Hyper as an option to open ssh connections. 
+
 ## [Add Alacritty Support] - 2024-04-09
 
 - Added support for alacritty as an option to open ssh connections.

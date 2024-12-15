@@ -45,7 +45,7 @@ export default function InstanceCommand({
       <Detail
         navigationTitle="No Sourcegraph Self-Hosted instance configured"
         markdown={`${bold(
-          `⚠️ No Sourcegraph Sourcegraph Self-Hosted instance configured`
+          `⚠️ No Sourcegraph Sourcegraph Self-Hosted instance configured`,
         )} - please set one up in the extension preferences to use this command!\n\n${tryCloudMessage}`}
         actions={
           <ActionPanel>
@@ -64,7 +64,7 @@ export default function InstanceCommand({
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted URL"
         markdown={`${bold(
-          `⚠️ Sourcegraph Self-Hosted URL '${src.instance}' is invalid:`
+          `⚠️ Sourcegraph Self-Hosted URL '${src.instance}' is invalid:`,
         )} ${e}\n\nUpdate it in the extension preferences!\n\n${tryCloudMessage}`}
         actions={
           <ActionPanel>
@@ -86,7 +86,7 @@ export default function InstanceCommand({
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted access token"
         markdown={`${bold(
-          `⚠️ A token is required for Sourcegraph Self-Hosted instance '${src.instance}'`
+          `⚠️ A token is required for Sourcegraph Self-Hosted instance '${src.instance}'`,
         )} - please add an access token for Sourcegraph Self-Hosted in the extension preferences!\n\n${tryCloudMessage}`}
         actions={
           <ActionPanel>
@@ -98,7 +98,7 @@ export default function InstanceCommand({
     );
   }
 
-  useEffect(checkAuthEffect(src));
+  useEffect(checkAuthEffect(src), []);
 
   return <Command src={src} props={props} />;
 }

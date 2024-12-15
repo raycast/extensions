@@ -1,5 +1,13 @@
 # Purelymail Changelog
 
+## [Confirm Password when Creating User] - 2024-10-15
+
+- Move some endpoints to `useCachedPromise` w/ improved `callApi` for optimistic updates
+- fix: wrong toast title when Deleting User
+- When creating a User you now have to confirm the password (enter it twice)
+
+## [Filter Users by Domain + Copy List of Users] - 2024-07-29
+
 ## [Added ListUser+ModifyUser Endpoints] - 2024-04-08
 
 ### Enhancements

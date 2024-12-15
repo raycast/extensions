@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, confirmAlert, Icon, Keyboard, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  LocalStorage,
+  open,
+} from "@raycast/api";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { PrimaryAction, primaryAction } from "../types/preferences";
 import { useTerminals } from "../hooks/useTerminals";
-import { clearShellHistory, getShellIcon, runShellCommand } from "../utils/shell-utils";
+import { clearShellHistory, getShellHistoryPath, getShellIcon, runShellCommand } from "../utils/shell-utils";
 import { Cli, Shell, ShellHistory } from "../types/types";
 import { MutatePromise } from "@raycast/utils/dist/types";
 import KeyEquivalent = Keyboard.KeyEquivalent;
@@ -34,6 +45,8 @@ export function ActionShellCommand(props: {
     }
     return Icon.AppWindow;
   };
+
+  const path = getShellHistoryPath(shell);
   return (
     <ActionPanel>
       <Action
@@ -64,7 +77,7 @@ export function ActionShellCommand(props: {
       />
       <ActionPanel.Section>
         <Action
-          title={"Copy CLI Tool"}
+          title={"Copy Cli Tool"}
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
           onAction={async () => {
@@ -102,6 +115,16 @@ export function ActionShellCommand(props: {
             await mutate();
           }}
         />
+        {path && (
+          <Action
+            title={`Open ${shell} History in Editor`}
+            icon={Icon.Finder}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "o" }}
+            onAction={async () => {
+              await open(path);
+            }}
+          />
+        )}
         <Action
           title={`Clear ${shell} History`}
           icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -123,11 +146,11 @@ export function ActionShellCommand(props: {
           }}
         />
         <Action
-          title={`Toggle History Deatil`}
+          title={`Toggle History Detail`}
           icon={Icon.Sidebar}
           shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
           onAction={async () => {
-            LocalStorage.setItem(CacheKey.ShowDetail, !showDetail);
+            await LocalStorage.setItem(CacheKey.ShowDetail, !showDetail);
             await mutate();
             await showDetailMutate();
           }}

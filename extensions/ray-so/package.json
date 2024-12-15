@@ -10,7 +10,8 @@
     "vette",
     "emlez",
     "samuelkraft",
-    "benoit.grelard"
+    "benoit.grelard",
+    "sdorra"
   ],
   "license": "MIT",
   "commands": [
@@ -37,20 +38,56 @@
           "default": "candy",
           "data": [
             {
-              "title": "Candy",
-              "value": "candy"
+              "title": "Vercel",
+              "value": "vercel"
+            },
+            {
+              "title": "Evil Rabbit",
+              "value": "rabbit"
+            },
+            {
+              "title": "Supabase",
+              "value": "supabase"
+            },
+            {
+              "title": "Tailwind",
+              "value": "tailwind"
+            },
+            {
+              "title": "Bitmap",
+              "value": "bitmap"
+            },
+            {
+              "title": "Noir",
+              "value": "noir"
+            },
+            {
+              "title": "Ice",
+              "value": "ice"
+            },
+            {
+              "title": "Sand",
+              "value": "sand"
+            },
+            {
+              "title": "Forest",
+              "value": "forest"
+            },
+            {
+              "title": "Mono",
+              "value": "mono"
             },
             {
               "title": "Breeze",
               "value": "breeze"
             },
             {
-              "title": "Crimson",
-              "value": "crimson"
+              "title": "Candy",
+              "value": "candy"
             },
             {
-              "title": "Evil Rabbit",
-              "value": "rabbit"
+              "title": "Crimson",
+              "value": "crimson"
             },
             {
               "title": "Falcon",
@@ -65,20 +102,12 @@
               "value": "midnight"
             },
             {
-              "title": "Mono",
-              "value": "mono"
-            },
-            {
               "title": "Raindrop",
               "value": "raindrop"
             },
             {
               "title": "Sunset",
               "value": "sunset"
-            },
-            {
-              "title": "Vercel",
-              "value": "vercel"
             }
           ]
         },

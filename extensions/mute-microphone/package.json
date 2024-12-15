@@ -7,7 +7,8 @@
   "author": "Quentin23Soleil",
   "contributors": [
     "iamyeizi",
-    "aliaksandr_zhebit"
+    "aliaksandr_zhebit",
+    "thewinger"
   ],
   "pastContributors": [
     "danulqua"
@@ -59,6 +60,30 @@
       "title": "Toggle Mute Audio Input",
       "description": "Mute/unmute audio input (microphone)",
       "mode": "no-view"
+    },
+    {
+      "name": "set-level",
+      "title": "Set Level of Audio Input",
+      "description": "Set level of audio input (microphone)",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "default-level",
+          "title": "Default Input level",
+          "description": "Default level of audio input",
+          "type": "textfield",
+          "placeholder": "Must be a number from 0 to 100",
+          "default": "100",
+          "required": true
+        }
+      ],
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0 - 100 or empty for default.",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

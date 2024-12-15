@@ -1,6 +1,16 @@
 export type Entity = Friend | Group;
 
-export type FriendOrGroupProps = { friend: Friend; group?: never } | { friend?: never; group: Group };
+export type FriendOrGroupProps =
+  | {
+      friend: Friend;
+      group?: never;
+      revalidateFriends: () => void;
+    }
+  | {
+      friend?: never;
+      group: Group;
+      revalidateGroups: () => void;
+    };
 
 export type GetFriends = {
   friends: Friend[];

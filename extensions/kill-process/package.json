@@ -2,14 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
+  "description": "Terminate processes sorted by CPU or memory usage",
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [
     "crazyones110",
     "zhenpewu",
     "Saafo",
-    "erics118"
+    "erics118",
+    "xilopaint"
   ],
   "license": "MIT",
   "commands": [
@@ -22,7 +23,7 @@
   ],
   "preferences": [
     {
-      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
+      "description": "Determine whether the process path should be searched for the query or only the process name.",
       "label": "Search Process Paths",
       "name": "shouldSearchInPaths",
       "required": false,
@@ -31,7 +32,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
+      "description": "Determine whether the process PID should be searched for the query or only the process name.",
       "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
@@ -40,7 +41,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Determines whether apps are listed before other results when filtering.",
+      "description": "Determine whether apps are listed before other results when filtering.",
       "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
@@ -49,7 +50,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Determines whether processes are sorted by CPU or memory usage.",
+      "description": "Determine whether processes are sorted by CPU or memory usage.",
       "label": "Sort by Memory Usage",
       "name": "sortByMem",
       "required": false,
@@ -58,7 +59,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Determines whether aggregate processes belong to the same app.",
+      "description": "Determine whether aggregate processes belong to the same app.",
       "label": "Aggregate Apps",
       "name": "aggregateApps",
       "required": false,
@@ -110,7 +111,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to 0.",
+      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
       "label": "Refresh Duration",
       "name": "refreshDuration",
       "required": false,
@@ -121,16 +122,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.2",
+    "@raycast/api": "^1.81.2",
     "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "18.18.4",
     "@types/react": "18.2.37",
-    "eslint": "^8.53.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",

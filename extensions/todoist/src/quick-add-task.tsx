@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, popToRoot, getPreferenceValues, LaunchProps, open, Toast } from "@raycast/api";
 
 import { quickAddTask, handleError, updateTask } from "./api";
 import { isTodoistInstalled, checkTodoistApp } from "./helpers/isTodoistInstalled";
@@ -16,6 +16,7 @@ async function QuickAddTask(props: QuickAddTaskProps) {
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
+      popToRoot({ clearSearchBar: true });
     }
 
     const { id } = await quickAddTask({

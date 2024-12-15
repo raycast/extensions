@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "envato",
-  "title": "Envato Sales",
+  "title": "Envato Sales, Purchases and Search",
   "version": "1.1.0",
-  "description": "Tracking New Sales For Envato Author",
+  "description": "Tracking New Sales For Envato Author, View Purchases and Search Catalog",
   "icon": "icon.png",
   "author": "astroon",
   "contributors": [
-    "3llomi"
+    "3llomi",
+    "xmok"
   ],
   "license": "MIT",
   "commands": [
@@ -22,7 +23,7 @@
       "name": "accountEnvato",
       "title": "Portfolio",
       "subtitle": "Envato",
-      "description": "My Protfolio For Envato",
+      "description": "My Portfolio For Envato",
       "mode": "view"
     },
     {
@@ -39,39 +40,55 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "list-purchases",
+      "title": "List Purchases",
+      "subtitle": "Envato",
+      "description": "List Purchases",
+      "mode": "view"
+    },
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "subtitle": "Envato",
+      "description": "Search Items in Envato Market Catalog",
+      "mode": "view"
     }
-  ],
+      ],
   "preferences": [
     {
       "name": "token",
       "type": "password",
       "required": true,
       "title": "Envato Token",
-      "description": "You need to provide an API token to access the API. The token must be a 32 character long alphanumeric string. See https://build.envato.com/api/#token"
+      "description": "You need to provide an API token to access the API. The token must be a 32 character long alphanumeric string. See https://build.envato.com/api/#token",
+      "placeholder": "XXX...XXX"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.84.8",
+    "@raycast/utils": "^1.18.0",
     "dateformat": "^5.0.3",
-    "envato": "^3.0.8",
-    "node-html-markdown": "^1.3.0",
-    "turndown": "^7.1.2"
+    "envato": "^3.2.0",
+    "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
-    "@raycast/utils": "^1.10.0",
     "@raycast/eslint-config": "1.0.5",
     "@types/dateformat": "^3.0.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.58",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.9.5"
+    "react": "^18.2.0",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

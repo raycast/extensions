@@ -1,7 +1,7 @@
-import { closeMainWindow, showHUD, LaunchProps } from "@raycast/api";
+import { closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { makeNewWindow } from "./arc";
-import { validateURL } from "./utils";
 import { URLArguments } from "./types";
+import { validateURL } from "./utils";
 
 const handleOpenNewIncognitoTab = async (newTabUrl: string) => {
   try {
@@ -14,7 +14,10 @@ const handleOpenNewIncognitoTab = async (newTabUrl: string) => {
   } catch (e) {
     console.error(e);
 
-    await showHUD("❌ Failed opening a new tab");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new tab",
+    });
   }
 };
 
@@ -29,6 +32,9 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
     }
     await handleOpenNewIncognitoTab(url);
   } catch {
-    await showHUD("❌ Failed opening a new incognito window");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed opening a new incognito window",
+    });
   }
 }

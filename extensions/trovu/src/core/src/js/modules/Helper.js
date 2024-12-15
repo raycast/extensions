@@ -21,17 +21,6 @@ export default class Helper {
   }
 
   /**
-   * Escape all regular expression commands in a string.
-   *
-   * @param {string} str    - The string to escape.
-   *
-   * @return {string} str   - The escaped string.
-   */
-  static escapeRegExp(str) {
-    return str.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1");
-  }
-
-  /**
    * Fetch the content of a file behind an URL.
    *
    * @param {string} url    - The URL of the file to fetch.
@@ -39,14 +28,15 @@ export default class Helper {
    * @return {string} text  - The content.
    */
   static async fetchAsync(url, env) {
+    const requestCache = env.reload ? "reload" : "default";
     const response = await env.fetch(url, {
-      cache: env.reload ? "reload" : "force-cache",
+      cache: requestCache,
     });
     if (response.status != 200) {
-      env.logger.info(`Problem fetching via ${env.reload ? "reload" : "cache"} ${url}: ${response.status}`);
+      env.logger.info(`Problem fetching via ${requestCache} ${url}: ${response.status}`);
       return null;
     }
-    env.logger.success(`Success fetching via ${env.reload ? "reload" : "cache"} ${url}`);
+    env.logger.success(`Success fetching via ${requestCache} ${url}`);
     const text = await response.text();
     return text;
   }

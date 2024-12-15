@@ -1,4 +1,18 @@
-# Say - Spoken Content Changelog
+# Say - Text to Speech Changelog
+
+## [Chore & Fixes] - 2024-11-21
+
+- Bump all dependencies to the latest
+- Fix argument types for spawn
+
+## [Chore] - 2024-10-28
+
+- Bump all dependencies to the latest
+
+## [Chore] - 2024-10-02
+
+- Rename extension title
+- Bump all dependencies to the latest
 
 ## [Bugfix] - 2024-06-23
 

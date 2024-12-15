@@ -4,6 +4,8 @@
 - [Functions](utils-reference/functions/README.md)
   - [runAppleScript](utils-reference/functions/runAppleScript.md)
   - [showFailureToast](utils-reference/functions/showFailureToast.md)
+  - [createDeeplink](utils-reference/functions/createDeeplink.md)
+  - [executeSQL](utils-reference/functions/executeSQL.md)
 - [Icons](utils-reference/icons/README.md)
   - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
   - [getFavicon](utils-reference/icons/getFavicon.md)

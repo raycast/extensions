@@ -64,8 +64,8 @@ interface OutdatedListProps {
 }
 
 function OutdatedList(props: OutdatedListProps) {
-  const formulae = props.filterType != InstallableFilterType.casks ? props.outdated?.formulae ?? [] : [];
-  const casks = props.filterType != InstallableFilterType.formulae ? props.outdated?.casks ?? [] : [];
+  const formulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
+  const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
 
   return (
     <List

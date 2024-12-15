@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
   brewIsInstalled,
   brewInstallPath,
@@ -10,7 +10,27 @@ import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
-import { runCommandInTerminal, terminalName } from "./runInTerminal";
+import { useTerminalApp } from "./runInTerminal";
+
+const DebugSection = (props: { obj: Cask | Formula }) => (
+  <ActionPanel.Section>
+    <Action.Push
+      target={
+        <Detail
+          navigationTitle="Debug Info"
+          markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
+            </ActionPanel>
+          }
+        />
+      }
+      title="Debug"
+      icon={Icon.MagnifyingGlass}
+    />
+  </ActionPanel.Section>
+);
 
 export function CaskActionPanel(props: {
   cask: Cask;
@@ -18,7 +38,8 @@ export function CaskActionPanel(props: {
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
-  const cask = props.cask;
+  const { cask } = props;
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
   function installedActionPanel() {
     return (
@@ -46,11 +67,10 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title={`Run Uninstall in ${terminalName()}`}
-            icon={Icon.Terminal}
-            onAction={() => {
-              runCommandInTerminal(brewUninstallCommand(cask));
-            }}
+            title={`Run Uninstall in ${terminalName}`}
+            icon={terminalIcon}
+            style={Action.Style.Destructive}
+            onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
           />
         </ActionPanel.Section>
 
@@ -62,6 +82,8 @@ export function CaskActionPanel(props: {
           />
           <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
+
+        <DebugSection obj={cask} />
       </ActionPanel>
     );
   }
@@ -93,11 +115,9 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title={`Run Install in ${terminalName()}`}
-            icon={Icon.Terminal}
-            onAction={() => {
-              runCommandInTerminal(brewInstallCommand(cask));
-            }}
+            title={`Run Install in ${terminalName}`}
+            icon={terminalIcon}
+            onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -121,7 +141,8 @@ export function FormulaActionPanel(props: {
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
 }): JSX.Element {
-  const formula = props.formula;
+  const { formula } = props;
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
   function installedActionPanel() {
     return (
@@ -151,13 +172,14 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title={`Run Uninstall in ${terminalName()}`}
-            icon={Icon.Terminal}
-            onAction={() => {
-              runCommandInTerminal(brewUninstallCommand(formula));
-            }}
+            title={`Run Uninstall in ${terminalName}`}
+            style={Action.Style.Destructive}
+            icon={terminalIcon}
+            onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
           />
         </ActionPanel.Section>
+
+        <DebugSection obj={formula} />
       </ActionPanel>
     );
   }
@@ -188,17 +210,17 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title={`Run Install in ${terminalName()}`}
-            icon={Icon.Terminal}
-            onAction={() => {
-              runCommandInTerminal(brewInstallCommand(formula));
-            }}
+            title={`Run Install in ${terminalName}`}
+            icon={terminalIcon}
+            onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser url={formula.homepage} />
           <Action.CopyToClipboard title="Copy URL" content={formula.homepage} />
         </ActionPanel.Section>
+
+        <DebugSection obj={formula} />
       </ActionPanel>
     );
   }
@@ -214,10 +236,11 @@ export function OutdatedActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
   onAction: (result: boolean) => void;
 }): JSX.Element {
-  const outdated = props.outdated;
+  const { outdated } = props;
+  const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
   function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
-    return (o as OutdatedFormula).pinned != undefined ? true : false;
+    return (o as OutdatedFormula).pinned != undefined;
   }
 
   return (
@@ -234,22 +257,19 @@ export function OutdatedActionPanel(props: {
           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
         <Action
-          title={`Run Upgrade in ${terminalName()}`}
-          icon={Icon.Terminal}
-          onAction={() => {
-            runCommandInTerminal(brewUpgradeCommand(outdated));
-          }}
+          title={`Run Upgrade in ${terminalName}`}
+          icon={terminalIcon}
+          onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
         <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
         <Action
-          title={`Run Uninstall in ${terminalName()}`}
-          icon={Icon.Terminal}
-          onAction={() => {
-            runCommandInTerminal(brewUninstallCommand(outdated));
-          }}
+          title={`Run Uninstall in ${terminalName}`}
+          icon={terminalIcon}
+          style={Action.Style.Destructive}
+          onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
         />
       </ActionPanel.Section>
     </ActionPanel>

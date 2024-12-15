@@ -1,25 +1,47 @@
 # 1Password Changelog
 
+## [Chore] - 2024-12-02
+
+- Add readme & FAQ
+- Bump all dependencies to the latest
+- Resolve all linting errors
+- Resolve all vulnerabilities through `npm audit fix`
+
+## [Enhancements] - 2024-10-16
+
+- Feat: allow filtering by additional information
+
+## [Enhancements] - 2024-08-13
+
+- Fix: multilingual OTP name can't be read
+- Feat: support generate random password
+
+## [Fix] - 2024-08-05
+
+- Add support for showing missing 1Password CLI error
+- Adjust toast message
+- Fix markdown format
+
 ## [Fix] - 2024-05-23
 
--- Fixes the infinite loading when trying to switch accounts.
+- Fixes the infinite loading when trying to switch accounts.
 
 ## [Fix] - 2024-05-21
 
--- Fixes account_uuid is undefined
+- Fixes account_uuid is undefined
 
 ## [Fix] - 2024-05-21
 
--- Fixes account selection
+- Fixes account selection
 
 ## [Enhancements] - 2024-05-10
 
--- Fixes double auth prompts.
--- Adds "My Vaults" command.
--- Adds "Switch Account" action.
--- Improves error handling.
--- Modifies Auto Renewal to be disabled by default.
--- Improves Auto Renewal to start renewing only after a manual sign-in.
+- Fixes double auth prompts.
+- Adds "My Vaults" command.
+- Adds "Switch Account" action.
+- Improves error handling.
+- Modifies Auto Renewal to be disabled by default.
+- Improves Auto Renewal to start renewing only after a manual sign-in.
 
 ## [Moved contributor] - 2024-05-03
 

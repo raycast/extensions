@@ -8,7 +8,10 @@
   "contributors": [
     "tm.wrnr",
     "j3lte",
-    "samuelkraft"
+    "samuelkraft",
+    "ridemountainpig",
+    "spookywy",
+    "seanparkross"
   ],
   "license": "MIT",
   "categories": [
@@ -104,6 +107,10 @@
           "value": "copyGifMarkdown"
         },
         {
+          "title": "Paste GIF Markdown",
+          "value": "pasteGifMarkdown"
+        },
+        {
           "title": "Add or Remove from Favorites",
           "value": "toggleFav"
         },
@@ -124,6 +131,22 @@
           "value": "downloadFile"
         }
       ]
+    },
+    {
+      "name": "downloadPath",
+      "title": "GIF Download Path",
+      "description": "Path to save downloaded GIFs",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "hideFilename",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Filename on Copy or Download",
+      "description": "Hide the original filename when copying or downloading GIFs",
+      "default": false,
+      "label": "Hide Filename"
     }
   ],
   "dependencies": {

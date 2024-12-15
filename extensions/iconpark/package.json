@@ -5,6 +5,9 @@
   "description": "IconPark gives access to more than 2000 high-quality icons without API key and network.",
   "icon": "icon-park.png",
   "author": "koinzhang",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Design Tools",
     "Media"
@@ -40,6 +43,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

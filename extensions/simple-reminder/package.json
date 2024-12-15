@@ -52,11 +52,29 @@
     },
     {
       "name": "mobileNotificationNtfyTopic",
-      "description": "Specify the topic you want to receive notifications in. Be precise e.g. simple_reminder_david_alecrim",
+      "description": "Specify the topic you want to receive notifications in. Can be used for the default ntfy server or a self-hosted one",
       "type": "textfield",
       "default": "",
       "required": false,
       "title": "ntfy topic"
+    },
+    {
+      "name": "mobileNotificationNtfyServerUrl",
+      "description": "When ntfy mobile notifications are on, if this url is set (from a self-hosted ntfy server), it will be used to send the notification",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "Only use this if you're using a self-hosted ntfy server",
+      "required": false,
+      "title": "ntfy server url"
+    },
+    {
+      "name": "mobileNotificationNtfyServerAccessToken",
+      "description": "When ntfy mobile notifications are on and a self-hosted ntfy url is being used, this is the authentication access token to use to authenticate against the server",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "Only use this if you're using a self-hosted ntfy server",
+      "required": false,
+      "title": "ntfy server access token"
     }
   ],
   "dependencies": {

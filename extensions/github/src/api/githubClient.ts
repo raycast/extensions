@@ -1,8 +1,8 @@
+import { Octokit } from "@octokit/rest";
 import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { GraphQLClient } from "graphql-request";
 import fetch from "node-fetch";
-import { Octokit } from "octokit";
 
 import { getSdk } from "../generated/graphql";
 

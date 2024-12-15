@@ -62,8 +62,10 @@ Alice AI allows you to export and import your actions. You can easily share your
 # 🚀 Supported OpenAI models
 
 Alice AI supports the following models:
-- GPT3.5 Turbo
-- GPT4 Turbo
+- GPT-3.5 Turbo
+- GPT-4 Turbo
+- GPT-4o
+- GPT-4o Mini
 
 ---
 

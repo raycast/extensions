@@ -2,7 +2,7 @@ import { Cli, CliType, Shell, ShellHistory, Terminal } from "../types/types";
 import path from "path";
 import os from "os";
 import readLastLines from "read-last-lines";
-import { maxLines, removeDuplicates } from "../types/preferences";
+import { maxLines, removeDuplicates, historyTimestamp } from "../types/preferences";
 import { captureException, Icon, open, showToast, Toast, trash } from "@raycast/api";
 import { ITERM2, TERMINAL } from "./constants";
 import { runAppleScript } from "@raycast/utils";
@@ -12,6 +12,16 @@ import { showCustomHud, truncate } from "./common-utils";
 export const zshHistoryFilePath = path.join(os.homedir(), ".zsh_history");
 export const bashHistoryFilePath = path.join(os.homedir(), ".bash_history");
 export const fishHistoryFilePath = path.join(os.homedir(), ".local/share/fish/fish_history");
+
+export function getShellHistoryPath(shell: Shell) {
+  if (shell === Shell.ZSH) {
+    return zshHistoryFilePath;
+  } else if (shell === Shell.BASH) {
+    return bashHistoryFilePath;
+  } else if (shell === Shell.FISH) {
+    return fishHistoryFilePath;
+  }
+}
 
 export async function clearShellHistory(shell: Shell) {
   if (shell === Shell.ZSH) {
@@ -70,6 +80,23 @@ export async function getShellHistoryFishFromFiles(maxLineCount: number = parseI
 }
 
 function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
+  let history: ShellHistory[] = [];
+
+  if (historyTimestamp) {
+    history = parseZshShellHistoryWithTimestamp(content, shell);
+  } else {
+    history = parseZshShellHistoryWithoutTimestamp(content, shell);
+  }
+
+  // double check if the history is not parsed correctly
+  if (history.length === 1 && content.split("\n").length > 1) {
+    history = parseZshShellHistoryWithoutTimestamp(content, shell);
+  }
+
+  return history;
+}
+
+function parseZshShellHistoryWithTimestamp(content: string, shell: Shell): ShellHistory[] {
   const history: ShellHistory[] = [];
   let commandBuffer: string = "";
   let timestamp: number | undefined = undefined;
@@ -102,7 +129,32 @@ function parseZshShellHistory(content: string, shell: Shell): ShellHistory[] {
       cli: parseCliTool(commandBuffer.trim()),
     });
   }
+  return history;
+}
 
+function parseZshShellHistoryWithoutTimestamp(content: string, shell: Shell): ShellHistory[] {
+  const history: ShellHistory[] = [];
+  content
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .forEach((line) => {
+      const match = line.match(/^:\s*(\d+):\d+;(.*)$/);
+      if (match) {
+        history.push({
+          command: match[2].trim(),
+          timestamp: parseInt(match[1], 10) * 1000,
+          shell: shell,
+          cli: parseCliTool(match[2].trim()),
+        });
+      } else {
+        history.push({
+          command: line.trim(),
+          timestamp: undefined,
+          shell: shell,
+          cli: parseCliTool(line.trim()),
+        });
+      }
+    });
   return history;
 }
 

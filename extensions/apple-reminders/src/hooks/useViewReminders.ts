@@ -1,12 +1,13 @@
-import { Icon, Image } from "@raycast/api";
+import { Icon, Image, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { isBefore, parseISO } from "date-fns";
+import { format, isBefore, parseISO, startOfDay } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
+const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
-import { displayDueDate, getDateString, isOverdue, isToday } from "../helpers";
+import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -96,20 +97,55 @@ export function groupByDueDates(reminders: Reminder[]) {
   const allDueDates = [...new Set(upcoming.map((reminder) => getDateString(reminder.dueDate as string)))];
   allDueDates.sort();
 
-  const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
-    return {
-      title: displayDueDate(date),
-      reminders: remindersOnDate,
-    };
-  });
+  const sections: Section[] = [];
+  const today = format(startOfDay(new Date()), "yyyy-MM-dd");
 
-  if (overdue.length > 0) {
+  const overdueReminders = useTimeOfDayGrouping
+    ? overdue.filter((reminder) => reminder.dueDate && isBefore(reminder.dueDate, today))
+    : overdue;
+
+  if (overdueReminders.length > 0) {
     sections.unshift({
       title: "Overdue",
-      reminders: overdue,
+      reminders: overdueReminders,
     });
   }
+
+  if (useTimeOfDayGrouping) {
+    const todayReminders = dated.filter((reminder) => getDateString(reminder.dueDate as string) === today);
+
+    if (todayReminders.length > 0) {
+      const allDayReminders = todayReminders.filter((reminder) => isFullDay(reminder.dueDate as string));
+      const timedReminders = todayReminders.filter((reminder) => !isFullDay(reminder.dueDate as string));
+
+      if (allDayReminders.length > 0) {
+        sections.push({ title: "Today", reminders: allDayReminders });
+      }
+
+      const morning = timedReminders.filter((reminder) => new Date(reminder.dueDate as string).getHours() < 12);
+      const afternoon = timedReminders.filter(
+        (reminder) =>
+          new Date(reminder.dueDate as string).getHours() >= 12 && new Date(reminder.dueDate as string).getHours() < 17,
+      );
+      const tonight = timedReminders.filter((reminder) => new Date(reminder.dueDate as string).getHours() >= 17);
+
+      if (morning.length > 0) sections.push({ title: "Morning", reminders: morning });
+      if (afternoon.length > 0) sections.push({ title: "Afternoon", reminders: afternoon });
+      if (tonight.length > 0) sections.push({ title: "Tonight", reminders: tonight });
+    }
+  }
+
+  const remindersOnDate = useTimeOfDayGrouping
+    ? allDueDates.filter((date) => isBefore(date, today))
+    : allDueDates.filter((date) => date);
+
+  remindersOnDate.forEach((date) => {
+    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
+    sections.push({
+      title: displayDueDate(date),
+      reminders: remindersOnDate,
+    });
+  });
 
   if (notDated.length > 0) {
     sections.push({
@@ -120,6 +156,7 @@ export function groupByDueDates(reminders: Reminder[]) {
 
   return sections;
 }
+
 export function groupByPriorities(reminders: Reminder[]) {
   const priorities: { name: string; value: Priority }[] = [
     { name: "High", value: "high" },

@@ -193,3 +193,11 @@ export function formatDateTime(date: string) {
 export function formatTime(date: string) {
   return moment(date).format("HH:mm a");
 }
+
+export function formatCurrency(price: number, currency: string) {
+  return (price / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: currency,
+    currencyDisplay: "narrowSymbol",
+  });
+}

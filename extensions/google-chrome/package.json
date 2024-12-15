@@ -47,6 +47,13 @@
       "mode": "view"
     },
     {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Google Chrome",
+      "description": "Search browser all tabs and history,bookmarks.",
+      "mode": "view"
+    },
+    {
       "name": "new-window",
       "title": "Create New Window",
       "subtitle": "Google Chrome",

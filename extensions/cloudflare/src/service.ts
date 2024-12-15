@@ -40,6 +40,10 @@ interface ZoneItem {
   type: string;
   development_mode: number;
   name_servers: string[];
+  modified_on: string;
+  created_on: string;
+  activated_on: string;
+  permissions: string[];
 }
 
 interface Zone {
@@ -232,9 +236,9 @@ class Service {
     return result.map((item) => formatZone(item));
   }
 
-  async getZone(id: string): Promise<Zone> {
+  async getZone(id: string): Promise<ZoneItem> {
     const response = await this.client.get<Response<ZoneItem>>(`zones/${id}`);
-    return formatZone(response.data.result);
+    return response.data.result;
   }
 
   async listDnsRecords(zoneId: string): Promise<DnsRecord[]> {

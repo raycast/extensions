@@ -14,7 +14,12 @@ import { setStorage, getStorage } from "./lib/storage";
 import { Direction, StorageKey } from "./lib/constants";
 import { Group, deleteGroup, useGroups } from "./lib/Groups";
 import { Pin, openPin, usePins } from "./lib/Pins";
-import { addIDAccessory, addParentGroupAccessory, addSortingStrategyAccessory } from "./lib/accessories";
+import {
+  addIDAccessory,
+  addParentGroupAccessory,
+  addSortingStrategyAccessory,
+  addVisibilityAccessory,
+} from "./lib/accessories";
 import { getGroupIcon } from "./lib/icons";
 import GroupForm from "./components/GroupForm";
 import { InstallExamplesAction } from "./components/actions/InstallExamplesAction";
@@ -62,12 +67,12 @@ const moveGroup = async (index: number, dir: Direction, setGroups: React.Dispatc
 export default function ViewGroupsCommand() {
   const { groups, setGroups, revalidateGroups } = useGroups();
   const { pins } = usePins();
-  const [examplesInstalled, setExamplesInstalled] = useState<LocalStorage.Value | undefined>(true);
+  const [examplesInstalled, setExamplesInstalled] = useState<boolean>(true);
   const preferences = getPreferenceValues<ExtensionPreferences & ViewGroupsPreferences>();
 
   useEffect(() => {
     Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLE_GROUPS_INSTALLED)).then((examplesInstalled) => {
-      setExamplesInstalled(examplesInstalled);
+      setExamplesInstalled(examplesInstalled === 1);
     });
   }, []);
 
@@ -93,6 +98,7 @@ export default function ViewGroupsCommand() {
         const groupPins = pins.filter((pin: Pin) => pin.group == group.name);
         const maxID = Math.max(...groups.map((group) => group.id));
         const accessories: List.Item.Accessory[] = [];
+        if (preferences.showVisibility) addVisibilityAccessory(group, accessories, true);
         if (preferences.showSortStrategy) addSortingStrategyAccessory(group, accessories);
         if (preferences.showIDs) addIDAccessory(group, accessories, maxID);
         if (preferences.showParentGroup) addParentGroupAccessory(group, accessories, groups);

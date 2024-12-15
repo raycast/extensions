@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import { usePersons } from "../hooks";
+import { usePromise } from "@raycast/utils";
+import { getPersons } from "../api";
 import { positionMap } from "../utils";
 import Person from "./person";
 
@@ -9,10 +10,14 @@ type PropsType = {
 };
 
 export default function ClubPersons(props: PropsType) {
-  const players = usePersons(props.club);
+  const { data: players, isLoading } = usePromise(getPersons, [props.club]);
 
   return (
-    <Grid navigationTitle={props.navigationTitle} throttle isLoading={!players}>
+    <Grid
+      navigationTitle={props.navigationTitle}
+      throttle
+      isLoading={isLoading}
+    >
       {players &&
         Object.entries(players).map(([position, persons]) => {
           return (

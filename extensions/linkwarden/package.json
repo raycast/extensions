@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linkwarden",
   "title": "Linkwarden",
-  "description": "This extension allows you to manage your Linkwarden bookmarks directly from Raycast. You can add new bookmarks and search through your existing ones effortlessly.",
+  "description": "Manage your Linkwarden bookmarks directly from Raycast. You can add new bookmarks and search through your existing ones effortlessly.",
   "icon": "extension_icon.png",
   "author": "leodbrs",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -26,14 +29,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
     "axios": "^1.7.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -44,7 +47,7 @@
       "title": "Linkwarden URL",
       "description": "Your Linkwarden URL",
       "type": "textfield",
-      "placeholder": "https://linkwarden.com",
+      "placeholder": "https://cloud.linkwarden.app/",
       "required": true
     },
     {

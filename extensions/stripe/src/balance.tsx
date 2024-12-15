@@ -1,17 +1,11 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import capitalize from "lodash/capitalize";
 import get from "lodash/get";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertAmount } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
-
-type BalanceResp = {
-  amount: number;
-  currency: string;
-  source_types: unknown[];
-};
 
 type Balance = {
   amount: number;
@@ -19,17 +13,27 @@ type Balance = {
   sourceTypes: Array<{ type: string; value: string }>;
 };
 
-const resolveBalance = ({ amount = 0, currency = "", source_types = [] }: BalanceResp): Balance => {
-  const uppercaseCurrency = currency.toUpperCase();
+const createSourceTypes = (balance: Stripe.Balance.Available): Balance["sourceTypes"] => {
+  if (!balance.source_types) {
+    return [];
+  }
 
-  return {
-    amount: convertAmount(amount),
-    currency: uppercaseCurrency,
-    sourceTypes: Object.entries(source_types).map(([sourceType, value]) => ({
-      type: capitalize(sourceType),
-      value: `${uppercaseCurrency}  ${convertAmount(value as number)}`,
-    })),
+  const sourceTypes = Object.entries(balance.source_types).map(([type, value]) => ({
+    type: capitalize(type),
+    value: `${balance.currency.toUpperCase()}  ${convertAmount(value as number)}`,
+  }));
+
+  return sourceTypes;
+};
+
+const resolveBalance = (balance: Stripe.Balance.Available): Balance => {
+  const resolvedBalance: Balance = {
+    amount: convertAmount(balance.amount),
+    currency: balance.currency.toUpperCase(),
+    sourceTypes: createSourceTypes(balance),
   };
+
+  return resolvedBalance;
 };
 
 const Balance = () => {

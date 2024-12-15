@@ -1,15 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { User } from "../types/user";
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
-import { ApiResponseUser } from "./useUser.types";
 import { Cache } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { User } from "../types/user";
+import { fetchPromise } from "../utils/fetcher";
+import { useCallbackSafeRef } from "./useCallbackSafeRef";
+import { ApiResponseUser } from "./useUser.types";
 
 const cache = new Cache();
 
 const useUser = () => {
-  const { fetcher } = reclaimApi();
-
   const cachedUserObj = cache.get("user");
   const cachedUserDate = cache.get("userDate");
 
@@ -20,7 +18,7 @@ const useUser = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleGetUser = useCallback(async () => {
+  const handleGetUser = useCallbackSafeRef(async () => {
     try {
       const currentDate = new Date();
       if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 1800) {
@@ -28,7 +26,7 @@ const useUser = () => {
       }
       setIsLoading(true);
 
-      const [user, error] = await axiosPromiseData<ApiResponseUser>(fetcher("/users/current"));
+      const [user, error] = await fetchPromise<ApiResponseUser>("/users/current");
 
       if (!user || error) throw error;
 
@@ -42,7 +40,7 @@ const useUser = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentUser, currentCacheDate]);
+  });
 
   useEffect(() => {
     void handleGetUser();

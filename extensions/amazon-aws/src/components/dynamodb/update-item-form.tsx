@@ -1,4 +1,4 @@
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -10,8 +10,9 @@ import {
   Toast,
   useNavigation,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
-import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { getErrorMessage } from "../../util";
@@ -30,9 +31,11 @@ interface UpdateItemFormValues {
 
 export const UpdateItemForm = ({
   table,
+  mutate,
   retryInitValues,
 }: {
   table: Table;
+  mutate: MutatePromise<Table[] | undefined>;
   retryInitValues?: UpdateItemFormValues;
 }) => {
   const { pop, push } = useNavigation();
@@ -40,33 +43,39 @@ export const UpdateItemForm = ({
   const tablePrimaryKey = table.keys[`${table.TableName}`];
   const { values, handleSubmit, itemProps } = useForm<UpdateItemFormValues>({
     onSubmit: async (values) => {
+      const input: UpdateItemCommandInput = {
+        TableName: table.TableName,
+        ReturnConsumedCapacity: "TOTAL",
+        UpdateExpression: values.updateExpression,
+        Key: marshall({
+          [tablePrimaryKey.hashKey.name]:
+            tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
+          ...(hasRangeKey && {
+            [tablePrimaryKey.rangeKey!.name]:
+              tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
+          }),
+        }),
+        ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
+        ...(values.useExpressionAttributeNames && {
+          ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
+        }),
+        ...(values.useExpressionAttributeValues && {
+          ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
+        }),
+      };
+
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: `🚀 Updating item in table ${table.TableName}`,
       });
-      new DynamoDBClient({})
-        .send(
-          new UpdateItemCommand({
-            TableName: table.TableName,
-            ReturnConsumedCapacity: "TOTAL",
-            UpdateExpression: values.updateExpression,
-            Key: marshall({
-              [tablePrimaryKey.hashKey.name]:
-                tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
-              ...(hasRangeKey && {
-                [tablePrimaryKey.rangeKey!.name]:
-                  tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
-              }),
-            }),
-            ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),
-            ...(values.useExpressionAttributeNames && {
-              ExpressionAttributeNames: JSON.parse(values.expressionAttributeNames),
-            }),
-            ...(values.useExpressionAttributeValues && {
-              ExpressionAttributeValues: marshall(JSON.parse(values.expressionAttributeValues)),
-            }),
-          }),
-        )
+
+      mutate(new DynamoDBClient({}).send(new UpdateItemCommand(input)), {
+        optimisticUpdate: (tables) => {
+          if (!tables) return undefined;
+          return tables.map((t) => (t.TableName !== table.TableName ? t : { ...t, ItemCount: (t.ItemCount ?? 0) + 1 }));
+        },
+        shouldRevalidateAfter: false,
+      })
         .then(({ ConsumedCapacity }) => {
           toast.style = Toast.Style.Success;
           toast.title = "✅ Item updated";
@@ -79,15 +88,15 @@ export const UpdateItemForm = ({
           toast.message = getErrorMessage(err);
           toast.primaryAction = {
             title: "Retry",
-            shortcut: { modifiers: ["cmd"], key: "r" },
+            shortcut: Keyboard.Shortcut.Common.Refresh,
             onAction: () => {
-              push(<UpdateItemForm table={table} retryInitValues={values} />);
+              push(<UpdateItemForm {...{ table, mutate, retryInitValues: values }} />);
               toast.hide();
             },
           };
           toast.secondaryAction = {
             title: "Copy Error",
-            shortcut: { modifiers: ["cmd"], key: "c" },
+            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => {
               Clipboard.copy(getErrorMessage(err));
               toast.hide();

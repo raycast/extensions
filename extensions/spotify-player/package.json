@@ -22,14 +22,27 @@
     "erics118",
     "hjoelh",
     "hobhouse",
-    "bkeys818",
     "jatindotdev",
     "devbear",
     "rfaccio",
     "badta5te",
     "andyburris",
-    "thomaslombart"
+    "thomaslombart",
+    "rhesamu",
+    "themitpatel"
   ],
+  "pastContributors": [
+    "bkeys818"
+  ],
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "license": "MIT",
   "preferences": [
     {
@@ -50,6 +63,15 @@
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
       "mode": "view",
       "preferences": [
+        {
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": true,
+          "type": "checkbox"
+        },
         {
           "title": "Top View",
           "data": [
@@ -405,21 +427,29 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "startDJ",
+      "title": "Start DJ",
+      "subtitle": "Spotify",
+      "description": "Start the DJ.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
+    "@raycast/api": "^1.82.3",
     "@raycast/utils": "^1.16.2",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.9.1",
-    "@types/react": "18.2.37",
+    "@types/node": "20.14.10",
+    "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

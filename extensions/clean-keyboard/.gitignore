@@ -9,5 +9,8 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
+# IDEs
+.vscode
+
 # misc
 .DS_Store

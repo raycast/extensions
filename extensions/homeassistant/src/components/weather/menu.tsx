@@ -1,22 +1,23 @@
 import { State } from "@lib/haapi";
-import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
+import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, launchCommand, LaunchType, MenuBarExtra, showToast, Toast } from "@raycast/api";
 
-import { MenuBarSubmenu } from "@components/menu";
+import { LastUpdateChangeMenubarItem, MenuBarSubmenu } from "@components/menu";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { ReactElement } from "react";
 import { getIcon } from "../state/utils";
+import { useWeatherForecast } from "./hooks";
 import {
   Forecast,
   getHumidityFromState,
   getPressureFromState,
   getTemperatureFromState,
   getWindspeedFromState,
-  isDailyForecast,
   weatherConditionToIcon,
   weatherConditionToText,
+  WeatherForecastType,
 } from "./utils";
 
-async function launchWeatherCommand() {
+export async function launchWeatherCommand() {
   try {
     await launchCommand({ name: "weather", type: LaunchType.UserInitiated });
   } catch (error) {
@@ -24,8 +25,7 @@ async function launchWeatherCommand() {
   }
 }
 
-export function WeatherWindSpeedMenubarItem(props: { state: State | undefined }): ReactElement | null {
-  const s = props.state;
+export function WeatherWindSpeedMenubarItem({ state: s }: { state: State | undefined }) {
   if (!s) {
     return null;
   }
@@ -36,8 +36,7 @@ export function WeatherWindSpeedMenubarItem(props: { state: State | undefined })
   return <MenuBarExtra.Item title="Wind Speed" icon="💨" subtitle={val} onAction={launchWeatherCommand} />;
 }
 
-export function WeatherWindBearingMenubarItem(props: { state: State | undefined }): ReactElement | null {
-  const s = props.state;
+export function WeatherWindBearingMenubarItem({ state: s }: { state: State | undefined }) {
   if (!s) {
     return null;
   }
@@ -48,8 +47,7 @@ export function WeatherWindBearingMenubarItem(props: { state: State | undefined 
   return <MenuBarExtra.Item title="Wind Bearing" icon="↗️" subtitle={`${val}`} onAction={launchWeatherCommand} />;
 }
 
-export function WeatherPressureMenubarItem(props: { state: State | undefined }): ReactElement | null {
-  const s = props.state;
+export function WeatherPressureMenubarItem({ state: s }: { state: State | undefined }) {
   if (!s) {
     return null;
   }
@@ -60,8 +58,7 @@ export function WeatherPressureMenubarItem(props: { state: State | undefined }):
   return <MenuBarExtra.Item title="Pressure" icon="📈" subtitle={val} onAction={launchWeatherCommand} />;
 }
 
-export function WeatherHumidityMenubarItem(props: { state: State | undefined }): ReactElement | null {
-  const s = props.state;
+export function WeatherHumidityMenubarItem({ state: s }: { state: State | undefined }) {
   if (!s) {
     return null;
   }
@@ -72,8 +69,7 @@ export function WeatherHumidityMenubarItem(props: { state: State | undefined }):
   return <MenuBarExtra.Item title="Humidity" icon="💧" subtitle={val} onAction={launchWeatherCommand} />;
 }
 
-export function WeatherTemperatureMenubarItem(props: { state: State | undefined }): ReactElement | null {
-  const s = props.state;
+export function WeatherTemperatureMenubarItem({ state: s }: { state: State | undefined }) {
   if (!s) {
     return null;
   }
@@ -85,14 +81,13 @@ export function WeatherTemperatureMenubarItem(props: { state: State | undefined 
     <MenuBarExtra.Item
       title="Temperature"
       subtitle={`${val}`}
-      icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+      icon={{ source: "thermometer.svg", tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
 }
 
-export function WeatherConditionMenubarItem(props: { condition: string | undefined }): ReactElement | null {
-  const c = props.condition;
+export function WeatherConditionMenubarItem({ condition: c }: { condition: string | undefined }) {
   if (!c) {
     return null;
   }
@@ -111,7 +106,7 @@ export function WeatherForecastMenubarItem(props: {
   forecast: Forecast;
   isDaily: boolean;
   tempUnit: string | undefined;
-}): ReactElement {
+}) {
   const f = props.forecast;
   const ts = new Date(f.datetime);
   const day = ts.toLocaleDateString("default", { day: "numeric" });
@@ -137,13 +132,17 @@ export function WeatherForecastMenubarItem(props: {
   );
 }
 
-export function WeatherCurrentMenubarSection(props: { weather: State | undefined }) {
+export function WeatherCurrentMenubarSection(props: {
+  weather: State | undefined;
+  temperature?: State;
+  humidity?: State;
+}) {
   const weather = props.weather;
   return (
     <MenuBarExtra.Section title="Current">
       <WeatherConditionMenubarItem condition={weather?.state} />
-      <WeatherTemperatureMenubarItem state={weather} />
-      <WeatherHumidityMenubarItem state={weather} />
+      <WeatherTemperatureMenubarItem state={props.temperature ?? weather} />
+      <WeatherHumidityMenubarItem state={props.humidity ?? weather} />
       <WeatherPressureMenubarItem state={weather} />
       <WeatherWindSpeedMenubarItem state={weather} />
       <WeatherWindBearingMenubarItem state={weather} />
@@ -151,27 +150,58 @@ export function WeatherCurrentMenubarSection(props: { weather: State | undefined
   );
 }
 
-export function WeatherForecastMenubarSection(props: { weather: State | undefined }) {
+export function WeatherForecastMenubarSection(props: {
+  weather: State | undefined;
+  forecast?: Forecast[] | null;
+  maxDailyChildren?: number;
+  maxHourlyChildren?: number;
+}) {
   const weather = props.weather;
-  const forecastAll = weather?.attributes.forecast as Forecast[] | undefined;
-  const forecast = forecastAll?.slice(0, 10);
-  const isDaily = isDailyForecast(forecast);
+  if (!weather) {
+    return null;
+  }
+  const { data: daily } = useWeatherForecast(weather.entity_id, {
+    data: props.forecast,
+    type: WeatherForecastType.Daily,
+  });
+
+  const { data: hourly } = useWeatherForecast(weather.entity_id, { type: WeatherForecastType.Hourly });
   const tempUnit = weather?.attributes.temperature_unit as string | undefined;
+  const validMaxChildrenValue = (value: number | undefined) => {
+    if (value !== undefined && value <= 0) {
+      return false;
+    }
+    return true;
+  };
   return (
-    <MenuBarExtra.Section title="Forecast">
-      {forecast?.map((f) => (
-        <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
-      ))}
-    </MenuBarExtra.Section>
+    <>
+      {validMaxChildrenValue(props.maxHourlyChildren) && (
+        <RUIMenuBarExtra.Section title="Forecast (Hourly)" childrenLimit={{ max: props.maxHourlyChildren ?? 5 }}>
+          {hourly?.map((f) => (
+            <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={false} tempUnit={tempUnit} />
+          ))}
+        </RUIMenuBarExtra.Section>
+      )}
+      {validMaxChildrenValue(props.maxDailyChildren) && (
+        <RUIMenuBarExtra.Section title="Forecast (Daily)" childrenLimit={{ max: props.maxDailyChildren ?? 10 }}>
+          {daily?.map((f) => (
+            <WeatherForecastMenubarItem key={f.datetime} forecast={f} isDaily={true} tempUnit={tempUnit} />
+          ))}
+        </RUIMenuBarExtra.Section>
+      )}
+    </>
   );
 }
 
-export function WeatherMenubarItem(props: { state: State }) {
-  const s = props.state;
+export function WeatherMenubarItem({ state: s }: { state: State }) {
   return (
     <MenuBarSubmenu title={getFriendlyName(s)} subtitle={s.state} icon={getIcon(s)}>
       <WeatherCurrentMenubarSection weather={s} />
       <WeatherForecastMenubarSection weather={s} />
+      <MenuBarExtra.Section>
+        <LastUpdateChangeMenubarItem state={s} />
+        <RUIMenuBarExtra.CopyToClipboard title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
+      </MenuBarExtra.Section>
     </MenuBarSubmenu>
   );
 }

@@ -1,5 +1,11 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2024-08-05
+
+- [Improvement] New action "Continue as Chat" on single shot commands allow continuing conversation on "Chat with Ollama".
+- [BugFix] Custom commands created before "2024-06-03" update, or with incorrect parameters now display error message instead of crashing.
+- [BugFix] Typo fixed on "Make Longer" command.
+
 ## [BugFix] - 2024-06-30
 
 - Fixed typo on error code 'Raycast Browser Extensions Needed for This Feature'.

@@ -16,7 +16,7 @@ import { useState } from "react";
 
 type EditProjectProps = {
   project: ProjectResult;
-  mutateProjects: MutatePromise<ProjectResult[] | undefined>;
+  mutateProjects: MutatePromise<ProjectResult[], ProjectResult[]>;
 };
 
 export default function EditProjectForm({ project, mutateProjects }: EditProjectProps) {

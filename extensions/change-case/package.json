@@ -13,7 +13,8 @@
   "contributors": [
     "pernielsentikaer",
     "nagauta",
-    "PWrzesinski"
+    "PWrzesinski",
+    "yug2005"
   ],
   "keywords": [
     "text",
@@ -50,8 +51,8 @@
       "type": "checkbox",
       "default": true,
       "title": "Behavior",
-      "description": "Uncheck this option to preserve the original case of text before applying transformation. See README for details.",
-      "label": "Lowercase text before transforming Sentence and Title Cases",
+      "description": "Uncheck this option to first lowercase the text before applying transformations. See README for details.",
+      "label": "Preserve Casing",
       "required": true
     },
     {
@@ -106,6 +107,22 @@
         }
       ],
       "default": "paste",
+      "required": false
+    },
+    {
+      "name": "prefixCharacters",
+      "type": "textfield",
+      "title": "Prefix Characters",
+      "description": "Characters to retain at the beginning of the input. Eg, `_` to keep underscores in `__typename`",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "suffixCharacters",
+      "type": "textfield",
+      "title": "Suffix Characters",
+      "description": "Characters to retain at the end of the input. Eg, `_` to keep underscores in `type_`",
+      "default": "",
       "required": false
     },
     {

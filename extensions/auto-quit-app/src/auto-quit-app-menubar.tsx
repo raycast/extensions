@@ -1,9 +1,13 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
-import { useEnabledQuitApps } from "./hooks/hooks";
 import { scriptQuitApps } from "./utils/applescript-utils";
+import { useMemo } from "react";
+import { useAutoQuitApps } from "./hooks/useAutoQuitApps";
 
 export default function AutoQuitAppMenubar() {
-  const { quitApps, loading } = useEnabledQuitApps();
+  const { data, isLoading } = useAutoQuitApps(true);
+  const quitApps = useMemo(() => {
+    return data || [];
+  }, [data]);
 
   return (
     <MenuBarExtra
@@ -13,11 +17,11 @@ export default function AutoQuitAppMenubar() {
           dark: "menu-bar-icon@dark.png",
         },
       }}
-      isLoading={loading}
+      isLoading={isLoading}
       tooltip={"Auto Quit App"}
     >
       {quitApps.length !== 0 && (
-        <MenuBarExtra.Section title={"Auto Quit Apps"}>
+        <MenuBarExtra.Section title={`Auto Quit Apps`}>
           {quitApps?.map((value) => {
             return (
               <MenuBarExtra.Item

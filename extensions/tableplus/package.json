@@ -7,7 +7,9 @@
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "xmok",
+    "MatteoGauthier"
   ],
   "license": "MIT",
   "commands": [
@@ -82,7 +84,7 @@
       "data": [
         {
           "title": "Show Environment",
-          "value": "environment" 
+          "value": "environment"
         },
         {
           "title": "Show Path",
@@ -121,7 +123,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.16.5",
     "plist": "^3.0.4"
   },
   "devDependencies": {
@@ -129,7 +132,7 @@
     "@types/expand-tilde": "^2.0.0",
     "@types/node": "^20.8.10",
     "@types/plist": "^3.0.2",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "expand-tilde": "^2.0.2",
     "prettier": "^3.0.2",

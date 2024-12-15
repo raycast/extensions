@@ -227,6 +227,19 @@ export default function RetrieveAllDomains() {
                         title="Not Local"
                         icon={item.notLocal === "1" ? Icon.Check : Icon.Multiply}
                       />
+                      {"labels" in item ? (
+                        <List.Item.Detail.Metadata.TagList title="Labels">
+                          {item.labels?.map((label) => (
+                            <List.Item.Detail.Metadata.TagList.Item
+                              key={label.id}
+                              text={label.title}
+                              color={label.color}
+                            />
+                          ))}
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : (
+                        <List.Item.Detail.Metadata.Label title="Labels" icon={Icon.Minus} />
+                      )}
                     </List.Item.Detail.Metadata>
                   }
                 />

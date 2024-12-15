@@ -5,6 +5,9 @@
   "description": "Time your solves, look up notations and algorithms",
   "icon": "extension-icon.png",
   "author": "samuelkraft",
+  "contributors": [
+    "Menchynskyi"
+  ],
   "categories": [
     "Fun"
   ],
@@ -28,6 +31,28 @@
       "keywords": [
         "4LLL",
         "four look last layer",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "orientation-of-the-last-layer",
+      "title": "OLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with Orientation of the Last Layer (OLL)",
+      "mode": "view",
+      "keywords": [
+        "OLL",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "permutation-of-the-last-layer",
+      "title": "PLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with Permutation of the Last Layer (PLL)",
+      "mode": "view",
+      "keywords": [
+        "PLL",
         "algorithms"
       ]
     },

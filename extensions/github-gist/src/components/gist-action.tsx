@@ -180,11 +180,15 @@ export function GistAction(props: {
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           snippet={{ name: gistFileName, text: gistFileContent }}
         />
+        <Action.CreateQuicklink
+          shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+          quicklink={{ name: gistFileName, link: gist.html_url }}
+        />
         <Action.OpenInBrowser
           title={"Open in Ray.so"}
-          icon={{ source: { light: "raycast.png", dark: "raycast@dark.png" } }}
+          icon={Icon.RaycastLogoPos}
           shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          url={raySo(gistFileName, Buffer.from(gistFileContent, "utf-8").toString("base64"))}
+          url={raySo(gistFileName, gistFileContent)}
         />
       </ActionPanel.Section>
     </>

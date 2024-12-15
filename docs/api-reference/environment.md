@@ -32,7 +32,7 @@ export default async function Command() {
 
 <InterfaceTableFromJSDoc name="Environment" />
 
-## environment.canAccess
+### environment.canAccess
 
 Checks whether the user can access a specific API or not.
 

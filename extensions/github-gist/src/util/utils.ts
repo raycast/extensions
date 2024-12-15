@@ -2,13 +2,14 @@ import { parse } from "path";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
 import ActionStyle = Alert.ActionStyle;
 import { GistItem } from "./gist-utils";
+import { encodeURI } from "js-base64";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
 export const raySo = (title: string, content: string) =>
-  `https://ray.so/?colors=cnady&background=true&darkMode=false&padding=32&title=${title}&code=${content}&language=auto`;
+  `https://ray.so/#colors=cnady&background=true&darkMode=false&padding=32&title=${title}&code=${encodeURI(content)}&language=auto`;
 
 export const imgExt = [".svg", ".gif", ".jpg", ".jpeg", ".png"];
 

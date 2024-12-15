@@ -1,11 +1,20 @@
 /**
  * Corresponds to Google Map's four possible modes of travel.
  */
-export enum TravelMode {
+export enum TransportType {
+  Cycling = "bicycling",
   Driving = "driving",
-  Walking = "walking",
-  Bicycling = "bicycling",
   Transit = "transit",
+  Walking = "walking",
+}
+
+/**
+ * Enum for origin options in the form
+ */
+export enum OriginOption {
+  CurLoc = "curloc",
+  Home = "home",
+  Custom = "custom",
 }
 
 /**
@@ -14,5 +23,7 @@ export enum TravelMode {
 export interface Preferences {
   homeAddress: string;
   preferredMode: string;
+  preferredOrigin: OriginOption;
   useSelected: boolean;
+  saveSearchHistory: boolean;
 }

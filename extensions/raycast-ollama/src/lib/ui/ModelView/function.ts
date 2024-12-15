@@ -23,7 +23,7 @@ export async function GetServerArray(): Promise<string[]> {
  */
 export async function GetServerClassByName(name: string): Promise<Ollama> {
   const s = await GetOllamaServers();
-  if (!s.has(name)) throw "Ollama Server Not Configured";
+  if (!s.has(name)) throw new Error("Ollama Server Not Configured");
   return new Ollama(s.get(name));
 }
 
@@ -60,8 +60,8 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
   (
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
-        const tag = await s[1].OllamaApiTags().catch(async (e) => {
-          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e });
+        const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
         if (!tag) return await Promise.resolve([] as Types.UiModel[]);
@@ -93,7 +93,7 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
 export async function DeleteModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
   await model.server.ollama
     .OllamaApiDelete(model.detail.name)
-    .then(async (v) => {
+    .then(async () => {
       await showToast({
         style: Toast.Style.Success,
         title: `Model '${model.detail.name}' Deleted on '${model.server.name}' Server`,

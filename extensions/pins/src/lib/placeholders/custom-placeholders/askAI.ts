@@ -26,7 +26,6 @@ const AskAIDirective: Placeholder = {
           ([key, value]) =>
             key.toLowerCase() === modelString.toLowerCase() || value.toLowerCase() === modelString.toLowerCase(),
         )?.[1] || AI.Model[preferences.defaultAIModel];
-      console.log(model);
       const creativity = matches[6] || "1.0";
       let query = matches[8].substring(0, 4096);
       let result = "";

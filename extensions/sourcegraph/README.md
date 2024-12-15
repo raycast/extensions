@@ -63,7 +63,9 @@ You can create an access token under the "Access tokens" tab in your user settin
 
 ### Search Code
 
-Get results as you type on [code search](https://about.sourcegraph.com/code-search) over your code and 2M+ public repositories.
+![search demo](metadata/1-search.png)
+
+Get results as you type on [code search](https://about.sourcegraph.com/code-search) over your code and many public repositories.
 
 #### Search contexts
 
@@ -71,8 +73,6 @@ Get results as you type on [code search](https://about.sourcegraph.com/code-sear
 To get started, you can try the [public Sourcegraph.com search contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph.com account or Sourcegraph instance's "Contexts" page!
 
 The Sourcegraph Raycast extension allows you to set a default context for your searches in the "Search Code" command preferences.
-
-![search demo](metadata/1-search.png)
 
 ### Code Search History
 
@@ -82,15 +82,6 @@ Recent searches are persisted [locally through a native Raycast API](https://dev
 
 ![search history demo](metadata/2a-search-history.png)
 
-### Find Search Notebooks
-
-Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
-Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
-
-To get started, you can try the [public Sourcegraph.com notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph.com account or Sourcegraph instance!
-
-![notebooks](metadata/3-notebook-view.png)
-
 ### Manage Batch Changes
 
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
@@ -98,7 +89,16 @@ Batch changes automate large-scale code changes to keep your code up to date, fi
 
 Batch changes is currently only supported on [Sourcegraph Instance](#sourcegraph-self-hosted).
 
-![notebooks](metadata/4-batch-change-manage.png)
+![batch changes](metadata/3-batch-change-manage.png)
+
+### Find Search Notebooks
+
+Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
+Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
+
+To get started, you can try the [public Sourcegraph.com notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph.com account or Sourcegraph instance!
+
+![notebooks](metadata/4-notebook-view.png)
 
 <br />
 

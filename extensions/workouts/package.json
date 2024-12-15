@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workouts",
   "title": "Workouts",
-  "description": "Stay on top of your workouts",
+  "description": "Stay on top of your workouts from Strava",
   "tags": [
     "strava",
     "activities",
@@ -13,7 +13,9 @@
   "icon": "icon.png",
   "author": "samuelkraft",
   "contributors": [
-    "yvysunu"
+    "yvysunu",
+    "pernielsentikaer",
+    "dianne_mcewan"
   ],
   "categories": [
     "Data"
@@ -24,30 +26,47 @@
       "name": "workouts",
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
+    },
+    {
+      "name": "createActivity",
+      "title": "Create Activity",
+      "description": "Create a manual activity on Strava",
+      "mode": "view",
+      "icon": "create.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
     },
     {
       "name": "leaderboard",
       "title": "Weekly Leaderboard",
       "description": "See your club's weekly leaderboard",
       "mode": "view",
-      "icon": "leaderboard-icon.png"
+      "icon": "leaderboard-icon.png",
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
+      ]
     },
     {
-      "name": "ask",
-      "title": "Ask Workout AI",
-      "description": "Ask AI about your 100 most recent workouts",
+      "name": "routes",
+      "title": "Search Routes",
+      "description": "See your routes from Strava",
+      "icon": "routes-icon.png",
       "mode": "view",
-      "icon": "ask-ai-icon.png",
-      "arguments": [
-        {
-          "name": "question",
-          "title": "Question",
-          "description": "Ask a question to the Workout AI",
-          "type": "text",
-          "placeholder": "Mileage this week?",
-          "required": true
-        }
+      "keywords": [
+        "strava",
+        "routes",
+        "exercise"
       ]
     },
     {
@@ -106,6 +125,11 @@
             }
           ]
         }
+      ],
+      "keywords": [
+        "strava",
+        "activities",
+        "exercise"
       ]
     }
   ],
@@ -127,14 +151,6 @@
         }
       ],
       "required": true
-    },
-    {
-      "name": "mapbox_access_token",
-      "title": "Mapbox Access Token",
-      "placeholder": "pk.abc123",
-      "description": "To display maps of your activities. You can create an access token at https://account.mapbox.com/access-tokens/",
-      "type": "textfield",
-      "required": false
     }
   ],
   "dependencies": {
@@ -147,7 +163,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.5",
     "typescript": "^5.2.2"
   },
   "scripts": {
