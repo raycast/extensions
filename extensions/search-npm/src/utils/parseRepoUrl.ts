@@ -1,5 +1,4 @@
-import parseGithubRepoUrl from 'parse-github-url'
-import parseGitlabRepoUrl from 'gitlab-url-parse'
+import gitUrlParse from 'git-url-parse'
 import { cleanGitUrl } from './cleanGitUrl'
 
 interface ParseRepoUrlResponse {
@@ -18,33 +17,18 @@ export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
       repoUrl: undefined,
     }
   }
-
-  const cleanedUrl = cleanGitUrl(repoUrl)
+  const parsedUrl = gitUrlParse(repoUrl)
+  const cleanedUrl = cleanGitUrl(parsedUrl.toString('https'))
   const isGithubRepo = cleanedUrl.includes('github.com')
   const isGitlabRepo = cleanedUrl.includes('gitlab.com')
-
-  if (isGithubRepo) {
-    const parsedRepo = parseGithubRepoUrl(repoUrl)
-    return {
-      owner: parsedRepo?.owner,
-      name: parsedRepo?.name,
-      type: 'github',
-      repoUrl: cleanedUrl,
-    }
-  } else if (isGitlabRepo) {
-    const parsedRepo = parseGitlabRepoUrl(repoUrl)
-    return {
-      owner: parsedRepo.user,
-      name: parsedRepo.project,
-      type: 'gitlab',
-      repoUrl: cleanedUrl,
-    }
-  }
+  const owner = parsedUrl.owner
+  const name = parsedUrl.name
+  const type = isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined
 
   return {
-    owner: null,
-    name: null,
-    type: undefined,
+    owner,
+    name,
+    type,
     repoUrl: cleanedUrl,
   }
 }
