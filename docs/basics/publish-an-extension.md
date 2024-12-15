@@ -16,10 +16,14 @@ Open your terminal, navigate to your extension directory, and run `npm run build
 
 ### Publish your extension
 
-To share your extension with others, navigate to your extension directory, and run `npm run publish` to publish your extension. You will be asked to authenticate with GitHub because the script will automatically open a pull request in our [repository](https://github.com/raycast/extensions).
+To share your extension with others, navigate to your extension directory, and run `npm run publish` to publish your extension. (If that command is not available, run `npx @raycast/api@latest publish` instead.)
+
+You will be asked to authenticate with GitHub because the script will automatically open a pull request in our [repository](https://github.com/raycast/extensions).
+
+The command will squash commits and their commit messages. If you want more control, see the [alternative way](#alternative-way) below.
 
 {% hint style="info" %}
-If someone contributes to your extension, running `npm run publish` will fail until you run
+If someone contributes to your extension, or you make edits directly on GitHub, running `npm run publish` will fail until you run
 
 ```bash
 npx @raycast/api@latest pull-contributions
