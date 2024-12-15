@@ -41,19 +41,20 @@ export function SafeAddressActions({
   return isSavedDataLoading ? null : addresses?.includes(normalizedAddress) ? (
     <Action
       icon={Icon.Trash}
-      onAction={() =>
-        confirmAlert({
-          title: "Remove Wallet",
-          message: `Address: ${middleTruncate({ value: normalizedAddress, leadingLettersCount: 5 })}`,
-          primaryAction: { style: Alert.ActionStyle.Destructive, title: "Remove" },
-        })
-          .then(() => removeAddress(normalizedAddress))
-          .then(() => {
-            revalidate();
-            onChangeSavedStatus?.();
-            showHUD("Removed Address From Saved", { popToRootType: PopToRootType.Default });
+      onAction={async () => {
+        if (
+          await confirmAlert({
+            title: "Remove Wallet",
+            message: `Address: ${middleTruncate({ value: normalizedAddress, leadingLettersCount: 5 })}`,
+            primaryAction: { style: Alert.ActionStyle.Destructive, title: "Remove" },
           })
-      }
+        ) {
+          await removeAddress(normalizedAddress);
+          revalidate();
+          onChangeSavedStatus?.();
+          showHUD("Removed Address From Saved", { popToRootType: PopToRootType.Default });
+        }
+      }}
       style={Action.Style.Destructive}
       title="Remove Wallet"
     />
