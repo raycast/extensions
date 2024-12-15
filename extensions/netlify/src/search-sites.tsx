@@ -21,13 +21,7 @@ export default function Command() {
   });
 
   const { data: sites = [], isLoading: isLoadingSites, pagination } = useCachedPromise(
-    (query: string, team: string) => async ({ page }) => {
-      const { data, hasMore } = await api.getSites(query, team, page+1);
-      return {
-        data,
-        hasMore
-      }
-    },
+    (query: string, team: string) => async ({ page }) => await api.getSites(query, team, page+1),
     [query, teamSlug],
   );
 
