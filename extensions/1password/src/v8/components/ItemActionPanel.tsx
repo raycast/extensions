@@ -27,6 +27,8 @@ export function ItemActionPanel({
             return CopyUsername(item);
           case "copy-password":
             return CopyPassword(item);
+          case "copy-credential":
+            return CopyCredential(item);
           case "copy-one-time-password":
             return CopyOneTimePassword(item);
           case "share-item":
@@ -93,6 +95,18 @@ function CopyPassword(item: Item) {
       key="copy-password"
       vault_id={item.vault.id}
       field="password"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+    />
+  );
+}
+
+function CopyCredential(item: Item) {
+  return (
+    <CopyToClipboard
+      id={item.id}
+      key="copy-credential"
+      vault_id={item.vault.id}
+      field="credential"
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );

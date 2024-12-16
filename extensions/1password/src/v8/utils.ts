@@ -66,6 +66,10 @@ export function actionsForItem(item: Item): ActionID[] {
       return deduplicatedActions;
     case "PASSWORD":
       return deduplicatedActions.filter((action) => action !== "copy-username");
+    case "API_CREDENTIAL":
+      return deduplicatedActions.map((action) => {
+        return action === "copy-password" ? "copy-credential" : action;
+      });
     default:
       return ["open-in-1password"];
   }
