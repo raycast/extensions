@@ -27,6 +27,8 @@ export function ItemActionPanel({
             return CopyUsername(item);
           case "copy-password":
             return CopyPassword(item);
+          case "copy-credential":
+            return CopyCredential(item);
           case "copy-one-time-password":
             return CopyOneTimePassword(item);
           case "share-item":
@@ -59,8 +61,16 @@ function OpenIn1Password(account: User | undefined, item: Item) {
 }
 
 function OpenInBrowser(item: Item) {
-  const href = hrefToOpenInBrowser(item);
+  let href = hrefToOpenInBrowser(item);
   if (href) {
+    // unencrypted uuid, worked with extension `8.10.56.28`
+    const extra = "x".repeat(26) + "=" + item.id;
+    if (href.includes("?")) {
+      href += `&${extra}`;
+    } else {
+      href += `?${extra}`;
+    }
+
     return (
       <Action.OpenInBrowser
         key="open-in-browser"
@@ -93,6 +103,18 @@ function CopyPassword(item: Item) {
       key="copy-password"
       vault_id={item.vault.id}
       field="password"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+    />
+  );
+}
+
+function CopyCredential(item: Item) {
+  return (
+    <CopyToClipboard
+      id={item.id}
+      key="copy-credential"
+      vault_id={item.vault.id}
+      field="credential"
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );

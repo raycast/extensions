@@ -1,5 +1,10 @@
 # 1Password Changelog
 
+## [Enhancements] - 2024-12-16
+
+- Feat: support copy api credential
+- Feat: support open and fill in browser
+
 ## [Chore] - 2024-12-02
 
 - Add readme & FAQ
