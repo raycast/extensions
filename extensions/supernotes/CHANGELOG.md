@@ -1,5 +1,8 @@
 # Supernotes Changelog
 
+## [Daily Append Local Time]
+- Use the local day when appending content to a daily card
+
 ## [Quick Daily Command] - 2024-11-27
 - Add a new "Quick Daily" command which appends the "content" argument to your Daily card
 - Remove some unnecessary dependencies 
