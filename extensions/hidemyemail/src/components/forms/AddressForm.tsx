@@ -1,6 +1,6 @@
 import { Form, Action, ActionPanel, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { iCloudService } from "../../api/connect";
 import { MetaData } from "../../api/hide-my-email";
 
@@ -22,6 +22,7 @@ export function AddressForm({
 }) {
   const [addressOption, setAddressOption] = useState<string | null>(null);
   const { pop } = useNavigation();
+  const effectRan = useRef(false);
 
   async function generate() {
     try {
@@ -37,9 +38,13 @@ export function AddressForm({
   }
 
   useEffect(() => {
-    (async () => {
-      await generate();
-    })();
+    // For React Strict Mode, which mounts twice
+    if (!effectRan.current) {
+      effectRan.current = true;
+      (async () => {
+        await generate();
+      })();
+    }
   }, []);
 
   const { handleSubmit, itemProps } = useForm<AddressFormValues>({

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Form, LocalStorage, showToast, Toast } from "@raycast/api";
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";
@@ -13,16 +13,21 @@ const AuthState = {
 export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }) {
   const [isAuthenticated, setIsAuthenticated] = useState<number | null>(null);
   const [service, setService] = useState<iCloudService | null>(null);
+  const effectRan = useRef(false);
 
   useEffect(() => {
-    (async () => {
-      const appleID = await LocalStorage.getItem<string>("appleID");
-      if (!appleID) {
-        setIsAuthenticated(AuthState.UNAUTHENTICATED);
-      } else {
-        await handleLogin(appleID);
-      }
-    })();
+    // For React Strict Mode, which mounts twice
+    if (!effectRan.current) {
+      effectRan.current = true;
+      (async () => {
+        const appleID = await LocalStorage.getItem<string>("appleID");
+        if (!appleID) {
+          setIsAuthenticated(AuthState.UNAUTHENTICATED);
+        } else {
+          await handleLogin(appleID);
+        }
+      })();
+    }
   }, []);
 
   async function handleLogin(appleID: string, password: string | null = null) {
