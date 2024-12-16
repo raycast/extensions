@@ -5,7 +5,6 @@
   "description": "Show All Your IPs, from Local Network and Multiple Sources",
   "icon": "ipchecking.png",
   "author": "jason5ng32",
-  "owner": "knb",
   "categories": [
     "Developer Tools"
   ],
