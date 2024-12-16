@@ -1,6 +1,6 @@
 # Mempool Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-16
 
 - `Cache` through `useFetch`
 - Show "No Priority" fee
