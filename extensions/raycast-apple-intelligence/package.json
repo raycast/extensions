@@ -49,19 +49,6 @@
       ]
     },
     {
-      "name": "siri",
-      "title": "Type to Siri",
-      "description": "Ask Siri to do something",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "type": "text",
-          "name": "prompt",
-          "placeholder": "Prompt"
-        }
-      ]
-    },
-    {
       "name": "create-key-points",
       "title": "Create Key Points",
       "description": "Create key points from the selected text",

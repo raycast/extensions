@@ -2,11 +2,10 @@
 
 ## [macOS 15.2 Update] - {PR_MERGE_DATE}
 
-A few goodies for macOS Sequoia 15.2, and a new Siri command!
+A few goodies for macOS Sequoia 15.2!
 
 ### What's new?
 
-- **⌨️ Type to Siri**: You can now directly send a command to Siri, straight from Raycast
 - **🖼️ Create Image**: Directly create a original image in Image Playground, with the new Create Image command
 - **🖊️ Compose**: You can now use the Compose Writing Tool, to collaborate with ChatGPT on your writing
 
