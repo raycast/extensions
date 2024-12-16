@@ -45,7 +45,10 @@ export function isSourcegraphDotCom(instance: string) {
  * instanceName generates a name for the given instance.
  */
 export function instanceName(src: Sourcegraph) {
-  return `${isSourcegraphDotCom(src.instance) ? "Sourcegraph.com" : new URL(src.instance).hostname}`;
+  if (isSourcegraphDotCom(src.instance)) {
+    return "Sourcegraph.com";
+  }
+  return new URL(src.instance).hostname || src.instance || null;
 }
 
 /**
