@@ -1,6 +1,6 @@
 # Zerion Changelog
 
-## [Zerion Client ] - 2024-12-17
+## [Zerion Client] - {PR_MERGE_DATE}
 - View wallet portfolio
 - Search tokens, addresses or domains
 - Show Wallet total value in the menu bar
