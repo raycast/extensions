@@ -1,5 +1,9 @@
 # Jetbrains Changelog
 
+## [Bugfix] - 2024-12-13
+
+- Bugfix for older v2 installations
+
 ## [Better Toolbox Integrations] - 2024-12-12
 
 - Better integration with toolbox configs
