@@ -1,5 +1,18 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Clipboard, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  Color,
+  Clipboard,
+  getPreferenceValues,
+  Keyboard,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { iCloudService } from "./api/connect";
 import { HideMyEmail, MetaData } from "./api/hide-my-email";
 import { formatTimestamp } from "./utils";
@@ -94,20 +107,34 @@ export default function Command() {
   }
 
   async function remove(email: HideMyEmail) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
-    try {
-      if (email.isActive) {
-        await service?.hideMyEmail.toggleActive(email.anonymousId, "deactivate");
-      }
-      await service?.hideMyEmail.deleteAddress(email.anonymousId);
-      await updateAddressList();
-      toast.style = Toast.Style.Success;
-      toast.title = "Address deleted";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Update failed";
-      toast.message = (error as { message: string }).message;
-    }
+    await confirmAlert({
+      title: "Are you sure?",
+      message: "This will delete the email address.",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
+          try {
+            if (email.isActive) {
+              await service?.hideMyEmail.toggleActive(email.anonymousId, "deactivate");
+            }
+            await service?.hideMyEmail.deleteAddress(email.anonymousId);
+            await updateAddressList();
+            toast.style = Toast.Style.Success;
+            toast.title = "Address deleted";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Update failed";
+            toast.message = (error as { message: string }).message;
+          }
+        },
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
+      rememberUserChoice: true,
+    });
   }
 
   async function add(address: string, metaData: MetaData) {
@@ -205,7 +232,8 @@ export default function Command() {
                         onAction={async () => {
                           await remove(email);
                         }}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        style={Action.Style.Destructive}
                         icon={Icon.Trash}
                       />
                       {email.isActive && (
