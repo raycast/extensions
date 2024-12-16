@@ -14,8 +14,7 @@
     "Aiee",
     "nagauta",
     "a-laughlin",
-    "tleo19",
-    "santiago_perez"
+    "tleo19"
   ],
   "license": "MIT",
   "commands": [
@@ -64,16 +63,6 @@
   ],
   "preferences": [
     {
-      "description": "Find the full path to the Google Chrome Profile path via chrome://version/. If empty, the default profile will be used.",
-      "label": "Profile",
-      "default": "",
-      "name": "profilePath",
-      "required": false,
-      "title": "Profile Path",
-      "type": "textfield",
-      "placeholder": "Application Support/Google/Chrome"
-    },
-    {
       "default": false,
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",
       "label": "Extract the favicon from every open tab",
@@ -106,7 +95,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.1",
+    "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.13",
     "run-applescript": "^6.0.0"
   },

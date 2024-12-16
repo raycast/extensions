@@ -5,7 +5,6 @@ import { getFavicon } from "@raycast/utils";
 export interface Preferences {
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
-  readonly profilePath: string;
 }
 
 export enum SettingsProfileOpenBehaviour {
