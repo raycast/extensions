@@ -1,6 +1,6 @@
 # Raycast Notification Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2024-12-16
 
 - Add support for macOS Notification Center notifier (even the Reply-from-Notification feature)
 - Add more cross-extension usages
