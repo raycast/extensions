@@ -157,7 +157,7 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
       )}
 
       {state.isLoading && state.results.length === 0 && (
-        <List.EmptyView icon={Icon.MugSteam} title={"Searching..."} description={searchSummary} />
+        <List.EmptyView title={"Searching..."} description={searchSummary || "No results yet"} />
       )}
 
       {/* results */}

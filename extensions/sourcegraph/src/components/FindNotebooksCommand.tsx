@@ -65,7 +65,7 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
         </List.Section>
       )}
 
-      {loading && length === 0 && <List.EmptyView icon={Icon.MugSteam} title={"Loading..."} />}
+      {loading && length === 0 && <List.EmptyView title={"Loading..."} />}
 
       <List.Section title={searchText ? "Notebooks" : "Recent notebooks"}>
         {notebooks?.map((n, i) => (
