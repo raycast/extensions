@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-16
 
 - Updated search bar placeholder of the `Assist` command.
 - Fixed icon color of the `Assist` command.
