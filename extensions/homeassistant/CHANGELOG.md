@@ -1,5 +1,10 @@
 # Home Assistant Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated search bar placeholder of the `Assist` command.
+- Fixed icon color of the `Assist` command.
+
 ## [Update] - 2024-12-06
 
 - Renamed `Mediaplayers` and `Mediaplayer Menu` commands to `Media Players` and `Media Player Menu`.
