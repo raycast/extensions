@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Fixed grammar in alert message of the `Updates` command.
+
 ## [Update] - 2024-12-16
 
 - Updated search bar placeholder of the `Assist` command.
