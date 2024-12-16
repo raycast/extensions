@@ -161,7 +161,7 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
       )}
 
       {/* results */}
-      <List.Section title="Results" subtitle={searchSummary}>
+      <List.Section title="Results" subtitle={searchSummary || (state.isLoading ? "Searching..." : undefined)}>
         {state.results.map((searchResult, i) => (
           <SearchResultItem
             key={`result-item-${i}`}

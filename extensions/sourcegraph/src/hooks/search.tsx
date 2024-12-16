@@ -14,6 +14,10 @@ export interface SearchState {
    */
   results: SearchResult[];
   /**
+   * Whether the results are from a previous search
+   */
+  isPreviousResults: boolean;
+  /**
    * Suggestions that should be rendered for the user if no results are found
    */
   suggestions: Suggestion[];
@@ -30,10 +34,6 @@ export interface SearchState {
    */
   isLoading: boolean;
   /**
-   * The previously executed search
-   */
-  previousSearch?: string;
-  /**
    * The previously used pattern type
    */
   previousPatternType?: PatternType;
@@ -41,11 +41,11 @@ export interface SearchState {
 
 const emptyState: SearchState = {
   results: [],
+  isPreviousResults: false,
   suggestions: [],
   summary: "",
   summaryDetail: undefined,
   isLoading: false,
-  previousSearch: undefined,
   previousPatternType: undefined,
 };
 
@@ -57,6 +57,7 @@ const emptyState: SearchState = {
  */
 export function useSearch(src: Sourcegraph, maxResults: number) {
   const [state, setState] = useState<SearchState>(emptyState);
+  const lastSearchRef = useRef<{ search: string; pattern: PatternType }>();
   const cancelRef = useRef<AbortController | null>(null);
   const { push } = useNavigation();
 
@@ -69,7 +70,10 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     }
 
     // Do not repeat searches that are essentially the same
-    if ((state.previousSearch || "").trim() === searchText.trim() && state.previousPatternType === pattern) {
+    if (
+      (lastSearchRef.current?.search || "").trim() === searchText.trim() &&
+      lastSearchRef.current?.pattern === pattern
+    ) {
       return;
     }
 
@@ -78,44 +82,45 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     cancelRef.current = new AbortController();
 
     // Reset state for new search
-    setState({
-      ...emptyState,
-      isLoading: true,
-      previousSearch: searchText,
+    setState((oldState) => {
+      if (lastSearchRef.current?.search && searchText.startsWith(lastSearchRef.current?.search)) {
+        return {
+          ...emptyState,
+          isLoading: true,
+          // Preserve the previous results to avoid flickering
+          results: oldState.results,
+          isPreviousResults: true,
+        };
+      }
+      return {
+        ...emptyState,
+        isLoading: true,
+      };
     });
+
+    // Search is starting - track current search as the last search.
+    lastSearchRef.current = { search: searchText, pattern };
 
     try {
       // Update search history
       await SearchHistory.addSearch(src, searchText);
 
-      const noResultsTimeoutSeconds = 10;
-      setTimeout(() => {
-        if (state.results.length === 0) {
-          setState((oldState) => {
-            // Cancel search if there are no results yet after a timeout
-            if (oldState.results.length === 0) {
-              cancelRef.current?.abort();
-              return {
-                ...oldState,
-                isLoading: false,
-                summary: `No results found in ${noResultsTimeoutSeconds} seconds`,
-              };
-            }
-            return oldState;
-          });
-        }
-      }, noResultsTimeoutSeconds * 1000);
-
       // Do the search
       await performSearch(cancelRef.current, src, searchText, pattern, {
         onResults: (results) => {
           setState((oldState) => {
+            // We're getting new results, so reset previous results
+            if (oldState.isPreviousResults) {
+              oldState.results = [];
+            }
+            // We should not render any more results.
             if (oldState.results.length > maxResults) {
               return oldState; // do nothing
             }
             const newResults = oldState.results.concat(results);
             return {
               ...oldState,
+              isPreviousResults: false,
               results: newResults,
               summaryDetail: `${newResults.length} results shown`,
             };
@@ -147,10 +152,17 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
           const results =
             matchCount === 0 ? `${matchCount}` : `${Intl.NumberFormat().format(matchCount)}${skipped ? "+" : ""}`;
 
-          setState((oldState) => ({
-            ...oldState,
-            summary: `Found ${results} results in ${duration}`,
-          }));
+          setState((oldState) => {
+            // If it's been a second or so and there's been no results, clear
+            // the previous results as it's likely they are no longer relevant.
+            if (oldState.isPreviousResults && durationMs > 1000) {
+              oldState.results = [];
+            }
+            return {
+              ...oldState,
+              summary: `Found ${results} results in ${duration}`,
+            };
+          });
         },
       });
     } catch (error) {
