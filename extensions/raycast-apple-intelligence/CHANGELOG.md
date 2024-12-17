@@ -1,6 +1,6 @@
 # Apple Intelligence Changelog
 
-## [macOS 15.2 Update] - {PR_MERGE_DATE}
+## [macOS 15.2 Update] - 2024-12-17
 
 A few goodies for macOS Sequoia 15.2!
 
