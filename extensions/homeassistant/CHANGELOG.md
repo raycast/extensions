@@ -1,5 +1,10 @@
 # Home Assistant Changelog
 
+## [Update] - 2024-12-17
+
+- Fixed grammar in alert message of the `Updates` command.
+- Removed unnecessary emoji from the update status of the `Updates` command.
+
 ## [Update] - 2024-12-16
 
 - Updated search bar placeholder of the `Assist` command.
