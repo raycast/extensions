@@ -38,8 +38,6 @@ export function assessGoalShape(category: Category): GoalShape {
     default:
       return category.budgeted < 0 ? 'overspent' : 'neutral';
   }
-
-  return 'neutral';
 }
 
 /**
@@ -81,6 +79,7 @@ export function displayGoalType(category: Category) {
 /**
  * Format a goal type into an easily digestible target
  * @example "Budget $3,000 by August 2025"
+ * @deprecated
  */
 export function formatGoalType(category: Category, currency: CurrencyFormat): string {
   if (!category.goal_type) return 'No Goal';
@@ -106,6 +105,51 @@ export function formatGoalType(category: Category, currency: CurrencyFormat): st
     default:
       return 'Goal Unknown';
   }
+}
+
+/* @see  */
+const GOAL_CADENCES_WITH_FREQUENCY = [1, 2, 13];
+const GOAL_CADENCES_WITHOUT_FREQUENCY = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14];
+
+export function formatGoalCadenceAndFrequency(category: Category, currency: CurrencyFormat): string {
+  if (category.goal_cadence == undefined) return 'No Goal';
+
+  const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
+
+  const baseString = `${target}`;
+
+  if (category.goal_cadence === 0) {
+    return `${baseString} once`;
+  }
+
+  if (GOAL_CADENCES_WITH_FREQUENCY.includes(category.goal_cadence)) {
+    const frequency = category.goal_cadence_frequency;
+
+    if (!frequency) {
+      console.error(`Encountered goal cadence [0-2, 13] without a frequency`);
+      return baseString;
+    }
+
+    switch (category.goal_cadence) {
+      case 1:
+        return `${baseString} ${frequency === 1 ? 'monthly' : `every ${frequency} months`}`;
+      case 2:
+        return `${baseString} ${frequency === 1 ? 'weekly' : `every ${frequency} weeks`}`;
+      case 13:
+        return `${baseString} ${frequency === 1 ? 'yearly' : `every ${frequency} years`}`;
+    }
+  }
+
+  if (GOAL_CADENCES_WITHOUT_FREQUENCY.includes(category.goal_cadence)) {
+    switch (category.goal_cadence) {
+      case 14:
+        return `${baseString} every 2 years`;
+      default:
+        return `${baseString} every ${category.goal_cadence - 1} months`;
+    }
+  }
+
+  return baseString;
 }
 
 export function isSplitTransaction(transaction: TransactionDetail): boolean {
