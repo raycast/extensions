@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Hide Cancelled Flights] - {PR_MERGE_DATE}
+## [Hide Cancelled Flights] - 2024-12-17
 
 - Filter out cancelled flights in SQL query
 
