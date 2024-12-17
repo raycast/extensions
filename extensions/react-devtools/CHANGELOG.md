@@ -1,3 +1,3 @@
-# Automation Changelog
+# React DevTools Changelog
 
-## [Initial Version] - 2024-11-26
+## [Initial Version] - {PR_MERGE_DATE}
