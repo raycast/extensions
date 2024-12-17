@@ -9,19 +9,19 @@ export function CategoryGroupSection({
   categoryGroups: CategoryGroupWithCategories[] | undefined;
   budget: BudgetDetailSummary | undefined;
 }) {
+  const validCategoryGroups = categoryGroups?.filter((group) => group.name !== 'Internal Master Category');
+
   return (
     <>
-      {categoryGroups
-        ?.filter((group) => group.name !== 'Internal Master Category')
-        ?.map((group) => (
-          <List.Section key={group.id} title={group.name} subtitle={`${group.categories.length} Categories`}>
-            {group.categories
-              .filter((category) => !category.hidden)
-              .map((category) => (
-                <CategoryItem key={category.id} category={category} budget={budget} />
-              ))}
-          </List.Section>
-        ))}
+      {validCategoryGroups?.map((group) => (
+        <List.Section key={group.id} title={group.name} subtitle={`${group.categories.length} Categories`}>
+          {group.categories
+            .filter((category) => !category.hidden)
+            .map((category) => (
+              <CategoryItem key={category.id} category={category} budget={budget} />
+            ))}
+        </List.Section>
+      ))}
     </>
   );
 }

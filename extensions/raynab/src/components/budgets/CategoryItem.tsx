@@ -18,11 +18,15 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
     currency,
   } = useCategories();
 
+  const goalShape = assessGoalShape(category);
+  const goalColor = displayGoalColor(goalShape);
+  const formattedTarget = formatGoalType(category, currency);
+
   const accessories = [
     category.goal_type && !isShowingProgress
       ? {
           icon: displayGoalType(category),
-          tooltip: formatGoalType(category, currency),
+          tooltip: formattedTarget,
         }
       : {},
     {
@@ -30,10 +34,12 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
         value: isShowingProgress
           ? renderProgressTitle(category)
           : formatToReadablePrice({ amount: category.balance, currency: currency }),
-        color: displayGoalColor(assessGoalShape(category)),
+        color: goalColor,
       },
     },
   ];
+
+  const activityInCurrency = formatToReadablePrice({ amount: category.activity, currency: currency });
 
   return (
     <List.Item
@@ -49,6 +55,24 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
                 title="Balance"
                 text={formatToReadablePrice({ amount: category.balance, currency: currency })}
               />
+              <List.Item.Detail.Metadata.Label
+                title="Activity"
+                text={`${category.activity > 0 ? '+' : ''}${activityInCurrency}`}
+              />
+
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="Goal Target"
+                text={category.goal_target ? formatToReadablePrice({ amount: category.goal_target, currency }) : '—'}
+              />
+              <List.Item.Detail.Metadata.Label title="Goal Type" text={formattedTarget} />
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.TagList title="Status">
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={goalShape[0].toUpperCase().concat(goalShape.slice(1))}
+                  color={goalColor}
+                />
+              </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>
           }
         />

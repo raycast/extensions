@@ -36,7 +36,7 @@ export function assessGoalShape(category: Category): GoalShape {
     case CategoryGoalTypeEnum.Debt:
       return category.goal_percentage_complete === 100 || category.goal_under_funded === 0 ? 'funded' : 'underfunded';
     default:
-      break;
+      return category.budgeted < 0 ? 'overspent' : 'neutral';
   }
 
   return 'neutral';
