@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-17
 
 - Fixed grammar in alert message of the `Updates` command.
 - Removed unnecessary emoji from the update status of the `Updates` command.
