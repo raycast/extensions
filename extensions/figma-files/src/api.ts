@@ -89,12 +89,11 @@ export async function fetchPages(fileKey: string) {
     const json = await request<FileDetail>(`/files/${fileKey}?depth=1`, {
       method: "GET",
     });
-
     return json.document.children;
   } catch (error) {
     console.error(error);
     if (environment.launchType !== "background") {
-      showToast(Toast.Style.Failure, "Could not load pages");
+      showToast(Toast.Style.Failure, "Could not load pages (Figma Slides not supported)");
     }
     return Promise.resolve([]);
   }
