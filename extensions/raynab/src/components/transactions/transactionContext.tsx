@@ -9,7 +9,7 @@ import {
   onTimelineType,
   SortNames,
   TransactionState,
-  ViewAction,
+  TransactionViewAction,
 } from '@srcTypes';
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
@@ -32,7 +32,7 @@ export function TransactionProvider({
   onTimelineChange,
   children,
 }: {
-  dispatch: React.Dispatch<ViewAction>;
+  dispatch: React.Dispatch<TransactionViewAction>;
   state: Omit<TransactionState, 'search'>;
   onTimelineChange: onTimelineType;
   children: ReactNode;

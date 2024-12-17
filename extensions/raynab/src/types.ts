@@ -66,7 +66,7 @@ export type onFilterType = (filterType: Filter) => () => void;
 export type onSortType = (sortType: SortNames) => () => void;
 export type onTimelineType = (period: Period) => void;
 
-export interface ViewState {
+export interface TransactionViewState {
   filter: Filter;
   search: string;
   group: GroupNames | null;
@@ -76,7 +76,7 @@ export interface ViewState {
   isShowingDetails: boolean;
 }
 
-export type ViewAction =
+export type TransactionViewAction =
   | { type: 'reset'; initialCollection?: TransactionDetail[] }
   | {
       type: 'filter';
@@ -87,6 +87,6 @@ export type ViewAction =
   | { type: 'sort'; sortBy: SortNames }
   | { type: 'toggleDetails' };
 
-export type TransactionState = Omit<ViewState, 'collection' | 'initialCollection'> & {
+export type TransactionState = Omit<TransactionViewState, 'collection' | 'initialCollection'> & {
   timeline: Period | undefined;
 };

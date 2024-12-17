@@ -21,7 +21,7 @@ import {
 } from '@components/actions';
 import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
-import { ToggleDetailsAction } from '@components/actions/toggleTransactionDetailsAction';
+import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
 import { TransactionCreationForm } from './transactionCreationForm';
 import { Shortcuts } from '@constants';
@@ -85,7 +85,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                 {hasSubtransactions ? (
                   [...transaction.subtransactions]
                     .sort((a, b) => {
-                      /* 
+                      /*
                     This might look a bit odd
                     But we're showing the highest income if the main
                     transaction is an inflow

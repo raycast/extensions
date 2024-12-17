@@ -5,8 +5,8 @@ import type {
   SortNames,
   SortTypes,
   sortOrder,
-  ViewAction,
-  ViewState,
+  TransactionViewAction,
+  TransactionViewState,
   TransactionDetail,
   TransactionDetailMap,
 } from '@srcTypes';
@@ -16,7 +16,10 @@ import Fuse from 'fuse.js';
 
 const MODIFIERS_REGEX = /(-?(?:account|type|category):[\w-]+)/g;
 
-export function transactionViewReducer(state: ViewState, action: ViewAction): ViewState {
+export function transactionViewReducer(
+  state: TransactionViewState,
+  action: TransactionViewAction
+): TransactionViewState {
   switch (action.type) {
     case 'reset': {
       const initialItems = action.initialCollection ?? state.initialCollection;
@@ -169,7 +172,7 @@ export function initView({
   search = '',
   initialCollection: initialItems,
   isShowingDetails: isShowingDetail = false,
-}: ViewState): ViewState {
+}: TransactionViewState): TransactionViewState {
   return {
     filter,
     group,
@@ -254,7 +257,11 @@ function filterCollectionBy(newFilter: Filter) {
  * @param group - Optional grouping to apply after filtering
  * @returns Either a filtered array of transactions or a grouped map of filtered transactions
  */
-function filterCollectionAndGroup(collection: TransactionDetail[], filter: Filter, group: ViewState['group']) {
+function filterCollectionAndGroup(
+  collection: TransactionDetail[],
+  filter: Filter,
+  group: TransactionViewState['group']
+) {
   return group
     ? (collection.filter(filterCollectionBy(filter)).reduce(groupToMap(group), new Map()) as TransactionDetailMap)
     : collection.filter(filterCollectionBy(filter));
