@@ -3,6 +3,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Fixed grammar in alert message of the `Updates` command.
+- Removed unnecessary emoji from the update status of the `Updates` command.
 
 ## [Update] - 2024-12-16
 
