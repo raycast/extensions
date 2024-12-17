@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Change menu bar unread style] - {PR_MERGE_DATE}
+## [Change menu bar unread style] - 2024-12-17
 
 - Use a new icon with indicator for unread state
 
