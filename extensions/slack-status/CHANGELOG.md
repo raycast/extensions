@@ -1,6 +1,6 @@
 # Slack Status Change
 
-## [Support pausing notifications] - {PR_MERGE_DATE}
+## [Support pausing notifications] - 2024-12-17
 
 - Presets can now pause notifications for the duration of that status. You will be asked to reconnect your Slack account to get the right permissions.
 
