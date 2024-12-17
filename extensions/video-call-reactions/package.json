@@ -5,6 +5,9 @@
   "description": "This extension triggers video call reactions such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers on macOS.",
   "icon": "video-call-reactions-icon.png",
   "author": "yazanzaid00",
+  "contributors": [
+    "jschmidtcordeiro"
+  ],
   "categories": [
     "Communication",
     "Applications",

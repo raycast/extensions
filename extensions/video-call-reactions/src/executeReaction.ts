@@ -17,51 +17,62 @@ export async function executeReaction(reactionCommand: string): Promise<void> {
         tell theBarItem
           perform action "AXPress"
         end tell
-        set timeoutDate to (current date) + 2
-        repeat while (not (window 1 exists)) and ((current date) < timeoutDate)
-          delay 0.01
-        end repeat
+        
+        delay 1
+        
         if not (window 1 exists) then
           return "${ERROR_VIDEO_MENU_NOT_VISIBLE}"
         end if
-        tell last group of group 1 of window 1
-          tell checkbox 1
-            if it exists then
-              set savedValue to value
-              set value to 1
-            else
-              return "${ERROR_REACTIONS_CHECKBOX_MISSING}"
-            end if
-          end tell
-          tell UI element 2
-            if it exists then
-              perform action "AXPress"
-            else
-              return "${ERROR_REACTIONS_SUBMENU_MISSING}"
-            end if
-          end tell
-          tell ${reactionCommand}
-            if it exists then
-              perform action "AXPress"
-            else
-              return "${ERROR_REACTION_BUTTON_MISSING}"
-            end if
-          end tell
-          tell UI element 2
-            if it exists then
-              perform action "AXPress"
-            else
-              return "${ERROR_REACTIONS_SUBMENU_MISSING}"
-            end if
-          end tell
-          tell checkbox 1
-            if it exists then
-              set value to savedValue
-            else
-              return "${ERROR_REACTIONS_CHECKBOX_MISSING}"
-            end if
+        
+        tell window 1
+          tell group 1
+            tell group 3
+              tell checkbox 1
+                if it exists then
+                  set savedValue to value
+                  set value to 1
+                else
+                  return "${ERROR_REACTIONS_CHECKBOX_MISSING}"
+                end if
+              end tell
+              
+              tell UI element 2
+                if it exists then
+                  perform action "AXPress"
+                else
+                  return "${ERROR_REACTIONS_SUBMENU_MISSING}"
+                end if
+              end tell
+              
+              tell ${reactionCommand}
+                if it exists then
+                  perform action "AXPress"
+                else
+                  return "${ERROR_REACTION_BUTTON_MISSING}"
+                end if
+              end tell
+              
+              tell UI element 2
+                if it exists then
+                  perform action "AXPress"
+                else
+                  return "${ERROR_REACTIONS_SUBMENU_MISSING}"
+                end if
+              end tell
+              
+              tell checkbox 1
+                if it exists then
+                  set value to savedValue
+                else
+                  return "${ERROR_REACTIONS_CHECKBOX_MISSING}"
+                end if
+              end tell
+            end tell
           end tell
         end tell
+        
+        delay 0.5
+        
         tell theBarItem
           perform action "AXPress"
         end tell
