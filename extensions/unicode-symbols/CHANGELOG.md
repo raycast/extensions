@@ -1,6 +1,6 @@
 # Unicode Symbols
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-12-17
 
 - Added option to set Primary Action (`copy`/`paste`) - ([#15901](https://github.com/raycast/extensions/issues/15901))
 - Updated (dev) dependencies
