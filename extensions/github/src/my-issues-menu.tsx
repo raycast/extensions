@@ -41,7 +41,7 @@ function MyIssuesMenu() {
   return (
     <MenuBarRoot
       title={showtext ? `${issuesCount}` : undefined}
-      icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: `issue-open${issuesCount > 0 ? "-unread" : ""}.svg`, tintColor: Color.PrimaryText }}
       isLoading={isLoading}
     >
       {sections?.map((section) => {

@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Change menu bar unread style] - {PR_MERGE_DATE}
+
+- Use a new icon with indicator for unread state
+
 ## [Support specifying git clone protocol] - 2024-12-12
 
 - Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.

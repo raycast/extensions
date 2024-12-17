@@ -58,7 +58,7 @@ function MyPullRequestsMenu() {
   return (
     <MenuBarRoot
       title={showtext ? `${prCount}` : undefined}
-      icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: `pull-request-open${prCount > 0 ? "-unread" : ""}.svg`, tintColor: Color.PrimaryText }}
       isLoading={isLoading}
     >
       {sections?.map((section) => {
