@@ -1,10 +1,10 @@
 # iAWriter Changelog
 
-## 2024-12-13
+## [Update] - 2024-12-13
 
 - [New] add daily note command [@chewhx](https://github.com/chewhx)
 
-## 2024-03-20
+## [Update] - 2024-03-20
 
 - [New] add installation check when command runs
 
