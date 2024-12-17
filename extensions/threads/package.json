@@ -177,9 +177,9 @@
       ]
     },
     {
-      "name": "download-thread-video",
-      "title": "Download Threads Video",
-      "description": "Download threads video with URL",
+      "name": "download-thread-media",
+      "title": "Download Threads Media",
+      "description": "Download threads media with URL",
       "mode": "no-view",
       "arguments": [
         {
@@ -192,9 +192,9 @@
       ],
       "preferences": [
         {
-          "name": "videoDownloadPath",
+          "name": "mediaDownloadPath",
           "title": "Video Download Path",
-          "description": "Path to save downloaded videos",
+          "description": "Path to save downloaded media",
           "type": "directory",
           "required": false
         }
