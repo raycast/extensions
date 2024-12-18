@@ -1,5 +1,11 @@
 # Fetch Youtube Transcript Changelog
 
+## [1.1.5] - 2024-12-18
+
+### Fixed
+
+- Now extension shows clear error if no transcript is found
+
 ## [1.1.4] - 2024-12-14
 
 ### Added
