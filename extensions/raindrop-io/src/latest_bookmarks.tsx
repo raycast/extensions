@@ -11,7 +11,7 @@ export default function LatestBookmarks() {
   const preferences: Preferences = getPreferenceValues();
   const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(
     "last-used-collection",
-    "0",
+    "0"
   );
 
   const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } =
@@ -28,7 +28,7 @@ export default function LatestBookmarks() {
   const defaultCollection = preferences.useLastCollection ? lastUsedCollection : "0";
   const [collection, setCollection] = useCachedState<string>(
     "selected-collection",
-    defaultCollection,
+    defaultCollection
   );
 
   const { isLoading, bookmarks, collections, revalidate } = useRequest({ collection });

@@ -12,7 +12,7 @@ export default function Main(): ReactElement {
   const preferences: Preferences = getPreferenceValues();
   const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(
     "last-used-collection",
-    "0",
+    "0"
   );
 
   const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } =
@@ -31,7 +31,7 @@ export default function Main(): ReactElement {
   const [searchText, setSearchText] = useState<string>("");
   const [collection, setCollection] = useCachedState<string>(
     "selected-collection",
-    defaultCollection,
+    defaultCollection
   );
 
   const { isLoading, bookmarks, collections, revalidate } = useRequest({

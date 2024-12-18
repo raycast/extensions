@@ -15,7 +15,7 @@ export function useUser() {
       onError: () => {
         showToast(Toast.Style.Failure, "Cannot fetch user details");
       },
-    },
+    }
   );
 
   return { isLoading, data, revalidate };

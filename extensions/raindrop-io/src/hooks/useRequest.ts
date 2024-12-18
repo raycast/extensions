@@ -9,7 +9,7 @@ import { useUser } from "./useUser";
 export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
   const [cachedCollections, setCachedCollections] = useCachedState<CollectionItem[]>(
     "collections",
-    [],
+    []
   );
   const { isLoading: isLoadingUser, data: user } = useUser();
   const {
@@ -20,7 +20,7 @@ export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
   const { isLoading: isLoadingCollections, data: collections } = useCollections();
   const isLoading = useMemo(
     () => isLoadingUser || isLoadingBookmarks || isLoadingCollections,
-    [isLoadingUser, isLoadingBookmarks, isLoadingCollections],
+    [isLoadingUser, isLoadingBookmarks, isLoadingCollections]
   );
 
   useEffect(() => {

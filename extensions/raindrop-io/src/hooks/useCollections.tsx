@@ -15,7 +15,7 @@ export function useCollections() {
       onError: () => {
         showToast(Toast.Style.Failure, "Cannot fetch collections");
       },
-    },
+    }
   );
 
   return { isLoading, data, revalidate };
