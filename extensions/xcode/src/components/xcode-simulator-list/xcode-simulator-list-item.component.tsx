@@ -79,7 +79,7 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                 icon={Icon.Link}
                 title="Open URL"
                 target={<XcodeSimulatorOpenUrlForm simulator={props.simulator} />}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
               <Action.Push
                 icon={Icon.AlarmRinging}

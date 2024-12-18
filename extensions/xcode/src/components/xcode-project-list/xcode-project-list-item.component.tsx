@@ -1,5 +1,5 @@
 import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
-import { Action, ActionPanel, Icon, List, open, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, open, showToast, Toast, useNavigation } from "@raycast/api";
 import tildify from "tildify";
 import { XcodeProjectIcon } from "../../shared/xcode-project-icon";
 import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
@@ -42,7 +42,7 @@ export function XcodeProjectListItem(props: {
             <Action
               title={`Open With ${terminalApp.name}`}
               icon={{ fileIcon: terminalApp.path }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.OpenWith}
               onAction={() =>
                 open(props.project.directoryPath, terminalApp).catch(() =>
                   showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
