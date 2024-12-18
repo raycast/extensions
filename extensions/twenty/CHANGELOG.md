@@ -4,6 +4,10 @@
 
 - Updated select field type with preference
 
+## [Enhancements] - 2024-12-11
+
+- Added support for rating field type
+
 ## [Enhancements] - 2024-12-04
 
 - Updated entire twenty extension to be flexible

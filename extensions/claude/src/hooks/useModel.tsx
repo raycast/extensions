@@ -8,7 +8,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Haiku",
   prompt: "You are a helpful assistant.",
-  option: "claude-3-haiku-20240307",
+  option: "claude-3-5-haiku-latest",
   temperature: "1",
   max_tokens: "4096",
   pinned: false,

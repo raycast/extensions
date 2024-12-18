@@ -16,7 +16,8 @@
     "iwex",
     "xilopaint",
     "marcjulian",
-    "ChangeHow"
+    "ChangeHow",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -71,6 +72,14 @@
           "label": "Group by status",
           "default": true,
           "description": "Group items by Read/Unread status"
+        },
+        {
+          "name": "hideReadItems",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide read items",
+          "default": false,
+          "description": "Hide read items"
         }
       ]
     },

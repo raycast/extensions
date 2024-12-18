@@ -5,11 +5,12 @@ import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util
 import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
+  const urlTable = tableUrl || tableTitle;
   return (
     "(" +
     terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ") +
     ") OR (" +
-    terms.map((t) => `${tableTitle}.url LIKE '%${t}%'`).join(" AND ") +
+    terms.map((t) => `${urlTable}.url LIKE '%${t}%'`).join(" AND ") +
     ")"
   );
 };

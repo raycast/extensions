@@ -1,5 +1,14 @@
 # Claude Changelog
 
+## [Update] - 2024-12-12
+
+- Fix: Remove duplicated "Copy Question" action, use existing with tweaked conditions
+- Fix: Use Claude 3.5 Haiku as default fallback modal
+
+## [Update] - 2024-12-09
+
+- Feature: Added copy question actions
+
 ## [Update] - 2024-11-05
 
 - Feature: Added new [Claude 3.5 Haiku](https://www.anthropic.com/news/3-5-models-and-computer-use)

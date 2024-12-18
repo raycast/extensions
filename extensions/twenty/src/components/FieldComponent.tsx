@@ -2,6 +2,7 @@ import { ItemProps } from "@raycast/api";
 import { DataModelField } from "../services/zod/schema/recordFieldSchema";
 import TextInput from "./TextInput";
 import Select from "./Select";
+import Rating from "./Rating";
 
 type FieldComponentProps = {
   values: {
@@ -20,6 +21,9 @@ export default function FieldComponent({ values }: FieldComponentProps) {
     }
     case "SELECT": {
       return <Select values={{ field }} {...itemProps} />;
+    }
+    case "RATING": {
+      return <Rating values={{ field }} {...itemProps} />;
     }
     default:
       return <></>;

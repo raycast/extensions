@@ -12,6 +12,7 @@ import {
   closeOtherWindows,
   terminalApp,
   showGitBranch,
+  gitBranchColor,
   layout,
 } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
@@ -23,6 +24,7 @@ import {
   isRemoteEntry,
   isRemoteWorkspaceEntry,
   isWorkspaceEntry,
+  isValidHexColor,
 } from "./utils";
 import {
   ListOrGrid,
@@ -192,8 +194,15 @@ function LocalItem(
 
   const accessories = [];
   if (showGitBranch && gitBranch) {
+    const branchColor =
+      gitBranchColor && isValidHexColor(gitBranchColor)
+        ? { light: gitBranchColor, dark: gitBranchColor, adjustContrast: false }
+        : Color.Green;
     accessories.push({
-      tag: { value: gitBranch, color: Color.Green },
+      tag: {
+        value: gitBranch,
+        color: branchColor,
+      },
       tooltip: `Git Branch: ${gitBranch}`,
     });
   }
@@ -294,6 +303,12 @@ function RemoteItem(
           </ActionPanel.Section>
           <RemoveActionSection {...props} />
           <PinActionSection {...props} />
+          <Action
+            title="Open Preferences"
+            icon={Icon.Gear}
+            onAction={openExtensionPreferences}
+            shortcut={{ modifiers: ["cmd"], key: "," }}
+          />
         </ActionPanel>
       }
     />
@@ -339,7 +354,7 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
       )}
       {movements.includes("up") && (
         <Action
-          title="Move Up in Pinned Entries"
+          title="Move up in Pinned Entries"
           shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
           icon={Icon.ArrowUp}
           onAction={async () => {
@@ -389,7 +404,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
     <ActionPanel.Section>
       <Action
         icon={Icon.Trash}
-        title="Remove From Recent Projects"
+        title="Remove from Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}

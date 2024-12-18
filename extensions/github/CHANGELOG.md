@@ -1,5 +1,18 @@
 # GitHub Changelog
 
+## [Change menu bar unread style] - 2024-12-17
+
+- Use a new icon with indicator for unread state
+
+## [Support specifying git clone protocol] - 2024-12-12
+
+- Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.
+- `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
+
+## [Update GraphQL generated types] - 2024-12-09
+
+- Updated auto-generated GraphQL codes with the latest schema.
+
 ## [Handle notification icon retrieval error] - 2024-11-08
 
 - Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.

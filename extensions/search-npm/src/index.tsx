@@ -82,7 +82,7 @@ export default function PackageList() {
                     <ActionPanel>
                       <Action.OpenInBrowser
                         url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                        title="View Npm Search Results"
+                        title="View npm Search Results"
                       />
                     </ActionPanel>
                   }
@@ -90,9 +90,12 @@ export default function PackageList() {
               ) : null}
               <List.Section title="Results" subtitle={data.length.toString()}>
                 {data.map((result) => {
+                  if (!result.name) {
+                    return null
+                  }
                   return (
                     <PackageListItem
-                      key={result.name}
+                      key={`search-${result.name}`}
                       result={result}
                       searchTerm={searchTerm}
                       setHistory={setHistory}
@@ -114,10 +117,29 @@ export default function PackageList() {
           {Number(historyCount) > 0 ? (
             history.length ? (
               <List.Section title="History">
-                {history.map((item, index) => {
+                {history.map((item) => {
+                  if (item.type === 'package' && item?.package?.name) {
+                    const pkgName = item.package.name
+                    return (
+                      <PackageListItem
+                        key={`history-${pkgName}`}
+                        result={item.package}
+                        searchTerm={searchTerm}
+                        setHistory={setHistory}
+                        isFavorited={
+                          favorites.findIndex(
+                            (fave) => fave.name === pkgName,
+                          ) !== -1
+                        }
+                        handleFaveChange={fetchFavorites}
+                        isHistoryItem={true}
+                      />
+                    )
+                  }
+
                   return (
                     <HistoryListItem
-                      key={`${item.term}-${item.type}-${index}`}
+                      key={`history-${item.term}-${item.type}`}
                       item={item}
                       setHistory={setHistory}
                       setSearchTerm={setSearchTerm}
