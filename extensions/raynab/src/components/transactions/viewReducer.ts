@@ -13,8 +13,9 @@ import type {
 
 import { nanoid as randomId } from 'nanoid';
 import Fuse from 'fuse.js';
+import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 
-const MODIFIERS_REGEX = /(-?(?:account|type|category):[\w-]+)/g;
+const MODIFIERS_REGEX = /(-?(?:account|amount|type|category):[.\w-]+)/g;
 
 export function transactionViewReducer(
   state: TransactionViewState,
@@ -286,15 +287,29 @@ function isSameFilter(filterA: Filter, filterB: Filter) {
   return isSameObject;
 }
 
-type ModifierType = 'account' | 'type' | 'category';
+type ModifierType = 'account' | 'type' | 'category' | 'amount';
 // Narrow this type down depending on modifier type w/ typeguard
 type Modifier = Map<ModifierType, { value: string; isNegative: boolean }>;
 
 /**
- * Given a set of positive or negative modifiers, this function filters the collection for items
- * that match them.
- * Each modifier is only applied once to the collection.
- * */
+ * Filters a collection based on search modifiers like account:, type:, amount:, and category:.
+ * Except for amount, each modifier can be positive (include matches) or negative (exclude matches).
+ * @param modifiers - Map of search modifiers and their values
+ * @returns Filter function that returns true if a transaction matches all modifiers
+ *
+ * @example
+ * // Include transactions from "Checking" account
+ * account:checking
+ *
+ * // Exclude transactions from "Savings" account
+ * -account:savings
+ *
+ * // Only show inflow transactions
+ * type:inflow
+ *
+ * // Only show transactions in "Groceries" category
+ * category:groceries
+ */
 function filterByModifiers(modifiers: Modifier) {
   return (t: TransactionDetail) => {
     let isMatch = false;
@@ -337,6 +352,16 @@ function filterByModifiers(modifiers: Modifier) {
           const categoryName = value.toLocaleLowerCase().replace('-', ' ');
           isMatch = t.category_name != undefined && t.category_name.toLocaleLowerCase().search(categoryName) !== -1;
           isMatch = isNegative ? !isMatch : isMatch;
+          break;
+        }
+        case 'amount': {
+          // Don't change the match statement if we can't safely convert to a number
+          if (!isNumberLike(value)) break;
+
+          const valueAsMilliUnit = formatToYnabAmount(value);
+
+          isMatch = t.amount === valueAsMilliUnit;
+          isMatch && console.log({ value, t });
           break;
         }
         default:
