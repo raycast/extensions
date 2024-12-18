@@ -78,11 +78,17 @@ export function displayGoalType(category: Category) {
 }
 
 /**
- * Format a goal type into an easily digestible target
- * @example "Budget $3,000 by August 2025"
- * @deprecated
+ * Formats a category's goal target into a human-readable string based on its goal type.
+ * Returns a string describing the goal amount and timing (if applicable).
+ *
+ * Note: Some goal types were deprecated in November 2024 but are kept for backwards compatibility.
+ * @see https://support.ynab.com/en_us/our-2024-update-to-targets-H1sZk8X0a
+ *
+ * @param category - The category containing goal information
+ * @param currency - The currency format to use for the target amount
+ * @returns A formatted string describing the goal (e.g. "Budget $3,000 by August 2025")
  */
-export function formatGoalType(category: Category, currency: CurrencyFormat): string {
+function formatGoalType(category: Category, currency: CurrencyFormat): string {
   if (!category.goal_type) return 'No Goal';
 
   const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
@@ -108,19 +114,21 @@ export function formatGoalType(category: Category, currency: CurrencyFormat): st
   }
 }
 
-/* @see  */
 const GOAL_CADENCES_WITH_FREQUENCY = [1, 2, 13];
 const GOAL_CADENCES_WITHOUT_FREQUENCY = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14];
 
 export function formatGoalCadenceAndFrequency(category: Category, currency: CurrencyFormat): string {
-  if (category.goal_cadence == undefined) return 'No Goal';
+  if (category.goal_cadence == undefined) {
+    return formatGoalType(category, currency);
+  }
 
   const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
 
   const baseString = `${target}`;
 
   if (category.goal_cadence === 0) {
-    return `${baseString} once`;
+    const targetMonth = category.goal_target_month;
+    return `${baseString} ${targetMonth ? `by ${time(targetMonth).format('LL')}` : 'once'}`;
   }
 
   if (GOAL_CADENCES_WITH_FREQUENCY.includes(category.goal_cadence)) {
