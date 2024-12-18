@@ -15,7 +15,11 @@ import { nanoid as randomId } from 'nanoid';
 import Fuse from 'fuse.js';
 import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 
-const MODIFIERS_REGEX = /(-?(?:account|amount|type|category):[.\w-]+)/g;
+const VALID_MODIFIERS = ['account', 'amount', 'type', 'category'] as const;
+const MODIFIERS_REGEX = new RegExp(
+  `(-?(?:${VALID_MODIFIERS.join('|')}):[\\w.-\\s]+?)(?=\\s+(?:-?(?:${VALID_MODIFIERS.join('|')}):)|$)`,
+  'gi'
+);
 
 export function transactionViewReducer(
   state: TransactionViewState,
@@ -343,13 +347,13 @@ function filterByModifiers(modifiers: Modifier) {
           break;
         }
         case 'account': {
-          const accountName = value.toLowerCase().replace('-', ' ');
+          const accountName = value.toLowerCase();
           isMatch = t.account_name.toLowerCase().search(accountName) !== -1;
           isMatch = isNegative ? !isMatch : isMatch;
           break;
         }
         case 'category': {
-          const categoryName = value.toLocaleLowerCase().replace('-', ' ');
+          const categoryName = value.toLocaleLowerCase();
           isMatch = t.category_name != undefined && t.category_name.toLocaleLowerCase().search(categoryName) !== -1;
           isMatch = isNegative ? !isMatch : isMatch;
           break;
