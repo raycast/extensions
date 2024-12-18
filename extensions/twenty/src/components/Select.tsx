@@ -14,7 +14,7 @@ const Select = forwardRef<FormItemRef, { values: SelectProps } & React.Component
     const { field } = values;
     const { options } = field;
     const defaultValue = field.defaultValue ? field.defaultValue.replace(/^'|'$/g, "") : "";
-    const { id, value, ...modifiedRest } = rest;      // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { id, value, ...modifiedRest } = rest; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     return (
       <Form.Dropdown
