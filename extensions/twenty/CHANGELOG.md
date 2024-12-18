@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-18
 
 - Updated select field type with preference
 
