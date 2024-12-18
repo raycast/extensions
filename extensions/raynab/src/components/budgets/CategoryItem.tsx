@@ -16,6 +16,7 @@ import { CategoryEditForm } from './categoryEditForm';
 import { Shortcuts } from '@constants';
 import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { useCategories } from './budgetContext';
+import { TransactionView } from '@components/transactions/transactionView';
 
 export function CategoryItem({ category, budget }: { category: Category; budget: BudgetDetailSummary | undefined }) {
   const {
@@ -47,6 +48,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
   ];
 
   const activityInCurrency = formatToReadablePrice({ amount: category.activity, currency: currency });
+  const hasGoal = !!category.goal_creation_month;
 
   return (
     <List.Item
@@ -77,12 +79,21 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
                   color={goalColor}
                 />
               </List.Item.Detail.Metadata.TagList>
-              {category.goal_type ? <List.Item.Detail.Metadata.Separator /> : null}
-              {category.goal_creation_month ? (
-                <List.Item.Detail.Metadata.Label
-                  title="Goal Created"
-                  text={time(category.goal_creation_month).format('LL')}
-                />
+              {hasGoal ? (
+                <>
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="Goal Created"
+                    text={time(category.goal_creation_month).format('LL')}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Percentage completed"
+                    text={`${category.goal_percentage_complete ?? 0}%`}
+                  />
+                  {category.goal_months_to_budget ?? 0 > 0 ? (
+                    <List.Item.Detail.Metadata.Label title="Months to go" text={`${category.goal_months_to_budget}`} />
+                  ) : null}
+                </>
               ) : null}
             </List.Item.Detail.Metadata>
           }
@@ -93,6 +104,12 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
           <ActionPanel.Section title="Inspect Budget">
             <ToggleDetailsAction showDetails={isDetailed} toggleDetails={toggleDetails} />
             <Action.Push title="Show Monthly Budget" icon={Icon.Envelope} target={<BudgetDetails budget={budget} />} />
+            <Action.Push
+              title="Show category's transactions"
+              icon={Icon.MagnifyingGlass}
+              target={<TransactionView search={`category:${category.name.split(' ').join('-').toLowerCase()}`} />}
+              shortcut={Shortcuts.ShowTransactionsForCategory}
+            />
             <OpenInYnabAction />
             <Action
               icon={Icon.Binoculars}

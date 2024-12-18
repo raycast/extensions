@@ -12,6 +12,7 @@ interface Constants {
   ShowBudgetProgress: Keyboard.Shortcut;
   EditBudgetCategory: Keyboard.Shortcut;
   CreateNewTransaction: Keyboard.Shortcut;
+  ShowTransactionsForCategory: Keyboard.Shortcut;
 }
 
 export const Shortcuts: Constants = {
@@ -29,4 +30,5 @@ export const Shortcuts: Constants = {
   ShowBudgetProgress: { modifiers: ['cmd', 'shift'], key: 'p' },
   EditBudgetCategory: { modifiers: ['cmd'], key: 'e' },
   CreateNewTransaction: { modifiers: ['opt'], key: 'c' },
+  ShowTransactionsForCategory: { modifiers: ['cmd', 'shift'], key: 'enter' },
 };
