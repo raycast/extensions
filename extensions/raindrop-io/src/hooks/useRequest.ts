@@ -7,9 +7,16 @@ import { useCollections } from "./useCollections";
 import { useUser } from "./useUser";
 
 export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
-  const [cachedCollections, setCachedCollections] = useCachedState<CollectionItem[]>("collections", []);
+  const [cachedCollections, setCachedCollections] = useCachedState<CollectionItem[]>(
+    "collections",
+    [],
+  );
   const { isLoading: isLoadingUser, data: user } = useUser();
-  const { isLoading: isLoadingBookmarks, data: bookmarks, revalidate } = useBookmarks({ collection, search });
+  const {
+    isLoading: isLoadingBookmarks,
+    data: bookmarks,
+    revalidate,
+  } = useBookmarks({ collection, search });
   const { isLoading: isLoadingCollections, data: collections } = useCollections();
   const isLoading = useMemo(
     () => isLoadingUser || isLoadingBookmarks || isLoadingCollections,

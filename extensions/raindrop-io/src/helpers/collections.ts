@@ -52,7 +52,6 @@ const flatChildCollections = (childColls: Collection[], prefix = "") => {
     treeFlat.push({
       value: elem._id,
       label: title,
-      name: elem.title,
     });
 
     if (elem.children) {
@@ -69,7 +68,6 @@ const flatCollections = (sortedColls: OrderedCollections) => {
     treeFlat.push({
       value: coll[2]?._id,
       label: title,
-      name: coll[2]?.title,
     });
 
     if (coll[2]?.children) {
