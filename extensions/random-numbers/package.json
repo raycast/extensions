@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random-numbers",
+  "title": "Random Numbers",
+  "description": "Generate random numbers, roll dice, or flip a coin",
+  "icon": "extension-icon.png",
+  "author": "rwblickhan",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-random-number",
+      "title": "Generate Random Number",
+      "description": "Generate a random number.",
+      "mode": "no-view",
+      "icon": "extension-icon.png",
+      "arguments": [
+        {
+          "name": "min",
+          "placeholder": "Min",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "max",
+          "placeholder": "Max",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "roll-die-d6",
+      "title": "Roll Die (d6)",
+      "description": "Generate a random number between 1 and 6.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d4",
+      "title": "Roll Die (d4)",
+      "description": "Generate a random number between 1 and 4.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d8",
+      "title": "Roll Die (d8)",
+      "description": "Generate a random number between 1 and 8.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d10",
+      "title": "Roll Die (d10)",
+      "description": "Generate a random number between 1 and 10.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d12",
+      "title": "Roll Die (d12)",
+      "description": "Generate a random number between 1 and 12.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d20",
+      "title": "Roll Die (d20)",
+      "description": "Generate a random number between 1 and 20.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "roll-die-d100",
+      "title": "Roll Die (d100)",
+      "description": "Generate a random number between 1 and 100.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "flip-coin",
+      "title": "Flip Coin",
+      "description": "Return heads or tails.",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableDelay",
+      "title": "Enable Delay (optional)",
+      "description": "Enable a delay before returning a value.",
+      "type": "checkbox",
+      "label": "Enable delay?",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "delay",
+      "title": "Delay Time (milliseconds)",
+      "description": "How long to delay before returning a value (if enabled).",
+      "type": "textfield",
+      "required": false,
+      "default": "600"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
