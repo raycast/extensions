@@ -144,7 +144,7 @@ const MAX_SYMBOL_COUNT = 10;
 function renderProgressTitle(category: Category) {
   const percentage = category.goal_percentage_complete;
 
-  if (!category.goal_type) return 'N/A';
+  if (percentage == undefined) return 'N/A';
 
   const fullSymbolsCount = Math.min(Math.round(((percentage ?? 0) * MAX_SYMBOL_COUNT) / 100), 100);
 
