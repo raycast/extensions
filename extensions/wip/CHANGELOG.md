@@ -1,5 +1,11 @@
 # WIP Changelog
 
+## [Fixed bug with upload] – {PR_MERGE_DATE}
+
+- Set correct mime-type of copy/pasted files
+- Update Client ID for development
+- Improve README
+
 ## [Improved README] - 2024-10-04
 
 - List all features
