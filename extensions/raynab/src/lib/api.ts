@@ -1,11 +1,8 @@
 import { getPreferenceValues, showToast, Toast } from '@raycast/api';
 import * as ynab from 'ynab';
 import { displayError, isYnabError } from './errors';
-import dayjs from 'dayjs';
-
-import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import type { Period, BudgetSummary, SaveTransaction, NewTransaction, Preferences } from '@srcTypes';
-dayjs.extend(quarterOfYear);
+import { time } from './utils';
 
 const { apiToken } = getPreferenceValues<Preferences>();
 const client = new ynab.API(apiToken);
@@ -121,8 +118,8 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
   try {
     const transactionsResponse = await client.transactions.getTransactions(
       selectedBudgetId,
-      dayjs()
-        .subtract(1, period as dayjs.ManipulateType)
+      time()
+        .subtract(1, period as time.ManipulateType)
         .toISOString()
     );
     const transactions = transactionsResponse.data.transactions;

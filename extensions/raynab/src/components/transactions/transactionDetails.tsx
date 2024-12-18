@@ -1,13 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon } from '@raycast/api';
-import { CurrencyFormat, TransactionDetail } from '@srcTypes';
-import dayjs from 'dayjs';
-
-import localizedFormat from 'dayjs/plugin/localizedFormat';
-dayjs.extend(localizedFormat);
-
-import { easyGetColorFromId, formatToReadablePrice, getFlagColor } from '@lib/utils';
-import { OpenInYnabAction } from '@components/actions';
 import { useLocalStorage } from '@raycast/utils';
+
+import { OpenInYnabAction } from '@components/actions';
+import { CurrencyFormat, TransactionDetail } from '@srcTypes';
+import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
 
 export function TransactionDetails({ transaction }: { transaction: TransactionDetail }) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
@@ -32,7 +28,7 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
             title="Amount"
             text={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
           />
-          <Detail.Metadata.Label title="Date" text={dayjs(transaction.date).format('LL')} />
+          <Detail.Metadata.Label title="Date" text={time(transaction.date).format('LL')} />
           <Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
             {hasSubtransactions ? (
               [...transaction.subtransactions]

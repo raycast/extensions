@@ -13,6 +13,7 @@ import { Color, Icon } from '@raycast/api';
 import { CategoryGoalTypeEnum } from 'ynab';
 import { formatToReadablePrice } from './transactions';
 import type { Category, CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
+import { time } from './time';
 
 type GoalShape = 'underfunded' | 'funded' | 'overspent' | 'neutral';
 

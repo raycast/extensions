@@ -1,6 +1,4 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import dayjs from 'dayjs';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import { OpenInYnabAction } from '@components/actions';
 import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
@@ -10,6 +8,7 @@ import {
   formatToReadablePrice,
   displayGoalColor,
   formatGoalCadenceAndFrequency,
+  time,
 } from '@lib/utils';
 import type { Category, BudgetDetailSummary } from '@srcTypes';
 import { BudgetDetails } from './budgetDetails';
@@ -17,8 +16,6 @@ import { CategoryEditForm } from './categoryEditForm';
 import { Shortcuts } from '@constants';
 import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { useCategories } from './budgetContext';
-
-dayjs.extend(localizedFormat);
 
 export function CategoryItem({ category, budget }: { category: Category; budget: BudgetDetailSummary | undefined }) {
   const {
@@ -84,7 +81,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
               {category.goal_creation_month ? (
                 <List.Item.Detail.Metadata.Label
                   title="Goal Created"
-                  text={dayjs(category.goal_creation_month).format('LL')}
+                  text={time(category.goal_creation_month).format('LL')}
                 />
               ) : null}
             </List.Item.Detail.Metadata>

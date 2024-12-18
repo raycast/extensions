@@ -1,16 +1,9 @@
 import { Icon, List, ActionPanel, Color, Action } from '@raycast/api';
 
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
-
-dayjs.extend(relativeTime);
-dayjs.extend(localizedFormat);
-
 import { TransactionDetail } from '@srcTypes';
 import { TransactionClearedStatus } from 'ynab';
 import { useTransaction } from './transactionContext';
-import { easyGetColorFromId, formatToReadablePrice, getFlagColor } from '@lib/utils';
+import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
 
 import {
   OpenInYnabAction,
@@ -65,7 +58,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                 icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined,
               },
               {
-                text: dayjs(transaction.date).fromNow(),
+                text: time(transaction.date).fromNow(),
                 tooltip: transaction.date,
               },
             ]
@@ -80,7 +73,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                 title="Amount"
                 text={formatToReadablePrice({ amount: transaction.amount, currency })}
               />
-              <List.Item.Detail.Metadata.Label title="Date" text={dayjs(transaction.date).format('LL')} />
+              <List.Item.Detail.Metadata.Label title="Date" text={time(transaction.date).format('LL')} />
               <List.Item.Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
                 {hasSubtransactions ? (
                   [...transaction.subtransactions]
