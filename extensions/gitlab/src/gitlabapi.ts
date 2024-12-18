@@ -388,6 +388,22 @@ export class GitLab {
     this.url = url;
   }
 
+  private getFetcher() {
+    return async (...args: Parameters<typeof fetch>) => {
+      const [fullUrl, options] = args;
+      const agent = getHttpAgent();
+
+      return await fetch(fullUrl, {
+        headers: {
+          "Content-Type": "application/json",
+          "PRIVATE-TOKEN": this.token,
+        },
+        agent: agent,
+        ...options,
+      });
+    };
+  }
+
   public joinUrl(relativeUrl: string): string {
     return new URL(relativeUrl, this.url).href;
   }
@@ -399,14 +415,9 @@ export class GitLab {
       const ps = paramString(pagedParams);
       const fullUrl = this.url + "/api/v4/" + url + ps;
       logAPI(`send GET request: ${fullUrl}`);
-      const agent = getHttpAgent();
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
-        agent: agent,
       });
       return response;
     };
@@ -433,11 +444,9 @@ export class GitLab {
 
   public async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
     logAPI(`download ${url}`);
-    const response = await fetch(url, {
+    const fetcher = this.getFetcher();
+    const response = await fetcher(url, {
       method: "GET",
-      headers: {
-        "PRIVATE-TOKEN": this.token,
-      },
     });
     if (!response.ok) {
       throw new Error(`unexpected response ${response.statusText}`);
@@ -452,12 +461,9 @@ export class GitLab {
     logAPI(`send POST request: ${fullUrl}`);
     logAPI(params);
     try {
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
         body: JSON.stringify(params),
       });
       const s = response.status;
@@ -504,12 +510,9 @@ export class GitLab {
     logAPI(`send PUT request: ${fullUrl}`);
     logAPI(params);
     try {
-      const response = await fetch(fullUrl, {
+      const fetcher = this.getFetcher();
+      const response = await fetcher(fullUrl, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": this.token,
-        },
         body: JSON.stringify(params),
       });
       await toJsonOrError(response);
@@ -524,6 +527,7 @@ export class GitLab {
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }
+
     const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params, all).then((issues) => {
       return issues.map((issue: any) => jsonDataToIssue(issue));
     });

@@ -20,7 +20,7 @@ export default function FieldComponent({ values }: FieldComponentProps) {
       return <TextInput values={{ field, placeholder: `Enter ${field.name}...` }} {...itemProps} />;
     }
     case "SELECT": {
-      return <Select values={{ field }} />;
+      return <Select values={{ field }} {...itemProps} />;
     }
     case "RATING": {
       return <Rating values={{ field }} {...itemProps} />;

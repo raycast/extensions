@@ -25,13 +25,7 @@ export function UpdateOpenInBrowserAction(props: { state: State }): JSX.Element 
   if (!s.entity_id.startsWith("update") || !url) {
     return null;
   }
-  return (
-    <Action.OpenInBrowser
-      shortcut={{ modifiers: ["cmd"], key: "b" }}
-      url={url}
-      onOpen={() => showHUD("Open Release Notes in Browser")}
-    />
-  );
+  return <Action.OpenInBrowser url={url} onOpen={() => showHUD("Open Release Notes in Browser")} />;
 }
 
 export function UpdateInstallAction(props: { state: State }): JSX.Element | null {
