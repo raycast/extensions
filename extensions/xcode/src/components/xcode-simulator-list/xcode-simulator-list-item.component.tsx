@@ -108,6 +108,24 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={<XcodeSimulatorRenameForm simulator={props.simulator} onRename={props.revalidate} />}
           />
+          <Action
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            title="Delete"
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            onAction={() => {
+              operationWithUserFeedback(
+                "Please wait",
+                `${props.simulator.name} deleted`,
+                `Failed to delete ${props.simulator.name}`,
+                async () => {
+                  await XcodeSimulatorService.delete(props.simulator);
+                  props.revalidate();
+                }
+              );
+              props.revalidate();
+            }}
+          />
         </ActionPanel>
       }
     />

@@ -239,6 +239,14 @@ export class XcodeSimulatorService {
   }
 
   /**
+   * Deletes a XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to delete
+   */
+  static async delete(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl delete ${xcodeSimulator.udid}`).then();
+  }
+
+  /**
    * Rename XcodeSimulator
    * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
    */
