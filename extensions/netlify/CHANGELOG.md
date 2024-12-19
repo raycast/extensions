@@ -1,6 +1,6 @@
 # Changelog
 
-## [Paginated Sites] - {PR_MERGE_DATE}
+## [Paginated Sites] - 2024-12-19
 
 ### Enhancements
 - Sites are now cached (and show up to 100 by default)
