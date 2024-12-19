@@ -7,14 +7,15 @@ import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 
 interface FormValues {
   date: Date | null;
   account_id: string;
   amount: string;
-  payee_name: string;
+  payee_name?: string;
+  payee_id?: string;
   memo?: string;
   flag_color?: string;
   categoryList?: string[];
@@ -33,6 +34,20 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>([]);
   const [amount, setAmount] = useState('0');
 
+  const [isTransfer, setisTransfer] = useState(false);
+  const [transferFrom, setTransferTo] = useState('');
+
+  const possibleAccounts = useMemo(() => {
+    return accounts
+      .filter((account) => {
+        if (isTransfer) {
+          return account.transfer_payee_id !== transferFrom;
+        }
+        return true;
+      })
+      .map((account) => <Form.Dropdown.Item key={account?.id ?? random()} value={account?.id} title={account?.name} />);
+  }, [accounts, isTransfer, transferFrom]);
+
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -43,14 +58,17 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
       cleared: false,
       payee_name: '',
       flag_color: '',
+      payee_id: undefined,
     },
     onSubmit: async (values) => {
       const transactionData = {
         ...values,
         date: (values.date ?? new Date()).toISOString(),
         amount: formatToYnabAmount(values.amount),
-        category_id: values.categoryList?.[0] || undefined,
         approved: true,
+        /* If there's a payee id, that means it's a transfer for which the payee is the transfer from account and the category doesn't matter */
+        category_id: values.payee_id ? null : values.categoryList?.[0] || undefined,
+        payee_name: values.payee_id ? undefined : values.payee_name,
         cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
         flag_color: values.flag_color
           ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
@@ -111,10 +129,17 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
     },
     validation: {
       date: FormValidation.Required,
-      payee_name: FormValidation.Required,
+      payee_name: (value) => {
+        if (!value && !isTransfer) {
+          return 'Please add a counterparty';
+        }
+      },
       amount: FormValidation.Required,
       categoryList: (value) => {
         const errorMessage = 'Please add one or more categories to this transaction';
+
+        if (isTransfer) return;
+
         if (!value) {
           return errorMessage;
         }
@@ -163,42 +188,57 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
         value={amount}
         onChange={setAmount}
       />
-      <Form.TextField {...itemProps.payee_name} title="Payee Name" placeholder="Enter the counterparty" />
-      <Form.Dropdown {...itemProps.account_id} title="Account" defaultValue={accountId}>
-        {accounts.map((account) => (
-          <Form.Dropdown.Item key={account?.id ?? random()} value={account?.id} title={account?.name} />
-        ))}
-      </Form.Dropdown>
-      <Form.TagPicker
-        {...itemProps.categoryList}
-        title="Category"
-        value={categoryList}
-        onChange={(newCategories) => {
-          if (newCategories.length > 1) {
-            const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) => amount.toString());
-            setCategoryList(newCategories);
-            setSubtransactions(
-              newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
-            );
-          } else {
-            setCategoryList(newCategories);
-            setSubtransactions([]);
-          }
-        }}
-      >
-        {categories ? (
-          categories.map((category, idx) => (
-            <Form.TagPicker.Item
-              key={category.id}
-              value={category.id}
-              title={category.name}
-              icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
+      <Form.Checkbox id="transfer" label="The transaction is a transfer" value={isTransfer} onChange={setisTransfer} />
+      {isTransfer ? (
+        <Form.Dropdown {...itemProps.payee_id} title="Transfer from" value={transferFrom} onChange={setTransferTo}>
+          {accounts.map((account) => (
+            <Form.Dropdown.Item
+              key={account?.id ?? random()}
+              value={account?.transfer_payee_id ?? ''}
+              title={account?.name}
             />
-          ))
-        ) : (
-          <Form.TagPicker.Item value="" title="" />
-        )}
-      </Form.TagPicker>
+          ))}
+        </Form.Dropdown>
+      ) : (
+        <Form.TextField {...itemProps.payee_name} title="Payee Name" placeholder="Enter the counterparty" />
+      )}
+      <Form.Dropdown {...itemProps.account_id} title={isTransfer ? 'To' : 'Account'} defaultValue={accountId}>
+        {possibleAccounts}
+      </Form.Dropdown>
+      {!isTransfer ? (
+        <Form.TagPicker
+          {...itemProps.categoryList}
+          title="Category"
+          value={categoryList}
+          onChange={(newCategories) => {
+            if (newCategories.length > 1) {
+              const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
+                amount.toString()
+              );
+              setCategoryList(newCategories);
+              setSubtransactions(
+                newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
+              );
+            } else {
+              setCategoryList(newCategories);
+              setSubtransactions([]);
+            }
+          }}
+        >
+          {categories ? (
+            categories.map((category, idx) => (
+              <Form.TagPicker.Item
+                key={category.id}
+                value={category.id}
+                title={category.name}
+                icon={{ source: Icon.PlusCircle, tintColor: easyGetColorFromId(idx) }}
+              />
+            ))
+          ) : (
+            <Form.TagPicker.Item value="" title="" />
+          )}
+        </Form.TagPicker>
+      ) : null}
 
       <Form.Checkbox {...itemProps.cleared} label="Has the transaction cleared?" storeValue={true} />
 
