@@ -12,7 +12,6 @@ import {
 
 import { showFailureToast } from "@raycast/utils";
 import { State, initialState, reducer } from "./reducer";
-import { retrieveAndSavePathToRepository } from "../../utils/git";
 import { generateCommitMessage } from "../../utils/ai";
 
 export function GenerateCommitMessageComponent() {
@@ -34,31 +33,48 @@ export function GenerateCommitMessageComponent() {
   };
 
   useEffect(() => {
-    dispatch(["set_loading", true]);
-    retrieveAndSavePathToRepository()
-      .then((path) => dispatch(["set_repository_path", path]))
-      .catch((error) => dispatch(["set_error", error]))
-      .finally(() => dispatch(["set_loading", false]));
-  }, [state.revalidationCount]);
+    const fullPath = "/Users/chihkanglin/PlayGround/raycast/ai-git-assistant";
+    console.log("Current repository path:", fullPath);
 
-  useEffect(() => {
-    if (state.repositoryPath) {
-      dispatch(["set_loading", true]);
-      generateCommitMessage(state.repositoryPath, prompt)
-        .then((commitMessage) => dispatch(["set_commit_message", commitMessage]))
-        .catch((error) => dispatch(["set_error", error]))
-        .finally(() => dispatch(["set_loading", false]));
+    if (!fullPath) {
+      console.log("No repository path found");
+      dispatch(["set_error", new Error("找不到儲存庫路徑")]);
+      return;
     }
-  }, [state.repositoryPath, state.revalidationCount]);
+
+    // 設置倉庫路徑到 state
+    dispatch(["set_repository_path", fullPath]);
+    dispatch(["set_loading", true]);
+    console.log("Attempting to generate commit message for path:", fullPath);
+
+    generateCommitMessage(fullPath, prompt)
+      .then((commitMessage) => {
+        // 確保每個項目都在新行
+        const formattedMessage = commitMessage.split("• ").join("\n• ").trim();
+        console.log("Successfully generated commit message");
+        dispatch(["set_commit_message", formattedMessage]);
+      })
+      .catch((error) => {
+        console.log("Error generating commit message:", error);
+        const errorMessage = error.message.includes("git repository")
+          ? `無效的 Git 儲存庫路徑：${fullPath}。請確認該路徑包含 .git 目錄。`
+          : error.message;
+        dispatch(["set_error", new Error(errorMessage)]);
+      })
+      .finally(() => {
+        dispatch(["set_loading", false]);
+      });
+  }, [state.revalidationCount]);
 
   useEffect(() => {
     getFrontmostApplication().then((application) => {
       dispatch(["set_frontmost_application", application]);
     });
-  });
+  }, []);
 
   useEffect(() => {
     if (state.error) {
+      console.log("Error state:", state.error);
       showFailureToast(state.error, { title: "Failed to generate commit message" }).then();
     }
   }, [state.error]);
@@ -69,9 +85,9 @@ export function GenerateCommitMessageComponent() {
 function content(state: State, primaryActionOnAction: () => void, secondaryActionOnAction: () => void) {
   if (state.error) {
     const markdown = `
-  # We encountered an error while generating the commit message 😔
-  ${state.error.message}
-  `;
+# We encountered an error while generating the commit message 😔
+${state.error.message}
+`;
 
     return (
       <Detail
@@ -90,11 +106,11 @@ function content(state: State, primaryActionOnAction: () => void, secondaryActio
     );
   } else {
     const markdown = `
-  ${state.isLoading ? "Generating Commit Message for" : "Generated Commit Message for"}
+# Generated Commit Message for
+\`${state.repositoryPath || ""}\`
 
-  ${state.repositoryPath ? `\`${state.repositoryPath}\`` : ""}
-  # ${state.isLoading ? "Generating.." : state.commitMessage}
-  `;
+${state.isLoading ? "Generating.." : state.commitMessage}
+`;
 
     return (
       <Detail

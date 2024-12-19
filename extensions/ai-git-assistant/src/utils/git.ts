@@ -41,18 +41,36 @@ export function getInnerRepositoryPath(pathToRepos: string) {
 }
 
 export function getListOfBranches(repositoryPath: string) {
+  console.log("Getting branches for repository:", repositoryPath);
   const currentBranch = getCurrentBranchName(repositoryPath);
-  return execSync(
-    `git -C ${repositoryPath} for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)||%(committerdate)||%(authorname)'`,
-  )
-    .toString()
-    .trim()
-    .split("\n")
-    .map((line) => {
-      const [name, date, author] = line.split("||");
-      return new Branch(name, date, author);
-    })
-    .filter((branch) => branch.name !== currentBranch);
+  console.log("Current branch:", currentBranch);
+
+  try {
+    const command = `git -C "${repositoryPath}" for-each-ref --sort=-committerdate refs/heads/ --format='%(refname:short)||%(committerdate)||%(authorname)'`;
+    console.log("Executing command:", command);
+
+    const output = execSync(command, { encoding: "utf-8" }).toString().trim();
+    console.log("Command output:", output);
+
+    if (!output) {
+      console.log("No branches found");
+      return [];
+    }
+
+    const branches = output
+      .split("\n")
+      .map((line) => {
+        const [name, date, author] = line.split("||");
+        return new Branch(name, date, author);
+      })
+      .filter((branch) => branch.name !== currentBranch);
+
+    console.log("Processed branches:", branches);
+    return branches;
+  } catch (error) {
+    console.error("Error in getListOfBranches:", error);
+    throw error instanceof Error ? error : new Error("Failed to get list of branches");
+  }
 }
 
 export function getCurrentBranchName(repositoryPath: string) {
@@ -65,9 +83,34 @@ export function getPrDiff(repositoryPath: string, currentBranch: string, baseBra
     .trim()
     .slice(0, 9000);
 }
+export function verifyGitRepository(path: string): boolean {
+  try {
+    execSync("git rev-parse --git-dir", {
+      cwd: path,
+      stdio: "ignore",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+export function getBranchDiff(repositoryPath: string): string {
+  if (!verifyGitRepository(repositoryPath)) {
+    throw new Error("Invalid Git repository path");
+  }
 
-export function getBranchDiff(repositoryPath: string) {
-  return execSync(`git -C ${repositoryPath} diff HEAD`).toString().slice(0, 6500);
+  try {
+    return execSync("git diff --staged", {
+      cwd: repositoryPath,
+      encoding: "utf-8",
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error("Failed to get git diff: " + error.message);
+    } else {
+      throw new Error("Failed to get git diff: Unknown error");
+    }
+  }
 }
 
 export function getBranchStatus(repositoryPath: string) {

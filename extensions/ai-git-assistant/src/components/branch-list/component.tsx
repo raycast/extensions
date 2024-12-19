@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/
 
 import { showFailureToast } from "@raycast/utils";
 import { State, initialState, reducer } from "./reducer";
-import { getListOfBranches, pathToRepositoryName, retrieveAndSavePathToRepository } from "../../utils/git";
+import { getListOfBranches, pathToRepositoryName } from "../../utils/git";
 import { GeneratePrDescriptionComponent } from "../generate-pr-description/component";
 import { Branch } from "../../models";
 
@@ -12,28 +12,57 @@ export function BranchListComponent() {
   const { push } = useNavigation();
 
   const navigateToPrDescriptionGeneration = async (branch: Branch) => {
-    push(<GeneratePrDescriptionComponent branchName={branch.name} repositoryPath={state.repositoryPath!} />);
+    if (!state.repositoryPath) {
+      showFailureToast(new Error("Repository path not found"));
+      return;
+    }
+    push(<GeneratePrDescriptionComponent branchName={branch.name} repositoryPath={state.repositoryPath} />);
   };
 
   useEffect(() => {
-    dispatch(["set_loading", true]);
-    retrieveAndSavePathToRepository()
-      .then((path) => dispatch(["set_repository_path", path]))
-      .catch((error) => dispatch(["set_error", error]))
-      .finally(() => dispatch(["set_loading", false]));
+    const fetchRepositoryPath = async () => {
+      try {
+        dispatch(["set_loading", true]);
+        // 使用固定路徑作為 fallback
+        const path = "/Users/chihkanglin/PlayGround/raycast/ai-git-assistant";
+
+        if (!path) {
+          throw new Error("No repository path found");
+        }
+
+        console.log("Retrieved repository path:", path);
+        dispatch(["set_repository_path", path]);
+      } catch (error) {
+        console.error("Error fetching repository path:", error);
+        dispatch(["set_error", error instanceof Error ? error : new Error(String(error))]);
+      } finally {
+        dispatch(["set_loading", false]);
+      }
+    };
+
+    fetchRepositoryPath();
   }, []);
 
   useEffect(() => {
     if (state.repositoryPath) {
-      dispatch(["set_loading", true]);
-      const branches = getListOfBranches(state.repositoryPath);
-      dispatch(["set_branches", branches]);
-      dispatch(["set_loading", false]);
+      try {
+        dispatch(["set_loading", true]);
+        console.log("Attempting to fetch branches for:", state.repositoryPath);
+        const branches = getListOfBranches(state.repositoryPath);
+        console.log("Retrieved branches:", branches);
+        dispatch(["set_branches", branches]);
+      } catch (error) {
+        console.error("Failed to fetch branches:", error);
+        dispatch(["set_error", error instanceof Error ? error : new Error(String(error))]);
+      } finally {
+        dispatch(["set_loading", false]);
+      }
     }
   }, [state.repositoryPath]);
 
   useEffect(() => {
     if (state.error) {
+      console.error("Error state:", state.error);
       showFailureToast(state.error, { title: "Failed to show Git branches" }).then();
     }
   }, [state.error]);

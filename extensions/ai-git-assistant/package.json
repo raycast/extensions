@@ -5,6 +5,9 @@
   "description": "Your personal AI assistant for Git commit operations such as generating commit messages and PR descriptions",
   "icon": "extension-icon.png",
   "author": "popalay",
+  "contributors": [
+    "chihkang_lin"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
