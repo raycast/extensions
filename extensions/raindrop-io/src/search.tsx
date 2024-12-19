@@ -39,6 +39,15 @@ export default function Main(): ReactElement {
     }
   };
 
+  const onSearch = (value: string) => {
+    if (value !== searchText) {
+      if (preferences.titleOnly) {
+        value = `title:"${value}"`;
+      }
+      setSearchText(value);
+    }
+  };
+
   // operators help: https://help.raindrop.io/using-search#operators
   return (
     <List
@@ -51,7 +60,7 @@ export default function Main(): ReactElement {
           defaultValue={collection}
         />
       }
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={onSearch}
       isLoading={isLoading}
       throttle
     >

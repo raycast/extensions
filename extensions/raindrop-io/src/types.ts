@@ -50,6 +50,7 @@ export interface Preferences {
   useLastCollection?: boolean;
   additionalItemToDisplayInList?: string;
   displayDate?: string;
+  titleOnly?: boolean;
 }
 
 export interface CollectionsResponse {
