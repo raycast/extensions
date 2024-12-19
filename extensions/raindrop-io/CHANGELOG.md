@@ -1,6 +1,5 @@
 # Raindrop.io Extension Changelog
 
-<<<<<<< HEAD
 ## [Enhancements] - {PR_MERGE_DATE}
 
 - Add option to search on title only ([#8939](https://github.com/raycast/extensions/issues/8939) and [#13867](https://github.com/raycast/extensions/issues/13867)).
@@ -34,8 +33,6 @@
 
 - Add better error messages for reporting.
 
-=======
->>>>>>> contributions/merge-1734545641980
 ## [Save multiple links, create collections]
 
 - Save multiple links to a collection at once. This is useful in saving entire browsing sessions or folders in Arc browser.
