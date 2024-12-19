@@ -1,4 +1,4 @@
-# Shopify-Polaris-Docs
+# Shopify Polaris Docs
 
 Search through Shopify Polaris documentation directlyfrom Raycast
 
