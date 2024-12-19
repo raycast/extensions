@@ -1,5 +1,10 @@
 # Football Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fotmob API
+  - Match day has the same problem now as team details had before and solved it with the same solution
+
 ## [Updates] - 2024-12-05
 
 - Fotmob API
