@@ -28,7 +28,7 @@ import { count, sentenceCase } from "../text";
 import { useSearch } from "../hooks/search";
 
 import { ColorDefault, ColorEmphasis, ColorError, ColorPrivate, ColorSubdued } from "./colors";
-import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { copyShortcut, drilldownShortcut, tertiaryActionShortcut, deleteShortcut } from "./shortcuts";
 import { SearchHistory } from "../searchHistory";
 import { useTelemetry } from "../hooks/telemetry";
 import path from "path";
@@ -69,6 +69,23 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
   }, [searchText, patternType]);
 
   const srcName = instanceName(src);
+  const searchSummary = state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary;
+
+  const openQueryInBrowserAction = (
+    <Action.OpenInBrowser
+      icon={Icon.Window}
+      title="Continue query in browser"
+      url={getQueryURL(src, searchText, patternType)}
+    />
+  );
+  const openSearchSyntaxAction = (
+    <Action.OpenInBrowser
+      icon={Icon.Book}
+      title="View search reference"
+      url={link.new(src, "/help/code_search/reference/queries")}
+    />
+  );
+
   return (
     <List
       isLoading={state.isLoading}
@@ -79,9 +96,24 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
       searchBarAccessory={
         src.featureFlags.searchPatternDropdown ? <SearchDropdown setPatternType={setPatternType} /> : undefined
       }
+      // actions are only shown when there aren't any children.
+      actions={
+        <ActionPanel>
+          {openQueryInBrowserAction}
+          {openSearchSyntaxAction}
+          {state.isLoading && (
+            <Action
+              icon={Icon.Xmark}
+              title="Cancel search"
+              onAction={() => setSearchText("")}
+              shortcut={deleteShortcut}
+            />
+          )}
+        </ActionPanel>
+      }
     >
       {/* show suggestions IFF no results */}
-      {!state.isLoading && state.results.length === 0 ? (
+      {!state.isLoading && state.results.length === 0 && (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion, i) => (
             <SuggestionItem
@@ -113,37 +145,29 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
             <List.Item
               title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
               icon={{ source: Icon.Window }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
-                </ActionPanel>
-              }
+              actions={<ActionPanel>{openQueryInBrowserAction}</ActionPanel>}
             />
             <List.Item
               title="View search query syntax reference"
-              icon={{ source: Icon.QuestionMark }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={link.new(src, "/help/code_search/reference/queries")} />
-                </ActionPanel>
-              }
+              icon={{ source: Icon.Book }}
+              actions={<ActionPanel>{openSearchSyntaxAction}</ActionPanel>}
             />
           </Fragment>
         </List.Section>
-      ) : (
-        <Fragment />
+      )}
+
+      {state.isLoading && state.results.length === 0 && (
+        <List.EmptyView title={"Searching..."} description={searchSummary || "No results yet"} />
       )}
 
       {/* results */}
-      <List.Section
-        title="Results"
-        subtitle={state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary}
-      >
+      <List.Section title="Results" subtitle={searchSummary || (state.isLoading ? "Searching..." : undefined)}>
         {state.results.map((searchResult, i) => (
           <SearchResultItem
             key={`result-item-${i}`}
             searchResult={searchResult}
             searchText={searchText}
+            patternType={patternType}
             src={src}
             setSearchText={setSearchText}
           />
@@ -226,8 +250,12 @@ function resultActions(url: string, customActions?: CustomResultActions) {
   );
 }
 
-function getQueryURL(src: Sourcegraph, query: string) {
-  return link.new(src, "/search", new URLSearchParams({ q: query }));
+function getQueryURL(src: Sourcegraph, query: string, pattern: PatternType | undefined) {
+  const params: Record<string, string> = { q: query };
+  if (pattern) {
+    params.patternType = pattern;
+  }
+  return link.new(src, "/search", new URLSearchParams(params));
 }
 
 // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
@@ -297,15 +325,17 @@ function makeFileActions(src: Sourcegraph, opts: { path: string; repository: str
 function SearchResultItem({
   searchResult,
   searchText,
+  patternType,
   src,
   setSearchText,
 }: {
   searchResult: SearchResult;
   searchText: string;
+  patternType: PatternType | undefined;
   src: Sourcegraph;
   setSearchText: (text: string) => void;
 }) {
-  const queryURL = getQueryURL(src, searchText);
+  const queryURL = getQueryURL(src, searchText, patternType);
   const { match } = searchResult;
 
   // Branches is a common property for setting a revision
