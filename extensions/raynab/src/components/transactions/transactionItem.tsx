@@ -38,6 +38,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;
   const hasCleared = transaction.cleared === TransactionClearedStatus.Cleared;
+  const isReconciled = transaction.cleared === TransactionClearedStatus.Reconciled;
 
   return (
     <List.Item
@@ -52,6 +53,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               !transaction.approved
                 ? { icon: { source: Icon.MagnifyingGlass, tintColor: Color.Orange }, tooltip: 'Unreviewed transaction' }
                 : {},
+              isReconciled ? { icon: { source: Icon.Lock, tintColor: Color.Green }, tooltip: 'Reconciled' } : {},
               transaction.transfer_account_id ? { icon: Icon.Switch, tooltip: 'Transfer' } : {},
               transaction.subtransactions.length > 0 ? { icon: Icon.Coins, tooltip: 'Split Transaction' } : {},
               {
@@ -119,8 +121,14 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Status"
-                text={hasCleared ? 'Cleared' : 'Uncleared'}
-                icon={hasCleared ? { source: Icon.CircleProgress100, tintColor: Color.Green } : Icon.Circle}
+                text={hasCleared ? 'Cleared' : isReconciled ? 'Reconciled' : 'Uncleared'}
+                icon={
+                  hasCleared
+                    ? { source: Icon.CircleProgress100, tintColor: Color.Green }
+                    : isReconciled
+                    ? { source: Icon.Lock, tintColor: Color.Green }
+                    : Icon.Circle
+                }
               />
               <List.Item.Detail.Metadata.Label
                 title="Flag"
