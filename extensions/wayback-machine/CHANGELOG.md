@@ -1,6 +1,6 @@
 # Wayback Machine Changelog
 
-## [Preferences update] - {PR_MERGE_DATE}
+## [Preferences update] - 2024-12-19
 
 - Add a preference to open the overview page on Wayback, instead of the latest snapshot
 - Dependency updates
