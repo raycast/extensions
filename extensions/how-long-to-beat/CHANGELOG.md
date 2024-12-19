@@ -1,6 +1,6 @@
 # Howlongtobeat Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2024-12-19
 
 - Fix: 404 error code again when fetching games by search
 
