@@ -8,7 +8,7 @@ import {
   isNumberLike,
   isSplitTransaction,
 } from '@lib/utils';
-import { TransactionFlagColor } from 'ynab';
+import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
 import {
   Action,
   ActionPanel,
@@ -23,7 +23,7 @@ import {
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
@@ -49,7 +49,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
 
-  const { data: payees, isValidating: isPayeesLoading } = usePayees(activeBudgetId);
+  const { data: payees, isValidating: isLoadingPayees } = usePayees(activeBudgetId);
   const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
 
@@ -68,6 +68,20 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
     return [transaction.category_id ?? ''];
   });
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
+
+  const isReconciled = transaction.cleared === TransactionClearedStatus.Reconciled;
+  /* We force the user hand so as not to allow reconciled transactions to be edited */
+  useEffect(() => {
+    if (isReconciled) {
+      confirmAlert({
+        title: 'Reconciled Transaction',
+        message: 'Reconciled transactions should not be edited in Raynab',
+        primaryAction: {
+          title: 'Understood',
+        },
+      }).then(() => pop());
+    }
+  }, [isReconciled]);
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
@@ -91,6 +105,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         memo: values.memo || null,
         category_id: values.categoryList?.[0] || undefined,
       };
+
+      if (isReconciled) {
+        await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
+        return;
+      }
 
       /**
        * We need make sure the total of subtransactions is equal to the transaction.
@@ -187,7 +206,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   return (
     <Form
       navigationTitle="Edit Transaction"
-      isLoading={isLoadingCategories}
+      isLoading={isLoadingCategories || isLoadingPayees}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
@@ -205,7 +224,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         value={amount}
         onChange={setAmount}
       />
-      <Form.Dropdown {...itemProps.payee_id} title="Payee" isLoading={isPayeesLoading}>
+      <Form.Dropdown {...itemProps.payee_id} title="Payee" isLoading={isLoadingPayees}>
         {payees?.map((payee) => (
           <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
         ))}
