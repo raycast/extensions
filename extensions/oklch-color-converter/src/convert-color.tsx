@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Action,
   ActionPanel,
@@ -6,8 +7,6 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-
-import { useState, useEffect } from "react";
 
 import {
   rgb,
@@ -955,7 +954,7 @@ export default function Command() {
     >
       {searchText && (
         <List.Section>
-          {colors.map((color, index) => (
+          {colors.map((color: ColorData, index: number) => (
             <List.Item
               key={index}
               icon={{

@@ -19,11 +19,15 @@
     "@raycast/api": "^1.87.4",
     "culori": "^3.2.0"
   },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@raycast/utils": "^1.9.0",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
+    "react": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.51.0",
