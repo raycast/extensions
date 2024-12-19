@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2024-12-19
 
 - Add Pinyin search support for Chinese
 - Add text contains search support for Arabic, Russian, Hindi, and Urdu
