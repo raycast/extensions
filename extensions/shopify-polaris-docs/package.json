@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shopify-polaris-docs",
-  "title": "Shopify-Polaris-Docs",
+  "title": "Shopify Polaris Docs",
   "description": "Search through Shopify Polaris documentation from Raycast",
   "icon": "shopify-icon.png",
   "author": "approxhuman",
