@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search-polaris",
-      "title": "Search Polaris documentation",
+      "title": "Search Polaris Docs",
       "subtitle": "Search Shopify Polaris Documentation",
       "description": "Search through Shopify Polaris documentation from Raycast",
       "mode": "view"
