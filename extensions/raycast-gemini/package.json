@@ -6,7 +6,8 @@
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "d0zingcat"
   ],
   "categories": [
     "Productivity",
@@ -49,6 +50,10 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
         }
@@ -97,6 +102,10 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
         }
@@ -137,6 +146,10 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
         }
@@ -168,8 +181,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Summarize the given text."
         }
       ]
     },
@@ -199,8 +224,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Explain the following text as best as you can."
         }
       ]
     },
@@ -230,8 +267,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Add comments to the given code. ONLY return the commented code and nothing else."
         }
       ]
     },
@@ -261,8 +310,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text seem more friendly. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -292,8 +353,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "In the following text, change it to use advanced vocabulary but do not overuse it. Make sure to use proper grammar and spell check thoroughly. Show expertise in the subject provided, but do not add any extra information. Try to keep your response at the same length of words as the original. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -323,8 +396,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Find one synonym for the given word. Only return that the synonym, and add nothing else. Keep the casing of the word the same. Your response should only have ONE WORD"
         }
       ]
     },
@@ -354,8 +439,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Fix the grammar in the following text. Try to keep all of the words from the given text and try to only add punctuation and correct any spelling errors. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -385,8 +482,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text longer without providing any extra information than what's given. ONLY return the elongated text and nothing else."
         }
       ]
     },
@@ -416,8 +525,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text shorter while keeping the core idea. ONLY return the shortened text and nothing else."
         }
       ]
     },
@@ -432,7 +553,7 @@
           "name": "TranslateLanguage",
           "placeholder": "Translate Language",
           "type": "text",
-          "required": true
+          "required": false
         }
       ],
       "preferences": [
@@ -455,8 +576,20 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Translate the following text to Target Language. Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
         }
       ]
     }
@@ -484,6 +617,10 @@
         {
           "title": "Gemini 1.5 Flash",
           "value": "gemini-1.5-flash-latest"
+        },
+        {
+          "title": "Gemini 2.0 Flash Experimental",
+          "value": "gemini-2.0-flash-exp"
         }
       ]
     }
