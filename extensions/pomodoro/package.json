@@ -36,18 +36,7 @@
       "subtitle": "Control timers from menu-bar",
       "description": "Start, pause, stop or continue pomodoro intervals",
       "mode": "menu-bar",
-      "interval": "10s",
-      "preferences": [
-        {
-          "name": "enableTimeOnMenuBar",
-          "type": "checkbox",
-          "required": false,
-          "title": "Menu Bar Time",
-          "description": "Shows time on the Menu Bar",
-          "default": true,
-          "label": "Show time on Menu Bar"
-        }
-      ]
+      "interval": "10s"
     },
     {
       "name": "pomodoro-control-timer",
@@ -101,6 +90,15 @@
     }
   ],
   "preferences": [
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
     {
       "name": "enableFocusWhileFocused",
       "title": "Enable Mac Do Not Disturb while Focused",
