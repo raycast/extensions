@@ -70,8 +70,8 @@
   "commands": [
     {
       "name": "searchDotCom",
-      "title": "Search Code",
-      "subtitle": "Public code on Sourcegraph.com",
+      "title": "Search Public Code",
+      "subtitle": "Sourcegraph",
       "description": "Search public repositories on Sourcegraph.com",
       "mode": "view",
       "keywords": [
@@ -119,8 +119,8 @@
     },
     {
       "name": "searchHistoryDotCom",
-      "title": "Code Search History",
-      "subtitle": "Public code on Sourcegraph.com",
+      "title": "Search Public Code History",
+      "subtitle": "Sourcegraph",
       "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
