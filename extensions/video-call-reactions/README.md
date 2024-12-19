@@ -32,7 +32,6 @@ To utilize the Video Call Reactions extension, ensure you have:
 Encountering issues or have suggestions? Open an issue on our GitHub repository.
 
 ## Example
-![Confetti Gif](./media/gif-confetti.gif)
 ![Fireworks Image](./media/fireworks.png)
 
 ## License
