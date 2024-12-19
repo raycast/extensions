@@ -1,5 +1,10 @@
 # Football Changelog
 
+## [Updates] - 2024-12-05
+
+- Fotmob API
+  - Fixed issue with fetching team details
+
 ## [Updates] - 2024-06-11
 
 - Cleanup UI
