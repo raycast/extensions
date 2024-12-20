@@ -3,6 +3,7 @@
 ## [Update] - 2024-12-20
 
 - Remove info item from emulators list
+- Fix suppress stderr toast messages on emulator launch
 
 ## [Feature Update] - 2024-02-23
 

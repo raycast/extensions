@@ -19,6 +19,7 @@ export const BROWSERS_BUNDLE_ID = {
   prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
   zen: "org.mozilla.com.zen.browser",
+  whale: "com.naver.whale",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

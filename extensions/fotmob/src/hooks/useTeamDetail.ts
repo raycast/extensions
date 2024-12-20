@@ -17,6 +17,7 @@ export function useTeamDetail(teamId: string) {
     async (teamId: string): Promise<TeamDetailData> => {
       const url = `https://www.fotmob.com/api/teams?id=${teamId}`;
       const token = await getHeaderToken();
+
       const response = await fetch(url, { headers: token });
       if (!response.ok) {
         throw new Error("Failed to fetch team details");
