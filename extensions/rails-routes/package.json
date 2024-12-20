@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "list-routes",
-      "title": "List routes",
+      "title": "List Rails Routes",
       "description": "list all the routes of the current Rails project",
       "mode": "view",
       "preferences": [
