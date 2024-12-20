@@ -165,7 +165,7 @@
 /extensions/brightness-control                                      @CaliCastle
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
 /extensions/browser-ai                                              @aeither
-/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish
+/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek
 /extensions/browser-tabs                                            @koinzhang
 /extensions/browsers-profiles                                       @skydiver @kytta
@@ -283,6 +283,7 @@
 /extensions/consoledev                                              @Rawnly @aliaksandrZh
 /extensions/contentful                                              @ewgenius @xmok
 /extensions/control-d                                               @httpjamesm
+/extensions/control-viscosity                                       @lialios
 /extensions/conventional-comments                                   @krzysztofzuraw
 /extensions/conventional-commits                                    @niemtec @Lucria
 /extensions/convert                                                 @nielsvanrijn
@@ -724,6 +725,7 @@
 /extensions/ip-tools                                                @meguoe
 /extensions/ipa-translator                                          @BossElijah
 /extensions/ipapi-is                                                @xmok
+/extensions/ipcheck-ing                                             @jason5ng32
 /extensions/iptv                                                    @Aayush9029
 /extensions/iridium                                                 @crisboarna
 /extensions/irish-rail                                              @dave-kav
@@ -1242,6 +1244,7 @@
 /extensions/rabbit-hole                                             @RobErskine
 /extensions/radicle                                                 @sebastinez
 /extensions/radix                                                   @peduarte @emlez
+/extensions/rails-routes                                            @renzo4web
 /extensions/railway                                                 @coffee-cup @nagauta @xmok @danieldeichfuss
 /extensions/rain-radars                                             @danieldbird @koinzhang
 /extensions/raindrop-io                                             @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho @tdkn @j3lte @rien7
@@ -1460,6 +1463,7 @@
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer @ridemountainpig
 /extensions/slugify                                                 @unreadablename @xmok
 /extensions/sm-ms                                                   @koinzhang
+/extensions/smallweb                                                @pomdtr
 /extensions/smartthings-connector                                   @4IngoJ
 /extensions/smultron                                                @blackspike
 /extensions/snake                                                   @tonka3000
