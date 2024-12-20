@@ -2,7 +2,7 @@
 
 Leverages Raycast AI to generate detailed research reports through an agentic process. Takes roughly 20 AI requests to generate a report. You must have access to Raycast AI to use this extension.
 
-## Current Supported Models
+## Current Supported Models (via Raycast AI)
 - GPT-4o
 - GPT-4o-mini
 - Claude 3 Opus
@@ -28,3 +28,8 @@ _Experimental extension. Developer is a high school student, hence updates are n
 
 ---
 
+## Screenshots
+
+![Screenshot](./assets/desc_1.png)
+![Screenshot](./assets/desc_2.png)
+![Screenshot](./assets/desc_3.png)

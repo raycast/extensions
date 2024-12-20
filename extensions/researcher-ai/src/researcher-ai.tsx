@@ -29,8 +29,6 @@ import {
 
 const STORAGE_KEY = "research_projects";
 
-type ProjectStatus = "not_started" | "in_progress" | "completed";
-
 export default function Command() {
   const [projects, setProjects] = useState<ResearchProject[]>([]);
   const { push } = useNavigation();
@@ -227,11 +225,11 @@ function TopicDetail({
   const updateProjectStep = async (stepIndex: number) => {
     const updatedProjects = projects.map((p) => {
       if (p.id === project.id) {
-        const newStatus: ProjectStatus = stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress";
+        const status: ResearchProject["status"] = stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress";
         return {
           ...p,
           currentStep: stepIndex,
-          status: newStatus,
+          status,
         };
       }
       return p;
@@ -736,11 +734,10 @@ function ProjectDetail({
   const updateProjectStep = async (stepIndex: number) => {
     const updatedProjects = projects.map((p) => {
       if (p.id === project.id) {
-        const newStatus: ProjectStatus = stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress";
         return {
           ...p,
           currentStep: stepIndex,
-          status: newStatus,
+          status: (stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress") as const,
         };
       }
       return p;

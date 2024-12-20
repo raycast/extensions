@@ -6,6 +6,7 @@
   "icon": "extension-icon.png",
   "author": "matthew_su",
   "license": "MIT",
+  "categories": ["Productivity"],
   "commands": [
     {
       "name": "researcher-ai",
