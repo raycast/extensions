@@ -1,5 +1,9 @@
 # Open in JSON Hero Changelog
 
+## [Preferences] - {PR_MERGE_DATE}
+
+- Added optional Endpoint to preferences
+
 ## [Preferences] - 2022-06-30
 
 - Added TTL to preferences
