@@ -109,7 +109,7 @@ const OrderItem = ({ order }: OrderProps) => {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Polar"
-            url={`https://polar.sh/dashboard/${organization?.slug}/sales`}
+            url={`https://polar.sh/dashboard/${organization?.slug}/sales/${order.id}`}
           />
           <Action.CopyToClipboard title="Copy Order ID" content={order.id} />
           <Action.OpenInBrowser
