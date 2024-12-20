@@ -6,5 +6,6 @@ export default function Longer(props) {
   return useGemini(props, {
     context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

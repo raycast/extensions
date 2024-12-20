@@ -6,5 +6,6 @@ export default function Shorter(props) {
   return useGemini(props, {
     context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

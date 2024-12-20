@@ -6,5 +6,6 @@ export default function Professional(props) {
   return useGemini(props, {
     context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

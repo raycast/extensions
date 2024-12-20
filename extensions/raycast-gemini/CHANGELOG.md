@@ -1,12 +1,12 @@
 # Google Gemini Changelog
 
-## [Added a bunch of new feedback] - {PR_MERGE_DATE}
+## [Gemini Flash 2.0 and More Customization] - {PR_MERGE_DATE}
 
-More Feattures:
+Features:
 
-- 🧹 Move prompts into preferences for easier customization.
-- 🆕 Add new Model for Gemini 2.0 Pro Experimental.
-- 🗯️ Make translate command more customizable, now you don't have to type the language each time as you can now just modify the prompt or just override the target language each time when you use the command.
+- 🆕 Add new Model for Gemini 2.0 Flash Experimental
+- 🧹 Allow prompts to be customizable in Raycast Settings
+- 🗯️ Add ability to add a default Translate language, and also ability to override with a parameter
 
 ## [Add Translate Command] - 2024-09-02
 
