@@ -14,7 +14,6 @@
     {
     "name": "index",
     "title": "Connect Pritunl Vpn Tunnel",
-    "subtitle": "Quick connect Pritunl Vpn",
     "description": "Quick Toggle VPN tunnel connection in Pritunl client",
     "mode": "no-view"
   }
