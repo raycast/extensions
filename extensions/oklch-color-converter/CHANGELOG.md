@@ -1,6 +1,6 @@
 # OKLCH Color Converter Changelog
 
-## [Fix ESLint and Formatting] - {PR_MERGE_DATE}
+## [Fix ESLint and Formatting] - 2024-12-20
 
 - Fix ESLint configuration
 - Update code formatting
