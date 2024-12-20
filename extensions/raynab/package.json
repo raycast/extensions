@@ -26,10 +26,17 @@
       "mode": "view"
     },
     {
-      "name": "transaction",
+      "name": "createTransaction",
       "title": "Create Transaction",
       "subtitle": "YNAB",
       "description": "Create a new transaction in the selected budget.",
+      "mode": "view"
+    },
+    {
+      "name": "scheduleTransaction",
+      "title": "Schedule Transaction",
+      "subtitle": "YNAB",
+      "description": "Schedules a future transaction in the selected budget.",
       "mode": "view"
     },
     {

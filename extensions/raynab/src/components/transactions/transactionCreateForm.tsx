@@ -23,7 +23,7 @@ interface FormValues {
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
 }
 
-export function TransactionCreationForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
+export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
   const { data: accounts = [], isValidating: isLoadingAccounts } = useAccounts(activeBudgetId);

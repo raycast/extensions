@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
 
 import { OpenInYnabAction } from '@components/actions';
-import { TransactionCreationForm } from '@components/transactions/transactionCreationForm';
+import { TransactionCreateForm } from '@components/transactions/transactionCreateForm';
 import {
   assessGoalShape,
   displayGoalType,
@@ -128,7 +128,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
             <Action.Push
               title="Create New Transaction"
               icon={Icon.Plus}
-              target={<TransactionCreationForm categoryId={category.id} />}
+              target={<TransactionCreateForm categoryId={category.id} />}
               shortcut={Shortcuts.CreateNewTransaction}
             />
           </ActionPanel.Section>

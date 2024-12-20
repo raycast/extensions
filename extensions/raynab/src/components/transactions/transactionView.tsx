@@ -119,7 +119,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
       onTimelineChange={setTimeline}
     >
       <List
-        isLoading={isValidating}
+        isLoading={isValidating || isValidatingScheduled}
         isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}

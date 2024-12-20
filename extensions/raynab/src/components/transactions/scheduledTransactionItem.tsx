@@ -1,13 +1,12 @@
 import { Icon, List, ActionPanel, Color, Action } from '@raycast/api';
 
 import { ScheduledTransactionDetail } from '@srcTypes';
-import { ScheduledTransactionDetailFrequencyEnum } from 'ynab';
 import { useTransaction } from './transactionContext';
-import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
+import { easyGetColorFromId, formatToReadableFrequency, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
 
 import { OpenInYnabAction, ToggleFlagsAction } from '@components/actions';
 import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
-import { TransactionCreationForm } from './transactionCreationForm';
+import { TransactionCreateForm } from './transactionCreateForm';
 import { Shortcuts } from '@constants';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { useLocalStorage } from '@raycast/utils';
@@ -141,27 +140,11 @@ export function ScheduledTransactionItem({ transaction }: { transaction: Schedul
           <Action.Push
             title="Create New Transaction"
             icon={Icon.Plus}
-            target={<TransactionCreationForm categoryId={transaction.category_id ?? undefined} />}
+            target={<TransactionCreateForm categoryId={transaction.category_id ?? undefined} />}
             shortcut={Shortcuts.CreateNewTransaction}
           />
         </ActionPanel>
       }
     />
   );
-}
-
-/**
- * Formats a YNAB scheduled transaction frequency enum into a human-readable string
- *
- * @param frequency - The frequency enum from the YNAB API (e.g. "everyOtherWeek", "twiceAMonth")
- * @returns A formatted string with proper spacing and capitalization (e.g. "Every-other Week", "Twice A Month")
- */
-
-function formatToReadableFrequency(frequency: ScheduledTransactionDetailFrequencyEnum): string {
-  const formatted = frequency
-    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-    .toLowerCase()
-    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-    .replace('every other', 'every-other');
-  return `Repeats ${formatted}`;
 }

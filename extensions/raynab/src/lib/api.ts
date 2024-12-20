@@ -3,6 +3,7 @@ import * as ynab from 'ynab';
 import { displayError, isYnabError } from './errors';
 import type { Period, BudgetSummary, SaveTransaction, NewTransaction, Preferences } from '@srcTypes';
 import { time } from './utils';
+import { SaveScheduledTransaction } from 'ynab';
 
 const { apiToken } = getPreferenceValues<Preferences>();
 const client = new ynab.API(apiToken);
@@ -195,6 +196,33 @@ export async function createTransaction(selectedBudgetId: string, transactionDat
     if (transactionCreationResponse.data.duplicate_import_ids) throw `Transcation already exists`;
 
     const createdTransaction = transactionCreationResponse.data.transaction;
+
+    return createdTransaction;
+  } catch (error) {
+    captureException(error);
+
+    if (isYnabError(error)) {
+      displayError(error, 'Failed to fetch update transaction');
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+}
+
+export async function createScheduledTransaction(selectedBudgetId: string, transactionData: SaveScheduledTransaction) {
+  try {
+    const transactionCreationResponse = await client.scheduledTransactions.createScheduledTransaction(
+      selectedBudgetId || 'last-used',
+      {
+        scheduled_transaction: transactionData,
+      }
+    );
+
+    const createdTransaction = transactionCreationResponse.data.scheduled_transaction;
 
     return createdTransaction;
   } catch (error) {

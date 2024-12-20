@@ -1,5 +1,5 @@
 import { CurrencyFormat } from '@srcTypes';
-import { utils } from 'ynab';
+import { ScheduledTransactionDetailFrequencyEnum, utils } from 'ynab';
 import { isNumberLike } from './validation';
 
 /**
@@ -95,4 +95,23 @@ export function autoDistribute(amount: number, dividend: number): number[] {
     newAmounts[0] = Math.round((newAmounts[0] + difference) * 100) / 100;
     return newAmounts;
   }
+}
+
+/**
+ * Formats a YNAB scheduled transaction frequency enum into a human-readable string
+ *
+ * @param frequency - The frequency enum from the YNAB API (e.g. "everyOtherWeek", "twiceAMonth")
+ * @param prefix - Whether to prefix the frequency with "Repeats" (default: true)
+ * @returns A formatted string with proper spacing and capitalization (e.g. "Repeats Every-other Week", "Repeats Twice A Month")
+ */
+export function formatToReadableFrequency(frequency: ScheduledTransactionDetailFrequencyEnum, prefix = true): string {
+  const formatted = frequency
+    .replace(/([A-Z\d])/g, ' $1') // Add space before capital letters
+    .toLowerCase()
+    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
+    .replace('every other', 'every-other');
+
+  if (prefix && frequency === 'never') return 'Never repeats';
+
+  return prefix ? `Repeats ${formatted}` : formatted;
 }

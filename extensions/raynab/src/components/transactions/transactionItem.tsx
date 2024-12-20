@@ -16,7 +16,7 @@ import { TransactionEditForm } from './transactionEditForm';
 import { FilterBySubmenu } from '@components/actions/filterSubmenu';
 import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
-import { TransactionCreationForm } from './transactionCreationForm';
+import { TransactionCreateForm } from './transactionCreateForm';
 import { Shortcuts } from '@constants';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
@@ -158,7 +158,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
             <Action.Push
               title="Create New Transaction"
               icon={Icon.Plus}
-              target={<TransactionCreationForm categoryId={transaction.category_id ?? undefined} />}
+              target={<TransactionCreateForm categoryId={transaction.category_id ?? undefined} />}
               shortcut={Shortcuts.CreateNewTransaction}
             />
             {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
