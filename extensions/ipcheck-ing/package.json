@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "main",
-      "title": "IP",
-      "subtitle": "Show My IP",
+      "title": "Show My IPs",
+      "subtitle": "IPCheck",
       "description": "Show All My IPs",
       "mode": "view"
     }
