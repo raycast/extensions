@@ -9,7 +9,7 @@ import type {
   SaveTransactionWithOptionalFields,
 } from 'ynab';
 
-export type { NewTransaction } from 'ynab';
+export type { NewTransaction, ScheduledTransactionDetail } from 'ynab';
 
 export interface Preferences {
   apiToken: string;

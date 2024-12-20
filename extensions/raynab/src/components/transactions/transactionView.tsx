@@ -8,6 +8,8 @@ import { CurrencyFormat, Filter, type Period } from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
 import { formatToReadablePrice } from '@lib/utils';
 import { useLocalStorage } from '@raycast/utils';
+import { useScheduledTransactions } from '@hooks/useScheduledTransactions';
+import { ScheduledTransactionItem } from './scheduledTransactionItem';
 
 interface TransactionViewProps {
   search?: string;
@@ -19,6 +21,8 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
   const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
   const { data: transactions = [], isLoading, isValidating } = useTransactions(activeBudgetId, timeline);
+  const { data: scheduledTransactions = [], isValidating: isValidatingScheduled } =
+    useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(
     transactionViewReducer,
@@ -88,11 +92,22 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     }
   }, [timeline, transactions, isLoadingBudget, isLoading]);
 
+  const [displayScheduled, setDisplayScheduled] = useState(false);
   const onDropdownFilterChange = (newValue: string) => {
-    if (newValue === 'all') {
-      dispatch({ type: 'filter', filterBy: null });
-    } else if (newValue === 'unreviewed') {
-      dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
+    setDisplayScheduled(false);
+    switch (newValue) {
+      case 'all':
+        dispatch({ type: 'filter', filterBy: null });
+        return;
+      case 'unreviewed':
+        dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
+        return;
+      case 'scheduled':
+        setDisplayScheduled(true);
+        return;
+      default:
+        setDisplayScheduled(false);
+        break;
     }
   };
   const dropDownValue = state.filter?.key === 'unreviewed' ? 'unreviewed' : 'all';
@@ -109,11 +124,14 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
+        filtering={displayScheduled}
         searchBarAccessory={
-          <TransactionViewDropdown selection={dropDownValue} onSelectionChange={onDropdownFilterChange} />
+          <TransactionFilterDropdown selection={dropDownValue} onSelectionChange={onDropdownFilterChange} />
         }
       >
-        {!Array.isArray(collection)
+        {displayScheduled
+          ? scheduledTransactions.map((t) => <ScheduledTransactionItem transaction={t} key={t.id} />)
+          : !Array.isArray(collection)
           ? Array.from(collection).map(([, group]) => (
               <List.Section
                 title={group.title}
@@ -133,16 +151,17 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
   );
 }
 
-interface TransactionViewDropdownProps {
+interface TransactionFilterDropdownProps {
   onSelectionChange: (newValue: string) => void;
   selection: string;
 }
 
-function TransactionViewDropdown(props: TransactionViewDropdownProps) {
+function TransactionFilterDropdown(props: TransactionFilterDropdownProps) {
   return (
     <List.Dropdown value={props.selection} tooltip="Select Transaction type" onChange={props.onSelectionChange}>
-      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Item title="Past Transactions" value="all" />
       <List.Dropdown.Item title="Unreviewed" value="unreviewed" />
+      <List.Dropdown.Item title="Scheduled" value="scheduled" />
     </List.Dropdown>
   );
 }
