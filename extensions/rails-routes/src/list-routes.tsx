@@ -3,7 +3,7 @@ import { useFetchRoutes } from "./hooks";
 import RouteListSection from "./components/route-section";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.ListRoutes>();
   const { isLoading, groupedRoutes, error } = useFetchRoutes(preferences.port);
 
   return (
