@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-20
 
 - Add option to search on title only ([#8939](https://github.com/raycast/extensions/issues/8939) and [#13867](https://github.com/raycast/extensions/issues/13867)).
 
