@@ -1,5 +1,4 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 import { useFetchRoutes } from "./hooks";
 import RouteListSection from "./components/route-section";
 
