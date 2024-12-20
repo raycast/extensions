@@ -848,7 +848,7 @@ function ProjectDetail({
         ...updatedProject,
         finalReport: finalResponse,
         currentStep: 4,
-        status: "completed" as ResearchProject["status"],
+        status: "completed" as const,
       };
 
       // Save all changes
