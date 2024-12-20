@@ -226,7 +226,7 @@
 /extensions/citation-generator                                      @AbhinavPalacharla
 /extensions/clarify                                                 @akramarev
 /extensions/clash                                                   @ciiiii
-/extensions/claude                                                  @florisdobber @alejandrot96 @FelixLisczyk @gcordalis @ridemountainpig @ridjis
+/extensions/claude                                                  @florisdobber @alejandrot96 @FelixLisczyk @gcordalis @rortan134 @ridemountainpig @ridjis
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig
 /extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk @pernielsentikaer
 /extensions/clear-clipboard                                         @d3caf
@@ -1040,6 +1040,7 @@
 /extensions/obsidian                                                @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais @rakoort
 /extensions/obsidian-bookmarks                                      @Dru89 @moeyua @iwex @qfettes
 /extensions/obsidian-smart-capture                                  @trillhause
+/extensions/oci                                                     @xmok
 /extensions/octoprint                                               @mSarheed
 /extensions/octopus-energy                                          @mike182uk
 /extensions/odesli                                                  @anned20
