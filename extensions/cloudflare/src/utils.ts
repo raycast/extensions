@@ -1,4 +1,8 @@
-import { getPreferenceValues, Icon, showToast, Toast } from '@raycast/api';
+import {
+  getPreferenceValues,
+  Icon,
+  openExtensionPreferences,
+} from '@raycast/api';
 import { AxiosError } from 'axios';
 import {
   DeploymentStatus,
@@ -7,6 +11,7 @@ import {
   Source,
   ZoneStatus,
 } from './service';
+import { showFailureToast } from '@raycast/utils';
 
 const CLOUDFLARE_BASE = 'https://dash.cloudflare.com';
 
@@ -18,12 +23,12 @@ function getToken() {
 function getSiteStatusIcon(status: ZoneStatus): Icon {
   switch (status) {
     case 'active':
-      return Icon.Checkmark;
+      return Icon.CheckCircle;
     case 'pending':
     case 'initializing':
       return Icon.Circle;
     case 'moved':
-      return Icon.ArrowRight;
+      return Icon.ArrowRightCircle;
     case 'deleted':
     case 'deactivated':
     case 'read only':
@@ -36,7 +41,7 @@ function getDeploymentStatusIcon(status: DeploymentStatus): Icon {
     case 'active':
       return Icon.Circle;
     case 'success':
-      return Icon.Checkmark;
+      return Icon.CheckCircle;
     case 'failure':
       return Icon.XMarkCircle;
   }
@@ -47,7 +52,7 @@ function getDomainStatusIcon(status: DomainStatus): Icon {
     case 'pending':
       return Icon.Circle;
     case 'active':
-      return Icon.Checkmark;
+      return Icon.CheckCircle;
   }
 }
 
@@ -56,7 +61,7 @@ function getMemberStatusIcon(status: MemberStatus): Icon {
     case 'pending':
       return Icon.Circle;
     case 'accepted':
-      return Icon.Checkmark;
+      return Icon.CheckCircle;
     case 'rejected':
       return Icon.XMarkCircle;
   }
@@ -99,16 +104,21 @@ function handleNetworkError(e: unknown): void {
   const error = e as AxiosError;
   const status = error.response?.status;
   if (!status) {
-    showToast(Toast.Style.Failure, 'Unknown error');
+    showFailureToast('', { title: 'Unknown error' });
   }
   if (status === 400 || status === 403) {
-    showToast(
-      Toast.Style.Failure,
-      'Failed to authorize',
-      'Please make sure that your API token is valid.',
-    );
+    showFailureToast('Please make sure that your API token is valid.', {
+      title: 'Failed to authorize',
+      message: 'Please make sure that your API token is valid.',
+      primaryAction: {
+        title: 'Open Extension Preferences',
+        onAction: openExtensionPreferences,
+      },
+    });
   } else {
-    showToast(Toast.Style.Failure, 'Network error', 'Please try again later.');
+    showFailureToast('Please try again later.', {
+      title: 'Network error',
+    });
   }
 }
 

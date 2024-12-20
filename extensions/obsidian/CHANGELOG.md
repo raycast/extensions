@@ -1,5 +1,8 @@
 # Obsidian Changelog
 
+## [Task Creation Date] - 2024-12-03
+- Tasks added now log the creation date.
+
 ## [Support for Fuzzy Search] - 2024-09-05
 - Add option to use Fuzzy Search on notes search. Disabled by default in note search config.
 

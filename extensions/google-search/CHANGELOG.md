@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Update] - 2024-11-21
+
+- Add a command to search Google with the selected text
+
 ## [Update] - 2024-08-06
 
 - Add an action for setting result as search text

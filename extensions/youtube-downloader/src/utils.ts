@@ -9,7 +9,6 @@ import ffmpeg, { setFfmpegPath, setFfprobePath } from "fluent-ffmpeg";
 import { promisify } from "util";
 import stream from "stream";
 import sanitizeFilename from "sanitize-filename";
-import { th } from "date-fns/locale";
 
 const pipeline = promisify(stream.pipeline);
 
@@ -63,7 +62,7 @@ export async function downloadVideo(url: string, options: DownloadOptions) {
   }
 
   const videoFormat = ytdl.chooseFormat(info.formats, {
-    quality: "highestvideo",
+    quality: "highest",
     filter: (format) =>
       format.container === container && format.hasVideo && format.itag.toString() === formatObject.itag,
   });

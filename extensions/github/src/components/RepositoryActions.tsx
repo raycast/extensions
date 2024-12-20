@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
+import { cloneAndOpen, buildCloneCommand, WEB_IDES } from "../helpers/repository";
 
 import CloneRepositoryForm from "./CloneRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
@@ -29,7 +29,7 @@ export default function RepositoryActions({
   sortTypesData,
 }: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
-  const { baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const updatedAt = new Date(repository.updatedAt);
 
@@ -234,7 +234,7 @@ export default function RepositoryActions({
         />
 
         <Action.CopyToClipboard
-          content={`git clone ${repository.url}`}
+          content={buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol)}
           title="Copy Clone Command"
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />

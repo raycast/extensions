@@ -6,10 +6,16 @@ import { getMatches, getSubscriptionRounds } from "./api";
 import Matchday from "./components/matchday";
 import { Match, Round } from "./types";
 
+const date = new Date();
+const currentYear = date.getFullYear();
+const currentMonth = date.getMonth();
+
+const year = currentMonth >= 6 ? currentYear : currentYear - 1;
+
 const competitions = [
   {
     title: "Copa del Rey",
-    value: "copa-del-rey-2022",
+    value: `copa-del-rey-${year}`,
   },
   // {
   //   title: "Copa de la Reina",
@@ -17,20 +23,20 @@ const competitions = [
   // },
   {
     title: "Champions League",
-    value: "champions-league-2022",
+    value: `champions-league-${year}`,
   },
   {
     title: "Eupora League",
-    value: "europa-league-2022",
+    value: `europa-league-${year}`,
   },
   {
     title: "Conference League",
-    value: "europa-conference-league-2022",
+    value: `europa-conference-league-${year}`,
   },
 ];
 
-export default function Fixture() {
-  const [competition, setCompetition] = useState<string>("");
+export default function OtherCompetitions() {
+  const [competition, setCompetition] = useState<string>(competitions[0].value);
   const [round, setRound] = useState<Round>();
 
   const { data: rounds } = usePromise(

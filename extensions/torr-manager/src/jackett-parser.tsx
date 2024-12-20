@@ -152,7 +152,7 @@ export default function Command() {
   const addTorrentToServerByMagnet = async (
     title: string,
     link: string,
-    save = true,
+    save_to_db = true,
   ): Promise<TorrentItem | undefined> => {
     showToast(Toast.Style.Animated, "Processing...");
 
@@ -160,7 +160,7 @@ export default function Command() {
       const params = {
         title,
         link,
-        save,
+        save_to_db,
         action: "add",
       };
 

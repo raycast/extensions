@@ -4,6 +4,13 @@ Interact with [Supernotes](https://supernotes.app/), the knowledge management an
 
 ![](./metadata/supernotes-0.png)
 
+## Commands
+
+- **Quick Daily** – send a simple piece of text to your Daily card on Supernotes
+- **Send Clipping** – send currently selected text or the clipboard to any Supernotes card
+- **Search Cards** – search for cards on Supernotes, and perform various quick actions
+- **Create Card** – quickly create a card with a simple name/content form
+
 ## Setup
 
 Please generate a Supernotes API Key from within your 'API & Integrations' Settings in Supernotes. If you require additional help, you can follow [this in-depth guide](https://docs.supernotes.app/en/articles/5257176-api-access).

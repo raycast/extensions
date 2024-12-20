@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "maverickdotdev",
   "contributors": [
-    "ivart"
+    "ivart",
+    "christy_mcgrory"
   ],
   "categories": [
     "Developer Tools",
@@ -80,6 +81,15 @@
       ],
       "default": "86400",
       "title": "Keep the file for:"
+    },
+    {
+      "name": "domain",
+      "description": "domain without path of the JSON Hero API to use. Defaults to the JSON Hero API",
+      "type": "textfield",
+      "required": false,
+      "default": "https://jsonhero.io",
+      "title": "Domain to use:",
+      "placeholder": "https://jsonhero.io or http://localhost:8787"
     }
   ],
   "dependencies": {
@@ -101,6 +111,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

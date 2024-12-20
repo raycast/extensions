@@ -128,6 +128,13 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   return pipe(
     runScript(`
       set output to ""
+      tell application "System Events"
+        set isNotRunning to (count of (every process whose name is "Music")) = 0
+      end tell
+
+      if isNotRunning then
+        error
+      else
         tell application "Music"
           set t to (get current track)
           set trackId to id of t
@@ -139,6 +146,8 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
 
           set output to ${querystring}
         end tell
+      end if
+
       return output
     `),
     TE.map(parseQueryString<Track>())

@@ -21,7 +21,7 @@ import { getIntervalValidationError, getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 
-type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
   title: string;
   listId?: string;
@@ -200,6 +200,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       case "daily":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} days` : "day";
         break;
+      case "weekdays":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks on weekdays` : "week on weekdays";
+        break;
+      case "weekends":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weekends` : "weekend";
+        break;
       case "weekly":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks` : "week";
         break;
@@ -259,6 +265,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             <>
               <Form.Dropdown {...itemProps.frequency} title="Frequency">
                 <Form.Dropdown.Item title="Daily" value="daily" />
+                <Form.Dropdown.Item title="Weekdays" value="weekdays" />
+                <Form.Dropdown.Item title="Weekends" value="weekends" />
                 <Form.Dropdown.Item title="Weekly" value="weekly" />
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />

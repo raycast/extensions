@@ -69,7 +69,7 @@ export default function ListWebDomainsComponent({ user }: ListWebDomainsComponen
               <ActionPanel>
                 <Action.Push
                   title="Add Web Domain"
-                  target={<AddWebDomain user={user} onWebDomainAdded={() => revalidate?.()} />}
+                  target={<AddWebDomain user={user} onWebDomainAdded={revalidate} />}
                 />
               </ActionPanel>
             }

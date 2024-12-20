@@ -1,9 +1,16 @@
 # Android Changelog
 
+## [Update] - 2024-12-20
+
+- Remove info item from emulators list
+- Fix suppress stderr toast messages on emulator launch
+
 ## [Feature Update] - 2024-02-23
+
 - Added preference to set Android avd path
 
 ## [Feature Update] - 2023-10-11
+
 - Added Emulator Shutdown & Restart
 - Added Fold/Unfold
 - Added Simulation for Fingerprint, Calls, and SMS

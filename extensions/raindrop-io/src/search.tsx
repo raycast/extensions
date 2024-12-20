@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import BookmarkItem from "./components/BookmarkItem";
 import CollectionsDropdown from "./components/CollectionsDropdown";
-import { Bookmark, Preferences } from "./types";
+import { Bookmark } from "./types";
 import { useRequest } from "./hooks/useRequest";
 import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
@@ -39,6 +39,15 @@ export default function Main(): ReactElement {
     }
   };
 
+  const onSearch = (value: string) => {
+    if (value !== searchText) {
+      if (preferences.titleOnly) {
+        value = `title:"${value}"`;
+      }
+      setSearchText(value);
+    }
+  };
+
   // operators help: https://help.raindrop.io/using-search#operators
   return (
     <List
@@ -51,7 +60,7 @@ export default function Main(): ReactElement {
           defaultValue={collection}
         />
       }
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={onSearch}
       isLoading={isLoading}
       throttle
     >

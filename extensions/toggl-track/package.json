@@ -15,7 +15,8 @@
     "bkeys818",
     "michaelfaisst",
     "teziovsky",
-    "lukebars"
+    "lukebars",
+    "AlanHuang"
   ],
   "license": "MIT",
   "commands": [
@@ -23,6 +24,12 @@
       "name": "index",
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
+      "mode": "view"
+    },
+    {
+      "name": "updateTimeEntry",
+      "title": "Update Time Entry",
+      "description": "Update the description, project, tags of recent time entries.",
       "mode": "view"
     },
     {

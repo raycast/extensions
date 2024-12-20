@@ -6,7 +6,10 @@
   "description": "Manage your timers for Tim from Raycast",
   "icon": "tim-icon.png",
   "author": "tm.wrnr",
-  "categories": ["Applications", "Productivity"],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -785,18 +788,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.15.0",
-    "dayjs": "^1.11.11",
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.18.0",
+    "dayjs": "^1.11.13",
     "parse-ms": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "react-devtools": "^4.27.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
     "typescript": "^5.2.2"
   },
   "scripts": {

@@ -82,7 +82,7 @@ export default function () {
                             fallback: Icon.Airplane,
                         }}
                         title={`${flight.airlineIata} ${flight.number}`}
-                        subtitle={depDate}
+                        accessories={[{text: depDate}]}
                         keywords={[
                             flight.number,
                             flight.airlineIata,

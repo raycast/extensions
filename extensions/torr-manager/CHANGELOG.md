@@ -1,4 +1,8 @@
-# torr-manager Changelog
+# Torr Manager Changelog
+
+## [Fix Database Save] - 2024-11-04
+
+- Fixed issue with saving torrents permanently to the database.
 
 ## [Improve Parser] - 2024-10-28
 

@@ -1,8 +1,12 @@
 # Craftdocs Changelog
 
+## [Security] - 2024-11-12
+
+- Updated dependencies via `npm audit fix` to address 4 vulnerabilities (2 moderate, 2 high).
+
 ## [Update] - 2023-02-11
 
-Added support for setapp version
+- Added support for setapp version.
 
 ## [Update] - 2022-07-12
 

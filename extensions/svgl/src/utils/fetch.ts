@@ -32,7 +32,7 @@ export const fetchCategories = async () => {
   });
 };
 
-const fetchSvg = async (url: string) => {
+export const fetchSvg = async (url: string) => {
   return withCache(
     `svgl_svg_${url}`,
     async () => {

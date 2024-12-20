@@ -138,6 +138,50 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
           {environment.canAccess(AI) && (
             <Action title="Generate Checklist with AI" icon={Icon.BulletPoints} onAction={generateChecklist} />
           )}
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus('title')}
+              shortcut={{ modifiers: ['cmd'], key: '1' }}
+            />
+            <Action
+              title="Focus Notes"
+              icon={Icon.TextInput}
+              onAction={() => focus('notes')}
+              shortcut={{ modifiers: ['cmd'], key: '2' }}
+            />
+            <Action
+              title="Focus When"
+              icon={Icon.TextInput}
+              onAction={() => focus('when')}
+              shortcut={{ modifiers: ['cmd'], key: 's' }}
+            />
+            <Action
+              title="Focus List"
+              icon={Icon.TextInput}
+              onAction={() => focus('listId')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+            />
+            <Action
+              title="Focus Tags"
+              icon={Icon.TextInput}
+              onAction={() => focus('tags')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 't' }}
+            />
+            <Action
+              title="Focus Checklist"
+              icon={Icon.TextInput}
+              onAction={() => focus('checklist-items')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            />
+            <Action
+              title="Focus Deadline"
+              icon={Icon.TextInput}
+              onAction={() => focus('deadline')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       // Don't enable drafts if coming from another list or an empty view

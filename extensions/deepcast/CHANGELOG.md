@@ -1,5 +1,11 @@
 # Deepcast Changelog
 
+## [Formality] - 2024-12-02
+- Better icon for switch languages action
+- Added support for formality
+- Added preference to show/hide transliteration
+- Added preference to show/hide formality configuration
+
 ## [More Languages] - 2024-10-21
 
 - Added Translate to Arabic

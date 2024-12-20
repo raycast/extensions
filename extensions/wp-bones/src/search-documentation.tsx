@@ -40,7 +40,7 @@ export default function Command() {
                   <Action.OpenInBrowser url={`https://wpbones.com/${d.path}`} />
                   <Action.Push
                     icon={Icon.Eye}
-                    title="Show excerpt"
+                    title="Show Excerpt"
                     target={<Detail markdown={Object.values(d.data).join("\n\n")} />}
                   />
                 </ActionPanel>

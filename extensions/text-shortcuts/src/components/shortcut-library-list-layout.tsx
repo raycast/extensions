@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { Shortcut, tags } from "../util/shortcut";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
+import React, { useState } from "react";
+import { getShortcuts, getShortcutsListDetail } from "../hooks/hooks";
+import { Preferences } from "../types/preferences";
+import { Shortcut, tags } from "../util/shortcut";
 import { ActionEditShortcut } from "./action-edit-shortcut";
 import { ActionOpenPreferences } from "./action-open-preferences";
-import { Preferences } from "../types/preferences";
 import { ActionRunShortcut } from "./action-run-shortcut";
-import { getShortcuts, getShortcutsListDetail } from "../hooks/hooks";
-import { useFrecencySorting } from "@raycast/utils";
 import { ShortcutsEmptyView } from "./shortcuts-empty-view";
 
 export function ShortcutLibraryListLayout(props: { preferences: Preferences }) {

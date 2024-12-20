@@ -19,6 +19,31 @@ export function Detail({ ec }: DetailProps) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
+            title="Scheduled departure"
+            text={
+              new Date(ec.aimedDepartureTime).toLocaleDateString("no-no") +
+              " " +
+              new Date(ec.aimedDepartureTime).toLocaleTimeString("no-no")
+            }
+          />
+          {ec.realtime && ec.expectedDepartureTime && (
+            <List.Item.Detail.Metadata.Label
+              title={`Estimated departure (${
+                ec.predictionInaccurate ? "inaccurate" : "real time"
+              })`}
+              text={new Date(ec.expectedDepartureTime).toLocaleTimeString("no-no")}
+              icon={
+                ec.realtime
+                  ? {
+                      source: Icon.CircleProgress100,
+                      tintColor: ec.predictionInaccurate ? Color.Yellow : Color.Green,
+                    }
+                  : { source: Icon.Signal1, tintColor: Color.SecondaryText }
+              }
+            />
+          )}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
             title="Authority"
             text={ec.serviceJourney.line.authority?.name}
             icon={
@@ -50,31 +75,6 @@ export function Detail({ ec }: DetailProps) {
                 text={getSubModeText(ec.serviceJourney.line.transportSubmode)}
               />
             )}
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Scheduled departure"
-            text={
-              new Date(ec.aimedDepartureTime).toLocaleDateString("no-no") +
-              " " +
-              new Date(ec.aimedDepartureTime).toLocaleTimeString("no-no")
-            }
-          />
-          {ec.realtime && ec.expectedDepartureTime && (
-            <List.Item.Detail.Metadata.Label
-              title={`Estimated departure (${
-                ec.predictionInaccurate ? "inaccurate" : "real time"
-              })`}
-              text={new Date(ec.expectedDepartureTime).toLocaleTimeString("no-no")}
-              icon={
-                ec.realtime
-                  ? {
-                      source: Icon.CircleProgress100,
-                      tintColor: ec.predictionInaccurate ? Color.Yellow : Color.Green,
-                    }
-                  : { source: Icon.Signal1, tintColor: Color.SecondaryText }
-              }
-            />
-          )}
         </List.Item.Detail.Metadata>
       }
       markdown={getEstimatedCallsMarkdown(ec.serviceJourney.estimatedCalls, ec.quay.id, theme)}
