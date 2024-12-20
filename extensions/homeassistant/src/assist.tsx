@@ -192,7 +192,7 @@ export default function AssistCommand(): JSX.Element {
   const isLoading = !error ? isLoadingPipeline || !conversations : false;
   return (
     <List
-      searchBarPlaceholder="Type your Request and Press Enter"
+      searchBarPlaceholder="Enter your request"
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
@@ -212,7 +212,10 @@ export default function AssistCommand(): JSX.Element {
               key={i.toString()}
               title={c.text}
               icon={{
-                value: c.author === Author.Assist ? "home-assistant.svg" : userPicture(),
+                value:
+                  c.author === Author.Assist
+                    ? { source: "home-assistant.svg", tintColor: Color.PrimaryText }
+                    : userPicture(),
                 tooltip: c.author === Author.Assist ? "Assist" : (currentUser?.name ?? ""),
               }}
               accessories={[{ date: c.date }]}

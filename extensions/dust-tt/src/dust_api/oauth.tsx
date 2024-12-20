@@ -40,7 +40,7 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 const provider = new OAuthService({
   client,
   clientId: preferences.oauthClientID,
-  scope: "openid offline_access",
+  scope: "offline_access read:user_profile read:conversation create:conversation update:conversation read:agent",
   authorizeUrl: `${preferences.oauthDomain}/authorize`,
   tokenUrl: `${preferences.oauthDomain}/oauth/token`,
   personalAccessToken: preferences.connexionFlow === "apiKey" ? getPreferenceValues().apiKey : undefined,
@@ -59,7 +59,7 @@ const provider = new OAuthService({
   },
   extraParameters: {
     prompt: "consent",
-    audience: `${preferences.oauthDomain}/api/v2/`,
+    audience: preferences.oauthAudience,
   },
 });
 

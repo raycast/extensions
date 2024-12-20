@@ -5,11 +5,22 @@
   "description": "See the current gas price of Ethereum.",
   "icon": "command-icon.png",
   "author": "vinch",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Web"
   ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "apiKey",
+      "description": "API Key from Etherscan",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "placeholder": "YourApiKeyToken"
+    },
     {
       "name": "hideIcon",
       "description": "Hide icon from the menu bar",
@@ -38,15 +49,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -54,6 +66,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

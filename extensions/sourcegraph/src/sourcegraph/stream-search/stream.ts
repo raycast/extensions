@@ -28,7 +28,7 @@ export type SearchEvent =
   | { type: "error"; data: ErrorLike }
   | { type: "done"; data: Record<string, never> };
 
-export type SearchMatch = ContentMatch | RepositoryMatch | CommitMatch | SymbolMatch | PathMatch;
+export type SearchMatch = ContentMatch | RepositoryMatch | CommitMatch | SymbolMatch | PathMatch | OwnerMatch;
 
 export interface PathMatch {
   type: "path";
@@ -39,6 +39,7 @@ export interface PathMatch {
   repoLastFetched?: string;
   branches?: string[];
   commit?: string;
+  language?: string;
   debug?: string;
 }
 
@@ -54,6 +55,7 @@ export interface ContentMatch {
   lineMatches?: LineMatch[];
   chunkMatches?: ChunkMatch[];
   hunks?: DecoratedHunk[];
+  language?: string;
   debug?: string;
 }
 
@@ -86,10 +88,17 @@ export interface LineMatch {
   offsetAndLengths: number[][];
 }
 
-interface ChunkMatch {
+export interface ChunkMatch {
   content: string;
   contentStart: Location;
   ranges: Range[];
+
+  /**
+   * Indicates that content has been truncated.
+   *
+   * This can only be true when maxLineLength search option is non-zero.
+   */
+  contentTruncated?: boolean;
 }
 
 export interface SymbolMatch {
@@ -101,6 +110,7 @@ export interface SymbolMatch {
   branches?: string[];
   commit?: string;
   symbols: MatchedSymbol[];
+  language?: string;
   debug?: string;
 }
 
@@ -117,7 +127,6 @@ type MarkdownText = string;
 /**
  * Our batch based client requests generic fields from GraphQL to represent repo and commit/diff matches.
  * We currently are only using it for commit. To simplify the PoC we are keeping this interface for commits.
- *
  * @see GQL.IGenericSearchResultInterface
  */
 export interface CommitMatch {
@@ -150,6 +159,34 @@ export interface RepositoryMatch {
   private?: boolean;
   branches?: string[];
   descriptionMatches?: Range[];
+  metadata?: Record<string, string | undefined>;
+  topics?: string[];
+}
+
+export type OwnerMatch = PersonMatch | TeamMatch;
+
+export interface BaseOwnerMatch {
+  handle?: string;
+  email?: string;
+}
+
+export interface PersonMatch extends BaseOwnerMatch {
+  type: "person";
+  handle?: string;
+  email?: string;
+  user?: {
+    username: string;
+    displayName?: string;
+    avatarURL?: string;
+  };
+}
+
+export interface TeamMatch extends BaseOwnerMatch {
+  type: "team";
+  name: string;
+  displayName?: string;
+  handle?: string;
+  email?: string;
 }
 
 /**
@@ -157,6 +194,8 @@ export interface RepositoryMatch {
  * Should be replaced when a new ones come in.
  */
 export interface Progress {
+  // No more progress to be tracked
+  done?: boolean;
   /**
    * The number of repositories matching the repo: filter. Is set once they
    * are resolved.
@@ -193,7 +232,8 @@ export interface Skipped {
    * - shard-timeout :: we ran out of time before searching a shard/repository.
    * - repository-cloning :: we could not search a repository because it is not cloned.
    * - repository-missing :: we could not search a repository because it is not cloned and we failed to find it on the remote code host.
-   * - excluded-fork :: we did not search a repository because it is a fork.
+   * - backend-missing :: we may be missing results due to a backend being transiently down.
+   * - repository-fork :: we did not search a repository because it is a fork.
    * - excluded-archive :: we did not search a repository because it is archived.
    * - display :: we hit the display limit, so we stopped sending results from the backend.
    */
@@ -204,7 +244,8 @@ export interface Skipped {
     | "shard-timedout"
     | "repository-cloning"
     | "repository-missing"
-    | "excluded-fork"
+    | "repository-fork"
+    | "backend-missing"
     | "excluded-archive"
     | "display"
     | "error";
@@ -231,13 +272,27 @@ export interface Filter {
   value: string;
   label: string;
   count: number;
-  limitHit: boolean;
-  kind: "file" | "repo" | "lang" | "utility";
+  exhaustive: boolean;
+  kind: "file" | "repo" | "lang" | "utility" | "author" | "commit date" | "symbol type" | "type";
 }
 
-export type AlertKind = "smart-search-additional-results" | "smart-search-pure-results";
+export const TELEMETRY_FILTER_TYPES = {
+  file: 1,
+  repo: 2,
+  lang: 3,
+  utility: 4,
+  author: 5,
+  "commit date": 6,
+  "symbol type": 7,
+  type: 8,
+  snippet: 9,
+  count: 10,
+};
 
-interface Alert {
+export type SmartSearchAlertKind = "smart-search-additional-results" | "smart-search-pure-results";
+export type AlertKind = SmartSearchAlertKind | "unowned-results";
+
+export interface Alert {
   title: string;
   description?: string | null;
   kind?: AlertKind | null;
@@ -247,13 +302,43 @@ interface Alert {
 // Same key values from internal/search/alert.go
 export type AnnotationName = "ResultCount";
 
-interface ProposedQuery {
+export interface ProposedQuery {
   description?: string | null;
   annotations?: { name: AnnotationName; value: string }[];
   query: string;
 }
 
 export type StreamingResultsState = "loading" | "error" | "complete";
+
+interface BaseAggregateResults {
+  state: StreamingResultsState;
+  results: SearchMatch[];
+  alert?: Alert;
+  filters: Filter[];
+  progress: Progress;
+}
+
+interface SuccessfulAggregateResults extends BaseAggregateResults {
+  state: "loading" | "complete";
+}
+
+interface ErrorAggregateResults extends BaseAggregateResults {
+  state: "error";
+  error: Error;
+}
+
+export type AggregateStreamingSearchResults = SuccessfulAggregateResults | ErrorAggregateResults;
+
+export const emptyAggregateResults: AggregateStreamingSearchResults = {
+  state: "loading",
+  results: [],
+  filters: [],
+  progress: {
+    durationMs: 0,
+    matchCount: 0,
+    skipped: [],
+  },
+};
 
 // Copied from the end of https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12&subtree=true
 
@@ -298,15 +383,53 @@ export function getCommitMatchUrl(commitMatch: CommitMatch): string {
   return "/" + encodeURI(commitMatch.repository) + "/-/commit/" + commitMatch.oid;
 }
 
+export function getOwnerMatchUrl(ownerMatch: OwnerMatch, ignoreUnknownPerson = false): string {
+  if (ownerMatch.type === "person" && ownerMatch.user) {
+    return "/users/" + encodeURI(ownerMatch.user.username);
+  }
+  if (ownerMatch.type === "team") {
+    return "/teams/" + encodeURI(ownerMatch.name);
+  }
+  if (ownerMatch.email) {
+    return `mailto:${ownerMatch.email}`;
+  }
+
+  if (ignoreUnknownPerson) {
+    return "";
+  }
+  // Unknown person with only a handle.
+  // We can't ignore this person and return an empty string, we
+  // need some unique dummy data here because this is used
+  // as the key in the virtual list. We can't use the index.
+  // In the future we may be able to link to the
+  // person's profile page in the external code host.
+  return "/unknown-person/" + encodeURI(ownerMatch.handle || "unknown");
+}
+
 export function getMatchUrl(match: SearchMatch): string {
   switch (match.type) {
     case "path":
     case "content":
-    case "symbol":
+    case "symbol": {
       return getFileMatchUrl(match);
-    case "commit":
+    }
+    case "commit": {
       return getCommitMatchUrl(match);
-    case "repo":
+    }
+    case "repo": {
       return getRepoMatchUrl(match);
+    }
+    case "person":
+    case "team": {
+      return getOwnerMatchUrl(match);
+    }
   }
+}
+
+export type SearchMatchOfType<T extends SearchMatch["type"]> = Extract<SearchMatch, { type: T }>;
+
+export function isSearchMatchOfType<T extends SearchMatch["type"]>(
+  type: T,
+): (match: SearchMatch) => match is SearchMatchOfType<T> {
+  return (match): match is SearchMatchOfType<T> => match.type === type;
 }

@@ -65,7 +65,7 @@
     },
     {
       "name": "mediaplayers",
-      "title": "Mediaplayers",
+      "title": "Media Players",
       "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant mediaplayers",
       "mode": "view"
@@ -192,22 +192,22 @@
     {
       "name": "notificationmenu",
       "title": "Notifications Menu",
-      "description": "Display Persistent Notifications, Low Batteries and Update in the Menu Bar",
+      "description": "Display persistent notifications, low batteries and updates in the menu bar",
       "mode": "menu-bar",
       "subtitle": "Home Assistant",
       "interval": "1m",
       "preferences": [
         {
           "name": "showcount",
-          "description": "Show Notification Count in Menu",
+          "description": "Show notification count in menu",
           "type": "checkbox",
-          "label": "Show Notification Count in Menubar",
+          "label": "Show notification count in the menu bar",
           "required": false,
           "default": false
         },
         {
           "name": "indicatorUpdates",
-          "description": "Pending Updates will activate the Indicator",
+          "description": "Pending updates will activate the indicator",
           "type": "checkbox",
           "required": false,
           "title": "Indicator",
@@ -219,14 +219,14 @@
     {
       "name": "zones",
       "title": "Zones",
-      "description": "Get states about Zones",
+      "description": "Get states about zones",
       "mode": "view",
       "subtitle": "Home Assistant"
     },
     {
       "name": "weathermenu",
       "title": "Weather Menu",
-      "description": "Display Weather entity in the Menu Bar",
+      "description": "Display Weather entity in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -240,7 +240,7 @@
         },
         {
           "name": "temperatureEntity",
-          "description": "Temperature Sensor which is used instead of the weather entity.",
+          "description": "Temperature sensor which is used instead of the weather entity",
           "type": "textfield",
           "required": false,
           "title": "Temperature Sensor",
@@ -248,7 +248,7 @@
         },
         {
           "name": "humidityEntity",
-          "description": "Humidity Sensor which is used instead of the weather entity.",
+          "description": "Humidity sensor which is used instead of the weather entity",
           "type": "textfield",
           "required": false,
           "title": "Humidity Sensor",
@@ -256,7 +256,7 @@
         },
         {
           "name": "maxHourlyForecastItems",
-          "description": "Max Hourly Forecast Items. 0 will disable the hourly forecast.",
+          "description": "Maximum number of hourly forecast items to display (0 to disable)",
           "type": "textfield",
           "required": false,
           "title": "Max Hourly Forecast Items",
@@ -264,7 +264,7 @@
         },
         {
           "name": "maxDailyForecastItems",
-          "description": "Max Daily Forecast Items. 0 will disable the daily forecast.",
+          "description": "Maximum number of daily forecast items to display (0 to disable)",
           "type": "textfield",
           "required": false,
           "title": "Max Daily Forecast Items",
@@ -282,21 +282,21 @@
     {
       "name": "connection",
       "title": "Connection Check",
-      "description": "Check the Connection to Home Assistant",
+      "description": "Check the connection to Home Assistant",
       "mode": "view",
       "subtitle": "Home Assistant",
       "disabledByDefault": true
     },
     {
       "name": "mediaplayermenu",
-      "title": "Mediaplayer Menu",
-      "description": "Display Media Players in the Menu Bar",
+      "title": "Media Player Menu",
+      "description": "Display media players in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to include in the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -304,7 +304,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to exclude from the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -315,13 +315,13 @@
     {
       "name": "lightsmenu",
       "title": "Lights Menu",
-      "description": "Display Lights in the Menu Bar",
+      "description": "Display lights in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to include in the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -329,7 +329,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to exclude from the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -340,13 +340,13 @@
     {
       "name": "coversmenu",
       "title": "Covers Menu",
-      "description": "Display Covers in the Menu Bar",
+      "description": "Display covers in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to include in the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -354,7 +354,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to exclude from the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -365,13 +365,13 @@
     {
       "name": "batteriesmenu",
       "title": "Batteries Menu",
-      "description": "Display Batteries in the Menu Bar",
+      "description": "Display batteries in the menu bar",
       "mode": "menu-bar",
       "interval": "30m",
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to include in the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Included Entities",
@@ -379,7 +379,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to exclude from the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -387,7 +387,7 @@
         },
         {
           "name": "excludeHigher",
-          "description": "Exclude Battery with a Level higher then the given value. Keep empty to disable the filter",
+          "description": "Exclude battery with a level higher then the given value. Keep empty to disable the filter",
           "type": "textfield",
           "required": false,
           "title": "Exclude Higher then",
@@ -398,13 +398,13 @@
     {
       "name": "entitiesmenu",
       "title": "Entities Menu",
-      "description": "Show given entities in the Menu Bar",
+      "description": "Show given entities in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
         {
           "name": "includedEntities",
-          "description": "Given entities will be included in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to include in the menu, with wildcard support",
           "type": "textfield",
           "required": true,
           "title": "Included Entities",
@@ -412,7 +412,7 @@
         },
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by commas. Wildcards are supported.",
+          "description": "Comma-separated list of entities to exclude from the menu, with wildcard support",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
@@ -423,7 +423,7 @@
     {
       "name": "entitymenu01",
       "title": "Entity Menu 1",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "preferences": [
@@ -440,7 +440,7 @@
     {
       "name": "entitymenu02",
       "title": "Entity Menu 2",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "disabledByDefault": true,
@@ -458,7 +458,7 @@
     {
       "name": "entitymenu03",
       "title": "Entity Menu 3",
-      "description": "Show a Single Entity directly in the Menubar",
+      "description": "Show a single entity directly in the menu bar",
       "mode": "menu-bar",
       "interval": "5m",
       "disabledByDefault": true,
@@ -476,31 +476,31 @@
     {
       "name": "services",
       "title": "Services",
-      "description": "Interact with Home Assistant Services",
+      "description": "Interact with Home Assistant services",
       "mode": "view"
     },
     {
       "name": "runService",
       "title": "Run Service",
-      "description": "Run a service. It accepts a context argument to launch services via Quicklinks or Deeplinks.",
+      "description": "Run a service with support for quicklinks and deeplinks via context arguments",
       "mode": "no-view"
     },
     {
       "name": "calendar",
       "title": "Calendar",
-      "description": "Query Calendars",
+      "description": "Query calendars",
       "mode": "view"
     },
     {
       "name": "calendarmenu",
       "title": "Calendar Menu",
-      "description": "Calendar in the menubar",
+      "description": "Display calendar in the menu bar",
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
         {
           "name": "maxRootTextLength",
-          "description": "Maximum Root Text Length. 0 disable the feature.",
+          "description": "Maximum length of root text (0 to disable)",
           "type": "textfield",
           "required": false,
           "title": "Maximum Root Text Length",
@@ -545,7 +545,7 @@
       "type": "textfield",
       "required": false,
       "title": "Internal Home Assistant URL (optional)",
-      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home Wi-Fi or the url is pingable.",
+      "description": "URL of your Home Assistant instance in your home network used when the current Wi-Fi SSID is in the SSID list of your home Wi-Fi or the URL is pingable",
       "placeholder": "http://homeassistant.local:8123"
     },
     {
@@ -553,12 +553,12 @@
       "type": "textfield",
       "required": false,
       "title": "Home Network Detection",
-      "description": "A list of your Home Network Wi-Fi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home Wi-Fi. Only required if the Internal Home Assistant URL is set.",
+      "description": "Comma-separated list of home Wi-Fi SSIDs used for detecting your home network when using the internal Home Assistant URL",
       "placeholder": "HomeWiFi1,HomeWiFi2"
     },
     {
       "name": "usePing",
-      "description": "Use ping to detect Home Network",
+      "description": "Use ping to detect home network",
       "type": "checkbox",
       "required": false,
       "label": "Use Ping",
@@ -593,16 +593,16 @@
     },
     {
       "name": "camerarefreshinterval",
-      "type": "textfield",
+      "type": "textfield", 
       "required": false,
       "default": "3000",
       "title": "Camera Refresh Interval (ms)",
-      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "description": "Specify the camera stream refresh interval in milliseconds (minimum 2000ms recommended, 0 disables auto-refresh)",
       "placeholder": "3000"
     },
     {
       "name": "preferredapp",
-      "description": "Preferred Application to Open",
+      "description": "Preferred application to open",
       "type": "dropdown",
       "required": false,
       "title": "Preferred Application",

@@ -1,5 +1,13 @@
 # Browser Bookmarks Changelog
 
+## [Update Logo] - 2024-12-11
+
+- Updated to latest logo since rebrand.
+
+## [Support Zen Browser] - 2024-11-26
+
+- Added support for Zen Browser Desktop.
+
 ## [Support for Prisma Access] - 2024-11-24
 
 - Add support for `Prisma Access` browser.
