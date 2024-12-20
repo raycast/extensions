@@ -1,72 +1,110 @@
-import { useEffect } from "react";
-import { getPreferenceValues, List } from "@raycast/api";
-import { ReactElement, useState } from "react";
-import { useCachedState } from "@raycast/utils";
-import BookmarkItem from "./components/BookmarkItem";
-import CollectionsDropdown from "./components/CollectionsDropdown";
-import { Bookmark } from "./types";
-import { useRequest } from "./hooks/useRequest";
-import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
+type Highlight = {
+  text: string;
+  note: string;
+};
 
-export default function Main(): ReactElement {
-  const preferences: Preferences = getPreferenceValues();
-  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
+export type Bookmark = {
+  _id: number;
+  collection: unknown; // object
+  cover: string;
+  created: string;
+  domain: string;
+  excerpt: string;
+  lastUpdate: string;
+  link: string;
+  media: object[];
+  tags: string[];
+  title: string;
+  type: string; // enum
+  user: unknown; // object
 
-  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } = useLastUsedCollection();
+  broken: boolean;
+  cache: unknown; // object
+  file: unknown; // object
+  important: boolean;
+  html: string;
+  note: string;
+  highlights: Highlight[];
+};
 
-  useEffect(() => {
-    const fetchLastUsedCollection = async () => {
-      const luc = await getLastUsedCollection();
-      setLastUsedCollection(luc || "0");
-    };
-    fetchLastUsedCollection();
-  }, []);
+type CollectionParent = {
+  $id: number;
+};
 
-  const defaultCollection = preferences.useLastCollection ? lastUsedCollection : "0";
+export type Collection = {
+  _id: number;
+  title: string;
+  parent: CollectionParent;
+  children?: Collection[];
+};
 
-  const [searchText, setSearchText] = useState<string>("");
-  const [collection, setCollection] = useCachedState<string>("selected-collection", defaultCollection);
+export type Group = {
+  title: string;
+  hidden: boolean;
+  sort: number;
+  collections: number[];
+};
 
-  const { isLoading, bookmarks, collections, revalidate } = useRequest({
-    collection,
-    search: searchText,
-  });
+export interface CollectionsResponse {
+  result: boolean;
+  items: Collection[];
+}
 
-  const onCollectionChange = (value: string) => {
-    if (collection !== value) {
-      setCollection(value);
-      setNextCollectionToUse(value);
-    }
-  };
+export interface CollectionCreationResponse {
+  result: boolean;
+  item: Collection;
+}
 
-  const onSearch = (value: string) => {
-    if (value !== searchText) {
-      if (preferences.titleOnly) {
-        value = `title:"${value}"`;
-      }
-      setSearchText(value);
-    }
-  };
+export interface BookmarksResponse {
+  items: Bookmark[];
+}
 
-  // operators help: https://help.raindrop.io/using-search#operators
-  return (
-    <List
-      searchBarPlaceholder="Search bookmarks using Raindrop.io operators..."
-      searchBarAccessory={
-        <CollectionsDropdown
-          isLoading={isLoading}
-          handleChange={onCollectionChange}
-          collections={collections}
-          defaultValue={collection}
-        />
-      }
-      onSearchTextChange={onSearch}
-      isLoading={isLoading}
-      throttle
-    >
-      {bookmarks?.items?.map((bookmark: Bookmark) => (
-        <BookmarkItem key={bookmark._id} bookmark={bookmark} revalidate={revalidate} />
-      ))}
-    </List>
-  );
+export interface TagsResponse {
+  items: Array<{
+    _id: string;
+    count: number;
+  }>;
+}
+
+export type UserData = {
+  // files: unknown;
+  // avatar: string;
+  // pro: boolean;
+  _id: number;
+  // registered: string;
+  // config: unknown;
+  // email: string;
+  // fullName: string;
+  // lastAction: string;
+  groups: Group[];
+  // lastUpdate: string;
+  // lastVisit: string;
+  // apple: unknown;
+  name: string;
+  // dropbox: unknown;
+  password: boolean;
+};
+
+export interface UserResponse {
+  result: boolean;
+  user: UserData;
+}
+
+export interface CollectionItem {
+  value?: number;
+  label: string;
+  name?: string;
+}
+
+export type BookmarksParams = {
+  collection: string;
+  search?: string;
+};
+
+export interface FormValues {
+  link: string;
+  title?: string;
+  collection?: string;
+  tags: string[];
+  newCollection?: string;
 }
