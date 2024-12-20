@@ -1,4 +1,4 @@
-import { showToast, Toast } from '@raycast/api';
+import { captureException, showToast, Toast } from '@raycast/api';
 import type { ErrorResponse } from 'ynab';
 
 export function isYnabError(error: unknown): error is ErrorResponse {
@@ -9,7 +9,7 @@ export function displayError(error: ErrorResponse, title?: string) {
   const { error: apiError } = error;
   if (apiError.id === '400') {
     console.error(apiError);
-    throw new Error('Malformed request to the API');
+    captureException(new Error('Malformed request to the API'));
   }
 
   const errorMessage = ErrorTable.get(apiError.id);
