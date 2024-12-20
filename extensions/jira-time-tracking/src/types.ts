@@ -20,7 +20,7 @@ export type Preferences = {
   domain: string;
   token: string;
   username: string;
-  onlyMyIssues: boolean;
+  customJQL: string;
 };
 
 export type Issue = {
