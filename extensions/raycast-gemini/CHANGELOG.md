@@ -1,6 +1,12 @@
 # Google Gemini Changelog
 
-## [Add Translate Command] - 2024-09-02
+## Added the following models (may not be available to all users): - 2024-12-10
+
+- Gemini 2.0 Flash Experimental
+- Gemini 2.0 Flash Thinking Experimental 1219
+- Gemini Experimental 1206 (Rumored to be Pro 2.0)
+
+## [Add Translate Command]
 
 More Features:
 
