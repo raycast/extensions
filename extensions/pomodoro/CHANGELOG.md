@@ -1,5 +1,13 @@
 # Pomodoro Changelog
 
+## [Update] - 2024-12-12
+
+- Move timer to dropdown menu if it's hidden
+
+## [Enhancement] - 2024-12-11
+
+- Add the weekly and daily statistics to the `View Pomodoro Stats` command
+
 ## [Fixes] - 2024-12-08
 
 - Fix short break timer

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
+import { ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { DestructiveAction, PrimaryAction } from "../actions";
 import { CopyActionSection } from "../actions/copy";
@@ -28,10 +28,10 @@ export const ChatView = ({
     <ActionPanel>
       {question.length > 0 ? (
         <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+      ) : (selectedChat.question || selectedChat.answer) && use.chats.selectedChatId === selectedChat.id ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
-          <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} />
+          {selectedChat.answer ? <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} /> : null}
           <ActionPanel.Section title="Output"></ActionPanel.Section>
         </>
       ) : null}
@@ -43,40 +43,30 @@ export const ChatView = ({
         onModelChange={onModelChange}
       />
       {use.chats.data.length > 0 && (
-        <>
-          <ActionPanel.Section title="Question">
-            <Action.CopyToClipboard
-              title="Copy Question"
-              icon={Icon.CopyClipboard}
-              content={selectedChat.question}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Restart">
-            <DestructiveAction
-              title="Start New Conversation"
-              icon={Icon.RotateAntiClockwise}
-              dialog={{
-                title: "Are you sure you want to start a new conversation?",
-                primaryButton: "Start New",
-              }}
-              onAction={() => {
-                setConversation({
-                  id: uuidv4(),
-                  chats: [],
-                  model: model,
-                  pinned: false,
-                  updated_at: "",
-                  created_at: new Date().toISOString(),
-                });
-                use.chats.clear();
-                clearSearchBar();
-                use.chats.setLoading(false);
-              }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-            />
-          </ActionPanel.Section>
-        </>
+        <ActionPanel.Section title="Restart">
+          <DestructiveAction
+            title="Start New Conversation"
+            icon={Icon.RotateAntiClockwise}
+            dialog={{
+              title: "Are you sure you want to start a new conversation?",
+              primaryButton: "Start New",
+            }}
+            onAction={() => {
+              setConversation({
+                id: uuidv4(),
+                chats: [],
+                model: model,
+                pinned: false,
+                updated_at: "",
+                created_at: new Date().toISOString(),
+              });
+              use.chats.clear();
+              clearSearchBar();
+              use.chats.setLoading(false);
+            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          />
+        </ActionPanel.Section>
       )}
       <PreferencesActionSection />
     </ActionPanel>

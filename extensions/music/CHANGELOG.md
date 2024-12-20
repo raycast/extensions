@@ -1,8 +1,16 @@
 # Apple Music Changelog
 
+## [Update Currently Playing] - 2024-12-13
+
+- Fixed a bug where `Currently Playing` command would open the Music app if it was not running.
+
+## [Update Currently Playing] - 2024-12-06
+
+- Update `Currently Playing` command to show the currently playing track in the subtitle instead of the toast.
+
 ## [New Command] - 2024-02-10
 
-- Added a new command that removes the currently playing track from the current playlist and skips to the next track. 
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track.
 
 ## [Update] - 2023-10-12
 

@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { useEffect, useReducer } from "react";
 
-import { TvScheduleDto } from "./modules/tv/domain/tvScheduleDto";
+import { toLocalizedTvSchedule, TvScheduleDto } from "./modules/tv/domain/tvScheduleDto";
 import { tvScheduleRepository } from "./modules/tv/repositories/tvScheduleRepository";
 import { ERROR_MESSAGE, ErrorMessage } from "./components/ErrorMessage";
 import { ChannelList } from "./components/ChannelList";
@@ -22,6 +22,7 @@ const Command = () => {
   const initialize = async () => {
     return tvScheduleRepository
       .getAll()
+      .then((tvSchedule) => toLocalizedTvSchedule(tvSchedule))
       .then((tvSchedule) => cacheIcons(tvSchedule).then(() => setState({ tvSchedule })))
       .catch((error) => setState({ error }));
   };

@@ -2,126 +2,176 @@
 // It provides a Raycast command interface for users to input a YouTube video ID,
 // retrieves the video's transcript, processes it, and saves it to a local file.
 // The script uses the YouTube Data API and handles user preferences for download locations.
-
 import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
-import ytdl from "ytdl-core";
+import { getSubtitles } from "youtube-captions-scraper";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
+import https from "https";
 
-// Define an interface for the transcript result
+// Define interfaces
+interface ExtensionPreferences {
+  defaultDownloadFolder: string;
+  defaultLanguage: string;
+}
+
 interface TranscriptResult {
   transcript: string;
   title: string;
 }
 
-// Fetches the transcript for a given YouTube video ID
-async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
-  try {
-    const fetch = (await import("node-fetch")).default;
-    const videoInfo = await ytdl.getInfo(videoId);
+interface TranscriptItem {
+  text: string;
+  start: number;
+  dur: number;
+}
 
-    // Extract video title
-    const videoTitle = videoInfo.videoDetails.title;
+// Function to fetch URL content using https
+function fetchUrl(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve(data));
+        res.on("error", reject);
+      })
+      .on("error", reject);
+  });
+}
 
-    if (videoInfo.player_response.captions && videoInfo.player_response.captions.playerCaptionsTracklistRenderer) {
-      const captions = videoInfo.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
-      if (captions && captions.length) {
-        const transcriptUrl = captions[0].baseUrl;
-        const transcriptResponse = await fetch(transcriptUrl);
-        const transcriptText = await transcriptResponse.text();
+// Function to extract video ID from URL
+function extractVideoId(url: string): string | null {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+  ];
 
-        // Add debug logging
-        console.log("Raw transcript:", transcriptText);
-        const processed = processTranscript(transcriptText);
-        console.log("Processed transcript:", processed);
-
-        return {
-          transcript: processed,
-          title: videoTitle,
-        };
-      }
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
     }
-    throw new Error("No captions available for this video.");
+  }
+  return null;
+}
+
+// Function to fetch video transcript
+async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
+  const { defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
+
+  // Try with preferred language
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: defaultLanguage || "en",
+    });
+
+    if (transcriptItems && transcriptItems.length > 0) {
+      const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+      const title = await getVideoTitle(videoId);
+      return { transcript, title };
+    }
   } catch (error) {
-    console.error("Error getting transcript:", error);
-    throw error;
+    console.warn(`Failed to get captions in preferred language: ${defaultLanguage}`);
+  }
+
+  // Try with English
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "en",
+    });
+
+    if (transcriptItems && transcriptItems.length > 0) {
+      const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+      const title = await getVideoTitle(videoId);
+      return { transcript, title };
+    }
+  } catch (error) {
+    console.warn("Failed to get English captions");
+  }
+
+  // Try auto-generated captions
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "auto",
+    });
+
+    if (!transcriptItems || transcriptItems.length === 0) {
+      throw new Error("Transcript Not Available");
+    }
+
+    const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+    const title = await getVideoTitle(videoId);
+    return { transcript, title };
+  } catch (error) {
+    throw new Error("Transcript Not Available");
   }
 }
 
-// Cleans up raw transcript text
-function processTranscript(transcriptText: string): string {
-  // Remove XML tags
-  const textOnly = transcriptText.replace(/<[^>]+>/g, " "); // Replace tags with space instead of empty string
-
-  // Decode HTML entities
-  const decodedText = textOnly
-    .replace(/&amp;#39;/g, "'")
-    .replace(/&amp;quot;/g, '"')
-    .replace(/&amp;/g, "&");
-
-  // Split into segments and process each line
-  const segments = decodedText
-    .split("\n")
-    .filter((segment) => segment.trim() !== "")
-    .map((segment) => {
-      // Ensure proper word spacing within each segment
-      return segment
-        .replace(/\s+/g, " ") // Normalize spaces
-        .trim(); // Remove leading/trailing spaces
-    });
-
-  // Join segments with double newlines and ensure proper word spacing
-  return segments.reduce((acc, current, index) => {
-    // Add space at the end of each line except the last one
-    if (index === segments.length - 1) {
-      return acc + current;
+// Helper function to get video title
+async function getVideoTitle(videoId: string): Promise<string> {
+  try {
+    const html = await fetchUrl(`https://www.youtube.com/watch?v=${videoId}`);
+    const titleMatch = html.match(/<title>(.*?)<\/title>/);
+    if (titleMatch && titleMatch[1]) {
+      return titleMatch[1].replace(" - YouTube", "");
     }
-    // Add a period and double newline between segments
-    return acc + current + ".\n\n";
-  }, "");
+  } catch (error) {
+    console.warn("Could not fetch video title");
+  }
+  return `YouTube Video ${videoId}`;
 }
 
 // Sanitize filename to remove invalid characters
 function sanitizeFilename(filename: string): string {
-  // Remove or replace characters that are not allowed in filenames
   return filename
-    .replace(/[/\\?%*:|"<>]/g, "-") // Replace invalid characters with hyphen
-    .replace(/\s+/g, " ") // Replace multiple whitespaces with single space
-    .trim() // Remove leading/trailing whitespace
-    .substring(0, 255); // Limit filename length
+    .replace(/[/\\?%*:|"<>]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .substring(0, 255);
 }
 
-// Main function for the command
+// Main command function
 export default async function Command(props: { arguments: { videoUrl: string } }) {
   const { videoUrl } = props.arguments;
 
   if (!videoUrl) {
-    await showToast({ style: Toast.Style.Failure, title: "YouTube URL is required" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "YouTube URL is required",
+    });
     return;
   }
 
   try {
-    const videoIdMatch = videoUrl.match(/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)|(?:v=)([a-zA-Z0-9_-]+)/);
-    const videoId = videoIdMatch?.[1] || videoIdMatch?.[2];
-
+    // Extract video ID
+    const videoId = extractVideoId(videoUrl);
     if (!videoId) {
       throw new Error("Invalid YouTube URL. Please provide a valid URL.");
     }
 
-    await showToast({ style: Toast.Style.Animated, title: "Fetching transcript..." });
+    // Show loading toast
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Fetching transcript...",
+    });
 
-    // Get both transcript and title
+    // Get transcript
     const { transcript, title } = await getVideoTranscript(videoId);
 
+    // Get download location
     const { defaultDownloadFolder } = getPreferenceValues<ExtensionPreferences>();
     const downloadsFolder = defaultDownloadFolder || path.join(os.homedir(), "Downloads");
 
-    // Use sanitized video title for filename
+    // Create filename and save
     const filename = path.join(downloadsFolder, `${sanitizeFilename(title)}_transcript.txt`);
-
     await fs.writeFile(filename, transcript);
 
+    // Show success toast with actions
     await showToast({
       style: Toast.Style.Success,
       title: "Transcript fetched and saved",
@@ -138,8 +188,8 @@ export default async function Command(props: { arguments: { videoUrl: string } }
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error fetching transcript",
-      message: String(error),
+      title: "Error",
+      message: error instanceof Error ? error.message : "Transcript Not Available",
     });
   }
 }

@@ -10,7 +10,7 @@ interface HelpTextDetailProps {
   toolbox: Application | undefined;
 }
 
-export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): JSX.Element {
+export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): React.JSX.Element {
   return (
     <Detail
       markdown={message.join("\n\n")}
