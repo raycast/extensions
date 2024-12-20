@@ -13,6 +13,7 @@
     {
       "name": "orders",
       "title": "View Recent Orders",
+      "subtitle": "Polar",
       "description": "View your last incoming orders",
       "mode": "view",
       "icon": "command-icon.png"
@@ -20,6 +21,7 @@
     {
       "name": "subscriptions",
       "title": "View Subscriptions",
+      "subtitle": "Polar",
       "description": "View your active subscriptions",
       "mode": "view",
       "icon": "command-icon.png"
