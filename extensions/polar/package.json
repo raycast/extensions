@@ -25,10 +25,18 @@
       "description": "View your active subscriptions",
       "mode": "view",
       "icon": "command-icon.png"
+    },
+    {
+      "name": "customers",
+      "title": "View Customers",
+      "subtitle": "Polar",
+      "description": "View your customers",
+      "mode": "view",
+      "icon": "command-icon.png"
     }
   ],
   "dependencies": {
-    "@polar-sh/sdk": "^0.18.1",
+    "@polar-sh/sdk": "^0.19.2",
     "@raycast/api": "^1.69.0",
     "@raycast/utils": "^1.18.1",
     "@tanstack/react-query": "^5.62.3",
