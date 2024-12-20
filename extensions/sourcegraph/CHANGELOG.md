@@ -1,6 +1,10 @@
 # Changelog
 
-## [Smoother search and bug fixes] - 2024-12-14
+## [Bug fixes] - 2024-12-19
+
+- **search**: Fix some issues where results do not reset when a search returns no results or fails.
+
+## [Smoother search and bug fixes](https://github.com/raycast/extensions/pull/15862) - 2024-12-14
 
 - **search**: Opening a query in browser now correctly preserves the selected pattern type from the pattern type selector.
 - **search**: Typing during ongoing searches should feel less jittery, as the suggestion view is now less likely to show up randomly.
