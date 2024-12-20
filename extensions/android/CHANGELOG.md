@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-12-20
 
-- List emulators without info item
+- Remove info item from emulators list
 
 ## [Feature Update] - 2024-02-23
 
