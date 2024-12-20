@@ -50,4 +50,5 @@ export interface appendTaskPreferences {
   notePath?: string;
   noteTag?: string;
   silent?: boolean;
+  creationDate?: boolean;
 }
