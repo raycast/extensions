@@ -132,7 +132,3 @@ export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }
     );
   }
 }
-
-interface Preferences {
-  useChineseAccount: boolean;
-}
