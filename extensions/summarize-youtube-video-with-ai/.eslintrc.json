@@ -1,9 +1,4 @@
 {
   "root": true,
-  "extends": ["@raycast"],
-  "plugins": ["react-hooks"],
-  "rules": {
-    "semi": ["error", "never"],
-    "react-hooks/exhaustive-deps": "warn"
-  }
+  "extends": ["@raycast"]
 }
