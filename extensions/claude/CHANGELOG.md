@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] -  {PR_MERGE_DATE}
+## [Update] -  2024-12-20
 
 - Fix: Models dropdown not displaying all models correctly
 
