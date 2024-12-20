@@ -75,7 +75,7 @@ function RouteListItem({ groupedRoute, controller, port }: ListItemProps) {
             <Action.OpenInBrowser url={`http://127.0.0.1:${port}${groupedRoute.path}`} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Controller Actions">
-            <Action title="Change Port" onAction={openExtensionPreferences} />
+            <Action title="Change Port" icon={Icon.Switch} onAction={openExtensionPreferences} />
             {groupedRoute.methods.map((route, idx) => (
               <Action.CopyToClipboard
                 key={idx}
