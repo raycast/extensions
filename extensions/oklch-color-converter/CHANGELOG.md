@@ -1,4 +1,4 @@
-# Color Converter Changelog
+# OKLCH Color Converter Changelog
 
 ## [Fix ESLint and Formatting] - {PR_MERGE_DATE}
 
