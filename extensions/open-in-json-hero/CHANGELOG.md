@@ -1,6 +1,6 @@
 # Open in JSON Hero Changelog
 
-## [Preferences] - {PR_MERGE_DATE}
+## [Preferences] - 2024-12-20
 
 - Added optional Endpoint to preferences
 
