@@ -9,28 +9,41 @@
     "pernielsentikaer"
   ],
   "license": "MIT",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "list-emails",
       "title": "List Emails",
       "description": "Lists all the Hide My Email addresses associated with iCloud account.",
       "mode": "view",
-      "preferences": [{
-        "name": "sortByCreationDate",
-        "title": "Sort list by creation date",
-        "label": "Sort list on most recently created address",
-        "description": "If enabled, the email list is sorted on most recently created.",
-        "type": "checkbox",
-        "required": false,
-        "default": false
-      }]
+      "preferences": [
+        {
+          "name": "sortByCreationDate",
+          "title": "Sort list by creation date",
+          "label": "Sort list on most recently created address",
+          "description": "If enabled, the email list is sorted on most recently created.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "create-new-email",
       "title": "Create New Email",
       "description": "Opens form to create a new email Hide My Email address",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useChineseAccount",
+      "label": "Use Chinese Account",
+      "description": "Use Chinese Apple ID account",
+      "type": "checkbox",
+      "required": false
     }
   ],
   "dependencies": {
