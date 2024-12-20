@@ -67,10 +67,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <List.Section title="Warning">
-        <List.Item title="Experimental Product. Quit and reopen if issues occur." accessories={[{ text: "⚠️" }]} />
-      </List.Section>
-
       <List.Section title="Projects">
         <List.EmptyView
           icon={Icon.Document}
@@ -153,14 +149,14 @@ function ProjectForm({
       await onSave(updatedProjects);
     } else {
       // Create mode
-      const newProject = {
+      const newProject: ResearchProject = {
         id: Date.now().toString(),
         title: values.title,
         model: values.model,
         researchPrompt: values.researchPrompt,
-        status: "not_started" as const,
+        status: "not_started",
         currentStep: 0,
-      } satisfies ResearchProject;
+      };
       await onSave([...projects, newProject]);
     }
     pop();
@@ -188,11 +184,15 @@ function ProjectForm({
         defaultValue={initialProject?.researchPrompt}
       />
       <Form.Dropdown id="model" title="Model Selection" defaultValue={initialProject?.model}>
-        <Form.Dropdown.Item value="OpenAI_GPT4o-mini" title="OpenAI/GPT4o-Mini" />
         <Form.Dropdown.Item value="Anthropic_Claude_Sonnet" title="Anthropic/Claude-3.5-Sonnet" />
         <Form.Dropdown.Item value="Anthropic_Claude_Haiku" title="Anthropic/Claude-3.5-Haiku" />
         <Form.Dropdown.Item value="Anthropic_Claude_Opus" title="Anthropic/Claude-3-Opus" />
         <Form.Dropdown.Item value="OpenAI_GPT4o" title="OpenAI/GPT4o" />
+        <Form.Dropdown.Item value="OpenAI_GPT4o-mini" title="OpenAI/GPT4o-Mini" />
+        <Form.Dropdown.Item value="Llama3.3_70B" title="Meta/Llama-3.3-70B" />
+        <Form.Dropdown.Item value="Llama3_70B" title="Meta/Llama-3-70B" />
+        <Form.Dropdown.Item value="Llama3.1_8B" title="Meta/Llama-3.1-8B" />
+        <Form.Dropdown.Item value="Llama3.1_405B" title="Meta/Llama-3.1-405B" />
       </Form.Dropdown>
     </Form>
   );
@@ -225,11 +225,10 @@ function TopicDetail({
   const updateProjectStep = async (stepIndex: number) => {
     const updatedProjects = projects.map((p) => {
       if (p.id === project.id) {
-        const status: ResearchProject["status"] = stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress";
         return {
           ...p,
           currentStep: stepIndex,
-          status,
+          status: stepIndex === RESEARCH_STEPS.length - 1 ? ("completed" as const) : ("in_progress" as const),
         };
       }
       return p;
@@ -737,7 +736,7 @@ function ProjectDetail({
         return {
           ...p,
           currentStep: stepIndex,
-          status: (stepIndex === RESEARCH_STEPS.length - 1 ? "completed" : "in_progress") as const,
+          status: stepIndex === RESEARCH_STEPS.length - 1 ? ("completed" as const) : ("in_progress" as const),
         };
       }
       return p;
@@ -789,7 +788,7 @@ function ProjectDetail({
         topicDisplay: displayMarkdown,
         parsedTopics,
         currentStep: 1,
-        status: "in_progress" as const,
+        status: "in_progress" as ResearchProject["status"],
       };
 
       await showHUD("✨ Topics generated!");
@@ -848,7 +847,7 @@ function ProjectDetail({
         ...updatedProject,
         finalReport: finalResponse,
         currentStep: 4,
-        status: "completed" as const,
+        status: "completed" as ResearchProject["status"],
       };
 
       // Save all changes

@@ -8,6 +8,10 @@ Leverages Raycast AI to generate detailed research reports through an agentic pr
 - Claude 3 Opus
 - Claude 3.5 Sonnet
 - Claude 3.5 Haiku
+- Llama 3.3 70B
+- Llama 3.1 8B
+- Llama 3.1 405B
+- Llama 3 70B
 
 ---
 _Experimental extension. Developer is a high school student, hence updates are not guaranteed._
