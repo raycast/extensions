@@ -9,21 +9,17 @@ export function getSummaryBlockSnippet(
     Be as concise as possible.
     Do not use more then ${MAX_CHARS / splitTranscripts} characters.
     
-    Here is the transcript: ${summaryBlock}`
+    Here is the transcript: ${summaryBlock}`;
 }
 
-export function getAiInstructionSnippet(
-  language: string,
-  temporarySummary: string,
-  transcript: string | undefined,
-) {
+export function getAiInstructionSnippet(language: string, temporarySummary: string, transcript: string | undefined) {
   return `Summarize the following transcription of a youtube video as a list of the most important points each starting with a fitting emoji. Ignore Sponsor Segments and Video Sponsors. Answer in ${language}.
   
   Format:
 
   [Emoji] [List Item] &nbsp;&nbsp;
   
-  Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`
+  Here is the transcript: ${temporarySummary.length > 0 ? temporarySummary : transcript}`;
 }
 
 export function getFollowUpQuestionSnippet(question: string, transcript: string) {
@@ -33,5 +29,5 @@ export function getFollowUpQuestionSnippet(question: string, transcript: string)
 
   [Emoji] [List Item] &nbsp;&nbsp;
   
-  Here is the transcript: ${transcript}. This is the question: ${question}`
+  Here is the transcript: ${transcript}. This is the question: ${question}`;
 }

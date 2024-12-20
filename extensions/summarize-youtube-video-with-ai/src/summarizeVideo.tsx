@@ -1,5 +1,5 @@
-import nodeFetch from "node-fetch"
-;(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never
+import nodeFetch from "node-fetch";
+(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
 import {
   Action,
@@ -11,46 +11,46 @@ import {
   Toast,
   useNavigation,
   type LaunchProps,
-} from "@raycast/api"
+} from "@raycast/api";
 
-import { useEffect, useState } from "react"
-import ytdl from "ytdl-core"
-import { ALERT } from "./const/toast_messages"
-import { useFollowUpQuestion } from "./hooks/useFollowUpQuestion"
-import { useGetSummary } from "./hooks/useGetSummary"
-import { getVideoData, type VideoDataTypes } from "./utils/getVideoData"
-import { getVideoTranscript } from "./utils/getVideoTranscript"
+import { useEffect, useState } from "react";
+import ytdl from "ytdl-core";
+import { ALERT } from "./const/toast_messages";
+import { useFollowUpQuestion } from "./hooks/useFollowUpQuestion";
+import { useGetSummary } from "./hooks/useGetSummary";
+import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
+import { getVideoTranscript } from "./utils/getVideoTranscript";
 
 interface SummarizeVideoProps {
-  video: string
+  video: string;
 }
 export type Preferences = {
-  chosenAi: "anthropic" | "openai" | "raycastai"
-  creativity: "0" | "0.5" | "1" | "1.5" | "2"
-  openaiApiToken: string
-  anthropicApiToken: string
-  language: string
-}
+  chosenAi: "anthropic" | "openai" | "raycastai";
+  creativity: "0" | "0.5" | "1" | "1.5" | "2";
+  openaiApiToken: string;
+  anthropicApiToken: string;
+  language: string;
+};
 
 const SummarizeVideo = (
   props: LaunchProps<{
-    arguments: SummarizeVideoProps
+    arguments: SummarizeVideoProps;
   }>,
 ) => {
-  const [summary, setSummary] = useState<string | undefined>()
-  const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false)
-  const [transcript, setTranscript] = useState<string | undefined>()
-  const [videoData, setVideoData] = useState<VideoDataTypes>()
-  const { pop } = useNavigation()
-  const { video } = props.arguments
+  const [summary, setSummary] = useState<string | undefined>();
+  const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
+  const [transcript, setTranscript] = useState<string | undefined>();
+  const [videoData, setVideoData] = useState<VideoDataTypes>();
+  const { pop } = useNavigation();
+  const { video } = props.arguments;
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid URL/ID",
       message: "The passed URL/ID is invalid, please check your input.",
-    })
-    return null
+    });
+    return null;
   }
 
   useEffect(() => {
@@ -61,8 +61,8 @@ const SummarizeVideo = (
           style: Toast.Style.Failure,
           title: ALERT.title,
           message: "Error fetching video data: " + error.message,
-        })
-      })
+        });
+      });
     getVideoTranscript(video)
       .then(setTranscript)
       .catch((error) => {
@@ -70,42 +70,34 @@ const SummarizeVideo = (
           style: Toast.Style.Failure,
           title: ALERT.title,
           message: "Error fetching video transcript: " + error.message,
-        })
-      })
-  }, [video])
+        });
+      });
+  }, [video]);
 
   useEffect(() => {
-    if (transcript === undefined) return
+    if (transcript === undefined) return;
     useGetSummary({
       transcript,
       setSummaryIsLoading,
       setSummary,
-    })
-  }, [transcript])
+    });
+  }, [transcript]);
 
   const askQuestion = (question: string) => {
-    if (question === undefined || transcript === undefined) return
-    useFollowUpQuestion(question, transcript, setSummary, pop)
-  }
+    if (question === undefined || transcript === undefined) return;
+    useFollowUpQuestion(question, transcript, setSummary, pop);
+  };
 
-  if (!videoData) return null
-  const {
-    duration,
-    ownerChannelName,
-    ownerProfileUrl,
-    publishDate,
-    thumbnail,
-    title,
-    video_url,
-    viewCount,
-  } = videoData
+  if (!videoData) return null;
+  const { duration, ownerChannelName, ownerProfileUrl, publishDate, thumbnail, title, video_url, viewCount } =
+    videoData;
 
   const markdown = summary
     ? `${summary}
 
 ![${title}](${thumbnail?.url})
   `
-    : undefined
+    : undefined;
 
   return (
     <Detail
@@ -118,10 +110,7 @@ const SummarizeVideo = (
               <Form
                 actions={
                   <ActionPanel>
-                    <Action.SubmitForm
-                      title="Ask"
-                      onSubmit={({ question }) => askQuestion(question)}
-                    />
+                    <Action.SubmitForm title="Ask" onSubmit={({ question }) => askQuestion(question)} />
                   </ActionPanel>
                 }
               >
@@ -140,11 +129,7 @@ const SummarizeVideo = (
         videoData && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Title" text={title} />
-            <Detail.Metadata.Link
-              title="Channel"
-              target={ownerProfileUrl}
-              text={ownerChannelName}
-            />
+            <Detail.Metadata.Link title="Channel" target={ownerProfileUrl} text={ownerChannelName} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Published" text={publishDate} />
             <Detail.Metadata.Label title="Duration" text={duration} />
@@ -154,7 +139,7 @@ const SummarizeVideo = (
       }
       navigationTitle={videoData && `${title} by ${ownerChannelName}`}
     />
-  )
-}
+  );
+};
 
-export default SummarizeVideo
+export default SummarizeVideo;
