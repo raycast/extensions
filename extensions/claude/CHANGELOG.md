@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] -  2024-12-20
+
+- Fix: Models dropdown not displaying all models correctly
+
 ## [Update] - 2024-12-12
 
 - Fix: Remove duplicated "Copy Question" action, use existing with tweaked conditions
