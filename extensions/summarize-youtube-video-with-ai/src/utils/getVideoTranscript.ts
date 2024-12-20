@@ -1,27 +1,25 @@
-import { Toast, popToRoot, showToast } from "@raycast/api";
-import { YoutubeTranscript } from "youtube-transcript";
+import { Toast, popToRoot, showToast } from "@raycast/api"
+import { YoutubeTranscript } from "youtube-transcript"
 
-async function getVideoTranscript(video: string) {
+export async function getVideoTranscript(video: string) {
   const transcript = await YoutubeTranscript.fetchTranscript(video)
     .then((result) => {
       const joinedTranscription = result
         .map((item) => item.text)
         .join(" ")
-        .replaceAll("\n", " ");
+        .replaceAll("\n", " ")
 
-      return joinedTranscription;
+      return joinedTranscription
     })
     .catch(() => {
       showToast({
         style: Toast.Style.Failure,
         title: "❗",
         message: "Sorry, this video doesn't have a transcript.",
-      });
-      popToRoot();
-      return undefined;
-    });
+      })
+      popToRoot()
+      return undefined
+    })
 
-  return transcript;
+  return transcript
 }
-
-export default getVideoTranscript;
