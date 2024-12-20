@@ -51,7 +51,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
         !state.isShowingDetails
           ? [
               !transaction.approved
-                ? { icon: { source: Icon.MagnifyingGlass, tintColor: Color.Orange }, tooltip: 'Unreviewed transaction' }
+                ? { icon: { source: Icon.MagnifyingGlass, tintColor: Color.Orange }, tooltip: 'Unreviewed' }
                 : {},
               isReconciled ? { icon: { source: Icon.Lock, tintColor: Color.Green }, tooltip: 'Reconciled' } : {},
               transaction.transfer_account_id ? { icon: Icon.Switch, tooltip: 'Transfer' } : {},
