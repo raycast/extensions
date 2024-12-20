@@ -1,16 +1,30 @@
 # Pritunl
 
-Extention help quickly connect already configured Pritunl VPN tunnel.
+Extention helps to quickly connect to already configured Pritunl VPN tunnel.
 
-For the sake of simplicity, there is no UI for selection for different connections, just find ID and put it to the settings as per screenshot.
+For the sake of simplicity, there is no UI support for multiple connections.
 
+## Setup
 
-1. Select Pritunl appliction from dropdown menu.
+1. Open extention settings and select "Pritunl App" from dropdown menu.
 2. Find your connection id using command 
+
 ``` shell
 /Applications/Pritunl.app/Contents/Resources/pritunl-client list -j | jq
 ```
-and put it to the Pritunl Connection ID field.  
-3. Set your PIN for conenction.
 
-(assets/preferences.png)
+or just copy from the Pritunl connection settings from UI as per screenshot.
+
+![](assets/pritunl_id.png)
+
+and put it to the extention Pritunl Connection ID field.
+
+3. Set your PIN for the connection.
+
+![](assets/preferences.png)
+
+## Usage 
+
+Run pritunl command in Raycast and enjoy automated VPN connection.
+
+The small notification "Pritunl is connecting" should appear.
