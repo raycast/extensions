@@ -1,6 +1,6 @@
 # HideMyEmail Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-12-20
 
 - Fixed typo
 - Changed default setting email list order
