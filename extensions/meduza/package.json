@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meduza",
   "title": "Meduza",
-  "description": "Every day, we bring you the most important news and feature stories from hundreds of sources in Russia and across the former Soviet Union. Our team includes some of Russia’s top professionals in news and reporting. We value our independence and strive to be a reliable, trusted outlet for verified, unbiased information about Russia and the former Soviet Union, as well as a source for sharp insights about one of the world’s most enigmatic regions",
+  "description": "Every day, we bring you the most important news and feature stories from hundreds of sources in Russia and across the former Soviet Union. Our team includes some of Russia's top professionals in news and reporting. We value our independence and strive to be a reliable, trusted outlet for verified, unbiased information about Russia and the former Soviet Union, as well as a source for sharp insights about one of the world's most enigmatic regions",
   "icon": "icon.png",
   "author": "castletaste",
   "access": "public",
@@ -24,6 +24,20 @@
       "subtitle": "Новости",
       "description": "Последние новости",
       "mode": "view"
+    },
+    {
+      "name": "ru-summary",
+      "title": "Meduza",
+      "subtitle": "Сводка новостей",
+      "description": "AI-дайджест последних новостей",
+      "mode": "view"
+    },
+    {
+      "name": "en-summary",
+      "title": "Meduza",
+      "subtitle": "News Summary",
+      "description": "AI-powered news digest",
+      "mode": "view"
     }
   ],
   "keywords": [
@@ -37,18 +51,18 @@
     "independent media"
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
     "rss-parser": "^3.13.0",
     "timeago.js": "^4.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@types/node": "20.17.10",
+    "@types/react": "18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",
