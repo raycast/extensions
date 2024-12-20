@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
@@ -9,7 +9,27 @@ const execAsync = promisify(exec);
 const scriptPath = path.join(os.tmpdir(), "mouse-halo-indicator.swift");
 const stateFile = path.join(os.tmpdir(), "mouse-halo.state");
 
-const swiftCode = `
+interface Preferences {
+  backgroundColor: string;
+  borderColor: string;
+  backgroundOpacity: string;
+}
+
+function hexToRGB(hex: string): { r: number; g: number; b: number } {
+  const cleanHex = hex.replace("#", "");
+  return {
+    r: parseInt(cleanHex.substring(0, 2), 16) / 255,
+    g: parseInt(cleanHex.substring(2, 4), 16) / 255,
+    b: parseInt(cleanHex.substring(4, 6), 16) / 255,
+  };
+}
+
+function getSwiftCode(prefs: Preferences): string {
+  const bgColor = hexToRGB(prefs.backgroundColor);
+  const borderColor = hexToRGB(prefs.borderColor);
+  const opacity = parseFloat(prefs.backgroundOpacity);
+
+  return `
 import Cocoa
 
 class HaloWindow: NSWindow {
@@ -33,8 +53,8 @@ class HaloWindow: NSWindow {
         
         let circle = CAShapeLayer()
         circle.path = CGPath(ellipseIn: CGRect(x: 2, y: 2, width: 36, height: 36), transform: nil)
-        circle.fillColor = CGColor(red: 1, green: 0, blue: 0, alpha: 0.2)
-        circle.strokeColor = CGColor(red: 1, green: 0, blue: 0, alpha: 1)
+        circle.fillColor = CGColor(red: ${bgColor.r}, green: ${bgColor.g}, blue: ${bgColor.b}, alpha: ${opacity})
+        circle.strokeColor = CGColor(red: ${borderColor.r}, green: ${borderColor.g}, blue: ${borderColor.b}, alpha: 1)
         circle.lineWidth = 2
         
         haloView.layer?.addSublayer(circle)
@@ -51,6 +71,7 @@ let window = HaloWindow()
 window.makeKeyAndOrderFront(nil)
 app.run()
 `;
+}
 
 async function isHaloRunning(): Promise<boolean> {
   return fs.existsSync(stateFile);
@@ -61,8 +82,11 @@ async function startHalo() {
     // Create state file
     fs.writeFileSync(stateFile, "running");
 
+    // Get user preferences
+    const preferences = getPreferenceValues<Preferences>();
+
     // Write Swift code to file
-    fs.writeFileSync(scriptPath, swiftCode);
+    fs.writeFileSync(scriptPath, getSwiftCode(preferences));
 
     // Compile and run
     await execAsync(`swiftc "${scriptPath}" -o "${scriptPath}.out"`);

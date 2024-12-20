@@ -2,16 +2,42 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mouse-halo",
   "title": "Mouse Halo",
-  "description": "Adds a halo around your mouse pointer",
-  "icon": "extension-icon.png",
+  "description": "Adds a halo around your mouse pointer. Useful for screensharing and presentations.",
+  "icon": "extension_icon.png",
   "author": "justinheinze",
   "license": "MIT",
   "commands": [
     {
       "name": "mouse-halo-toggle",
-      "title": "Mouse Halo Toggle",
-      "description": "Toggle Mouse Halo Off/On",
+      "title": "Mouse Halo",
+      "description": "Toggle Mouse Halo On/Off",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "backgroundColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Background Color",
+      "description": "Background color in hex format (e.g., #FF0000). Updates require toggle to take effect.",
+      "default": "#FF0000"
+    },
+    {
+      "name": "borderColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Border Color",
+      "description": "Border color in hex format (e.g., #FF0000). Updates require toggle to take effect.",
+      "default": "#FF0000"
+    },
+    {
+      "name": "backgroundOpacity",
+      "type": "textfield",
+      "required": false,
+      "title": "Background Opacity",
+      "description": "Background opacity (0.0 to 1.0). Updates require toggle to take effect.",
+      "default": "0.2"
     }
   ],
   "dependencies": {
