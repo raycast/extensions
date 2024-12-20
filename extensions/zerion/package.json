@@ -20,6 +20,7 @@
     {
       "name": "my-wallets",
       "title": "My Wallets",
+      "subtitle": "Zerion",
       "description": "View your wallets overview",
       "mode": "view",
       "keywords": [
@@ -32,6 +33,7 @@
     {
       "name": "address-info",
       "title": "Overview",
+      "subtitle": "Zerion",
       "description": "Overview a portofolio using an address or an ENS name",
       "mode": "view",
       "keywords": [
@@ -54,6 +56,7 @@
     {
       "name": "find-token-or-address",
       "title": "Search Web3",
+      "subtitle": "Zerion",
       "description": "Search any token, address or domain",
       "mode": "view",
       "keywords": [
@@ -76,6 +79,7 @@
     {
       "name": "menu-bar-wallet",
       "title": "Menu Bar Wallet",
+      "subtitle": "Zerion",
       "description": "View your wallet's value in the menu bar",
       "mode": "menu-bar",
       "interval": "5m"
