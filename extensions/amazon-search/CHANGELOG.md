@@ -1,6 +1,6 @@
 # Amazon Search Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2024-12-20
 
 - Added the ability for the user-entered term to always appear as the first suggestion, regardless of API results.
 - Changed the empty state message.
