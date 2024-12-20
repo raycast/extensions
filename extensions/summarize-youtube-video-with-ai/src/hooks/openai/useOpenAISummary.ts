@@ -76,7 +76,7 @@ export const useOpenAISummary = async ({
     setSummaryIsLoading(false)
     showToast({
       style: Toast.Style.Failure,
-      title: "🚨",
+      title: ALERT.title,
       message: error.message,
     })
   })
