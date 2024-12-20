@@ -24,6 +24,19 @@ import {
 import { LocalStorage } from "@raycast/api";
 import { getNestedHeader, hashPassword } from "./utils";
 
+const ENDPOINTS = {
+  DEFAULT: {
+    AUTH_ENDPOINT: "https://idmsa.apple.com/appleauth/auth",
+    HOME_ENDPOINT: "https://www.icloud.com",
+    SETUP_ENDPOINT: "https://setup.icloud.com/setup/ws/1",
+  },
+  CHINA: {
+    AUTH_ENDPOINT: "https://idmsa.apple.com/appleauth/auth",
+    HOME_ENDPOINT: "https://www.icloud.com.cn",
+    SETUP_ENDPOINT: "https://setup.icloud.com.cn/setup/ws/1",
+  },
+};
+
 interface ErrorData {
   error?: string;
   reason?: string;
@@ -187,13 +200,12 @@ export class iCloudSession {
 }
 
 export class iCloudService {
-  static AUTH_ENDPOINT: string = "https://idmsa.apple.com/appleauth/auth";
-  static HOME_ENDPOINT: string = "https://www.icloud.com";
-  static SETUP_ENDPOINT: string = "https://setup.icloud.com/setup/ws/1";
-
   private appleID: string;
   private clientID: string;
   private session: iCloudSession;
+  private authEndpoint: string;
+  private homeEndpoint: string;
+  private setupEndpoint: string;
 
   private webservices!: Record<string, unknown>;
   private sessionData: Record<string, unknown> = {};
@@ -204,10 +216,14 @@ export class iCloudService {
     hsaTrustedBrowser?: string;
   };
 
-  constructor(appleID: string) {
+  constructor(appleID: string, options: Options = {}) {
     this.appleID = appleID;
     this.clientID = `auth-${uuidv1().toLowerCase()}`;
     this.session = new iCloudSession(this);
+    const endpiontCountry = options.useChineseAccount ? "CHINA" : "DEFAULT";
+    this.authEndpoint = ENDPOINTS[endpiontCountry].AUTH_ENDPOINT;
+    this.homeEndpoint = ENDPOINTS[endpiontCountry].HOME_ENDPOINT;
+    this.setupEndpoint = ENDPOINTS[endpiontCountry].SETUP_ENDPOINT;
   }
 
   async init() {
@@ -224,8 +240,8 @@ export class iCloudService {
 
     await this.session.init();
     Object.assign(this.session.instance.defaults.headers.common, {
-      Origin: iCloudService.HOME_ENDPOINT,
-      Referer: `${iCloudService.HOME_ENDPOINT}/`,
+      Origin: this.homeEndpoint,
+      Referer: `${this.homeEndpoint}/`,
     });
   }
 
@@ -271,7 +287,7 @@ export class iCloudService {
     let m2;
     let c;
     try {
-      let response = await this.session.request("post", `${iCloudService.AUTH_ENDPOINT}/signin/init`, {
+      let response = await this.session.request("post", `${this.authEndpoint}/signin/init`, {
         data,
         headers: this.getAuthHeaders(),
       });
@@ -287,7 +303,7 @@ export class iCloudService {
 
       // Make actual request with public key A to receive public key B
       data.a = srpClient.computeA().toString("base64");
-      response = await this.session.request("post", `${iCloudService.AUTH_ENDPOINT}/signin/init`, {
+      response = await this.session.request("post", `${this.authEndpoint}/signin/init`, {
         data,
         headers: this.getAuthHeaders(),
       });
@@ -316,7 +332,7 @@ export class iCloudService {
           trustTokens: [],
         };
         // Sets session token
-        await this.session.request("post", `${iCloudService.AUTH_ENDPOINT}/signin/complete`, {
+        await this.session.request("post", `${this.authEndpoint}/signin/complete`, {
           data,
           params: { isRememberMeEnabled: "true" },
           headers: this.getAuthHeaders(),
@@ -337,7 +353,7 @@ export class iCloudService {
     };
 
     try {
-      const response = await this.session.request("post", `${iCloudService.SETUP_ENDPOINT}/accountLogin`, { data });
+      const response = await this.session.request("post", `${this.setupEndpoint}/accountLogin`, { data });
       this.data = response.data;
     } catch (error) {
       if (error instanceof iCloudAPIResponseError)
@@ -347,7 +363,7 @@ export class iCloudService {
   }
 
   async validateToken() {
-    const response = await this.session.request("post", `${iCloudService.SETUP_ENDPOINT}/validate`);
+    const response = await this.session.request("post", `${this.setupEndpoint}/validate`);
     return response.data;
   }
 
@@ -366,7 +382,7 @@ export class iCloudService {
     const data = { securityCode: { code: code } };
     const headers = this.getAuthHeaders(true);
 
-    await this.session.request("post", `${iCloudService.AUTH_ENDPOINT}/verify/trusteddevice/securitycode`, {
+    await this.session.request("post", `${this.authEndpoint}/verify/trusteddevice/securitycode`, {
       data,
       headers,
     });
@@ -383,7 +399,7 @@ export class iCloudService {
     if (!this.data?.dsInfo?.ICDRSCapableDeviceCount) {
       try {
         const data = { phoneNumber: { id: 1 }, mode: "sms" };
-        const response = await this.session.request("put", `${iCloudService.AUTH_ENDPOINT}/verify/phone`, {
+        const response = await this.session.request("put", `${this.authEndpoint}/verify/phone`, {
           data,
           headers,
         });
@@ -395,7 +411,7 @@ export class iCloudService {
     }
 
     // There is a trusted device
-    await this.session.request("put", `${iCloudService.AUTH_ENDPOINT}/verify/trusteddevice/securitycode`, { headers });
+    await this.session.request("put", `${this.authEndpoint}/verify/trusteddevice/securitycode`, { headers });
     return null;
   }
 
@@ -403,7 +419,7 @@ export class iCloudService {
     const headers = this.getAuthHeaders(true);
 
     try {
-      await this.session.request("get", `${iCloudService.AUTH_ENDPOINT}/2sv/trust`, { headers });
+      await this.session.request("get", `${this.authEndpoint}/2sv/trust`, { headers });
       await this.authenticateWithToken();
       return true;
     } catch (error) {
@@ -466,4 +482,8 @@ export class iCloudService {
     const serviceRoot = this.getWebserviceUrl("premiummailsettings");
     return new HideMyEmailService(serviceRoot, this, this.session);
   }
+}
+
+interface Options {
+  useChineseAccount?: boolean;
 }
