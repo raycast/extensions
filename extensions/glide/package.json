@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "glide",
-      "title": "Glide",
+      "title": "Open Glide Apps",
       "description": "Open Glide Apps",
       "mode": "view"
     }
