@@ -47,7 +47,7 @@ export default function Command() {
       <Action
         title={device.state === "Booted" ? "Open" : "Boot"}
         icon={Icon.Power}
-        onAction={async () => {
+        onAction={() => {
           exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
