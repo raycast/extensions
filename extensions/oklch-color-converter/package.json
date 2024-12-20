@@ -11,6 +11,7 @@
     {
       "name": "convert-color",
       "title": "Convert Color",
+      "subtitle": "Oklch Color Converter",
       "description": "Convert colors between different color spaces and formats",
       "mode": "view"
     }
