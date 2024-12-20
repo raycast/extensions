@@ -14,7 +14,7 @@
     {
       "name": "search-polaris",
       "title": "Search Polaris Docs",
-      "subtitle": "Search Shopify Polaris Documentation",
+      "subtitle": "Shopify Polaris Docs",
       "description": "Search through Shopify Polaris documentation from Raycast",
       "mode": "view"
     }
