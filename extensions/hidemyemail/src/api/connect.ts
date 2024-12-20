@@ -220,10 +220,10 @@ export class iCloudService {
     this.appleID = appleID;
     this.clientID = `auth-${uuidv1().toLowerCase()}`;
     this.session = new iCloudSession(this);
-    const endpiontCountry = options.useChineseAccount ? "CHINA" : "DEFAULT";
-    this.authEndpoint = ENDPOINTS[endpiontCountry].AUTH_ENDPOINT;
-    this.homeEndpoint = ENDPOINTS[endpiontCountry].HOME_ENDPOINT;
-    this.setupEndpoint = ENDPOINTS[endpiontCountry].SETUP_ENDPOINT;
+    const endpointCountry = options.useChineseAccount ? "CHINA" : "DEFAULT";
+    this.authEndpoint = ENDPOINTS[endpointCountry].AUTH_ENDPOINT;
+    this.homeEndpoint = ENDPOINTS[endpointCountry].HOME_ENDPOINT;
+    this.setupEndpoint = ENDPOINTS[endpointCountry].SETUP_ENDPOINT;
   }
 
   async init() {

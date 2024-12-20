@@ -26,3 +26,7 @@ A quick way to generate a new iCloud Hide My Email address.
 ## Chinese Apple ID
 
 To use a Chinese Apple ID, please enable the `Use Chinese Account` checkbox in the extension settings.
+
+## Acknowledgments
+
+The iCloud API is derived from the [pyiCloud](https://github.com/picklepete/pyicloud) module.
