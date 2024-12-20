@@ -6,10 +6,6 @@ export interface Route {
   action: string;
 }
 
-export interface Preferences {
-  port: string;
-}
-
 export interface GroupedRoute {
   path: string;
   methods: Route[];
