@@ -1,6 +1,6 @@
 # Threads Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2024-12-21
 
 - Added the `Download Threads Media` command to download medias from Threads.
 
