@@ -1,5 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, LaunchType, open } from "@raycast/api";
-import { crossLaunchCommand } from "raycast-cross-extension";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, open } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -12,20 +11,7 @@ export default function Command() {
           <ActionPanel>
             <Action
               title="Open Threads Extension"
-              onAction={() =>
-                crossLaunchCommand({
-                  name: "threads",
-                  type: LaunchType.UserInitiated,
-                  extensionName: "threads",
-                  ownerOrAuthorName: "chrismessina",
-                  context: {
-                    foo: "foo",
-                    bar: "bar",
-                  },
-                }).catch(() => {
-                  open("raycast://extensions/chrismessina/threads");
-                })
-              }
+              onAction={() => open("raycast://extensions/chrismessina/threads")}
               icon={Icon.ArrowRight}
             />
             <Action
