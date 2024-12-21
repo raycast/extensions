@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { OmniFocusTask } from "./lib/types/task";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, open, Keyboard } from "@raycast/api";
 import { listTasks } from "./lib/api/list-tasks";
 import { deleteTask } from "./lib/api/delete-task";
 import { completeTask } from "./lib/api/complete.task";
@@ -83,6 +83,7 @@ export default function ListInboxTasks() {
                   />
                   <Action
                     title="Delete"
+                    style={Action.Style.Destructive}
                     onAction={async () => {
                       await deleteTask(t.id);
                       await showToast({
@@ -92,6 +93,7 @@ export default function ListInboxTasks() {
                       await fetchTasks();
                     }}
                     icon={Icon.Trash}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                 </ActionPanel>
               }
