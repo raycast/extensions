@@ -1,19 +1,12 @@
-import { closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { closeMainWindow, environment, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import path from "path";
-import os from "os";
 
 const execAsync = promisify(exec);
-const scriptPath = path.join(os.tmpdir(), "mouse-halo-indicator.swift");
-const stateFile = path.join(os.tmpdir(), "mouse-halo.state");
-
-interface Preferences {
-  backgroundColor: string;
-  borderColor: string;
-  backgroundOpacity: string;
-}
+const scriptPath = path.join(environment.supportPath, "mouse-halo-indicator.swift");
+const stateFile = path.join(environment.supportPath, "mouse-halo.state");
 
 function hexToRGB(hex: string): { r: number; g: number; b: number } {
   const cleanHex = hex.replace("#", "");
