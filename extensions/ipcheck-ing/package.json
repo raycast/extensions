@@ -9,6 +9,66 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "getLocalIPs",
+      "title": "Local IPs",
+      "description": "Get Local IPs",
+      "label": "Get Local IPs",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromCloudflare_V4",
+      "title": "External IP Sources to Fetch",
+      "description": "Fetch IP from CloudFlare IPv4",
+      "label": "CloudFlare IPv4",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromCloudflare_V6",
+      "description": "Fetch IP from CloudFlare IPv6",
+      "label": "CloudFlare IPv6",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromIPCheck4",
+      "description": "Fetch IP from IPCheck.ing IPv4",
+      "label": "IPCheck.ing IPv4",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromIPCheck6",
+      "description": "Fetch IP from IPCheck.ing IPv6",
+      "label": "IPCheck.ing IPv6",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromIPCheck64",
+      "description": "Fetch IP from IPCheck.ing DualStack",
+      "label": "IPCheck.ing DualStack",
+      "default": true,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "getIPFromIPIP",
+      "description": "Fetch IP from IPIP.net",
+      "label": "IPIP.net",
+      "default": true,
+      "required": true
+    }
+  ],
   "commands": [
     {
       "name": "main",
