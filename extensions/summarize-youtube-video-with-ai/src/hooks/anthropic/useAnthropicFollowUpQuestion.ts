@@ -11,7 +11,7 @@ export const useAnthropicFollowUpQuestion = async (
   pop: () => void,
 ) => {
   const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, anthropicApiToken } = preferences;
+  const { chosenAi, anthropicApiToken, anthropicModel } = preferences;
   setSummary(undefined);
 
   if (chosenAi !== "anthropic") {
@@ -29,7 +29,7 @@ export const useAnthropicFollowUpQuestion = async (
   });
 
   const answer = anthropic.messages.stream({
-    model: "claude-3-5-sonnet-latest",
+    model: anthropicModel,
     max_tokens: 8192,
     stream: true,
     messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
