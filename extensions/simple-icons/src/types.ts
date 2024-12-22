@@ -27,10 +27,6 @@ export type IconData = {
   aliases?: Aliases;
 };
 
-export type IconJson = {
-  icons: IconData[];
-};
-
 export type JsDelivrNpmResponse = {
   type: string;
   name: string;
