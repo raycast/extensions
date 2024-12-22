@@ -1,7 +1,7 @@
 // src/index.tsx
-import { ActionPanel, Action, List } from "@raycast/api";
-import Parser from "rss-parser";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, List } from "@raycast/api"
+import { useCachedPromise } from "@raycast/utils"
+import Parser from "rss-parser"
 
 // interface NewsItem {
 //     title: string;
@@ -10,21 +10,21 @@ import { useCachedPromise } from "@raycast/utils";
 // }
 
 async function fetchNews() {
-  const parser = new Parser();
-  const feed = await parser.parseURL("http://feeds.bbci.co.uk/news/rss.xml");
+  const parser = new Parser()
+  const feed = await parser.parseURL("http://feeds.bbci.co.uk/news/rss.xml")
 
   return feed.items.map((item) => ({
     title: item.title || "",
     link: item.link || "",
     pubDate: item.pubDate || "",
-  }));
+  }))
 }
 
 export default function Command() {
-  const { data: items, isLoading } = useCachedPromise(fetchNews);
+  const { data: items, isLoading } = useCachedPromise(fetchNews)
 
   return (
-    <List isLoading={isLoading} navigationTitle="BBC News Headlines" searchBarPlaceholder="Search headlines...">
+    <List isLoading={isLoading} navigationTitle="News Headlines" searchBarPlaceholder="Search headlines...">
       {items?.map((item, index) => (
         <List.Item
           key={index}
@@ -47,5 +47,5 @@ export default function Command() {
         />
       ))}
     </List>
-  );
+  )
 }
