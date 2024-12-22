@@ -4,7 +4,7 @@
 
 Features:
 
-- 🆕 Add new Model for Gemini 2.0 Flash Experimental
+- 🆕 Add new Models for Gemini 2.0 Flash Experimental, Gemini Experimental 1206, Gemini 2.0 Flash Thinking Experimental and LearnLM 1.5 Pro Experimental
 - 🧹 Allow prompts to be customizable in Raycast Settings
 - 🗯️ Add ability to add a default Translate language, and also ability to override with a parameter
 
