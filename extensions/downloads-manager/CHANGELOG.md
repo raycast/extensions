@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Add show hidden files preference] - {PR_MERGE_DATE}
+
+- Added a preference to show hidden files in the `Manage Downloads` command
+
 ## [Add close window script] - 2024-10-29
 
 - Added a script to close the window to ensure it closes after the action is completed
