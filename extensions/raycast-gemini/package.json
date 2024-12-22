@@ -6,7 +6,8 @@
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "ViGeng"
   ],
   "categories": [
     "Productivity",
@@ -49,6 +50,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -97,6 +106,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -137,6 +154,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -168,6 +193,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -199,6 +232,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -230,6 +271,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -261,6 +310,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -292,6 +349,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -323,6 +388,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -354,6 +427,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -385,6 +466,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -416,6 +505,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -455,6 +552,14 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 flash (exp)",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini 1.5 flash (8b)",
+              "value": "gemini-1.5-flash-8b-latest"
             }
           ]
         }
@@ -484,6 +589,14 @@
         {
           "title": "Gemini 1.5 Flash",
           "value": "gemini-1.5-flash-latest"
+        },
+        {
+          "title": "Gemini 2.0 flash (exp)",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "Gemini 1.5 flash (8b)",
+          "value": "gemini-1.5-flash-8b-latest"
         }
       ]
     }

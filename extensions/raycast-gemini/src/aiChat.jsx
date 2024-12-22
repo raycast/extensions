@@ -1,19 +1,19 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  getPreferenceValues,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
+  ActionPanel,
   confirmAlert,
+  Form,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
+import { useEffect, useState } from "react";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -86,6 +86,8 @@ export default function Chat({ launchContext }) {
           <Form.Dropdown.Item title="Default" value="default" />
           <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
           <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
+          <Form.Dropdown.Item title="Gemini 2.0 flash (exp)" value="gemini-2.0-flash-exp" />
+          <Form.Dropdown.Item title="Gemini 1.5 flash (8b)" value="gemini-1.5-flash-8b-latest" />
         </Form.Dropdown>
       </Form>
     );
