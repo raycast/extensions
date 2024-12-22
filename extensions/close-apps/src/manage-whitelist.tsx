@@ -65,7 +65,7 @@ export default function AppList() {
     const newWhitelist = new Set(
       application.isWhitelisted
         ? whitelistedApps?.filter((app) => app !== application.name) || []
-        : [...(whitelistedApps || []), application.name]
+        : [...(whitelistedApps || []), application.name],
     );
 
     setWhitelistedApps(Array.from(newWhitelist));
