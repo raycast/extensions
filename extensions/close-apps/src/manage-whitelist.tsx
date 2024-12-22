@@ -52,7 +52,7 @@ export default function AppList() {
       case "open":
         return openApps;
       case "whitelisted":
-        return whitelistedApps?.map((app) => ({
+        return Array.from(new Set(whitelistedApps)).map((app) => ({
           name: app,
           isWhitelisted: true,
         }));
@@ -62,11 +62,13 @@ export default function AppList() {
   }, [listState, allApps, openApps, whitelistedApps]);
 
   const toggleWhitelist = (application: Application) => {
-    const newWhitelist = application.isWhitelisted
-      ? whitelistedApps?.filter((app) => app !== application.name) || []
-      : [...(whitelistedApps || []), application.name];
+    const newWhitelist = new Set(
+      application.isWhitelisted
+        ? whitelistedApps?.filter((app) => app !== application.name) || []
+        : [...(whitelistedApps || []), application.name]
+    );
 
-    setWhitelistedApps(newWhitelist);
+    setWhitelistedApps(Array.from(newWhitelist));
     revalidate();
 
     showToast({
@@ -136,9 +138,9 @@ export default function AppList() {
       }
     >
       <List.Section title={StateToTitle[listState]} subtitle={`${apps?.length} apps`}>
-        {apps?.map((app) => (
+        {apps?.map((app, index) => (
           <List.Item
-            key={app.name}
+            key={`${app.name}-${index}`}
             title={app.name}
             icon={{ fileIcon: extractIcon(app.name) }}
             accessories={[

@@ -19,10 +19,16 @@ export const getOpenApps = async (): Promise<string[]> => {
 		end tell
 	`);
 
-  const apps = openApps
-    .split(",")
-    .map((app) => app.replace(/\.app$/, "").trim())
-    .filter((app) => !systemWhitelist.includes(app));
+  const systemWhitelistSet = new Set(systemWhitelist);
+
+  const apps = Array.from(
+    new Set(
+      openApps
+        .split(",")
+        .map((app) => app.replace(/\.app$/, "").trim())
+        .filter((app) => !systemWhitelistSet.has(app))
+    )
+  );
   return apps;
 };
 
@@ -33,10 +39,11 @@ export const getAllApps = async (): Promise<string[]> => {
         reject(`Error: ${stderr}`);
         return;
       }
-      const appNames = stdout
+      const appNames = Array.from(new Set(stdout
         .split("\n")
         .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b));
+        .sort((a, b) => a.localeCompare(b))
+      ));
       resolve(appNames);
     });
   });
