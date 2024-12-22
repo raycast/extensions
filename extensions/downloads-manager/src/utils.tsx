@@ -4,7 +4,7 @@ import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
 const showHiddenFiles = preferences.showHiddenFiles;
 
