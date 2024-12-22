@@ -1,5 +1,17 @@
 # Changelog
 
+## [Bug fixes] - 2024-12-19
+
+- **search**: Fix some issues where results do not reset when a search returns no results or fails.
+
+## [Smoother search and bug fixes](https://github.com/raycast/extensions/pull/15862) - 2024-12-14
+
+- **search**: Opening a query in browser now correctly preserves the selected pattern type from the pattern type selector.
+- **search**: Typing during ongoing searches should feel less jittery, as the suggestion view is now less likely to show up randomly.
+- **search**: Loading state looks better with a better no-results view that shows progress and options to continue the search in browser or cancel it entirely.
+- **dotcom**: When using 'Public code on Sourcegraph.com' commands, if an access token is not provided a random anonymous user ID is now generated and used with API requests and telemetry for diagnostics. Telemetry can be disabled in the extension preferences.
+- **doc**: 'Sourcegraph.com' commands are now called 'Public code on Sourcegraph.com', and 'Sourcegraph instance' commands are now just referred to as 'Sourcegraph' commands.
+
 ## [Search improvements, pattern selector, and proxy support](https://github.com/raycast/extensions/pull/15625) - 2024-11-30
 
 - **search**: The search pattern selector is now enabled by default, allowing you to easily toggle between standard, literal, regexp, and other search patterns. This can be disabled in the extension preferences if you find the dropdown takes up too much space in the search bar.

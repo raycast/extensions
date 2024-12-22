@@ -289,14 +289,6 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "maxitems",
-          "description": "Maximum issues shown per category.",
-          "type": "textfield",
-          "required": false,
-          "title": "Max Issues per category",
-          "placeholder": "10"
-        },
-        {
           "name": "showtext",
           "description": "Show issues count with menu bar icon.",
           "type": "checkbox",
@@ -304,6 +296,22 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum issues shown per category.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Issues per category",
+          "placeholder": "10"
         },
         {
           "name": "showCreated",
@@ -347,6 +355,23 @@
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
+        {
+          "name": "showtext",
+          "description": "Show pull requests count with menu bar icon.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show",
+          "title": "Icon Count",
+          "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
         {
           "name": "includeAssigned",
           "type": "checkbox",
@@ -395,15 +420,6 @@
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
-        },
-        {
-          "name": "showtext",
-          "description": "Show pull requests count with menu bar icon.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show",
-          "title": "Icon Count",
-          "default": true
         }
       ]
     }

@@ -232,10 +232,9 @@ const globFromChannel = async (tool: Tool, channel: ChannelDetail) => {
   if (tool.toolName === undefined) {
     return [];
   }
-  const build = channel.history?.toolBuilds[0] ?? {};
+  const build = channel.history?.toolBuilds?.[0] ?? {};
   const directoryPatterns = build?.tool?.intelliJProperties?.directoryPatterns ?? [];
-  const recentProjectsFilenames =
-    channel.history?.toolBuilds[0]?.tool?.intelliJProperties?.recentProjectsFilenames ?? [];
+  const recentProjectsFilenames = build?.tool?.intelliJProperties?.recentProjectsFilenames ?? [];
   if (directoryPatterns.length === 0 || recentProjectsFilenames.length === 0) {
     const defaults = (tool?.extensions ?? []).find(
       (extension: Extension) => extension?.defaultConfigDirectories ?? false

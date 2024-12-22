@@ -2,10 +2,11 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Llama3.1 8B 132k", id: "llama-3.1-8b-instant" },
-  { name: "Llama3.1 70B 132k", id: "llama-3.1-70b-versatile" },
-  { name: "Llama3 8B 8k", id: "llama3-8b-8192" },
-  { name: "Llama3 70B 8k", id: "llama3-70b-8192" },
+  { name: "Llama 3.1 8B 128k", id: "llama-3.1-8b-instant" },
+  { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-versatile" },
+  { name: "Llama 3.3 70B SpecDec 8k", id: "llama-3.3-70b-specdec" },
+  { name: "Llama 3 8B 8k", id: "llama3-8b-8192" },
+  { name: "Llama 3 70B 8k", id: "llama3-70b-8192" },
   { name: "Mixtral 8x7B 32k", id: "mixtral-8x7b-32768" },
   { name: "Gemma 7B 8k", id: "gemma-7b-it" },
   { name: "Gemma2 9B 8k", id: "gemma2-9b-it" },
@@ -33,8 +34,11 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       price = ((prompt_token * 0.24) / 1_000_000 + (output_token * 0.24) / 1_000_000) * 100;
       break;
     case "llama3-70b-8192":
-    case "llama-3.1-70b-versatile":
+    case "llama-3.3-70b-versatile":
       price = ((prompt_token * 0.59) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
+      break;
+    case "llama-3.3-70b-specdec":
+      price = ((prompt_token * 0.59) / 1_000_000 + (output_token * 0.99) / 1_000_000) * 100;
       break;
     case "llama3-8b-8192":
     case "llama-3.1-8b-instant":

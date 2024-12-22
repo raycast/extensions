@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-apple-intelligence",
   "title": "Apple Intelligence",
-  "description": "Use Apple Intelligence commands from the comfort of Raycast.",
+  "description": "Use Apple Intelligence from the comfort of Raycast.",
   "icon": "apple-intelligence.png",
   "author": "EvanZhouDev",
   "categories": [
@@ -28,6 +28,25 @@
       "title": "Rewrite",
       "description": "Rewrite the selected text",
       "mode": "no-view"
+    },
+    {
+      "name": "compose",
+      "title": "Compose",
+      "description": "Compose with ChatGPT",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-image",
+      "title": "Create Image",
+      "description": "Create an image with Image Playground",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "prompt",
+          "placeholder": "Prompt"
+        }
+      ]
     },
     {
       "name": "create-key-points",

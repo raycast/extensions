@@ -2,10 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-notification",
   "title": "Raycast Notification",
-  "description": "This extension makes it easy to display Raycast notifications via a quicklink, making the Raycast interface accessible to other applications or scripts",
+  "description": "This extension makes it easy to display system built-in Notification Center and Raycast HUD via a quicklink or cross-extension launch, making the Raycast interface accessible to other applications or scripts.",
   "icon": "command-icon.png",
   "author": "maxnyby",
-  "contributors": ["stelo"],
+  "contributors": [
+    "stelo",
+    "litomore"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -24,6 +27,12 @@
           "required": true
         },
         {
+          "name": "message",
+          "placeholder": "Message",
+          "type": "text",
+          "required": false
+        },
+        {
           "name": "type",
           "type": "dropdown",
           "placeholder": "Type",
@@ -40,6 +49,10 @@
             {
               "title": "Failure",
               "value": "failure"
+            },
+            {
+              "title": "Notification Center",
+              "value": "notification-center"
             }
           ]
         }
@@ -47,15 +60,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@raycast/api": "^1.87.0",
+    "raycast-cross-extension": "^0.2.3",
+    "raycast-notifier": "^0.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.2.0",
-    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",
