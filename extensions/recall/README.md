@@ -42,5 +42,8 @@ By default, Recall stores your memories in `~/.raycast-recall`. You can change t
 The "*" indicates the shortcut is globally accessible. Of course, you can change these to your liking.
 
 ## Warning
-_Experimental extension. Developer is a high school student, hence updates are not guaranteed._
-When modifying a memory, the description is not reloaded until the next time you open the dashboard. In that case, please refresh the extension.
+_Experimental extension - bugs may occur. Developer is a high school student, hence updates are not guaranteed._
+### Potential Future Features
+- [ ] Add tags to memories
+- [ ] Add reminders and filtering by date
+- [ ] Add AI-powered memory analysis with RaycastAI

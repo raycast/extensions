@@ -1,5 +1,9 @@
 # Recall Changelog
 
+## [Prerelease Fix] - 2024-12-22
+
+- Resolved changes failing to sync after edit form was closed for the detail view and gallery view
+
 ## [Initial Version] - 2024-12-22
 
 - Added Memory Dashboard for viewing and managing captured moments
