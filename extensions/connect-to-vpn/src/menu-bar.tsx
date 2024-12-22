@@ -17,10 +17,10 @@ export default function Command() {
   const isChecking = useRef(false);
 
   useEffect(() => {
-    if (environment.launchType === LaunchType.Background) {
+    if (environment.launchType === LaunchType.Background && !isLoading) {
       startRefresh();
     }
-  }, [environment.launchType, favoriteServices, otherServices, invalidServices]);
+  }, [environment.launchType, favoriteServices.length, otherServices.length, invalidServices.length]);
 
   const startRefresh = async () => {
     if (!isChecking.current) {
