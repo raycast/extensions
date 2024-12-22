@@ -2,7 +2,10 @@
 
 ## [Add Gemini 2.0exp and 1.5-8b options] - {PR_MERGE_DATE}
 
-Experience the power of Gemini 2.0exp and the reliability of Gemini 1.5-8b with the new options in Extension Preferences!
+- 🎄 New model options:
+  - 💪 Gemini 2.0exp: The latest and greatest model from Gemini AI.
+  - 🚀 Gemini 1.5-8b: Ask faster.
+- 💬 Refine `Summarize` command to show 2 levels of information density.
 
 ## [Add Translate Command] - 2024-09-02
 

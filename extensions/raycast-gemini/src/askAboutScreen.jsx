@@ -1,8 +1,7 @@
-import { environment, closeMainWindow, launchCommand, LaunchType } from "@raycast/api";
-import util from "util";
+import { closeMainWindow, environment, launchCommand, LaunchType } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
-import jimp from "jimp";
+import util from "util";
 
 export default async function AskAboutScreenContent(props) {
   await closeMainWindow();
