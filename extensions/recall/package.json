@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recall",
+  "title": "Recall",
+  "description": "Allows you to quickly capture your screen to remind you to get back to something in the future. All in Raycast and free!",
+  "icon": "extension-icon.png",
+  "author": "matthew_su",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "memory-dashboard",
+      "title": "Memory Dashboard",
+      "description": "Allows you to view and manage all the memories (of your screen) that you wanted to recall!",
+      "mode": "view"
+    },
+    {
+      "name": "capture-moment",
+      "title": "Capture Moment",
+      "description": "Allows you to capture your screen immediately and opens up a dashboard to add more descriptions to the memory.",
+      "mode": "no-view",
+      "keywords": ["screenshot", "memory", "capture"],
+      "preferences": [
+        {
+          "name": "storageDir",
+          "type": "directory",
+          "required": false,
+          "title": "Storage Directory",
+          "description": "Directory to store memories and screenshots",
+          "default": "~/.raycast-recall"
+        }
+      ],
+      "shortcut": "cmd+shift+0"
+    },
+    {
+      "name": "capture-select-moment",
+      "title": "Capture Select Moment",
+      "description": "Allows you to capture a selected portion of your screen and save it as a memory.",
+      "mode": "no-view",
+      "keywords": ["screenshot", "memory", "capture", "select", "area"],
+      "preferences": [
+        {
+          "name": "storageDir",
+          "type": "directory",
+          "required": false,
+          "title": "Storage Directory",
+          "description": "Directory to store memories and screenshots",
+          "default": "~/.raycast-recall"
+        }
+      ],
+      "shortcut": "cmd+shift+9"
+    },
+    {
+      "name": "delete-all-memories",
+      "title": "Delete All Memories",
+      "description": "Permanently deletes all memories and their associated screenshots.",
+      "mode": "no-view",
+      "keywords": ["delete", "clear", "remove", "reset"],
+      "shortcut": "cmd+ctrl+opt+shift+backspace"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
