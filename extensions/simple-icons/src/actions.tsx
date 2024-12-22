@@ -47,6 +47,14 @@ export const CopyUnpkg = ({ icon, version }: ActionProps) => {
   return <Action.CopyToClipboard title="Copy unpkg CDN Link" content={unpkgCdnLink} />;
 };
 
+export const CopyFontEntities = ({ icon }: ActionProps) => (
+  <>
+    <Action.CopyToClipboard title="Copy Character" content={String.fromCodePoint(icon.code)} />
+    <Action.CopyToClipboard title="Copy HTML Code" content={`&#${icon.code.toString()};`} />
+    <Action.CopyToClipboard title="Copy UTF Code" content={`\\u{${icon.code.toString(16).toUpperCase()}}`} />
+  </>
+);
+
 export const Supports = () => (
   <>
     <Action.OpenInBrowser
