@@ -1,21 +1,15 @@
 import { Icon, List, ActionPanel, Action, Color, showToast } from '@raycast/api';
-import { SWRConfig } from 'swr';
 
-import { cacheConfig } from '@lib/cache';
 import { BudgetSummary, CurrencyFormat } from '@srcTypes';
 import { useBudgets } from '@hooks/useBudgets';
 import { useLocalStorage } from '@raycast/utils';
 
 export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <BudgetList />
-    </SWRConfig>
-  );
+  return <BudgetList />;
 }
 
 function BudgetList() {
-  const { data: budgets, isValidating } = useBudgets();
+  const { data: budgets, isLoading } = useBudgets();
 
   const { value: activeBudgetId, setValue: setActiveBudgetId } = useLocalStorage('activeBudgetId', '');
 
@@ -41,7 +35,7 @@ function BudgetList() {
   };
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isLoading}>
       {budgets?.map((budget) => (
         <BudgetItem
           key={budget.id}

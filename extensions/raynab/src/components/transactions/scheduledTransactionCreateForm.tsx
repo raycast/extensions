@@ -41,8 +41,8 @@ interface FormValues {
 export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
-  const { data: accounts = [], isValidating: isLoadingAccounts } = useAccounts(activeBudgetId);
-  const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
+  const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
+  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
 
   const [categoryList, setCategoryList] = useState([categoryId ?? '']);

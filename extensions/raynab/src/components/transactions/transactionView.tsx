@@ -20,9 +20,8 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
   const [timeline, setTimeline] = useState<Period>('month');
-  const { data: transactions = [], isLoading, isValidating } = useTransactions(activeBudgetId, timeline);
-  const { data: scheduledTransactions = [], isValidating: isValidatingScheduled } =
-    useScheduledTransactions(activeBudgetId);
+  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline);
+  const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(
     transactionViewReducer,
@@ -47,8 +46,9 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     // We progressively back off in order to not fetch unnecessary data
     // This might cause problems for budgets with no transactions in the past year
     // TODO add a view for > 1 year, change to a different fallback model?
+    if (isLoading || isLoadingBudget) return;
 
-    if (!isLoadingBudget && !isLoading && transactions.length == 0) {
+    if (transactions.length == 0) {
       let fallbackTimeline: Period;
       switch (timeline) {
         case 'day':
@@ -71,6 +71,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
         title: `No results for the past ${timeline}`,
         message: `Falling back to the last ${fallbackTimeline}`,
       });
+
       return;
     }
 
@@ -119,7 +120,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
       onTimelineChange={setTimeline}
     >
       <List
-        isLoading={isValidating || isValidatingScheduled}
+        isLoading={isLoading || isLoadingScheduled}
         isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}

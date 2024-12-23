@@ -9,11 +9,11 @@ import { CurrencyFormat } from '@srcTypes';
 
 export function AccountView() {
   const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
-  const { data: accounts, isValidating } = useAccounts(activeBudgetId);
+  const { data: accounts, isLoading } = useAccounts(activeBudgetId);
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isLoading}>
       {accounts?.map((account) => (
         <List.Item
           key={account.id}

@@ -1,6 +1,7 @@
-import useSWR from 'swr';
+import { useCachedPromise } from '@raycast/utils';
+
 import { fetchPayees } from '@lib/api';
 
 export function usePayees(budgetId: string | undefined) {
-  return useSWR(budgetId ? [budgetId, 'payees'] : null, ([budgetId]) => fetchPayees(budgetId));
+  return useCachedPromise(fetchPayees, [budgetId || ''], { keepPreviousData: true, execute: !!budgetId });
 }

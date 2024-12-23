@@ -49,8 +49,8 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
 
-  const { data: payees, isValidating: isLoadingPayees } = usePayees(activeBudgetId);
-  const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
+  const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
+  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
 
   const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
