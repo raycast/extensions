@@ -1,20 +1,50 @@
-import { useState } from "react";
-import { PopToRootType, showHUD, showToast, Toast, Clipboard } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
+import { PopToRootType, showHUD, showToast, Toast, Clipboard, Form } from "@raycast/api";
 import { iCloudService } from "./api/connect";
 import { MetaData } from "./api/hide-my-email";
-import { Login } from "./components/Login";
-import { AddressForm } from "./components/forms/AddressForm";
+import { getiCloudService, Login } from "./components/Login";
+import { AddressForm, AddressFormValues } from "./components/forms/AddressForm";
 
 export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
+  const [showLogin, setShowLogin] = useState<boolean>(false);
+  const effectRan = useRef(false);
 
-  if (!service) {
-    return <Login onLogin={(iService: iCloudService) => setService(iService)} />;
+  useEffect(() => {
+    // For React Strict Mode, which mounts twice
+    if (!effectRan.current) {
+      effectRan.current = true;
+      (async () => {
+        try {
+          const iService = await getiCloudService();
+          showToast({ style: Toast.Style.Success, title: "Logged in" });
+          setService(iService);
+        } catch (error) {
+          showToast({ style: Toast.Style.Failure, title: "Not logged in" });
+          setShowLogin(true);
+        }
+      })();
+    }
+  }, []);
+
+  if (!showLogin && !service) {
+    return <Form isLoading={true} />;
+  }
+
+  if (showLogin) {
+    return (
+      <Login
+        onLogin={(iService) => {
+          setService(iService);
+          setShowLogin(false);
+        }}
+      />
+    );
   }
 
   async function handleCopy(address: string) {
     Clipboard.copy(address);
-    await showHUD("Email added & copied", {
+    await showHUD("Email Added & Copied", {
       clearRootSearch: false,
       popToRootType: PopToRootType.Immediate,
     });
@@ -34,9 +64,10 @@ export default function Command() {
 
   return (
     <AddressForm
+      initialValues={{ label: "", note: "", address: "" }}
       service={service}
-      submit={async (address, metaData) => {
-        await add(address, metaData);
+      submit={async (values: AddressFormValues) => {
+        await add(values.address, { label: values.label, note: values.note });
       }}
     />
   );

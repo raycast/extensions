@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
-import { Form, LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";
 import { LoginForm } from "./forms/LoginForm";
+import { iCloudError, iCloudFailedLoginError } from "../api/errors";
 
 const AuthState = {
   UNAUTHENTICATED: 0,
@@ -10,8 +11,28 @@ const AuthState = {
   AUTHENTICATED: 2,
 };
 
+export async function getiCloudService() {
+  const { useChineseAccount } = getPreferenceValues<Preferences>();
+  const appleID = await LocalStorage.getItem<string>("appleID");
+
+  if (!appleID) {
+    throw new iCloudFailedLoginError("");
+  }
+  const iService = new iCloudService(appleID, { useChineseAccount });
+  await iService.init();
+  await iService.authenticate();
+  if (!iService.hideMyEmail.isActive()) {
+    throw new iCloudError("Are you sure the Hide My Email feature is activated?");
+  }
+
+  if (iService.requires2FA) {
+    throw new iCloudFailedLoginError("Two-factor authentication required");
+  }
+  return iService;
+}
+
 export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<number | null>(AuthState.UNAUTHENTICATED);
   const [service, setService] = useState<iCloudService | null>(null);
   const effectRan = useRef(false);
 
@@ -81,7 +102,7 @@ export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }
         toast.title = "Logged in";
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "2FA Failed";
+        toast.title = "2FA failed";
         toast.message = (error as { message: string }).message;
       }
     }
@@ -105,10 +126,6 @@ export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }
         });
       }
     }
-  }
-
-  if (isAuthenticated === null) {
-    return <Form isLoading />;
   }
 
   if (isAuthenticated === AuthState.UNAUTHENTICATED) {

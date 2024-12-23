@@ -72,7 +72,7 @@ export class iCloudSession {
     this.instance = wrapper(
       axios.create({
         jar: this.jar,
-        timeout: 5000,
+        timeout: 10000,
       }),
     );
 
@@ -107,9 +107,8 @@ export class iCloudSession {
           console.log("Status: ", response.status);
           console.log("StatusText: ", response.statusText);
           console.log("Data: ", response.data);
-        } else if (error?.request) {
-          console.log("error.request: ", error.request);
         } else {
+          console.log("error.code: ", error.code);
           console.log("error.message: ", error.message);
         }
         console.log("------- ----- -------");
