@@ -33,6 +33,33 @@
       "mode": "view"
     },
     {
+      "name": "quickCreateTransaction",
+      "title": "Quick Transaction",
+      "subtitle": "YNAB",
+      "description": "Quickly enter a new transaction in the selected budget",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "required": true,
+          "placeholder": "Amount"
+        },
+        {
+          "name": "payeeName",
+          "type": "text",
+          "required": true,
+          "placeholder": "Payee"
+        },
+        {
+          "name": "categoryName",
+          "type": "text",
+          "required": true,
+          "placeholder": "Category"
+        }
+      ]
+    },
+    {
       "name": "scheduleTransaction",
       "title": "Schedule Transaction",
       "subtitle": "YNAB",
@@ -67,7 +94,7 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.2",
+    "@raycast/api": "^1.88.4",
     "@raycast/utils": "^1.18.1",
     "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
