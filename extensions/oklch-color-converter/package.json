@@ -1,6 +1,6 @@
 {
   "name": "oklch-color-converter",
-  "title": "Oklch Color Converter",
+  "title": "OKLCH Color Converter",
   "description": "Convert colors between formats with wide gamut support",
   "version": "1.0.0",
   "author": "strongeron",
