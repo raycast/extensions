@@ -2,7 +2,7 @@
 
 ## [Fix] - 2024-12-23
 
-- Fix issue when showing processes battery usage on Intel-based Macs
+- Fix issue when showing battery level on Intel-based Macs
 
 ## [Chore] - 2024-11-24
 
