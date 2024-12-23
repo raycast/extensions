@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "french-data-generator",
+  "title": "French Ssn & Iban Generator",
+  "description": "Generate realistic French-specific fake data, including Social Security Numbers (SSNs) tied to the birth date and location, IBANs, and addresses. Perfect for developers and testers working with French data scenarios.",
+  "icon": "extension-icon.png",
+  "author": "yoann-drx",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-french-data",
+      "title": "Generate French Ssn & Iban Data",
+      "description": "Generate realistic French fake data, including SSNs tied to birth date and location.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-french-data",
+      "title": "French Data Menu Bar",
+      "subtitle": "Quickly view and regenerate French fake data",
+      "description": "Display generated French-specific fake data (SSN, IBAN, etc.) in the menu bar with quick regeneration options.",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
