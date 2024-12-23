@@ -25,7 +25,7 @@ This mod provides a command to sync folders with the `rsync` command. It provide
 
 ## Author
 
-Developed by Giovambattista Fazioli ([@gfazioli on GitHub](https://github.com/gfazioli)).
+Developed by [Undolog](https://www.raycast.com/Undolog).
 
 I am open to requests for features, bug reports, and edits to the code made by the community.
 

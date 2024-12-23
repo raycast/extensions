@@ -26,6 +26,7 @@ enum EmailStatus {
   INACTIVE = "INACTIVE",
 }
 
+
 function StatusDropdown({ onStatusChange }: { onStatusChange: (newStatus: EmailStatus) => void }) {
   return (
     <List.Dropdown

@@ -1,6 +1,11 @@
 # Amazon AWS Changelog
 
-## Lambda command - 2024-10-28
+## [Secrets command] - 2024-12-06
+
+- Add actions to copy individual secret values [#14582](https://github.com/raycast/extensions/issues/14582)
+- Updated the dependencies to get rid of critical security vulnerabilities.
+
+## [Lambda command] - 2024-10-28
 
 - Add an Invoke option which allows to save, update or delete payloads and saves the result in clipboard
 

@@ -31,6 +31,8 @@ import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
+import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
+import useZenBookmarks from "./hooks/useZenBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
@@ -116,6 +118,8 @@ export default function Command() {
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
+  const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -132,6 +136,8 @@ export default function Command() {
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
+  const whale = useWhaleBookmarks(hasWhale);
+  const zen = useZenBookmarks(hasZen);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -153,6 +159,8 @@ export default function Command() {
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
+      ...whale.bookmarks,
+      ...zen.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -202,6 +210,8 @@ export default function Command() {
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
+    whale.bookmarks,
+    zen.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -223,6 +233,8 @@ export default function Command() {
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
+      ...whale.folders,
+      ...zen.folders,
     ];
 
     setFolders(folders);
@@ -241,6 +253,8 @@ export default function Command() {
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
+    whale.folders,
+    zen.folders,
     setFolders,
   ]);
 
@@ -361,6 +375,12 @@ export default function Command() {
     if (hasVivaldi) {
       vivaldi.mutate();
     }
+    if (hasWhale) {
+      whale.mutate();
+    }
+    if (hasZen) {
+      zen.mutate();
+    }
   }
 
   async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
@@ -416,7 +436,9 @@ export default function Command() {
         prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
-        vivaldi.isLoading
+        vivaldi.isLoading ||
+        whale.isLoading ||
+        zen.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
@@ -594,6 +616,24 @@ export default function Command() {
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.whale}
+                    name="Whale"
+                    icon="whale.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    profiles={whale.profiles}
+                    currentProfile={whale.currentProfile}
+                    setCurrentProfile={whale.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.zen}
+                    name="Zen"
+                    icon="zen.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                    profiles={zen.profiles}
+                    currentProfile={zen.currentProfile}
+                    setCurrentProfile={zen.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 

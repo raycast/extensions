@@ -1,9 +1,8 @@
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { getFavicon, getProgressIcon, useFrecencySorting } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { JsonFormat } from "./helpers/types";
 import { getJsonFormatFromStore } from "./helpers";
-import { useFrecencySorting } from "@raycast/utils";
-import { getProgressIcon, getFavicon } from "@raycast/utils";
-import { ActionPanel, Action, List, Icon, getPreferenceValues } from "@raycast/api";
+import { JsonFormat } from "./helpers/types";
 
 // Ente colors - purple #A400B6, orange #FF9800
 const getProgressColor = (remainingTime: number) => {

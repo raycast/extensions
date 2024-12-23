@@ -31,20 +31,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -89,20 +93,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -147,20 +155,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -205,20 +217,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -263,20 +279,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -321,20 +341,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -395,20 +419,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -470,20 +498,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -529,20 +561,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -588,20 +624,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -647,20 +687,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -706,20 +750,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -765,20 +813,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -824,20 +876,24 @@
               "value": "global"
             },
             {
-              "value": "llama-3.1-70b-versatile",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-versatile",
+              "title": "Llama 3.3 70B 128k"
+            },
+            {
+              "value": "llama-3.3-70b-specdec",
+              "title": "Llama 3.3 70B SpecDec 8k"
             },
             {
               "value": "llama-3.1-8b-instant",
-              "title": "Llama3.1 8B 132k"
+              "title": "Llama 3.1 8B 128k"
             },
             {
               "value": "llama3-70b-8192",
-              "title": "Llama3 70B 8k"
+              "title": "Llama 3 70B 8k"
             },
             {
               "value": "llama3-8b-8192",
-              "title": "Llama3 8B 8k"
+              "title": "Llama 3 8B 8k"
             },
             {
               "value": "mixtral-8x7b-32768",
@@ -871,23 +927,27 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama3-70b-8192",
+      "default": "llama-3.3-70b-versatile",
       "data": [
         {
-          "value": "llama-3.1-70b-versatile",
-          "title": "Llama3.1 70B 132k"
+          "value": "llama-3.3-70b-versatile",
+          "title": "Llama 3.3 70B 128k"
+        },
+        {
+          "value": "llama-3.3-70b-specdec",
+          "title": "Llama 3.3 70B SpecDec 8k"
         },
         {
           "value": "llama-3.1-8b-instant",
-          "title": "Llama3.1 8B 132k"
+          "title": "Llama 3.1 8B 128k"
         },
         {
           "value": "llama3-70b-8192",
-          "title": "Llama3 70B 8k"
+          "title": "Llama 3 70B 8k"
         },
         {
           "value": "llama3-8b-8192",
-          "title": "Llama3 8B 8k"
+          "title": "Llama 3 8B 8k"
         },
         {
           "value": "mixtral-8x7b-32768",

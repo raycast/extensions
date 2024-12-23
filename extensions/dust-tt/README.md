@@ -40,6 +40,10 @@ The ID can be found in any of the workspace's pages. It's a string of 10 chars t
 
 (optional) You can specify a custom Oauth client ID (advanced usage, mostly for developping the extension).
 
+#### OAuth Audience (optional)
+
+(optional) You can specify a Oauth audience.
+
 #### OAuth Domain (optional)
 
 (optional) You can specify a Oauth domain (advanced usage, mostly for developping the extension).

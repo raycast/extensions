@@ -16,6 +16,13 @@
       "subtitle": "Media Converter",
       "description": "Converts a media file to a different file format",
       "mode": "view"
+    },
+    {
+      "name": "quick-convert",
+      "title": "Quick Convert",
+      "subtitle": "Media Converter",
+      "description": "Converts a media file to a different file format",
+      "mode": "view"
     }
   ],
   "dependencies": {

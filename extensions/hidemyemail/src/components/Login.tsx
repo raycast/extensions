@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+
 import { LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";

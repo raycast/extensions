@@ -26,7 +26,7 @@ export class ZshMissingError extends ExtensionError {}
 export class ConnectionError extends ExtensionError {}
 
 export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
-  existsSync(path)
+  existsSync(path),
 );
 
 export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
@@ -83,7 +83,7 @@ export const handleErrors = (stderr: string) => {
   if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
   } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
-    throw new NotFoundError("Item not found on 1password.", "Check it on your 1Password app.");
+    throw new NotFoundError("Item not found on 1Password.", "Check it on your 1Password app.");
   } else if (stderr.includes("ENOENT") || stderr.includes("file") || stderr.includes("enoent")) {
     throw new CommandLineMissingError("1Password CLI not found.");
   } else if (stderr.includes("does not have a field")) {
@@ -165,12 +165,12 @@ export const usePasswords2 = ({
           title: e.message,
         });
       },
-    }
+    },
   );
 
 export const usePasswords = (flags: string[] = []) =>
   useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
-    data.sort((a, b) => a.title.localeCompare(b.title))
+    data.sort((a, b) => a.title.localeCompare(b.title)),
   );
 
 export const useVaults = () =>
@@ -178,7 +178,7 @@ export const useVaults = () =>
 
 export const useCategories = () =>
   useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
-    data.sort((a, b) => a.name.localeCompare(b.name))
+    data.sort((a, b) => a.name.localeCompare(b.name)),
   );
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);

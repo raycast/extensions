@@ -1,7 +1,7 @@
+import { exec } from "node:child_process";
 import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
 import { ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { exec } from "child_process";
 import {
   continueInterval,
   createInterval,
@@ -12,10 +12,10 @@ import {
   preferences,
   resetInterval,
   restartInterval,
-} from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, Interval, Quote } from "../lib/types";
-import { checkDNDExtensionInstall } from "../lib/doNotDisturb";
+} from "./lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { GiphyResponse, Interval, Quote } from "./lib/types";
+import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
 
 const createAction = (action: () => void) => () => {
   action();

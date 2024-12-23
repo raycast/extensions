@@ -40,8 +40,10 @@ export class HideMyEmailService {
     return this.service.dsInfo?.isHideMyEmailSubscriptionActive ?? false;
   }
 
+
   async getAllAdresses(axiosConfig: AxiosRequestConfig = {}) {
     const response = await this.session.request("get", `${this.emailEndpointGet}/list`, axiosConfig, false);
+
     if (response.data.success === false) {
       console.log("Failed to fetch addresses: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error.errorCode);
@@ -89,7 +91,6 @@ export class HideMyEmailService {
     const endPoint = `${this.emailEndpointUpdate}/generate`;
 
     const response = await this.session.request("post", endPoint, axiosConfig, false);
-
     if (response.data.success === false) {
       console.log("Generating address failed: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error?.errorCode);

@@ -1,6 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences, BookmarksParams, BookmarksResponse } from "../types";
+import { BookmarksParams, BookmarksResponse } from "../types";
 
 export function useBookmarks({ collection, search = "" }: BookmarksParams) {
   const preferences: Preferences = getPreferenceValues();
