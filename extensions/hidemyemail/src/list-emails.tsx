@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ActionPanel,
   Action,
@@ -16,29 +16,29 @@ import {
 import { iCloudService } from "./api/connect";
 import { HideMyEmail, MetaData } from "./api/hide-my-email";
 import { formatTimestamp } from "./utils";
-import { Login } from "./components/Login";
-import { MetaDataForm } from "./components/forms/MetaDataForm";
-import { AddressForm } from "./components/forms/AddressForm";
+import { getiCloudService, Login } from "./components/Login";
+import { AddressForm, AddressFormValues } from "./components/forms/AddressForm";
+import { useCachedPromise } from "@raycast/utils";
 
-enum Status {
+enum EmailStatus {
   ANY = "ANY",
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
 }
 
-function StatusDropdown({ onStatusChange }: { onStatusChange: (newStatus: Status) => void }) {
+function StatusDropdown({ onStatusChange }: { onStatusChange: (newStatus: EmailStatus) => void }) {
   return (
     <List.Dropdown
       tooltip="Status"
       storeValue={true}
       onChange={(newStatus) => {
-        onStatusChange(newStatus as Status);
+        onStatusChange(newStatus as EmailStatus);
       }}
     >
       <List.Dropdown.Section title="Email Status">
-        <List.Dropdown.Item title="Any" value={Status.ANY} />
-        <List.Dropdown.Item title="Active" value={Status.ACTIVE} />
-        <List.Dropdown.Item title="Inactive" value={Status.INACTIVE} />
+        <List.Dropdown.Item title="Any" value={EmailStatus.ANY} />
+        <List.Dropdown.Item title="Active" value={EmailStatus.ACTIVE} />
+        <List.Dropdown.Item title="Inactive" value={EmailStatus.INACTIVE} />
       </List.Dropdown.Section>
     </List.Dropdown>
   );
@@ -46,67 +46,124 @@ function StatusDropdown({ onStatusChange }: { onStatusChange: (newStatus: Status
 
 export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
-  const [emails, setEmails] = useState<Array<HideMyEmail> | null>(null);
-  const [status, setStatus] = useState<Status>(Status.ANY);
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>(EmailStatus.ANY);
+  const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
   const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
+  const isOnCooldown = useRef(false);
+  const effectRan = useRef(false);
+  const abortable = useRef<AbortController>();
+
+  const {
+    isLoading,
+    data: emails,
+    mutate,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      const emails = await service!.hideMyEmail.getAllAdresses({ signal: abortable.current?.signal });
+
+      if (emails) {
+        if (sortByCreationDate)
+          emails.sort((hme1: HideMyEmail, hme2: HideMyEmail) => hme2.createTimestamp - hme1.createTimestamp);
+      }
+      return emails;
+    },
+    [],
+    {
+      initialData: [],
+      execute: service != null,
+      abortable,
+    },
+  );
 
   useEffect(() => {
-    (async () => {
-      await updateAddressList();
-    })();
-  }, [service]);
+    // For React Strict Mode, which mounts twice
+    if (!effectRan.current) {
+      effectRan.current = true;
+      (async () => {
+        try {
+          const iService = await getiCloudService();
+          showToast({ style: Toast.Style.Success, title: "Logged in" });
+          setService(iService);
+        } catch (error) {
+          if (emails.length > 0) {
+            showToast({ style: Toast.Style.Failure, title: "Not logged in" });
+            setShowLoginAction(true);
+          }
+        }
+      })();
+    }
+  }, []);
 
-  if (!service) {
+  if (!service && !emails.length) {
     return <Login onLogin={(iService: iCloudService) => setService(iService)} />;
   }
 
-  if (emails === null) {
-    return <List isLoading={true} />;
-  }
-
-  async function updateAddressList() {
-    if (service) {
-      const data = await service.hideMyEmail.getAllAdresses();
-      const hmeEmails = data?.["hmeEmails"];
-      if (hmeEmails) {
-        if (sortByCreationDate)
-          hmeEmails.sort((hme1: HideMyEmail, hme2: HideMyEmail) => hme2.createTimestamp - hme1.createTimestamp);
-
-        setEmails(hmeEmails);
-      }
+  async function isServiceAvailable() {
+    if (!service) {
+      showToast({ style: Toast.Style.Animated, title: "Logging in, please wait" });
+      return false;
     }
+    return true;
   }
 
   async function toggleActive(email: HideMyEmail) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
+    if (!(await isServiceAvailable())) return;
+    if (isOnCooldown.current) {
+      showToast({ style: Toast.Style.Failure, title: "Not too fast, please" });
+      return;
+    }
 
+    isOnCooldown.current = true;
     try {
-      await service?.hideMyEmail.toggleActive(email.anonymousId, email.isActive ? "deactivate" : "reactivate");
-      await updateAddressList();
-      toast.style = Toast.Style.Success;
-      toast.title = "Updated";
+      await mutate(service?.hideMyEmail.toggleActive(email, email.isActive ? "deactivate" : "reactivate"), {
+        optimisticUpdate: (emails) => {
+          emails.forEach((e: HideMyEmail) => {
+            if (e.anonymousId === email.anonymousId) e.isActive = !e.isActive;
+          });
+          return emails;
+        },
+        shouldRevalidateAfter: true,
+      });
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Update failed";
-      toast.message = (error as { message: string }).message;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Update failed",
+        message: (error as { message: string }).message,
+      });
+    } finally {
+      isOnCooldown.current = false;
     }
   }
 
   async function updateMetaData(email: HideMyEmail, newMetaData: MetaData) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
+    if (!(await isServiceAvailable())) return;
+
     try {
-      await service?.hideMyEmail.updateMetaData(email.anonymousId, newMetaData);
-      await updateAddressList();
-      toast.style = Toast.Style.Success;
-      toast.title = "Label updated";
+      await mutate(service?.hideMyEmail.updateMetaData(email, newMetaData), {
+        optimisticUpdate: (emails) => {
+          emails.forEach((e: HideMyEmail) => {
+            if (e.anonymousId === email.anonymousId) {
+              e.label = newMetaData.label;
+              e.note = newMetaData.note;
+            }
+          });
+          return emails;
+        },
+        shouldRevalidateAfter: true,
+      });
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Update failed";
-      toast.message = (error as { message: string }).message;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Update failed",
+        message: (error as { message: string }).message,
+      });
     }
   }
 
   async function remove(email: HideMyEmail) {
+    if (!(await isServiceAvailable())) return;
+
     await confirmAlert({
       title: "Are you sure?",
       message: "This will delete the email address.",
@@ -114,19 +171,19 @@ export default function Command() {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
         onAction: async () => {
-          const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
           try {
-            if (email.isActive) {
-              await service?.hideMyEmail.toggleActive(email.anonymousId, "deactivate");
-            }
-            await service?.hideMyEmail.deleteAddress(email.anonymousId);
-            await updateAddressList();
-            toast.style = Toast.Style.Success;
-            toast.title = "Address deleted";
+            await mutate(service?.hideMyEmail.deleteAddress(email), {
+              optimisticUpdate: (emails) => {
+                return emails.filter((e: HideMyEmail) => e.anonymousId != email.anonymousId);
+              },
+              shouldRevalidateAfter: true,
+            });
           } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Update failed";
-            toast.message = (error as { message: string }).message;
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Deleting failed",
+              message: (error as { message: string }).message,
+            });
           }
         },
       },
@@ -142,7 +199,7 @@ export default function Command() {
     try {
       await service?.hideMyEmail.addAddress(address, metaData);
       Clipboard.copy(address);
-      await updateAddressList();
+      revalidate();
       toast.style = Toast.Style.Success;
       toast.title = "Email added & copied";
     } catch (error) {
@@ -152,12 +209,12 @@ export default function Command() {
     }
   }
 
-  function onStatusChange(newStatus: Status) {
-    setStatus(newStatus);
+  function onStatusChange(newStatus: EmailStatus) {
+    setEmailStatus(newStatus);
   }
 
   return (
-    <List searchBarAccessory={<StatusDropdown onStatusChange={onStatusChange} />} isShowingDetail>
+    <List searchBarAccessory={<StatusDropdown onStatusChange={onStatusChange} />} isShowingDetail isLoading={isLoading}>
       {emails && emails.length == 0 ? (
         <List.EmptyView
           icon={Icon.List}
@@ -170,12 +227,14 @@ export default function Command() {
                   title="Create New Address"
                   target={
                     <AddressForm
+                      initialValues={{ label: "", note: "", address: "" }}
                       service={service}
-                      submit={async (address, metaData) => {
-                        await add(address, metaData);
+                      submit={async (values: AddressFormValues) => {
+                        await add(values.address, { label: values.label, note: values.note });
                       }}
                     />
                   }
+                  icon={Icon.PlusCircle}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
               )}
@@ -184,10 +243,10 @@ export default function Command() {
         />
       ) : (
         emails.map(
-          (email) =>
-            (status == Status.ANY ||
-              (email.isActive && status == Status.ACTIVE) ||
-              (!email.isActive && status == Status.INACTIVE)) && (
+          (email: HideMyEmail) =>
+            (emailStatus == EmailStatus.ANY ||
+              (email.isActive && emailStatus == EmailStatus.ACTIVE) ||
+              (!email.isActive && emailStatus == EmailStatus.INACTIVE)) && (
               <List.Item
                 key={email.anonymousId}
                 id={email.anonymousId}
@@ -204,14 +263,9 @@ export default function Command() {
                           text={formatTimestamp(email.createTimestamp)}
                         />
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.TagList title="Status">
-                          <List.Item.Detail.Metadata.TagList.Item
-                            text={email.isActive ? "Active" : "Inactive"}
-                            color={email.isActive ? "#07ba65" : "#f5090a"}
-                          />
-                        </List.Item.Detail.Metadata.TagList>
+                        <List.Item.Detail.Metadata.Label title="Status" text={email.isActive ? "Active" : "Inactive"} />
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label title="Note" text={email.note || "-"} />
+                        <List.Item.Detail.Metadata.Label title="Note" text={email.note || ""} />
                       </List.Item.Detail.Metadata>
                     }
                   />
@@ -220,71 +274,67 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Section>
                       <Action.CopyToClipboard title={"Copy Email"} content={email.hme} />
-                      <Action
-                        title={email.isActive ? "Deactivate" : "Activate"}
-                        onAction={async () => {
-                          await toggleActive(email);
-                        }}
-                        icon={Icon.Power}
-                      />
-                      <Action
-                        title={"Delete"}
-                        onAction={async () => {
-                          await remove(email);
-                        }}
-                        shortcut={Keyboard.Shortcut.Common.Remove}
-                        style={Action.Style.Destructive}
-                        icon={Icon.Trash}
-                      />
-                      {email.isActive && (
+                      {showLoginAction && (
+                        <Action.Push
+                          title={"Log In"}
+                          target={<Login onLogin={(iService: iCloudService) => setService(iService)} />}
+                          icon={{ source: Icon.Person, tintColor: "#4798FF" }}
+                        />
+                      )}
+                      {service && (
                         <>
-                          <Action.Push
-                            title="Update Label"
-                            icon={Icon.ShortParagraph}
-                            target={
-                              <MetaDataForm
-                                type={"Label"}
-                                currentValue={email.label}
-                                onSubmit={async (newLabel) => {
-                                  await updateMetaData(email, { label: newLabel, note: email.note });
-                                }}
-                              />
-                            }
+                          <Action
+                            title={email.isActive ? "Deactivate" : "Activate"}
+                            onAction={async () => {
+                              await toggleActive(email);
+                            }}
+                            icon={Icon.Power}
                           />
-
-                          <Action.Push
-                            title="Update Note"
-                            icon={Icon.Paragraph}
-                            target={
-                              <MetaDataForm
-                                type={"Note"}
-                                currentValue={email.note}
-                                onSubmit={async (newNote) => {
-                                  await updateMetaData(email, { label: email.label, note: newNote });
-                                }}
-                              />
-                            }
+                          <Action
+                            title={"Delete"}
+                            onAction={async () => {
+                              await remove(email);
+                            }}
+                            shortcut={Keyboard.Shortcut.Common.Remove}
+                            style={Action.Style.Destructive}
+                            icon={Icon.Trash}
                           />
+                          {email.isActive && (
+                            <Action.Push
+                              title="Update Label or Note"
+                              icon={Icon.ShortParagraph}
+                              target={
+                                <AddressForm
+                                  initialValues={{ address: email.hme, label: email.label, note: email.note }}
+                                  service={service}
+                                  submit={async (newMetaData: MetaData) => {
+                                    await updateMetaData(email, newMetaData);
+                                  }}
+                                />
+                              }
+                            />
+                          )}
                         </>
                       )}
                     </ActionPanel.Section>
-                    <ActionPanel.Section>
-                      {service && (
+                    {service && (
+                      <ActionPanel.Section>
                         <Action.Push
                           title="Create New Address"
                           target={
                             <AddressForm
+                              initialValues={{ label: "", note: "", address: "" }}
                               service={service}
-                              submit={async (address, metaData) => {
-                                await add(address, metaData);
+                              submit={async (values: AddressFormValues) => {
+                                await add(values.address, { label: values.label, note: values.note });
                               }}
                             />
                           }
-                          shortcut={{ modifiers: ["cmd"], key: "n" }}
                           icon={Icon.PlusCircle}
+                          shortcut={{ modifiers: ["cmd"], key: "n" }}
                         />
-                      )}
-                    </ActionPanel.Section>
+                      </ActionPanel.Section>
+                    )}
                   </ActionPanel>
                 }
               />

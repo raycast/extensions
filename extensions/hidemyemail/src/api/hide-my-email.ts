@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from "axios";
 import { iCloudService, iCloudSession } from "./connect";
 import { iCloudAPIResponseError } from "./errors";
 
@@ -39,30 +40,30 @@ export class HideMyEmailService {
     return this.service.dsInfo?.isHideMyEmailSubscriptionActive ?? false;
   }
 
-  async getAllAdresses() {
-    const response = await this.session.request("get", `${this.emailEndpointGet}/list`, {}, false);
+  async getAllAdresses(axiosConfig: AxiosRequestConfig = {}) {
+    const response = await this.session.request("get", `${this.emailEndpointGet}/list`, axiosConfig, false);
     if (response.data.success === false) {
       console.log("Failed to fetch addresses: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error.errorCode);
     }
-    return response.data.result;
+    return response.data.result?.hmeEmails;
   }
 
-  async toggleActive(id: string, toggle: AllowedValues) {
+  async toggleActive(email: HideMyEmail, toggle: AllowedValues, axiosConfig: AxiosRequestConfig = {}) {
     const endPoint = `${this.emailEndpointUpdate}/` + toggle;
-    const data = { anonymousId: id };
+    const data = { anonymousId: email.anonymousId };
 
-    const response = await this.session.request("post", endPoint, { data }, false);
+    const response = await this.session.request("post", endPoint, { data, ...axiosConfig }, false);
     if (response.data.success === false) {
       console.log("Changing email status failed: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error.errorCode);
     }
   }
 
-  async updateMetaData(id: string, newMetaData: MetaData) {
+  async updateMetaData(email: HideMyEmail, newMetaData: MetaData, axiosConfig: AxiosRequestConfig = {}) {
     const endPoint = `${this.emailEndpointUpdate}/updateMetaData`;
-    const data = { anonymousId: id, ...newMetaData };
-    const response = await this.session.request("post", endPoint, { data }, false);
+    const data = { anonymousId: email.anonymousId, ...newMetaData };
+    const response = await this.session.request("post", endPoint, { data, ...axiosConfig }, false);
 
     if (response.data.success === false) {
       console.log("Updating meta data failed: ", response.data);
@@ -70,21 +71,25 @@ export class HideMyEmailService {
     }
   }
 
-  async deleteAddress(id: string) {
-    const endPoint = `${this.emailEndpointUpdate}/delete`;
-    const data = { anonymousId: id };
+  async deleteAddress(email: HideMyEmail, axiosConfig: AxiosRequestConfig = {}) {
+    if (email.isActive) await this.toggleActive(email, "deactivate");
 
-    const response = await this.session.request("post", endPoint, { data }, false);
+    const endPoint = `${this.emailEndpointUpdate}/delete`;
+    const data = { anonymousId: email.anonymousId };
+
+    const response = await this.session.request("post", endPoint, { data, ...axiosConfig }, false);
     if (response.data.success === false) {
       console.log("Deleting address failed: ", response.data);
+      if (email.isActive) await this.toggleActive(email, "reactivate");
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error?.errorCode);
     }
   }
 
-  async generateAddress() {
+  async generateAddress(axiosConfig: AxiosRequestConfig = {}) {
     const endPoint = `${this.emailEndpointUpdate}/generate`;
 
-    const response = await this.session.request("post", endPoint, {}, false);
+    const response = await this.session.request("post", endPoint, axiosConfig, false);
+
     if (response.data.success === false) {
       console.log("Generating address failed: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error?.errorCode);
@@ -94,11 +99,11 @@ export class HideMyEmailService {
     return address;
   }
 
-  async addAddress(address: string, metaData: MetaData) {
+  async addAddress(address: string, metaData: MetaData, axiosConfig: AxiosRequestConfig = {}) {
     const endPoint = `${this.emailEndpointUpdate}/reserve`;
     const data = { hme: address, ...metaData };
 
-    const response = await this.session.request("post", endPoint, { data }, false);
+    const response = await this.session.request("post", endPoint, { data, ...axiosConfig }, false);
     if (response.data.success === false) {
       console.log("Adding address failed: ", response.data);
       throw new iCloudAPIResponseError(response.data.error.errorMessage, response.data.error?.errorCode);
