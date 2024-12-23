@@ -19,8 +19,13 @@ interface TransactionViewProps {
 export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
-  const [timeline, setTimeline] = useState<Period>('month');
-  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline);
+  const {
+    value: timeline,
+    setValue: setTimeline,
+    isLoading: isLoadingTimeline,
+  } = useLocalStorage<Period>('timeline', 'month');
+
+  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline ?? 'month');
   const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(
@@ -46,7 +51,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     // We progressively back off in order to not fetch unnecessary data
     // This might cause problems for budgets with no transactions in the past year
     // TODO add a view for > 1 year, change to a different fallback model?
-    if (isLoading || isLoadingBudget) return;
+    if (isLoading || isLoadingBudget || isLoadingTimeline) return;
 
     if (transactions.length == 0) {
       let fallbackTimeline: Period;
@@ -91,7 +96,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     } else {
       showToast({ style: Toast.Style.Success, title: `Showing transactions for the past ${timeline}` });
     }
-  }, [timeline, transactions, isLoadingBudget, isLoading]);
+  }, [timeline, transactions, isLoadingBudget, isLoading, isLoadingTimeline]);
 
   const [displayScheduled, setDisplayScheduled] = useState(false);
   const onDropdownFilterChange = (newValue: string) => {
