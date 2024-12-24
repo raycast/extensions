@@ -5,6 +5,7 @@
   "description": "Manage your NZBGet application from the comfort of Raycast.",
   "icon": "command-icon.png",
   "author": "wyattjoh",
+  "version": "1.0.0",
   "categories": [
     "Media"
   ],
