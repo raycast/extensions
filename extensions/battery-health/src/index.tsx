@@ -46,9 +46,10 @@ export default function Command() {
   const { health, percentage } = useMemo(() => {
     const values: TValues = DEFAULT_VALUES;
     if (state?.batteryRegistry && !state.isLoading) {
-      const { AppleRawMaxCapacity, DesignCapacity, CurrentCapacity } = state.batteryRegistry;
-      if (!isNaN(AppleRawMaxCapacity / DesignCapacity)) {
-        values["health"] = ((AppleRawMaxCapacity / DesignCapacity) * 100).toFixed(1) + "%";
+      const { NominalChargeCapacity, AppleRawMaxCapacity, DesignCapacity, CurrentCapacity } = state.batteryRegistry;
+      const MaxCapacity = Math.max(NominalChargeCapacity, AppleRawMaxCapacity);
+      if (!isNaN(MaxCapacity / DesignCapacity)) {
+        values["health"] = ((MaxCapacity / DesignCapacity) * 100).toFixed(1) + "%";
       }
       if (CurrentCapacity !== undefined && CurrentCapacity <= 100) values["percentage"] = `${CurrentCapacity}%`;
     }
