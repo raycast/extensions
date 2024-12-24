@@ -1,7 +1,7 @@
 import { captureException, getPreferenceValues, showToast, Toast } from '@raycast/api';
 import * as ynab from 'ynab';
 import { displayError, isYnabError } from './errors';
-import type { Period, BudgetSummary, SaveTransaction, NewTransaction, Preferences } from '@srcTypes';
+import type { Period, BudgetSummary, SaveTransaction, NewTransaction } from '@srcTypes';
 import { time } from './utils';
 import { SaveScheduledTransaction } from 'ynab';
 
@@ -176,7 +176,7 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      displayError(error, 'Failed to update transaction');
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -202,7 +202,28 @@ export async function createTransaction(selectedBudgetId: string, transactionDat
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      displayError(error, 'Failed to create transaction');
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Something went wrong',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+}
+
+export async function deleteTransaction(selectedBudgetId: string, transactionId: string) {
+  try {
+    const updateResponse = await client.transactions.deleteTransaction(selectedBudgetId || 'last-used', transactionId);
+
+    const { transaction: deletedTransaction } = updateResponse.data;
+    return deletedTransaction;
+  } catch (error) {
+    captureException(error);
+
+    if (isYnabError(error)) {
+      displayError(error, 'Failed to delete transaction');
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -229,7 +250,7 @@ export async function createScheduledTransaction(selectedBudgetId: string, trans
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      displayError(error, 'Failed to create scheduled transaction');
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -256,7 +277,7 @@ export async function updateCategory(selectedBudgetId: string, categoryId: strin
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch update transaction');
+      displayError(error, 'Failed to update category');
     } else {
       showToast({
         style: Toast.Style.Failure,

@@ -11,10 +11,6 @@ import type {
 
 export type { NewTransaction, ScheduledTransactionDetail } from 'ynab';
 
-export interface Preferences {
-  apiToken: string;
-}
-
 export type TransactionDetail = ynabTransactionDetail;
 export type TransactionDetailMap = Map<string, Group<TransactionDetail>>;
 

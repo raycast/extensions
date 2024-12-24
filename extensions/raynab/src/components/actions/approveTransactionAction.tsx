@@ -63,7 +63,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
               })
               .catch(() => {
                 toast.style = Toast.Style.Failure;
-                toast.title = 'Failed to approved transaction';
+                toast.title = 'Failed to approve transaction';
               });
             return;
           }

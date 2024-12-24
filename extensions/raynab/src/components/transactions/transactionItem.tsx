@@ -18,6 +18,7 @@ import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { ApproveTransactionAction } from '@components/actions/approveTransactionAction';
 import { TransactionCreateForm } from './transactionCreateForm';
 import { Shortcuts } from '@constants';
+import { DeleteTransactionAction } from '@components/actions/deleteTransactionAction';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
@@ -154,16 +155,17 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               target={<TransactionEditForm transaction={transaction} />}
             />
             <OpenInYnabAction accounts accountId={transaction.account_id} />
-            <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
             <Action.Push
               title="Create New Transaction"
               icon={Icon.Plus}
               target={<TransactionCreateForm categoryId={transaction.category_id ?? undefined} />}
               shortcut={Shortcuts.CreateNewTransaction}
             />
+            <DeleteTransactionAction transaction={transaction} />
             {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
           </ActionPanel.Section>
           <ActionPanel.Section title="Modify List View">
+            <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
             <GroupBySubmenu onGroup={onGroup} currentGroup={state.group} />
             <SortBySubmenu onSort={onSort} currentSort={state.sort} />
             <TimelineSubmenu onTimelineChange={onTimelineChange} currentTimeline={state.timeline ?? 'month'} />
