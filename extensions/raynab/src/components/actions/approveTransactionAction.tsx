@@ -71,6 +71,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
           push(<TransactionEditForm transaction={transaction} forApproval />);
         }
       }}
+      icon={Icon.CheckCircle}
       shortcut={Shortcuts.ApproveTransaction}
     />
   );
