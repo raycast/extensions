@@ -14,6 +14,7 @@ interface Constants {
   EditBudgetCategory: Keyboard.Shortcut;
   CreateNewTransaction: Keyboard.Shortcut;
   ShowTransactionsForCategory: Keyboard.Shortcut;
+  TogglePayeeFieldType: Keyboard.Shortcut;
 }
 
 export const Shortcuts: Constants = {
@@ -33,4 +34,5 @@ export const Shortcuts: Constants = {
   EditBudgetCategory: { modifiers: ['cmd'], key: 'e' },
   CreateNewTransaction: { modifiers: ['opt'], key: 'c' },
   ShowTransactionsForCategory: { modifiers: ['cmd', 'shift'], key: 'enter' },
+  TogglePayeeFieldType: { modifiers: ['opt'], key: 'p' },
 };

@@ -29,6 +29,7 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
+import { Shortcuts } from '@constants';
 
 interface FormValues {
   date: Date | null;
@@ -38,6 +39,8 @@ interface FormValues {
   categoryList?: string[];
   flag_color?: string;
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
+  cleared?: boolean;
+  payee_name?: string;
   approved: true;
 }
 
@@ -72,6 +75,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
     return [transaction.category_id ?? ''];
   });
+
+  // It can happen that the payee name is not in the list of payees
+  // creating a new payee require providing a name instead of an id
+  const [selectOwnPayee, setselectOwnPayee] = useState(false);
+
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
   const isReconciled = transaction.cleared === TransactionClearedStatus.Reconciled;
@@ -109,6 +117,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         payee_id: values.payee_id,
         memo: values.memo || null,
         category_id: values.categoryList?.[0] || undefined,
+        payee_name: values.payee_name || transaction.payee_name,
         approved: true,
       };
 
@@ -158,24 +167,32 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
 
-      mutate(updateTransaction(activeBudgetId, transaction.id, transactionData), {
-        optimisticUpdate(currentData) {
-          if (!currentData) return;
+      mutate(
+        updateTransaction(activeBudgetId, transaction.id, {
+          ...transactionData,
+          payee_id: selectOwnPayee ? null : values.payee_id,
+        }),
+        {
+          optimisticUpdate(currentData) {
+            if (!currentData) return;
 
-          const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+            const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
 
-          if (transactionIdx < 0) return currentData;
+            if (transactionIdx < 0) return currentData;
 
-          const newData = [...currentData];
+            const newData = [...currentData];
 
-          newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+            newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
 
-          return newData;
-        },
-      })
-        .then(() => {
+            return newData;
+          },
+        }
+      )
+        .then((value) => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
+
+          console.log(value);
 
           if (forApproval) {
             pop();
@@ -193,7 +210,13 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
         if (isNumberLike(value) === false) return `${value} is not a valid number`;
       },
-      payee_id: FormValidation.Required,
+      payee_id: (value) => {
+        const errorMessage = 'Please select or enter a payee';
+
+        if (!selectOwnPayee && !value) {
+          return errorMessage;
+        }
+      },
       categoryList: (value) => {
         const errorMessage = 'Please add one or more categories to this transaction';
         if (!value) {
@@ -246,6 +269,13 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           {subtransactions.length > 1 && !isSplitTransaction(transaction) ? (
             <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
           ) : null}
+          <Action
+            title={selectOwnPayee ? 'Show Payee dropdown' : 'Show Payee Textfield'}
+            onAction={() => {
+              setselectOwnPayee((v) => !v);
+            }}
+            shortcut={Shortcuts.TogglePayeeFieldType}
+          />
         </ActionPanel>
       }
     >
@@ -260,11 +290,15 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         value={amount}
         onChange={setAmount}
       />
-      <Form.Dropdown {...itemProps.payee_id} title="Payee" isLoading={isLoadingPayees}>
-        {payees?.map((payee) => (
-          <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
-        ))}
-      </Form.Dropdown>
+      {selectOwnPayee ? (
+        <Form.TextField {...itemProps.payee_name} title="Payee" />
+      ) : (
+        <Form.Dropdown {...itemProps.payee_id} title="Payee" isLoading={isLoadingPayees}>
+          {payees?.map((payee) => (
+            <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       {/*
         This form field is special. As we want to support split transactions with a simpler interface
@@ -292,7 +326,8 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
                   setSubtransactions([]);
                 }
               }
-            : undefined
+            : // eslint-disable-next-line @typescript-eslint/no-empty-function
+              () => {}
         }
       >
         {categories ? (
