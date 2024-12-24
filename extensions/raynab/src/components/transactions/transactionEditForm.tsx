@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
+import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 
 interface FormValues {
   date: Date | null;
@@ -216,12 +217,25 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       const newList = [...oldList];
       newList[previousSubtransactionIdx] = newSubtransaction;
 
+      const isDualSplitTransaction = oldList.length === 2;
+      if (isDualSplitTransaction) {
+        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
+        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
+        const otherAmount = +amount - +newAmount;
+
+        if (!Number.isNaN(otherAmount)) {
+          otherSubTransaction.amount = otherAmount.toString();
+          newList[otherSubTransactionIdx] = otherSubTransaction;
+        }
+      }
+
       setSubtransactions(newList);
     };
 
     return eventHandler;
   };
 
+  const isNewSplitTransaction = subtransactions.length > 0 && !isSplitTransaction(transaction);
   return (
     <Form
       navigationTitle="Edit Transaction"
@@ -229,6 +243,9 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          {subtransactions.length > 1 && !isSplitTransaction(transaction) ? (
+            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+          ) : null}
         </ActionPanel>
       }
     >
@@ -293,7 +310,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       </Form.TagPicker>
 
       {/* We don't want to show split transactions' subtransaction amounts as they won't be updated anyway */}
-      {subtransactions.length > 0 && !isSplitTransaction(transaction) ? (
+      {isNewSplitTransaction ? (
         <>
           <Form.Separator />
           {subtransactions.map((transaction, idx) => (

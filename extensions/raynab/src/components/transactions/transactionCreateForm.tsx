@@ -10,6 +10,7 @@ import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts } from '@
 import { useMemo, useState } from 'react';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { useTransactions } from '@hooks/useTransactions';
+import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 
 interface FormValues {
   date: Date | null;
@@ -167,6 +168,20 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
       const newList = [...oldList];
       newList[previousSubtransactionIdx] = newSubtransaction;
 
+      // If there are exactly 2 subtransactions, we can automatically calculate the second amount
+      // based on the total transaction amount and the first subtransaction amount
+      const isDualSplitTransaction = oldList.length === 2;
+      if (isDualSplitTransaction) {
+        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
+        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
+        const otherAmount = +amount - +newAmount;
+
+        if (!Number.isNaN(otherAmount)) {
+          otherSubTransaction.amount = otherAmount.toString();
+          newList[otherSubTransactionIdx] = otherSubTransaction;
+        }
+      }
+
       setSubtransactions(newList);
     };
 
@@ -178,6 +193,9 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          {subtransactions.length > 1 ? (
+            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+          ) : null}
         </ActionPanel>
       }
       navigationTitle="Create transaction"
