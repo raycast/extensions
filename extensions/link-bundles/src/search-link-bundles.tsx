@@ -7,7 +7,7 @@ import { fuzzySearchList } from "./utils/fuzzySearch";
 import { decodeUrlSafely } from "./utils/url";
 
 export default function Command() {
-  const { bundles, createBundle, editBundle, deleteBundle } = useBundles();
+  const { bundles, isLoading, createBundle, editBundle, deleteBundle } = useBundles();
   const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
@@ -33,7 +33,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search bundles..."
       throttle
-      isLoading={false}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action

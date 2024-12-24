@@ -1,18 +1,31 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { Bundle } from "../types";
 import { loadBundles, saveBundles } from "../utils/storage";
 
 export function useBundles() {
-  const [bundles, setBundles] = useState<Bundle[]>(loadBundles());
+  const [bundles, setBundles] = useState<Bundle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const isDuplicateTitle = (title: string, excludeIndex?: number): boolean => {
-    return bundles.some(
-      (bundle, index) => bundle.title.toLowerCase() === title.toLowerCase() && index !== excludeIndex,
-    );
-  };
+  useEffect(() => {
+    const initializeBundles = async () => {
+      const loadedBundles = await loadBundles();
+      setBundles(loadedBundles);
+      setIsLoading(false);
+    };
+    initializeBundles();
+  }, []);
 
-  const createBundle = (newBundle: Bundle) => {
+  const isDuplicateTitle = useCallback(
+    (title: string, excludeIndex?: number): boolean => {
+      return bundles.some(
+        (bundle, index) => bundle.title.toLowerCase() === title.toLowerCase() && index !== excludeIndex,
+      );
+    },
+    [bundles],
+  );
+
+  const createBundle = async (newBundle: Bundle) => {
     if (isDuplicateTitle(newBundle.title)) {
       showToast({
         style: Toast.Style.Failure,
@@ -24,7 +37,7 @@ export function useBundles() {
 
     const updatedBundles = [...bundles, newBundle];
     setBundles(updatedBundles);
-    saveBundles(updatedBundles);
+    await saveBundles(updatedBundles);
     showToast({
       style: Toast.Style.Success,
       title: "Success",
@@ -33,7 +46,7 @@ export function useBundles() {
     return true;
   };
 
-  const editBundle = (index: number, updatedBundle: Bundle) => {
+  const editBundle = async (index: number, updatedBundle: Bundle) => {
     if (isDuplicateTitle(updatedBundle.title, index)) {
       showToast({
         style: Toast.Style.Failure,
@@ -46,7 +59,7 @@ export function useBundles() {
     const updatedBundles = [...bundles];
     updatedBundles[index] = updatedBundle;
     setBundles(updatedBundles);
-    saveBundles(updatedBundles);
+    await saveBundles(updatedBundles);
     showToast({
       style: Toast.Style.Success,
       title: "Success",
@@ -65,7 +78,7 @@ export function useBundles() {
         onAction: async () => {
           const updatedBundles = bundles.filter((_, i) => i !== index);
           setBundles(updatedBundles);
-          saveBundles(updatedBundles);
+          await saveBundles(updatedBundles);
           showToast({
             style: Toast.Style.Success,
             title: "Success",
@@ -78,12 +91,12 @@ export function useBundles() {
       },
       rememberUserChoice: true,
     });
-
     return true;
   };
 
   return {
     bundles,
+    isLoading,
     createBundle,
     editBundle,
     deleteBundle,

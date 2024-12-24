@@ -1,9 +1,10 @@
-import fs from "fs";
-import path from "path";
+import { LocalStorage } from "@raycast/api";
 import { Bundle } from "../types";
 
-const BUNDLES_STORAGE_PATH = path.join(process.env.HOME || "", ".raycast-link-bundles/bundles.json");
-const CHROME_PROFILES_PATH = path.join(process.env.HOME || "", ".raycast-link-bundles/bundles-chrome-profiles.json");
+const STORAGE_KEYS = {
+  PROFILES: "link-bundles-profiles",
+  BUNDLES: "link-bundles",
+} as const;
 
 interface ChromeProfileData {
   bundleTitle: string;
@@ -11,27 +12,25 @@ interface ChromeProfileData {
 }
 
 // Load Chrome profiles from separate file
-const loadChromeProfiles = (): Record<string, string> => {
+const loadChromeProfiles = async (): Promise<Record<string, string>> => {
   try {
-    if (fs.existsSync(CHROME_PROFILES_PATH)) {
-      const data = fs.readFileSync(CHROME_PROFILES_PATH, "utf8");
-      const profiles: ChromeProfileData[] = JSON.parse(data);
-      return profiles.reduce(
-        (acc, { bundleTitle, profile }) => ({
-          ...acc,
-          [bundleTitle]: profile,
-        }),
-        {},
-      );
-    }
+    const data = await LocalStorage.getItem<string>(STORAGE_KEYS.PROFILES);
+    const profiles: ChromeProfileData[] = JSON.parse(data ?? "[]");
+    return profiles.reduce(
+      (acc, { bundleTitle, profile }) => ({
+        ...acc,
+        [bundleTitle]: profile,
+      }),
+      {},
+    );
   } catch (error) {
     console.error("Failed to load Chrome profiles:", error);
+    return {};
   }
-  return {};
 };
 
 // Save Chrome profiles to separate file
-const saveChromeProfiles = (bundles: Bundle[]) => {
+const saveChromeProfiles = async (bundles: Bundle[]): Promise<void> => {
   try {
     const profileData: ChromeProfileData[] = bundles
       .filter((bundle) => bundle.chromeProfile)
@@ -39,53 +38,49 @@ const saveChromeProfiles = (bundles: Bundle[]) => {
         bundleTitle: bundle.title,
         profile: bundle.chromeProfile || "Default",
       }));
-
-    fs.writeFileSync(CHROME_PROFILES_PATH, JSON.stringify(profileData, null, 2));
+    await LocalStorage.setItem(STORAGE_KEYS.PROFILES, JSON.stringify(profileData));
   } catch (error) {
     console.error("Failed to save Chrome profiles:", error);
   }
 };
 
-export const loadBundles = (): Bundle[] => {
+export const loadBundles = async (): Promise<Bundle[]> => {
   try {
-    if (fs.existsSync(BUNDLES_STORAGE_PATH)) {
-      const data = fs.readFileSync(BUNDLES_STORAGE_PATH, "utf8");
-      const loadedBundles = JSON.parse(data);
-      const chromeProfiles = loadChromeProfiles();
-
-      return loadedBundles.map((bundle: Bundle) => ({
-        ...bundle,
-        chromeProfile: chromeProfiles[bundle.title] || "Default",
-      }));
-    }
+    const data = await LocalStorage.getItem<string>(STORAGE_KEYS.BUNDLES);
+    const loadedBundles: Bundle[] = JSON.parse(data ?? "[]");
+    const chromeProfiles = await loadChromeProfiles();
+    return loadedBundles.map((bundle: Bundle) => ({
+      ...bundle,
+      chromeProfile: chromeProfiles[bundle.title] || "Default",
+    }));
   } catch (error) {
     console.error("Failed to load bundles:", error);
+    return [];
   }
-  return [];
 };
 
-export const saveBundles = (bundles: Bundle[]) => {
+export const saveBundles = async (bundles: Bundle[]): Promise<void> => {
   try {
     // Save bundles without chrome profile information
     const bundlesWithoutProfiles = bundles.map(({ ...bundle }) => bundle);
-    fs.writeFileSync(BUNDLES_STORAGE_PATH, JSON.stringify(bundlesWithoutProfiles, null, 2));
+    await LocalStorage.setItem(STORAGE_KEYS.BUNDLES, JSON.stringify(bundlesWithoutProfiles));
 
     // Save chrome profiles separately
-    saveChromeProfiles(bundles);
+    await saveChromeProfiles(bundles);
   } catch (error) {
     console.error("Failed to save bundles:", error);
   }
 };
 
 // Utility function to get Chrome profile for a specific bundle title
-export const getChromeProfile = (bundleTitle: string): string => {
-  const profiles = loadChromeProfiles();
+export const getChromeProfile = async (bundleTitle: string): Promise<string> => {
+  const profiles = await loadChromeProfiles();
   return profiles[bundleTitle] || "Default";
 };
 
 // Utility function to update Chrome profile for a specific bundle title
-export const updateChromeProfile = (bundleTitle: string, profile: string) => {
-  const profiles = loadChromeProfiles();
+export const updateChromeProfile = async (bundleTitle: string, profile: string): Promise<void> => {
+  const profiles = await loadChromeProfiles();
   profiles[bundleTitle] = profile;
 
   const profileData: ChromeProfileData[] = Object.entries(profiles).map(([bundleTitle, profile]) => ({
@@ -93,5 +88,5 @@ export const updateChromeProfile = (bundleTitle: string, profile: string) => {
     profile,
   }));
 
-  fs.writeFileSync(CHROME_PROFILES_PATH, JSON.stringify(profileData, null, 2));
+  await LocalStorage.setItem(STORAGE_KEYS.PROFILES, JSON.stringify(profileData));
 };

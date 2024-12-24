@@ -5,7 +5,7 @@ import { getChromeProfiles } from "../utils/chrome";
 
 interface BundleFormProps {
   bundle?: Bundle;
-  onSubmit: (bundle: Bundle) => boolean;
+  onSubmit: (bundle: Bundle) => Promise<boolean>;
 }
 
 export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
@@ -97,16 +97,14 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
 
     const nonEmptyLinks = linkInputs.filter((link) => link.url.trim() !== "").map((link) => link.url.trim());
 
-    const success = onSubmit({
+    onSubmit({
       title: values.title.trim(),
       description: values.description.trim(),
       links: nonEmptyLinks,
       chromeProfile,
+    }).then((success) => {
+      if (success) pop();
     });
-
-    if (success) {
-      pop();
-    }
   };
 
   return (
