@@ -6,9 +6,10 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
-import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
+import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { useMemo, useState } from 'react';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
+import { useTransactions } from '@hooks/useTransactions';
 
 interface FormValues {
   date: Date | null;
@@ -26,6 +27,11 @@ interface FormValues {
 export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
+
+  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
+
+  const { mutate } = useTransactions(activeBudgetId, timeline);
+
   const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
@@ -117,7 +123,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Creating Transaction' });
 
-      createTransaction(activeBudgetId, transactionData)
+      mutate(createTransaction(activeBudgetId, transactionData))
         .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction created successfully';

@@ -1,20 +1,24 @@
 import { TransactionEditForm } from '@components/transactions/transactionEditForm';
 import { Shortcuts } from '@constants';
+import { useTransactions } from '@hooks/useTransactions';
 import { updateTransaction } from '@lib/api';
 import { formatToReadablePrice } from '@lib/utils';
 import { Action, confirmAlert, Icon, showToast, Toast, useNavigation, type Alert } from '@raycast/api';
 import { useLocalStorage } from '@raycast/utils';
-import { CurrencyFormat, TransactionDetail } from '@srcTypes';
+import { CurrencyFormat, Period, TransactionDetail } from '@srcTypes';
 
 interface ApproveTransactionActionProps {
   transaction: TransactionDetail;
 }
 
 export function ApproveTransactionAction({ transaction }: ApproveTransactionActionProps) {
+  const { push } = useNavigation();
+
   const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
-  const { push } = useNavigation();
+  const { mutate } = useTransactions(activeBudgetId, timeline);
 
   return (
     <Action
@@ -38,7 +42,21 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
 
           if (await confirmAlert(options)) {
             const toast = await showToast({ style: Toast.Style.Animated, title: 'Approving transaction' });
-            updateTransaction(activeBudgetId, transaction.id, { ...transaction, approved: true })
+            mutate(updateTransaction(activeBudgetId, transaction.id, { ...transaction, approved: true }), {
+              optimisticUpdate(currentData) {
+                if (!currentData) return;
+
+                const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+
+                if (transactionIdx < 0) return currentData;
+
+                const newData = [...currentData];
+
+                newData.splice(transactionIdx, 1, { ...transaction, approved: true });
+
+                return newData;
+              },
+            })
               .then(() => {
                 toast.style = Toast.Style.Success;
                 toast.title = 'Transaction approved successfully';

@@ -25,7 +25,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     isLoading: isLoadingTimeline,
   } = useLocalStorage<Period>('timeline', 'month');
 
-  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline ?? 'month');
+  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline);
   const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(

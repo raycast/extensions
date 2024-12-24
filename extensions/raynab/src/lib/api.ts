@@ -170,7 +170,7 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
     const updateResponse = await client.transactions.updateTransaction(selectedBudgetId || 'last-used', transactionId, {
       transaction: data,
     });
-    const updatedTransaction = updateResponse.data;
+    const { transaction: updatedTransaction } = updateResponse.data;
     return updatedTransaction;
   } catch (error) {
     captureException(error);

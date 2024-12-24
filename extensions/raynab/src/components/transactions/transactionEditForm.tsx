@@ -22,11 +22,12 @@ import {
   useNavigation,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
-import { CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
+import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useEffect, useState } from 'react';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { usePayees } from '@hooks/usePayees';
+import { useTransactions } from '@hooks/useTransactions';
 
 interface FormValues {
   date: Date | null;
@@ -36,6 +37,7 @@ interface FormValues {
   categoryList?: string[];
   flag_color?: string;
   subtransactions?: SaveSubTransactionWithReadableAmounts[];
+  approved: true;
 }
 
 interface TransactionEditFormProps {
@@ -48,7 +50,9 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
   const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
+  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
 
+  const { mutate } = useTransactions(activeBudgetId, timeline);
   const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
@@ -104,6 +108,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         payee_id: values.payee_id,
         memo: values.memo || null,
         category_id: values.categoryList?.[0] || undefined,
+        approved: true,
       };
 
       if (isReconciled) {
@@ -151,8 +156,22 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       }
 
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
-      /* The transaction should be approved at this point */
-      updateTransaction(activeBudgetId, transaction.id, { ...transactionData, approved: true })
+
+      mutate(updateTransaction(activeBudgetId, transaction.id, transactionData), {
+        optimisticUpdate(currentData) {
+          if (!currentData) return;
+
+          const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+
+          if (transactionIdx < 0) return currentData;
+
+          const newData = [...currentData];
+
+          newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+
+          return newData;
+        },
+      })
         .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
