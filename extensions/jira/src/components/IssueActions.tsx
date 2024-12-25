@@ -146,7 +146,6 @@ export default function IssueActions({
     }
   }
 
-
   const { open_in } = getPreferenceValues<Preferences>();
 
   return (
@@ -159,20 +158,19 @@ export default function IssueActions({
             target={<IssueDetail initialIssue={issue} issueKey={issue.key} />}
           />
         ) : null}
-        
+
         {open_in ? (
           <Action
-          title={`Open in ${open_in.name}`}
-          icon={Icon.Globe}
-          onAction={async () => {
-            open(issueUrl, open_in);
-            closeMainWindow();
-          }}
-        />
+            title={`Open in ${open_in.name}`}
+            icon={Icon.Globe}
+            onAction={async () => {
+              open(issueUrl, open_in);
+              closeMainWindow();
+            }}
+          />
         ) : (
           <Action.OpenInBrowser url={issueUrl} />
         )}
-
 
         {showAttachmentsAction && "attachment" in issue.fields ? (
           <Action.Push
