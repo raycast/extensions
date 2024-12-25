@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";
@@ -16,7 +16,7 @@ export async function getiCloudService() {
   const appleID = await LocalStorage.getItem<string>("appleID");
 
   if (!appleID) {
-    throw new iCloudFailedLoginError("");
+    throw new iCloudFailedLoginError("No credentials");
   }
   const iService = new iCloudService(appleID, { useChineseAccount });
   await iService.init();
@@ -34,22 +34,6 @@ export async function getiCloudService() {
 export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }) {
   const [isAuthenticated, setIsAuthenticated] = useState<number | null>(AuthState.UNAUTHENTICATED);
   const [service, setService] = useState<iCloudService | null>(null);
-  const effectRan = useRef(false);
-
-  useEffect(() => {
-    // For React Strict Mode, which mounts twice
-    if (!effectRan.current) {
-      effectRan.current = true;
-      (async () => {
-        const appleID = await LocalStorage.getItem<string>("appleID");
-        if (!appleID) {
-          setIsAuthenticated(AuthState.UNAUTHENTICATED);
-        } else {
-          await handleLogin(appleID);
-        }
-      })();
-    }
-  }, []);
 
   async function handleLogin(appleID: string, password: string | null = null) {
     const { useChineseAccount } = getPreferenceValues<Preferences>();

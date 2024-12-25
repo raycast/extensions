@@ -3,6 +3,8 @@ import { useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { iCloudService } from "../../api/connect";
 import { MetaData } from "../../api/hide-my-email";
+import { iCloudSessionExpiredError } from "../../api/errors";
+import { Login } from "../Login";
 
 export interface AddressFormValues {
   address: string;
@@ -16,13 +18,16 @@ const MAX_LENGTH_LABEL = 256;
 export function AddressForm({
   initialValues,
   service,
+  setService,
   submit,
 }: {
   initialValues: AddressFormValues;
-  service: iCloudService | null;
+  service: iCloudService;
+  setService: React.Dispatch<React.SetStateAction<iCloudService | null>>;
   submit: ((values: MetaData) => Promise<void>) | ((values: AddressFormValues) => Promise<void>);
 }) {
   const [addressOption, setAddressOption] = useState<string | null>(null);
+  const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
   const { pop } = useNavigation();
   const effectRan = useRef(false);
 
@@ -31,12 +36,16 @@ export function AddressForm({
       try {
         const address = await service.hideMyEmail.generateAddress();
         setAddressOption(address);
+        setValidationError("address", null);
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Generating address failed",
           message: (error as { message: string }).message,
         });
+        if (error instanceof iCloudSessionExpiredError) {
+          setShowLoginAction(true);
+        }
       }
     }
   }
@@ -51,7 +60,7 @@ export function AddressForm({
     }
   }, [service]);
 
-  const { handleSubmit, itemProps } = useForm<AddressFormValues>({
+  const { handleSubmit, itemProps, setValidationError } = useForm<AddressFormValues>({
     async onSubmit(values) {
       if (values.label == initialValues.label && values.note == initialValues.note) {
         // Nothing changed
@@ -90,26 +99,48 @@ export function AddressForm({
 
   return (
     <Form
-      isLoading={!initialValues.address && !addressOption}
+      isLoading={!initialValues.address && !addressOption && !showLoginAction}
       actions={
         <ActionPanel>
-          {initialValues.address ||
-            (service && addressOption && <Action.SubmitForm title="Save" onSubmit={handleSubmit} icon={Icon.Stars} />)}
-          {service && addressOption && (
-            <Action
-              title="Generate New Address"
-              onAction={async () => {
-                setAddressOption(null);
-                await generate();
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              icon={Icon.Repeat}
+          {showLoginAction ? (
+            <Action.Push
+              title={"Log In"}
+              target={
+                <Login
+                  onLogin={(iService: iCloudService) => {
+                    setService(iService);
+                    setShowLoginAction(false);
+                    effectRan.current = false;
+                    pop();
+                  }}
+                />
+              }
+              icon={{ source: Icon.Person, tintColor: "#4798FF" }}
             />
+          ) : (
+            <>
+              <Action.SubmitForm title="Save" onSubmit={handleSubmit} icon={Icon.Stars} />
+              {addressOption && (
+                <Action
+                  title="Generate New Address"
+                  onAction={async () => {
+                    setAddressOption(null);
+                    await generate();
+                    setValidationError("address", null);
+                  }}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  icon={Icon.Repeat}
+                />
+              )}
+            </>
           )}
         </ActionPanel>
       }
     >
-      <Form.Description title="Address" text={initialValues.address || (addressOption ?? "Loading...")} />
+      <Form.Description
+        title="Address"
+        text={showLoginAction ? "Please log in" : initialValues.address || (addressOption ?? "Loading...")}
+      />
 
       <Form.TextField title="Label" {...itemProps.label} error={itemProps.label.error || itemProps.address.error} />
       <Form.TextField title="Note" {...itemProps.note} />

@@ -20,7 +20,11 @@ export default function Command() {
           showToast({ style: Toast.Style.Success, title: "Logged in" });
           setService(iService);
         } catch (error) {
-          showToast({ style: Toast.Style.Failure, title: "Not logged in" });
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to log in",
+            message: (error as { message: string }).message,
+          });
           setShowLogin(true);
         }
       })();
@@ -44,7 +48,7 @@ export default function Command() {
 
   async function handleCopy(address: string) {
     Clipboard.copy(address);
-    await showHUD("Email Added & Copied", {
+    await showHUD("🔗 Email Added & Copied", {
       clearRootSearch: false,
       popToRootType: PopToRootType.Immediate,
     });
@@ -65,7 +69,8 @@ export default function Command() {
   return (
     <AddressForm
       initialValues={{ label: "", note: "", address: "" }}
-      service={service}
+      service={service!}
+      setService={setService}
       submit={async (values: AddressFormValues) => {
         await add(values.address, { label: values.label, note: values.note });
       }}

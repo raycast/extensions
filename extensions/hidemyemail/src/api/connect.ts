@@ -20,6 +20,7 @@ import {
   iCloudFailedLoginError,
   iCloudNetworkError,
   iCloudServiceNotActivatedError,
+  iCloudSessionExpiredError,
 } from "./errors";
 import { LocalStorage } from "@raycast/api";
 import { getNestedHeader, hashPassword } from "./utils";
@@ -185,6 +186,13 @@ export class iCloudSession {
       }
     }
 
+    if (
+      (error.status === 421 && errorData?.trustTokens) ||
+      (error.status == 401 && reason === "Invalid global session")
+    ) {
+      return new iCloudSessionExpiredError("Session expired");
+    }
+
     if (["ZONE_NOT_FOUND", "AUTHENTICATION_FAILED"].includes(code)) {
       reason = "Please log into https://icloud.com/ to manually " + "finish setting up your iCloud service";
       return new iCloudServiceNotActivatedError(reason);
@@ -227,6 +235,7 @@ export class iCloudService {
 
   async init() {
     const sessionData = await LocalStorage.getItem<string>(this.sessionKey);
+
     if (sessionData) {
       this.sessionData = JSON.parse(sessionData);
     }
@@ -246,7 +255,7 @@ export class iCloudService {
 
   async authenticate(password: string | null = null) {
     let loginSuccessful = false;
-    if (this.sessionData?.sessionToken) {
+    if (this.sessionData?.sessionToken && !password) {
       try {
         const data = await this.validateToken();
         this.data = data;

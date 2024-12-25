@@ -12,13 +12,16 @@ import {
   Keyboard,
   confirmAlert,
   Alert,
+  useNavigation,
+  Image,
 } from "@raycast/api";
 import { iCloudService } from "./api/connect";
-import { HideMyEmail, MetaData } from "./api/hide-my-email";
+import { getIcon, HideMyEmail, MetaData } from "./api/hide-my-email";
 import { formatTimestamp } from "./utils";
 import { getiCloudService, Login } from "./components/Login";
 import { AddressForm, AddressFormValues } from "./components/forms/AddressForm";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { iCloudSessionExpiredError } from "./api/errors";
 
 enum EmailStatus {
   ANY = "ANY",
@@ -44,14 +47,19 @@ function StatusDropdown({ onStatusChange }: { onStatusChange: (newStatus: EmailS
   );
 }
 
+interface AppIcons {
+  [key: string]: string;
+}
+
 export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>(EmailStatus.ANY);
   const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
+  const [appIcons, setAppIcons] = useCachedState<AppIcons>("app-icons", { default: "extension-icon.png" });
   const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
-  const isOnCooldown = useRef(false);
   const effectRan = useRef(false);
   const abortable = useRef<AbortController>();
+  const { pop } = useNavigation();
 
   const {
     isLoading,
@@ -73,6 +81,23 @@ export default function Command() {
       initialData: [],
       execute: service != null,
       abortable,
+      onError: (error) => {
+        if (error instanceof iCloudSessionExpiredError) {
+          setShowLoginAction(true);
+          setService(null);
+        }
+      },
+      onData: async (data) => {
+        const newIcons: AppIcons = {};
+        let newData = false;
+        for (const hme of data) {
+          if (hme.appID && appIcons && !(hme.appID in appIcons)) {
+            newIcons[hme.appID] = await getIcon(hme);
+            if (newIcons[hme.appID]) newData = true;
+          }
+        }
+        if (newData) setAppIcons((prevValue) => ({ ...prevValue, ...newIcons }));
+      },
     },
   );
 
@@ -87,7 +112,11 @@ export default function Command() {
           setService(iService);
         } catch (error) {
           if (emails.length > 0) {
-            showToast({ style: Toast.Style.Failure, title: "Not logged in" });
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to log in",
+              message: (error as { message: string }).message,
+            });
             setShowLoginAction(true);
           }
         }
@@ -109,17 +138,16 @@ export default function Command() {
 
   async function toggleActive(email: HideMyEmail) {
     if (!(await isServiceAvailable())) return;
-    if (isOnCooldown.current) {
-      showToast({ style: Toast.Style.Failure, title: "Not too fast, please" });
-      return;
+    if (abortable.current) {
+      abortable.current.abort();
+      abortable.current = new AbortController();
     }
 
-    isOnCooldown.current = true;
     try {
       await mutate(service?.hideMyEmail.toggleActive(email, email.isActive ? "deactivate" : "reactivate"), {
         optimisticUpdate: (emails) => {
           emails.forEach((e: HideMyEmail) => {
-            if (e.anonymousId === email.anonymousId) e.isActive = !e.isActive;
+            if (e.id === email.id) e.isActive = !e.isActive;
           });
           return emails;
         },
@@ -131,19 +159,21 @@ export default function Command() {
         title: "Update failed",
         message: (error as { message: string }).message,
       });
-    } finally {
-      isOnCooldown.current = false;
     }
   }
 
   async function updateMetaData(email: HideMyEmail, newMetaData: MetaData) {
     if (!(await isServiceAvailable())) return;
+    if (abortable.current) {
+      abortable.current.abort();
+      abortable.current = new AbortController();
+    }
 
     try {
       await mutate(service?.hideMyEmail.updateMetaData(email, newMetaData), {
         optimisticUpdate: (emails) => {
           emails.forEach((e: HideMyEmail) => {
-            if (e.anonymousId === email.anonymousId) {
+            if (e.id === email.id) {
               e.label = newMetaData.label;
               e.note = newMetaData.note;
             }
@@ -171,10 +201,15 @@ export default function Command() {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
         onAction: async () => {
+          if (abortable.current) {
+            abortable.current.abort();
+            abortable.current = new AbortController();
+          }
+
           try {
             await mutate(service?.hideMyEmail.deleteAddress(email), {
               optimisticUpdate: (emails) => {
-                return emails.filter((e: HideMyEmail) => e.anonymousId != email.anonymousId);
+                return emails.filter((e: HideMyEmail) => e.id != email.id);
               },
               shouldRevalidateAfter: true,
             });
@@ -195,6 +230,10 @@ export default function Command() {
   }
 
   async function add(address: string, metaData: MetaData) {
+    if (abortable.current) {
+      abortable.current.abort();
+      abortable.current = new AbortController();
+    }
     const toast = await showToast({ style: Toast.Style.Animated, title: "Adding address..." });
     try {
       await service?.hideMyEmail.addAddress(address, metaData);
@@ -203,6 +242,10 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Email added & copied";
     } catch (error) {
+      if (error instanceof iCloudSessionExpiredError) {
+        setShowLoginAction(true);
+        setService(null);
+      }
       toast.style = Toast.Style.Failure;
       toast.title = "Adding failed";
       toast.message = (error as { message: string }).message;
@@ -229,6 +272,7 @@ export default function Command() {
                     <AddressForm
                       initialValues={{ label: "", note: "", address: "" }}
                       service={service}
+                      setService={setService}
                       submit={async (values: AddressFormValues) => {
                         await add(values.address, { label: values.label, note: values.note });
                       }}
@@ -248,16 +292,28 @@ export default function Command() {
               (email.isActive && emailStatus == EmailStatus.ACTIVE) ||
               (!email.isActive && emailStatus == EmailStatus.INACTIVE)) && (
               <List.Item
-                key={email.anonymousId}
-                id={email.anonymousId}
+                key={email.id}
+                id={email.id}
                 title={`${email.label}`}
                 icon={{ source: Icon.ChevronRightSmall, tintColor: email.isActive ? Color.Green : Color.Red }}
                 detail={
                   <List.Item.Detail
                     metadata={
                       <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Email" text={email.hme} />
+                        <List.Item.Detail.Metadata.Label title="Email" text={email.address} />
                         <List.Item.Detail.Metadata.Label title="Forward to" text={email.forwardToEmail} />
+                        <List.Item.Detail.Metadata.Separator />
+                        {
+                          <List.Item.Detail.Metadata.Label
+                            title="Created where"
+                            icon={
+                              email.appID && email.appID in appIcons
+                                ? { source: appIcons[email.appID], mask: Image.Mask.RoundedRectangle }
+                                : null
+                            }
+                            text={email.origin}
+                          />
+                        }
                         <List.Item.Detail.Metadata.Label
                           title="Created on"
                           text={formatTimestamp(email.createTimestamp)}
@@ -273,14 +329,26 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title={"Copy Email"} content={email.hme} />
+                      <Action.CopyToClipboard title={"Copy Email"} content={email.address} />
+                      {email.domain && <Action.OpenInBrowser title={"Open Website"} url={`https://${email.domain}`} />}
                       {showLoginAction && (
                         <Action.Push
                           title={"Log In"}
-                          target={<Login onLogin={(iService: iCloudService) => setService(iService)} />}
+                          target={
+                            <Login
+                              onLogin={(iService: iCloudService) => {
+                                setService(iService);
+                                setShowLoginAction(false);
+                                pop();
+                              }}
+                            />
+                          }
                           icon={{ source: Icon.Person, tintColor: "#4798FF" }}
+                          shortcut={{ modifiers: ["shift"], key: "l" }}
                         />
                       )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
                       {service && (
                         <>
                           <Action
@@ -289,6 +357,7 @@ export default function Command() {
                               await toggleActive(email);
                             }}
                             icon={Icon.Power}
+                            shortcut={{ modifiers: ["shift"], key: "return" }}
                           />
                           <Action
                             title={"Delete"}
@@ -305,8 +374,9 @@ export default function Command() {
                               icon={Icon.ShortParagraph}
                               target={
                                 <AddressForm
-                                  initialValues={{ address: email.hme, label: email.label, note: email.note }}
+                                  initialValues={{ address: email.address, label: email.label, note: email.note }}
                                   service={service}
+                                  setService={setService}
                                   submit={async (newMetaData: MetaData) => {
                                     await updateMetaData(email, newMetaData);
                                   }}
@@ -325,6 +395,7 @@ export default function Command() {
                             <AddressForm
                               initialValues={{ label: "", note: "", address: "" }}
                               service={service}
+                              setService={setService}
                               submit={async (values: AddressFormValues) => {
                                 await add(values.address, { label: values.label, note: values.note });
                               }}
