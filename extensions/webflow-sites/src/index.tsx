@@ -21,31 +21,33 @@ export default withAccessToken(provider)(Command);
 
 function Command() {
   const webflow = getWebflowClient();
-  const { isLoading, data, error } = useCachedPromise(async () => {
-    const result = await webflow.sites.list();
-    const sorted = sortByLastPublished(result.sites ?? []);
-    return sorted;
-  }, [], {
-    async onWillExecute() {
-      await showToast({ title: "Fetching", message: "Loading", style: Toast.Style.Animated });
+  const { isLoading, data, error } = useCachedPromise(
+    async () => {
+      const result = await webflow.sites.list();
+      const sorted = sortByLastPublished(result.sites ?? []);
+      return sorted;
     },
-    async onData(data) {
-      await showToast({
-        title: "Ready",
-        message: `${data.length} sites loaded`,
-        style: Toast.Style.Success,
-      });
+    [],
+    {
+      async onWillExecute() {
+        await showToast({ title: "Fetching", message: "Loading", style: Toast.Style.Animated });
+      },
+      async onData(data) {
+        await showToast({
+          title: "Ready",
+          message: `${data.length} sites loaded`,
+          style: Toast.Style.Success,
+        });
+      },
+      onError,
+      initialData: [],
     },
-    onError,
-    initialData: []
-  });
+  );
 
   if (error) {
-    const markdown = `**Weblow API Key Incorrect**  
-    Please update it in Settings (see screenshot) and try again. Press _Enter_ to open. 
-    ![Image Title](peeks-api-incorrect.png)
+    const markdown = `**Error**  
     
-    Still having issues contact us at raycast@peeks.co`;
+    ${error.message}`;
 
     return (
       <Detail

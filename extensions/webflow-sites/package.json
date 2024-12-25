@@ -37,7 +37,7 @@
       "title": "Webflow API Token",
       "description": "Generate at: https://www.peeks.co/raycast",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "Paste Webflow API Token"
     }
   ],
