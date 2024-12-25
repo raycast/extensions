@@ -69,11 +69,8 @@ export class HideMyEmail {
 export async function getIcon(hme: HideMyEmail) {
   try {
     const response = await axios.get(`https://itunes.apple.com/search?term=${hme.origin}&limit=3&entity=software`);
-    console.log(hme.appID);
-    console.log(response.data.results);
     for (const entry of response.data.results) {
       if (entry.bundleId === hme.appID) {
-        console.log("FOUND!", entry.artworkUrl512);
         return entry.artworkUrl512;
       }
     }
