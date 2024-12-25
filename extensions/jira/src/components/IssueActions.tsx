@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast, open } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -146,6 +146,9 @@ export default function IssueActions({
     }
   }
 
+
+  const { open_in } = getPreferenceValues<Preferences>();
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -156,8 +159,20 @@ export default function IssueActions({
             target={<IssueDetail initialIssue={issue} issueKey={issue.key} />}
           />
         ) : null}
+        
+        {open_in ? (
+          <Action
+          title={`Open in ${open_in.name}`}
+          icon={Icon.Globe}
+          onAction={async () => {
+            open(issueUrl, open_in);
+            closeMainWindow();
+          }}
+        />
+        ) : (
+          <Action.OpenInBrowser url={issueUrl} />
+        )}
 
-        <Action.OpenInBrowser url={issueUrl} />
 
         {showAttachmentsAction && "attachment" in issue.fields ? (
           <Action.Push
