@@ -1,31 +1,32 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "@raycast/api": {
-    "apiVersion": "1.88.4"
-  },
   "name": "business-license-query-verification",
   "title": "工商信息查询与核验",
   "description": "批量查询工商注册信息并支持多种格式导出，支持企业名称与统一社会信用代码的核验",
-  "icon": "extension_icon.png",
+  "version": "1.0.0",
   "author": "bblmian",
+  "owner": "bblmian",
+  "license": "MIT",
+  "icon": "assets/extension_icon.png",
   "categories": [
     "Productivity",
     "Data",
     "Developer Tools"
   ],
-  "license": "MIT",
   "commands": [
     {
-      "name": "business-license-query-information-search-data",
+      "name": "query",
       "title": "工商信息查询",
       "description": "批量查询企业的工商注册信息，支持多个企业名称",
-      "mode": "view"
+      "mode": "view",
+      "main": "src/query.tsx"
     },
     {
-      "name": "business-license-verify-information-check-data",
+      "name": "verify",
       "title": "工商信息核验",
       "description": "批量核验企业名称与统一社会信用代码的一致性",
-      "mode": "view"
+      "mode": "view",
+      "main": "src/verify.tsx"
     }
   ],
   "preferences": [
@@ -71,46 +72,5 @@
       "description": "每批处理的企业数量，建议不超过10",
       "placeholder": "10"
     }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "axios": "^1.6.2",
-    "p-limit": "^3.1.0",
-    "react": "^18.2.0",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.10.0",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.0.6",
-    "eslint": "^8.57.1",
-    "prettier": "^3.4.2",
-    "typescript": "^5.3.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "keywords": [
-    "raycast",
-    "business",
-    "license",
-    "query",
-    "verification",
-    "工商",
-    "信息",
-    "查询",
-    "核验"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bblmian/raycast-business-license-query"
-  },
-  "bugs": {
-    "url": "https://github.com/bblmian/raycast-business-license-query/issues"
-  },
-  "homepage": "https://github.com/bblmian/raycast-business-license-query#readme"
-}
+  ]
+} 
