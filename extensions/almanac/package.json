@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "almanac",
+  "title": "黄历",
+  "description": "中国传统黄历，支持农历、宜忌、吉凶等",
+  "icon": "extension-icon.png",
+  "author": "baranwang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "almanac",
+      "title": "查看黄历",
+      "description": "查看黄历详情（农历、宜忌、吉凶等）",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "dayjs": "^1.11.13",
+    "dayjs-plugin-lunar": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
