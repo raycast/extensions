@@ -1,5 +1,12 @@
 # Coffee Changelog
 
+## [Enhancement] - 2024-10-18
+
+- Implemented schedule-based caffeination, allowing different schedules for different days
+- Integrated NLP using regex to support natural language input for setting schedules
+- Added pause, resume, and delete functionality for schedules
+- Created README documentation
+
 ## [Update] – 2024-07-18
 
 - Updated HUD show time to improve user experience.

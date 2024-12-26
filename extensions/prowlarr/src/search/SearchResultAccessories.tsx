@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { ReleaseResource } from "../prowlarrApi";
-import { formatBytes } from "./utils";
+import { formatBytes } from "./utils/formatBytes";
 
 export function searchResultAccessories({ item }: { item: ReleaseResource }): List.Item.Accessory[] {
   return [

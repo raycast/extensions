@@ -5,6 +5,10 @@
   "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium, Orion and Sidekick.",
   "icon": "icon.png",
   "author": "crisboarna",
+  "contributors": [
+    "tkdkid1000",
+    "mikugeek"
+  ],
   "categories": [
     "Applications",
     "Developer Tools",

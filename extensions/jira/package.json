@@ -14,7 +14,10 @@
     "literallyjustroy",
     "mheidinger",
     "mikybars",
-    "luarmr"
+    "luarmr",
+    "horumy",
+    "santiago_perez",
+    "silv"
   ],
   "pastContributors": [
     "igor9silva"
@@ -31,7 +34,17 @@
       "title": "Create Issue",
       "subtitle": "Jira",
       "description": "Create and assign new issues.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyURLtoClipboard",
+          "description": "If checked, copies the newly created issue URL to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy created issue URL to clipboard"
+        }
+      ]
     },
     {
       "name": "open-issues",

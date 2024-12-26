@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from
 import { extname } from "path";
 import { CustomTimer, Preferences, Timer, TimerLaunchConfig } from "./types";
 import { formatTime, secondsBetweenDates } from "./formatUtils";
-import { showHudOrToast } from "./utils";
+import { showHudOrToast, showInitialRingContinuouslyWarning } from "./utils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 const DEFAULT_PRESET_VISIBLES_FILE = environment.supportPath + "/defaultPresetVisibles.json";
@@ -35,6 +35,7 @@ async function startTimer({
   launchedFromMenuBar = false,
   selectedSound = "default",
 }: TimerLaunchConfig) {
+  if (!(await showInitialRingContinuouslyWarning())) return;
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
@@ -47,16 +48,15 @@ async function startTimer({
   cmdParts.push(
     `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`,
   );
-  const afplayString = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
-  if (prefs.selectedSound === "speak_timer_name") {
-    cmdParts.push(`say "${timerName}"`);
-  } else {
-    cmdParts.push(afplayString);
-  }
+  const alertSoundString =
+    prefs.selectedSound === "speak_timer_name"
+      ? `say ${timerName}`
+      : `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
+  cmdParts.push(alertSoundString);
   if (prefs.ringContinuously) {
     const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
     writeFileSync(dismissFile, ".dismiss file for Timers");
-    cmdParts.push(`while [ -f "${dismissFile}" ]; do ${afplayString}; done`);
+    cmdParts.push(`while [ -f "${dismissFile}" ]; do ${alertSoundString}; done`);
   }
   cmdParts.push(`rm "${masterName}"; else echo "Timer deleted"; fi`);
   exec(cmdParts.join(" ; "), (error, stderr) => {

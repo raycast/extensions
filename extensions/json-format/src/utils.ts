@@ -33,6 +33,27 @@ export async function formatJS(text: string) {
   return beautify(json, options);
 }
 
+function unescapeJsonString(str: string): string {
+  return str.replace(/\\(["\\/bfnrt]|u[0-9a-fA-F]{4})/g, function (match, p1) {
+    const unescapeMap: { [key: string]: string } = {
+      '"': '"',
+      "\\": "\\",
+      "/": "/",
+      b: "\b",
+      f: "\f",
+      n: "\n",
+      r: "\r",
+      t: "\t",
+    };
+
+    if (p1[0] === "u") {
+      return String.fromCharCode(parseInt(p1.slice(1), 16));
+    } else {
+      return unescapeMap[p1] || p1;
+    }
+  });
+}
+
 export async function copyFormattedJs(result: string) {
   const { autopaste } = getPreferenceValues<Preferences>();
   if (autopaste) {
@@ -55,11 +76,17 @@ export async function copyFormattedJs(result: string) {
 }
 
 async function convert(input: string) {
-  if (isJson(input)) return input;
-  if (input.endsWith(";")) input = input.slice(0, -1);
+  let processedInput = input;
   try {
-    if (isExecuteable(input)) throw new Error("executeable");
-    const result = Function(`"use strict";return (${input})`)();
+    processedInput = unescapeJsonString(processedInput);
+  } catch (error) {
+    console.error("Error unescaping JSON string:", error);
+  }
+  if (isJson(processedInput)) return processedInput;
+  if (processedInput.endsWith(";")) processedInput = processedInput.slice(0, -1);
+  try {
+    if (isExecuteable(processedInput)) throw new Error("executeable");
+    const result = Function(`"use strict";return (${processedInput})`)();
     return JSON.stringify(result);
   } catch {
     await showToast({

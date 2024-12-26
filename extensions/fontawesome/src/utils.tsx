@@ -1,5 +1,5 @@
 import { SearchItem } from './types';
-import { Clipboard, showHUD, ActionPanel, Action } from '@raycast/api';
+import { Clipboard, showHUD, ActionPanel, Action, getPreferenceValues } from '@raycast/api';
 
 export const copySvgToClipboard = async (icon: SearchItem) => {
   // Since v6, Font Awesome stopped setting the SVGs fill color to currentColor, this restores that behavior.
@@ -64,21 +64,71 @@ export function iconForStyle(prefix: string) {
 }
 
 export function iconActions(searchItem: SearchItem) {
-  return (
-    <ActionPanel>
-      <Action title={`Copy Icon Name`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(searchItem)} />
-      <Action
-        title={`Copy Icon Classes`}
-        icon="copy-clipboard-16"
-        onAction={() => copyFAClassesToClipboard(searchItem)}
-      />
-      <Action title={`Copy as SVG`} icon="copy-clipboard-16" onAction={() => copySvgToClipboard(searchItem)} />
-      <Action title={`Copy Icon Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(searchItem)} />
-      <Action
-        title={`Copy Icon Unicode`}
-        icon="copy-clipboard-16"
-        onAction={() => copyFAUnicodeClipboard(searchItem)}
-      />
-    </ActionPanel>
-  );
+  const { PRIMARY_ACTION } = getPreferenceValues();
+
+  const actions = [
+    {
+      action: (
+        <Action
+          key="copyIconName"
+          title={`Copy Icon Name`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFASlugToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconName',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconClasses"
+          title={`Copy Icon Classes`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAClassesToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconClasses',
+    },
+    {
+      action: (
+        <Action
+          key="copyAsSvg"
+          title={`Copy as SVG`}
+          icon="copy-clipboard-16"
+          onAction={() => copySvgToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyAsSvg',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconGlyph"
+          title={`Copy Icon Glyph`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAGlyphToClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconGlyph',
+    },
+    {
+      action: (
+        <Action
+          key="copyIconUnicode"
+          title={`Copy Icon Unicode`}
+          icon="copy-clipboard-16"
+          onAction={() => copyFAUnicodeClipboard(searchItem)}
+        />
+      ),
+      id: 'copyIconUnicode',
+    },
+  ];
+
+  const primaryActionIndex = actions.findIndex((a) => a.id === PRIMARY_ACTION);
+  if (primaryActionIndex > -1) {
+    const [primaryAction] = actions.splice(primaryActionIndex, 1);
+    actions.unshift(primaryAction);
+  }
+
+  return <ActionPanel>{actions.map((a) => a.action)}</ActionPanel>;
 }

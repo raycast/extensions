@@ -19,18 +19,64 @@
   ],
   "commands": [
     {
+      "name": "send",
+      "title": "Send Clipping",
+      "subtitle": "Supernotes",
+      "description": "Send the current selection or clipboard to a Supernotes card.",
+      "mode": "view",
+      "keywords": [
+        "sn",
+        "send",
+        "clipping",
+        "selection",
+        "clipboard",
+        "card"
+      ]
+    },
+    {
+      "name": "daily",
+      "title": "Quick Daily",
+      "subtitle": "Supernotes",
+      "description": "Quickly append content to your Supernotes daily card.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Content",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "sn",
+        "quick",
+        "daily",
+        "card"
+      ]
+    },
+    {
       "name": "create",
       "title": "Create Card",
       "subtitle": "Supernotes",
       "description": "Quickly create a Supernotes card.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "sn",
+        "card",
+        "create"
+      ]
     },
     {
       "name": "search",
       "title": "Search Cards",
       "subtitle": "Supernotes",
       "description": "Search your cards on Supernotes.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "sn",
+        "card",
+        "search"
+      ]
     }
   ],
   "preferences": [
@@ -42,28 +88,26 @@
       "required": true
     }
   ],
-  "importSort": {
-    ".js, .jsx, .ts, .tsx": {
-      "style": "supernotes"
-    }
-  },
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.81.2",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
+    "@types/lodash": "^4.17.7",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
-    "import-sort-style-supernotes": "^0.4.1",
-    "prettier": "^2.8.0",
-    "typescript": "^4.9.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

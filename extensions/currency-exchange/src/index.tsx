@@ -111,7 +111,7 @@ function Exchange({
       {currencyResult.conversion_rate_exchanged ? (
         <>
           <List.Section
-            title={`Pinned Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Pinned Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
           >
@@ -119,7 +119,9 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "No Currency"}
+                subtitle={
+                  item.value !== Number.POSITIVE_INFINITY ? formatCurrency(item.value, item.code) : "No Currency"
+                }
                 accessories={[{ text: currencyCode2Name[item.code], icon: Icon.Pin }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -135,7 +137,7 @@ function Exchange({
             ))}
           </List.Section>
           <List.Section
-            title={`Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
             subtitle={
@@ -148,7 +150,7 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "∞"}
+                subtitle={item.value !== Number.POSITIVE_INFINITY ? formatCurrency(item.value, item.code) : "∞"}
                 accessories={[{ text: currencyCode2Name[item.code] }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -295,7 +297,7 @@ function useExchange() {
           cancelRef.current.signal,
           filter,
           historyDate,
-          state.pinnedCurrencyCodes
+          state.pinnedCurrencyCodes,
         );
         console.log(result?.conversion_rate_exchanged?.at(0));
         setState((oldState) => ({
@@ -322,7 +324,7 @@ function useExchange() {
         });
       }
     },
-    [cancelRef, state.fromCurrencyCode, state.pinnedCurrencyCodes]
+    [cancelRef, state.fromCurrencyCode, state.pinnedCurrencyCodes],
   );
 
   useEffect(() => {
@@ -345,7 +347,7 @@ async function performExchange(
   signal: AbortSignal,
   filter: string,
   historyDate: Date | null,
-  pinned?: Array<string>
+  pinned?: Array<string>,
 ): Promise<CurrencyResult | undefined> {
   console.log(`start to exchange | ${fromCode} |${amount}|`);
   if (amount > 0) {
@@ -353,7 +355,7 @@ async function performExchange(
     return LocalStorage.getItem<string>(
       `currency${
         historyDate ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate() : ""
-      }`
+      }`,
     )
       .then((content) => {
         if (content) {
@@ -380,7 +382,7 @@ async function performExchange(
                     ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate()
                     : ""
                 }`,
-                JSON.stringify(responseJson)
+                JSON.stringify(responseJson),
               );
               return result;
             } else {
@@ -420,7 +422,7 @@ function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Res
       historyDate
         ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
         : ""
-    }`
+    }`,
   );
   return fetch(
     `https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
@@ -432,7 +434,7 @@ function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Res
       signal: signal,
       method: "GET",
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
@@ -441,7 +443,7 @@ function enrichExchangeData(
   amount: number,
   fromCode: string,
   filter: string,
-  pinned?: Array<string>
+  pinned?: Array<string>,
 ): CurrencyResult {
   const base = currencyData.conversion_rates[fromCode] || 0;
   console.log("filter: ", filter);
@@ -455,7 +457,7 @@ function enrichExchangeData(
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
+          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0),
     )
     .map<ConversionRate>((key: string) => ({
       code: key,
@@ -470,7 +472,7 @@ function enrichExchangeData(
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
+          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0),
     )
     .map<ConversionRate>((key: string) => ({
       code: key,
@@ -507,7 +509,7 @@ function SetCurrencyDateForm(props: {
               amountExpression && historyDate
                 ? setSearchText(
                     amountExpression.replace(regex, "") +
-                      ` at ${historyDate.getFullYear()}/${historyDate.getMonth() + 1}/${historyDate.getDate()}`
+                      ` at ${historyDate.getFullYear()}/${historyDate.getMonth() + 1}/${historyDate.getDate()}`,
                   )
                 : null;
               pop();
@@ -534,6 +536,20 @@ function getFlagEmoji(countryAndRegionCode: string): string {
   let v = countryAndRegionCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
   v = countryAndRegionCode === "AN" ? "🇺🇳" : v;
   return v;
+}
+
+function formatCurrency(amount: number, currencyCode: string): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    }).format(amount);
+  } catch (error) {
+    console.error(`Error formatting currency: ${error}`);
+    return amount.toString();
+  }
 }
 
 interface ExchangeState {

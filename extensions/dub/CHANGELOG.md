@@ -1,6 +1,17 @@
 # Dub Link Shortener Changelog
 
+## [Typeahead Support] - 2024-12-04
+
+- Add typeahead support for short links to load more that 100 links [#14198](https://github.com/raycast/extensions/issues/14198)
+- Bump dependencies to resolve critical vulnerabilities
+
+## [Chore] - 2024-10-23
+
+- Bump dub sdk to v0.43.9
+- Fixed an issue where links were not loading when `link.userId` is null
+
 ## [Renaming and Fixes] - 2024-08-01
+
 - Rename extension from `dub-link-shortener` to `dub`
 - Transfer to `dubinc` organization
 - Fixed retry for shortening failures and open short links within toast with a push.

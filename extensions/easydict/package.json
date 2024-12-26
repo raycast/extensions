@@ -513,6 +513,29 @@
       ]
     },
     {
+      "title": "Bing Host",
+      "name": "bingHost",
+      "type": "dropdown",
+      "label": "Bing Host",
+      "required": false,
+      "description": "Bing Host Type",
+      "default": "",
+      "data": [
+        {
+          "title": "Auto",
+          "value": ""
+        },
+        {
+          "title": "cn.bing.com",
+          "value": "cn.bing.com"
+        },
+        {
+          "title": "www.bing.com",
+          "value": "www.bing.com"
+        }
+      ]
+    },
+    {
       "title": "Switch Boxes",
       "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
@@ -538,14 +561,6 @@
       "default": true
     },
     {
-      "name": "enableBaiduLanguageDetect",
-      "type": "checkbox",
-      "label": "Enable Baidu Language Detect",
-      "required": false,
-      "description": "⚠️ If turn off it, the language detection will be slower, even cause timeout.",
-      "default": true
-    },
-    {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
       "label": "Play Word Pronunciation Automatically",
@@ -568,6 +583,15 @@
       "required": false,
       "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
       "default": false
+    },
+    {
+      "title": "Langauge Detection",
+      "name": "enableBaiduLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Baidu Language Detect",
+      "required": false,
+      "description": "Turn on/off Baidu Language Detect.",
+      "default": true
     },
     {
       "title": "Apple System Features",

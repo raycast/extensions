@@ -1,5 +1,18 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2025-12-12
+
+- Add shortcut to "Create Similar Time Entry"
+
+## [New Feature] - 2024-12-09
+
+- Add "Update Time Entry" command to update time entries
+- Add ability to update time entry action from the list
+
+## [New Feature] - 2024-10-07
+
+- Add ability to create task for time entry form
+
 ## [Bug Fixes] - 2024-08-20
 
 - Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.

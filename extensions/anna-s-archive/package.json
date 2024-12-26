@@ -15,19 +15,43 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "mirror",
+      "title": "Mirror",
+      "type": "dropdown",
+      "default": "https://annas-archive.org",
+      "description": "Choose a mirror to use",
+      "required": false,
+      "data": [
+        {
+          "value": "https://annas-archive.org",
+          "title": "https://annas-archive.org"
+        },
+        {
+          "value": "https://annas-archive.se",
+          "title": "https://annas-archive.se"
+        },
+        {
+          "value": "https://annas-archive.li",
+          "title": "https://annas-archive.li"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.3",
-    "cheerio": "^1.0.0-rc.12"
+    "@raycast/api": "^1.82.5",
+    "@raycast/utils": "^1.17.0",
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "22.0.0",
-    "@types/react": "18.3.3",
+    "@types/node": "22.5.5",
+    "@types/react": "18.3.5",
     "eslint": "^8.51.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

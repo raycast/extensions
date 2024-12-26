@@ -8,4 +8,4 @@ export const getCardUrl = ({ entity_type, slug }: { entity_type: string; slug: s
           ? `${webUrl}/${slug}`
           : `${webUrl}/card/${slug}`;
 
-export const apiUrl = isStaging ? `https://staging.startupy.world/api/v2` : `https://beta.startupy.world/api/v2`;
+export const apiUrl = isStaging ? `https://staging.api.sublime.app/api/v2` : `https://api.sublime.app/api/v2`;

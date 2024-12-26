@@ -1,18 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Image,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { execaCommand } from "execa";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fs from "fs";
-import { cpus, homedir } from "os";
+import { cpus } from "os";
+import { runShellScript } from "./utils";
 
 export type ServiceStatus = string;
 
@@ -29,13 +18,8 @@ const brewPath: string =
   preferences.brewPath && preferences.brewPath.length > 0
     ? preferences.brewPath
     : cpus()[0].model.includes("Apple")
-    ? "/opt/homebrew/bin/brew"
-    : "/usr/local/bin/brew";
-
-export async function runShellScript(command: string) {
-  const { stdout } = await execaCommand(command);
-  return stdout;
-}
+      ? "/opt/homebrew/bin/brew"
+      : "/usr/local/bin/brew";
 
 export async function getServices(): Promise<Service[]> {
   // make sure that brewPath exists, is a file, and is executable
@@ -93,11 +77,18 @@ export async function stopService(service: string) {
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "Stopping Service",
-    message: `Stopping ${service}`,
+    message: `Stopping ${service == "--all" ? "all services" : service}`,
   });
   toast.show();
 
   await runShellScript(`${brewPath} services stop ${service}`);
+
+  if (service === "--all") {
+    toast.style = Toast.Style.Success;
+    toast.title = "Stopped All Services";
+    toast.message = "Stopped all services";
+    return;
+  }
 
   const data = await getServices();
   for (const d of data) {
@@ -119,11 +110,18 @@ export async function startService(service: string) {
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "Starting Service",
-    message: `Starting ${service}`,
+    message: `Starting ${service == "--all" ? "all services" : service}`,
   });
   toast.show();
 
   await runShellScript(`${brewPath} services start ${service}`);
+
+  if (service === "--all") {
+    toast.style = Toast.Style.Success;
+    toast.title = "Started All Services";
+    toast.message = "Started all services";
+    return;
+  }
 
   const data = await getServices();
   for (const d of data) {
@@ -145,11 +143,18 @@ export async function restartService(service: string) {
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "Restarting Service",
-    message: `Restarting ${service}`,
+    message: `Restarting ${service == "--all" ? "all services" : service}`,
   });
   toast.show();
 
   await runShellScript(`${brewPath} services restart ${service}`);
+
+  if (service === "--all") {
+    toast.style = Toast.Style.Success;
+    toast.title = "Restarted All Services";
+    toast.message = "Restarted all services";
+    return;
+  }
 
   const data = await getServices();
   for (const d of data) {
@@ -171,13 +176,20 @@ export async function runService(service: string) {
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "Running Service",
-    message: `Running ${service}`,
+    message: `Running ${service == "--all" ? "all services" : service}`,
   });
   toast.show();
 
   await runShellScript(`${brewPath} services run ${service}`);
 
   const services = await getServices();
+
+  if (service === "--all") {
+    toast.style = Toast.Style.Success;
+    toast.title = "Ran All Services";
+    toast.message = "Ran all services";
+    return;
+  }
 
   const s = services.find((s) => s.name === service)!;
   if (s.status === "running") {
@@ -189,94 +201,4 @@ export async function runService(service: string) {
     toast.title = "Error Running Service";
     toast.message = `${service} could not be run properly`;
   }
-}
-
-export function createIcon(status: string): Image.ImageLike {
-  switch (status) {
-    case "started":
-      return { source: Icon.Play, tintColor: Color.Green };
-    case "running":
-      return { source: Icon.PlayFilled, tintColor: Color.Green };
-    case "error":
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
-    case "none":
-      return { source: Icon.Stop, tintColor: Color.PrimaryText };
-    default:
-      return { source: Icon.QuestionMark, tintColor: Color.Red };
-  }
-}
-
-export function StopService(props: { name: string }) {
-  return <Action icon={Icon.Stop} title="Stop Service" onAction={() => stopService(props.name)} />;
-}
-
-export function RestartService(props: { name: string }) {
-  return <Action icon={Icon.RotateAntiClockwise} title="Restart Service" onAction={() => restartService(props.name)} />;
-}
-
-export function StartService(props: { name: string }) {
-  return <Action icon={Icon.Play} title="Start Service" onAction={() => startService(props.name)} />;
-}
-
-export function RunService(props: { name: string }) {
-  return <Action icon={Icon.ForwardFilled} title="Run Service" onAction={() => runService(props.name)} />;
-}
-
-export function PlistActions(props: { path: string }) {
-  const path = props.path.replace(/^~/, homedir());
-  return (
-    <ActionPanel.Section title="Plist">
-      <Action.ShowInFinder title="Show Plist File in Finder" path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-      <Action.OpenWith title="Open Plist File With" path={path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
-      <Action.CopyToClipboard
-        title="Copy Plist File Path"
-        content={path}
-        shortcut={Keyboard.Shortcut.Common.CopyPath}
-      />
-    </ActionPanel.Section>
-  );
-}
-
-export function BrewActions(props: { data: Service }) {
-  if (props.data.status === "started" || props.data.status === "running") {
-    return (
-      <ActionPanel>
-        <ActionPanel.Section title="Manage Service">
-          <StopService name={props.data.name} />
-          <RestartService name={props.data.name} />
-        </ActionPanel.Section>
-        <PlistActions path={props.data.path} />
-      </ActionPanel>
-    );
-  } else if (props.data.status === "stopped" || props.data.status === "none") {
-    return (
-      <ActionPanel title="Manage Service">
-        <StartService name={props.data.name} />
-        <RunService name={props.data.name} />
-      </ActionPanel>
-    );
-  } else {
-    return (
-      <ActionPanel title="Manage Service">
-        <StopService name={props.data.name} />
-        <RestartService name={props.data.name} />
-      </ActionPanel>
-    );
-  }
-}
-
-export function BrewItemList(props: { services: Service[] | undefined }) {
-  return (
-    <List isLoading={!props.services} searchBarPlaceholder="Search for services...">
-      {(props.services ?? []).map((d) => (
-        <List.Item
-          title={d.name}
-          subtitle={d.status}
-          accessories={d.user ? [{ text: d.user, icon: Icon.Person }] : undefined}
-          icon={createIcon(d.status)}
-          actions={<BrewActions data={d} />}
-        />
-      ))}
-    </List>
-  );
 }

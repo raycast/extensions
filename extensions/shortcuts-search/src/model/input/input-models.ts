@@ -11,6 +11,7 @@ export interface AllApps {
  */
 export interface InputApp {
   bundleId?: string;
+  hostname?: string;
   name: string;
   slug: string;
   keymaps: InputKeymap[];

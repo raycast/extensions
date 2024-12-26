@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Task Creation Date] - 2024-12-03
+- Tasks added now log the creation date.
+
+## [Support for Fuzzy Search] - 2024-09-05
+- Add option to use Fuzzy Search on notes search. Disabled by default in note search config.
+
 ## [Bugfix for nested bookmarks] - 2024-02-06
 - Fixes a bug where nested bookmarks would not be displayed correctly in search
 

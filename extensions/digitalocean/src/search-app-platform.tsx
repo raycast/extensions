@@ -29,12 +29,13 @@ export default function Command() {
           key={app.id}
           icon={{ source: Icon.Dot, tintColor: app.live_url ? Color.Green : Color.Blue }}
           title={app.spec.name}
-          subtitle={app.region.slug}
-          accessories={[{ date: new Date(app.created_at) }]}
+          subtitle={app.live_url}
+          accessories={[{ tag: app.tier_slug }, { date: new Date(app.created_at) }]}
           actions={
             <ActionPanel>
               {app.live_url && <Action.OpenInBrowser title="Visit Live URL" url={app.live_url} />}
               <Action.Push icon={Icon.Eye} title="View Deployments" target={<AppDeploymentsList app={app} />} />
+              <Action.Push icon={Icon.MagnifyingGlass} title="Manage Env Vars" target={<AppEnvsList app={app} />} />
               <Action.OpenInBrowser url={`https://cloud.digitalocean.com/apps/${app.id}`} />
             </ActionPanel>
           }
@@ -89,6 +90,29 @@ function AppDeploymentsList({ app }: { app: App }) {
             />
           );
         })}
+      </List.Section>
+    </List>
+  );
+}
+
+function AppEnvsList({ app }: { app: App }) {
+  return (
+    <List isShowingDetail>
+      <List.Section title={`Apps / ${app.spec.name} / Env Vars`}>
+        {app.spec.envs?.map((env, idx) => (
+          <List.Item
+            key={idx}
+            icon={env.type === "SECRET" ? Icon.QuestionMark : Icon.MagnifyingGlass}
+            title={env.key}
+            detail={<List.Item.Detail markdown={env.value} />}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Key to Clipboard" content={env.key} />
+                <Action.CopyToClipboard title="Copy Value to Clipboard" content={env.value} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );

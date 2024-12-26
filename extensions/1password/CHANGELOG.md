@@ -1,5 +1,16 @@
 # 1Password Changelog
 
+## [Chore] - 2024-12-02
+
+- Add readme & FAQ
+- Bump all dependencies to the latest
+- Resolve all linting errors
+- Resolve all vulnerabilities through `npm audit fix`
+
+## [Enhancements] - 2024-10-16
+
+- Feat: allow filtering by additional information
+
 ## [Enhancements] - 2024-08-13
 
 - Fix: multilingual OTP name can't be read

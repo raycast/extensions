@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Generate Playlist Improvement - Artists] - 2024-12-03
+
+- Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
+
+## [Fix Search Command] - 2024-11-22
+
+- Even though it's not documented, the Spotify API can return null items in some cases when searching for items. This has now been fixed.
+
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
 ## [Generate Playlist Improvement] - 2024-09-06
 
 - Use GPT-4o mini instead of GPT-4o to make it faster.
@@ -35,7 +47,7 @@
 
 ## [New Album Actions] - 2024-05-30
 
--  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+- Added new actions in the album panel: `Add To Library` and `Remove From Library`.
 
 ## [Automatically Trigger Current Track] - 2024-05-28
 

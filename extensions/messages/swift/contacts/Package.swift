@@ -8,7 +8,8 @@ let package = Package(
     .macOS(.v12)
   ],
   dependencies: [
-    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.4")
+    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.4"),
+    .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.12.2"),
   ],
   targets: [
     .executableTarget(
@@ -17,6 +18,7 @@ let package = Package(
         .product(name: "RaycastSwiftMacros", package: "extensions-swift-tools"),
         .product(name: "RaycastSwiftPlugin", package: "extensions-swift-tools"),
         .product(name: "RaycastTypeScriptPlugin", package: "extensions-swift-tools"),
+        .product(name: "SQLite", package: "SQLite.swift"),
       ]
     )
   ]

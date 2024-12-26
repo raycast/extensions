@@ -64,6 +64,8 @@ export interface MyPreferences {
   openAIAPIKey: string;
   openAIAPIURL: string;
   openAIModel: string;
+
+  bingHost: string;
 }
 
 /**

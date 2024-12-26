@@ -18,8 +18,8 @@ import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { WeatherMenubarItem } from "@components/weather/menu";
 import { State } from "@lib/haapi";
 import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { getIcon, getStateValue } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
@@ -115,7 +115,7 @@ export function MenuBarExtraEntity(props: { state: State | undefined; isLoading?
   return (
     <MenuBarExtra
       title={stateValue(s)}
-      icon={s ? getIcon(s) : "entity.png"}
+      icon={s ? getIcon(s) : "shape.svg"}
       tooltip={s ? getFriendlyName(s) : undefined}
       isLoading={props.isLoading}
     >

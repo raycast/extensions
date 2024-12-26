@@ -8,62 +8,89 @@ import {
   DatabaseProperty,
   User,
   PropertyConfig,
-  getPropertyConfig,
+  ReadablePropertyType,
+  FormValueForDatabaseProperty,
 } from "../../utils/notion";
 
-export function createConvertToFieldFunc(
-  itemPropsFor: GetFieldPropsFunc,
-  relationPages: Record<string, Page[]> | undefined,
-  users: User[],
-) {
-  return (property: DatabaseProperty) => {
-    let placeholder = property.type.replace(/_/g, " ");
-    placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
-
-    switch (property.type) {
-      case "date":
-        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
-      case "checkbox":
-        return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
-      case "select":
-      case "status":
-        return (
-          <Form.Dropdown {...itemPropsFor<typeof property.type>(property)}>
-            {getPropertyConfig(property, [property.type])?.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
-          </Form.Dropdown>
-        );
-      case "multi_select":
-      case "relation":
-      case "people": {
-        let options: PropertyConfig<"multi_select">["options"] | Page[] | User[] | undefined;
-        if (property.type == "multi_select") options = getPropertyConfig(property, [property.type])?.options;
-        else if (property.type == "people") options = users;
-        else if (relationPages && property.type == "relation") {
-          const relationId = getPropertyConfig(property, [property.type])?.database_id;
-          if (relationId) options = relationPages[relationId];
-        }
-        return (
-          <Form.TagPicker placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)}>
-            {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
-          </Form.TagPicker>
-        );
-      }
-      case "formula":
-        return null;
-      default:
-        return (
-          <Form.TextField
-            info="Supports a single line of inline Markdown"
-            placeholder={placeholder}
-            {...itemPropsFor<typeof property.type>(property)}
-          />
-        );
-    }
+// @ts-expect-error - Overload doesn't match, but is the function signature we want to be visisble.
+export function PagePropertyField(props: {
+  type: ReadablePropertyType;
+  databaseProperty: DatabaseProperty;
+  itemProps: ReturnType<typeof useForm>["itemProps"][string];
+  relationPages: Record<string, Page[]> | undefined;
+  users: User[];
+}): JSX.Element;
+export function PagePropertyField({
+  type,
+  databaseProperty,
+  itemProps,
+  relationPages,
+  users,
+}: {
+  [DP in DatabaseProperty as DP["type"]]: {
+    type: DP["type"];
+    databaseProperty: DP;
+    itemProps: Form.ItemProps<FormValueForDatabaseProperty<DP["type"]>>;
+    relationPages: Record<string, Page[]> | undefined;
+    users: User[];
   };
+}[ReadablePropertyType]) {
+  // Note: `key` shouldn't be passed to a react component with the spread opperator.
+  const sharedProps = { title: databaseProperty.name, placeholder: createPlaceholder(databaseProperty) };
+  switch (type) {
+    case "date":
+      return <Form.DatePicker {...itemProps} {...sharedProps} key={itemProps.id} />;
+    case "checkbox":
+      return <Form.Checkbox {...itemProps} {...sharedProps} key={itemProps.id} label={sharedProps.placeholder} />;
+    case "select":
+    case "status":
+      return (
+        <Form.Dropdown {...itemProps} {...sharedProps} key={itemProps.id}>
+          {databaseProperty.config.options.map(createMapOptionsFunc(Form.Dropdown.Item))}
+        </Form.Dropdown>
+      );
+    case "multi_select":
+    case "relation":
+    case "people": {
+      let options: ItemOption[] | Page[] | User[] | undefined;
+      if (databaseProperty.type == "multi_select") options = databaseProperty.config.options;
+      else if (databaseProperty.type == "people") options = users;
+      else if (relationPages && databaseProperty.type == "relation") {
+        const relationId = databaseProperty.config.database_id;
+        if (relationId) options = relationPages[relationId];
+      }
+      return (
+        <Form.TagPicker {...itemProps} {...sharedProps} key={itemProps.id}>
+          {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
+        </Form.TagPicker>
+      );
+    }
+    case "formula":
+      return null;
+    case "title":
+      return (
+        <Form.TextField
+          {...itemProps}
+          {...sharedProps}
+          key={itemProps.id}
+          info="Supports a single line of inline Markdown"
+        />
+      );
+    default:
+      return (
+        <Form.TextField
+          {...itemProps}
+          {...sharedProps}
+          key={itemProps.id}
+          info="Supports a single line of inline Markdown"
+        />
+      );
+  }
 }
 
+type ItemOption = PropertyConfig<"select">["options"][number];
 function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPicker.Item) {
-  return (option: PropertyConfig<"select">["options"][number] | Page | User) => {
+  return (option: ItemOption | Page | User) => {
     if (!option.id) return null;
     let title: string | null;
     let icon: Image.ImageLike | undefined;
@@ -81,18 +108,8 @@ function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPi
   };
 }
 
-export type GetFieldPropsFunc = <T extends DatabaseProperty["type"]>(property: DatabaseProperty) => FieldProps<T>;
-
-export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
-  typeof useForm<{
-    [k: string]: T extends "date"
-      ? Date | null
-      : T extends "checkbox"
-        ? boolean
-        : T extends "multi_select" | "relation" | "people"
-          ? string[]
-          : T extends "formula"
-            ? null
-            : string;
-  }>
->["itemProps"][string];
+function createPlaceholder(property: DatabaseProperty) {
+  let placeholder = property.type.replace(/_/g, " ");
+  placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
+  return placeholder;
+}

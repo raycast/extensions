@@ -31,7 +31,9 @@
     "j3lte",
     "stelo",
     "vlasischar",
-    "javalangruntimeexception"
+    "javalangruntimeexception",
+    "shyaka",
+    "sushichan044"
   ],
   "categories": [
     "Developer Tools",
@@ -111,12 +113,20 @@
       ],
       "preferences": [
         {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
           "name": "showAssigned",
           "description": "Show issues assigned to you",
           "type": "checkbox",
           "required": false,
           "label": "Assigned",
-          "title": "Categories to Display",
           "default": true
         },
         {
@@ -279,14 +289,6 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "maxitems",
-          "description": "Maximum issues shown per category.",
-          "type": "textfield",
-          "required": false,
-          "title": "Max Issues per category",
-          "placeholder": "10"
-        },
-        {
           "name": "showtext",
           "description": "Show issues count with menu bar icon.",
           "type": "checkbox",
@@ -296,12 +298,36 @@
           "default": true
         },
         {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum issues shown per category.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Issues per category",
+          "placeholder": "10"
+        },
+        {
+          "name": "showCreated",
+          "description": "Show issues you created",
+          "type": "checkbox",
+          "required": false,
+          "label": "Created",
+          "title": "Categories to Display",
+          "default": true
+        },
+        {
           "name": "showAssigned",
           "description": "Show issues assigned to you",
           "type": "checkbox",
           "required": false,
           "label": "Assigned",
-          "title": "Categories to Display",
           "default": true
         },
         {
@@ -329,6 +355,23 @@
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
+        {
+          "name": "showtext",
+          "description": "Show pull requests count with menu bar icon.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show",
+          "title": "Icon Count",
+          "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
         {
           "name": "includeAssigned",
           "type": "checkbox",
@@ -377,15 +420,6 @@
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
-        },
-        {
-          "name": "showtext",
-          "description": "Show pull requests count with menu bar icon.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show",
-          "title": "Icon Count",
-          "default": true
         }
       ]
     }
@@ -415,6 +449,25 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "name": "repositoryCloneProtocol",
+      "title": "Repository Clone Protocol",
+      "label": "Protocol for Cloning Repositories",
+      "description": "The protocol to use when cloning a repository.",
+      "type": "dropdown",
+      "required": false,
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ]
     },
     {
       "type": "checkbox",

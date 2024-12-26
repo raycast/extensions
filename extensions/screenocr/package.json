@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenocr",
   "title": "ScreenOCR",
-  "description": "ScreenOCR allows you to quickly and easily extract text from screen captures via OCR, perfect for extracting text from any on-screen content. All processing is done locally on device.",
+  "description": "Extract text from screen captures locally via OCR",
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [
-    "anwarulislam"
+    "anwarulislam",
+    "xilopaint"
   ],
   "categories": [
     "Productivity"
@@ -14,11 +15,11 @@
   "license": "MIT",
   "preferences": [
     {
-      "required": true,
       "name": "primaryLanguage",
       "title": "Primary Language",
       "description": "Primary language for text recognition",
       "type": "dropdown",
+      "required": true,
       "data": [
         {
           "title": "🇺🇸 English (US)",
@@ -87,11 +88,11 @@
       ]
     },
     {
-      "required": true,
       "name": "ocrMode",
       "title": "Recognition Level",
-      "description": "Affects performance and accuracy of the text recognition.",
+      "description": "Affects performance and accuracy of the text recognition",
       "type": "dropdown",
+      "required": true,
       "data": [
         {
           "title": "Accurate",
@@ -104,79 +105,74 @@
       ]
     },
     {
-      "required": true,
       "name": "languageCorrection",
-      "title": "Language Correction",
-      "description": "Applies language correction during the recognition process. Disabling this property returns the raw recognition results, which provides performance benefits but less accurate results.",
+      "title": "Options",
+      "description": "Disabling this property returns the raw recognition results, which provides performance benefits but less accurate results",
       "type": "checkbox",
-      "label": "Use Language Correction",
+      "required": true,
+      "label": "Use language correction",
       "default": true
     },
     {
-      "required": true,
-      "name": "keepImage",
-      "title": "Keep Image in Clipboard",
-      "description": "Keep the image in the clipboard after text recognition",
-      "type": "checkbox",
-      "label": "Keep Image in Clipboard",
-      "default": false
-    },
-    {
-      "required": false,
       "name": "ignoreLineBreaks",
-      "title": "Ignore Line Breaks",
       "description": "Ignores Line Breaks",
       "type": "checkbox",
-      "label": "Ignore Line Breaks",
+      "required": false,
+      "label": "Ignore line breaks",
       "default": false
     },
     {
-      "required": false,
+      "name": "keepImage",
+      "description": "Keep the image in the clipboard after text recognition",
+      "type": "checkbox",
+      "required": true,
+      "label": "Keep image in clipboard",
+      "default": false
+    },
+    {
       "name": "customWordsList",
       "title": "Custom Words List",
       "description": "You can improve text recognition by providing a list of words that are special to your text",
       "type": "textfield",
+      "required": false,
       "label": "Custom Words List"
     }
   ],
   "commands": [
     {
       "title": "Select Recognition Languages",
-      "description": "Select Recognition Languages for ScreenOCR to recognize",
+      "description": "Choose which languages will be used for text recognition",
       "name": "preferences",
       "mode": "view"
     },
     {
       "name": "recognize-text",
       "title": "Recognize Text",
-      "description": "Detect all text from the captured screen area.",
+      "description": "Detect all text from the captured screen area",
       "mode": "no-view"
     },
     {
       "name": "recognize-text-fullscreen",
-      "title": "Recognize Text Entire Screen",
-      "description": "Detect all text from the captured screen.",
+      "title": "Recognize Text on Entire Screen",
+      "description": "Detect all text from the captured screen",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
-    "@raycast/utils": "^1.5.2",
-    "execa": "^7.1.1",
-    "immer": "^10.0.2",
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
     "use-immer": "^0.9.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^5.0.4"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognize-text assets",
+    "build": "ray build --skip-types -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

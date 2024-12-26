@@ -15,6 +15,37 @@ export type ProjectResult = Pick<
   teams: { nodes: { id: string; key: string }[] };
 };
 
+type PageInfo = {
+  endCursor: string;
+  hasNextPage: boolean;
+};
+
+type PaginatedResponse<Node> = {
+  nodes: Node[];
+  pageInfo: PageInfo;
+};
+
+type ProjectsResponse = {
+  projects: PaginatedResponse<ProjectResult>;
+};
+
+type TeamProjectsResponse = {
+  team: ProjectsResponse;
+};
+
+type GetProjectsOptions = {
+  teamId?: string;
+  searchText?: string;
+  first?: number | null;
+  after?: string | null;
+};
+
+type GetProjectsResult = {
+  data: ProjectResult[];
+  hasMore: boolean;
+  cursor: string | null;
+};
+
 const projectFragment = `
   id
   name
@@ -45,44 +76,63 @@ const projectFragment = `
   }
 `;
 
-export async function getProjects(teamId?: string) {
+export async function getProjects({
+  teamId,
+  searchText = "",
+  after = null,
+  first = null,
+}: GetProjectsOptions): Promise<GetProjectsResult> {
   const { graphQLClient } = getLinearClient();
 
+  const projectsQueryFragment = `
+    projects(first: $first, after: $after, filter: { name: { containsIgnoreCase: $searchText } }) {
+      nodes {
+        ${projectFragment}
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  `;
+
   if (!teamId) {
-    const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
+    const { data } = await graphQLClient.rawRequest<ProjectsResponse, Omit<GetProjectsOptions, "teamId">>(
       `
-        query {
-          projects {
-            nodes {
-              ${projectFragment}
-            }
-          }
+        query($first: Int, $after: String, $searchText: String) {
+          ${projectsQueryFragment}
         }
       `,
+      { first, after, searchText },
     );
 
-    return data?.projects.nodes;
-  } else {
-    const { data } = await graphQLClient.rawRequest<
-      { team: { projects: { nodes: ProjectResult[] } } },
-      Record<string, unknown>
-    >(
-      `
-        query($teamId: String!) {
-          team(id: $teamId) {
-            projects {
-              nodes {
-                ${projectFragment}
-              }
-            }
-          }
-        }
-      `,
-      { teamId },
-    );
+    const projects = data?.projects;
 
-    return data?.team.projects.nodes;
+    return {
+      data: projects?.nodes ?? [],
+      hasMore: !!projects?.pageInfo.hasNextPage,
+      cursor: projects?.pageInfo.endCursor || null,
+    };
   }
+
+  const { data } = await graphQLClient.rawRequest<TeamProjectsResponse, GetProjectsOptions>(
+    `
+      query($teamId: String!, $first: Int, $after: String, $searchText: String) {
+        team(id: $teamId) {
+          ${projectsQueryFragment}
+        }
+      }
+    `,
+    { teamId, first, after, searchText },
+  );
+
+  const projects = data?.team?.projects;
+
+  return {
+    data: projects?.nodes ?? [],
+    hasMore: !!projects?.pageInfo.hasNextPage,
+    cursor: projects?.pageInfo.endCursor || null,
+  };
 }
 
 export type ProjectUpdateResult = Pick<ProjectUpdate, "id" | "body" | "url" | "health" | "createdAt"> & {

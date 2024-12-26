@@ -1,5 +1,9 @@
 # UUID Generator Changelog
 
+## [Added support for TypeID] - 2024-09-10
+
+- You can now create Base32 encoded, Stripe ID-inspired V7 UUIDs with & without prefix.
+
 ## [Added history management feature] - 2024-08-28
 
 - You can now view, clear, and delete UUID generation history

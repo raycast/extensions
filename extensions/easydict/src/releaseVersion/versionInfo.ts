@@ -26,27 +26,25 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.9.2";
-  buildNumber = 28;
-  versionDate = "2024-08-25";
+  version = "2.9.3";
+  buildNumber = 29;
+  versionDate = "2024-09-13";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 💎 优化
-
-- 支持 HTTP OpenAI API endpoint，感谢 [rookiezn](https://github.com/rookiezn) 的 PR https://github.com/tisfeng/Raycast-Easydict/pull/51。
-- DeepL 翻译支持阿拉伯语 AR。
-- 移除了已废弃的内置的 DeepL API key。
-- 移除了对有道翻译官方 API 的支持，现默认只使用网页 API。
-
 ### 🐞 修复
 
-- 修复了 argument 参数可能丢失问题。https://github.com/tisfeng/Raycast-Easydict/pull/63
-`;
+- 修复了 Bing 语种识别 API 失败，导致查询过程卡住问题。https://github.com/raycast/extensions/issues/14357
 
+---
+
+### 🐞 Fixed
+
+- Fixed Bing language detection API failed, which caused the query process to hang. https://github.com/raycast/extensions/issues/14357
+`;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
   }

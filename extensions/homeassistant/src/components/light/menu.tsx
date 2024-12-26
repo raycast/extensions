@@ -3,8 +3,8 @@ import { getIcon, stateChangeSleep } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import {
   callLightBrightnessService,
   getLightBrightnessValues,
@@ -40,7 +40,7 @@ function LightTurnOnMenubarItem(props: { state: State }) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }
   };
-  return <MenuBarExtra.Item title="Turn On" onAction={handle} icon={"power-btn.png"} />;
+  return <MenuBarExtra.Item title="Turn On" onAction={handle} icon={"power.svg"} />;
 }
 
 function LightTurnOffMenubarItem(props: { state: State }) {
@@ -55,7 +55,7 @@ function LightTurnOffMenubarItem(props: { state: State }) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }
   };
-  return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon="power-btn.png" />;
+  return <MenuBarExtra.Item title="Turn Off" onAction={handle} icon="power.svg" />;
 }
 
 export function LightMenubarItem(props: { state: State }): JSX.Element | null {

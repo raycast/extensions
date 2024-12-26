@@ -16,7 +16,8 @@
     "MonsterDeveloper",
     "Yamen",
     "EvanZhouDev",
-    "erics118"
+    "erics118",
+    "riadhrebei"
   ],
   "license": "MIT",
   "commands": [
@@ -26,6 +27,21 @@
       "subtitle": "Deepcast",
       "description": "Translate text using DeepL",
       "mode": "view"
+    },
+    {
+      "name": "arabic",
+      "title": "Translate into Arabic",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Arabic using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
     },
     {
       "name": "bulgarian",
@@ -655,7 +671,7 @@
       "required": false
     },
     {
-      "description": "Action on Translation",
+      "description": "Action on translation",
       "name": "onTranslateAction",
       "required": false,
       "title": "On Translation Action",
@@ -674,6 +690,36 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "description": "Show transliteration",
+      "name": "showTransliteration",
+      "required": false,
+      "title": "Show Transliteration",
+      "default": "whenProvided",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "When Provided",
+          "value": "whenProvided"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ]
+    },
+    {
+      "label": "Show Formality Configuration",
+      "name": "showFormalityConfig",
+      "required": false,
+      "description": "Show options to configure formality in the translation form",
+      "default": false,
+      "type": "checkbox"
     }
   ],
   "dependencies": {

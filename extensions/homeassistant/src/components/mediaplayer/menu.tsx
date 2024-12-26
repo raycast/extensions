@@ -1,10 +1,10 @@
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
-import { getMediaPlayerTitleAndArtist } from "./utils";
+import { LastUpdateChangeMenubarItem } from "@components/menu";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { LastUpdateChangeMenubarItem } from "@components/menu";
+import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { getMediaPlayerTitleAndArtist } from "./utils";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.05);
@@ -79,7 +79,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
     return t;
   };
   const icon = () => {
-    let icon = s.state === "playing" ? Icon.SpeakerOn : "mediaplayer.png";
+    let icon = s.state === "playing" ? Icon.SpeakerOn : "cast-connected.svg";
     const ep = s.attributes.entity_picture;
     if (ep) {
       icon = ha.urlJoin(ep);

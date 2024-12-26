@@ -83,7 +83,13 @@ export default function Command() {
     }
   }
 
-  function DataPointForm({ goalSlug }: { goalSlug: string }) {
+  function DataPointForm({
+    goalSlug,
+    lastDatapoint,
+  }: {
+    goalSlug: string;
+    lastDatapoint?: number;
+  }) {
     const { pop } = useNavigation();
     const { handleSubmit, itemProps } = useForm<DataPointFormValues>({
       async onSubmit(values) {
@@ -127,7 +133,11 @@ export default function Command() {
         <Form.TextField
           title="Datapoint"
           autoFocus
-          placeholder={`Enter datapoint for ${goalSlug}`}
+          placeholder={
+            lastDatapoint !== undefined
+              ? `Last datapoint: ${lastDatapoint}`
+              : `Enter datapoint for ${goalSlug}`
+          }
           {...itemProps.dataPoint}
         />
         <Form.TextField id="comment" title="Comment" defaultValue="Sent from Raycast 🐝" />
@@ -215,7 +225,12 @@ export default function Command() {
                   <Action.Push
                     title="Enter datapoint"
                     icon={Icon.PlusCircle}
-                    target={<DataPointForm goalSlug={goal.slug} />}
+                    target={
+                      <DataPointForm
+                        goalSlug={goal.slug}
+                        lastDatapoint={goal.last_datapoint?.value}
+                      />
+                    }
                   />
                   <Action.OpenInBrowser
                     title="Open goal in Beeminder"

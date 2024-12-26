@@ -1,8 +1,8 @@
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { formatToHumanDateTime } from "@lib/utils";
-import { Icon, Image, Keyboard, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Icon, Image, Keyboard, MenuBarExtra } from "@raycast/api";
 
 export function LastUpdateChangeMenubarItem({ state, onAction }: { state: State; onAction?: () => void }) {
   const humanDateString = (dt: string) => {
@@ -64,7 +64,7 @@ export function OpenInMenubarItem(props: {
   const app = isCompanion ? "Companion" : "Browser";
   const action = props.action ? props.action : "Open In";
   const title = `${action} ${app}`;
-  const icon = isCompanion ? "home-assistant.png" : Icon.Globe;
+  const icon = isCompanion ? "home-assistant.svg" : Icon.Globe;
   return (
     <RUIMenuBarExtra.OpenInBrowser
       url={url}

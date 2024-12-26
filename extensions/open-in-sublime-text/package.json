@@ -5,6 +5,9 @@
   "description": "Open current Finder directory, selected folder or file in Sublime Text.",
   "icon": "icon.png",
   "author": "anfalas",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -16,10 +19,17 @@
       "title": "Open in Sublime Text",
       "description": "Open current Finder directory, selected folder or file in Sublime Text.",
       "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Open the Clipboard Content in Sublime Text",
+      "description": "Open the clipboard content in Sublime Text.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1"
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

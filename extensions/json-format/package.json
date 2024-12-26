@@ -11,7 +11,9 @@
     "lachero",
     "alexs",
     "stelo",
-    "duranbe"
+    "duranbe",
+    "nigelang",
+    "cl1107"
   ],
   "categories": [
     "Data",
@@ -30,6 +32,12 @@
       "title": "Format Selected JSON",
       "description": "Formats a JSON/JS Object string selected in the foremost editor and copies/pastes it back",
       "mode": "no-view"
+    },
+    {
+      "name": "formatSelectionAndShow",
+      "title": "Format Selected JSON and Show",
+      "description": "Formats a JSON/JS Object string selected in the foremost editor and shows it in the viewer",
+      "mode": "view"
     },
     {
       "name": "index",

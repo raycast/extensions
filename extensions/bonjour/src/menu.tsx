@@ -1,4 +1,4 @@
-import { MenuBarExtra, open } from "@raycast/api";
+import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { cache, HttpService, KEY } from "./service";
 
@@ -25,6 +25,10 @@ export default function Command() {
             <MenuBarExtra.Item
               key={index}
               title={service.name}
+              icon={{
+                source: Icon.CircleFilled,
+                tintColor: service.host.status,
+              }}
               onAction={() => {
                 open(service.origin);
               }}

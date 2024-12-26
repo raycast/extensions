@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Improvements & Bugfix] - 2024-09-22
+
+- Fix detail panel for tap that doesn't have a license ([#12507](https://github.com/raycast/extensions/issues/12507))
+- Add JSON Debug Info Action
+
 ## [Improvements] - 2024-07-29
 
 - Added new terminal options for Alacritty, kitty, WezTerm and Hyper.

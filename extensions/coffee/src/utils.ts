@@ -1,4 +1,4 @@
-import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
 import { exec, execSync } from "node:child_process";
 
 type Preferences = {
@@ -12,6 +12,14 @@ type Updates = {
   menubar: boolean;
   status: boolean;
 };
+
+export interface Schedule {
+  day: string;
+  from: string;
+  to: string;
+  IsManuallyDecafed: boolean;
+  IsRunning: boolean;
+}
 
 export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
   if (hudMessage) {
@@ -57,4 +65,58 @@ function generateArgs(additionalArgs?: string) {
   if (additionalArgs) args.push(` ${additionalArgs}`);
 
   return args.length > 0 ? `-${args.join("")}` : "";
+}
+
+export function numberToDayString(dayIndex: number): string {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return daysOfWeek[dayIndex];
+}
+
+export async function getSchedule() {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+
+  const getSchedule: string | undefined = await LocalStorage.getItem(currentDayString);
+  if (getSchedule === undefined) return undefined;
+
+  const schedule: Schedule = JSON.parse(getSchedule);
+  return schedule;
+}
+
+export async function changeScheduleState(operation: string, schedule: Schedule) {
+  switch (operation) {
+    case "caffeinate": {
+      schedule.IsManuallyDecafed = false;
+      schedule.IsRunning = false;
+      await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+      break;
+    }
+    case "decaffeinate": {
+      if (schedule.IsRunning === true || isNotTodaysSchedule(schedule)) {
+        schedule.IsManuallyDecafed = true;
+        schedule.IsRunning = false;
+        await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+}
+
+export function isTodaysSchedule(schedule: Schedule) {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+
+  if (schedule.day === currentDayString) return true;
+  else return false;
+}
+
+export function isNotTodaysSchedule(schedule: Schedule) {
+  const currentDate = new Date();
+  const currentDayString = numberToDayString(currentDate.getDay()).toLowerCase();
+
+  if (schedule.day === currentDayString) return false;
+  else return true;
 }

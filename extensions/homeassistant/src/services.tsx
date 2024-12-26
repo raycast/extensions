@@ -89,7 +89,7 @@ export default function ServiceCallCommand() {
               <ActionPanel.Section>
                 <Action.SubmitForm title="Run Service" icon={Icon.Terminal} onSubmit={handle} />
                 <Action.SubmitForm
-                  title="Run Service And Close"
+                  title="Run Service and Close"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   icon={Icon.Terminal}
                   onSubmit={(values) => handle(values, { popToRootOnSuccessful: true })}
@@ -97,7 +97,7 @@ export default function ServiceCallCommand() {
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action
-                  title={yamlMode ? "Switch to UI Mode" : "Switch to Yaml Mode"}
+                  title={yamlMode ? "Switch to Ui Mode" : "Switch to Yaml Mode"}
                   icon={yamlMode ? Icon.AppWindow : Icon.AppWindowList}
                   onAction={() => {
                     const newYamlMode = !yamlMode;

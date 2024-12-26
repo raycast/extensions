@@ -1,12 +1,49 @@
 import { Action, ActionPanel, environment, Icon, Keyboard, List } from "@raycast/api";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { useFetch, useLocalStorage } from "@raycast/utils";
 import { Doc } from "./types";
 import { SearchEntries } from "./search-entries";
+import { useEffect, useState } from "react";
 
 export default function SearchDocsets(): JSX.Element {
   const { data, isLoading } = useFetch<Doc[]>(`https://devdocs.io/docs/docs.json`, {});
+  const defaultDocs = { docs: ["css", "html", "http", "javascript", "dom"].join("/") };
+  const { value: docSlugsStorage } = useLocalStorage("docs", JSON.stringify(defaultDocs));
 
-  return <List isLoading={isLoading}>{data?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}</List>;
+  const [documentations, setDocumentations] = useState<[Doc[], Doc[]]>([[], []]);
+
+  useEffect(() => {
+    const docSlugsObject = JSON.parse(docSlugsStorage || "{}");
+    const docSlugs = docSlugsObject["docs"] ? Array.from(docSlugsObject["docs"]?.split("/")) : [];
+    if (data && docSlugsObject) {
+      const preferredDocs: Doc[] = [];
+      const availableDocs: Doc[] = [];
+
+      data.forEach((doc) => {
+        if (docSlugs?.find((preferredDoc) => preferredDoc === doc.slug)) {
+          preferredDocs.push(doc);
+        } else {
+          availableDocs.push(doc);
+        }
+      });
+
+      setDocumentations([preferredDocs, availableDocs]);
+    }
+  }, [isLoading]);
+
+  return (
+    <List isLoading={isLoading}>
+      {documentations[0].length > 0 && (
+        <>
+          <List.Section title="Preferred">
+            {documentations[0]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
+          </List.Section>
+          <List.Section title="Available">
+            {documentations[1]?.map((doc) => <DocItem key={doc.slug} doc={doc} />)}
+          </List.Section>
+        </>
+      )}
+    </List>
+  );
 }
 
 function DocItem({ doc }: { doc: Doc }): JSX.Element {
@@ -19,7 +56,10 @@ function DocItem({ doc }: { doc: Doc }): JSX.Element {
   return (
     <List.Item
       title={doc.name}
-      icon={doc.links?.home ? getFavicon(doc.links.home) : Icon.Book}
+      icon={{
+        source: `https://github.com/freeCodeCamp/devdocs/blob/main/public/icons/docs/${doc.slug.split("~")[0]}/16@2x.png?raw=true`,
+        fallback: Icon.Book,
+      }}
       subtitle={doc.version}
       actions={
         <ActionPanel>

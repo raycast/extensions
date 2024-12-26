@@ -1,5 +1,21 @@
 # Browser Bookmarks Changelog
 
+## [Support Whale Browser] - 2024-12-14
+
+- Added support for `Whale` Browser Desktop.
+
+## [Update Logo] - 2024-12-11
+
+- Updated to latest logo since rebrand.
+
+## [Support Zen Browser] - 2024-11-26
+
+- Added support for Zen Browser Desktop.
+
+## [Support for Prisma Access] - 2024-11-24
+
+- Add support for `Prisma Access` browser.
+
 ## [Support for Chrome Beta] - 2024-01-12
 
 - Add support for `Chrome Beta` browser.

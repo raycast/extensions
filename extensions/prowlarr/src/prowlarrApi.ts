@@ -1,5 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 
+import { getPreferenceValues } from "@raycast/api";
+
 export enum ContentType {
   Json = "application/json",
   FormData = "multipart/form-data",
@@ -42,7 +44,7 @@ export interface HttpResponse<D, E = unknown> {
   error: E;
 }
 
-export class HttpClient {
+class HttpClient {
   public baseUrl: string = "{protocol}://{hostpath}";
 
   private baseApiParams: RequestParams = {
@@ -233,7 +235,47 @@ export interface ReleaseResource {
   downloadClientId?: number | null;
 }
 
-export class ProwlarrApi extends HttpClient {
+export interface IndexerResource {
+  /** @format int32 */
+  id?: number;
+  name?: string | null;
+  // fields?: Field[] | null;
+  implementationName?: string | null;
+  implementation?: string | null;
+  configContract?: string | null;
+  infoLink?: string | null;
+  // message?: ProviderMessage;
+  /** @uniqueItems true */
+  tags?: number[] | null;
+  presets?: IndexerResource[] | null;
+  indexerUrls?: string[] | null;
+  legacyUrls?: string[] | null;
+  definitionName?: string | null;
+  description?: string | null;
+  language?: string | null;
+  encoding?: string | null;
+  enable?: boolean;
+  redirect?: boolean;
+  supportsRss?: boolean;
+  supportsSearch?: boolean;
+  supportsRedirect?: boolean;
+  supportsPagination?: boolean;
+  /** @format int32 */
+  appProfileId?: number;
+  protocol?: DownloadProtocol;
+  // privacy?: IndexerPrivacy;
+  // capabilities?: IndexerCapabilityResource;
+  /** @format int32 */
+  priority?: number;
+  /** @format int32 */
+  downloadClientId?: number;
+  /** @format date-time */
+  added?: string;
+  // status?: IndexerStatusResource;
+  sortName?: string | null;
+}
+
+class ProwlarrApi extends HttpClient {
   api = {
     /**
      * No description
@@ -283,5 +325,48 @@ export class ProwlarrApi extends HttpClient {
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags Indexer
+     * @name V1IndexerList
+     * @request GET:/api/v1/indexer
+     * @secure
+     */
+    v1IndexerList: (params: RequestParams = {}) =>
+      this.request<IndexerResource[], any>({
+        path: `/api/v1/indexer`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags IndexerDefaultCategories
+     * @name V1IndexerCategoriesList
+     * @request GET:/api/v1/indexer/categories
+     * @secure
+     */
+    v1IndexerCategoriesList: (params: RequestParams = {}) =>
+      this.request<IndexerCategory[], any>({
+        path: `/api/v1/indexer/categories`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
   };
 }
+
+const preference = getPreferenceValues<Preferences.Search>();
+
+const { api: prowlarrApi } = new ProwlarrApi({
+  baseUrl: `${preference.protocol}://${preference.host}:${preference.port}${preference.urlBase}`,
+  baseApiParams: { headers: { "X-Api-Key": preference.apiKey } },
+});
+
+export { prowlarrApi };

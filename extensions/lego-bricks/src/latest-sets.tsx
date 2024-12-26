@@ -1,40 +1,48 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ENDPOINTS, HEADERS } from "./constants/preferences";
 import { LegoSetsResponse } from "../types/set";
 import { LegoSetListEntry } from "./componenets/set";
+import { ErrorResponse } from "../types/error";
 
 export default function GetLEGOSets() {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { data, isLoading, revalidate } = useFetch(`${ENDPOINTS.LATESTSETS}&search=${encodeURIComponent(searchText)}`, {
-    headers: HEADERS,
-    async onWillExecute() {
-      await showToast({
-        title: `Fetching LEGO sets...`,
-        style: Toast.Style.Animated,
-      });
+  const { data, isLoading, pagination } = useFetch(
+    (options) => `${ENDPOINTS.LATESTSETS}&search=${encodeURIComponent(searchText)}&page=${options.page + 1}`,
+    {
+      headers: HEADERS,
+      async onWillExecute() {
+        await showToast({
+          title: `Fetching LEGO sets...`,
+          style: Toast.Style.Animated,
+        });
+      },
+      async parseResponse(response) {
+        if (!response.ok) {
+          const result = (await response.json()) as ErrorResponse;
+          throw new Error(result.detail);
+        }
+        const result = (await response.json()) as LegoSetsResponse;
+        return result;
+      },
+      mapResult(result) {
+        return {
+          data: result.results,
+          hasMore: !!result.next,
+        };
+      },
+      async onData(data) {
+        await showToast({
+          title: `Successfully fetched ${data.length} LEGO sets`,
+          style: Toast.Style.Success,
+        });
+      },
+      initialData: [],
+      keepPreviousData: true,
     },
-    mapResult(result: LegoSetsResponse) {
-      return {
-        data: result.results,
-        hasMore: !!result.next,
-      };
-    },
-    async onData() {
-      await showToast({
-        title: `Successfully fetched LEGO sets`,
-        style: Toast.Style.Success,
-      });
-    },
-    initialData: [],
-    keepPreviousData: true,
-  });
-
-  useEffect(() => {
-    revalidate();
-  }, [searchText]);
+  );
 
   return (
     <List
@@ -44,12 +52,11 @@ export default function GetLEGOSets() {
       throttle
       isShowingDetail
       filtering={false}
+      pagination={pagination}
     >
-      {!isLoading &&
-        Array.isArray(data) &&
-        data.map((set: LegoSetsResponse["results"]) => {
-          return <LegoSetListEntry set={set} key={set.set_num} />;
-        })}
+      {data.map((set, index) => {
+        return <LegoSetListEntry set={set} key={`${index}_${set.set_num}`} />;
+      })}
     </List>
   );
 }

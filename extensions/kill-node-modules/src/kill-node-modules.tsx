@@ -109,7 +109,9 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Delete Node_modules"
+                // disabling rule since node_modules should be in lowercase
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Delete node_modules"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleDelete(item.id, item.title)}

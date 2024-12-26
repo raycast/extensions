@@ -1,5 +1,10 @@
 # Auto Quit App Changelog
 
+## [Increase Interval] - 2024-10-01
+
+- Increase the minimum detection interval
+- Refactor to simplify code logic
+
 ## [Added More Time] - 2024-07-18
 
 - Added more time options

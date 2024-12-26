@@ -7,7 +7,8 @@
   "author": "thomas",
   "contributors": [
     "ron-myers",
-    "Kimcha"
+    "Kimcha",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity",
@@ -19,7 +20,18 @@
       "name": "manage-downloads",
       "title": "Manage Downloads",
       "description": "Search and organize your downloaded files",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "name": "showHiddenFiles",
+          "label": "Show Hidden Files",
+          "title": "Show Hidden Files",
+          "description": "Show hidden files in the folder",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "open-latest-download",

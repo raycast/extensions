@@ -5,6 +5,9 @@
   "description": "Query the current time of a region, ip or domain.",
   "icon": "command-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "keywords": [
     "time",
     "timezone"

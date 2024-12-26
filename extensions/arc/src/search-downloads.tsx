@@ -2,15 +2,16 @@ import { Icon, LaunchProps, List } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { useState } from "react";
 import { DownloadListItem } from "./list";
-import { getDownloadQuery, historyDatabasePath } from "./sql";
+import { getDownloadQuery } from "./sql";
 import { Download } from "./types";
 import { VersionCheck } from "./version";
+import { defaultHistoryDatabasePath } from "./history";
 
 function SearchDownloads(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const escapedSearchText = searchText.replace(/"/g, '""');
   const { data, isLoading, permissionView } = useSQL<Download>(
-    historyDatabasePath,
+    defaultHistoryDatabasePath,
     getDownloadQuery(escapedSearchText),
   );
 

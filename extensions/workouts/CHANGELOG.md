@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Removed AI features] - 2024-11-28
+
+Removed AI features after Strava updated their terms to not allow it.
+
 ## [Added a new view on Create Activity Command success] - 2024-08-30
 
 Added a new view after successfully creating an activity

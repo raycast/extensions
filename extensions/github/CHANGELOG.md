@@ -1,5 +1,34 @@
 # GitHub Changelog
 
+## [Change menu bar unread style] - 2024-12-17
+
+- Use a new icon with indicator for unread state
+
+## [Support specifying git clone protocol] - 2024-12-12
+
+- Added support to specify the git clone protocol (SSH or HTTPS) in extension preferences.
+- `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
+
+## [Update GraphQL generated types] - 2024-12-09
+
+- Updated auto-generated GraphQL codes with the latest schema.
+
+## [Handle notification icon retrieval error] - 2024-11-08
+
+- Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Improved options for My Issues] - 2024-11-04
+
+- My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
+
+## [Fix crash when searching visited repositories] - 2024-10-04
+
+The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
+
+## [Fix copy commit tree URL action] - 2024-09-13
+
+- Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
+
 ## [Clone Repo Fixes] - 2024-08-20
 
 - [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.

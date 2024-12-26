@@ -1,10 +1,13 @@
 import { Action, ActionPanel, Grid } from "@raycast/api";
 import { UploadedFileData } from "uploadthing/types";
+import { useFileWithSignedUrls } from "./hooks";
 
 export const FileGrid = (props: { files: UploadedFileData[] }) => {
+  const files = useFileWithSignedUrls(props.files);
+
   return (
     <Grid>
-      {props.files.map((file) => (
+      {files.map((file) => (
         <Grid.Item
           key={file.key}
           content={file.url}

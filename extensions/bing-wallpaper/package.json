@@ -163,11 +163,11 @@
       "title": "Auto Switch Bing Wallpaper",
       "description": "Auto-switch latest Bing wallpapers to desktop every day (refresh every 3 hours).",
       "mode": "no-view",
-      "interval": "4h"
+      "interval": "3h"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
+    "@raycast/api": "^1.83.1",
     "file-url": "^4.0.0",
     "fs-extra": "^11.2.0",
     "node-fetch": "^3.3.2",
@@ -175,14 +175,12 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "~20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
-    "@typescript-eslint/parser": "^7.9.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

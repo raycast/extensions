@@ -1,5 +1,11 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2024-10-25
+
+- Add frecency sorting to passwords
+- Only capture unexpected errors
+- Update dependencies
+
 ## [Improvements] - 2024-05-22
 
 - The CLI path is now required to reduce errors

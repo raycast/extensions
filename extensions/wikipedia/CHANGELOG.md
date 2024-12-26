@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Fixes] - 2024-10-25
+
+- Fix page-item crash when the URL is `undefined`
+
 ## [Add languages] - 2024-08-24
 
 - Add `Catalan`, `Basque`, `Galician`, `Occitan`, `Aragonese` and `Asturian` languages

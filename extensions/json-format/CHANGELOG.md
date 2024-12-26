@@ -1,5 +1,13 @@
 # Changelog
 
+## [Adds formatSelectionAndShow] - 2024-12-06
+
+- Add a new command to format JSON selected in the foremost editor and show it in the viewer
+
+## [Adds support for escaped JSON strings] - 2024-10-02
+
+- Correctly validate a JSON string that has been escaped
+
 ## [Improvements and fixes] - 2024-08-29
 
 - Format JSON Lines: Make actions in sync with Format JSON command, i.e. copies the output to clipboard for "Format" action.

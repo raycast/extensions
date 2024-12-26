@@ -6,6 +6,7 @@
   "icon": "extension_icon.png",
   "author": "that70schris",
   "keywords": [
+    "network",
     "local",
     "mdns",
     "dns"

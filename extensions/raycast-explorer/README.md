@@ -1,6 +1,6 @@
 # Raycast Explorer
 
-Make the most of snippets, AI commands, AI Presets and custom themes.
+Make the most of snippets, AI commands, AI Presets, Quicklinks and custom themes.
 
 ## Contributing
 

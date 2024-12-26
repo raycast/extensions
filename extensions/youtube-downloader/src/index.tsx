@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
 import ytdl, { videoFormat } from "@distube/ytdl-core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
 import {
@@ -198,13 +198,22 @@ export default function DownloadVideo() {
         ))}
         <Form.Dropdown.Section title="Audio">
           {audioFormats.map((format, index) => (
-            <Form.Dropdown.Item
-              key={`${format.itag}-${format.audioBitrate}-${index}`}
-              keywords={["mp3", "audio"]}
-              value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
-              title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
-              icon={Icon.Music}
-            />
+            <Fragment key={`${format.itag}-${format.audioBitrate}-${index}`}>
+              <Form.Dropdown.Item
+                key={`${format.itag}-${format.audioBitrate}-${index}-mp3`}
+                keywords={["mp3", "audio"]}
+                value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
+                title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
+                icon={Icon.Music}
+              />
+              <Form.Dropdown.Item
+                key={`${format.itag}-${format.audioBitrate}-${index}-wav`}
+                keywords={["wav", "audio"]}
+                value={JSON.stringify({ itag: format.itag.toString(), wav: true } as FormatOptions)}
+                title={`${format.audioBitrate}kps (WAV)`}
+                icon={Icon.Music}
+              />
+            </Fragment>
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>

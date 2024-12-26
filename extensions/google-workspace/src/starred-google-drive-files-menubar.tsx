@@ -1,17 +1,18 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { File, getStarredFilesURL } from "./api/getFiles";
+import { useCachedPromise } from "@raycast/utils";
+import { getStarredFiles } from "./api/getFiles";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 import { getFileIconLink } from "./helpers/files";
 import { createDocFromUrl } from "./helpers/docs";
-import { getOAuthToken } from "./api/googleAuth";
 
 function StarredFiles() {
-  const { data, isLoading } = useFetch<{ files: File[] }>(getStarredFilesURL(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
+  const { data, isLoading } = useCachedPromise(async () => {
+    try {
+      return await getStarredFiles();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   });
 
   const MAX_ITEMS = 40;

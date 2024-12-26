@@ -1,5 +1,19 @@
 # Search npm Changelog
 
+## [Update] - 2024-12-14
+
+- Fixed another issue with git url parsing
+- Added more detail to the history view. If there's a package there, it will be displayed like in the package list which means it is much quicker to access the package you previously searched for.
+
+## [Update] - 2024-12-13
+
+- Added a Git URL parser for the repository URL in the open repository action
+
+## [Updates] - 2024-10-07
+
+- Hide history list when `historyCount` is zero
+- Bump all dependencies to the latest
+
 ## [Refactoring] - 2024-02-03
 
 - Bump dependecies

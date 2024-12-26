@@ -3,8 +3,8 @@ import { LightMenubarItem } from "@components/light/menu";
 import { LaunchCommandMenubarItem } from "@components/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { MenuBarExtra as RUIMenuBarExtra } from "@raycast-community/ui";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function LightsMenuCommand() {
   const { states, error, isLoading } = useHAStates();
@@ -19,7 +19,7 @@ export default function LightsMenuCommand() {
 
   return (
     <MenuBarExtra
-      icon={{ source: "lightbulb.png", tintColor: rootColor }}
+      icon={{ source: "lightbulb.svg", tintColor: rootColor }}
       isLoading={isLoading}
       tooltip={`Home Assistant Lights: On ${lightOnCount}, Off ${lightOffCount}`}
     >

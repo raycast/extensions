@@ -35,6 +35,24 @@
       "default": "/usr/local/bin/gittower",
       "value": "/usr/local/bin/gittower",
       "required": true
+    },
+    {
+      "name": "defaultTerminal",
+      "title": "Terminal Application",
+      "description": "Open the repository in your default terminal",
+      "type": "appPicker",
+      "default": "Terminal",
+      "required": true,
+      "value": "Terminal"
+    },
+    {
+      "name": "defaultEditor",
+      "title": "Editor Application",
+      "description": "Open the repository in your default editor",
+      "type": "appPicker",
+      "default": "Visual Studio Code",
+      "required": true,
+      "value": "Visual Studio Code"
     }
   ],
   "dependencies": {

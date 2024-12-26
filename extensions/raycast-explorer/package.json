@@ -34,6 +34,13 @@
       "mode": "view"
     },
     {
+      "name": "explore-quicklinks",
+      "title": "Explore Quicklinks",
+      "icon": "quicklinks-icon.png",
+      "description": "Browse quicklinks",
+      "mode": "view"
+    },
+    {
       "name": "explore-themes",
       "title": "Explore Themes",
       "icon": "themes-icon.png",

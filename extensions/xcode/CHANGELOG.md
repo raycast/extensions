@@ -1,5 +1,13 @@
 # Xcode Changelog
 
+## [Added Delete App Data] - 2024-09-30
+
+- Added delete app data command to remove the data of an app installed on a simulator without uninstalling.
+
+## [Search Recent Projects Improvements] - 2024-09-20
+
+- Improved the "Search Recent Projects" command to remember the last filter option
+
 ## [Clear SwiftUI Previews Cache] - 2024-04-03
 
 - Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory

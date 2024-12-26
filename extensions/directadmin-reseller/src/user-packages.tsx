@@ -1,9 +1,12 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { getTextAndIconFromVal, getTitleFromKey } from "./utils/functions";
+import { getTextAndIconFromVal, getTitleFromKey, isInvalidUrl } from "./utils/functions";
 import ErrorComponent from "./components/ErrorComponent";
 import { useGetUserPackageInformation, useGetUserPackages } from "./utils/hooks";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
 
 export default function UserPackages() {
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
+
   const { isLoading, data: packages, error } = useGetUserPackages();
 
   return error ? (

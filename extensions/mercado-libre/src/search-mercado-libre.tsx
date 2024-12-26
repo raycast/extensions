@@ -53,7 +53,6 @@ export default function Command() {
       setRecentSearches([]);
     }
   };
-
   if (recentSearches.length === 0 && searchQuery === "") {
     return (
       <List

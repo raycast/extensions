@@ -7,7 +7,9 @@ export type SublimeCardWithMarkdown = SublimeCard & { markdown: string };
 export function populateCardMarkdown(card: SublimeCard): SublimeCardWithMarkdown {
     return {
         ...card,
-        markdown: htmlToMarkdown(card.html || card.text || card.description || ""),
+        name: card.name !== "Tweet" ? card.name : undefined,
+        thumbnail: card.thumbnail || card.info?.images?.[0] || undefined,
+        markdown: htmlToMarkdown(card.info?.content || card.html || card.text || card.description || ""),
     };
 }
 

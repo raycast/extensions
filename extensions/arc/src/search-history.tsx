@@ -1,18 +1,12 @@
 import { Icon, LaunchProps, List } from "@raycast/api";
-import { useSQL } from "@raycast/utils";
 import { useState } from "react";
 import { HistoryEntryListItem } from "./list";
-import { getHistoryQuery, historyDatabasePath } from "./sql";
-import { HistoryEntry } from "./types";
+import { useHistorySearch } from "./history";
 import { VersionCheck } from "./version";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const escapedSearchText = searchText.replace(/"/g, '""');
-  const { data, isLoading, permissionView } = useSQL<HistoryEntry>(
-    historyDatabasePath,
-    getHistoryQuery(escapedSearchText),
-  );
+  const { data, isLoading, permissionView } = useHistorySearch(searchText);
 
   if (permissionView) {
     return permissionView;

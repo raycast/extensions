@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Fix avifenc Installation] - 2024-09-11
+
+- Fixed an issue where the `avifenc` and `avifdec` binaries were not being installed correctly
+
 ## [Lossless Setting & Improved PNG Optimization] - 2024-07-08
 
 - Added a "Lossless Conversions" setting for WebP and AVIF image operations, disabled by default

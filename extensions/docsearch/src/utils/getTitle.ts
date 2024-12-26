@@ -6,7 +6,9 @@ export function getTitleForAlgolis(result: any) {
 
   return escape2Html(
     combinedTitle(
-      "path" in result || "slug" in result ? [result.title, result.description] : Object.values(result.hierarchy)
+      "path" in result || "slug" in result || "name" in result
+        ? [result.title || result.name]
+        : Object.values(result.hierarchy)
     )
   );
 }

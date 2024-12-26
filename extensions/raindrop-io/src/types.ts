@@ -45,13 +45,6 @@ export type Group = {
   collections: number[];
 };
 
-export interface Preferences {
-  token: string;
-  useLastCollection?: boolean;
-  additionalItemToDisplayInList?: string;
-  displayDate?: string;
-}
-
 export interface CollectionsResponse {
   result: boolean;
   items: Collection[];
@@ -110,6 +103,7 @@ export type BookmarksParams = {
 
 export interface FormValues {
   link: string;
+  title?: string;
   collection?: string;
   tags: string[];
   newCollection?: string;

@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 
 import type { ArchiveItem } from "@/api/archive";
 
@@ -9,6 +9,8 @@ import ArchiveListItemDetail from "./ArchiveListItemDetail";
 interface ArchiveListItemProps {
   item: ArchiveItem;
 }
+
+const mirror = getPreferenceValues<Preferences>().mirror ?? "https://annas-archive.org";
 
 const ArchiveListItemF = ({ item }: ArchiveListItemProps) => {
   const icon = useMemo(() => {
@@ -24,8 +26,8 @@ const ArchiveListItemF = ({ item }: ArchiveListItemProps) => {
       detail={<ArchiveListItemDetail item={item} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://annas-archive.org/md5/${item.id}`} />
-          <Action.CopyToClipboard title="Copy URL to Clipboard" content={`https://annas-archive.org/md5/${item.id}`} />
+          <Action.OpenInBrowser title="Open in Browser" url={`${mirror}/md5/${item.id}`} />
+          <Action.CopyToClipboard title="Copy URL to Clipboard" content={`${mirror}/md5/${item.id}`} />
         </ActionPanel>
       }
     />

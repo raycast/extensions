@@ -47,6 +47,13 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "import-docs",
+      "title": "Import Documentation Settings",
+      "subtitle": "DevDocs",
+      "description": "Import your enabled documentation from the DevDocs website",
+      "mode": "view"
     }
   ],
   "preferences": [

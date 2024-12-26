@@ -5,6 +5,9 @@
   "description": "integrate Raycast with Drafts app",
   "icon": "drafts-icon.png",
   "author": "FlohGro",
+  "contributors": [
+    "william_morgano"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -13,9 +16,16 @@
   "commands": [
     {
       "name": "create-draft-and-open",
-      "title": "Create Draft",
+      "title": "Create and Open Draft",
       "subtitle": "Drafts",
-      "description": "creates a new draft in Drafts with the provided content",
+      "description": "creates and opens a new draft in Drafts with the provided content",
+      "mode": "view"
+    },
+    {
+      "name": "create-draft-background",
+      "title": "Create Draft in Background",
+      "subtitle": "Drafts",
+      "description": "creates a new draft in Drafts with the provided content in the background",
       "mode": "view"
     },
     {
@@ -26,17 +36,31 @@
       "mode": "no-view"
     },
     {
-      "name": "create-draft-from-clipboard",
-      "title": "Create Draft from Clipboard",
+      "name": "create-draft-from-clipboard-and-open",
+      "title": "Create and Open Draft from Clipboard",
       "subtitle": "Drafts",
-      "description": "creates a new draft with the clipboard as content",
+      "description": "creates and opens a new draft with the clipboard as content",
       "mode": "no-view"
     },
     {
-      "name": "create-draft-from-selection",
-      "title": "Create Draft from Selection",
+      "name": "create-draft-from-clipboard-background",
+      "title": "Create Draft from Clipboard in Background",
       "subtitle": "Drafts",
-      "description": "creates a new draft with the selected text as content",
+      "description": "creates a new draft with the clipboard as content in the background",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-selection-and-open",
+      "title": "Create and Open Draft from Selection",
+      "subtitle": "Drafts",
+      "description": "creates and opens a new draft with the selected text as content",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-selection-background",
+      "title": "Create Draft from Selection in Background",
+      "subtitle": "Drafts",
+      "description": "creates a new draft with the selected text as content in the background",
       "mode": "no-view"
     },
     {
@@ -94,18 +118,34 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "capture",
+      "title": "Capture Draft",
+      "subtitle": "Drafts",
+      "description": "create a new draft quickly in the background using the command argument",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Draft Content",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "1.17.0",
     "open": "^8.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.6.2",
     "react": "^18.2.0",
     "typescript": "^4.4.3"
   },

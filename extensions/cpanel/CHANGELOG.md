@@ -1,5 +1,19 @@
 # cPanel Changelog
 
+## [Enhancements: Files & DB + New Account Command ] - 2024-10-21
+
+- Show or Hide "MIME Type" in `Files` via Preferences
+- View "File Content" for small files in `Files`
+- View "Database Schema" in `Databases`
+- View "Account Statistics and Usage" in `Accounts`
+- Change "cPanel Account Password" in `Accounts`
+
+## [Enhancements] - 2024-09-11
+
+- Create Email Account
+- Filter DNS Zone (records) by (record) type
+- View Files and Directories
+
 ## [View Databases + Create Limited DNS Records] - 2024-08-26
 
 - View MySQL or PostgreSQL Databases

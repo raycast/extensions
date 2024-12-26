@@ -1,3 +1,4 @@
+// (c) 2024 Aaron Ma (@aaronhma), Vaibhav Satishkumar (@Visual-Studio-Coder), Michitoshi Yano (@nagauta)
 import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
 import { exec } from "child_process";
 import macosRelease from "macos-release";
@@ -20,6 +21,20 @@ export default function Command() {
   const [storageInfo, setStorageInfo] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [networkDevices, setNetworkDevices] = useState([]);
+  const [processes, setProcesses] = useState([]);
+
+  const releaseImage = () => {
+    switch (macosRelease().name) {
+      case "Sonoma":
+        return `${environment.assetsPath}/macos_sonoma.png`;
+      case "Ventura":
+        return `${environment.assetsPath}/macos_ventura.png`;
+      case "Monterey":
+        return `${environment.assetsPath}/macos_monterey.png`;
+      default:
+        return `${environment.assetsPath}/macos_sequoia.png`;
+    }
+  };
 
   useEffect(() => {
     calculateDiskStorage().then((size) => {
@@ -54,22 +69,21 @@ export default function Command() {
     }
 
     setNetworkDevices(devices);
+
+    si.processes().then((data) => {
+      setProcesses(data.list);
+    });
   }, []);
 
-  const releaseImage = () => {
-    switch (macosRelease().name) {
-      // TODO: macOS 15 betas doesn't report themselves as "Sequoia", instead "macOS 15" shows up
-      // case "Sequoia":
-      //   return `${environment.assetsPath}/macos_sequoia.png`;
-      case "Sonoma":
-        return `${environment.assetsPath}/macos_sonoma.png`;
-      case "Ventura":
-        return `${environment.assetsPath}/macos_ventura.png`;
-      case "Monterey":
-        return `${environment.assetsPath}/macos_monterey.png`;
-      default:
-        return "ERROR";
-    }
+  const quitProcess = (pid) => {
+    exec(`kill ${pid}`, (error) => {
+      if (error) {
+        console.error(`Failed to kill process with PID ${pid}: ${error.message}`);
+      } else {
+        console.log(`Process with PID ${pid} has been killed.`);
+        setProcesses((prevProcesses) => prevProcesses.filter((proc) => proc.pid !== pid));
+      }
+    });
   };
 
   return (
@@ -111,10 +125,9 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="macOS">
         <List.Item
-          icon={releaseImage() == "ERROR" ? Icon.Gear : releaseImage()}
+          icon={releaseImage()}
           title={`macOS ${macosRelease().name == "Unknown" ? macOSVersion().split(".")[0] : `${macosRelease().name}`}`}
           accessories={[{ text: `Version ${macOSVersion()}` }]}
           actions={
@@ -138,7 +151,6 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="Storage">
         <List.Item
           icon={Icon.HardDrive}
@@ -154,7 +166,6 @@ export default function Command() {
           }
         />
       </List.Section>
-
       <List.Section title="Network">
         {networkDevices.map((device) => (
           <List.Item
@@ -165,6 +176,24 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy IP Address" content={device.ip} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title="Running Processes">
+        {processes.map((proc) => (
+          <List.Item
+            key={proc.pid}
+            icon={Icon.Application}
+            title={`${proc.name}`}
+            accessories={[{ text: `PID: ${proc.pid}` }]}
+            actions={
+              <ActionPanel>
+                <Action title="Quit Process" onAction={() => quitProcess(proc.pid)} />
+                <Action.CopyToClipboard title="Copy Process Name" content={proc.name} />
+                <Action.CopyToClipboard title="Copy PID" content={proc.pid.toString()} />
               </ActionPanel>
             }
           />

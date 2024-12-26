@@ -27,7 +27,11 @@ export function extractCode(original: string) {
     //   "2773 is your Microsoft account verification code"
 
     code = m[1];
-  } else if ((m = /(code\s*:|is\s*:|码|use code)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+  } else if (
+    (m = /(code\s*:|is\s*:|码|use code|autoriza(?:ca|çã)o\s*:|c(?:o|ó)digo\s*:)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      message
+    )) !== null
+  ) {
     // "code:" OR "is:" OR "use code", optional whitespace, then 4-8 consecutive alphanumeric characters
     // examples:
     //   "Your Airbnb verification code is: 1234."
@@ -36,6 +40,7 @@ export function extractCode(original: string) {
     //   "【抖音】验证码9316，用于手机验证"
     //   "Your healow verification code is : 7579."
     //   "TRUSTED LOCATION PASSCODE: mifsuc"
+    //   "Código de Autorização: 12345678"
     code = m[2];
   } else {
     // more generic, brute force patterns

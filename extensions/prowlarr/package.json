@@ -73,32 +73,6 @@
       "placeholder": "cjbyxrhgyd7hykqdye9wdztsxgqxrrbr"
     },
     {
-      "name": "defaultSort",
-      "title": "Default Sort",
-      "required": false,
-      "description": "Search results default sort order",
-      "type": "dropdown",
-      "default": "SeedsDesc",
-      "data": [
-        {
-          "title": "Most seeds",
-          "value": "SeedsDesc"
-        },
-        {
-          "title": "Least seeds",
-          "value": "SeedsAsc"
-        },
-        {
-          "title": "Biggest first",
-          "value": "SizeDesc"
-        },
-        {
-          "title": "Smallest first",
-          "value": "SizeAsc"
-        }
-      ]
-    },
-    {
       "name": "maxSearchResultsCount",
       "title": "Max Search Results",
       "required": false,
@@ -106,6 +80,22 @@
       "type": "textfield",
       "default": "100",
       "placeholder": "100"
+    },
+    {
+      "name": "keepIndexerSelection",
+      "label": "Keep indexer selection",
+      "required": false,
+      "description": "Keep the last used indexers for the next search",
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "keepCategorySelection",
+      "label": "Keep category selection",
+      "required": false,
+      "description": "Keep the last used categories for the next search",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {

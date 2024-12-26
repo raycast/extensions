@@ -11,7 +11,7 @@ function InputButtonPressMenubarItem(props: { state: State }) {
   if (!isEditableInputButton(s)) {
     return null;
   }
-  return <MenuBarExtra.Item title="Press" icon="toggle.png" onAction={() => callInputButtonPressService(s)} />;
+  return <MenuBarExtra.Item title="Press" icon="cached.svg" onAction={() => callInputButtonPressService(s)} />;
 }
 
 export function InputButtonMenubarItem(props: { state: State }) {

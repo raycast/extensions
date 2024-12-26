@@ -19,7 +19,7 @@ export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: s
         value: getDomain(props.entry.url),
         tooltip: props.entry.url,
       }}
-      accessories={[getLastVisitedAt(props.entry)]}
+      accessories={[getLastVisitedAt(props.entry), { tag: props.entry.profileName }]}
       actions={
         <ActionPanel>
           <OpenLinkActionSections tabOrUrl={props.entry.url} searchText={props.searchText} />
@@ -125,6 +125,7 @@ export function TabListItem(props: { tab: Tab; searchText: string; mutate: Mutat
         value: getDomain(props.tab.url),
         tooltip: props.tab.url,
       }}
+      keywords={[props.tab.url]} // Add this line to include URL in searchable content
       actions={
         <ActionPanel>
           <OpenLinkActionSections tabOrUrl={props.tab} searchText={props.searchText} />

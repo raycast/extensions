@@ -100,6 +100,10 @@ ${examples || ""}
       <Action
         title="Send Query"
         onAction={async () => {
+          if (searchText === "reload") {
+            // Set env to null to trigger a reload on useEffect.
+            setEnv(null);
+          }
           await open(buildTrovuUrl(searchText));
         }}
       />

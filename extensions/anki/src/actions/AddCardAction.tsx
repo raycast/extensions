@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Detail, Form, showToast, Toast } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from '@raycast/api';
 import noteActions from '../api/noteActions';
 import { useCachedPromise, useForm } from '@raycast/utils';
 import deckActions from '../api/deckActions';
@@ -40,6 +48,8 @@ export default function AddCardAction({ deckName }: Props) {
     };
   }, []);
 
+  const { allow_empty_card_fields } = getPreferenceValues<Preferences.AddCard>();
+
   const { handleSubmit, itemProps, values, reset, focus, setValidationError } =
     useForm<CreateCardFormValues>({
       initialValues: {
@@ -57,11 +67,13 @@ export default function AddCardAction({ deckName }: Props) {
           const createCardRequestBody = transformSubmittedData(values, fieldNames);
 
           // Validate card fields
-          for (const fieldName of fieldNames) {
-            const fieldValue = values[`field_${fieldName}`];
-            if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
-              setValidationError(`field_${fieldName}`, `${fieldName} is required`);
-              return;
+          if (!allow_empty_card_fields) {
+            for (const fieldName of fieldNames) {
+              const fieldValue = values[`field_${fieldName}`];
+              if (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+                setValidationError(`field_${fieldName}`, `${fieldName} is required`);
+                return;
+              }
             }
           }
 
@@ -172,13 +184,23 @@ export default function AddCardAction({ deckName }: Props) {
           navigationTitle="Add Card"
           isLoading={decksLoading || modelsLoading || tagsLoading}
         >
-          <Form.Dropdown {...itemProps.deckName} title="Deck" isLoading={decksLoading}>
+          <Form.Dropdown
+            {...itemProps.deckName}
+            title="Deck"
+            storeValue={true}
+            isLoading={decksLoading}
+          >
             {decks?.map(deck => (
               <Form.Dropdown.Item key={deck.deck_id} title={deck.name} value={deck.name} />
             ))}
           </Form.Dropdown>
 
-          <Form.Dropdown {...itemProps.modelName} title="Model" isLoading={modelsLoading}>
+          <Form.Dropdown
+            {...itemProps.modelName}
+            title="Model"
+            storeValue={true}
+            isLoading={modelsLoading}
+          >
             {models?.map(model => (
               <Form.Dropdown.Item key={model.id} title={model.name} value={model.name} />
             ))}

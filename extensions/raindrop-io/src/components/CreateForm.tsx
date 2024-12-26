@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/a
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { CollectionCreationResponse, FormValues, Preferences } from "../types";
+import { CollectionCreationResponse, FormValues } from "../types";
 
 import { useRequest } from "../hooks/useRequest";
 import { useTags } from "../hooks/useTags";
@@ -53,6 +53,7 @@ async function createBookmark({
     body: JSON.stringify({
       items: values.link.split(/[ ,;]/).map((link) => ({
         link: link.trim(),
+        title: values.title,
         collectionId,
         tags: values.tags,
         pleaseParse: {},
@@ -68,6 +69,20 @@ type CreateFormProps = {
   onCreated?: () => void;
   onError?: (error: Error) => void;
 };
+
+async function getLinkTitle(link: string) {
+  return fetch(link)
+    .then((response) => response.text())
+    .then((html) => {
+      const match = html.match(/<title>(.*?)<\/title>/i);
+      const title = match ? match[1] : "";
+      return title;
+    })
+    .catch((error) => {
+      console.error("Error fetching title:", error);
+      return "";
+    });
+}
 
 export const CreateForm = (props: CreateFormProps) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -110,6 +125,7 @@ export const CreateForm = (props: CreateFormProps) => {
     },
     initialValues: {
       link: props.defaultLink ?? "",
+      title: undefined,
       collection: "-1",
     },
   });
@@ -119,6 +135,14 @@ export const CreateForm = (props: CreateFormProps) => {
       setValue("link", props.defaultLink);
     }
   }, [props.defaultLink, setValue]);
+
+  useEffect(() => {
+    if (props.defaultLink) {
+      getLinkTitle(props.defaultLink).then((title) => {
+        setValue("title", title);
+      });
+    }
+  }, [props.defaultLink]);
 
   return (
     <Form
@@ -135,7 +159,16 @@ export const CreateForm = (props: CreateFormProps) => {
         placeholder="https://example.com"
         info="You can add multiple links separated by commas, spaces, or semicolons."
         autoFocus
+        onBlur={(event) => {
+          const link = event.target.value;
+          if (link) {
+            getLinkTitle(link).then((title) => {
+              setValue("title", title);
+            });
+          }
+        }}
       />
+      <Form.TextField {...itemProps.title} title="Title" placeholder="Example title" />
       <Form.Dropdown
         {...itemProps.collection}
         title="Collection"

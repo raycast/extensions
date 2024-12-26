@@ -1,8 +1,24 @@
 # Apple Reminders Changelog
 
+## [Add weekdays and weekends options for recurring reminders] - 2024-12-04
+
+- Add weekdays and weekends options for recurring reminders in the `Create Reminder` command.
+
+## [Group today's reminders by time of day] - 2024-10-28
+
+- Group today's reminders by time of day (morning, afternoon, tonight) just like in the native Reminders app.
+
+## [Sort menu bar reminders by due date] - 2024-10-01
+
+- Sort menu bar reminders by due date instead of the order they were created.
+
+## [Add pre-fill for the Create Reminder command with text from My Reminders search] - 2024-09-18
+
+The Create Reminder command will automatically pre-fill the title with the initial query when there are no search results in My Reminders.
+
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
-Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
 
 ## [Add Saved Locations] - 2024-04-16
 

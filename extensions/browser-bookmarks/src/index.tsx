@@ -27,9 +27,12 @@ import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
+import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
+import useZenBookmarks from "./hooks/useZenBookmarks";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
@@ -111,9 +114,12 @@ export default function Command() {
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
+  const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
@@ -126,9 +132,12 @@ export default function Command() {
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
+  const whale = useWhaleBookmarks(hasWhale);
+  const zen = useZenBookmarks(hasZen);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -146,9 +155,12 @@ export default function Command() {
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
+      ...whale.bookmarks,
+      ...zen.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -194,9 +206,12 @@ export default function Command() {
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
+    whale.bookmarks,
+    zen.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -214,9 +229,12 @@ export default function Command() {
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
+      ...whale.folders,
+      ...zen.folders,
     ];
 
     setFolders(folders);
@@ -235,6 +253,8 @@ export default function Command() {
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
+    whale.folders,
+    zen.folders,
     setFolders,
   ]);
 
@@ -343,6 +363,9 @@ export default function Command() {
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
+    if (hasPrismaAccess) {
+      prismaAccess.mutate();
+    }
     if (hasSafari) {
       safari.mutate();
     }
@@ -351,6 +374,12 @@ export default function Command() {
     }
     if (hasVivaldi) {
       vivaldi.mutate();
+    }
+    if (hasWhale) {
+      whale.mutate();
+    }
+    if (hasZen) {
+      zen.mutate();
     }
   }
 
@@ -404,9 +433,12 @@ export default function Command() {
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
-        vivaldi.isLoading
+        vivaldi.isLoading ||
+        whale.isLoading ||
+        zen.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
@@ -568,6 +600,15 @@ export default function Command() {
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
+                    name="Prisma Access"
+                    icon="prisma-access.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    profiles={prismaAccess.profiles}
+                    currentProfile={prismaAccess.currentProfile}
+                    setCurrentProfile={prismaAccess.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
                     name="Vivaldi"
                     icon="vivaldi.png"
@@ -575,6 +616,24 @@ export default function Command() {
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.whale}
+                    name="Whale"
+                    icon="whale.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    profiles={whale.profiles}
+                    currentProfile={whale.currentProfile}
+                    setCurrentProfile={whale.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.zen}
+                    name="Zen"
+                    icon="zen.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                    profiles={zen.profiles}
+                    currentProfile={zen.currentProfile}
+                    setCurrentProfile={zen.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 

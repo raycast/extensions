@@ -1,7 +1,7 @@
 const GET_USER_STORIES = `
-  query StoriesByType($username: String!) {
+  query StoriesByType($username: String!, $page: Int!) {
     user(username: $username) {
-      posts(page: 1, pageSize: 20) {
+      posts(page: $page, pageSize: 20) {
         nodes {
           cuid
           title
@@ -17,6 +17,10 @@ const GET_USER_STORIES = `
           publication {
             url
           }
+        }
+        pageInfo {
+          hasNextPage
+          nextPage
         }
       }
     }

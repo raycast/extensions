@@ -53,8 +53,7 @@ function useErrorHandling() {
 It seems there's an issue connecting to Anki. This could be due to one of the following reasons:
 
 1. **Anki is not running**
-   - Ensure Anki is open and running in the background
-   - If Anki is closed, launch it and try again
+   - Ensure the Anki application is open and running in the background
 
 2. **AnkiConnect is not installed or activated**
    - Go to Tools > Add-ons in Anki to verify that anki-connect add-on is installed in Anki
@@ -70,11 +69,11 @@ It seems there's an issue connecting to Anki. This could be due to one of the fo
      4. Verify the "webBindPort" is set to 8765
      5. (Optional): If you do not want to use port 8765, change it to your preferred port number in the extension configuration and the add-on
 
-## Troubleshooting Steps
+## Additional Troubleshooting Steps
 
 1. Restart Anki
-2. Ensure AnkiConnect is up to date
-3. Check your firewall settings
+2. Ensure Anki is updated to latest version
+3. Ensure AnkiConnect is udpated to latest version
 4. Restart your computer
 
 If the issue persists, please report it as a bug in the [GitHub repository](https://github.com/anton-suprun/anki-raycast/issues/new).`;
