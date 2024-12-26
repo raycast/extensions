@@ -6,7 +6,7 @@
   "icon": "multi-icon.png",
   "author": "edg",
   "license": "MIT",
-"commands": [
+  "commands": [
     {
       "name": "prompt",
       "title": "New Prompt",
@@ -21,8 +21,8 @@
       "mode": "view"
     },
     {
-      "name": "add-urls",
-      "title": "Add Urls",
+      "name": "manage-urls",
+      "title": "Manage Urls",
       "subtitle": "Add or remove links for Multi command",
       "keywords": [
         "add",
