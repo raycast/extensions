@@ -7,8 +7,14 @@ export const CurrentTime: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setNow(dayjs());
-    }, 1000 * 5);
+      setNow((prev) => {
+        const currentTime = dayjs();
+        if (prev.isSame(currentTime, 'minute')) {
+          return prev;
+        }
+        return currentTime;
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
