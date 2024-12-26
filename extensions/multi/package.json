@@ -2,13 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi",
   "title": "Multi",
-  "description": "See rooms & teammates, join sessions, control devices and more",
+  "description": "Raycast extension to prompt or open multiple links at once using a custom URL search query",
   "icon": "multi-icon.png",
-  "author": "fernando_barbat",
-  "contributors": [
-    "artlasovsky",
-    "pernielsentikaer"
-  ],
+  "author": "edg",
   "access": "public",
   "owner": "multi",
   "categories": [
@@ -49,59 +45,29 @@
   ],
   "commands": [
     {
-      "name": "startNewSession",
-      "title": "Start New Session",
-      "subtitle": "Multi",
-      "keywords": ["new", "session", "call", "start"],
-      "description": "Start a new session and copy join link to clipboard.",
-      "mode": "no-view"
-    },
-    {
-      "name": "copySessionLink",
-      "title": "Copy Session Link",
-      "subtitle": "Multi",
-      "keywords": ["copy", "link", "session", "call"],
-      "description": "If in a session, it copies a link to it. Otherwise, it will copy a link to a new session.",
-      "mode": "no-view"
-    },
-    {
-      "name": "toggleMic",
-      "title": "Toggle Microphone",
-      "subtitle": "Multi",
-      "keywords": ["mic", "toggle", "microphone"],
-      "description": "Toggle your microphone during a session.",
-      "mode": "no-view"
-    },
-    {
-      "name": "toggleCamera",
-      "title": "Toggle Camera",
-      "subtitle": "Multi",
-      "keywords": ["cam", "toggle", "camera"],
-      "description": "Toggle your camera during a session.",
-      "mode": "no-view"
-    },
-    {
-      "name": "toggleSharingContent",
-      "title": "Toggle Screen Sharing",
-      "subtitle": "Multi",
-      "keywords": ["screen", "sharing", "toggle"],
-      "description": "Start or stop screen share during a session.",
-      "mode": "no-view"
-    },
-    {
-      "name": "joinRoom",
-      "title": "Join Room",
-      "subtitle": "Multi",
-      "keywords": ["room", "join", "invite", "call", "start", "session"],
-      "description": "Search and join rooms on your team.",
+      "name": "prompt",
+      "title": "New Prompt",
+      "subtitle": "Open multiple links at once using a custom URL search query",
+      "keywords": [
+        "new",
+        "prompt",
+        "query",
+        "open"
+      ],
+      "description": "Open multiple links at once using a custom URL search query",
       "mode": "view"
     },
     {
-      "name": "inviteUser",
-      "title": "Call Teammate",
-      "subtitle": "Multi",
-      "keywords": ["teammate", "join", "invite", "call", "start", "session"],
-      "description": "Search teammates and start a Multi session with them.",
+      "name": "add-urls",
+      "title": "Add Urls",
+      "subtitle": "Add or remove links for Multi command",
+      "keywords": [
+        "add",
+        "remove",
+        "url",
+        "links"
+      ],
+      "description": "Add or remove links for Multi command",
       "mode": "view"
     },
     {
@@ -116,7 +82,16 @@
           "type": "text"
         }
       ],
-      "keywords": ["https://call.multi.app", "https", "call", "multi", "link", "url", "join", "session"],
+      "keywords": [
+        "https://call.multi.app",
+        "https",
+        "call",
+        "multi",
+        "link",
+        "url",
+        "join",
+        "session"
+      ],
       "description": "Join a Multi session from a given link.",
       "mode": "no-view"
     },
@@ -124,7 +99,11 @@
       "name": "leaveSession",
       "title": "Leave Session",
       "subtitle": "Multi",
-      "keywords": ["leave", "session", "call"],
+      "keywords": [
+        "leave",
+        "session",
+        "call"
+      ],
       "description": "Leave the current session.",
       "mode": "no-view"
     }
