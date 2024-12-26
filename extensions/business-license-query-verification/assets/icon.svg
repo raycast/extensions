@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="256" cy="256" r="256" fill="#007AFF"/>
+  
+  <!-- 文档图标 -->
+  <path d="M160 128h192c17.7 0 32 14.3 32 32v192c0 17.7-14.3 32-32 32H160c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32z" fill="white"/>
+  
+  <!-- 放大镜 -->
+  <circle cx="320" cy="320" r="48" stroke="white" stroke-width="32"/>
+  <path d="M352 352l32 32" stroke="white" stroke-width="32" stroke-linecap="round"/>
+  
+  <!-- 文本线条 -->
+  <rect x="192" y="192" width="128" height="16" rx="8" fill="#007AFF"/>
+  <rect x="192" y="240" width="96" height="16" rx="8" fill="#007AFF"/>
+  <rect x="192" y="288" width="64" height="16" rx="8" fill="#007AFF"/>
+</svg> 
