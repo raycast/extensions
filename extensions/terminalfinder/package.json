@@ -6,10 +6,18 @@
   "icon": "command-icon.png",
   "author": "yedongze",
   "contributors": [
-    "Ianvs"
+    "Ianvs",
+    "daniele_avitabile"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "clipboardToGhostty",
+      "title": "Clipboard → Ghostty",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
     {
       "name": "clipboardToITerm",
       "title": "Clipboard → iTerm",
@@ -34,6 +42,13 @@
     {
       "name": "clipboardToWez",
       "title": "Clipboard → WezTerm",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToGhostty",
+      "title": "Finder → Ghostty",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
@@ -67,31 +82,38 @@
       "mode": "no-view"
     },
     {
+      "name": "ghosttyToFinder",
+      "title": "Ghostty → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Terminal directory in Finder",
+      "mode": "no-view"
+    },
+    {
       "name": "iTermToFinder",
       "title": "iTerm → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "terminalToFinder",
       "title": "Terminal → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "warpToFinder",
       "title": "Warp → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "wezToFinder",
       "title": "WezTerm → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
+      "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     }
   ],
@@ -110,6 +132,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
