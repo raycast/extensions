@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Get ready for the v14 new data structure
+- Add support for copying icon title
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2024-10-16
 
 - Fix the issue where AI search could not be stopped
