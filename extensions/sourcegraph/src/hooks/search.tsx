@@ -164,9 +164,19 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
             };
           });
         },
+        onDone: () => {
+          setState((oldState) => {
+            if (oldState.isPreviousResults) {
+              return { ...oldState, results: [], isPreviousResults: false };
+            }
+            return oldState;
+          });
+        },
       });
     } catch (error) {
       ExpandableToast(push, "Unexpected error", "Search failed", String(error)).show();
+      // Reset the search state
+      setState((oldState) => ({ ...oldState, loading: false, results: [], isPreviousResults: false }));
     } finally {
       setState((oldState) => ({
         ...oldState,

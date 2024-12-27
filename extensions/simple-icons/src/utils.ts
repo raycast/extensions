@@ -21,7 +21,7 @@ import { execa } from "execa";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
 import { titleToSlug } from "simple-icons/sdk";
-import { JsDelivrNpmResponse, IconData, IconJson, LaunchContext } from "./types.js";
+import { JsDelivrNpmResponse, IconData, LaunchContext } from "./types.js";
 
 const cache = new Cache();
 
@@ -86,9 +86,18 @@ export const cacheAssetPack = async (version: string) => {
 };
 
 export const loadCachedJson = async (version: string) => {
-  const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
+  const [major] = version.split(".");
+  const isNewFormat = Number(major) >= 14;
+  const jsonPath = join(
+    environment.assetsPath,
+    "pack",
+    `simple-icons-${version}`,
+    isNewFormat ? "data" : "_data",
+    "simple-icons.json",
+  );
   const jsonFile = await readFile(jsonPath, "utf8");
-  return JSON.parse(jsonFile) as IconJson;
+  const json = JSON.parse(jsonFile);
+  return isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
 };
 
 export const loadCachedVersion = () => {

@@ -37,6 +37,7 @@ export interface SearchHandlers {
   onSuggestions: (suggestions: Suggestion[], top: boolean) => void;
   onAlert: (alert: Alert) => void;
   onProgress: (progress: Progress) => void;
+  onDone: () => void;
 }
 
 // Copied by hand from https://sourcegraph.sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+f:graphql+%22enum+SearchPatternType+%7B%22&patternType=keyword&case=yes&sm=0
@@ -232,6 +233,9 @@ export async function performSearch(
     });
 
     // done indicator
-    stream.addEventListener("done", resolveStream);
+    stream.addEventListener("done", () => {
+      handlers.onDone();
+      resolveStream();
+    });
   });
 }
