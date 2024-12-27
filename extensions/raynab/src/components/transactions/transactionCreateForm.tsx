@@ -264,7 +264,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
         </Form.TagPicker>
       ) : null}
 
-      <Form.Checkbox {...itemProps.cleared} label="Has the transaction cleared?" storeValue={true} />
+      <Form.Checkbox {...itemProps.cleared} label="Mark as cleared" storeValue={true} />
 
       {subtransactions.length > 0 ? (
         <>

@@ -291,9 +291,18 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         onChange={setAmount}
       />
       {selectOwnPayee ? (
-        <Form.TextField {...itemProps.payee_name} title="Payee" />
+        <Form.TextField
+          {...itemProps.payee_name}
+          title="Payee"
+          info="Press Opt+P to select from the list of existing payees"
+        />
       ) : (
-        <Form.Dropdown {...itemProps.payee_id} title="Payee" isLoading={isLoadingPayees}>
+        <Form.Dropdown
+          {...itemProps.payee_id}
+          title="Payee"
+          isLoading={isLoadingPayees}
+          info="Press Opt+P to add a payee not in the list"
+        >
           {payees?.map((payee) => (
             <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
           ))}
