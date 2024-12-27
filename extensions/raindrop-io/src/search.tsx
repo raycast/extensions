@@ -4,7 +4,7 @@ import { ReactElement, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import BookmarkItem from "./components/BookmarkItem";
 import CollectionsDropdown from "./components/CollectionsDropdown";
-import { Bookmark, Preferences } from "./types";
+import { Bookmark } from "./types";
 import { useRequest } from "./hooks/useRequest";
 import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 

@@ -45,14 +45,6 @@ export type Group = {
   collections: number[];
 };
 
-export interface Preferences {
-  token: string;
-  useLastCollection?: boolean;
-  additionalItemToDisplayInList?: string;
-  displayDate?: string;
-  titleOnly?: boolean;
-}
-
 export interface CollectionsResponse {
   result: boolean;
   items: Collection[];
@@ -115,4 +107,11 @@ export interface FormValues {
   collection?: string;
   tags: string[];
   newCollection?: string;
+}
+
+export interface Preferences {
+  token: string;
+  useLastCollection?: boolean;
+  additionalItemToDisplayInList?: string;
+  displayDate?: string;
 }
