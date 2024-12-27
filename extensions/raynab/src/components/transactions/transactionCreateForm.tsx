@@ -62,7 +62,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
       date: new Date(),
       account_id: accountId,
       categoryList: categoryList,
-      cleared: false,
+      cleared: true,
       payee_name: '',
       flag_color: '',
       payee_id: undefined,
