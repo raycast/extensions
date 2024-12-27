@@ -5,7 +5,10 @@
   "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
-  "contributors": ["Ianvs", "daniele_avitabile"],
+  "contributors": [
+    "Ianvs",
+    "daniele_avitabile"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -124,7 +127,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "3.4.2",
+    "react-devtools": "^1.0.5",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -133,4 +137,3 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
-
