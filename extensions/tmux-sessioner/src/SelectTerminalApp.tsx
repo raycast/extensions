@@ -10,6 +10,7 @@ const ALLOWED_APPS_BUNDLEID = [
   "com.apple.Terminal",
   "dev.warp.Warp-Stable",
   "com.github.wez.wezterm",
+  "com.mitchellh.ghostty",
 ];
 
 export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?: (value: boolean) => void }) => {

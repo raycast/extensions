@@ -1,4 +1,8 @@
 # Tmux Sessioner Changelog
+## [v0.0.6] - 2024-12-27
+### Added
+- Support Ghostty Terminal 🖥️
+
 ## [v0.0.5] - 2024-04-14
 ### Updated
 - In manage tmux windows, support filter by both window name and session name.
