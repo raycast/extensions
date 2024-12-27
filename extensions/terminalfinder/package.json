@@ -5,10 +5,7 @@
   "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, WezTerm) and vice versa",
   "icon": "command-icon.png",
   "author": "yedongze",
-  "contributors": [
-    "Ianvs",
-    "daniele_avitabile"
-  ],
+  "contributors": ["Ianvs", "daniele_avitabile"],
   "license": "MIT",
   "commands": [
     {
@@ -136,3 +133,4 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
+

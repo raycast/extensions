@@ -3,6 +3,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Added support for Ghostty
+- Changed description of 'Clipboard to' in package.json for all terminals.
 
 ## [Update] - 2024-02-05
 

@@ -15,3 +15,4 @@ export default async () => {
     await showToast(Toast.Style.Failure, "Something went wrong");
   }
 };
+
