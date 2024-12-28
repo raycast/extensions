@@ -6,7 +6,8 @@
   "icon": "text-quotifier.png",
   "author": "kricsleo",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ],
   "keywords": [
     "json",
@@ -17,9 +18,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "text-quotifier",
-      "title": "Text Quotifier",
-      "subtitle": "Quotes text to a valid JSON value.",
+      "name": "quotify-text",
+      "title": "Quotify Text",
       "description": "Quotes text to a valid JSON value.",
       "mode": "view"
     }
