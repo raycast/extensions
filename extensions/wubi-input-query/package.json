@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "wubi86",
-      "title": "Chinese Input Query (The 86 Version)",
+      "title": "Chinese Input Query (the 86 Version)",
       "description": "Search The Code Of WuBi By Pinyin, Support The 86 Version. 中文五笔输入法86版编码查询工具.",
       "mode": "view"
     }
