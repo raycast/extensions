@@ -33,6 +33,8 @@ const defaultSnippet: Values = {
   color: "candy",
 };
 
+const defaultTitle = "Untitled%201";
+
 export default function CreateSnippet() {
   const { data } = useFetch<Data>("https://ray.so/api/config");
 
@@ -46,9 +48,11 @@ export default function CreateSnippet() {
       return;
     }
 
+    const parsedTitle = values.title ? values.title.replace(/ /g, "%20") : defaultTitle;
+
     const url = `https://ray.so/#theme=${values.color}&background=${values.background}&darkMode=${values.darkMode}&padding=${
       values.padding
-    }&title=${values.title || "Untitled%201"}&code=${encodeURI(values.snippet)}&language=${values.language}`;
+    }&title=${parsedTitle}&code=${encodeURI(values.snippet)}&language=${values.language}`;
 
     open(url);
     closeMainWindow();
