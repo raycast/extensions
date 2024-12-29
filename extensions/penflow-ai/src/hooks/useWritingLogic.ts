@@ -31,12 +31,7 @@ export function useWritingLogic() {
       setIsLoading(true);
       try {
         const results = await processInput(text);
-        setSuggestions(
-          results.map(text => ({
-            text,
-            type: "completion",
-          }))
-        );
+        setSuggestions(results);
       } catch (error) {
         handleError(error);
       } finally {

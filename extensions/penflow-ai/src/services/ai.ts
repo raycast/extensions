@@ -29,7 +29,7 @@ function logAICall(
   console.log("================\n");
 }
 
-async function processWithModel(
+export async function processWithModel(
   messages: Message[],
   _options?: AIRequestOptions
 ): Promise<string> {

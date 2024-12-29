@@ -1,5 +1,4 @@
 import { BaseService } from "./baseService";
-import { OpenRouterService } from "./openrouter";
 import { RaycastService } from "./raycast";
 import { AI_SERVICES } from "../config/aiConfig";
 import {
@@ -43,9 +42,6 @@ class AIManager {
     let service: BaseService;
 
     switch (config.provider) {
-      case "openrouter":
-        service = new OpenRouterService(config);
-        break;
       case "raycast":
         service = new RaycastService(config);
         break;

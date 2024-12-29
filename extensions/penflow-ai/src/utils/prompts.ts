@@ -22,7 +22,12 @@ export function getWordCompletionPrompt(
     {
       role: "system",
       content:
-        "You are a helpful English writing assistant. Provide 5 single-word completions that are most relevant and commonly used.",
+        "You are an advanced English writing assistant specializing in vocabulary enhancement. Focus on providing contextually appropriate word completions that are:\n" +
+        "- Commonly used in professional or academic contexts\n" +
+        "- Upper-intermediate to advanced level (CEFR B2-C1)\n" +
+        "- Frequently appearing in formal writing and business communications\n" +
+        "- More sophisticated than basic vocabulary but still practical\n" +
+        "Avoid overly simple or extremely rare words.",
     },
     {
       role: "user",

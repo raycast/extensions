@@ -1,11 +1,8 @@
 import { AI } from "@raycast/api";
 
-export type AIProvider = "raycast" | "openai" | "openrouter";
+export type AIProvider = "raycast" | "openai";
 
-export type SupportedModel =
-  | "openai-gpt-4o-mini"
-  | "openai-gpt-4o"
-  | "anthropic-claude-sonnet";
+export type SupportedModel = "raycast";
 
 export interface TestResult {
   success: boolean;
@@ -108,7 +105,7 @@ export interface AIRequestOptions {
 
 export interface Suggestion {
   text: string;
-  type: "completion";
+  type: "completion" | "translation" | "polish";
 }
 
 export interface WritingState {
