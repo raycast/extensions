@@ -5,7 +5,6 @@ import {
   AIProvider,
   AIServiceConfig,
   AIModelConfig,
-  ServiceStatus,
   ServiceLog,
   TestResult,
 } from "../utils/types";
@@ -76,27 +75,20 @@ class AIManager {
     return this.getAllModels().filter(model => model.provider === provider);
   }
 
-  public getServicesStatus(): Record<AIProvider, ServiceStatus> {
-    const status: Record<AIProvider, ServiceStatus> = {} as Record<
-      AIProvider,
-      ServiceStatus
-    >;
-    this.services.forEach((service, provider) => {
-      status[provider] = service.getStatus();
-    });
-    return status;
-  }
-
   public getAllLogs(): ServiceLog[] {
     return [...this.logs].sort((a, b) => b.timestamp - a.timestamp);
   }
 
-  public logServiceCall(log: ServiceLog) {
+  public logServiceCall(provider: AIProvider, model: string, input: string, output?: string, error?: string) {
+    const log: ServiceLog = {
+      timestamp: Date.now(),
+      provider,
+      model,
+      input,
+      output,
+      error,
+    };
     this.logs.push(log);
-    const service = this.services.get(log.provider);
-    if (service) {
-      service.logRequest(log);
-    }
   }
 
   public async testConnection(
@@ -104,7 +96,7 @@ class AIManager {
     debug: boolean = false
   ): Promise<TestResult> {
     const service = this.getService(provider);
-    return await service.testConnection(debug);
+    return service.testConnection(debug);
   }
 
   public async testAllConnections(
@@ -114,8 +106,8 @@ class AIManager {
       AIProvider,
       TestResult
     >;
-    for (const provider of this.services.keys()) {
-      results[provider] = await this.testConnection(provider, debug);
+    for (const [provider, service] of this.services) {
+      results[provider] = await service.testConnection(debug);
     }
     return results;
   }

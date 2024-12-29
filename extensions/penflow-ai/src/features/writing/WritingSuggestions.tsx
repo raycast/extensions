@@ -53,7 +53,6 @@ export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
                   <Action.Paste
                     title="Paste to Active App"
                     content={suggestion.text}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

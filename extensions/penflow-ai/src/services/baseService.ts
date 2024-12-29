@@ -3,26 +3,15 @@ import {
   ChatRequest,
   ChatResponse,
   ServiceLog,
-  ServiceStatus,
   TestResult,
 } from "../utils/types";
 
 export abstract class BaseService {
   protected config: AIServiceConfig;
   protected logs: ServiceLog[] = [];
-  protected status: ServiceStatus;
 
   constructor(config: AIServiceConfig) {
     this.config = config;
-    this.status = {
-      provider: config.provider,
-      isAvailable: true,
-      activeModels: config.models.filter(m => m.enabled).map(m => m.id),
-      successfulRequests: 0,
-      failedRequests: 0,
-      totalTokensUsed: 0,
-      lastChecked: new Date(),
-    };
   }
 
   abstract chat(request: ChatRequest): Promise<ChatResponse>;
@@ -41,23 +30,19 @@ export abstract class BaseService {
     return model;
   }
 
-  public getStatus(): ServiceStatus {
-    return { ...this.status };
-  }
-
   public getLogs(): ServiceLog[] {
     return [...this.logs];
   }
 
-  public logRequest(log: ServiceLog) {
+  protected logRequest(input: string, output?: string, error?: string) {
+    const log: ServiceLog = {
+      timestamp: Date.now(),
+      provider: this.config.provider,
+      model: this.config.models[0].id,
+      input,
+      output,
+      error,
+    };
     this.logs.push(log);
-    if (log.success) {
-      this.status.successfulRequests++;
-      if (log.usage) {
-        this.status.totalTokensUsed += log.usage.totalTokens;
-      }
-    } else {
-      this.status.failedRequests++;
-    }
   }
 }

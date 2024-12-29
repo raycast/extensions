@@ -2,8 +2,6 @@ import { AI } from "@raycast/api";
 
 export type AIProvider = "raycast" | "openai";
 
-export type SupportedModel = "raycast";
-
 export interface TestResult {
   success: boolean;
   message: string;
@@ -76,13 +74,8 @@ export interface ServiceLog {
   timestamp: number;
   provider: AIProvider;
   model: string;
-  action: "chat" | "completion" | "translation";
-  success: boolean;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
+  input: string;
+  output?: string;
   error?: string;
 }
 
