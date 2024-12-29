@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "yedongze",
   "contributors": [
-    "Ianvs"
+    "Ianvs",
+    "AnirudhG07"
   ],
   "license": "MIT",
   "commands": [
@@ -39,8 +40,22 @@
       "mode": "no-view"
     },
     {
+      "name": "clipboardToGhostty",
+      "title": "Clipboard → Ghostty",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
       "name": "finderToITerm",
       "title": "Finder → iTerm",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "finderToGhostty",
+      "title": "Finder → Ghostty",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
@@ -90,6 +105,13 @@
     {
       "name": "wezToFinder",
       "title": "WezTerm → Finder",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "ghosttyToFinder",
+      "title": "Ghostty → Finder",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
