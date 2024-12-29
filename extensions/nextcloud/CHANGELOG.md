@@ -1,5 +1,9 @@
 # Nextcloud Changelog
 
+## [WebDAV request Fix] - 2024-12-29
+- `200 OK` check with each items
+- Array check for `item["d:propstat"]`
+
 ## [`Show Activity` is now Paginated] - 2024-10-07
 
 ### Dev Notes
