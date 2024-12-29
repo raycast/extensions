@@ -10,13 +10,12 @@ export function EmptyStateView({ hasAIPro }: EmptyStateViewProps) {
     <List.EmptyView
       icon={Icon.Text}
       title="Start Writing"
-      description={`Type English or Chinese to get suggestions\n${
-        hasAIPro !== null
+      description={`Type English or Chinese to get suggestions\n${hasAIPro !== null
           ? hasAIPro
             ? "Raycast Pro Activated"
             : "Raycast Pro Required"
           : "Checking Raycast Pro access..."
-      }`}
+        }`}
     />
   );
 }
