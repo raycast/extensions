@@ -6,7 +6,6 @@ import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } 
 interface ActionListProps {
   commandName: string;
   supportedTypes: string[];
-  actionTitle: string;
   urlScheme: string;
   launchContext?: {
     actionId?: string;
