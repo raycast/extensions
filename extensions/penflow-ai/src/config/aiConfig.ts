@@ -24,7 +24,7 @@ export const AI_SERVICES: AIServiceConfig[] = [
 
 export function getModelProvider(modelId: string): AIProvider {
   for (const service of AI_SERVICES) {
-    const model = service.models.find(m => m.id === modelId);
+    const model = service.models.find((m) => m.id === modelId);
     if (model) {
       return model.provider;
     }

@@ -1,10 +1,4 @@
-import {
-  AIServiceConfig,
-  ChatRequest,
-  ChatResponse,
-  ServiceLog,
-  TestResult,
-} from "../utils/types";
+import { AIServiceConfig, ChatRequest, ChatResponse, ServiceLog, TestResult } from "../utils/types";
 
 export abstract class BaseService {
   protected config: AIServiceConfig;
@@ -19,11 +13,11 @@ export abstract class BaseService {
   abstract testConnection(debug?: boolean): Promise<TestResult>;
 
   public getModels() {
-    return this.config.models.filter(model => model.enabled);
+    return this.config.models.filter((model) => model.enabled);
   }
 
   protected validateModel(modelId: string) {
-    const model = this.config.models.find(m => m.id === modelId);
+    const model = this.config.models.find((m) => m.id === modelId);
     if (!model || !model.enabled) {
       throw new Error(`Model ${modelId} is not available`);
     }

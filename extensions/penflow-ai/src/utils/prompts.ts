@@ -14,10 +14,7 @@ export function getStylePrompt(_style: WritingStyle): string {
   return stylePrompts[WritingStyle.Professional];
 }
 
-export function getWordCompletionPrompt(
-  input: string,
-  style: WritingStyle
-): Message[] {
+export function getWordCompletionPrompt(input: string, style: WritingStyle): Message[] {
   return [
     {
       role: "system",

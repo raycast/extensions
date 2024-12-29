@@ -1,10 +1,5 @@
 import { BaseService } from "./baseService";
-import {
-  AIServiceConfig,
-  ChatRequest,
-  ChatResponse,
-  TestResult,
-} from "../utils/types";
+import { AIServiceConfig, ChatRequest, ChatResponse, TestResult } from "../utils/types";
 
 export class OpenAIService extends BaseService {
   constructor(config: AIServiceConfig) {

@@ -1,9 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
 
   return function executedFunction(...args: Parameters<T>) {
@@ -22,8 +19,7 @@ export function handleError(error: unknown, context?: string) {
   showToast({
     style: Toast.Style.Failure,
     title: context ? `${context} Failed` : "Error",
-    message:
-      error instanceof Error ? error.message : "An unexpected error occurred",
+    message: error instanceof Error ? error.message : "An unexpected error occurred",
   });
 }
 

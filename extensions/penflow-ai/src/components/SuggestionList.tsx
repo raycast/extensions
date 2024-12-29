@@ -7,12 +7,7 @@ interface SuggestionListProps {
   isLoading?: boolean;
 }
 
-export function SuggestionList({
-  suggestions,
-  onSelect,
-  onPolish,
-  isLoading = false,
-}: SuggestionListProps) {
+export function SuggestionList({ suggestions, onSelect, onPolish, isLoading = false }: SuggestionListProps) {
   return (
     <List isLoading={isLoading}>
       {suggestions.map((suggestion, index) => (
@@ -22,20 +17,9 @@ export function SuggestionList({
           icon={Icon.Text}
           actions={
             <ActionPanel>
-              <Action
-                title="Use Suggestion"
-                icon={Icon.CheckCircle}
-                onAction={() => onSelect(suggestion)}
-              />
-              <Action
-                title="Polish Text"
-                icon={Icon.Wand}
-                onAction={() => onPolish(suggestion)}
-              />
-              <Action.CopyToClipboard
-                title="Copy to Clipboard"
-                content={suggestion}
-              />
+              <Action title="Use Suggestion" icon={Icon.CheckCircle} onAction={() => onSelect(suggestion)} />
+              <Action title="Polish Text" icon={Icon.Wand} onAction={() => onPolish(suggestion)} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={suggestion} />
             </ActionPanel>
           }
         />

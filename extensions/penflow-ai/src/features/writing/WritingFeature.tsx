@@ -5,8 +5,7 @@ import { useWritingLogic } from "../../hooks/useWritingLogic";
 import { WritingSuggestions } from "./WritingSuggestions";
 
 export function WritingFeature() {
-  const { input, setInput, suggestions, isLoading, hasAIPro } =
-    useWritingLogic();
+  const { input, setInput, suggestions, isLoading, hasAIPro } = useWritingLogic();
 
   return (
     <List

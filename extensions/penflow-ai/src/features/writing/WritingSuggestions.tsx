@@ -16,11 +16,11 @@ function isValidSuggestion(suggestion: any): suggestion is Suggestion {
 }
 
 export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
-  console.log('WritingSuggestions - received suggestions:', JSON.stringify(suggestions, null, 2));
+  console.log("WritingSuggestions - received suggestions:", JSON.stringify(suggestions, null, 2));
 
   // 过滤无效的建议
   const validSuggestions = suggestions.filter(isValidSuggestion);
-  console.log('WritingSuggestions - valid suggestions:', JSON.stringify(validSuggestions, null, 2));
+  console.log("WritingSuggestions - valid suggestions:", JSON.stringify(validSuggestions, null, 2));
 
   return (
     <List.Section title="Writing Suggestions">
@@ -33,11 +33,12 @@ export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
             icon={Icon.Text}
             accessories={[
               {
-                text: suggestion.type === "completion"
-                  ? "Completion"
-                  : suggestion.type === "translation"
-                    ? "Translation"
-                    : "Polish",
+                text:
+                  suggestion.type === "completion"
+                    ? "Completion"
+                    : suggestion.type === "translation"
+                      ? "Translation"
+                      : "Polish",
                 tooltip: "Suggestion type",
               },
             ]}
@@ -50,10 +51,7 @@ export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
                     content={suggestion.text}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
-                  <Action.Paste
-                    title="Paste to Active App"
-                    content={suggestion.text}
-                  />
+                  <Action.Paste title="Paste to Active App" content={suggestion.text} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

@@ -38,7 +38,7 @@ export function useWritingLogic() {
         setIsLoading(false);
       }
     }, CONFIG.AI.DEBOUNCE_DELAY),
-    [hasAIPro]
+    [hasAIPro],
   );
 
   useEffect(() => {
@@ -47,11 +47,7 @@ export function useWritingLogic() {
 
   useEffect(() => {
     if (isLoading) {
-      setLoadingText(
-        input.match(/[\u4e00-\u9fa5]/)
-          ? "Translating to English..."
-          : "Getting suggestions..."
-      );
+      setLoadingText(input.match(/[\u4e00-\u9fa5]/) ? "Translating to English..." : "Getting suggestions...");
     }
   }, [isLoading, input]);
 

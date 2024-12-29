@@ -2,22 +2,13 @@ import { getPreferenceValues } from "@raycast/api";
 import { AIRequestOptions, WritingStyle } from "../utils/types";
 import { handleError } from "../utils/errorHandler";
 import { aiManager } from "./aiManager";
-import {
-  Message,
-  getWordCompletionPrompt,
-  getTranslationPrompt,
-} from "../utils/prompts";
+import { Message, getWordCompletionPrompt, getTranslationPrompt } from "../utils/prompts";
 
 // 使用固定的默认模型
 const DEFAULT_MODEL = "openai-gpt-4o-mini";
 
 // 添加日志函数
-function logAICall(
-  type: string,
-  input: string,
-  messages: Message[],
-  response?: string
-) {
+function logAICall(type: string, input: string, messages: Message[], response?: string) {
   console.log("\n=== AI Call Log ===");
   console.log("Type:", type);
   console.log("Model:", DEFAULT_MODEL);
@@ -29,10 +20,7 @@ function logAICall(
   console.log("================\n");
 }
 
-export async function processWithModel(
-  messages: Message[],
-  _options?: AIRequestOptions
-): Promise<string> {
+export async function processWithModel(messages: Message[], _options?: AIRequestOptions): Promise<string> {
   try {
     const modelConfig = aiManager.getModelConfig(DEFAULT_MODEL);
     if (!modelConfig) {
@@ -61,15 +49,9 @@ export async function processWithModel(
   }
 }
 
-export async function getWordCompletions(
-  input: string,
-  options?: AIRequestOptions
-): Promise<string[]> {
+export async function getWordCompletions(input: string, options?: AIRequestOptions): Promise<string[]> {
   try {
-    const messages = getWordCompletionPrompt(
-      input,
-      options?.style || WritingStyle.Professional
-    );
+    const messages = getWordCompletionPrompt(input, options?.style || WritingStyle.Professional);
     logAICall("Word Completion", input, messages);
 
     const response = await processWithModel(messages, options);
@@ -77,8 +59,8 @@ export async function getWordCompletions(
     // 修改为返回5个补全建议
     const completions = response
       .split("\n")
-      .map(s => s.trim())
-      .filter(s => s.length > 0)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
       .slice(0, 5);
 
     return completions.length > 0 ? completions : [response];
@@ -88,10 +70,7 @@ export async function getWordCompletions(
   }
 }
 
-export async function translateMixedText(
-  text: string,
-  options?: AIRequestOptions
-): Promise<string[]> {
+export async function translateMixedText(text: string, options?: AIRequestOptions): Promise<string[]> {
   try {
     const messages = getTranslationPrompt(text);
     logAICall("Translation", text, messages);
@@ -101,8 +80,8 @@ export async function translateMixedText(
     // 解析所有变体
     const results = response
       .split("\n")
-      .filter(line => line.includes(": "))
-      .map(line => line.split(": ")[1].trim());
+      .filter((line) => line.includes(": "))
+      .map((line) => line.split(": ")[1].trim());
 
     return results.length >= 4 ? results : [response];
   } catch (error) {

@@ -1,13 +1,7 @@
 import { BaseService } from "./baseService";
 import { RaycastService } from "./raycast";
 import { AI_SERVICES } from "../config/aiConfig";
-import {
-  AIProvider,
-  AIServiceConfig,
-  AIModelConfig,
-  ServiceLog,
-  TestResult,
-} from "../utils/types";
+import { AIProvider, AIServiceConfig, AIModelConfig, ServiceLog, TestResult } from "../utils/types";
 
 class AIManager {
   private static instance: AIManager;
@@ -27,11 +21,11 @@ class AIManager {
   }
 
   private initializeServices() {
-    AI_SERVICES.forEach(config => {
+    AI_SERVICES.forEach((config) => {
       // 注册服务
       this.registerService(config);
       // 缓存模型配置
-      config.models.forEach(model => {
+      config.models.forEach((model) => {
         this.modelConfigs.set(model.id, model);
       });
     });
@@ -68,11 +62,11 @@ class AIManager {
   }
 
   public getEnabledModels(): AIModelConfig[] {
-    return this.getAllModels().filter(model => model.enabled);
+    return this.getAllModels().filter((model) => model.enabled);
   }
 
   public getModelsByProvider(provider: AIProvider): AIModelConfig[] {
-    return this.getAllModels().filter(model => model.provider === provider);
+    return this.getAllModels().filter((model) => model.provider === provider);
   }
 
   public getAllLogs(): ServiceLog[] {
@@ -91,21 +85,13 @@ class AIManager {
     this.logs.push(log);
   }
 
-  public async testConnection(
-    provider: AIProvider,
-    debug: boolean = false
-  ): Promise<TestResult> {
+  public async testConnection(provider: AIProvider, debug: boolean = false): Promise<TestResult> {
     const service = this.getService(provider);
     return service.testConnection(debug);
   }
 
-  public async testAllConnections(
-    debug: boolean = false
-  ): Promise<Record<AIProvider, TestResult>> {
-    const results: Record<AIProvider, TestResult> = {} as Record<
-      AIProvider,
-      TestResult
-    >;
+  public async testAllConnections(debug: boolean = false): Promise<Record<AIProvider, TestResult>> {
+    const results: Record<AIProvider, TestResult> = {} as Record<AIProvider, TestResult>;
     for (const [provider, service] of this.services) {
       results[provider] = await service.testConnection(debug);
     }

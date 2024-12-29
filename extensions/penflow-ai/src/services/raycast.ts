@@ -14,12 +14,9 @@ export class RaycastService extends BaseService {
         throw new Error(`Unsupported model: ${request.model}`);
       }
 
-      const response = await AI.ask(
-        request.messages[request.messages.length - 1].content,
-        {
-          model: raycastModel,
-        }
-      );
+      const response = await AI.ask(request.messages[request.messages.length - 1].content, {
+        model: raycastModel,
+      });
 
       return {
         content: response.trim(),
@@ -46,8 +43,7 @@ export class RaycastService extends BaseService {
         },
         {
           role: "user",
-          content:
-            "Please respond with 'Connection successful!' if you receive this message.",
+          content: "Please respond with 'Connection successful!' if you receive this message.",
         },
       ];
 
