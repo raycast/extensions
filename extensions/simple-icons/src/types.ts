@@ -18,6 +18,7 @@ export type Aliases = {
 };
 
 export type IconData = {
+  code: number;
   title: string;
   hex: string;
   source: string;
