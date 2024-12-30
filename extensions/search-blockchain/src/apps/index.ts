@@ -12,7 +12,7 @@ import tronscan from "./Tronscan";
 import xmr from "./Xmr";
 import xrpscan from "./Xrpscan";
 import invariant from "tiny-invariant";
-import { App } from "#/types";
+import type { App } from "#/types";
 
 const apps: Record<string, App> = {
   Bitcoin: blockchair,

@@ -1,6 +1,6 @@
 import { base58 } from "@scure/base";
 
-const coins = {
+const coins: Record<string, IsValidTxHash> = {
   Solana: solIsValidTxHash,
 };
 
@@ -26,3 +26,5 @@ function defaultIsValidTxHash(query: string) {
   const newQuery = query.startsWith("0x") ? query.slice(2) : query;
   return DEFAULT_TX_HASH_REGEX.test(newQuery);
 }
+
+type IsValidTxHash = (query: string) => boolean;
