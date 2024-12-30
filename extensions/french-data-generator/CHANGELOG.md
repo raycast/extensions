@@ -1,5 +1,27 @@
 # Fake Data Generator Changelog
 
+## [Improved Architecture and State Management] - 2024-12-30
+
+- Refactored project architecture for better modularity and maintainability.
+  - Split logic.
+  - Organized the project into clearer folder structures (`helpers`, `components`, `store`, etc.).
+- Integrated RXJS to manage application state between the menu bar and the main panel dynamically.
+- Implemented combined observables to handle multiple state streams effectively.
+
+## [API Enhancements and Reliability] - 2024-12-30
+
+- Updated the address generation API for better accuracy and reliability.
+- Improved error handling and retry logic in address fetching with `axios`.
+- Switched to a dynamic age-based minor/major date generation algorithm for better realism.
+
+## [Enhanced User Experience] - 2024-12-30
+
+- Added toast notifications throughout the app to indicate success and failure of actions (e.g., data regeneration, address fetching).
+- Improved the edit form:
+  - Added dynamic age calculation displayed alongside the date of birth.
+  - Enabled quick toggling between minor and major date presets with checkboxes.
+  - Manual edits override checkbox selections, enhancing user control.
+
 ## [Menu Bar Integration] - 2024-12-20
 
 - Added a menu bar icon to display generated fake data.
