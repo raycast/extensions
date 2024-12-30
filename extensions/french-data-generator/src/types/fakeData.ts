@@ -1,10 +1,10 @@
 // Types for the fake data states
-export type PersonName = {
+type PersonName = {
   name: string;
   gender: "male" | "female";
 };
 
-export type BankDetails = {
+type BankDetails = {
   iban: string;
   bic: string;
 };

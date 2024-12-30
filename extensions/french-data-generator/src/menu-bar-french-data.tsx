@@ -1,8 +1,10 @@
 import { MenuBarExtra, showToast, Toast, Clipboard, Icon } from "@raycast/api";
-import { useFakeData } from "./hook/useFakeData";
+import { useSubscribeObservable } from "./helpers/rx.helper";
+import { FakeDataStore } from "./stores";
 
 export default function MenuBarFakeData() {
-  const { fakeData, isLoading, regenerateData } = useFakeData();
+  const { data: fakeData } = useSubscribeObservable(FakeDataStore.fakeData$);
+  const { data: isLoading } = useSubscribeObservable(FakeDataStore.isLoading$);
 
   const copyToClipboard = async (label: string, content?: string | null) => {
     try {
@@ -13,7 +15,17 @@ export default function MenuBarFakeData() {
     }
   };
 
-  const { dob, name, ssn, bankDetails, address } = fakeData;
+  const regenerateData = async () => {
+    try {
+      await FakeDataStore.regenerateData();
+      showToast({ style: Toast.Style.Success, title: "Données régénérées !" });
+    } catch (error) {
+      console.error("[MenuBarFakeData] Erreur lors de la régénération des données :", error);
+      showToast({ style: Toast.Style.Failure, title: "Échec de la régénération des données" });
+    }
+  };
+
+  const { dob, name, ssn, bankDetails, address } = fakeData || {};
 
   return (
     <MenuBarExtra icon={Icon.AddPerson} tooltip="Voir les données générées">

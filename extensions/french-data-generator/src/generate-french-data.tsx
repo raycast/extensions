@@ -1,125 +1,57 @@
-import { useState } from "react";
-import { List, ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
-import { useFakeData } from "./hook/useFakeData";
-import { generateRandomSSN, getRandomName } from "./Utils/random";
+import { useEffect, useState } from "react";
+import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useSubscribeObservable } from "./helpers/rx.helper";
+import { FakeDataStore } from "./stores";
+import { EditForm } from "./components/EditForm";
+import { calculateAge } from "./utils/date.utils";
 
 export default function Command() {
-  const { fakeData, setFakeData, saveData, isLoading, revalidate } = useFakeData();
+  const { data: fakeData } = useSubscribeObservable(FakeDataStore.fakeData$);
+  const { data: isAddressLoading } = useSubscribeObservable(FakeDataStore.isAddressLoading$);
+
   const [isEditing, setIsEditing] = useState(false);
-  const { dob, name, ssn, bankDetails, address } = fakeData;
-  const [isMinor, setIsMinor] = useState<boolean>(
-    dob ? new Date().getFullYear() - parseInt(dob.split("/")[2], 10) < 18 : false,
-  );
 
-  const handleSaveAndRegenerate = async (newDob: string | null, minorStatus: boolean) => {
-    try {
-      // Use the existing date or a new one if provided
-      const updatedDob = newDob || dob || (isMinor ? "01/01/2010" : "01/01/1980");
-      const updatedName = getRandomName();
-      const updatedSSN = generateRandomSSN(updatedDob, updatedName.gender, minorStatus ?? isMinor);
+  const isMinor = calculateAge(fakeData?.dob || null)! < 18;
+  const age = calculateAge(fakeData?.dob || "");
 
-      // Update data with date, name, and SSN
-      const updatedFakeData = {
-        ...fakeData,
-        dob: updatedDob,
-        name: updatedName,
-        ssn: updatedSSN,
-        address: "Non générée", // Reset the address to trigger a new fetch
-      };
-
-      setFakeData(updatedFakeData);
-      await saveData(updatedFakeData); // Save in local storage
-      await revalidate(); // Fetch a new address
-      showToast({ style: Toast.Style.Success, title: "Données sauvegardées et régénérées !" });
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Échec de la mise à jour des données" });
+  useEffect(() => {
+    if (!fakeData?.dob || !fakeData?.name || !fakeData?.ssn || !fakeData?.bankDetails || !fakeData?.address) {
+      FakeDataStore.regenerateData().then(() => {
+        showToast({ style: Toast.Style.Success, title: "Données générées avec succès !" });
+      });
     }
-  };
+  }, [fakeData]);
 
   if (isEditing) {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action
-              title="Valider"
-              onAction={async () => {
-                await handleSaveAndRegenerate(fakeData.dob, isMinor); // Use updated values
-                setIsEditing(false); // Exit edit mode
-              }}
-            />
-            <Action title="Annuler" onAction={() => setIsEditing(false)} />
-          </ActionPanel>
-        }
-      >
-        <Form.Checkbox
-          id="isMinor"
-          label="Générer une personne mineure"
-          value={isMinor}
-          onChange={(newValue) => {
-            setIsMinor(newValue);
-            const updatedDob = newValue ? "01/01/2010" : "01/01/1980";
-            setFakeData({ ...fakeData, dob: updatedDob });
-          }}
-        />
-        <Form.TextField
-          id="dob"
-          title="Date de naissance"
-          placeholder="JJ/MM/AAAA"
-          value={dob || ""}
-          onChange={(newDob) => setFakeData({ ...fakeData, dob: newDob })}
-        />
-      </Form>
-    );
+    return <EditForm initialDob={fakeData?.dob || ""} onClose={() => setIsEditing(false)} />;
   }
 
   return (
     <List>
       <List.Section title="Informations Générées">
-        <List.Item
-          title="Nom et Prénom"
-          subtitle={name?.name || "Nom non défini"}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={name?.name || ""} title="Copier Nom / Prénom" />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Numéro de Sécurité Sociale"
-          subtitle={ssn || "SSN non défini"}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={ssn || ""} title="Copier Ssn" />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="IBAN"
-          subtitle={bankDetails?.iban || "IBAN non défini"}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={bankDetails?.iban || ""} title="Copier Iban" />
-            </ActionPanel>
-          }
-        />
+        <List.Item title="Nom et Prénom" subtitle={fakeData?.name?.name || "Nom non défini"} />
+        <List.Item title="Numéro de Sécurité Sociale" subtitle={fakeData?.ssn || "SSN non défini"} />
+        <List.Item title="IBAN" subtitle={fakeData?.bankDetails?.iban || "IBAN non défini"} />
         <List.Item
           title="Adresse"
-          subtitle={isLoading ? "Chargement..." : address || "Adresse non définie"}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={address || ""} title="Copier Adresse" />
-            </ActionPanel>
-          }
+          subtitle={isAddressLoading ? "Chargement..." : fakeData?.address || "Adresse non définie"}
         />
       </List.Section>
       <List.Section title="Actions">
         <List.Item
           title="Modifier la date de naissance"
-          subtitle={`Date : ${dob || "Non définie"} | ${isMinor ? "Mineur" : "Majeur"}`}
+          subtitle={`Date : ${fakeData?.dob || "Non définie"}${
+            isMinor !== null ? ` | ${isMinor ? "Mineur" : "Majeur"} - ${age} ans` : ""
+          }`}
           actions={
             <ActionPanel>
-              <Action title="Modifier" onAction={() => setIsEditing(true)} />
+              <Action
+                title="Modifier"
+                onAction={() => {
+                  showToast({ style: Toast.Style.Animated, title: "Modification en cours..." });
+                  setIsEditing(true);
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -131,8 +63,8 @@ export default function Command() {
                 title="Régénérer"
                 onAction={async () => {
                   try {
-                    await handleSaveAndRegenerate(dob, isMinor); // Re-use existing date and minor status
-                    showToast({ style: Toast.Style.Success, title: "Données régénérées !" });
+                    await FakeDataStore.regenerateData();
+                    showToast({ style: Toast.Style.Success, title: "Données régénérées avec succès !" });
                   } catch {
                     showToast({ style: Toast.Style.Failure, title: "Échec de la régénération des données" });
                   }
