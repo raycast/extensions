@@ -16,10 +16,11 @@ import {
 } from "@raycast/api";
 import debounce from "lodash/debounce.js";
 import { titleToSlug } from "simple-icons/sdk";
-import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
+import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import {
   cacheAssetPack,
   defaultDetailAction,
+  displaySimpleIconsFontFeatures,
   enableAiSearch,
   getAliases,
   loadCachedJson,
@@ -259,6 +260,11 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                     ))}
                                   </ActionPanel.Section>
                                 </>
+                              )}
+                              {displaySimpleIconsFontFeatures && (
+                                <ActionPanel.Section>
+                                  <CopyFontEntities icon={icon} version={version} />
+                                </ActionPanel.Section>
                               )}
                               <ActionPanel.Section>
                                 <Supports />
