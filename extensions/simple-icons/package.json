@@ -89,6 +89,15 @@
       "required": false,
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "displaySimpleIconsFontFeatures",
+      "title": "Display Simple Icons Font Features",
+      "label": "Enabled",
+      "description": "Display Simple Icons Font Features, such as font Copy Character, Copy HTML Code, and Copy UTF Code",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {

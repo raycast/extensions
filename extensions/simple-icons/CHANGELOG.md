@@ -1,6 +1,11 @@
 # Brand Icons Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Enhancements & Fixes] - 2024-10-28
+
+- Fix incorrect file path
+- Add support for copying font entities
+
+## [Maintenance] - 2024-10-27
 
 - Get ready for the v14 new data structure
 - Add support for copying icon title
