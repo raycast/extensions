@@ -1,5 +1,10 @@
 # Wikipedia Changelog
 
+## [Add languages] - {PR_MERGE_DATE}
+
+- Add `Finnish`, `Swedish` and `Norwegian` languages
+- Fix spelling for `Ukrainian`
+
 ## [Fixes] - 2024-10-25
 
 - Fix page-item crash when the URL is `undefined`
