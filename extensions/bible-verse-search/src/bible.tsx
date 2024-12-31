@@ -1,9 +1,11 @@
 // src/index.tsx
 
 import { ActionPanel, Action, Icon, List, Detail, showToast, Toast, LocalStorage } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 import axios from "axios";
+
+import RandomVerseDetail from "./RandomVerse";
 
 // Define interfaces for type safety
 interface Verse {
@@ -28,7 +30,7 @@ const fetcher = (url: string) =>
     })
     .catch((error) => {
       console.error("Error:", error);
-      // throw error;
+      throw error;
     });
 
 // Detail View Component
@@ -38,52 +40,11 @@ function VerseDetail({ reference, verse, text }: { reference: string; verse: num
   return <Detail markdown={markdown} />;
 }
 
-export function RandomVerseDetail() {
-  const [verse, setVerse] = useState<Verse | null>(null);
-  const [reference, setReference] = useState<string>("");
-  const hasFetchedRandomVerse = useRef(false);
-
-  useEffect(() => {
-    if (hasFetchedRandomVerse.current) return;
-    hasFetchedRandomVerse.current = true;
-
-    // console.log("Component mounted");
-    const fetchRandomVerse = async () => {
-      try {
-        // Display searching message
-        setVerse(null);
-        // Assuming the API supports a random verse query parameter
-        const response = await axios.get<BibleResponse>(`https://bible-api.com/?random=verse`);
-        // console.log("Random Verse Response:", response.data);
-        if (response.data.verses.length > 0) {
-          const fetchedVerse = response.data.verses[0];
-          setVerse(fetchedVerse);
-          setReference(response.data.reference);
-        } else {
-          showToast(Toast.Style.Failure, "No verses found.", "Try fetching another random verse.");
-        }
-      } catch (error) {
-        console.error("Error fetching random verse:", error);
-        showToast(Toast.Style.Failure, "Failed to fetch random verse.");
-      }
-    };
-
-    fetchRandomVerse();
-  }, []);
-
-  if (!verse) {
-    return <Detail isLoading={true} />;
-  }
-
-  const markdown = `# ${reference} - Verse ${verse.verse}\n\n${verse.text.replace(/\n/g, "  \n")}`; // '  \n' adds a line break in Markdown
-
-  return <Detail markdown={markdown} />;
-}
-
 // Main Command Component
 export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [favorites, setFavorites] = useState<Verse[]>([]);
+  const [randomVerse, setRandomVerse] = useState<Verse | null>(null);
 
   // Function to load favorites from local storage
   const loadFavorites = async (): Promise<Verse[]> => {
@@ -268,12 +229,18 @@ export default function Command() {
           title="Get a Random Verse"
           actions={
             <ActionPanel>
-              <Action.Push title="Fetch Random Verse" icon={Icon.QuestionMark} target={<RandomVerseDetail />} />
+              <Action.Push
+                title="Fetch Random Verse"
+                icon={Icon.QuestionMark}
+                target={<RandomVerseDetail setRandomVerse={setRandomVerse} />}
+              />
             </ActionPanel>
           }
         />
       </List.Section>
-      {randomVerse && <VerseDetail reference={randomReference} verse={randomVerse.verse} text={randomVerse.text} />}
+      {randomVerse && (
+        <VerseDetail reference={randomVerse.reference} verse={randomVerse.verse} text={randomVerse.text} />
+      )}
     </List>
   );
 }
