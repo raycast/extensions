@@ -86,6 +86,10 @@
           "value": "alacritty"
         },
         {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
           "title": "Hyper",
           "value": "hyper"
         },

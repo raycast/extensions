@@ -6,6 +6,7 @@ type TerminalApp = (typeof preferences)["terminalApp"];
 
 const names: { [key in TerminalApp]: string } = {
   alacritty: "Alacritty",
+  ghostty: "Ghostty",
   hyper: "Hyper",
   iterm: "iTerm",
   kitty: "kitty",
@@ -16,6 +17,7 @@ const names: { [key in TerminalApp]: string } = {
 
 const icons: { [key in TerminalApp]: Image.ImageLike } = {
   alacritty: { fileIcon: "/Applications/Alacritty.app" },
+  ghostty: { fileIcon: "/Applications/Ghostty.app" },
   hyper: { fileIcon: "/Applications/Hyper.app" },
   iterm: { fileIcon: "/Applications/iTerm.app" },
   kitty: { fileIcon: "/Applications/kitty.app" },
@@ -26,6 +28,7 @@ const icons: { [key in TerminalApp]: Image.ImageLike } = {
 
 const appBundleIds: { [key in TerminalApp]: string } = {
   alacritty: "org.alacritty",
+  ghostty: "com.mitchellh.ghostty",
   hyper: "co.zeit.hyper",
   iterm: "com.googlecode.iterm2",
   kitty: "org.kovidgoyal.kitty",
@@ -46,6 +49,7 @@ const runCommandInTermAppleScript = (c: string, terminalApp: string): string => 
 
 const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
   alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
+  ghostty: (c: string) => runCommandInTermAppleScript(c, names.ghostty),
   hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
   iterm: (c: string) => `
     tell application "iTerm"
