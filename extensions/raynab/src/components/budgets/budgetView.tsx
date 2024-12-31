@@ -29,7 +29,14 @@ export function BudgetView() {
         searchBarPlaceholder={`Search categories in ${getCurrentMonth()}`}
         isShowingDetail={state.isDetailed}
       >
-        <CategoryGroupSection categoryGroups={categoryGroups} budget={budget} />
+        {categoryGroups && categoryGroups?.length > 0 ? (
+          <CategoryGroupSection categoryGroups={categoryGroups} budget={budget} />
+        ) : (
+          <List.EmptyView
+            title="No Categories"
+            description="We couldn't find any categories for your budget. Try opening YNAB and adding some."
+          />
+        )}
       </List>
     </CategoriesProvider>
   );
