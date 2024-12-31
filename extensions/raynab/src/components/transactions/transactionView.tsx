@@ -1,10 +1,17 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { List, showToast, Toast } from '@raycast/api';
+import { Icon, List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
 import { TransactionProvider } from './transactionContext';
-import { CurrencyFormat, Filter, type Period } from '@srcTypes';
+import {
+  CurrencyFormat,
+  Filter,
+  ScheduledTransactionDetail,
+  TransactionDetail,
+  TransactionDetailMap,
+  type Period,
+} from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
 import { formatToReadablePrice } from '@lib/utils';
 import { useLocalStorage } from '@raycast/utils';
@@ -135,23 +142,12 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
           <TransactionFilterDropdown selection={dropDownValue} onSelectionChange={onDropdownFilterChange} />
         }
       >
-        {displayScheduled
-          ? scheduledTransactions.map((t) => <ScheduledTransactionItem transaction={t} key={t.id} />)
-          : !Array.isArray(collection)
-          ? Array.from(collection).map(([, group]) => (
-              <List.Section
-                title={group.title}
-                subtitle={formatToReadablePrice({
-                  amount: group.items.reduce((total, { amount }) => total + +amount, 0),
-                  currency: activeBudgetCurrency,
-                })}
-                key={group.id}
-                children={group.items.map((t) => (
-                  <TransactionItem transaction={t} key={t.id} />
-                ))}
-              />
-            ))
-          : collection.map((t) => <TransactionItem transaction={t} key={t.id} />)}
+        <TransactionViewItems
+          transactions={collection}
+          scheduledTransactions={scheduledTransactions}
+          displayScheduled={displayScheduled}
+          currency={activeBudgetCurrency}
+        />
       </List>
     </TransactionProvider>
   );
@@ -170,4 +166,59 @@ function TransactionFilterDropdown(props: TransactionFilterDropdownProps) {
       <List.Dropdown.Item title="Scheduled" value="scheduled" />
     </List.Dropdown>
   );
+}
+
+interface TransactionViewItemsProps {
+  transactions: TransactionDetail[] | TransactionDetailMap;
+  scheduledTransactions: ScheduledTransactionDetail[];
+  displayScheduled: boolean;
+  currency: CurrencyFormat;
+}
+
+function TransactionViewItems({
+  transactions,
+  scheduledTransactions,
+  displayScheduled: displaySchedule,
+  currency,
+}: TransactionViewItemsProps) {
+  if (displaySchedule) {
+    return scheduledTransactions.length > 0 ? (
+      scheduledTransactions.map((t) => <ScheduledTransactionItem transaction={t} key={t.id} />)
+    ) : (
+      <List.EmptyView
+        title="No Scheduled transactions"
+        description="You don't have any scheduled transactions. Try adding some with the 'Schedule Transaction' command."
+      />
+    );
+  }
+
+  const isArray = Array.isArray(transactions);
+  const hasTransactions = isArray ? transactions.length > 0 : transactions.size > 0;
+
+  if (!hasTransactions) {
+    return (
+      <List.EmptyView
+        title="No Transactions"
+        description="You don't have any transactions. Try adding some with the `Create Transaction` command."
+      />
+    );
+  }
+
+  if (!isArray) {
+    return Array.from(transactions).map(([, group]) => (
+      <List.Section
+        title={group.title}
+        subtitle={formatToReadablePrice({
+          amount: group.items.reduce((total, { amount }) => total + +amount, 0),
+          currency,
+        })}
+        key={group.id}
+        children={group.items.map((t) => (
+          <TransactionItem transaction={t} key={t.id} />
+        ))}
+      />
+    ));
+  }
+
+  return transactions.map((t) => <TransactionItem transaction={t} key={t.id} />);
 }
