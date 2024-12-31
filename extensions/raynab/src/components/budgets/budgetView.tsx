@@ -10,7 +10,7 @@ import { CategoriesProvider } from './budgetContext';
 
 export function BudgetView() {
   const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
-  const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
+  const { data: categoryGroups = [], isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const { data: budget, isLoading: isLoadingBudget } = useBudget(activeBudgetId);
 
   const [state, dispatch] = useReducer(
