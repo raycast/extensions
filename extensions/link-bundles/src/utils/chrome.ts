@@ -13,7 +13,6 @@ interface ChromeProfile {
   isDefault: boolean;
 }
 
-// Cache for profiles to avoid repeated file reads
 let profilesCache: ChromeProfile[] | null = null;
 let profilesByDirCache: Map<string, ChromeProfile> | null = null;
 let lastCacheUpdate = 0;
@@ -26,7 +25,6 @@ const createProfilesCache = (profiles: ChromeProfile[]) => {
 };
 
 export const getChromeProfiles = (): ChromeProfile[] => {
-  // Return cached profiles if they're still valid
   if (profilesCache && Date.now() - lastCacheUpdate < CACHE_TTL) {
     return profilesCache;
   }

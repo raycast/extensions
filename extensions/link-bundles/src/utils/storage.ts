@@ -11,7 +11,6 @@ interface ChromeProfileData {
   profile: string;
 }
 
-// Load Chrome profiles from separate file
 const loadChromeProfiles = async (): Promise<Record<string, string>> => {
   try {
     const data = await LocalStorage.getItem<string>(STORAGE_KEYS.PROFILES);
@@ -29,7 +28,6 @@ const loadChromeProfiles = async (): Promise<Record<string, string>> => {
   }
 };
 
-// Save Chrome profiles to separate file
 const saveChromeProfiles = async (bundles: Bundle[]): Promise<void> => {
   try {
     const profileData: ChromeProfileData[] = bundles
@@ -61,24 +59,20 @@ export const loadBundles = async (): Promise<Bundle[]> => {
 
 export const saveBundles = async (bundles: Bundle[]): Promise<void> => {
   try {
-    // Save bundles without chrome profile information
     const bundlesWithoutProfiles = bundles.map(({ ...bundle }) => bundle);
     await LocalStorage.setItem(STORAGE_KEYS.BUNDLES, JSON.stringify(bundlesWithoutProfiles));
 
-    // Save chrome profiles separately
     await saveChromeProfiles(bundles);
   } catch (error) {
     console.error("Failed to save bundles:", error);
   }
 };
 
-// Utility function to get Chrome profile for a specific bundle title
 export const getChromeProfile = async (bundleTitle: string): Promise<string> => {
   const profiles = await loadChromeProfiles();
   return profiles[bundleTitle] || "Default";
 };
 
-// Utility function to update Chrome profile for a specific bundle title
 export const updateChromeProfile = async (bundleTitle: string, profile: string): Promise<void> => {
   const profiles = await loadChromeProfiles();
   profiles[bundleTitle] = profile;

@@ -69,7 +69,6 @@ export function fuzzySearch<T extends FuzzySearchable>(searchText: string, item:
   // Weight title matches more heavily than description matches
   const totalScore = Math.max(titleScore * CONSTANTS.TITLE_WEIGHT_MULTIPLIER, descriptionScore);
 
-  // Return null if the score is too low
   if (totalScore < CONSTANTS.MIN_SCORE_THRESHOLD) return null;
 
   return {
@@ -83,7 +82,6 @@ export function fuzzySearchList<T extends FuzzySearchable>(items: T[], searchTex
     return items.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
   }
 
-  // Apply fuzzy search and sort by score
   return items
     .map((item) => fuzzySearch(searchText, item))
     .filter((result): result is FuzzySearchResult<T> => result !== null)
