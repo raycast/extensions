@@ -185,6 +185,7 @@ interface AuthState {
   passwordError: boolean;
   twoFactorError: boolean;
   twoFactorNumericError: string | undefined;
+  twoFactorWarning?: string;
 }
 
 export default function Command() {
@@ -200,6 +201,7 @@ export default function Command() {
     passwordError: false,
     twoFactorError: false,
     twoFactorNumericError: undefined,
+    twoFactorWarning: undefined,
   });
 
   const twoFactorRef = useRef<Form.TextField>(null);
@@ -455,29 +457,48 @@ export default function Command() {
         </>
       )}
       {authState.twoFactorType && (
-        <Form.TextField
-          id="twoFactorCode"
-          title="2FA Code"
-          ref={twoFactorRef}
-          placeholder={authState.twoFactorPrompt}
-          value={authState.twoFactorCode}
-          autoFocus
-          error={authState.twoFactorError ? "2FA code is required" : authState.twoFactorNumericError}
-          onChange={(newInput) => {
-            // Strip out any non-numeric characters
-            const numericOnly = newInput.replace(/\D/g, "");
+        <>
+          <Form.TextField
+            id="twoFactorCode"
+            title="2FA Code"
+            ref={twoFactorRef}
+            placeholder={authState.twoFactorPrompt}
+            value={authState.twoFactorCode}
+            autoFocus
+            error={
+              authState.twoFactorError
+                ? "2FA code is required"
+                : authState.twoFactorNumericError
+                  ? authState.twoFactorNumericError
+                  : undefined
+            }
+            onChange={(newInput) => {
+              // Strip out any non-numeric characters
+              const numericOnly = newInput.replace(/\D/g, "");
 
-            // Only update if not longer than 6 digits
-            if (numericOnly.length <= 6) {
+              // Check if input was pasted (length > 1) and contained non-numeric characters
+              const hasNonNumeric = /[^0-9]/.test(newInput);
+              const isPaste = newInput.length > 1;
+              const isTooLong = numericOnly.length > 6;
+
+              // Check if the last character entered was non-numeric
+              const lastCharIsNonNumeric = newInput.length > 0 && /[^0-9]/.test(newInput[newInput.length - 1]);
+
               setAuthState((prev) => ({
                 ...prev,
-                twoFactorCode: numericOnly,
+                twoFactorCode: numericOnly.slice(0, 6), // Limit to 6 digits after validation
                 twoFactorError: false,
-                twoFactorNumericError: undefined,
+                twoFactorNumericError: isTooLong
+                  ? "Code cannot be longer than 6 digits"
+                  : lastCharIsNonNumeric
+                    ? "Only numbers are allowed"
+                    : undefined,
+                twoFactorWarning: isPaste && hasNonNumeric ? "Non-numeric characters have been removed" : undefined,
               }));
-            }
-          }}
-        />
+            }}
+          />
+          {authState.twoFactorWarning && <Form.Description text={authState.twoFactorWarning} />}
+        </>
       )}
     </Form>
   );
