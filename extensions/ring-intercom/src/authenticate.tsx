@@ -418,7 +418,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={authState.twoFactorType ? "Verify Code" : "Authenticate"} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={authState.twoFactorType ? "Submit Code" : "Authenticate"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       navigationTitle={authState.twoFactorType ? "Enter 2FA Code" : "Ring Authentication"}
