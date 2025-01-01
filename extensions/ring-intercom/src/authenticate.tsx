@@ -335,7 +335,7 @@ export default function Command() {
       setAuthState((prev) => ({
         ...prev,
         twoFactorError: false,
-        twoFactorNumericError: "2FA code must be 6 digits",
+        twoFactorNumericError: "Code Must be 6 Digits",
       }));
       hasError = true;
     }
@@ -467,7 +467,7 @@ export default function Command() {
             autoFocus
             error={
               authState.twoFactorError
-                ? "2FA code is required"
+                ? "Code is Required"
                 : authState.twoFactorNumericError
                   ? authState.twoFactorNumericError
                   : undefined
@@ -489,11 +489,14 @@ export default function Command() {
                 twoFactorCode: numericOnly.slice(0, 6), // Limit to 6 digits after validation
                 twoFactorError: false,
                 twoFactorNumericError: isTooLong
-                  ? "Code cannot be longer than 6 digits"
+                  ? "Max 6 Digits"
                   : lastCharIsNonNumeric
-                    ? "Only numbers are allowed"
+                    ? "Only Numbers Allowed"
                     : undefined,
-                twoFactorWarning: isPaste && hasNonNumeric ? "Non-numeric characters have been removed" : undefined,
+                twoFactorWarning:
+                  isPaste && hasNonNumeric && numericOnly.length > 0
+                    ? "Non-numeric characters have been removed"
+                    : undefined,
               }));
             }}
           />
