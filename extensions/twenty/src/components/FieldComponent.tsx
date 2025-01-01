@@ -27,7 +27,7 @@ export default function FieldComponent({ values }: FieldComponentProps) {
       return <Rating values={{ field }} {...itemProps} />;
     }
     case "MULTI_SELECT": {
-      return <MultiSelect values={{ field, placeholder: `Enter ${field.name}...` }} {...itemProps} />;
+      return <MultiSelect values={{ field, placeholder: `Select ${field.name}...` }} {...itemProps} />;
     }
     default:
       return <></>;
