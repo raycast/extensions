@@ -8,10 +8,6 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
-tempCodeRunnerFile.js
-.prettierrc
-.eslintrc.json
-tsconfig.json
-package-lock.json
-package.json
 .env
+.vscode
+tempCodeRunnerFile.js
