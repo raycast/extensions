@@ -375,7 +375,7 @@ export default function Command() {
       console.error("Authentication failed", error);
 
       if (error instanceof TwoFactorError) {
-        console.log("[Ring Auth] 2FA required, saving credentials");
+        console.debug("2FA required, saving credentials");
         await LocalStorage.setItem("RING_EMAIL", authState.email);
         await LocalStorage.setItem("RING_PASSWORD", authState.password);
 
@@ -418,7 +418,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={authState.twoFactorType ? "Verify 2fa" : "Authenticate"} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={authState.twoFactorType ? "Verify 2FA" : "Authenticate"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       navigationTitle={authState.twoFactorType ? "Enter 2FA Code" : "Ring Authentication"}
