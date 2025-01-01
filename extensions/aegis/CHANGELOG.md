@@ -1,5 +1,9 @@
 # Aegis Extension Changelog
 
+## [Aegis Search Enhance] - {PR_MERGE_DATE}
+
+- Improves the search functionality to allow substring matching anywhere in both name and issuer
+
 ## [Aegis Backup Integration] - 2024-08-14
 
 - Fix missing preference for fallback icon colour
