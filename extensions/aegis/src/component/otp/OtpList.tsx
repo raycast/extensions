@@ -32,11 +32,10 @@ export function OtpList() {
 
   // Create searcher when items load
   const searcher = new Searcher(items.otpList, {
-    keySelector: (item) => [
-      item.name,
-      item.issuer || "", // Handle potential undefined
-      item.accountType || "", // Handle potential undefined
-    ],
+    keySelector: (item) =>
+      [item.name, item.issuer, item.accountType].filter((x): x is string =>
+        Boolean(x)
+      ),
   });
 
   // Get filtered items based on search
