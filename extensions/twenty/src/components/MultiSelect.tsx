@@ -5,7 +5,7 @@ import { optionIcons } from "../enum/icons";
 
 type MultiSelectProps = {
   field: DataModelField;
-  placeholder?: string
+  placeholder?: string;
 };
 
 // Use forwardRef for consistency and ref handling
