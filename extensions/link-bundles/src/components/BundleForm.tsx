@@ -13,7 +13,7 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
   const [title, setTitle] = useState(bundle?.title || "");
   const [titleError, setTitleError] = useState<string | undefined>();
   const [description, setDescription] = useState(bundle?.description || "");
-  const [chromeProfile, setChromeProfile] = useState(bundle?.chromeProfile || "Default");
+  const [chromeProfileDirectory, setChromeProfileDirectory] = useState(bundle?.chromeProfileDirectory || "Default");
   const [linkInputs, setLinkInputs] = useState<{ url: string; error?: string }[]>(
     bundle?.links.length ? bundle.links.map((url) => ({ url })) : [{ url: "" }],
   );
@@ -101,7 +101,7 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       title: values.title.trim(),
       description: values.description.trim(),
       links: nonEmptyLinks,
-      chromeProfile,
+      chromeProfileDirectory: chromeProfileDirectory,
     }).then((success) => {
       if (success) pop();
     });
@@ -134,7 +134,12 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
         onChange={setDescription}
       />
 
-      <Form.Dropdown id="chromeProfile" title="Chrome Profile" value={chromeProfile} onChange={setChromeProfile}>
+      <Form.Dropdown
+        id="chromeProfile"
+        title="Chrome Profile"
+        value={chromeProfileDirectory}
+        onChange={setChromeProfileDirectory}
+      >
         {getChromeProfiles().map((profile) => (
           <Form.Dropdown.Item key={profile.directory} value={profile.directory} title={profile.name} />
         ))}

@@ -89,7 +89,6 @@ export function useBundles() {
       dismissAction: {
         title: "Cancel",
       },
-      rememberUserChoice: true,
     });
     return true;
   };

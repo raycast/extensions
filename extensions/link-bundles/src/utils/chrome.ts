@@ -3,6 +3,8 @@ import fs from "fs";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { getPreferenceValues } from "@raycast/api";
+import { Bundle } from "../types";
+import { decodeUrlSafely } from "./url";
 
 const execAsync = promisify(exec);
 const preferences: Preferences = getPreferenceValues();
@@ -16,7 +18,7 @@ interface ChromeProfile {
 let profilesCache: ChromeProfile[] | null = null;
 let profilesByDirCache: Map<string, ChromeProfile> | null = null;
 let lastCacheUpdate = 0;
-const CACHE_TTL = 30 * 60 * 1000;
+const CACHE_TTL = 5 * 60 * 1000;
 
 const createProfilesCache = (profiles: ChromeProfile[]) => {
   profilesCache = profiles;
@@ -57,7 +59,6 @@ export const getChromeProfiles = (): ChromeProfile[] => {
 };
 
 const getProfileByDirectory = (directory: string): ChromeProfile | undefined => {
-  // Ensure cache is initialized and valid
   if (!profilesByDirCache || Date.now() - lastCacheUpdate >= CACHE_TTL) {
     getChromeProfiles();
   }
@@ -71,15 +72,15 @@ export const getProfileNameByDirectory = (directory: string): string => {
 };
 
 export const openLinksInChrome = async (
-  links: string[],
-  profile: string,
+  bundle: Bundle,
   options: { newWindow?: boolean; incognito?: boolean } = {},
 ): Promise<void> => {
-  if (links.length === 0) return;
-
+  if (bundle.links.length === 0) return;
+  const chromeProfileDirectory = getProfileByDirectory(bundle.chromeProfileDirectory)?.directory || "Default";
+  const decodedLinks = bundle.links.map(decodeUrlSafely);
   const chromePath = path.join(preferences.chromeApplicationDirectory, "Google Chrome.app");
-  const profileArg = `--profile-directory="${profile}"`;
-  const urls = links.map((link) => `"${encodeURI(link)}"`).join(" ");
+  const profileArg = `--profile-directory="${chromeProfileDirectory}"`;
+  const urls = decodedLinks.map((link) => `"${encodeURI(link)}"`).join(" ");
 
   const args = [profileArg, options.newWindow ? "--new-window" : "", options.incognito ? "--incognito" : "", urls]
     .filter(Boolean)
