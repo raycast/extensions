@@ -5,12 +5,13 @@ import { optionIcons } from "../enum/icons";
 
 type MultiSelectProps = {
   field: DataModelField;
+  placeholder?: string
 };
 
 // Use forwardRef for consistency and ref handling
 const MultiSelect = forwardRef<FormItemRef, { values: MultiSelectProps } & React.ComponentProps<typeof Form.TagPicker>>(
   ({ values, ...rest }, ref) => {
-    const { field } = values;
+    const { field, placeholder } = values;
     const { options } = field;
 
     const defaultValue = Array.isArray(field.defaultValue)
@@ -24,6 +25,7 @@ const MultiSelect = forwardRef<FormItemRef, { values: MultiSelectProps } & React
     return (
       <Form.TagPicker
         title={field.label}
+        placeholder={placeholder}
         defaultValue={defaultValue}
         id={field.name}
         ref={ref as React.Ref<FormItemRef>}
