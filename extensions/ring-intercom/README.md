@@ -4,13 +4,12 @@ This extension allows you to control your Ring Intercom device directly from Ray
 
 ## Features
 
-- Authenticate with your Ring account using 2FA
-- Unlock your Ring Intercom device with a single command
+- Unlock your Ring Intercom device
 
 ## Setup
 
 1. Install the extension
-2. Run the "Authenticate Ring Account" command
+2. Run the "Authenticate" command
 3. Enter your Ring account email, password, and 2FA code
 4. Once authenticated, you can use the "Unlock Door" command
 
@@ -22,7 +21,6 @@ The extension uses two main components:
 
 - Handles the Ring account authentication process
 - Securely stores authentication token for future use
-- Uses Ring's official API endpoints
 
 ### Unlock Door Command
 
@@ -43,6 +41,6 @@ The extension uses two main components:
 
 If you encounter issues:
 
-1. Try re-authenticating using the "Ring Intercom: Authenticate" command
+1. Try re-authenticating using the "Authenticate" command
 2. Ensure you have a stable internet connection
 3. Check if your Ring Intercom device is online in the Ring app
