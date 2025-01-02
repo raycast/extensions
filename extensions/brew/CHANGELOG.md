@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-01-02
 
 - Add terminal option for Ghostty
 - Updated dependencies
