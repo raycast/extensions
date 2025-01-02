@@ -1,6 +1,6 @@
 # Year in Progress Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-01-02
 
 - Fix typos in "Week starts date" settings dropdown
 - Change type `any` to `Day` exported from date-fns
