@@ -15,8 +15,8 @@ Enjoy using DeepSeeker! 🚀
 - [x] 🚀 Results Stream in real time
 - [x] ⌘ Supports custom keybinding for each action
 - [x] 📄 Custom prompt for each action
+- [x] Set token price in settings
 - [ ] Fix notes
-- [ ] Set token price in settings
 - [ ] 📦 More flexibility for personal needs
   - [ ] Prompt zoo
   - [ ] Choose proopt when running the command
@@ -26,5 +26,3 @@ Enjoy using DeepSeeker! 🚀
   - [x] ChatGPT
 
 > This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).
-
-say happy new year

@@ -1,5 +1,5 @@
 import { encode } from "@nem035/gpt-3-encoder";
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 function escapeStringForAppleScript(str: string) {
@@ -25,6 +25,11 @@ export function countToken(content: string) {
   return encode(content).length;
 }
 
+// get priceoutput, priceinput from preference
+const input_price = getPreferenceValues().priceinput || 0.27;
+const output_price = getPreferenceValues().priceoutput || 1.1;
+
+
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
   // from : https://openai.com/api/pricing/
@@ -42,7 +47,7 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
   }
   if (model == "deepseek-chat") {
-    price = (prompt_token * 0.27 + output_token * 1.1) / 10000;
+    price = (prompt_token * input_price + output_token * output_price) / 10000;
     // * there is a tmeporary discount for deepseek-chat, we ignore it for now
     // * there is cache discount for deepseek-chat, we ignore it
     // so your actual price may be lower than this

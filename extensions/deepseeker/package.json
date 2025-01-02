@@ -458,6 +458,20 @@
       "title": "Custom API Endpoint"
     },
     {
+      "name": "priceinput",
+      "description": "Input price($) per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model Input Price"
+    },
+    {
+      "name": "priceoutput",
+      "description": "Output price($) per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model Input Price"
+    },
+    {
       "name": "model",
       "description": "DeepSeek LLM to use for your commands",
       "type": "dropdown",
