@@ -346,7 +346,6 @@ export default function Command() {
           console.debug("Attempting to validate existing token");
           const ringApi = new RingApi({
             refreshToken: existingToken,
-            debug: false,
           });
 
           await ringApi.getLocations();
@@ -463,9 +462,11 @@ export default function Command() {
         console.debug("2FA required");
 
         // Save credentials immediately since they're valid
-        await LocalStorage.setItem("RING_EMAIL", emailToUse);
-        await LocalStorage.setItem("RING_PASSWORD", passwordToUse);
-        console.debug("Saved valid credentials");
+        if (emailToUse && passwordToUse) {
+          await LocalStorage.setItem("RING_EMAIL", emailToUse as string);
+          await LocalStorage.setItem("RING_PASSWORD", passwordToUse as string);
+          console.debug("Saved valid credentials");
+        }
 
         const twoFactorPrompt =
           error.twoFactorType === "totp"
