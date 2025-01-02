@@ -1,6 +1,6 @@
 # IPCheck Changelog
 
-## [Version 1.1] - {PR_MERGE_DATE}
+## [Version 1.1] - 2025-01-02
 
 - Add options to choose IP sources to fetch from
 - Improve code quality
