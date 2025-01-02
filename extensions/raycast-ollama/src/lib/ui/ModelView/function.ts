@@ -5,19 +5,6 @@ import { showToast, Toast } from "@raycast/api";
 import { GetServerClass } from "../function";
 
 /**
- * Get Ollama Server Array.
- * @returns Servers Names Array.
- */
-export async function GetServerArray(): Promise<string[]> {
-  const s = await GetOllamaServers();
-  const a = [...s.keys()].sort();
-  const al = a.filter((v) => v === "Local");
-  const ao = a.filter((v) => v !== "Local");
-  if (a.length > 1) return ["All", ...al, ...ao];
-  return [...al, ...ao];
-}
-
-/**
  * Get Ollama Server Class.
  * @returns Server Map.
  */
@@ -64,6 +51,10 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
           await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
+        const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
+          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          return undefined;
+        });
         if (!tag) return await Promise.resolve([] as Types.UiModel[]);
         return await Promise.all(
           tag.models.map(async (v): Promise<Types.UiModel> => {
@@ -76,6 +67,7 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
               detail: v,
               show: show,
               modelfile: s[1].OllamaApiShowParseModelfile(show),
+              ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
             };
           })
         );
@@ -83,6 +75,21 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
     )
   ).forEach((v) => (o = o.concat(v)));
   return o;
+}
+
+/**
+ * Update model pulling from the registry the latest version
+ * @param model.
+ * @param setDownload - setDownload Function.
+ * @param revalidate - RevalidateModel Function.
+ */
+export async function UpdateModel(
+  model: Types.UiModel,
+  setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
+  revalidate: CallableFunction
+) {
+  const o = await GetServerClassByName(model.server.name);
+  await PullModel(o, model.server.name, model.detail.name, setDownload, revalidate);
 }
 
 /**
