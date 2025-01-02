@@ -14,6 +14,7 @@
     {
       "name": "quick-add-to-inbox",
       "title": "Quick Add to Inbox",
+      "subtitle": "OmniFocus",
       "description": "Quickly add a task to your OmniFocus inbox.",
       "mode": "no-view",
       "arguments": [
@@ -28,12 +29,14 @@
     {
       "name": "add-task",
       "title": "Add a Task",
+      "subtitle": "OmniFocus",
       "description": "Add a task to OmniFocus.",
       "mode": "view"
     },
     {
       "name": "list-inbox",
       "title": "List the Tasks in Your Inbox",
+      "subtitle": "OmniFocus",
       "description": "List the tasks currently in your inbox.",
       "mode": "view"
     }
