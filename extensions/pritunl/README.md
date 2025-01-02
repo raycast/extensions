@@ -15,13 +15,13 @@ For the sake of simplicity, there is no UI support for multiple connections.
 
 or just copy from the Pritunl connection settings from UI as per screenshot.
 
-![](assets/pritunl_id.png)
+![](./media/pritunl_id.png)
 
 and put it to the extention Pritunl Connection ID field.
 
 3. Set your PIN for the connection.
 
-![](assets/preferences.png)
+![](./media/preferences.png)
 
 ## Usage 
 
