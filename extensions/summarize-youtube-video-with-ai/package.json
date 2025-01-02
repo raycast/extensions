@@ -33,12 +33,16 @@
           "default": "raycastai",
           "data": [
             {
-              "value": "raycastai",
-              "title": "Raycast AI"
+              "value": "anthropic",
+              "title": "Anthropic Claude"
             },
             {
-              "value": "chatgpt",
-              "title": "ChatGPT"
+              "value": "openai",
+              "title": "OpenaAI ChatGPT"
+            },
+            {
+              "value": "raycastai",
+              "title": "Raycast AI"
             }
           ],
           "required": true
@@ -82,6 +86,14 @@
           "required": false
         },
         {
+          "name": "anthropicApiToken",
+          "title": "Anthropic API Token",
+          "description": "Your Anthropic API Token. Required if you choose Anthropic Claude as your AI.",
+          "type": "password",
+          "default": "",
+          "required": false
+        },
+        {
           "name": "language",
           "title": "Language",
           "description": "Define the language which the AI should use to summarize the video.",
@@ -93,19 +105,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.15.0",
-    "date-fns": "^3.6.0",
+    "@anthropic-ai/sdk": "^0.33.1",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
-    "openai": "^3.2.1",
+    "openai": "^4.77.0",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.3.1",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.3.3",
     "typescript": "^5.4.5",
     "ytdl-core": "^4.11.5"
   },

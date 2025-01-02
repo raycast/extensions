@@ -9,7 +9,7 @@
 </h1>
 
 <p align="center">
-  Search code, browse notebooks, and manage batch changes on <a href="https://about.sourcegraph.com">Sourcegraph</a> with <a href="https://www.raycast.com">Raycast</a>.
+  Search code, manage batch changes, and browse notebooks on <a href="https://about.sourcegraph.com">Sourcegraph</a> with <a href="https://www.raycast.com">Raycast</a>.
 </p>
 
 <p align="center">
@@ -50,11 +50,11 @@ To configure your own [search contexts](#search-contexts), create search noteboo
 Once you have an account, you can create an access token under the "Access tokens" tab in your user settings on [Sourcegraph.com](https://sourcegraph.com/user/settings).
 Copy that access token to the "Sourcegraph.com: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
 
-To search your private code, please reach out [get a demo of the single-tenant solution](https://about.sourcegraph.com/demo) or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted).
+To search your private code, please reach out [get a demo of the single-tenant solution](https://sourcegraph.com/contact/request-info) or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted).
 
 ### Sourcegraph Instance
 
-To start searching code on a custom Sourcegraph instance (e.g. [self-hosted](https://docs.sourcegraph.com/admin/install) or [managed](https://docs.sourcegraph.com/admin/deploy/managed)), you can set up access through the 'Sourcegraph Instance' variants of this extensions's commands by configuring the "Sourcegraph Instance: Instance URL" and "Sourcegraph Instance: Access token" fields in the Sourcegraph Raycast extension preferences.
+To start searching code on a custom Sourcegraph instance (e.g. [self-hosted](https://sourcegraph.com/docs/admin/deploy) or [managed](https://sourcegraph.com/docs/cloud)), you can set up access through the 'Sourcegraph Instance' variants of this extensions's commands by configuring the "Sourcegraph Instance: Instance URL" and "Sourcegraph Instance: Access token" fields in the Sourcegraph Raycast extension preferences.
 You can create an access token under the "Access tokens" tab in your user settings on your Sourcegraph instance.
 
 <br />
@@ -69,7 +69,7 @@ Get results as you type on [code search](https://about.sourcegraph.com/code-sear
 
 #### Search contexts
 
-[Search contexts](https://docs.sourcegraph.com/code_search/explanations/features#search-contexts) allow you to narrow down your search to code you care about.
+[Search contexts](https://sourcegraph.com/docs/code-search/features#search-contexts) allow you to narrow down your search to code you care about.
 To get started, you can try the [public Sourcegraph.com search contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph.com account or Sourcegraph instance's "Contexts" page!
 
 The Sourcegraph Raycast extension allows you to set a default context for your searches in the "Search Code" command preferences.
@@ -87,16 +87,16 @@ Recent searches are persisted [locally through a native Raycast API](https://dev
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
 Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
-Batch changes is currently only supported on [Sourcegraph Instance](#sourcegraph-self-hosted).
+Batch changes are currently only supported on [Sourcegraph Instance](#sourcegraph-instance).
 
 ![batch changes](metadata/3-batch-change-manage.png)
 
 ### Find Search Notebooks
 
-Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
+Browse and preview [search notebooks](https://sourcegraph.com/docs/notebooks) straight from Raycast.
 Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
 
-To get started, you can try the [public Sourcegraph.com notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph.com account or Sourcegraph instance!
+Notebooks are currently only supported on [Sourcegraph Instance](#sourcegraph-instance).
 
 ![notebooks](metadata/4-notebook-view.png)
 

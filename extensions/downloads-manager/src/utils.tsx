@@ -4,13 +4,14 @@ import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
+const showHiddenFiles = preferences.showHiddenFiles;
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
   return files
-    .filter((file) => !file.startsWith("."))
+    .filter((file) => showHiddenFiles || !file.startsWith("."))
     .map((file) => {
       const path = join(downloadsFolder, file);
       const lastModifiedAt = statSync(path).mtime;
