@@ -112,8 +112,8 @@ export default function SearchDovetail() {
         setEndCursor(null);
       }
     } catch (error: unknown) {
-      if (error.name !== "AbortError") {
-        showToast(ToastStyle.Failure, "Error fetching data", error.message);
+      if ((error as Error).name !== "AbortError") {
+        showToast(ToastStyle.Failure, "Error fetching data", (error as Error).message);
       }
     }
   };
