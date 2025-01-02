@@ -16,6 +16,7 @@ export type TeamInfo = {
   };
   commonName?: {
     default: string;
+    fr?: string;
   };
   placeNameWithPreposition?: {
     default: string;
