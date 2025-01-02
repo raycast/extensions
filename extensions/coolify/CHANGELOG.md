@@ -1,6 +1,6 @@
 # Coolify Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-01-02
 
 - In `Projects`:
     - Create Project
