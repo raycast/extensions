@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Gemini Flash 2.0 and More Customization] - {PR_MERGE_DATE}
+## [Gemini Flash 2.0 and More Customization] - 2025-01-02
 
 Features:
 
