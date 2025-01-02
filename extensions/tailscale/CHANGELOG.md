@@ -1,6 +1,6 @@
 # Tailscale Changelog
 
-## [Add new features] - 2024-12-02
+## [Add new features] - {PR_MERGE_DATE}
 
 - Add `netcheck` command
 
