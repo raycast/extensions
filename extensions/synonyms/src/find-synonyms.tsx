@@ -358,12 +358,6 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title="View History"
-            onAction={() => {
-              push(<HistoryView />);
-            }}
-          />
-          <Action
             title="Change Model Provider in Preferences"
             onAction={() => openExtensionPreferences()}
             icon={Icon.Gear}
@@ -399,6 +393,7 @@ export default function Command() {
                 {item.synonym && !!prefs.openaiApiKey && (
                   <Action
                     title="Pronounce Speech"
+                    icon={Icon.Speaker}
                     onAction={async () => {
                       setIsLoading(true);
                       showToast({
@@ -418,6 +413,7 @@ export default function Command() {
                 )}
                 <Action
                   title="View History"
+                  icon={Icon.Clock}
                   onAction={() => {
                     push(<HistoryView />);
                   }}
@@ -502,15 +498,13 @@ export async function notifyError(error: Error) {
   });
 }
 
-const openai = new OpenAI({
-  apiKey: prefs.openaiApiKey,
-});
-
 const player = getPlayer();
 
 async function generateAndPlaySpeech(text: string, language: string) {
   try {
-    // Generate speech using OpenAI API
+    const openai = new OpenAI({
+      apiKey: prefs.openaiApiKey || "",
+    });
     const response = await openai.audio.speech.create({
       model: "tts-1",
       voice: "onyx",
