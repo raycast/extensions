@@ -30,4 +30,3 @@ export default async function Command() {
     await showHUD(`No response from model ${model}`);
   }
 }
-
