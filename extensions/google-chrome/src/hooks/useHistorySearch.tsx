@@ -8,6 +8,11 @@ const whereClauses = (tableTitle: string, terms: string[]) => {
   return terms.map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`).join(" AND ");
 };
 
+/**
+ * Generates a query to search the history for a list of terms.
+ *
+ * Using `last_visit_time > 0` to filter out bookmarks.
+ */
 const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
   `SELECT id,
             url,
@@ -19,6 +24,7 @@ const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
                      'localtime') as lastVisited
      FROM ${table}
      WHERE ${whereClauses(table, terms)}
+     AND last_visit_time > 0
      ORDER BY ${date_field} DESC LIMIT 30;`;
 
 const searchHistory = (profile: string, query?: string): SearchResult<HistoryEntry> => {
