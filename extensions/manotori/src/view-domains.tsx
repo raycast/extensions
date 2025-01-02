@@ -144,7 +144,7 @@ function ViewDomainEvents({ domain }: { domain: string }) {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search event" isShowingDetail>
-      <List.Section title={"redacted.invalid"}>
+      <List.Section title={domain}>
         {data.map((event, index) => (
           <List.Item
             key={index}
