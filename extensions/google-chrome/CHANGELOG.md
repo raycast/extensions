@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix bookmark list in the Search All command.
+
 ## [Add Search All Command] - 2024-08-01
 
 - Add Google Chrome tabs and history, bookmarks search.
