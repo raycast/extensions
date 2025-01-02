@@ -87,7 +87,8 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^5.2.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "preferences": [
     {
@@ -104,6 +105,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "vitest"
   }
 }

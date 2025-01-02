@@ -3,15 +3,14 @@ import { ScheduledTransactionDetailFrequencyEnum, utils } from 'ynab';
 import { isNumberLike } from './validation';
 
 /**
- * Format a YNAB currency amount with its symbol based on placement rules.
+ * Format a YNAB currency amount with optional currency formatting.
  * @see https://api.ynab.com/#formats
- * @param amount - The formatted amount in milliunits (e.g. "1,234.56")
- * @param symbol - The currency symbol (e.g. "$")
- * @param symbol_first - Whether the symbol should appear before the amount
- * @param shouldPrefixSymbol - Whether to place the negative sign before the symbol for negative amounts
- * @returns The formatted string with proper symbol placement (e.g. "$1,234.56" or "-$1,234.56")
+ * @param amount - The amount in milliunits (e.g. 1234560 for $1,234.56)
+ * @param currency - Optional currency format configuration
+ * @param locale - Whether to format with locale-specific number formatting (default: true)
+ * @param prefixNegativeSign - Whether to place negative sign before currency symbol (default: true)
+ * @returns The formatted string (e.g. "$1,234.56", "-$1,234.56", "1,234.56", or "1234.56")
  */
-
 export function formatToReadablePrice({
   amount,
   currency,
@@ -108,8 +107,8 @@ export function formatToReadableFrequency(frequency: ScheduledTransactionDetailF
   const formatted = frequency
     .replace(/([A-Z\d])/g, ' $1') // Add space before capital letters
     .toLowerCase()
-    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-    .replace('every other', 'every-other');
+    .replace('every other', 'every-other')
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
 
   if (prefix && frequency === 'never') return 'Never repeats';
 
