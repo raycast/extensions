@@ -26,6 +26,13 @@
       "subtitle": "Manotori",
       "description": "View Domains",
       "mode": "view"
+    },
+    {
+      "name": "view-nameserver-sets",
+      "title": "View Nameserver Sets",
+      "subtitle": "Manotori",
+      "description": "View Nameserver Sets",
+      "mode": "view"
     }
   ],
   "dependencies": {
