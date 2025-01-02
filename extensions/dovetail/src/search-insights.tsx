@@ -19,10 +19,9 @@ interface Insight {
   title: string;
   project_title: string;
   created_at: string;
-  published: boolean;
 }
 
-export default function SearchDovetail() {
+export default function SearchInsights() {
   // Retrieve preferences, including the Dovetail API token
   const preferences = getPreferenceValues<{ dovetailApiToken: string }>();
   const apiToken = preferences.dovetailApiToken;
@@ -113,8 +112,8 @@ export default function SearchDovetail() {
         setEndCursor(null);
       }
     } catch (error: unknown) {
-      if (error.name !== "AbortError") {
-        showToast(ToastStyle.Failure, "Error fetching data", error.message);
+      if ((error as Error).name !== "AbortError") {
+        showToast(ToastStyle.Failure, "Error fetching data", (error as Error).message);
       }
     }
   };
@@ -142,18 +141,16 @@ export default function SearchDovetail() {
 
   return (
     <List
+      isLoading={data === undefined}
       onSearchTextChange={onSearchTextChange}
       throttle
-      searchBarPlaceholder="Search for insights across your workspace..."
+      searchBarPlaceholder="Search for insights in any project..."
       pagination={{ onLoadMore, hasMore: hasNextPage, pageSize: DEFAULT_PAGE_SIZE }}
     >
       <List.Section title="Most relevant" subtitle={numberOfResults}>
         {data.map((item) => {
           const createdAt = new Date(item.created_at);
           const accessories: List.Item.Accessory[] = [
-            {
-              tag: { value: item.published ? "Published" : "Draft" },
-            },
             {
               text: getShortDate(createdAt),
               tooltip: `Created: ${format(createdAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
@@ -164,12 +161,12 @@ export default function SearchDovetail() {
             <List.Item
               key={item.id}
               title={truncateString(item.title || "No Title", 60)}
-              icon={{ source: Icon.Stars }}
+              icon={{ source: Icon.Document }}
               subtitle={truncateString(item.project_title || "No project", 40)}
               accessories={accessories}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Dovetail" url={`https://dovetail.com/insight/${item.id}`} />
+                  <Action.OpenInBrowser title="Open in Dovetail" url={`https://dovetail.com/insights/${item.id}`} />
                 </ActionPanel>
               }
             />
