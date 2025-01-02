@@ -1,17 +1,8 @@
-# Harb news for Raycast
+# Habr news for Raycast
 
-<!--- [Link to the original repo]() -->
+[![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x)](https://x.com/khlebobul) [![Telegram](https://img.shields.io/badge/Telegram-000?style=for-the-badge&logo=telegram&logoColor=2CA5E0)](https://t.me/khlebobul)
 
-This is a simple extension that allows you to read [Harb](https://habr.com/ru/all/) news. It works directly in Raycast, no external applications or dependencies are required 
-
-<!--- <a id="install-extension-button" title="Install Harb Raycast Extension" href="https://www.raycast.com/ThatNerd/timers#install">
-        <img height="64" style="height: 64px" src="https://assets.raycast.com/ThatNerd/timers/install_button@2x.png">
-</a> -->
-
-#### If you enjoy using Habr for Raycast and/or want to support further development, feel free to donate below!
-
-<a href="https://bmc.link/khlebobul" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-<a href="https://pay.cloudtips.ru/p/edff283a" target="_blank"><img src="https://static.tildacdn.com/tild3465-3233-4263-b937-316135666261/Horiz.svg" alt="Cloudtips" style="height: 60px !important;width: 217px !important;" ></a>
+This is a simple extension that allows you to read [Habr](https://habr.com/ru/all/) news. It works directly in Raycast, no external applications or dependencies are required 
 
 ## Commands
 
@@ -24,4 +15,4 @@ This is a simple extension that allows you to read [Harb](https://habr.com/ru/al
 - [ ] Add the number of views, the number of comments and the author of the article
 - [ ] Add the ability to read a user's personalised feed
 
-#### Thanks to the Harb team for designing the [RSS feed material](https://habr.com/ru/docs/help/lenta/)
+Thanks to the Harb team for designing the [RSS feed material](https://habr.com/ru/docs/help/lenta/)

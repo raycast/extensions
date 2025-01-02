@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Habr",
-      "description": "Template with a plain detail view",
+      "description": "News from Habr",
       "mode": "view"
     }
   ],
@@ -27,7 +27,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
