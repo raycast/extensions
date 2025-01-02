@@ -123,6 +123,26 @@ export default function Conversation() {
           title="No Conversation"
           description="Your recent conversation will be showed up here"
           icon={Icon.Stars}
+          actions={
+            <ActionPanel>
+              <Action
+                title={"Import Conversation"}
+                icon={Icon.Download}
+                onAction={() =>
+                  push(
+                    <ImportForm
+                      moduleName="Conversation"
+                      onSubmit={async (file) => {
+                        ImportData<Conversation>("conversations", file).then((data) => {
+                          conversations.setConversations(data);
+                        });
+                      }}
+                    />
+                  )
+                }
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         <>
