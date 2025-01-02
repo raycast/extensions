@@ -1,3 +1,3 @@
 # Pritunl Changelog
 
-## [Initial Version] - 2024-01-10
+## [Initial Version] - {PR_MERGE_DATE}
