@@ -1,6 +1,6 @@
 # Aegis Extension Changelog
 
-## [Aegis Search Enhance] - {PR_MERGE_DATE}
+## [Aegis Search Enhance] - 2025-01-02
 
 - Improves the search functionality to allow substring matching anywhere in both name and issuer
 
