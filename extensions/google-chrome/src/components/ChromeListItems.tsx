@@ -9,10 +9,18 @@ export class ChromeListItems {
   public static TabHistory = HistoryItem;
 }
 
-function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
+function HistoryItem({
+  profile,
+  entry: { url, title, id },
+  type,
+}: {
+  entry: HistoryEntry;
+  profile: string;
+  type: "History" | "Bookmark";
+}): ReactElement {
   return (
     <List.Item
-      id={`${profile}-${id}`}
+      id={`${profile}-${type}-${id}`}
       title={title}
       subtitle={url}
       icon={getFavicon(url)}
