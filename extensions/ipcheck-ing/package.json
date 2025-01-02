@@ -17,7 +17,7 @@
       "description": "Get Local IPs",
       "label": "Get Local IPs",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -26,7 +26,7 @@
       "description": "Fetch IP from CloudFlare IPv4",
       "label": "CloudFlare IPv4",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -34,7 +34,7 @@
       "description": "Fetch IP from CloudFlare IPv6",
       "label": "CloudFlare IPv6",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -42,7 +42,7 @@
       "description": "Fetch IP from IPCheck.ing IPv4",
       "label": "IPCheck.ing IPv4",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -50,7 +50,7 @@
       "description": "Fetch IP from IPCheck.ing IPv6",
       "label": "IPCheck.ing IPv6",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -58,7 +58,7 @@
       "description": "Fetch IP from IPCheck.ing DualStack",
       "label": "IPCheck.ing DualStack",
       "default": true,
-      "required": true
+      "required": false
     },
     {
       "type": "checkbox",
@@ -66,7 +66,7 @@
       "description": "Fetch IP from IPIP.net",
       "label": "IPIP.net",
       "default": true,
-      "required": true
+      "required": false
     }
   ],
   "commands": [
