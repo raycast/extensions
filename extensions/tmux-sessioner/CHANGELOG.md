@@ -1,12 +1,12 @@
 # Tmux Sessioner Changelog
 
-## v0.0.7 - {PR_MERGE_DATE}
+## v0.0.7 - 2025-01-02
 
 ### Updated
 
 - Changed Keyboard shortcuts for **Delete This Window**, **Delete This Session** to Raycast standardised ⌃X (from ⌘D)
 
-## v0.0.6 - {PR_MERGE_DATE}
+## v0.0.6 - 2025-01-02
 
 ### Added
 
