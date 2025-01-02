@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-01-02
 
 - Fix issue when showing battery level on Intel-based Macs
 
