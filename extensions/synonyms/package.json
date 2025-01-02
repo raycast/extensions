@@ -25,6 +25,10 @@
       "type": "dropdown",
       "data": [
         {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
           "value": "fireworks",
           "title": "Fireworks.ai"
         },
@@ -98,6 +102,7 @@
     "ai": "^4.0.17",
     "dedent": "^1.5.3",
     "openai": "^4.76.2",
+    "partial-json": "^0.1.7",
     "play-sound": "^1.1.6",
     "undici": "^7.1.0",
     "zod": "^3.24.1"
@@ -114,7 +119,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

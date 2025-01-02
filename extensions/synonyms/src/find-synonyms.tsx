@@ -1,28 +1,30 @@
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { parse, Allow } from "partial-json";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   Action,
   ActionPanel,
+  AI,
   getPreferenceValues,
   Icon,
   List,
+  LocalStorage,
+  openExtensionPreferences,
   showToast,
   Toast,
-  LocalStorage,
   useNavigation,
-  openExtensionPreferences,
 } from "@raycast/api";
-import { fetch } from "undici";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import dedent from "dedent";
+import fs from "fs";
 import OpenAI from "openai";
 import getPlayer from "play-sound";
 import { useEffect, useMemo, useState } from "react";
+import { fetch } from "undici";
 import { z } from "zod";
-import fs from "fs";
 
 const preferences = getPreferenceValues();
-type LLMProvider = "openai" | "groq" | "fireworks" | "anthropic" | "together";
+type LLMProvider = "openai" | "groq" | "fireworks" | "anthropic" | "together" | "raycast";
 
 type Preferences = {
   llmProvider: LLMProvider;
@@ -45,6 +47,10 @@ if (
   showToast({
     style: Toast.Style.Failure,
     title: "API Key Missing",
+    primaryAction: {
+      title: "Add API Key",
+      onAction: () => openExtensionPreferences(),
+    },
     message: `API key for ${llmProvider} is missing. Please provide the API key in the preferences.`,
   });
 }
@@ -53,6 +59,9 @@ type FetchFunction = typeof globalThis.fetch;
 
 const { model, mode } = (() => {
   switch (llmProvider) {
+    case "raycast": {
+      return { model: null, mode: "auto" as const };
+    }
     case "openai": {
       const openai = createOpenAI({
         apiKey: prefs.openaiApiKey,
@@ -194,82 +203,139 @@ export default function Command() {
           return;
         }
 
-        const stream = await streamObject({
-          model,
-          mode,
-          messages: [
+        if (llmProvider === "raycast") {
+          const prompt = dedent`
+            Find synonyms for: "${query}"
+            The synonyms should be in ${language}.
+            Format the response as a JSON object with this structure:
             {
-              role: "system",
-              content: dedent`
-              The user wants to find synonyms for a word or sentence <sentence/>.
+              "originalLanguage": "detected language",
+              "synonyms": [
+                {
+                  "emoji": "relevant emoji",
+                  "synonym": "the synonym",
+                  "meaning": "short meaning or null"
+                }
+              ]
+            }
+            Maximum 9 synonyms. Make them suitable for literary use.
+            If the input is not in ${language}, add the direct translation as first synonym.
 
-              You need to find synonyms for it. The returned synonyms should be in the user requested <language/> language.
+            Only output JSON without any other text or markdown formatting.
+          `;
 
-              The synonyms should be different than the initial word passed by the user. Don't repeat the same word or phrase twice.
+          let response = "";
+          console.log("Asking AI...");
+          const answer = AI.ask(prompt, { signal: abortController.signal });
+          answer.on("data", (data) => {
+            response += data;
+            response = response
+              .split("\n")
+              .filter((x) => !x.startsWith("```"))
+              .join("\n");
 
-              If the user used another language than the user requested language, add the direct translation as the first synonym.
+            try {
+              const parsed = parse(response, Allow.ALL);
+              if (parsed.synonyms?.length) {
+                setResults(parsed.synonyms);
+              }
+            } catch (e) {
+              // Partial JSON, wait for more data
+            }
+          });
 
-              These synonyms should be suitable for literary use, avoiding common or simplistic alternatives.
-
-              If the there not enough synonyms for the word use a phrase instead, for example "squinting" in Italian would be "socchiudere gli occhi".
-            `,
-            },
-            {
-              role: "user",
-              content: dedent`
-              <sentence>gioioso, in italiano</sentence>
-              <language>English</language>
-            `,
-            },
-            {
-              role: "assistant",
-              content: JSON.stringify(examplePerfectOutput),
-            },
-            {
-              role: "user",
-              content: dedent`
-              <sentence>${query}</sentence>
-              <language>${language}</language>
-            `,
-            },
-          ],
-          schema,
-          abortSignal: abortController.signal,
-        });
-
-        let detectedLanguage: string | undefined;
-        let lastUpdate = Date.now();
-        let addedToHistory = false;
-        for await (const obj of stream.partialObjectStream) {
-          if (abortController.signal.aborted) {
-            return;
+          await answer;
+          try {
+            const finalResult = JSON.parse(response);
+            setResults(finalResult.synonyms);
+            if (finalResult.originalLanguage) {
+              showToast({
+                style: Toast.Style.Success,
+                title: "Language Detected",
+                message: finalResult.originalLanguage,
+              });
+            }
+          } catch (e) {
+            throw new Error("Failed to parse AI response");
           }
-          if (!detectedLanguage && obj.originalLanguage && obj.synonyms?.length) {
-            detectedLanguage = obj.originalLanguage;
-            showToast({
-              style: Toast.Style.Success,
-              title: `Language Detected`,
-              message: detectedLanguage,
-            });
-          }
+        } else {
+          const stream = await streamObject({
+            model: model!,
+            mode,
+            messages: [
+              {
+                role: "system",
+                content: dedent`
+                The user wants to find synonyms for a word or sentence <sentence/>.
 
-          if (obj.synonyms?.length) {
-            const now = Date.now();
-            if (now - lastUpdate >= 50) {
-              setResults(obj.synonyms as z.infer<typeof synonymSchema>[]);
-              lastUpdate = now;
+                You need to find synonyms for it. The returned synonyms should be in the user requested <language/> language.
+
+                The synonyms should be different than the initial word passed by the user. Don't repeat the same word or phrase twice.
+
+                If the user used another language than the user requested language, add the direct translation as the first synonym.
+
+                These synonyms should be suitable for literary use, avoiding common or simplistic alternatives.
+
+                If the there not enough synonyms for the word use a phrase instead, for example "squinting" in Italian would be "socchiudere gli occhi".
+              `,
+              },
+              {
+                role: "user",
+                content: dedent`
+                <sentence>gioioso, in italiano</sentence>
+                <language>English</language>
+              `,
+              },
+              {
+                role: "assistant",
+                content: JSON.stringify(examplePerfectOutput),
+              },
+              {
+                role: "user",
+                content: dedent`
+                <sentence>${query}</sentence>
+                <language>${language}</language>
+              `,
+              },
+            ],
+            schema,
+            abortSignal: abortController.signal,
+          });
+
+          let detectedLanguage: string | undefined;
+          let lastUpdate = Date.now();
+          let addedToHistory = false;
+          for await (const obj of stream.partialObjectStream) {
+            if (abortController.signal.aborted) {
+              return;
+            }
+            if (!detectedLanguage && obj.originalLanguage && obj.synonyms?.length) {
+              detectedLanguage = obj.originalLanguage;
+              showToast({
+                style: Toast.Style.Success,
+                title: `Language Detected`,
+                message: detectedLanguage,
+              });
+            }
+
+            if (obj.synonyms?.length) {
+              const now = Date.now();
+              if (now - lastUpdate >= 50) {
+                setResults(obj.synonyms as z.infer<typeof synonymSchema>[]);
+                lastUpdate = now;
+              }
+            }
+            if (obj.synonyms?.length && obj.synonyms?.length > 2 && !addedToHistory) {
+              // Add query to history
+              const history = JSON.parse((await LocalStorage.getItem("queryHistory")) || "[]");
+              history.unshift({ query, language, timestamp: Date.now() });
+              await LocalStorage.setItem("queryHistory", JSON.stringify(history.slice(0, 50))); // Keep last 50 queries
+              addedToHistory = true;
             }
           }
-          if (obj.synonyms?.length && obj.synonyms?.length > 2 && !addedToHistory) {
-            // Add query to history
-            const history = JSON.parse((await LocalStorage.getItem("queryHistory")) || "[]");
-            history.unshift({ query, language, timestamp: Date.now() });
-            await LocalStorage.setItem("queryHistory", JSON.stringify(history.slice(0, 50))); // Keep last 50 queries
-            addedToHistory = true;
-          }
+          const finalResult = await stream.object;
+          setResults(finalResult.synonyms);
         }
-        const finalResult = await stream.object;
-        setResults(finalResult.synonyms);
         setIsLoading(false);
       } catch (e) {
         if (!isAbortError(e)) {
