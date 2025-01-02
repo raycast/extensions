@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-01-02
 
 - Close Raycast after saving browser tab ([#16052](https://github.com/raycast/extensions/issues/16052))
 
