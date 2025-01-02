@@ -52,13 +52,6 @@ export function formatToYnabAmount(amount: string | number): number {
   }
 }
 
-/**
- * Get the current month according to the UTC time zone.
- */
-export function getCurrentMonth(): string {
-  return new Intl.DateTimeFormat('en-us', { month: 'long', timeZone: 'UTC' }).format(new Date());
-}
-
 function formatCurrencyPlacement(amount: string, symbol: string, symbol_first: boolean, shouldPrefixSymbol: boolean) {
   if (symbol_first) {
     return shouldPrefixSymbol ? `-${symbol}${amount.substring(1)}` : `${symbol}${amount}`;

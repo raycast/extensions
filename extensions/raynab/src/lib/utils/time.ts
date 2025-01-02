@@ -7,4 +7,11 @@ dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(quarterOfYear);
 
-export { dayjs as time };
+/**
+ * Get the current month according to the UTC time zone.
+ */
+function getCurrentMonth(): string {
+  return new Intl.DateTimeFormat('en-us', { month: 'long', timeZone: 'UTC' }).format(new Date());
+}
+
+export { dayjs as time, getCurrentMonth };
