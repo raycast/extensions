@@ -1,5 +1,9 @@
 # Date Converter Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Support hexadecimal numbers for seconds/ms
+
 ## [Update] - 2024-05-19
 
 - 24h time format support.
