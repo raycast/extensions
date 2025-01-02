@@ -4,11 +4,11 @@
 
 # Coolify Raycast Extension
 
-This is a Raycast extension for [Coolify](https://coolify.io/). With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments and more in your Coolify instance.
+This is a Raycast extension for [Coolify](https://coolify.io/). With this extension you can view Servers, Server Details, Resources, Teams, Team Members, Projects, Environments, Private Keys and more in your Coolify instance.
 
 ## 🚀 Getting Started
 
-1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/coolify) OR via Raycast Store
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/coolify) OR `install` via Raycast Store
 
 2. **Enter your Coolify Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
 
