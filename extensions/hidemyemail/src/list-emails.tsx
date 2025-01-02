@@ -55,7 +55,11 @@ export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>(EmailStatus.ANY);
   const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
-  const [appIcons, setAppIcons] = useCachedState<AppIcons>("app-icons", { default: "extension-icon.png" });
+  const [appIcons, setAppIcons] = useCachedState<AppIcons>(
+    "app-icons",
+    { default: "extension-icon.png" },
+    { cacheNamespace: "app-icons" },
+  );
   const { sortByCreationDate } = getPreferenceValues<Preferences.ListEmails>();
   const effectRan = useRef(false);
   const abortable = useRef<AbortController>();
