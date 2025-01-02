@@ -1,14 +1,14 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
 import { getAllApps, closeNotWhitelisted, getOpenApps } from "./scripts";
 import type { Application } from "./types";
-import { useLocalStorage, usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
-import fs from "node:fs";
+import { useCachedState, useLocalStorage, usePromise } from "@raycast/utils";
+import { useMemo } from "react";
+import ListItem from "./components/ListItem";
 
 export default function AppList() {
-  const [listState, setListState] = useState<ListState>("all");
+  const [listState, setListState] = useCachedState<ListState>("show-details", "all");
 
-  const { value: whitelistedApps, setValue: setWhitelistedApps } = useLocalStorage<string[]>("whitelistedApps", []);
+  const { value: whitelistedAppNames, setValue: setWhitelistedApps } = useLocalStorage<string[]>("whitelistedApps", []);
 
   const {
     data: allApps,
@@ -24,14 +24,16 @@ export default function AppList() {
         }));
       }
 
-      const allApps = apps.map((app) => ({
-        name: app,
-        isWhitelisted: whitelistedApps?.includes(app) || app === "Raycast",
-      }));
+      const allApps = apps
+        .filter((app) => !whitelistedApps.includes(app))
+        .map((app) => ({
+          name: app,
+          isWhitelisted: whitelistedApps?.includes(app) || app === "Raycast",
+        }));
 
       return allApps;
     },
-    [whitelistedApps],
+    [whitelistedAppNames],
   );
 
   const { data: openApps, isLoading: openAppsLoading } = usePromise(
@@ -42,8 +44,13 @@ export default function AppList() {
         isWhitelisted: whitelistedApps?.includes(app) || app === "Raycast",
       }));
     },
-    [whitelistedApps],
+    [whitelistedAppNames],
   );
+
+  const whitelist: Application[] = Array.from(new Set(whitelistedAppNames)).map((app) => ({
+    name: app,
+    isWhitelisted: true,
+  }));
 
   const apps = useMemo(() => {
     switch (listState) {
@@ -52,20 +59,17 @@ export default function AppList() {
       case "open":
         return openApps;
       case "whitelisted":
-        return Array.from(new Set(whitelistedApps)).map((app) => ({
-          name: app,
-          isWhitelisted: true,
-        }));
+        return whitelist;
       default:
         return [];
     }
-  }, [listState, allApps, openApps, whitelistedApps]);
+  }, [listState, allApps, openApps, whitelist]);
 
   const toggleWhitelist = (application: Application) => {
     const newWhitelist = new Set(
       application.isWhitelisted
-        ? whitelistedApps?.filter((app) => app !== application.name) || []
-        : [...(whitelistedApps || []), application.name],
+        ? whitelistedAppNames?.filter((app) => app !== application.name) || []
+        : [...(whitelistedAppNames || []), application.name],
     );
 
     setWhitelistedApps(Array.from(newWhitelist));
@@ -110,74 +114,48 @@ export default function AppList() {
   const nextStateTitle = `Show ${StateToTitle[getAdjacentListState(listState, "next")]}`;
   const prevStateTitle = `Show ${StateToTitle[getAdjacentListState(listState, "prev")]}`;
 
-  const extractIcon = (app: string) => {
-    const applicationPaths = [`/Applications/${app}.app`, `/System/Applications/${app}.app`];
-    return (
-      applicationPaths.find((path) => {
-        try {
-          return fs.existsSync(path);
-        } catch {
-          return false;
-        }
-      }) || `/Applications/${app}.app`
-    );
-  };
+  const NavigationSection = () => (
+    <ActionPanel.Section title="Navigation">
+      <CycleListState title={nextStateTitle} action={cycleListState} type="next" />
+      <CycleListState title={prevStateTitle} action={cycleListState} type="prev" />
+    </ActionPanel.Section>
+  );
 
   return (
     <List
-      navigationTitle={StateToTitle[listState]}
       isLoading={allAppsLoading || openAppsLoading}
       searchBarPlaceholder="Filter apps..."
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Navigation">
-            <CycleListState title={nextStateTitle} action={cycleListState} type="next" />
-            <CycleListState title={prevStateTitle} action={cycleListState} type="prev" />
-          </ActionPanel.Section>
+          <NavigationSection />
         </ActionPanel>
       }
     >
+      {listState === "all" && (
+        <List.Section title={StateToTitle.whitelisted} subtitle={`${whitelistedAppNames?.length} apps`}>
+          {whitelist?.map(({ isWhitelisted, name }, index) => (
+            <ListItem
+              key={`${index} - ${name}`}
+              isWhitelisted={isWhitelisted}
+              name={name}
+              closeAppsAction={closeAllNonWhitelisted}
+              refreshAction={revalidate}
+              toggleWhitelistAction={toggleWhitelist}
+              navigationComponent={<NavigationSection />}
+            />
+          ))}
+        </List.Section>
+      )}
       <List.Section title={StateToTitle[listState]} subtitle={`${apps?.length} apps`}>
-        {apps?.map((app, index) => (
-          <List.Item
-            key={`${app.name}-${index}`}
-            title={app.name}
-            icon={{ fileIcon: extractIcon(app.name) }}
-            accessories={[
-              {
-                icon: app.isWhitelisted
-                  ? { source: Icon.Check, tintColor: Color.Green }
-                  : { source: Icon.Xmark, tintColor: Color.SecondaryText },
-                tooltip: app.isWhitelisted ? "Whitelisted" : "Not whitelisted",
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Actions">
-                  <Action
-                    title={app.isWhitelisted ? "Remove from Whitelist" : "Add to Whitelist"}
-                    icon={app.isWhitelisted ? Icon.Shield : Icon.Shield}
-                    onAction={() => toggleWhitelist(app)}
-                  />
-
-                  <Action
-                    title="Close Non-whitelisted Apps"
-                    icon={Icon.XMarkCircle}
-                    onAction={closeAllNonWhitelisted}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={revalidate}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Navigation">
-                  <CycleListState title={nextStateTitle} action={cycleListState} type="next" />
-                  <CycleListState title={prevStateTitle} action={cycleListState} type="prev" />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
+        {apps?.map(({ isWhitelisted, name }, index) => (
+          <ListItem
+            key={`${index} - ${name}`}
+            isWhitelisted={isWhitelisted}
+            name={name}
+            closeAppsAction={closeAllNonWhitelisted}
+            refreshAction={revalidate}
+            toggleWhitelistAction={toggleWhitelist}
+            navigationComponent={<NavigationSection />}
           />
         ))}
       </List.Section>
