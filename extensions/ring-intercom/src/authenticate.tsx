@@ -56,13 +56,19 @@ interface LocationsResponse {
 
 class RingApi {
   private readonly TIMEOUT_MS = 5000;
-  private hardwareId!: string;
+  private readonly BASE_URL = "https://oauth.ring.com/oauth/token";
+
+  private readonly ERROR_MESSAGES: Record<number, string> = {
+    404: "Ring service endpoint not found. Please try again later.",
+    401: "Authentication token expired. Please log in again.",
+    403: "Access denied. Please check your credentials.",
+    429: "Too many requests. Please try again in a few minutes.",
+    ...Object.fromEntries(
+      [500, 502, 503, 504].map((code) => [code, "Ring servers are currently unavailable. Please try again later."]),
+    ),
+  } as const;
 
   constructor(private readonly config: { refreshToken: string }) {}
-
-  async initialize() {
-    this.hardwareId = await getOrCreateHardwareId();
-  }
 
   private async fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
     const controller = new AbortController();
@@ -92,18 +98,22 @@ class RingApi {
     }
   }
 
+  private getBaseHeaders(): Record<string, string> {
+    return {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      "User-Agent": "android:com.ringapp",
+      "2fa-support": "true",
+    };
+  }
+
   async getLocations() {
     try {
       console.debug("Getting access token using refresh token");
 
-      const tokenResponse = await this.fetchWithTimeout("https://oauth.ring.com/oauth/token", {
+      const tokenResponse = await this.fetchWithTimeout(this.BASE_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-          "User-Agent": "android:com.ringapp",
-          "2fa-support": "true",
-        },
+        headers: this.getBaseHeaders(),
         body: new URLSearchParams({
           grant_type: "refresh_token",
           refresh_token: this.config.refreshToken,
@@ -161,88 +171,57 @@ class RingApi {
     }
   }
 
-  private getErrorMessageForStatus(status: number): string {
-    switch (status) {
-      case 404:
-        return "Ring service endpoint not found. Please try again later.";
-      case 401:
-        return "Authentication token expired. Please log in again.";
-      case 403:
-        return "Access denied. Please check your credentials.";
-      case 429:
-        return "Too many requests. Please try again in a few minutes.";
-      case 500:
-      case 502:
-      case 503:
-      case 504:
-        return "Ring servers are currently unavailable. Please try again later.";
-      default:
-        return "Unable to reach Ring servers.";
-    }
-  }
-}
-
-async function getAuthToken(
-  email: string,
-  password: string,
-  twoFactorCode: string,
-  hardwareId: string,
-): Promise<string> {
-  const params = new URLSearchParams({
-    client_id: "ring_official_android",
-    scope: "client",
-    grant_type: "password",
-    username: email,
-    password: password,
-  });
-
-  const headers: { [key: string]: string } = {
-    "content-type": "application/x-www-form-urlencoded",
-    "2fa-support": "true",
-    hardware_id: hardwareId,
-    "User-Agent": "android:com.ringapp",
-    Accept: "application/json",
-  };
-
-  if (twoFactorCode) {
-    headers["2fa-code"] = twoFactorCode;
-  }
-
-  const response = await fetch("https://oauth.ring.com/oauth/token", {
-    method: "POST",
-    headers: headers,
-    body: params.toString(),
-  });
-
-  const data = await response.text();
-  console.debug("Ring API Response:", data);
-  const parsedData = JSON.parse(data);
-
-  if (parsedData?.error) {
-    console.debug("Error details:", {
-      error: parsedData.error,
-      description: parsedData?.error_description,
+  async authenticate(email: string, password: string, twoFactorCode: string, hardwareId: string): Promise<string> {
+    const response = await this.fetchWithTimeout(this.BASE_URL, {
+      method: "POST",
+      headers: {
+        ...this.getBaseHeaders(),
+        hardware_id: hardwareId,
+        ...(twoFactorCode && { "2fa-code": twoFactorCode }),
+      },
+      body: new URLSearchParams({
+        client_id: "ring_official_android",
+        scope: "client",
+        grant_type: "password",
+        username: email,
+        password: password,
+      }).toString(),
     });
 
-    const errorMessage =
-      parsedData.error === "access_denied" && parsedData?.error_description === "invalid user credentials"
-        ? "Please check your email and password."
-        : parsedData?.error_description?.toLowerCase()?.includes("verification code")
-          ? "Invalid verification code. Please try again."
-          : parsedData.error?.toLowerCase()?.includes("too many requests")
-            ? "Too many attempts. Please try again in a few minutes."
-            : (parsedData?.error_description ?? parsedData.error ?? "An authentication error occurred.");
+    const data = await response.text();
+    console.debug("Ring API Response:", data);
+    const parsedData = JSON.parse(data);
 
-    throw new RingAuthenticationError(
-      "INVALID_CREDENTIALS",
-      parsedData?.error_description ?? parsedData.error,
-      errorMessage,
-    );
-  } else if (parsedData?.tsv_state) {
-    throw new TwoFactorError(parsedData.tsv_state, parsedData?.phone);
+    if (parsedData?.error) {
+      console.debug("Error details:", {
+        error: parsedData.error,
+        description: parsedData?.error_description,
+      });
+
+      const errorMessage =
+        parsedData.error === "access_denied" && parsedData?.error_description === "invalid user credentials"
+          ? "Please check your email and password."
+          : parsedData?.error_description?.toLowerCase()?.includes("verification code")
+            ? "Invalid verification code. Please try again."
+            : parsedData.error?.toLowerCase()?.includes("too many requests")
+              ? "Too many attempts. Please try again in a few minutes."
+              : (parsedData?.error_description ?? parsedData.error ?? "An authentication error occurred.");
+
+      throw new RingAuthenticationError(
+        "INVALID_CREDENTIALS",
+        parsedData?.error_description ?? parsedData.error,
+        errorMessage,
+      );
+    } else if (parsedData?.tsv_state) {
+      throw new TwoFactorError(parsedData.tsv_state, parsedData?.phone);
+    }
+
+    return parsedData.refresh_token;
   }
 
-  return parsedData.refresh_token;
+  private getErrorMessageForStatus(status: number): string {
+    return this.ERROR_MESSAGES[status] ?? "Unable to reach Ring servers.";
+  }
 }
 
 interface AuthState {
@@ -271,7 +250,7 @@ function sanitizeTwoFactorCode(
 } {
   const numericOnly = input.replace(/\D/g, "");
 
-  const isPaste = input.length > prevInput.length + 1; // More than one character added at once
+  const isPaste = input.length > prevInput.length + 2;
   const hasNonNumeric = /\D/.test(input);
   const isTooLong = numericOnly.length > 6;
   const lastCharIsNonNumeric = input.length > 0 && /\D/.test(input[input.length - 1]);
@@ -283,6 +262,103 @@ function sanitizeTwoFactorCode(
     warning:
       isPaste && hasNonNumeric && numericOnly.length > 0 ? "Non-numeric characters have been removed" : undefined,
   };
+}
+
+function LoginForm({
+  authState,
+  setAuthState,
+  savedCredentials,
+}: {
+  authState: AuthState;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
+  savedCredentials: { email?: string; password?: string };
+}) {
+  return (
+    <>
+      <Form.TextField
+        id="email"
+        title="Email"
+        value={authState.email}
+        placeholder={savedCredentials.email || "Enter your Ring account email"}
+        error={authState.emailError ? "Email is required" : authState.emailFormatError}
+        onChange={(newEmail) =>
+          setAuthState((prev) => ({
+            ...prev,
+            email: newEmail,
+            emailError: false,
+            emailFormatError: undefined,
+          }))
+        }
+      />
+      <Form.PasswordField
+        id="password"
+        title="Password"
+        value={authState.password}
+        placeholder={
+          savedCredentials.password ? "•".repeat(savedCredentials.password.length) : "Enter your Ring account password"
+        }
+        error={authState.passwordError ? "Password is required" : undefined}
+        onChange={(newPassword) =>
+          setAuthState((prev) => ({
+            ...prev,
+            password: newPassword,
+            passwordError: false,
+          }))
+        }
+      />
+    </>
+  );
+}
+
+function TwoFactorForm({
+  authState,
+  setAuthState,
+  twoFactorRef,
+}: {
+  authState: AuthState;
+  setAuthState: React.Dispatch<React.SetStateAction<AuthState>>;
+  twoFactorRef: React.RefObject<Form.TextField>;
+}) {
+  return (
+    <>
+      <Form.TextField
+        id="twoFactorCode"
+        title="2FA Code"
+        ref={twoFactorRef}
+        placeholder={authState.twoFactorPrompt}
+        value={authState.twoFactorCode}
+        autoFocus
+        error={
+          authState.twoFactorError
+            ? "Code is required"
+            : authState.twoFactorNumericError
+              ? authState.twoFactorNumericError
+              : undefined
+        }
+        onChange={(newInput) => {
+          const { code, numericError, warning } = sanitizeTwoFactorCode(newInput, authState.twoFactorCode);
+
+          setAuthState((prev) => ({
+            ...prev,
+            twoFactorCode: code,
+            twoFactorError: false,
+            twoFactorNumericError: numericError,
+            twoFactorWarning: warning,
+          }));
+
+          if (numericError === "6 digits max" || (code.length === 6 && numericError === "Only numbers allowed")) {
+            setTimeout(() => {
+              setAuthState((prev) => ({
+                ...prev,
+                twoFactorNumericError: undefined,
+              }));
+            }, 1000);
+          }
+        }}
+      />
+      {authState.twoFactorWarning && <Form.Description text={authState.twoFactorWarning} />}
+    </>
+  );
 }
 
 export default function Command() {
@@ -317,64 +393,61 @@ export default function Command() {
     }
   }, [authState.twoFactorType]);
 
-  useEffect(() => {
-    async function initializeAuth() {
-      console.debug("Starting authentication initialization");
+  const initializeAuth = async () => {
+    console.debug("Starting authentication initialization");
 
-      const id = await getOrCreateHardwareId();
-      setHardwareId(id);
+    const [savedEmail, savedPassword] = await Promise.all([
+      LocalStorage.getItem<string>("RING_EMAIL"),
+      LocalStorage.getItem<string>("RING_PASSWORD"),
+    ]);
+    setSavedCredentials({ email: savedEmail ?? "", password: savedPassword ?? "" });
+    setAuthState((prev) => ({ ...prev, isLoading: false }));
 
-      const [savedEmail, savedPassword] = await Promise.all([
-        LocalStorage.getItem<string>("RING_EMAIL"),
-        LocalStorage.getItem<string>("RING_PASSWORD"),
-      ]);
-      setSavedCredentials({ email: savedEmail ?? "", password: savedPassword ?? "" });
+    const id = await getOrCreateHardwareId();
+    setHardwareId(id);
 
-      const existingToken = await LocalStorage.getItem<string>("RING_REFRESH_TOKEN");
-      if (existingToken) {
-        try {
-          if (!(await checkInternetConnection())) {
-            console.warn("Internet connection check failed");
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "No Internet",
-              message: "Please check your internet connection",
-            });
-            return;
-          }
+    await validateExistingToken();
+  };
 
-          console.debug("Attempting to validate existing token");
-          const ringApi = new RingApi({
-            refreshToken: existingToken,
-          });
+  const validateExistingToken = async () => {
+    const existingToken = await LocalStorage.getItem<string>("RING_REFRESH_TOKEN");
+    if (!existingToken) return;
 
-          await ringApi.getLocations();
-        } catch (error) {
-          console.error("Token validation failed", error);
-
-          if (error instanceof RingAuthenticationError) {
-            if (error.code === "INVALID_CREDENTIALS") {
-              await LocalStorage.removeItem("RING_REFRESH_TOKEN");
-              console.debug("Removed invalid token from storage");
-            }
-            await showToast({
-              style: Toast.Style.Failure,
-              title: error.code === "NETWORK_ERROR" ? "Connection Error" : "Authentication Failed",
-              message: error.userMessage || "Please log in again.",
-            });
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Error",
-              message: error instanceof Error ? error.message : String(error),
-            });
-          }
-        }
+    try {
+      if (!(await checkInternetConnection())) {
+        throw new Error("No internet connection");
       }
 
-      setAuthState((prev) => ({ ...prev, isLoading: false }));
+      console.debug("Attempting to validate existing token");
+      const ringApi = new RingApi({ refreshToken: existingToken });
+      await ringApi.getLocations();
+    } catch (error) {
+      handleTokenValidationError(error);
     }
+  };
 
+  const handleTokenValidationError = async (error: unknown) => {
+    console.error("Token validation failed", error);
+
+    if (error instanceof RingAuthenticationError) {
+      if (error.code === "INVALID_CREDENTIALS") {
+        await LocalStorage.removeItem("RING_REFRESH_TOKEN");
+      }
+      await showToast({
+        style: Toast.Style.Failure,
+        title: error.code === "NETWORK_ERROR" ? "Connection Error" : "Authentication Failed",
+        message: error.userMessage || "Please log in again.",
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  useEffect(() => {
     initializeAuth();
   }, []);
 
@@ -436,8 +509,8 @@ export default function Command() {
         return;
       }
 
-      // Call getAuthToken with 2FA code if present
-      const token = await getAuthToken(emailToUse, passwordToUse, authState.twoFactorCode, hardwareId);
+      const ringApi = new RingApi({ refreshToken: "" });
+      const token = await ringApi.authenticate(emailToUse, passwordToUse, authState.twoFactorCode, hardwareId);
 
       if (token) {
         console.debug("Verifying token with API");
@@ -520,85 +593,11 @@ export default function Command() {
       }
       navigationTitle={authState.twoFactorType ? "Enter 2FA Code" : "Ring Authentication"}
     >
-      {/* If user is not loading and 2FA is not required, show email/password fields */}
       {!authState.isLoading && !authState.twoFactorType && (
-        <>
-          <Form.TextField
-            id="email"
-            title="Email"
-            value={authState.email}
-            placeholder={savedCredentials.email || "Enter your Ring account email"}
-            error={authState.emailError ? "Email is required" : authState.emailFormatError}
-            onChange={(newEmail) =>
-              setAuthState((prev) => ({
-                ...prev,
-                email: newEmail,
-                emailError: false,
-                emailFormatError: undefined,
-              }))
-            }
-          />
-          <Form.PasswordField
-            id="password"
-            title="Password"
-            value={authState.password}
-            placeholder={
-              savedCredentials.password
-                ? "•".repeat(savedCredentials.password.length)
-                : "Enter your Ring account password"
-            }
-            error={authState.passwordError ? "Password is required" : undefined}
-            onChange={(newPassword) =>
-              setAuthState((prev) => ({
-                ...prev,
-                password: newPassword,
-                passwordError: false,
-              }))
-            }
-          />
-        </>
+        <LoginForm authState={authState} setAuthState={setAuthState} savedCredentials={savedCredentials} />
       )}
-
-      {/* If 2FA is required, show the 2FA code field */}
       {authState.twoFactorType && (
-        <>
-          <Form.TextField
-            id="twoFactorCode"
-            title="2FA Code"
-            ref={twoFactorRef}
-            placeholder={authState.twoFactorPrompt}
-            value={authState.twoFactorCode}
-            autoFocus
-            error={
-              authState.twoFactorError
-                ? "Code is required"
-                : authState.twoFactorNumericError
-                  ? authState.twoFactorNumericError
-                  : undefined
-            }
-            onChange={(newInput) => {
-              const { code, numericError, warning } = sanitizeTwoFactorCode(newInput, authState.twoFactorCode);
-
-              setAuthState((prev) => ({
-                ...prev,
-                twoFactorCode: code,
-                twoFactorError: false,
-                twoFactorNumericError: numericError,
-                twoFactorWarning: warning,
-              }));
-
-              if (numericError === "6 digits max" || (code.length === 6 && numericError === "Only numbers allowed")) {
-                setTimeout(() => {
-                  setAuthState((prev) => ({
-                    ...prev,
-                    twoFactorNumericError: undefined,
-                  }));
-                }, 1000);
-              }
-            }}
-          />
-          {authState.twoFactorWarning && <Form.Description text={authState.twoFactorWarning} />}
-        </>
+        <TwoFactorForm authState={authState} setAuthState={setAuthState} twoFactorRef={twoFactorRef} />
       )}
     </Form>
   );
