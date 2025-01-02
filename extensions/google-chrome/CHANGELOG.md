@@ -2,6 +2,7 @@
 
 ## [Fix] - {PR_MERGE_DATE}
 
+- Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
 - Fix bookmark list in the Search All command.
 
 ## [Add Search All Command] - 2024-08-01

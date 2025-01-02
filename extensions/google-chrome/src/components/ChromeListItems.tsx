@@ -28,7 +28,7 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed
       subtitle={props.tab.urlWithoutScheme()}
       keywords={[props.tab.urlWithoutScheme()]}
       actions={<ChromeActions.TabList tab={props.tab} onTabClosed={props.onTabClosed} />}
-      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
+      icon={props.useOriginalFavicon ? props.tab.realFavicon() : props.tab.googleFavicon()}
     />
   );
 }

@@ -5,8 +5,8 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
-    ? `execute of tab _tab_index of window _window_index javascript ¬
-                    "document.head.querySelector('link[rel~=icon]').href;"`
+    ? `execute t javascript ¬
+        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
     : '""';
 
   await checkAppInstalled();
@@ -82,11 +82,11 @@ export async function openNewTab({
                     exit repeat
                 end if
             end repeat
-            
+
             if not winExists then
                 make new window
             end if
-            
+
             tell window 1
                 set newTab to make new tab ` +
         (url
@@ -98,7 +98,7 @@ export async function openNewTab({
             end tell
         end tell
         return true
-        
+
   `;
       break;
     case SettingsProfileOpenBehaviour.ProfileCurrent:
