@@ -28,7 +28,7 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
   // from : https://openai.com/api/pricing/
-  // 
+  //
   let price = 0;
   if (model == "gpt-3.5-turbo") {
     price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
@@ -40,7 +40,8 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
   } else if (model == "gpt-4o") {
     price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
-  } if (model == 'deepseek-chat') {
+  }
+  if (model == "deepseek-chat") {
     price = (prompt_token * 0.27 + output_token * 1.1) / 10000;
     // * there is a tmeporary discount for deepseek-chat, we ignore it for now
     // * there is cache discount for deepseek-chat, we ignore it
