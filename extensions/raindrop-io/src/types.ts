@@ -108,10 +108,3 @@ export interface FormValues {
   tags: string[];
   newCollection?: string;
 }
-
-export interface Preferences {
-  token: string;
-  useLastCollection?: boolean;
-  additionalItemToDisplayInList?: string;
-  displayDate?: string;
-}
