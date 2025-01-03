@@ -1,6 +1,6 @@
 # Habr Changelog
 
-## [Updated README] - 2025-01-02
+## [Updated README] - 2025-03-01
 
 ## [Updated README] - 2023-07-24
 
