@@ -61,7 +61,7 @@ const DATE_FORMATS: DateFormatter[] = [
 ];
 
 function isHex(query: string) {
-  return /^0[xX][0-9a-f]+$/.test(query);
+  return /^0x[0-9a-f]+$/i.test(query);
 }
 
 function parseMachineReadableDate(query: string): LabeledDate | undefined {
