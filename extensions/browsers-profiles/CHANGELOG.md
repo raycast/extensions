@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Fix Firefox] - {PR_MERGE_DATE}
+
+- Fix extensions error when `profiles.ini` is missing from the Firefox folder 
+
 ## [Developer Edition] - 2024-01-29
 - Added Developer Editions of Chrome, Edge, and Firefox
 - Updated and added missing icons
