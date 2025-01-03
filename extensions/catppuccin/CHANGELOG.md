@@ -1,6 +1,6 @@
 # Catppuccin Changelog
 
-## [Search Improvements and Refactoring] - {PR_MERGE_DATE}
+## [Search Improvements and Refactoring] - 2025-01-03
 
 - Use fuzzy search for `search-palette`, `search-ports`, and `search-userstyles`
   - `search-palette` now supports searching hex codes
