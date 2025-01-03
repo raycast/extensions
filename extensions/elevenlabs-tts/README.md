@@ -4,8 +4,8 @@
 
 [Watch Demo](https://www.loom.com/share/d340fc09e88c47f1a032c0da291f3cc3)
 
-![Voice Selection](images/readme/voice-selection-dropdown.png)
-![Extension Setup](images/readme/elevenlabs-settings-screen.png)
+![Voice Selection](./images/readme/voice-selection-dropdown.png)
+![Extension Setup](./images/readme/elevenlabs-settings-screen.png)
 
 ## ✨ Features
 
