@@ -71,22 +71,28 @@ export const getProfileNameByDirectory = (directory: string): string => {
   return profile?.name || "Default Profile";
 };
 
-export const openLinksInChrome = async (
-  bundle: Bundle,
-  options: { newWindow?: boolean; incognito?: boolean } = {},
-): Promise<void> => {
+export const openLinksInChrome = async (bundle: Bundle): Promise<void> => {
   if (bundle.links.length === 0) return;
-  const chromeProfileDirectory = getProfileByDirectory(bundle.chromeProfileDirectory)?.directory || "Default";
-  const decodedLinks = bundle.links.map(decodeUrlSafely);
+
   const chromePath = path.join(preferences.chromeApplicationDirectory, "Google Chrome.app");
-  const profileArg = `--profile-directory="${chromeProfileDirectory}"`;
+  const decodedLinks = bundle.links.map(decodeUrlSafely);
   const urls = decodedLinks.map((link) => `"${encodeURI(link)}"`).join(" ");
 
-  const args = [profileArg, options.newWindow ? "--new-window" : "", options.incognito ? "--incognito" : "", urls]
-    .filter(Boolean)
-    .join(" ");
+  const args = [];
 
-  const command = `open -na "${chromePath}" --args ${args}`;
+  if (bundle.openInIncognitoWindow) {
+    args.push("--incognito");
+  } else {
+    const chromeProfileDirectory = getProfileByDirectory(bundle.chromeProfileDirectory)?.directory || "Default";
+    args.push(`--profile-directory="${chromeProfileDirectory}"`);
+    if (bundle.openInNewWindow) {
+      args.push("--new-window");
+    }
+  }
+
+  args.push(urls);
+
+  const command = `open -na "${chromePath}" --args ${args.join(" ")}`;
 
   try {
     await execAsync(command);

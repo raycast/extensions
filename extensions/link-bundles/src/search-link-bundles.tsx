@@ -1,4 +1,13 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useState, useMemo } from "react";
 import { BundleForm } from "./components/BundleForm";
 import { useBundles } from "./hooks/useBundles";
@@ -15,7 +24,7 @@ export default function Command() {
 
   const handleOpenBundle = async (bundle: Bundle) => {
     try {
-      await openLinksInChrome(bundle, { newWindow: true });
+      await openLinksInChrome(bundle);
       await showToast(
         Toast.Style.Success,
         `Bundle opened in ${getProfileNameByDirectory(bundle.chromeProfileDirectory)} profile`,
@@ -50,7 +59,9 @@ export default function Command() {
           subtitle={bundle.description}
           accessories={[
             { icon: Icon.Link, text: `${bundle.links.length}` },
-            { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
+            bundle.openInIncognitoWindow
+              ? { icon: Icon.Person, tag: "Incognito" }
+              : { tag: getProfileNameByDirectory(bundle.chromeProfileDirectory) },
           ]}
           actions={
             <ActionPanel>
@@ -81,6 +92,7 @@ export default function Command() {
                   icon={Icon.Plus}
                   onAction={() => push(<BundleForm onSubmit={createBundle} />)}
                 />
+                <Action title="Configure Extension" icon={Icon.Cog} onAction={openExtensionPreferences} />
               </ActionPanel.Section>
             </ActionPanel>
           }

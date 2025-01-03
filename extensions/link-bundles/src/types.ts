@@ -3,4 +3,6 @@ export interface Bundle {
   description: string;
   links: string[];
   chromeProfileDirectory: string;
+  openInNewWindow: boolean;
+  openInIncognitoWindow: boolean;
 }

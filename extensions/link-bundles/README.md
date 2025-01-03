@@ -17,4 +17,4 @@ Browse and manage all your link bundles.
 
 ### Create Link Bundle
 
-Quickly create new link bundles with a dedicated command. Add multiple URLs, set a Chrome profile, and include a description for better organization.
+Quickly create new link bundles using a dedicated command. Add multiple links, choose whether to open them in an incognito window or a new window, select a Chrome profile, and include descriptions for better organization.

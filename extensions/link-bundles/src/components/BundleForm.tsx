@@ -1,7 +1,20 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  useNavigation,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+  Icon,
+  openCommandPreferences,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState, Fragment } from "react";
 import { Bundle } from "../types";
 import { getChromeProfiles } from "../utils/chrome";
+
+const preferences: Preferences.CreateLinkBundle = getPreferenceValues();
 
 interface BundleFormProps {
   bundle?: Bundle;
@@ -16,6 +29,12 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
   const [chromeProfileDirectory, setChromeProfileDirectory] = useState(bundle?.chromeProfileDirectory || "Default");
   const [linkInputs, setLinkInputs] = useState<{ url: string; error?: string }[]>(
     bundle?.links.length ? bundle.links.map((url) => ({ url })) : [{ url: "" }],
+  );
+  const [openInNewWindow, setOpenInNewWindow] = useState(
+    bundle?.openInNewWindow || preferences.defaultNewWindow || false,
+  );
+  const [openInIncognitoWindow, setOpenInIncognitoWindow] = useState(
+    bundle?.openInIncognitoWindow || preferences.defaultIncognitoWindow || false,
   );
 
   const validateTitle = (value: string) => {
@@ -102,6 +121,8 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       description: values.description.trim(),
       links: nonEmptyLinks,
       chromeProfileDirectory: chromeProfileDirectory,
+      openInNewWindow: openInNewWindow,
+      openInIncognitoWindow: openInIncognitoWindow,
     }).then((success) => {
       if (success) pop();
     });
@@ -111,14 +132,15 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Bundle" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.SaveDocument} title="Save Bundle" onSubmit={handleSubmit} />
+          <Action title="Configure Command" icon={Icon.Cog} onAction={openCommandPreferences} />
+          <Action title="Configure Extension" icon={Icon.Cog} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="title"
-        title="Title"
-        placeholder="Enter bundle title"
+        title="Bundle Title"
         value={title}
         onChange={(value) => {
           setTitle(value);
@@ -126,34 +148,42 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
         }}
         error={titleError}
       />
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Enter bundle description"
-        value={description}
-        onChange={setDescription}
+      <Form.TextField id="description" title="Bundle Description" value={description} onChange={setDescription} />
+      <Form.Separator />
+      <Form.Checkbox
+        id="incognito"
+        label="Open in Incognito Window"
+        value={openInIncognitoWindow}
+        onChange={setOpenInIncognitoWindow}
       />
 
-      <Form.Dropdown
-        id="chromeProfile"
-        title="Chrome Profile"
-        value={chromeProfileDirectory}
-        onChange={setChromeProfileDirectory}
-      >
-        {getChromeProfiles().map((profile) => (
-          <Form.Dropdown.Item key={profile.directory} value={profile.directory} title={profile.name} />
-        ))}
-      </Form.Dropdown>
-
+      {!openInIncognitoWindow && (
+        <>
+          <Form.Checkbox
+            id="newWindow"
+            label="Open in New Window"
+            value={openInNewWindow}
+            onChange={setOpenInNewWindow}
+          />
+          <Form.Dropdown
+            id="chromeProfile"
+            title="Chrome Profile"
+            value={chromeProfileDirectory}
+            onChange={setChromeProfileDirectory}
+          >
+            {getChromeProfiles().map((profile) => (
+              <Form.Dropdown.Item key={profile.directory} value={profile.directory} title={profile.name} />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
       <Form.Separator />
 
       {linkInputs.map((link, index) => (
         <Fragment key={`link-group-${index}`}>
-          {index > 0 && <Form.Separator />}
           <Form.TextField
             id={`link-url-${index}`}
-            title="URL"
-            placeholder="Enter link URL"
+            title={`Link ${index + 1}`}
             value={link.url}
             onChange={(value) => updateLinkInput(index, value)}
             error={link.error}

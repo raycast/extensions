@@ -20,7 +20,25 @@
       "name": "create-link-bundle",
       "title": "Create Link Bundle",
       "description": "Create a new bundle of links with custom title, description, and Chrome profile assignment.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultNewWindow",
+          "title": "Default values for flags in a form",
+          "label": "Open in New Window",
+          "description": "Whether new bundles should open in a new window",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "defaultIncognitoWindow",
+          "label": "Open in Incognito Window",
+          "description": "Whether new bundles should open in an incognito window",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }]
     }
   ],
   "dependencies": {
