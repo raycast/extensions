@@ -29,7 +29,6 @@ export function countToken(content: string) {
 const input_price = getPreferenceValues().priceinput || 0.27;
 const output_price = getPreferenceValues().priceoutput || 1.1;
 
-
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
   // from : https://openai.com/api/pricing/
