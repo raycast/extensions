@@ -91,6 +91,23 @@
   ],
   "preferences": [
     {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
+    {
       "name": "focusIntervalDuration",
       "type": "dropdown",
       "required": true,
@@ -331,12 +348,57 @@
       ]
     },
     {
-      "name": "enableFocusWhileFocused",
-      "title": "Enable Mac Do Not Disturb while Focused",
+      "name": "enableConfetti",
       "type": "checkbox",
-      "label": "Do Not Disturb while focused",
       "required": false,
-      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+      "title": "Show Confetti (Deprecated)",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured below when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
     },
     {
       "name": "completionImage",
@@ -386,68 +448,6 @@
           "title": "R"
         }
       ]
-    },
-    {
-      "name": "sound",
-      "description": "Play sound",
-      "type": "dropdown",
-      "required": false,
-      "title": "Play Completion Sound",
-      "default": "",
-      "data": [
-        {
-          "title": "No Sound",
-          "value": ""
-        },
-        {
-          "title": "Submarine",
-          "value": "Submarine"
-        },
-        {
-          "title": "Tink",
-          "value": "Tink"
-        },
-        {
-          "title": "Ping",
-          "value": "Ping"
-        }
-      ]
-    },
-    {
-      "name": "enableTimeOnMenuBar",
-      "type": "checkbox",
-      "required": false,
-      "title": "Menu Bar Time",
-      "description": "Shows time on the Menu Bar",
-      "default": true,
-      "label": "Show time on Menu Bar"
-    },
-    {
-      "name": "enableConfetti",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Confetti (Deprecated)",
-      "description": "Shows confetti when interval finishes",
-      "default": false,
-      "label": "Shows confetti when interval finishes"
-    },
-    {
-      "name": "enableQuote",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Quote",
-      "description": "Shows a random quote from zenquotes.io when interval finishes",
-      "default": false,
-      "label": "Shows quote when interval finishes"
-    },
-    {
-      "name": "enableImage",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Image",
-      "description": "Shows the image configured above when interval finishes",
-      "default": true,
-      "label": "Shows image when interval finishes"
     }
   ],
   "dependencies": {
