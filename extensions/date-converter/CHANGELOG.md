@@ -1,6 +1,6 @@
 # Date Converter Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-03
 
 - Support hexadecimal numbers for seconds/ms
 
