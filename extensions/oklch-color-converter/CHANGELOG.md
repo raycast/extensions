@@ -1,9 +1,5 @@
 # OKLCH Color Converter Changelog
 
-## [Title Case Fix] - 2025-01-03
-- Updated extension title to use consistent "OKLCH" capitalization
-- Updated command title to include "OKLCH"
-
 ## [Fix ESLint and Formatting] - 2024-12-20
 
 - Fix ESLint configuration
