@@ -1,6 +1,6 @@
 # Manotori Changelog
 
-## [View NS Sets] - {PR_MERGE_DATE}
+## [View NS Sets] - 2025-01-03
 
 - View `Nameserver Sets`
 - Better Error Handling
