@@ -175,7 +175,7 @@
     },
     {
       "name": "why",
-      "title": "Why is it?",
+      "title": "Why?",
       "description": "Ask why a certain text is the way it is",
       "mode": "view",
       "preferences": [
@@ -229,7 +229,7 @@
     },
     {
       "name": "what",
-      "title": "What is this?",
+      "title": "What?",
       "description": "Introduction of selected text/Words/Phrases",
       "mode": "view",
       "preferences": [
