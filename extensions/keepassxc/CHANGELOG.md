@@ -6,7 +6,7 @@
 - Remove the password and the key file fields from the extension preference
 - Add TOTP indicators and usernames while searching entries
 - Use the official KeePassXC.app icon as the extension icon
-- Use `keepassxc-cli export` to retrieve entries and most other data from the database instead of relying heavily `keepassxc-cli show`
+- Use `keepassxc-cli export` to retrieve entries and most other data from the database instead of relying heavily on `keepassxc-cli show`
 - Update the README.md
 - Update the screenshots
 - Comment the code
