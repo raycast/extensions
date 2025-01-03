@@ -1,6 +1,7 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import OpenAI from "openai";
 import React from "react";
+import { OPENAI_MODEL } from "../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../const/toast_messages";
 import { Preferences } from "../../summarizeVideo";
 import { getAiInstructionSnippet } from "../../utils/getAiInstructionSnippets";
@@ -49,7 +50,7 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
   });
 
   const chatCompletion = openai.beta.chat.completions.stream({
-    model: openaiModel,
+    model: openaiModel || OPENAI_MODEL,
     temperature: parseInt(creativity),
     messages: [{ role: "user", content: aiInstructions }],
     stream: true,

@@ -99,10 +99,9 @@
         {
           "name": "openaiModel",
           "title": "OpenAI Model",
-          "description": "Choose the OpenAI model to use.",
+          "description": "Choose the OpenAI model to use. Defaults to `chatgpt-4o-latest`.",
           "type": "textfield",
-          "default": "chatgpt-4o-latest",
-          "required": true
+          "required": false
         },
         {
           "name": "anthropicApiToken",
@@ -115,10 +114,9 @@
         {
           "name": "anthropicModel",
           "title": "Anthropic Model",
-          "description": "Choose the Anthropic model to use.",
+          "description": "Choose the Anthropic model to use. Defaults to `claude-3-5-sonnet-latest`.",
           "type": "textfield",
-          "default": "claude-3-5-sonnet-latest",
-          "required": true
+          "required": false
         },
         {
           "name": "language",

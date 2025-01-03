@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import React from "react";
+import { ANTHROPIC_MODEL } from "../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../const/toast_messages";
 import { Preferences } from "../../summarizeVideo";
 import { getAiInstructionSnippet } from "../../utils/getAiInstructionSnippets";
@@ -50,7 +51,7 @@ export const useAnthropicSummary = async ({
   });
 
   const chatCompletion = anthropic.messages.stream({
-    model: anthropicModel,
+    model: anthropicModel || ANTHROPIC_MODEL,
     max_tokens: 8192,
     stream: true,
     messages: [{ role: "user", content: aiInstructions }],
