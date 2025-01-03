@@ -1,6 +1,6 @@
 # Mullvad Changelog
 
-## [Added ability to select specific server, Added freceny sorting] - {PR_MERGE_DATE}
+## [Added ability to select specific server, Added freceny sorting] - 2025-01-03
 
 ## [Support Reconnecting via the Mullvad CLI, Fixed HUD message display] - 2024-10-25
 
