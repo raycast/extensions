@@ -22,8 +22,7 @@
           "title": "Summarize Prompt",
           "description": "The prompt for the summarize command",
           "type": "textfield",
-          "default": "Summarize the text and give a *TLDR* version with concisest tex and a normal very concise version *Summary* and, bold keywords, use --- to separate two Summaries: \n\n",
-          "required": false
+          "default": "Summarize the text, please ignore the common sense (low information density) and only provide most informative content (high information densigty) in two versions: 1. a very short **TLDR** version 2. a normal concise version *Summary* and. They should bold keywords, use --- to separate two Summaries: \n\n"
         },
         {
           "name": "model_summarize",
