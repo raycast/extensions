@@ -33,7 +33,11 @@ function limitConversationLength(chats: Chat[]) {
 }
 
 export function chatTransformer(chat: Chat[], prompt: string): Message[] {
-  const messages: Message[] = [{ role: "system", content: prompt }];
+  const messages: Message[] = [];
+  if (prompt !== "") {
+    // only add system prompt if it's not empty
+    messages.push({ role: "system", content: prompt });
+  }
   const limitedChat = limitConversationLength(chat);
   limitedChat.forEach(({ question, answer }) => {
     messages.push({ role: "user", content: question });

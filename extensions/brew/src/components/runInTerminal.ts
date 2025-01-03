@@ -5,33 +5,36 @@ import { preferences } from "../preferences";
 type TerminalApp = (typeof preferences)["terminalApp"];
 
 const names: { [key in TerminalApp]: string } = {
-  terminal: "Terminal",
-  iterm: "iTerm",
-  warp: "Warp",
-  kitty: "kitty",
   alacritty: "Alacritty",
-  wezterm: "WezTerm",
+  ghostty: "Ghostty",
   hyper: "Hyper",
+  iterm: "iTerm",
+  kitty: "kitty",
+  terminal: "Terminal",
+  warp: "Warp",
+  wezterm: "WezTerm",
 };
 
 const icons: { [key in TerminalApp]: Image.ImageLike } = {
-  terminal: { fileIcon: "/System/Applications/Utilities/Terminal.app" },
-  iterm: { fileIcon: "/Applications/iTerm.app" },
-  warp: { fileIcon: "/Applications/Warp.app" },
-  kitty: { fileIcon: "/Applications/kitty.app" },
   alacritty: { fileIcon: "/Applications/Alacritty.app" },
-  wezterm: { fileIcon: "/Applications/WezTerm.app" },
+  ghostty: { fileIcon: "/Applications/Ghostty.app" },
   hyper: { fileIcon: "/Applications/Hyper.app" },
+  iterm: { fileIcon: "/Applications/iTerm.app" },
+  kitty: { fileIcon: "/Applications/kitty.app" },
+  terminal: { fileIcon: "/System/Applications/Utilities/Terminal.app" },
+  warp: { fileIcon: "/Applications/Warp.app" },
+  wezterm: { fileIcon: "/Applications/WezTerm.app" },
 };
 
 const appBundleIds: { [key in TerminalApp]: string } = {
-  terminal: "com.apple.terminal",
-  iterm: "com.googlecode.iterm2",
-  warp: "dev.warp.Warp-Stable",
-  kitty: "org.kovidgoyal.kitty",
   alacritty: "org.alacritty",
-  wezterm: "com.github.wez.wezterm",
+  ghostty: "com.mitchellh.ghostty",
   hyper: "co.zeit.hyper",
+  iterm: "com.googlecode.iterm2",
+  kitty: "org.kovidgoyal.kitty",
+  terminal: "com.apple.terminal",
+  warp: "dev.warp.Warp-Stable",
+  wezterm: "com.github.wez.wezterm",
 };
 
 const runCommandInTermAppleScript = (c: string, terminalApp: string): string => `
@@ -45,22 +48,23 @@ const runCommandInTermAppleScript = (c: string, terminalApp: string): string => 
   `;
 
 const appleScripts: { [key in TerminalApp]: (c: string) => string } = {
+  alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
+  ghostty: (c: string) => runCommandInTermAppleScript(c, names.ghostty),
+  hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
+  iterm: (c: string) => `
+    tell application "iTerm"
+      set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
+    end tell
+    `,
+  kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
   terminal: (c: string) => `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
       do script "echo ; ${c} ; bash -c 'read -n 1 -s -r -p \\"Press any key to exit - will not quit\\"' ; exit" in selected tab of the front window
     end tell
   `,
-  iterm: (c: string) => `
-    tell application "iTerm"
-      set newWindow to create window with default profile command "bash -c '${c}; read -n 1 -s -r -p \\"Press any key to exit - will not quit\\" ; echo' ; exit"
-    end tell
-  `,
-  kitty: (c: string) => runCommandInTermAppleScript(c, names.kitty),
-  alacritty: (c: string) => runCommandInTermAppleScript(c, names.alacritty),
   warp: (c: string) => runCommandInTermAppleScript(c, names.warp),
   wezterm: (c: string) => runCommandInTermAppleScript(c, names.wezterm),
-  hyper: (c: string) => runCommandInTermAppleScript(c, names.hyper),
 };
 
 export const useTerminalApp = () => {

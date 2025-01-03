@@ -177,3 +177,26 @@ export interface OllamaApiChatMessage {
   content: string;
   images?: string[];
 }
+
+export interface OllamaApiPsResponse {
+  models: OllamaApiPsModel[];
+}
+
+export interface OllamaApiPsModel {
+  name: string;
+  model: string;
+  size: number;
+  digest: string;
+  details: OllamaApiPsModelDetails;
+  expires_at: string;
+  size_vram: number;
+}
+
+export interface OllamaApiPsModelDetails {
+  parent_model: string;
+  format: string;
+  family: string;
+  families: string[];
+  parameter_size: string;
+  quantization_level: string;
+}

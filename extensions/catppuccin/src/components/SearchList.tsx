@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetchData } from "../hooks/useFetchData";
+import Fuse, { IFuseOptions } from "fuse.js";
+import { DataType } from "../utils/data.util";
 
 interface SearchListProps<T> {
-  dataKey: "ports" | "styles";
+  dataKey: DataType;
   searchBarPlaceholder: string;
-  renderItem: (itemKey: string, itemDetails: T) => JSX.Element;
-  filterFunction: (itemKey: string, itemDetails: T, searchText: string) => boolean;
+  renderItem: (identifier: string, item: T) => JSX.Element;
 }
 
-export function SearchList<T>({ dataKey, searchBarPlaceholder, renderItem, filterFunction }: SearchListProps<T>) {
+export function SearchList<T>({ dataKey, searchBarPlaceholder, renderItem }: SearchListProps<T>) {
   const { data, isLoading, setData } = useFetchData<T>(dataKey);
   const [searchText, setSearchText] = useState<string>("");
 
-  const entries = Object.entries(data) as [string, T][];
-  const filteredData = entries.filter(([key, value]) => filterFunction(key, value, searchText));
+  const fuseOptions = {
+    keys: ["identifier"],
+    threshold: 0.5,
+  } satisfies IFuseOptions<unknown>;
+  const fuse = new Fuse(Object.values(data), fuseOptions);
+  const filteredData = fuse.search(searchText).map((result) => result.item) as [string, T][];
 
   return (
     <List
