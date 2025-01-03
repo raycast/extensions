@@ -4,9 +4,9 @@
   "title": "KeePassXC",
   "description": "Access a KeePass database through KeePassXC",
   "icon": "keepassxc.png",
-  "author": "zkytech",
+  "author": "Sulfyderz",
   "contributors": [
-    "Sulfyderz"
+    "zkytech"
   ],
   "categories": [
     "Security"
