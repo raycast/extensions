@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-01-03
 
 - Update preferences organization
 
