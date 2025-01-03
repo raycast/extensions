@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Language, Documentation } from "./type";
-import { getLanguages, getDocumentation } from "./util";
+import { getLanguages, getDocumentation } from "./utils/documentation";
 
 export default function Command() {
   const [currentLanguage, setCurrentLanguage] = useCachedState<string>("language", "");
