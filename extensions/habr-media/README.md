@@ -2,7 +2,7 @@
 
 [![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x)](https://x.com/khlebobul) [![Telegram](https://img.shields.io/badge/Telegram-000?style=for-the-badge&logo=telegram&logoColor=2CA5E0)](https://t.me/khlebobul)
 
-This is a simple extension that allows you to read [Habr](https://habr.com/ru/all/) news. It works directly in Raycast, no external applications or dependencies are required
+This is a simple extension that allows you to read [Habr](https://habr.com/ru/all/) news. It works directly in Raycast, no external applications or dependencies are required 
 
 ## Commands
 
