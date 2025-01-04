@@ -38,7 +38,7 @@ export function transactionViewReducer(
         search: state.search,
         collection: initialItems,
         initialCollection: initialItems,
-        isShowingDetails: false,
+        isShowingDetails: state.isShowingDetails,
       };
     }
     case 'group': {
@@ -365,7 +365,6 @@ function filterByModifiers(modifiers: Modifier) {
           const valueAsMilliUnit = formatToYnabAmount(value);
 
           isMatch = t.amount === valueAsMilliUnit;
-          isMatch && console.log({ value, t });
           break;
         }
         default:

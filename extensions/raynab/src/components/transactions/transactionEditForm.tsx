@@ -186,13 +186,12 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
             return newData;
           },
+          shouldRevalidateAfter: true,
         }
       )
-        .then((value) => {
+        .then(() => {
           toast.style = Toast.Style.Success;
           toast.title = 'Transaction updated successfully';
-
-          console.log(value);
 
           if (forApproval) {
             pop();

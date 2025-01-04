@@ -1,5 +1,5 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
-import { Icon, List, showToast, Toast } from '@raycast/api';
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
@@ -24,7 +24,10 @@ interface TransactionViewProps {
 }
 
 export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetCurrency, isLoading: isLoadingCurrency } = useLocalStorage<CurrencyFormat | null>(
+    'activeBudgetCurrency',
+    null
+  );
   const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
   const {
     value: timeline,
@@ -53,12 +56,12 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
 
   // Prevents success toast from overriding a failure
   const errorToastPromise = useRef<Promise<Toast> | null>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Showing an empty list will prevent users from accessing actions and will be stuck
     // We progressively back off in order to not fetch unnecessary data
     // This might cause problems for budgets with no transactions in the past year
     // TODO add a view for > 1 year, change to a different fallback model?
-    if (isLoading || isLoadingBudget || isLoadingTimeline) return;
+    if (isLoadingCurrency || isLoading || isLoadingBudget || isLoadingTimeline) return;
 
     if (transactions.length == 0) {
       let fallbackTimeline: Period;
@@ -103,7 +106,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     } else {
       showToast({ style: Toast.Style.Success, title: `Showing transactions for the past ${timeline}` });
     }
-  }, [timeline, transactions, isLoadingBudget, isLoading, isLoadingTimeline]);
+  }, [transactions, isLoadingBudget, isLoading, isLoadingTimeline, isLoadingCurrency]);
 
   const [displayScheduled, setDisplayScheduled] = useState(false);
   const onDropdownFilterChange = (newValue: string) => {
@@ -132,7 +135,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
       onTimelineChange={setTimeline}
     >
       <List
-        isLoading={isLoading || isLoadingScheduled}
+        isLoading={isLoadingCurrency || isLoadingBudget || isLoadingTimeline || isLoading || isLoadingScheduled}
         isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}

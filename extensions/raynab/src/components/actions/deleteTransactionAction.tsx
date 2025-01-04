@@ -49,6 +49,7 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
 
               return newData;
             },
+            shouldRevalidateAfter: true,
           })
             .then(() => {
               toast.style = Toast.Style.Success;

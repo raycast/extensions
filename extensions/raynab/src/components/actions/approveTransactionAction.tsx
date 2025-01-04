@@ -56,6 +56,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
 
                 return newData;
               },
+              shouldRevalidateAfter: true,
             })
               .then(() => {
                 toast.style = Toast.Style.Success;
