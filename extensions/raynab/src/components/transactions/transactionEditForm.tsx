@@ -110,9 +110,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       const transactionData = {
         ...transaction,
         date: (values.date ?? new Date()).toISOString(),
-        flag_color: values.flag_color
-          ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
-          : null,
+        flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
         amount: formatToYnabAmount(values.amount),
         payee_id: values.payee_id,
         memo: values.memo || null,
@@ -372,13 +370,37 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
       <Form.TextArea {...itemProps.memo} title="Memo" placeholder="Enter additional information…" />
       <Form.Dropdown {...itemProps.flag_color} title="Flag Color">
-        <Form.Dropdown.Item value="" title="No Flag" icon={{ source: Icon.Flag }} />
-        <Form.Dropdown.Item value="red" title="Red" icon={{ source: Icon.Flag, tintColor: Color.Red }} />
-        <Form.Dropdown.Item value="orange" title="Orange" icon={{ source: Icon.Flag, tintColor: Color.Orange }} />
-        <Form.Dropdown.Item value="yellow" title="Yellow" icon={{ source: Icon.Flag, tintColor: Color.Yellow }} />
-        <Form.Dropdown.Item value="green" title="Green" icon={{ source: Icon.Flag, tintColor: Color.Green }} />
-        <Form.Dropdown.Item value="blue" title="Blue" icon={{ source: Icon.Flag, tintColor: Color.Blue }} />
-        <Form.Dropdown.Item value="purple" title="Purple" icon={{ source: Icon.Flag, tintColor: Color.Purple }} />
+        <Form.Dropdown.Item value="" title="No Flag" icon={{ source: Icon.Dot }} />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Red}
+          title="Red"
+          icon={{ source: Icon.Dot, tintColor: Color.Red }}
+        />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Orange}
+          title="Orange"
+          icon={{ source: Icon.Dot, tintColor: Color.Orange }}
+        />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Yellow}
+          title="Yellow"
+          icon={{ source: Icon.Dot, tintColor: Color.Yellow }}
+        />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Green}
+          title="Green"
+          icon={{ source: Icon.Dot, tintColor: Color.Green }}
+        />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Blue}
+          title="Blue"
+          icon={{ source: Icon.Dot, tintColor: Color.Blue }}
+        />
+        <Form.Dropdown.Item
+          value={TransactionFlagColor.Purple}
+          title="Purple"
+          icon={{ source: Icon.Dot, tintColor: Color.Purple }}
+        />
       </Form.Dropdown>
     </Form>
   );
