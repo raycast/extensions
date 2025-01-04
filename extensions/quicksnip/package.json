@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "copy-snippet",
-      "title": "Copy snippet",
+      "title": "Copy Snippet",
       "description": "Find a code snippet using QuickSnip, then copy it to your clipboard.",
       "mode": "view"
     }
