@@ -68,16 +68,16 @@ export const useOwnershipCode = () =>
     keepPreviousData: true,
   });
 
-  export const useDomains = ({ includeShared=false } = {}) =>
-    useCachedPromise(
-      async () => {
-        const body = { includeShared };
-        const result = await callApi<{ domains: Domain[] }>("listDomains", { body });
-        return result.domains;
-      },
-      [],
-      {
-        initialData: [],
-        keepPreviousData: true,
-      },
-    );
+export const useDomains = ({ includeShared = false } = {}) =>
+  useCachedPromise(
+    async () => {
+      const body = { includeShared };
+      const result = await callApi<{ domains: Domain[] }>("listDomains", { body });
+      return result.domains;
+    },
+    [],
+    {
+      initialData: [],
+      keepPreviousData: true,
+    },
+  );

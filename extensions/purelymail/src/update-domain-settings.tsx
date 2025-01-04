@@ -10,22 +10,21 @@ interface DomainArgs {
 
 export default function UpdateDomainSettings(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
-  const { isLoading, data: domains, error, mutate } = useDomains();
+  const { isLoading, data, error, mutate } = useDomains();
+  const domains = data.filter(d => !d.isShared)
 
   const { handleSubmit, itemProps, setValue } = useForm<UpdateDomainSettingsRequest>({
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating Domain");
       try {
-        await mutate(
-          callApi("updateDomainSettings", {body: values}), {
-            optimisticUpdate(data) {
-              const index = data.findIndex(d => d.name===values.name);
-              const d = data[index];
-              data[index] = { ...d, ...values };
-              return data;
-            },
-          }
-        )
+        await mutate(callApi("updateDomainSettings", { body: values }), {
+          optimisticUpdate(data) {
+            const index = data.findIndex((d) => d.name === values.name);
+            const d = data[index];
+            data[index] = { ...d, allowAccountReset: values.allowAccountReset, symbolicSubaddressing: values.allowAccountReset };
+            return data;
+          },
+        });
         toast.style = Toast.Style.Success;
         toast.title = "Domain Settings Updated";
         toast.message = "DOMAIN: " + values.name;

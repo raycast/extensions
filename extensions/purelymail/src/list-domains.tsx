@@ -24,7 +24,7 @@ export default function ListDomains() {
 
   const [isShowingDetails, setIsShowingDetails] = useState(false);
   const [filter, setFilter] = useState("");
-  
+
   const toggleShowDetails = () => {
     setIsShowingDetails(!isShowingDetails);
   };
@@ -43,15 +43,15 @@ export default function ListDomains() {
         await mutate(
           callApi("deleteDomain", {
             body: {
-              name: domain
-            }
+              name: domain,
+            },
           }),
           {
             optimisticUpdate(data) {
-              return data.filter(d => d.name!==domain)
+              return data.filter((d) => d.name !== domain);
             },
-            shouldRevalidateAfter: false
-          }
+            shouldRevalidateAfter: false,
+          },
         );
         toast.style = Toast.Style.Success;
         toast.title = "Domain Deleted";
@@ -78,13 +78,14 @@ export default function ListDomains() {
     }
   };
 
-  const filteredDomains = !filter ? domains : domains
-        .filter((domain) => {
-          if (filter === "domains_shared") return domain.isShared;
-          if (filter === "domains_custom") return !domain.isShared;
-          if (filter.includes("tld_")) return domain.name.split(".").pop() === filter.slice(4);
-          return domain;
-        });
+  const filteredDomains = !filter
+    ? domains
+    : domains.filter((domain) => {
+        if (filter === "domains_shared") return domain.isShared;
+        if (filter === "domains_custom") return !domain.isShared;
+        if (filter.includes("tld_")) return domain.name.split(".").pop() === filter.slice(4);
+        return domain;
+      });
 
   const domainsTitle = `${filteredDomains.length} of ${domains?.length || 0} domains`;
 
