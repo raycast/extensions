@@ -38,7 +38,7 @@ export default function ListDomains() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const toast = await showToast(Toast.Style.Animated, "Deleting User");
+      const toast = await showToast(Toast.Style.Animated, "Deleting Domain");
       try {
         await mutate(
           callApi("deleteDomain", {
