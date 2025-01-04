@@ -7,6 +7,12 @@ import { createInitialsIcon } from "../utils/avatarUtils";
 import { getLDUrlWithEnvs } from "../utils/ld-urls";
 import FlagDetails from "../components/FlagDetails";
 
+interface FetchPagination {
+  hasMore: boolean;
+  pageSize: number;
+  onLoadMore: () => void;
+}
+
 export default function ListFeatureFlags() {
   const [searchText, setSearchText] = useState("");
   const [stateFilter, setStateFilter] = useState("live");
@@ -18,11 +24,15 @@ export default function ListFeatureFlags() {
     totalCount: number;
     isLoading: boolean;
     error: Error | undefined;
-    pagination: { hasMore: boolean };
+    pagination: FetchPagination;
     revalidate: () => void;
   };
 
   const [selectedFlagKey, setSelectedFlagKey] = useState<string>();
+
+  const handleSelectionChange = (id: string | null) => {
+    setSelectedFlagKey(id || undefined);
+  };
 
   function getVariationLabel(flag: LDFlag, index: number): string {
     const variation = flag.variations[index];
@@ -51,12 +61,12 @@ export default function ListFeatureFlags() {
       searchText={searchText || ""}
       onSearchTextChange={(value) => setSearchText(value || "")}
       selectedItemId={selectedFlagKey}
-      onSelectionChange={setSelectedFlagKey}
+      onSelectionChange={handleSelectionChange}
       isShowingDetail
       pagination={{
         pageSize: 20,
         hasMore: pagination?.hasMore || false,
-        onLoadMore: () => pagination?.loadMore(),
+        onLoadMore: () => pagination?.onLoadMore?.(),
       }}
       filtering={false}
       searchBarAccessory={
