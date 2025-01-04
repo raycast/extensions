@@ -139,6 +139,16 @@ function EnvironmentDetail({ envKey, env, flag }: { envKey: string; env: LDFlagE
   );
 }
 
+function getEnvironmentAccessories(env: LDFlagEnvironment): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
+
+  if (env.archived) {
+    accessories.push({ tag: { value: "Archived", color: Color.Yellow } });
+  }
+
+  return accessories;
+}
+
 export default function EnvironmentsList({ flag, environmentOrder, onMoveEnvironment }: EnvironmentsListProps) {
   function handleMove(envKey: string, direction: "up" | "down") {
     onMoveEnvironment(envKey, direction);
@@ -160,10 +170,7 @@ export default function EnvironmentsList({ flag, environmentOrder, onMoveEnviron
           key={envKey}
           icon={env.on ? Icon.CircleFilled : Icon.Circle}
           title={capitalizeFirstLetter(envKey)}
-          accessories={[
-            { text: env.on ? "Enabled" : "Disabled" },
-            env.archived && { tag: { value: "Archived", color: Color.Yellow } },
-          ].filter(Boolean)}
+          accessories={getEnvironmentAccessories(env)}
           detail={<EnvironmentDetail envKey={envKey} env={env} flag={flag} />}
           actions={
             <ActionPanel>

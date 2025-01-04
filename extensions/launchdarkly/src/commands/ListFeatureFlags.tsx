@@ -53,7 +53,11 @@ export default function ListFeatureFlags() {
       selectedItemId={selectedFlagKey}
       onSelectionChange={setSelectedFlagKey}
       isShowingDetail
-      pagination={pagination}
+      pagination={{
+        pageSize: 20,
+        hasMore: pagination?.hasMore || false,
+        onLoadMore: () => pagination?.loadMore(),
+      }}
       filtering={false}
       searchBarAccessory={
         <List.Dropdown
