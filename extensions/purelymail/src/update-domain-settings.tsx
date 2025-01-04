@@ -11,7 +11,7 @@ interface DomainArgs {
 export default function UpdateDomainSettings(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
   const { isLoading, data, error, mutate } = useDomains();
-  const domains = data.filter(d => !d.isShared)
+  const domains = data.filter((d) => !d.isShared);
 
   const { handleSubmit, itemProps, setValue } = useForm<UpdateDomainSettingsRequest>({
     async onSubmit(values) {
@@ -21,7 +21,11 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
           optimisticUpdate(data) {
             const index = data.findIndex((d) => d.name === values.name);
             const d = data[index];
-            data[index] = { ...d, allowAccountReset: values.allowAccountReset, symbolicSubaddressing: values.allowAccountReset };
+            data[index] = {
+              ...d,
+              allowAccountReset: values.allowAccountReset,
+              symbolicSubaddressing: values.allowAccountReset,
+            };
             return data;
           },
         });
