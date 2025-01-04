@@ -100,6 +100,15 @@
       "label": "Show time on Menu Bar"
     },
     {
+      "name": "hideTimeWhenStopped",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Time When Stopped",
+      "description": "Hide time on the Menu Bar when the timer is stopped",
+      "default": true,
+      "label": "Hide the time when stopped"
+    },
+    {
       "name": "enableFocusWhileFocused",
       "title": "Enable Mac Do Not Disturb while Focused",
       "type": "checkbox",
