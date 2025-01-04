@@ -21,6 +21,7 @@ export default function Command() {
     <List>
       {languages?.map((l) => (
         <List.Item
+          key={l.lang}
           icon={{ source: iconUrlForLanguage(l.lang) }}
           title={l.lang}
           actions={
@@ -45,7 +46,7 @@ function LanguageSnippets({ language }: { language: Language }) {
   return (
     <List navigationTitle={`Search for ${language.lang} snippets`} isShowingDetail>
       {categories?.map((category) => (
-        <List.Section title={category.categoryName}>
+        <List.Section title={category.categoryName} key={category.categoryName}>
           {category.snippets.map((snippet) => (
             <List.Item
               key={snippet.title}
