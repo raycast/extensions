@@ -17,7 +17,7 @@ export const DEFAULT_MODEL: Model = {
 };
 
 export function useModel(): ModelHook {
-  const [data, setData] = useState<Model[]>([]);
+  const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
@@ -65,7 +65,7 @@ export function useModel(): ModelHook {
                   title: "Error",
                   message: err.message,
                   style: Toast.Style.Failure,
-                }
+                },
           );
         })
         .finally(() => {
@@ -78,12 +78,26 @@ export function useModel(): ModelHook {
 
   useEffect(() => {
     (async () => {
-      const storedModels = await LocalStorage.getItem<string>("models");
+      const storedModels: Model[] | Record<string, Model> = JSON.parse(
+        (await LocalStorage.getItem<string>("models")) || "{}",
+      );
+      const storedModelsLength = ((models: Record<string, Model> | Model[]): number =>
+        Array.isArray(models) ? models.length : Object.keys(models).length)(storedModels);
 
-      if (!storedModels || storedModels === "[]") {
-        setData([DEFAULT_MODEL]);
+      if (storedModelsLength === 0) {
+        setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
       } else {
-        setData(JSON.parse(storedModels));
+        let modelsById: Record<string, Model>;
+        // Support for old data structure
+        if (Array.isArray(storedModels)) {
+          modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
+        } else {
+          modelsById = storedModels;
+        }
+        if (!modelsById[DEFAULT_MODEL.id]) {
+          modelsById[DEFAULT_MODEL.id] = DEFAULT_MODEL;
+        }
+        setData(modelsById);
       }
       setLoading(false);
       isInitialMount.current = false;
@@ -104,40 +118,48 @@ export function useModel(): ModelHook {
         title: "Saving your model...",
         style: Toast.Style.Animated,
       });
-      const newModel: Model = { ...model, created_at: new Date().toISOString() };
-      setData([...data, newModel]);
+      setData((prevData) => ({ ...prevData, [model.id]: { ...model, created_at: new Date().toISOString() } }));
       toast.title = "Model saved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const update = useCallback(
     async (model: Model) => {
-      setData((prev) => {
-        return prev.map((x) => {
-          if (x.id === model.id) {
-            return model;
-          }
-          return x;
-        });
+      const toast = await showToast({
+        title: "Updating your model...",
+        style: Toast.Style.Animated,
       });
+      setData((prevData) => ({
+        ...prevData,
+        [model.id]: {
+          ...prevData[model.id],
+          ...model,
+          updated_at: new Date().toISOString(),
+        },
+      }));
+      toast.title = "Model updated!";
+      toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const remove = useCallback(
     async (model: Model) => {
       const toast = await showToast({
-        title: "Remove your model...",
+        title: "Removing your model...",
         style: Toast.Style.Animated,
       });
-      const newModels: Model[] = data.filter((oldModel) => oldModel.id !== model.id);
-      setData(newModels);
+      setData((prevData) => {
+        const newData = { ...prevData };
+        delete newData[model.id];
+        return newData;
+      });
       toast.title = "Model removed!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const clear = useCallback(async () => {
@@ -145,21 +167,20 @@ export function useModel(): ModelHook {
       title: "Clearing your models ...",
       style: Toast.Style.Animated,
     });
-    const newModels: Model[] = data.filter((oldModel) => oldModel.id === DEFAULT_MODEL.id);
-    setData(newModels);
+    setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
     toast.title = "Models cleared!";
     toast.style = Toast.Style.Success;
   }, [setData]);
 
   const setModels = useCallback(
-    async (models: Model[]) => {
+    async (models: Record<string, Model>) => {
       setData(models);
     },
-    [setData]
+    [setData],
   );
 
   return useMemo(
     () => ({ data, isLoading, option, add, update, remove, clear, setModels, isFetching }),
-    [data, isLoading, option, add, update, remove, clear, setModels, isFetching]
+    [data, isLoading, option, add, update, remove, clear, setModels, isFetching],
   );
 }

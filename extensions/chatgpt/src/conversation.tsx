@@ -1,11 +1,13 @@
-import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import Ask from "./ask";
 import { useConversations } from "./hooks/useConversations";
-import { Conversation } from "./type";
+import { Conversation as ConversationType } from "./type";
 import { ConversationListView } from "./views/conversation-list";
+import { ExportData, ImportData } from "./utils/import-export";
+import { ImportForm } from "./views/import-form";
 
 export default function Conversation() {
   const conversations = useConversations();
@@ -13,7 +15,7 @@ export default function Conversation() {
 
   const [searchText, setSearchText] = useState<string>("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [conversation, setConversation] = useState<Conversation | null>();
+  const [conversation, setConversation] = useState<ConversationType | null>();
 
   useEffect(() => {
     setConversation(conversations.data.find((x) => x.id === selectedConversationId));
@@ -26,7 +28,7 @@ export default function Conversation() {
   }, [conversation]);
 
   const uniqueConversations = conversations.data.filter(
-    (value, index, self) => index === self.findIndex((conversation) => conversation.id === value.id)
+    (value, index, self) => index === self.findIndex((conversation) => conversation.id === value.id),
   );
 
   const filteredConversations = searchText
@@ -34,13 +36,13 @@ export default function Conversation() {
         x.chats.some(
           (x) =>
             x.question.toLowerCase().includes(searchText.toLocaleLowerCase()) ||
-            x.answer.toLowerCase().includes(searchText.toLocaleLowerCase())
-        )
+            x.answer.toLowerCase().includes(searchText.toLocaleLowerCase()),
+        ),
       )
     : uniqueConversations;
 
   const sortedConversations = filteredConversations.sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
   );
 
   const pinnedConversation = sortedConversations.filter((x) => x.pinned);
@@ -48,7 +50,7 @@ export default function Conversation() {
   const uniqueSortedConversations =
     pinnedConversation.length > 0 ? sortedConversations.filter((x) => !x.pinned) : sortedConversations;
 
-  const getActionPanel = (conversation: Conversation) => (
+  const getActionPanel = (conversation: ConversationType) => (
     <ActionPanel>
       <PrimaryAction title="Continue Ask" onAction={() => push(<Ask conversation={conversation} />)} />
       <PinAction
@@ -56,6 +58,29 @@ export default function Conversation() {
         isPinned={conversation.pinned}
         onAction={() => setConversation({ ...conversation, pinned: !conversation.pinned })}
       />
+      <ActionPanel.Section title="Import/Export">
+        <Action
+          title={"Export Conversation"}
+          icon={Icon.Upload}
+          onAction={() => ExportData(conversations.data, "Conversation")}
+        />
+        <Action
+          title={"Import Conversation"}
+          icon={Icon.Download}
+          onAction={() =>
+            push(
+              <ImportForm
+                moduleName="Conversation"
+                onSubmit={async (file) => {
+                  ImportData<ConversationType>("conversations", file).then((data) => {
+                    conversations.setConversations(data);
+                  });
+                }}
+              />,
+            )
+          }
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section title="Delete">
         <DestructiveAction
           title="Remove"
@@ -98,6 +123,26 @@ export default function Conversation() {
           title="No Conversation"
           description="Your recent conversation will be showed up here"
           icon={Icon.Stars}
+          actions={
+            <ActionPanel>
+              <Action
+                title={"Import Conversation"}
+                icon={Icon.Download}
+                onAction={() =>
+                  push(
+                    <ImportForm
+                      moduleName="Conversation"
+                      onSubmit={async (file) => {
+                        ImportData<ConversationType>("conversations", file).then((data) => {
+                          conversations.setConversations(data);
+                        });
+                      }}
+                    />,
+                  )
+                }
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         <>
