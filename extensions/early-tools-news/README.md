@@ -1,3 +1,5 @@
-# founders.menu news
+# early.tools news
 
-News feed from the top entrepreneurs on the web.
+Long-form updates from 80+ of the greatest entrepreneurs on the web.
+
+This is a raycast-only service for now.
