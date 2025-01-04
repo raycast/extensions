@@ -1,5 +1,15 @@
 # Brand Icons Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Use `getIconSlug()` to keep slugs consistent
+- Add support for copying icon title
+- Move API documentation separate to keep extension homepage tidy
+- Add Simple Icons Font to related project list
+- Fix vulnerabilities with `npm audit fix`
+- Clean redundant dependencies since they're already in `@raycast/api`'s dependencies
+- Bump all dependencies to the latest
+
 ## [Enhancements & Fixes] - 2024-10-28
 
 - Fix incorrect file path
