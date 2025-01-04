@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { List, showToast, Toast } from '@raycast/api';
 
 import { TransactionItem } from './transactionItem';
@@ -35,7 +35,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
     isLoading: isLoadingTimeline,
   } = useLocalStorage<Period>('timeline', 'month');
 
-  const { data: transactions = [], isLoading } = useTransactions(activeBudgetId, timeline);
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useTransactions(activeBudgetId, timeline);
   const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);
 
   const [state, dispatch] = useReducer(
@@ -54,59 +54,54 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
 
   const { collection, group, sort, filter, search: query, isShowingDetails } = state;
 
-  // Prevents success toast from overriding a failure
-  const errorToastPromise = useRef<Promise<Toast> | null>(null);
-  useLayoutEffect(() => {
-    // Showing an empty list will prevent users from accessing actions and will be stuck
-    // We progressively back off in order to not fetch unnecessary data
-    // This might cause problems for budgets with no transactions in the past year
-    // TODO add a view for > 1 year, change to a different fallback model?
-    if (isLoadingCurrency || isLoading || isLoadingBudget || isLoadingTimeline) return;
-
-    if (transactions.length == 0) {
-      let fallbackTimeline: Period;
-      switch (timeline) {
-        case 'day':
-          fallbackTimeline = 'week';
-          break;
-        case 'week':
-          fallbackTimeline = 'month';
-          break;
-        case 'month':
-          fallbackTimeline = 'quarter';
-          break;
-        default:
-          fallbackTimeline = 'year';
-          break;
-      }
-
-      setTimeline(fallbackTimeline);
-      errorToastPromise.current = showToast({
-        style: Toast.Style.Failure,
-        title: `No results for the past ${timeline}`,
-        message: `Falling back to the last ${fallbackTimeline}`,
-      });
-
-      return;
-    }
-
+  useEffect(() => {
+    if (!transactions.length) return;
     dispatch({ type: 'reset', initialCollection: transactions });
-
-    // Keep the current query and previous filter state in sync with the new collection to filter
     dispatch({ type: 'search', query });
 
     if (filter?.key === 'unreviewed') {
       dispatch({ type: 'filter', filterBy: { key: 'unreviewed' } });
     }
+  }, [transactions.length]);
 
-    // Prevents success toast from overriding a failure
-    if (errorToastPromise.current) {
-      errorToastPromise.current.then((t) => setTimeout(() => t.hide(), 1500));
-      errorToastPromise.current = null;
-    } else {
-      showToast({ style: Toast.Style.Success, title: `Showing transactions for the past ${timeline}` });
+  // Prevents success toast from overriding a failure
+  const errorToastPromise = useRef<Promise<Toast> | null>(null);
+  useEffect(() => {
+    if (isLoadingCurrency || isLoadingTransactions || isLoadingBudget || isLoadingTimeline) return;
+    if (transactions.length > 0) {
+      if (!errorToastPromise.current) {
+        showToast({ style: Toast.Style.Success, title: `Showing transactions for the past ${timeline}` });
+      }
+      return;
     }
-  }, [transactions, isLoadingBudget, isLoading, isLoadingTimeline, isLoadingCurrency]);
+
+    if (!timeline) return;
+
+    const fallbackMap: Record<Period, Period> = {
+      day: 'week',
+      week: 'month',
+      month: 'quarter',
+      quarter: 'year',
+      year: 'year',
+    };
+
+    const fallbackTimeline = fallbackMap[timeline];
+    setTimeline(fallbackTimeline);
+
+    errorToastPromise.current = showToast({
+      style: Toast.Style.Failure,
+      title: `No results for the past ${timeline}`,
+      message: `Falling back to the last ${fallbackTimeline}`,
+    });
+
+    // Clear error toast after success
+    return () => {
+      if (errorToastPromise.current) {
+        errorToastPromise.current.then((t) => setTimeout(() => t.hide(), 1500));
+        errorToastPromise.current = null;
+      }
+    };
+  }, [isLoadingCurrency, isLoadingTransactions, isLoadingBudget, isLoadingTimeline, timeline, transactions.length]);
 
   const [displayScheduled, setDisplayScheduled] = useState(false);
   const onDropdownFilterChange = (newValue: string) => {
@@ -135,7 +130,9 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
       onTimelineChange={setTimeline}
     >
       <List
-        isLoading={isLoadingCurrency || isLoadingBudget || isLoadingTimeline || isLoading || isLoadingScheduled}
+        isLoading={
+          isLoadingCurrency || isLoadingBudget || isLoadingTimeline || isLoadingTransactions || isLoadingScheduled
+        }
         isShowingDetail={isShowingDetails}
         searchBarPlaceholder={`Search transactions in the last ${timeline}`}
         searchText={state.search}
