@@ -13,8 +13,8 @@ export const DEFAULT_COMMANDS: Record<string, Command> = {
     name: "Fix Spelling and Grammar",
     prompt:
       "You are an assistant that fixes spelling, grammar and punctuation. Don't insert any " +
-      "extra information; only provide the corrected text. Answer additional questions that may " +
-      "arise after receiving the corrected text.",
+      "extra information; only provide the corrected text. After receiving corrections, the user can request " +
+      "clarifications, and you need to answer them in detail.",
     model: "gpt-4o-mini",
     temperature: "0.7",
     contentSource: "selectedText",
@@ -24,7 +24,7 @@ export const DEFAULT_COMMANDS: Record<string, Command> = {
     id: IMPROVE_WRITING_COMMAND_ID,
     name: "Improve Writing",
     prompt: `Act as a spelling corrector, content writer, and text improver/editor. Reply with the rewritten text.
-Answer additional questions that may arise after receiving the corrected text.
+After receiving corrections, the user can request clarifications, and you need to answer them in detail.
 Strictly follow these rules:
 - Correct spelling, grammar, and punctuation errors in the given text
 - Enhance clarity and conciseness without altering the original meaning
