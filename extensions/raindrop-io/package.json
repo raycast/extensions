@@ -56,6 +56,15 @@
       "placeholder": "Enter your Raindrop.io Test Access token."
     },
     {
+      "name": "titleOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Search",
+      "description": "Search on title only.",
+      "default": false,
+      "label": "Search on title only"
+    },
+    {
       "name": "useLastCollection",
       "type": "checkbox",
       "required": false,

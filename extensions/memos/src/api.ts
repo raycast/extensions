@@ -8,7 +8,7 @@ import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
 import { Preferences, ResponseData, ROW_STATUS, ResourceObj } from "./types";
-import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
+import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse } from "./types";
 
 const cache = new Cache();
 
@@ -125,15 +125,32 @@ export const sendMemo = (data: PostMemoParams) => {
   });
 };
 
-export const getTags = () => {
-  const url = getRequestUrl(`/api/v1/memos/-/tags`);
-
-  return getUseFetch<TagResponse>(url, {
-    keepPreviousData: true,
-    initialData: {
-      tagAmounts: {},
-    },
+export const getRecentTags = async (): Promise<string[]> => {
+  const me = await getFetch<MeResponse>({
+    url: getRequestUrl(`/api/v1/auth/status`),
+    method: "POST",
   });
+
+  const memos = await getFetch<{
+    memos: MemoInfoResponse[];
+  }>({
+    url: getRequestUrl(`/api/v1/memos?pageSize=50&filter=creator=='users/${me.id}'`),
+    method: "GET",
+  });
+
+  const recentTags: string[] = [];
+
+  memos.memos.forEach((memo) => {
+    const tags = memo.property?.tags || [];
+
+    tags.forEach((tag) => {
+      if (!recentTags.includes(tag)) {
+        recentTags.push(tag);
+      }
+    });
+  });
+
+  return recentTags;
 };
 
 export const postFile = (filePath: string, filename: string) => {
@@ -246,7 +263,7 @@ export const deleteMemo = (memoId: string) => {
 export const getResourceBin = (resourceName: string, resourceFilename: string) => {
   const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}`);
 
-  return getFetch<BinaryData>({
+  return getFetch<Blob>({
     url,
     method: "GET",
     responseType: "blob",

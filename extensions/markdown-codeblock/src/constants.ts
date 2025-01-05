@@ -299,4 +299,9 @@ export const LIST_ITEMS = [
     icon: "icons/applescript.svg",
     keywords: ["applescript"],
   },
+  {
+    title: "Astro",
+    icon: "icons/astro.svg",
+    keywords: ["astro"],
+  },
 ];

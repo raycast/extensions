@@ -1,5 +1,11 @@
 # Catppuccin Changelog
 
+## [Search Improvements and Refactoring] - 2025-01-03
+
+- Use fuzzy search for `search-palette`, `search-ports`, and `search-userstyles`
+  - `search-palette` now supports searching hex codes
+- Add "All" flavors option to `search-palette` dropdown
+
 ## [Stability Changes & Major Visual Improvements] - 2024-11-11
 
 - Add icons to both `search-ports` and `search-userstyles` commands

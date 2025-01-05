@@ -1,5 +1,16 @@
 # Brand Icons Changelog
 
+## [Enhancements & Fixes] - 2024-10-28
+
+- Fix incorrect file path
+- Add support for copying font entities
+
+## [Maintenance] - 2024-10-27
+
+- Get ready for the v14 new data structure
+- Add support for copying icon title
+- Bump all dependencies to the latest
+
 ## [Fixes] - 2024-10-16
 
 - Fix the issue where AI search could not be stopped

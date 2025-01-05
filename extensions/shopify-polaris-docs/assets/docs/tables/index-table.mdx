@@ -1,0 +1,278 @@
+---
+title: Index table
+category: Tables
+keywords:
+  - ResourceList
+  - index
+  - table
+  - list
+  - collections
+  - items
+  - objects
+  - list of products
+  - list of orders
+  - product lists
+  - order lists
+  - collections lists
+  - collection lists
+  - list of collections
+  - product listings list
+  - channel lists
+  - resource list attributes
+  - list attributes
+  - exceptions list
+  - list secondary actions
+  - secondary actions in a list
+  - list of resources
+  - filter
+  - sort
+examples:
+  - fileName: index-table-default.tsx
+    title: Default
+    description: An index table with simple items and no bulk actions, sorting, or filtering.
+  - fileName: index-table-with-views-search-filter-sorting.tsx
+    title: With saved views, search, filtering, and sorting
+    description: An index table with saved views, search, filtering, sorting, and bulk actions.
+  - fileName: index-filters-with-edit-colums-button.tsx
+    title: With edit columns button
+    description: An index table with edit columns, saved views, search, filtering, sorting, and bulk actions.
+  - fileName: index-table-with-disabled-rows.tsx
+    title: With disabled rows
+    description: An index table with saved views, search, filtering, sorting, and bulk actions.
+  - fileName: index-table-small-screen.tsx
+    title: Small screen
+    description: A small screen index table with simple items and no bulk actions, sorting, or filtering.
+  - fileName: index-table-condensed-with-views-search-filter-sorting.tsx
+    title: Small screen with saved views, search, filtering, and sorting
+    description: A small screen index table with saved views, search, filtering, sorting, and bulk actions.
+  - fileName: index-table-with-empty-state.tsx
+    title: With empty state
+    description: Use to explain the purpose of a index table when no resources exist yet. This allows a smooth transition from a list in a loading state to a list where zero, one, or many resources exist.
+  - fileName: index-table-with-bulk-actions.tsx
+    title: With bulk actions
+    description: Allows merchants to select items and perform an action on the selection.
+  - fileName: index-table-with-multiple-promoted-bulk-actions.tsx
+    title: With multiple promoted bulk actions
+    description: Allows merchants to select items and perform different actions on the selection.
+  - fileName: index-table-with-bulk-actions-and-selection-across-pages.tsx
+    title: With bulk actions and selection across pages
+    description: Allows merchants to select items, perform an action on the selection and select resources across pages.
+  - fileName: index-table-with-selection-and-no-bulk-actions.tsx
+    title: With selection and no bulk actions
+    description: For when a table is selectable, but doesn't have any bulk actions.
+  - fileName: index-table-with-loading-state.tsx
+    title: With loading state
+    description: Notifies merchants that index table items are being processed.
+  - fileName: index-table-with-filtering.tsx
+    title: With filtering
+    description: Allows merchants to narrow the index table to a subset of the original items.
+  - fileName: index-table-with-sticky-last-column.tsx
+    title: With sticky last column
+    description: An index table with a sticky last column that stays visible on scroll. The last heading will also be sticky if not hidden.
+  - fileName: index-table-with-row-navigation-link.tsx
+    title: With row navigation link
+    description: Use when clicking the row should navigate merchants to another page, like the row item's detail page. When a row contains a `Link` with the `dataPrimaryLink` prop set to `true`, clicking the row will trigger navigation to the link's `url` instead of selecting the row as well as trigger the callback set on the `IndexTable` `onNavigation` prop if provided.
+  - fileName: index-table-without-checkboxes.tsx
+    title: Without checkboxes
+    description: An index table without checkboxes and bulk actions.
+  - fileName: index-table-with-subheaders.tsx
+    title: With subheaders
+    description: An index table with multiple table headers. Use to present merchants with resources grouped by a relevant data value to enable faster bulk selection.
+  - fileName: index-table-with-pagination.tsx
+    title: With pagination
+    description: Use when the table contains many rows and they need paginating.
+  - fileName: index-table-with-nested-rows.tsx
+    title: With nested rows
+    description: An index table with nested rows. Use to present hierarchical or related data in a structured manner.
+  - fileName: index-table-with-sticky-scroll-bar.tsx
+    title: With sticky scroll bar
+    description: An index table with pagination and a horizontal scroll bar, to show how the scroll bar behaves with the sticky pagination.
+  - fileName: index-table-with-pagination-and-bulk-actions.tsx
+    title: With pagination and bulk actions
+    description: An index table with both pagination and bulk actions elements, to see how they integrate with one another.
+previewImg: /images/components/tables/index-table.png
+---
+
+# {frontmatter.title}
+
+<Lede>
+
+An index table displays a collection of objects of the same type, like orders or products. The main job of an index table is to help merchants get an at-a-glance of the objects to perform actions or navigate to a full-page representation of it.
+
+</Lede>
+
+<Examples />
+
+<Props componentName={frontmatter.title} />
+
+Index tables can also:
+
+- Support [customized index rows and columns](https://polaris.shopify.com/components/resource-item)
+- Include bulk actions so merchants can act on multiple objects at once
+- Support sorting and [filtering](https://polaris.shopify.com/components/filters) of long lists
+- Be paired with pagination to make long lists digestible
+
+---
+
+## Build
+
+Using an index table in a project involves combining the following components and subcomponents:
+
+- IndexTable
+- [IndexTable.Row](#index-table-row)
+- [IndexTable.Cell](#index-table-cell)
+- [Filters](/components/selection-and-input/filters) (optional)
+- [IndexFilters](/components/selection-and-input/index-filters) (optional)
+- [Pagination](/components/navigation/pagination) (optional)
+
+The index table component provides the UI elements for list selection, sorting, filtering, and pagination, but doesn’t provide the logic for these operations. When a sort option is changed, filter added, or second page requested, you’ll need to handle that event (including any network requests) and then update the component with new props.
+
+---
+
+## Purpose
+
+Shopify is organized around objects that represent merchants' businesses, like customers, products, and orders. Each individual order, for example, is given a dedicated page that can be linked to. In Shopify, we call these types of objects _resources_, and we call the object’s dedicated page its _details page_.
+
+### Problem
+
+Take orders as an example. Merchants may have a lot of them. They need a way to scan their orders, view the different attributes on each order, and find out which ones need action first. In other words, they need a way find an individual order, call up more information about it, and take action on it.
+
+### Solution
+
+Index tables function as:
+
+- A content format, presenting a set of individual resources with multiple columns of information for each
+- A system for taking action on one or more individual resources
+- A way to navigate to an individual resource’s details page
+
+Because a details page displays all the content and actions for an individual resource, you can think of a resource list as a summary of these details pages. In this way resource lists bridge a middle level in Shopify’s navigation hierarchy.
+
+---
+
+## Best practices
+
+Index tables should:
+
+- Have items that perform an action when clicked. The action should navigate to the resource’s details page or otherwise provide more detail about the item.
+- [Customize the content and layout](https://polaris.shopify.com/components/resource-item) of their items rows to surface information to support merchants’ needs.
+- Support sorting if the list can be long, and especially if different merchant tasks benefit from different sort orders.
+- Support [filtering](https://polaris.shopify.com/components/filters) if the list can be long.
+- Paginate when the current list contains more than 50 items.
+- Use the [skeleton page](https://polaris.shopify.com/components/skeleton-page) component on initial page load for the rest of the page if the loading prop is true and items are processing.
+- Numeric cells and titles should be right aligned with the [Text](https://polaris.shopify.com/components/text) component
+- Numeric cells should use the numeric style with the [Text](https://polaris.shopify.com/components/text) component
+
+Index tables can optionally:
+
+- Provide bulk actions for tasks that are often applied to many list items at once. For example, merchants may want to add the same tag to a large number of products.
+- Hide bulk actions on small screens using the `condensed` prop. We only recommend hiding bulk actions on screens smaller than 490px using our `breakpoints-sm` value: `condensed={useBreakpoints().smDown}`.
+  - Hiding bulk actions means a merchant can’t select multiple items at once, so it should only be used when the bulk actions are not essential to the merchant’s workflow.
+
+---
+
+## Content guidelines
+
+Index tables should:
+
+- Identify the type of resource, usually with a heading
+
+<DoDont>
+
+#### Do
+
+- Products
+- Showing 50 products
+
+#### Don’t
+
+- _No heading_
+
+</DoDont>
+
+- Indicate when not all members of a resource are being shown. For a card summarizing and linking to recently purchased products:
+
+<DoDont>
+
+#### Do
+
+- Popular products this week
+
+#### Don’t
+
+- Products
+
+</DoDont>
+
+- Follow the verb + noun formula for bulk actions
+
+- Follow the [content guidelines for filter options and applied filters](https://polaris.shopify.com/components/filters#content-guidelines)
+
+---
+
+## IndexTable.Row
+
+An `IndexTable.Row` is used to render a row representing an item within an `IndexTable`
+
+### IndexTable.Row properties
+
+| Prop                | Type                                                          | Description                                                                                                                                                                                         |
+| ------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| children            | ReactNode                                                     | Table header or data cells                                                                                                                                                                          |
+| id                  | string                                                        | A unique identifier for the row                                                                                                                                                                     |
+| selected?           | boolean &#124; "indeterminate"                                | A boolean property indicating whether the row or it's related rows are selected                                                                                                                     |
+| position            | number                                                        | The zero-indexed position of the row. Used for Shift key multi-selection as well as selection of a range of rows when a `selectionRange` is set.                                                    |
+| tone?               | "subdued" &#124; "success" &#124; "warning" &#124; "critical" | Whether the row should visually indicate its status with a background color                                                                                                                         |
+| disabled?           | boolean                                                       | Whether the row should be disabled                                                                                                                                                                  |
+| selectionRange?     | [number, number]                                              | A tuple array with the first and last index of the range of other rows that the row describes. All non-disabled rows in the range are selected when the row with a selection range set is selected. |
+| rowType?            | "data" &#124; "subheader" &#124; "child"                      | Indicates the relationship or role of the row's contents. A `rowType` of "subheader" looks and behaves the same as the table header. Rows of type "child" are indented. Defaults to "data".         |
+| accessibilityLabel? | string                                                        | Label set on the row's checkbox. Defaults to "Select \{resourceName\}"                                                                                                                              |
+| onClick?            | () => void                                                    | Callback fired when the row is clicked. Overrides the default click behaviour.                                                                                                                      |
+| onNavigation?       | (id: string) => void                                          | Callback fired when the row is clicked and contains an anchor element with the `data-primary-link` property set                                                                                     |
+
+## IndexTable.Cell
+
+An `IndexTable.Cell` is used to render a single cell within an `IndexTable.Row`
+
+### IndexTable.Cell properties
+
+| Prop       | Type                                                                              | Description                                                                                                                                                              |
+| ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| as?        | 'th' &#124; 'td'                                                                  | The table cell element to render. Render the cell as a `th` if it serves as a subheading. Defaults to `td`.                                                              |
+| id?        | string                                                                            | The unique ID to set on the cell element                                                                                                                                 |
+| children?  | ReactNode                                                                         | The cell contents                                                                                                                                                        |
+| className? | string                                                                            | Adds a class to the cell. Use to set a custom cell width.                                                                                                                |
+| flush?     | boolean                                                                           | Whether the cell padding should be removed. Defaults to false.                                                                                                           |
+| colSpan?   | [HTMLTableCellElement['colSpan']](https://www.w3schools.com/tags/att_colspan.asp) | For subheader cells -- The number of the columns that the cell element should extend to within the row.                                                                  |
+| scope?     | [HTMLTableCellElement['scope']](https://www.w3schools.com/tags/att_scope.asp)     | For subheader cells -- Indicates the cells that the `th` element relates to                                                                                              |
+| headers?   | [HTMLTableCellElement['headers']](https://www.w3schools.com/tags/att_headers.asp) | A space-separated list of the `th` cell IDs that describe or apply to it. Use for cells within a row that relate to a subheader cell in addition to their column header. |
+
+---
+
+## Related components
+
+- To create an actionable list of related items that link to details pages, such as a list of customers, use the [resource list component](https://polaris.shopify.com/components/lists/resource-list)
+- To present structured data for comparison and analysis, like when helping merchants to gain insights or review analytics, use the [data table component](https://polaris.shopify.com/components/tables/data-table)
+- To display a simple list of related content, [use the list component](https://polaris.shopify.com/components/lists/list)
+
+---
+
+## Accessibility
+
+### Structure
+
+The `IndexTable` is an actionable, filterable, and sortable table widget that supports row selection with [subheaders](https://www.w3.org/WAI/tutorials/tables/multi-level/). To ensure that the power of this table is accessible to all merchants when implementing `IndexTable.Row` subheaders, set the following props on `IndexTable.Cell` that are appropriate for the enhancement you are implementing.
+
+Merchants can select a group of rows at once by clicking or <kbd>Space</kbd> keypressing a subheader row's checkbox. To indicate that an `IndexTable.Row` serves as a subheader for 1 or more rows below it, set the:
+
+- Zero-indexed table `position` of the first and last `IndexTable.Row` described by the subheader `IndexTable.Row` as a tuple array on its `selectionRange` prop
+- Unique `id` on the `IndexTable.Cell` that contains the subheader content
+- Element tag to `"th"` on the `as` prop of the subheader `IndexTable.Cell`
+- Subheader `IndexTable.Cell` `scope` prop to `"colgroup"`
+
+To associate the subheader `IndexTable.Row` with each `IndexTable.Cell` that it describes, set the:
+
+- Unique `id` provided to the subheader `IndexTable.Cell` on the `headers` prop of each related `IndexTable.Cell` (contained by an `IndexTable.Row` that's position is within the `selectionRange`) as well as the unique `id` of its corresponding column heading that you provided to the `IndexTable` `headings` prop
+
+### Keyboard support
+
+`IndexTable` also supports multi-selection of a range of rows by keypressing the <kbd>Shift</kbd> key. To select a range, press and hold the <kbd>Shift</kbd> key while you click or keypress the <kbd>Space</kbd> key on a row checkbox and then do the same on another row's checkbox. All selectable rows between the selected checkboxes will also be selected.

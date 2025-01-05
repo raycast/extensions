@@ -5,7 +5,8 @@
   "description": "Quick Tmux Session Switcher",
   "icon": "command-icon.png",
   "author": "louishuyng",
-  "contributors": ["sxn"],
+  "contributors": ["sxn",
+    "jasonshanks"],
   "categories": ["Developer Tools"],
   "license": "MIT",
   "commands": [

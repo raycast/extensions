@@ -1,5 +1,12 @@
 # Brew Changelog
 
+## [Improvements] - 2025-01-02
+
+- Add terminal option for Ghostty
+- Updated dependencies
+- Fixed linter error
+- Organized code
+
 ## [Improvements & Bugfix] - 2024-09-22
 
 - Fix detail panel for tap that doesn't have a license ([#12507](https://github.com/raycast/extensions/issues/12507))
