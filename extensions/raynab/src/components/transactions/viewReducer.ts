@@ -306,7 +306,7 @@ type Modifier = Map<ModifierType, { value: string; isNegative: boolean }>;
  * account:checking
  *
  * // Exclude transactions from "Savings" account
- * -account:savings
+ * account:savings
  *
  * // Only show inflow transactions
  * type:inflow
