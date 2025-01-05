@@ -58,7 +58,7 @@ export function UnreviewedTransactionView() {
                   name: 'transactions',
                   type: LaunchType.UserInitiated,
                   context: {
-                    search: `account:${accountName.split(' ').join('-').toLowerCase()}`,
+                    search: `account:${accountName.toLowerCase()}`,
                     filter: { key: 'unreviewed' },
                   },
                 })
