@@ -105,7 +105,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
             <ToggleDetailsAction showDetails={isDetailed} toggleDetails={toggleDetails} />
             <Action.Push title="Show Monthly Budget" icon={Icon.Envelope} target={<BudgetDetails budget={budget} />} />
             <Action.Push
-              title="Show category's transactions"
+              title="Show Related Transactions"
               icon={Icon.MagnifyingGlass}
               target={<TransactionView search={`category:${category.name.split(' ').join('-').toLowerCase()}`} />}
               shortcut={Shortcuts.ShowTransactionsForCategory}
