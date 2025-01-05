@@ -29,7 +29,6 @@ export default function ShowMonitors() {
   return (
     <List isLoading={isLoading && isWhoamiLoading}>
       {data
-        .filter((monitor) => monitor.active === true)
         .map((monitor) => (
           <List.Item
             key={monitor.id}
