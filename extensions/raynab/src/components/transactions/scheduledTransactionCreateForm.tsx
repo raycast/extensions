@@ -196,7 +196,7 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
       isLoading={isLoadingAccounts || isLoadingCategories}
     >
       <Form.Description
-        title="Create a new transaction"
+        title="Schedule a new transaction"
         text="Enter your transaction details below. Amounts can be positive or negative."
       />
       <Form.DatePicker
@@ -204,6 +204,7 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
         title="Date of Transaction"
         type={Form.DatePicker.Type.Date}
         min={tomorrow}
+        info="Date of first occurence"
       />
       <Form.TextField
         {...itemProps.amount}
