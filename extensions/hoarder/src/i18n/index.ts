@@ -63,6 +63,12 @@ export const translations = {
         note: "📒 Note",
       },
 
+      // Checkboxes
+      archived: "Archived",
+      archivedLabel: "Archive this bookmark",
+      favourited: "Favorited",
+      favouritedLabel: "Favorite this bookmark",
+
       // Actions
       actions: {
         openInBrowser: "Open in Browser",
@@ -136,9 +142,9 @@ export const translations = {
         title: "No bookmarks found",
         description: "No bookmarks in favorites",
       },
-      archived: "Archived",
-      openArchived: "Open Archived",
-      searchInArchived: "Search in Archived...",
+      archive: "Archive",
+      openArchive: "Open Archived",
+      searchInArchive: "Search in Archive...",
       openList: "Open List",
       deleteList: "Delete List",
       deleteConfirm: "Are you sure you want to delete list {name}?",
@@ -301,6 +307,12 @@ export const translations = {
         note: "📒 笔记",
       },
 
+      // Checkboxes
+      archived: "归档",
+      archivedLabel: "归档此书签",
+      favourited: "收藏",
+      favouritedLabel: "收藏此书签",
+
       // 操作
       actions: {
         openInBrowser: "在浏览器中打开",
@@ -374,9 +386,9 @@ export const translations = {
         title: "暂无收藏",
         description: "收藏夹中暂无书签",
       },
-      archived: "已归档",
-      openArchived: "打开已归档",
-      searchInArchived: "在已归档中搜索...",
+      archive: "已归档",
+      openArchive: "打开已归档",
+      searchInArchive: "在已归档中搜索...",
       openList: "打开列表",
       deleteList: "删除列表",
       deleteConfirm: "确定要删除列表 {name} 吗？",

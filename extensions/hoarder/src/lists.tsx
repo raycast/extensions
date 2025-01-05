@@ -77,7 +77,7 @@ function ArchivedBookmarks() {
       hasMore={hasMore}
       onRefresh={revalidate}
       loadMore={loadNextPage}
-      searchBarPlaceholder={t("list.searchInArchived")}
+      searchBarPlaceholder={t("list.searchInArchive")}
       emptyViewTitle={t("list.noArchived.title")}
       emptyViewDescription={t("list.noArchived.description")}
       filterFn={(bookmark) => bookmark.archived}
@@ -220,10 +220,10 @@ export default function Lists() {
       />
       <List.Item
         icon="📦"
-        title={t("list.archived")}
+        title={t("list.archive")}
         actions={
           <ActionPanel>
-            <Action title={t("list.openArchived")} onAction={handleShowArchivedBookmarks} icon={Icon.List} />
+            <Action title={t("list.openArchive")} onAction={handleShowArchivedBookmarks} icon={Icon.List} />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/archive`} title={t("common.viewInBrowser")} />
           </ActionPanel>
         }

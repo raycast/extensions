@@ -11,7 +11,10 @@ interface FormValues {
   type: "text" | "link";
   url?: string;
   content?: string;
+  note?: string;
   list?: string;
+  archived?: boolean;
+  favourited?: boolean;
 }
 
 export default function CreateBookmarkView() {
@@ -45,15 +48,17 @@ export default function CreateBookmarkView() {
 
       try {
         const basePayload = {
-          createdAt: new Date().toISOString(),
+          archived: values.archived,
+          favourited: values.favourited,
+          note: values.note,
         };
 
         const content =
           values.type === "text" ? { type: "text", text: values.content } : { type: "link", url: values.url };
 
         const payload = {
-          ...basePayload,
           ...content,
+          ...basePayload,
         };
         const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
 
@@ -102,12 +107,17 @@ export default function CreateBookmarkView() {
         <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
       )}
 
+      <Form.TextArea {...itemProps.note} title={t("bookmark.note")} placeholder={t("bookmark.notePlaceholder")} />
+
       <Form.Dropdown title={t("bookmark.list")} {...itemProps.list}>
         <Form.Dropdown.Item value="" title={t("bookmark.defaultListPlaceholder")} />
         {lists.map((list) => (
           <Form.Dropdown.Item key={list.id} value={list.id} title={list.name} />
         ))}
       </Form.Dropdown>
+
+      <Form.Checkbox {...itemProps.archived} title={t("bookmark.archived")} label={t("bookmark.archivedLabel")} />
+      <Form.Checkbox {...itemProps.favourited} title={t("bookmark.favourited")} label={t("bookmark.favouritedLabel")} />
     </Form>
   );
 }
