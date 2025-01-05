@@ -148,6 +148,7 @@ class KeePassLoader {
       const cli = this.spawn(`${this.keepassxcCli}`, [
         "db-info",
         ...this.convertIntoKeyFileOption(keyFile),
+        "-q",
         `${this.database}`,
       ]);
 
@@ -246,6 +247,7 @@ class KeePassLoader {
     return this.execKeepassXCCli([
       "show",
       ...this.convertIntoKeyFileOption(this.keyFile),
+      "-q",
       "-t",
       `${this.database}`,
       `${entry}`,
@@ -320,6 +322,7 @@ class KeePassLoader {
     return this.execKeepassXCCli([
       "export",
       ...this.convertIntoKeyFileOption(this.keyFile),
+      "-q",
       "-f",
       "csv",
       `${this.database}`,
