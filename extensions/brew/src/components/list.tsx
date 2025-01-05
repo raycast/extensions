@@ -2,6 +2,11 @@ import { Color, Icon, List } from "@raycast/api";
 import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../brew";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 
+const tertiaryTextColor: Color.Dynamic = {
+  light: "#00000066",
+  dark: "#FFFFFF66",
+};
+
 export interface FormulaListProps {
   isLoading: boolean;
   formulae: Formula[];
@@ -56,7 +61,7 @@ export function FormulaListItem(props: {
 }): JSX.Element {
   const formula = props.formula;
   let version = formula.versions.stable;
-  let tintColor = Color.SecondaryText;
+  let tintColor = null;
   let tooltip: string | undefined = undefined;
   let iconMark: Icon = Icon.Circle;
 
@@ -65,9 +70,12 @@ export function FormulaListItem(props: {
     tintColor = formula.outdated ? Color.Red : Color.Green;
     iconMark = Icon.CheckCircle;
     tooltip = formula.outdated ? "Outdated" : "Up to date";
+  } else {
+    // not installed, set to tertiaryTextColor
+    tintColor = tertiaryTextColor;
   }
 
-  const icon = { source: iconMark, tintColor };
+  const icon = { source: iconMark, tintColor: tintColor };
 
   return (
     <List.Item
@@ -94,7 +102,7 @@ export function CaskListItem(props: {
 }): JSX.Element {
   const cask = props.cask;
   let version = cask.version;
-  let tintColor = Color.SecondaryText;
+  let tintColor = null;
   let tooltip: string | undefined = undefined;
   let iconMark: Icon = Icon.Circle;
 
@@ -103,9 +111,12 @@ export function CaskListItem(props: {
     tintColor = cask.outdated ? Color.Red : Color.Green;
     iconMark = Icon.CheckCircle;
     tooltip = cask.outdated ? "Outdated" : "Up to date";
+  } else {
+    // not installed, set to tertiaryTextColor
+    tintColor = tertiaryTextColor;
   }
 
-  const icon = { source: iconMark, tintColor };
+  const icon = { source: iconMark, tintColor: tintColor };
 
   return (
     <List.Item
