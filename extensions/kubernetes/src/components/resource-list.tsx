@@ -23,6 +23,9 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
   const { currentNamespace } = useKubernetesNamespace();
 
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [showManagedFields, setShowManagedFields] = useState(false);
+  const [showLastAppliedConfiguration, setShowLastAppliedConfiguration] = useState(false);
+
   const [searchText, setSearchText] = useState("");
   const [resources, setResources] = useState<T[]>([]);
 
@@ -43,7 +46,7 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
 
   return (
     <List
-      navigationTitle={`${apiVersion}/${kind} [${resources.length ?? 0}] ✨ Context: ${currentContext}`}
+      navigationTitle={`${kind} (${resources.length ?? 0}) 🐳 Context: ${currentContext}`}
       isShowingDetail={isShowingDetail}
       isLoading={isLoading}
       searchText={searchText}
@@ -56,7 +59,15 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
         <List.Item
           key={resource.metadata?.uid}
           title={resource.metadata?.name ?? ""}
-          detail={<ResourceDetail apiVersion={apiVersion} kind={kind} resource={resource} />}
+          detail={
+            <ResourceDetail
+              apiVersion={apiVersion}
+              kind={kind}
+              resource={resource}
+              showManagedFields={showManagedFields}
+              showLastAppliedConfiguration={showLastAppliedConfiguration}
+            />
+          }
           actions={
             <ActionPanel>
               <Action title="Toggle Detail View" onAction={() => setIsShowingDetail(!isShowingDetail)} />
@@ -65,6 +76,20 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
                 content={resource.metadata?.name ?? ""}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
+              {isShowingDetail && (
+                <Action
+                  title="Toggle Show Managed Fields"
+                  onAction={() => setShowManagedFields(!showManagedFields)}
+                  shortcut={{ modifiers: ["cmd"], key: "m" }}
+                />
+              )}
+              {isShowingDetail && (
+                <Action
+                  title="Toggle Show Last Applied Configuration"
+                  onAction={() => setShowLastAppliedConfiguration(!showLastAppliedConfiguration)}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                />
+              )}
             </ActionPanel>
           }
           accessories={
@@ -86,18 +111,43 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
   );
 }
 
-function ResourceDetail<T extends KubernetesObject>(props: { apiVersion: string; kind: string; resource: T }) {
-  const { apiVersion, kind, resource } = props;
+function ResourceDetail<T extends KubernetesObject>(props: {
+  apiVersion: string;
+  kind: string;
+  resource: T;
+  showManagedFields: boolean;
+  showLastAppliedConfiguration: boolean;
+}) {
+  const { apiVersion, kind, resource, showManagedFields, showLastAppliedConfiguration } = props;
 
   const hideManagedFields = (resource: T) => {
-    const managedFields = resource.metadata?.managedFields;
-    if (!managedFields) {
+    if (showManagedFields) {
+      return resource;
+    }
+    return {
+      ...resource,
+      metadata: {
+        ...resource.metadata,
+        managedFields: undefined,
+      },
+    };
+  };
+
+  const hideLastAppliedConfiguration = (resource: T) => {
+    if (showLastAppliedConfiguration) {
       return resource;
     }
 
-    const clonedResource = { ...resource };
-    delete clonedResource?.metadata?.managedFields;
-    return clonedResource;
+    return {
+      ...resource,
+      metadata: {
+        ...resource.metadata,
+        annotations: {
+          ...resource.metadata?.annotations,
+          "kubectl.kubernetes.io/last-applied-configuration": undefined,
+        },
+      },
+    };
   };
 
   const wrapCodeBlock = (content: string) => {
@@ -110,7 +160,7 @@ function ResourceDetail<T extends KubernetesObject>(props: { apiVersion: string;
         yaml.dump({
           apiVersion,
           kind,
-          ...hideManagedFields(resource),
+          ...hideManagedFields(hideLastAppliedConfiguration(resource)),
         }),
       )}
     />
