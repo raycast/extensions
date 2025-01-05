@@ -1,5 +1,6 @@
 import { OpenInYnabAction } from '@components/actions';
 import { TransactionCreateForm } from '@components/transactions/transactionCreateForm';
+import { TransactionView } from '@components/transactions/transactionView';
 import { Shortcuts } from '@constants';
 import { useAccounts } from '@hooks/useAccounts';
 import { formatToReadablePrice } from '@lib/utils';
@@ -39,6 +40,11 @@ export function AccountView() {
           ]}
           actions={
             <ActionPanel>
+              <Action.Push
+                title="Show Related Transactions"
+                icon={Icon.MagnifyingGlass}
+                target={<TransactionView search={`account:${account.name.toLowerCase()}`} />}
+              />
               <Action.Push
                 title="Create New Transaction"
                 icon={Icon.Plus}
