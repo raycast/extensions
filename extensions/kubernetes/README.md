@@ -10,3 +10,5 @@ Kubernetes client in Raycast!
 	- [ ] Logs
 	- [ ] Port forwarding
 	- [ ] Delete
+- [ ] Support other resources operations
+- [ ] Support automatic refresh
