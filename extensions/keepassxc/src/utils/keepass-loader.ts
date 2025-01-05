@@ -52,6 +52,22 @@ class KeePassLoader {
   }
 
   /**
+   * Check if the folder is valid for a search
+   *
+   * KeePassXC's search doesn't include all folders. That function aims to replicate which folder are used.
+   *
+   * @param {string} entryStr - The folder to check.
+   * @returns {boolean} - True if the folder is valid, false otherwise.
+   */
+  private static isValidFolder = (folder: string) => {
+    return (
+      folder !== undefined &&
+      folder.length > 0 &&
+      !["回收站", "Trash", "Deprecated", "Recycle Bin"].some((exclude) => folder.startsWith(exclude))
+    );
+  };
+  
+  /**
    * Error handler for the KeePassXC CLI's STDERR stream.
    *
    * If the error message contains the string "Enter password to unlock", or "Maximum depth of replacement has been reached",
@@ -98,13 +114,27 @@ class KeePassLoader {
    * information of an entry.
    */
   private static parseCsvEntries = (entries: string) => {
-    return parse(entries, { delimiter: ",", from_line: 2 }).sort((a: string[], b: string[]) => {
-      // sort first by the title
-      const titleComparison = a[1].localeCompare(b[1]);
-      if (titleComparison !== 0) return titleComparison;
-      // sort second by the username
-      return a[2] ? (b[2] ? a[2].localeCompare(b[2]) : -1) : 1;
+    let entriesArray = parse(entries, { delimiter: ",", from_line: 2 })
+      .sort((a: string[], b: string[]) => {
+        // sort first by the title
+        const titleComparison = a[1].localeCompare(b[1]);
+        if (titleComparison !== 0) return titleComparison;
+        // sort second by the username
+        return a[2] ? (b[2] ? a[2].localeCompare(b[2]) : -1) : 1;
+      })
+      .filter((entry: string[]) => {
+        // check if there is a nested folder and its validity
+        const parts = entry[0].split("/");
+        if (parts.length < 2) return true;
+        const lastPart = parts.pop();
+        return lastPart ? this.isValidFolder(lastPart) : true;
+      });
+    entriesArray = entriesArray.map((entry: string[]) => {
+      const parts = entry[0].split("/");
+      entry[0] = parts.slice(1).join("/");
+      return entry;
     });
+    return entriesArray;
   };
 
   /**
