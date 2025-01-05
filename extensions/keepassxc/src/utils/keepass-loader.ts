@@ -54,7 +54,8 @@ class KeePassLoader {
   /**
    * Check if the folder is valid for a search
    *
-   * KeePassXC's search doesn't include all folders. That function aims to replicate which folder are used.
+   * KeePassXC's search doesn't include all folders.
+   * That function aims to replicate which folder are used.
    *
    * @param {string} entryStr - The folder to check.
    * @returns {boolean} - True if the folder is valid, false otherwise.
@@ -66,7 +67,7 @@ class KeePassLoader {
       !["回收站", "Trash", "Deprecated", "Recycle Bin"].some((exclude) => folder.startsWith(exclude))
     );
   };
-  
+
   /**
    * Error handler for the KeePassXC CLI's STDERR stream.
    *
@@ -178,7 +179,6 @@ class KeePassLoader {
       const cli = this.spawn(`${this.keepassxcCli}`, [
         "db-info",
         ...this.convertIntoKeyFileOption(keyFile),
-        "-q",
         `${this.database}`,
       ]);
 
@@ -277,7 +277,6 @@ class KeePassLoader {
     return this.execKeepassXCCli([
       "show",
       ...this.convertIntoKeyFileOption(this.keyFile),
-      "-q",
       "-t",
       `${this.database}`,
       `${entry}`,
@@ -352,7 +351,6 @@ class KeePassLoader {
     return this.execKeepassXCCli([
       "export",
       ...this.convertIntoKeyFileOption(this.keyFile),
-      "-q",
       "-f",
       "csv",
       `${this.database}`,
