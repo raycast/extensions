@@ -106,7 +106,7 @@ Pressing Enter (`↵`) will show the transaction detail view which provides more
 ##### Update Transaction
 
 - Delete Transaction (`⌥` + `⇧` + `X`): Delete the currently selected transaction. This is a destructive action
-- Approve Transaction (`⇧` + `A`): Only available on unreviewed transactions, this action helps you mark them as approved as quickly as possible
+- Approve Transaction (`⌥` + `A`): Only available on unreviewed transactions, this action helps you mark them as approved as quickly as possible
   - In case YNAB recognizes the transaction and already has a category assigned, Raynab will mark it as approved as is after a prompt
   - Otherwise, Raynab will redirect you to the **Transaction Edit** view where you can update it manually
     > _Note_: If you want to approve a transaction which has the wrong category assigned by YNAB, use the **Edit Transaction** action (`⌘` + `↵`)
@@ -176,6 +176,12 @@ Negative modifiers are the same as normal modifiers, but instead they will _excl
 
 **Note:** **The payee name must happen before any modifiers otherwise they will be ignored. Typing `account:chase checking Taco Bell`** **will show all transactions in your Chase Checking account.**
 
+### Unreviewed Transactions
+
+This menu bar command, when activated, will allow you to visualize how many uncategorized, or unapproved transactions are present in the selected budget broken down by account.
+
+Clicking on any of the menu items will open the [List Transactions](#list-transactions) command filtered by unreviewed transactions.
+
 ### Create Transaction
 
 File a new transaction into your budget by entering its related information.
@@ -184,6 +190,18 @@ The following fields are required:
 
 - Date
 - Amount (Must be a non-zero floating point number)
+- Payee Name
+- Category
+
+### Schedule Transaction
+
+Create a new scheduled transaction which will be applied at the specified future date with an option for repetition.
+
+The following fields are required:
+
+- Date
+- Amount (Must be a non-zero floating point number)
+- Repeats (defaults to "Never")
 - Payee Name
 - Category
 
@@ -205,7 +223,7 @@ Each account is presented from left to right:
 #### _Account List Actions_
 
 - Show Related Transactions (`↵`): Take a peek at recent transactions on the selected account
-- Create New Transaction (`⌘` + `↵`): Create a new transaction on the selected account:
+- Create New Transaction (`⌥` + `C`): Create a new transaction on the selected account:
   - Amount
   - Payee
   - Date
@@ -234,7 +252,7 @@ Categories are grouped in their original category group. Each category is presen
 
 ##### Inspect Budget
 
-- Show Category (`↵`): Give a detailed view of the category
+- Show Details (`↵`): Give a detailed view of the category
   - Balance
   - Activity this month
   - Budgeted
@@ -252,7 +270,7 @@ Categories are grouped in their original category group. Each category is presen
 - Show Related Transactions (`⇧` + `⌘` + `↵`): Take a peek at recent transactions on the selected category
 - Open in YNAB (`⌘` + `O`): Open the current budget in the YNAB Web App
 
-- Toggle Progress (`⌘` + `P`): Show or hide progress bar for category goals
+- Toggle Progress (`⌘` + `⇧` + `P`): Show or hide progress bar for category goals.
 
   Categories with no goals or associated progress will show as `N/A`
 
@@ -261,14 +279,46 @@ Categories are grouped in their original category group. Each category is presen
 - Edit Category (`⌘` + `E`): Edit any of the provided transaction information
   - Budgeted Amount
     > This is the only available form field due to a restriction of the current YNAB API
-- Create New Transaction (`⌥` + `C` ): Create a new transaction in the selected category
+- Create New Transaction (`⌥` + `C`): Create a new transaction in the selected category
   - Category: The category of the transaction
   - Payee: The counterpart name
   - Account: The account of the transaction
 
+### More about transaction forms
+
+#### Transfers
+
+When marking a transaction as a transfer, you will be asked to select an account to transfer from, and an account receiving the amount instead of a payee name.
+
+> Account transfers do not have a category in YNAB, and therefore **can not** be split transactions.
+
+#### Split Transactions
+
+Split transactions are transactions with multiple categories. Transactions are automatically converted to split transactions when adding more than one category in the picker.
+
+By default, Raynab will distribute the total evenly between the created categories as you add them to the list.
+
+##### Category total and Auto-Distribute
+
+The sum of all amounts for each category must always be equal to the transaction total amount. If that's not the case, Raynab will prompt you to adjust either the total or distribute them _evenly_ across the categories for you. This function of Raynab is called "Auto-Distribute" from the feature of the same name in YNAB.
+
+With multiple categories selected, you can trigger "Auto-Distribute" yourself at any point by using the "Distribute Total Equally" action.
+
+In addition, when only two categories are selected, Raynab will balance the category amounts when making a change so that when one increases, the other decreases to match the initial transaction's total.
+
+#### Editing existing split transactions
+
+Due to a limitation of the YNAB API, existing split transactions cannot be edited.
+
+### Payee Names
+
+By default, when editing an existing transaction, you can only select a pre-existing payee name. While this covers most of the use case for transaction edits, it is useful to have an option to manually set a new payee name.
+
+The "Show Payee Textfield" action (`⌥` + `P`) will allow you to replace the payee dropdown with a text field and vice-versa.
+
 ## Author
 
-Charles De Mount is a Software Developer who previously worked at [SuperHi](https://superhi.com) and [Vercel](https://vercel.com/).
+Charles De Mount is a Designer & Software Developer who previously worked at [SuperHi](https://superhi.com) and [Vercel](https://vercel.com/).
 Send pets pics or angry messages on Twitter ([@nogocharli](https://x.com/nogocharli)), and job opportunities on [LinkedIn](https://www.linkedin.com/in/charles-yahouedeou/).
 
 Special thanks to the Raycast team and their ever growing API!
