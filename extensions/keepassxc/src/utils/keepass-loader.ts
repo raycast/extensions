@@ -64,7 +64,7 @@ class KeePassLoader {
     return (
       folder !== undefined &&
       folder.length > 0 &&
-      !["回收站", "Trash", "Deprecated", "Recycle Bin"].some((exclude) => folder.startsWith(exclude))
+      !["Deprecated", "Recycle Bin", "Trash", "回收站"].some((exclude) => folder.startsWith(exclude))
     );
   };
 
@@ -127,8 +127,7 @@ class KeePassLoader {
         // check if there is a nested folder and its validity
         const parts = entry[0].split("/");
         if (parts.length < 2) return true;
-        const lastPart = parts.pop();
-        return lastPart ? this.isValidFolder(lastPart) : true;
+        return parts.every((part) => this.isValidFolder(part));
       });
     entriesArray = entriesArray.map((entry: string[]) => {
       const parts = entry[0].split("/");
