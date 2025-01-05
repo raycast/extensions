@@ -68,6 +68,13 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       icon: { source: Icon.Person, tintColor: Color.SecondaryText },
                     }
                   : {},
+                entry[0] !== ""
+                  ? {
+                      text: { value: entry[0], color: Color.SecondaryText },
+                      tooltip: "Folder",
+                      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
+                    }
+                  : {},
               ]}
               actions={
                 <ActionPanel>
