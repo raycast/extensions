@@ -30,7 +30,7 @@ function matchService(service: V1Service, searchText: string): boolean {
   }
 
   // 2. Search by type
-  if (service.spec?.type?.includes(searchText)) {
+  if (service.spec?.type?.toLowerCase().includes(searchText)) {
     return true;
   }
 

@@ -24,7 +24,7 @@ export default function Command() {
 }
 
 function matchStatefulSet(statefulSet: V1StatefulSet, searchText: string): boolean {
-  if (statefulSet.metadata?.name?.includes(searchText.toLowerCase())) {
+  if (statefulSet.metadata?.name?.includes(searchText)) {
     return true;
   }
   return false;

@@ -25,7 +25,7 @@ export default function Command() {
 
 function matchPod(pod: V1Pod, searchText: string) {
   // 1. Search by name
-  if (pod.metadata?.name?.includes(searchText.toLowerCase())) {
+  if (pod.metadata?.name?.includes(searchText)) {
     return true;
   }
 

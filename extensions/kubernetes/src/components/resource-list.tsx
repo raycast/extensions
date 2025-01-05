@@ -41,7 +41,7 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
     if (!data) {
       return;
     }
-    setResources(data.filter((resource) => !searchText || matchResource(resource, searchText)));
+    setResources(data.filter((resource) => !searchText || matchResource(resource, searchText.toLowerCase())));
   }, [data, searchText]);
 
   return (

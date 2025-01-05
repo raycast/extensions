@@ -24,7 +24,7 @@ export default function Command() {
 }
 
 function matchDaemonSet(daemonSet: V1DaemonSet, searchText: string): boolean {
-  if (daemonSet.metadata?.name?.includes(searchText.toLowerCase())) {
+  if (daemonSet.metadata?.name?.includes(searchText)) {
     return true;
   }
   return false;

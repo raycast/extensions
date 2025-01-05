@@ -24,7 +24,7 @@ export default function Command() {
 }
 
 function matchNode(node: V1Node, searchText: string): boolean {
-  if (node.metadata?.name?.includes(searchText.toLowerCase())) {
+  if (node.metadata?.name?.includes(searchText)) {
     return true;
   }
   return false;

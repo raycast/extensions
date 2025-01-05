@@ -24,7 +24,7 @@ export default function Command() {
 }
 
 function matchDeployment(deployment: V1Deployment, searchText: string): boolean {
-  if (deployment.metadata?.name?.includes(searchText.toLowerCase())) {
+  if (deployment.metadata?.name?.includes(searchText)) {
     return true;
   }
   return false;
