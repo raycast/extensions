@@ -1,7 +1,6 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { monitorSchema, WhoamiSchema } from "./api/schema";
-import type { Preferences } from "./interface";
 import fetch from "node-fetch";
 
 export default function ShowMonitors() {
@@ -30,12 +29,18 @@ export default function ShowMonitors() {
   return (
     <List isLoading={isLoading && isWhoamiLoading}>
       {data
-        ?.filter((monitor) => monitor.active === true)
         .map((monitor) => (
           <List.Item
             key={monitor.id}
+            icon={{
+              tooltip: monitor.active ? "Monitor is active" : "Monitor is inactive",
+              value: { source: Icon.Dot, tintColor: monitor.active ? Color.Green : Color.Red },
+            }}
             title={monitor.name}
             subtitle={monitor.url}
+            accessories={[
+              { icon: monitor.public ? Icon.Eye : Icon.EyeDisabled, tooltip: monitor.public ? "Public" : "Private" },
+            ]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
@@ -43,6 +48,7 @@ export default function ShowMonitors() {
                   url={`https://www.openstatus.dev/app/${whoamiData?.slug}/monitors/${monitor.id}/overview`}
                 />
                 <Action
+                  icon={Icon.Hammer}
                   title="Trigger Monitor Execution"
                   onAction={async () => {
                     await fetch(`https://api.openstatus.dev/v1/monitor/${monitor.id}/trigger`, {

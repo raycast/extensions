@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { pageSchema, StatusReport } from "./api/schema";
 import fetch from "node-fetch";
@@ -46,12 +46,12 @@ export default function CreateStatusReport() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Report" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Create Report" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Title" {...itemProps.title} />
-      <Form.TextArea title="message" {...itemProps.message} />
+      <Form.TextField title="Title" placeholder="Downtime..." {...itemProps.title} />
+      <Form.TextArea title="Message" placeholder="We are encountering..." {...itemProps.message} />
       <Form.DatePicker title="Start Date" {...itemProps.date} />
       <Form.Dropdown id="status" title="Status" defaultValue="investigating">
         <Form.Dropdown.Item value="investigating" title="Investigating" />

@@ -5,6 +5,9 @@
   "description": "Manage your OpenStatus monitors, Incidents and status page",
   "icon": "OpenStatus.png",
   "author": "thibaultleouay",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -30,7 +33,8 @@
       "description": "Enter your OpenStatus Access Token",
       "type": "password",
       "title": "Access Token",
-      "required": true
+      "required": true,
+      "placeholder": "os_xxxxxxxxx"
     }
   ],
   "dependencies": {
