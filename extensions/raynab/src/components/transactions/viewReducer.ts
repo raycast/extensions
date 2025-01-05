@@ -17,7 +17,7 @@ import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 
 const VALID_MODIFIERS = ['account', 'amount', 'type', 'category'] as const;
 const MODIFIERS_REGEX = new RegExp(
-  `(-?(?:${VALID_MODIFIERS.join('|')}):[\\w.-\\s]+?)(?=\\s+(?:-?(?:${VALID_MODIFIERS.join('|')}):)|$)`,
+  `(-?(?:${VALID_MODIFIERS.join('|')}):[\\w.'"-\\s]+?)(?=\\s+(?:-?(?:${VALID_MODIFIERS.join('|')}):)|$)`,
   'gi'
 );
 

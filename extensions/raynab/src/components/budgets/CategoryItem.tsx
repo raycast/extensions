@@ -107,7 +107,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
             <Action.Push
               title="Show Related Transactions"
               icon={Icon.MagnifyingGlass}
-              target={<TransactionView search={`category:${category.name.split(' ').join('-').toLowerCase()}`} />}
+              target={<TransactionView search={`category:${category.name.toLowerCase()}`} />}
               shortcut={Shortcuts.ShowTransactionsForCategory}
             />
             <OpenInYnabAction />
