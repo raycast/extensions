@@ -14,3 +14,7 @@ export async function listNamespaces(client: CoreV1Api) {
 export async function listNodes(client: CoreV1Api) {
   return listResources(() => client.listNode(), apiVersion, "nodes");
 }
+
+export async function listServices(client: CoreV1Api) {
+  return listResources(() => client.listServiceForAllNamespaces(), apiVersion, "services");
+}

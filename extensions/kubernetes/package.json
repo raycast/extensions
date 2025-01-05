@@ -37,16 +37,22 @@
       "subtitle": "Kubernetes",
       "description": "Get Nodes in a Kubernetes cluster.",
       "mode": "view"
-    }
-  ,
+    },
     {
       "name": "get-daemonsets",
       "title": "Get Daemonsets",
       "subtitle": "Kubernetes",
       "description": "List DaemonSets in a Kubernetes cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-services",
+      "title": "Get Services",
+      "subtitle": "Kubernetes",
+      "description": "List Services in Kubernetes Cluster.",
+      "mode": "view"
     }
-      ],
+  ],
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
     "@raycast/api": "^1.88.0",
