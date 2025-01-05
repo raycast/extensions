@@ -9,6 +9,12 @@
   "categories": ["Applications", "Productivity"],
   "commands": [
     {
+      "name": "screenshot",
+      "title": "Take Screenshot",
+      "description": "Trigger an action with screenshot input",
+      "mode": "view"
+    },
+    {
       "name": "audio",
       "title": "Record Audio",
       "description": "Trigger an action with audio input",
@@ -29,9 +35,17 @@
       "mode": "view"
     },
     {
-      "name": "screenshot",
-      "title": "Take Screenshot",      
-      "description": "Trigger an action with screenshot input",
+      "name": "queue_selected_text",
+      "title": "Attach",
+      "subtitle": "Selected Text",
+      "description": "Queue an action with selected text",
+      "mode": "view"
+    },
+    {
+      "name": "queue_browser_content",
+      "title": "Attach",
+      "subtitle": "Browser Content",
+      "description": "Queue an action with browser content",
       "mode": "view"
     },
     {
@@ -46,7 +60,7 @@
       "subtitle": "with Selected Text",
       "description": "Trigger an action with selected text",
       "mode": "view"
-    },    
+    },
     {
       "name": "execute_browser_content",
       "title": "Process Text",
