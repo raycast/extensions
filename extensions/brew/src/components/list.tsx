@@ -1,6 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
-import { Cask, Formula } from "../brew";
-import { brewFormatVersion, brewIsInstalled, brewName } from "../brew";
+import { brewFormatVersion, brewIsInstalled, brewName, Cask, Formula } from "../brew";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 
 export interface FormulaListProps {
@@ -59,14 +58,16 @@ export function FormulaListItem(props: {
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
   let tooltip: string | undefined = undefined;
+  let iconMark: Icon = Icon.Circle;
 
   if (brewIsInstalled(formula)) {
     version = brewFormatVersion(formula);
     tintColor = formula.outdated ? Color.Red : Color.Green;
+    iconMark = Icon.CheckCircle;
     tooltip = formula.outdated ? "Outdated" : "Up to date";
   }
 
-  const icon = { source: Icon.Checkmark, tintColor };
+  const icon = { source: iconMark, tintColor };
 
   return (
     <List.Item
@@ -95,14 +96,16 @@ export function CaskListItem(props: {
   let version = cask.version;
   let tintColor = Color.SecondaryText;
   let tooltip: string | undefined = undefined;
+  let iconMark: Icon = Icon.Circle;
 
   if (brewIsInstalled(cask)) {
     version = brewFormatVersion(cask);
     tintColor = cask.outdated ? Color.Red : Color.Green;
+    iconMark = Icon.CheckCircle;
     tooltip = cask.outdated ? "Outdated" : "Up to date";
   }
 
-  const icon = { source: Icon.Checkmark, tintColor };
+  const icon = { source: iconMark, tintColor };
 
   return (
     <List.Item
