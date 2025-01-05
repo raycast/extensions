@@ -77,22 +77,30 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
 
     if (!timeline) return;
 
-    const fallbackMap: Record<Period, Period> = {
+    const fallbackMap: Record<Period, Period | null> = {
       day: 'week',
       week: 'month',
       month: 'quarter',
       quarter: 'year',
-      year: 'year',
+      year: null,
     };
-
     const fallbackTimeline = fallbackMap[timeline];
-    setTimeline(fallbackTimeline);
 
-    errorToastPromise.current = showToast({
-      style: Toast.Style.Failure,
-      title: `No results for the past ${timeline}`,
-      message: `Falling back to the last ${fallbackTimeline}`,
-    });
+    if (fallbackTimeline !== null) {
+      setTimeline(fallbackTimeline);
+
+      errorToastPromise.current = showToast({
+        style: Toast.Style.Failure,
+        title: `No results for the past ${timeline}`,
+        message: `Falling back to the last ${fallbackTimeline}`,
+      });
+    } else {
+      errorToastPromise.current = showToast({
+        style: Toast.Style.Failure,
+        title: `No results for the past ${timeline}`,
+        message: `Unable to fetch transactions for this period`,
+      });
+    }
 
     // Clear error toast after success
     return () => {
