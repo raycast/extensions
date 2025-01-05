@@ -264,7 +264,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
 
       <Form.Checkbox {...itemProps.cleared} label="Mark as cleared" storeValue={true} />
 
-      {subtransactions.length > 0 ? (
+      {subtransactions.length > 0 && !isTransfer ? (
         <>
           <Form.Separator />
           {subtransactions.map((transaction, idx) => (
