@@ -1,0 +1,49 @@
+{
+     "name": "ip-info",
+     "title": "IP Info",
+     "version": "1.0.0",
+     "description": "Query IP info from IPInfo.io",
+     "icon": "ipinfo.png",
+     "author": "wzfukui",
+     "categories": ["Developer Tools", "Security"],
+     "license": "MIT",
+     "commands": [
+          {
+               "name": "index",
+               "title": "Query IP info from IPInfo.io",
+               "description": "Query information about an IP address",
+               "mode": "view"
+          }
+     ],
+     "main": "src/index.tsx",
+     "scripts": {
+          "build": "npx ray build -e src/index.tsx",
+          "dev": "npx ray develop",
+          "lint": "npx ray lint"
+     },
+     "keywords": [],
+     "dependencies": {
+          "@raycast/api": "^1.84.2",
+          "@raycast/utils": "^1.18.0",
+          "node-fetch": "^3.2.0"
+     },
+     "devDependencies": {
+          "@types/node": "~18.8.3",
+          "@types/node-fetch": "^2.6.1",
+          "@types/react": "^18.0.9",
+          "typescript": "^4.9.5"
+     },
+     "preferences": [
+          {
+               "name": "apiToken",
+               "title": "API Token",
+               "description": "Your IPInfo API token (must be at least 10 hexadecimal characters)",
+               "type": "password",
+               "required": true,
+               "validation": {
+                    "pattern": "^[0-9a-fA-F]{10,}$",
+                    "message": "Please enter a valid API token (at least 10 hexadecimal characters)"
+               }
+          }
+     ]
+}
