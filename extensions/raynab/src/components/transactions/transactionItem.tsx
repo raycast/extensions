@@ -155,21 +155,25 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
               target={<TransactionEditForm transaction={transaction} />}
             />
             <OpenInYnabAction accounts accountId={transaction.account_id} />
+            <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Update Transaction">
+            <DeleteTransactionAction transaction={transaction} />
+            {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Change List View">
+            <GroupBySubmenu onGroup={onGroup} currentGroup={state.group} />
+            <SortBySubmenu onSort={onSort} currentSort={state.sort} />
+            <TimelineSubmenu onTimelineChange={onTimelineChange} currentTimeline={state.timeline ?? 'month'} />
+            <FilterBySubmenu onFilter={onFilter} currentFilter={state.filter} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Other">
             <Action.Push
               title="Create New Transaction"
               icon={Icon.Plus}
               target={<TransactionCreateForm categoryId={transaction.category_id ?? undefined} />}
               shortcut={Shortcuts.CreateNewTransaction}
             />
-            <DeleteTransactionAction transaction={transaction} />
-            {transaction.approved ? '' : <ApproveTransactionAction transaction={transaction} />}
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Modify List View">
-            <ToggleFlagsAction showFlags={showFlags} setShowFlags={setShowFlags} />
-            <GroupBySubmenu onGroup={onGroup} currentGroup={state.group} />
-            <SortBySubmenu onSort={onSort} currentSort={state.sort} />
-            <TimelineSubmenu onTimelineChange={onTimelineChange} currentTimeline={state.timeline ?? 'month'} />
-            <FilterBySubmenu onFilter={onFilter} currentFilter={state.filter} />
           </ActionPanel.Section>
         </ActionPanel>
       }
