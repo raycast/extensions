@@ -8,6 +8,7 @@ export interface PromptFormValues {
 export interface Prompt extends PromptFormValues {
   id: string;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export type ErrorCallback = (error: unknown | DOMException) => void;
