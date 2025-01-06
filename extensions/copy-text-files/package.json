@@ -3,7 +3,7 @@
   "name": "copy-text-files",
   "title": "Copy Text Files",
   "description": "Copy text files in current finder",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "netcookies",
   "categories": [
     "Developer Tools"

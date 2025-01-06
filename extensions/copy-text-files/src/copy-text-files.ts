@@ -13,7 +13,7 @@ async function getFinderDirectory(): Promise<string | null> {
       .trim();
     return result;
   } catch (error) {
-    showToast(ToastStyle.Failure, "无法获取当前 Finder 目录");
+    showToast(ToastStyle.Failure, "❌ Unable to get current Finder directory");
     return null;
   }
 }
@@ -59,7 +59,7 @@ async function getTextFilesFromDirectory(directory: string): Promise<string[]> {
     console.log(result);
     return result;
   } catch (error) {
-    showToast(ToastStyle.Failure, "无法读取目录内容");
+    showToast(ToastStyle.Failure, "📁 Unable to read directory contents");
     return [];
   }
 }
@@ -82,12 +82,12 @@ export default async function Command() {
 
   const textFiles = await getTextFilesFromDirectory(directory);
   if (textFiles.length === 0) {
-    showToast(ToastStyle.Failure, "该目录下没有纯文本文件");
+    showToast(ToastStyle.Failure, "📄 No text files found in this directory");
     return;
   }
 
   const mergedContent = await readFileContents(textFiles);
   await Clipboard.copy(mergedContent);
 
-  showToast(ToastStyle.Success, "文本文件内容已复制到剪贴板");
+  showToast(ToastStyle.Success, "✨ Text files content copied to clipboard");
 }
