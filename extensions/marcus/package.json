@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "marcus",
+  "title": "Marcus",
+  "description": "The stoic companion for everyday virtue",
+  "icon": "extension-icon.png",
+  "author": "frilo.eth",
+  "categories": [
+    "Fun",
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quote",
+      "title": "Quote",
+      "subtitle": "Stoic wisdom at your fingertips",
+      "description": "Bring timeless advice when you need it the most",
+      "mode": "view"
+    },
+    {
+      "name": "journal",
+      "title": "Journal",
+      "subtitle": "Write to hone virtue",
+      "description": "Journaling is the most powerful way to remember, and be remembered",
+      "mode": "view"
+    },
+    {
+      "name": "memento-mori",
+      "title": "Memento Mori",
+      "subtitle": "Remember you are mortal",
+      "description": "A reminder of life's finite nature to help focus on what truly matters",
+      "mode": "view"
+    },
+    {
+      "name": "meditations",
+      "title": "Meditations",
+      "subtitle": "Review your reflections",
+      "description": "Browse and search through your past meditations",
+      "mode": "view",
+      "keywords": ["journal", "entries", "search", "history"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "birthDate",
+      "type": "textfield",
+      "required": true,
+      "title": "Birth Date",
+      "description": "Your date of birth for Memento Mori calculations (YYYY-MM-DD format)",
+      "placeholder": "1990-01-01"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "media/quote.png",
+      "title": "Daily Stoic Quotes",
+      "description": "Access timeless wisdom from Stoic philosophers"
+    },
+    {
+      "path": "media/journal.png",
+      "title": "Stoic Journaling",
+      "description": "Practice daily reflection with guided prompts"
+    },
+    {
+      "path": "media/memento-mori.png",
+      "title": "Memento Mori",
+      "description": "Visualize life's finite nature for better focus"
+    },
+    {
+      "path": "media/meditations.png",
+      "title": "Your Meditations",
+      "description": "Review and search through your past reflections"
+    }
+  ],
+  "keywords": [
+    "stoicism",
+    "philosophy",
+    "meditation",
+    "journal",
+    "quotes",
+    "wisdom",
+    "reflection",
+    "mindfulness"
+  ]
+}
