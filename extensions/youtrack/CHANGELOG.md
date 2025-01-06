@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Update YouTrack icon
+
 ## [Update] - 2024-07-08
 
 - Add Assignee to Issue Details page
