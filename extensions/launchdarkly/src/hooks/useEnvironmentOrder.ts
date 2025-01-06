@@ -7,29 +7,21 @@ export function useEnvironmentOrder(currentEnvKeys: string[]) {
   const [environmentOrder, setEnvironmentOrder] = useCachedState<string[]>(GLOBAL_ENVIRONMENT_ORDER_KEY, []);
 
   useEffect(() => {
-    let changed = false;
-    let newOrder = [...environmentOrder];
+    if (currentEnvKeys.length > 0) {
+      const validOrder = environmentOrder.filter((k) => currentEnvKeys.includes(k));
+      const newEnvs = currentEnvKeys.filter((k) => !environmentOrder.includes(k));
 
-    currentEnvKeys.forEach((key) => {
-      if (!newOrder.includes(key)) {
-        newOrder.push(key);
-        changed = true;
+      if (environmentOrder.length === 0) {
+        setEnvironmentOrder([...currentEnvKeys]);
+      } else if (newEnvs.length > 0 || validOrder.length !== environmentOrder.length) {
+        setEnvironmentOrder([...validOrder, ...newEnvs]);
       }
-    });
-
-    const filtered = newOrder.filter((k) => currentEnvKeys.includes(k));
-    if (filtered.length !== newOrder.length) {
-      newOrder = filtered;
-      changed = true;
-    }
-
-    if (changed) {
-      setEnvironmentOrder(newOrder);
     }
   }, [currentEnvKeys]);
 
   function moveEnvironment(envKey: string, direction: "up" | "down") {
-    const newOrder = [...environmentOrder];
+    const currentOrder = environmentOrder.length > 0 ? environmentOrder : currentEnvKeys;
+    const newOrder = [...currentOrder];
     const currentIndex = newOrder.indexOf(envKey);
     if (currentIndex === -1) return;
 
