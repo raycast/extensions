@@ -131,6 +131,10 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
   };
   const dropDownValue = state.filter?.key === 'unreviewed' ? 'unreviewed' : 'all';
 
+  const searchBarPlaceHolder = displayScheduled
+    ? 'Search scheduled transactions'
+    : `Search ${dropDownValue === 'unreviewed' ? 'unreviewed ' : ''}transactions in the last ${timeline}`;
+
   return (
     <TransactionProvider
       dispatch={dispatch}
@@ -142,7 +146,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
           isLoadingCurrency || isLoadingBudget || isLoadingTimeline || isLoadingTransactions || isLoadingScheduled
         }
         isShowingDetail={isShowingDetails}
-        searchBarPlaceholder={`Search transactions in the last ${timeline}`}
+        searchBarPlaceholder={searchBarPlaceHolder}
         searchText={state.search}
         onSearchTextChange={(query) => dispatch({ type: 'search', query })}
         filtering={displayScheduled}
