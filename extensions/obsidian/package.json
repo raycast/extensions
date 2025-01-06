@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "ofalvai",
     "adamadamsmusic",
-    "fservais"
+    "fservais",
+    "psychomane"
   ],
   "license": "MIT",
   "preferences": [
@@ -549,6 +550,15 @@
           "description": "Defaults to #task for compatibility with Obsidian Tasks.",
           "type": "textfield",
           "default": "#task"
+        },
+        {
+          "name": "creationDate",
+          "type": "checkbox",
+          "title": "Creation Date",
+          "label": "Append creation date to the task",
+          "required": false,
+          "description": "➕ YYYY-MM-DD (Current date)",
+          "default": false
         },
         {
           "description": "Name of Obsidian vault where note is",

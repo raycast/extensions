@@ -59,69 +59,57 @@ function extractVideoId(url: string): string | null {
 
 // Function to fetch video transcript
 async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
+  const { defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
+
+  // Try with preferred language
   try {
-    const { defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: defaultLanguage || "en",
+    });
 
-    try {
-      // Try with preferred language first
-      const transcriptItems = await getSubtitles({
-        videoID: videoId,
-        lang: defaultLanguage || "en",
-      });
-
-      if (transcriptItems && transcriptItems.length > 0) {
-        const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
-        const title = await getVideoTitle(videoId);
-        return { transcript, title };
-      }
-    } catch (error) {
-      console.warn(`Failed to get captions in preferred language: ${defaultLanguage}`);
-
-      // Try with English as fallback
-      try {
-        const transcriptItems = await getSubtitles({
-          videoID: videoId,
-          lang: "en",
-        });
-
-        if (transcriptItems && transcriptItems.length > 0) {
-          const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
-          const title = await getVideoTitle(videoId);
-          return { transcript, title };
-        }
-      } catch (error) {
-        console.warn("Failed to get English captions");
-      }
-
-      // Try auto-generated captions as last resort
-      const transcriptItems = await getSubtitles({
-        videoID: videoId,
-        lang: "auto",
-      });
-
-      if (!transcriptItems || transcriptItems.length === 0) {
-        throw new Error("No captions available for this video");
-      }
-
+    if (transcriptItems && transcriptItems.length > 0) {
       const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
       const title = await getVideoTitle(videoId);
-
-      return {
-        transcript,
-        title,
-      };
+      return { transcript, title };
     }
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Detailed error:", error);
-      throw new Error(`Failed to fetch transcript: ${error.message}`);
-    } else {
-      console.error("Unknown error:", error);
-      throw new Error("Failed to fetch transcript: Unknown error occurred");
-    }
+  } catch (error) {
+    console.warn(`Failed to get captions in preferred language: ${defaultLanguage}`);
   }
 
-  throw new Error("Failed to fetch transcript");
+  // Try with English
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "en",
+    });
+
+    if (transcriptItems && transcriptItems.length > 0) {
+      const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+      const title = await getVideoTitle(videoId);
+      return { transcript, title };
+    }
+  } catch (error) {
+    console.warn("Failed to get English captions");
+  }
+
+  // Try auto-generated captions
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "auto",
+    });
+
+    if (!transcriptItems || transcriptItems.length === 0) {
+      throw new Error("Transcript Not Available");
+    }
+
+    const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+    const title = await getVideoTitle(videoId);
+    return { transcript, title };
+  } catch (error) {
+    throw new Error("Transcript Not Available");
+  }
 }
 
 // Helper function to get video title
@@ -200,8 +188,8 @@ export default async function Command(props: { arguments: { videoUrl: string } }
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error fetching transcript",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
+      title: "Error",
+      message: error instanceof Error ? error.message : "Transcript Not Available",
     });
   }
 }

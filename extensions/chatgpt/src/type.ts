@@ -63,7 +63,10 @@ export type HistoryHook = Hook<Chat>;
 
 export type SavedChatHook = Hook<SavedChat>;
 
-export type ConversationsHook = Hook<Conversation> & { update: PromiseFunctionWithOneArg<Conversation> };
+export type ConversationsHook = Hook<Conversation> & {
+  update: PromiseFunctionWithOneArg<Conversation>;
+  setConversations: PromiseFunctionWithOneArg<Conversation[]>;
+};
 
 export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneArg<string> };
 

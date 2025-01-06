@@ -89,16 +89,14 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
 
   useEffect(() => {
     (async () => {
-      if (context || useSelected) {
+      if (useSelected) {
         try {
           let selected = await getSelectedText();
-          if (useSelected) {
-            if (argQuery === "") {
-              setSelected(selected);
-              setPage(Pages.Form);
-            } else {
-              getResponse(`${argQuery}\n${selected}`);
-            }
+          if (argQuery === "") {
+            setSelected(selected);
+            setPage(Pages.Form);
+          } else {
+            getResponse(`${context}\n${argQuery}\n${selected}`);
             return;
           }
           getResponse(`${context}\n${selected}`);

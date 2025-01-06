@@ -1,5 +1,13 @@
 # Coolify Changelog
 
+## [Enhancements] - 2025-01-02
+
+- In `Projects`:
+    - Create Project
+    - Update Project
+- In `Private Keys`
+    - View Private Keys
+
 ## [Enhancements] - 2024-10-23
 
 - Fix issue where `Resources` command would crash if the resource type is not "application" or "service"

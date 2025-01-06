@@ -19,6 +19,7 @@ export class Ollama {
   private _RouteApiGenerate = `/api/generate`;
   private _RouteApiChat = `/api/chat`;
   private _RouteApiEmbeddings = `/api/embeddings`;
+  private _RouteApiPs = `/api/ps`;
 
   /**
    * @param server - Ollama Server Route, default value: { url: "http://127.0.0.1:11434" }.
@@ -798,5 +799,42 @@ export class Ollama {
         });
     }
     return embeddings;
+  }
+
+  /**
+   * Show loaded models
+   * @return List of models loaded in ram
+   */
+  async OllamaApiPs(): Promise<Types.OllamaApiPsResponse> {
+    const route = this._RouteApiPs;
+    const url = `${this._server}${route}`;
+    const req: RequestInit = {
+      method: "GET",
+      headers: this._headers,
+    };
+    let ps: Types.OllamaApiPsResponse | undefined;
+
+    while (ps === undefined) {
+      ps = await fetch(url, req)
+        .then(async (response) => {
+          if (!response.ok) {
+            const message = (await response.json()) as Types.OllamaErrorResponse;
+            this._ErrorHandlerOllamaServer(route, response.status, message, req);
+          }
+          return response.json();
+        })
+        .then(async (response) => {
+          if (response === undefined) {
+            return undefined;
+          }
+          return response as Types.OllamaApiPsResponse;
+        })
+        .catch((err: FetchError | Error) => {
+          this._ErrorLogger(err);
+          if (err instanceof FetchError && err.type === "ECONNREFUSED") throw Errors.OllamaNotInstalledOrRunning;
+          throw err;
+        });
+    }
+    return ps;
   }
 }

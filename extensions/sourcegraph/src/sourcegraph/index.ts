@@ -1,5 +1,6 @@
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
-import { getPreferenceValues } from "@raycast/api";
+import { v4 as uuidv4 } from "uuid";
 import { newApolloClient } from "./gql/apollo";
 
 export interface Sourcegraph {
@@ -44,18 +45,33 @@ export function isSourcegraphDotCom(instance: string) {
  * instanceName generates a name for the given instance.
  */
 export function instanceName(src: Sourcegraph) {
-  return `${isSourcegraphDotCom(src.instance) ? "Sourcegraph.com" : new URL(src.instance).hostname}`;
+  if (isSourcegraphDotCom(src.instance)) {
+    return "Sourcegraph.com";
+  }
+  return new URL(src.instance).hostname || src.instance || null;
 }
 
 /**
  * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
-export function sourcegraphDotCom(): Sourcegraph {
+export async function sourcegraphDotCom(): Promise<Sourcegraph> {
   const prefs = getPreferenceValues<Preferences>();
   const searchPrefs = getPreferenceValues<Preferences.SearchDotCom>();
+
+  // If there is no token, generate a persisted anonymous identifier for the user.
+  let anonymousUserID = "";
+  if (!prefs.cloudToken) {
+    anonymousUserID = (await LocalStorage.getItem("anonymous-user-id")) as string;
+    if (!anonymousUserID) {
+      anonymousUserID = uuidv4();
+      await LocalStorage.setItem("anonymous-user-id", anonymousUserID);
+    }
+  }
+
   const connect = {
     instance: dotComURL,
     token: prefs.cloudToken,
+    anonymousUserID,
   };
   return {
     ...connect,
@@ -66,7 +82,7 @@ export function sourcegraphDotCom(): Sourcegraph {
 }
 
 /**
- * sourcegraphSelfHosted returns the configured Sourcegraph instance.
+ * sourcegraphInstance returns the configured Sourcegraph instance.
  */
 export function sourcegraphInstance(): Sourcegraph | null {
   const prefs = getPreferenceValues<Preferences>();

@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support Whale Browser] - 2024-12-14
+
+- Added support for `Whale` Browser Desktop.
+
 ## [Update Logo] - 2024-12-11
 
 - Updated to latest logo since rebrand.

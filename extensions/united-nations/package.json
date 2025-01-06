@@ -194,23 +194,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
     "cheerio": "^1.0.0",
-    "execa": "^9.4.0",
-    "fast-xml-parser": "^4.5.0",
-    "got": "^14.4.2",
-    "mac-say": "^0.2.9",
+    "fast-xml-parser": "^4.5.1",
+    "got": "^14.4.5",
+    "mac-say": "^0.3.1",
+    "pinyin-pro": "^3.26.0",
     "raycast-cross-extension": "^0.2.3",
     "turndown": "^7.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.7.4",
-    "@types/react": "^18.3.10",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18",
     "@types/turndown": "^5.0.5",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   }
 }

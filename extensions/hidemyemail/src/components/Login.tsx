@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Form, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Form, LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { iCloudService } from "../api/connect";
 import TwoFactorAuthForm from "./forms/TwoFactorAuthForm";
 import { LoginForm } from "./forms/LoginForm";
@@ -31,11 +31,13 @@ export function Login({ onLogin }: { onLogin: (service: iCloudService) => void }
   }, []);
 
   async function handleLogin(appleID: string, password: string | null = null) {
+    const { useChineseAccount } = getPreferenceValues<Preferences>();
+
     // Password exists means apple ID did not exist and login form
     // was shown so store apple ID in LocalStorage
     if (password) await LocalStorage.setItem("appleID", appleID);
 
-    const iService = new iCloudService(appleID);
+    const iService = new iCloudService(appleID, { useChineseAccount });
     await iService.init();
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Logging in..." });
