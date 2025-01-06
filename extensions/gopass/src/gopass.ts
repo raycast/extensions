@@ -74,6 +74,10 @@ async function otp(entry: string): Promise<string> {
   return gopass(["otp", "--password", entry]);
 }
 
+async function sync(): Promise<void> {
+  await gopass(["sync"]);
+}
+
 async function clip(entry: string): Promise<void> {
   await gopass(["show", "--clip", entry]);
 }
@@ -106,4 +110,4 @@ async function show(entry: string): Promise<string[]> {
     .then((data) => data.filter((item) => item.includes(":")));
 }
 
-export default { list, password, clip, show, otp, pwgen, showAll, insert, remove };
+export default { list, password, clip, show, otp, sync, pwgen, showAll, insert, remove };

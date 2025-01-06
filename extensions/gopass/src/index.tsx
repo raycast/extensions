@@ -36,6 +36,17 @@ export async function removePassword(entry: string): Promise<void> {
   }
 }
 
+export async function sync(): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Syncing Passwords", style: Toast.Style.Animated });
+    await gopass.sync();
+    await toast.hide();
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not sync password", style: Toast.Style.Failure });
+  }
+}
+
 export async function copyPassword(entry: string): Promise<void> {
   try {
     const toast = await showToast({ title: "Copying password", style: Toast.Style.Animated });
@@ -147,6 +158,7 @@ export default function Main({ prefix = "" }): JSX.Element {
       onSearchTextChange={setSearchText}
       actions={
         <ActionPanel>
+          <Action title="Sync Passwords" icon={Icon.Network} onAction={sync} />
           <Action.Push title="New Password" icon={Icon.NewDocument} target={<CreateEditPassword />} />
         </ActionPanel>
       }
