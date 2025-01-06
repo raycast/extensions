@@ -18,6 +18,10 @@ Configure the extension via `Raycast Settings > Extensions > AI Text to Calendar
 | `openAiApiKey` | OpenAI API Key | string | true     | Your personal OpenAI API key                     |
 | `language`     | Language       | string | true     | Language of the input text (e.g., English, 日本語) |
 
+## TODO
+- [ ] User default settings (e.g., default date, time)
+- [ ] With supplementary information (e.g., selected text + user input)
+
 ## License
 
 This project is licensed under the MIT License.

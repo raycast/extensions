@@ -1,4 +1,4 @@
-import { showHUD, Toast, showToast, getSelectedText, getPreferenceValues, Clipboard, open } from "@raycast/api";
+import { Clipboard, getPreferenceValues, getSelectedText, open, showHUD, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
 
 interface CalendarEvent {
@@ -13,11 +13,14 @@ interface CalendarEvent {
 
 export default async function main() {
   try {
-    const { openAiApiKey, language } = getPreferenceValues<Preferences.AiTextToCalendar>();
+    const apiKey = getPreferenceValues().apiKey;
+    const endpoint = getPreferenceValues().endpoint;
+    const language = getPreferenceValues().language;
+    const model = getPreferenceValues().model;
 
     showToast({ style: Toast.Style.Animated, title: "Extracting..." });
     const selectedText = await getSelectedText();
-    const json = await ai(selectedText, openAiApiKey, language);
+    const json = await ai(selectedText, apiKey, language, endpoint, model);
     if (!json) {
       throw new Error("Extraction failed");
     }
@@ -37,13 +40,13 @@ export default async function main() {
   }
 }
 
-async function ai(text: string, openaiKey: string, language: string) {
+async function ai(text: string, openaiKey: string, language: string, endpoint: string, model: string) {
   const systemMessage = `\
 Extract schedule information from the text provided by the user.
 The output should be in the following JSON format.
 
 {
-  title: string, // Event title
+  title: string, // Event title, should be descriptive and very concise
   start_date: YYYYMMDD, // Start date
   start_time: hhmmss, // Start time
   end_date: YYYYMMDD, // End date
@@ -59,9 +62,9 @@ Note:
 * Ensure the location is easily identifiable
 * If the end date and time are unknown, set it to 2 hours after the start date and time\
 `;
-  const openai = new OpenAI({ apiKey: openaiKey });
+  const openai = new OpenAI({ apiKey: openaiKey, baseURL: endpoint });
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: model,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: systemMessage },
