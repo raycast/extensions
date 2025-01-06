@@ -5,6 +5,9 @@
   "description": "Efficiently manage and organize your AI prompts. Save, tag, and favorite your most effective prompts for quick access across any LLM or chatbot.",
   "icon": "extension-icon.png",
   "author": "renzo",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",

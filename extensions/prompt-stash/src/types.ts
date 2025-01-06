@@ -17,4 +17,5 @@ export type UseLocalPromptsReturn = [Prompt[], boolean, () => Promise<void>];
 export type UsePromptReturn = [
   (newPrompt: Prompt, onSuccess?: SuccessCallback, onError?: ErrorCallback) => Promise<void>,
   (promptId: string, onSuccess?: SuccessCallback, onError?: ErrorCallback) => Promise<void>,
+  (promptId: string, updatePrompt: Prompt, onSuccess?: SuccessCallback, onError?: ErrorCallback) => Promise<void>,
 ];

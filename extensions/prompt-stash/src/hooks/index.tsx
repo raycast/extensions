@@ -77,6 +77,20 @@ export function usePrompt(): UsePromptReturn {
       await showToast({ title: "Error", message: "Failed to delete prompt" });
     }
   }
+  async function update(promptId: string, updatedPrompt: Prompt, onSuccess?: SuccessCallback, onError?: ErrorCallback) {
+    try {
+      const storedPrompts = await LocalStorage.getItem<string>(PROMPTS_KEY);
+      const currentPrompts = storedPrompts ? JSON.parse(storedPrompts) : [];
 
-  return [create, destroy];
+      const updatedPrompts = currentPrompts.map((p: Prompt) => (p.id === promptId ? updatedPrompt : p));
+
+      await LocalStorage.setItem(PROMPTS_KEY, JSON.stringify(updatedPrompts));
+      onSuccess?.();
+      loadPrompts();
+    } catch (error) {
+      onError?.(error as DOMException);
+    }
+  }
+
+  return [create, destroy, update];
 }
