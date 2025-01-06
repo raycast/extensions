@@ -107,9 +107,16 @@
     },
     {
       "name": "copy-to-clipboard",
-      "title": "Copy to Clipboard",
+      "title": "Copy URL to Clipboard",
       "subtitle": "Safari",
-      "description": "Copy the current Safari tab url to your clipboard",
+      "description": "Copy the current Safari tab URL to your clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-title-as-link-to-clipboard",
+      "title": "Copy Title as Link to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab title as Markdown link ([title](url)) to your clipboard",
       "mode": "no-view"
     }
   ],
