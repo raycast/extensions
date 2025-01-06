@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
-import { Model } from "./type";
+import type { Model } from "./type";
 import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
 import { ExportData, ImportData } from "./utils/import-export";

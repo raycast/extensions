@@ -1,4 +1,4 @@
-import { showToast, Toast, confirmAlert, Alert, Icon, LocalStorage } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Alert, Icon, LocalStorage, open } from "@raycast/api";
 import { writeFile, readFile } from "fs/promises";
 import moment from "moment";
 import { homedir } from "os";
@@ -14,6 +14,14 @@ export function ExportData(data: any, moduleName: string) {
         title: `${moduleName} exported`,
         message: `to ~/${filename}`,
         style: Toast.Style.Success,
+        primaryAction: {
+          title: "Open File",
+          onAction: () => open(join(homedir(), filename)),
+        },
+        secondaryAction: {
+          title: "Open Folder",
+          onAction: () => open(join(homedir(), "Downloads")),
+        },
       });
     })
     .catch((error) => {
