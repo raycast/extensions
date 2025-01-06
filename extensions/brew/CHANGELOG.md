@@ -3,7 +3,7 @@
 ## [Improvements] - {PR_MERGE_DATE}
 
 - Optimized checkmark icon
-- Minor change on tint color
+- Minor change on tint color and minor fixes
 - Updated metadata
 
 ## [Improvements] - 2025-01-02

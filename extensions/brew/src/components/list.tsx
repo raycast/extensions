@@ -61,7 +61,7 @@ export function FormulaListItem(props: {
 }): JSX.Element {
   const formula = props.formula;
   let version = formula.versions.stable;
-  let tintColor = null;
+  let tintColor: Color.ColorLike = tertiaryTextColor;
   let tooltip: string | undefined = undefined;
   let iconMark: Icon = Icon.Circle;
 
@@ -70,9 +70,6 @@ export function FormulaListItem(props: {
     tintColor = formula.outdated ? Color.Red : Color.Green;
     iconMark = Icon.CheckCircle;
     tooltip = formula.outdated ? "Outdated" : "Up to date";
-  } else {
-    // not installed, set to tertiaryTextColor
-    tintColor = tertiaryTextColor;
   }
 
   const icon = { source: iconMark, tintColor: tintColor };
@@ -102,7 +99,7 @@ export function CaskListItem(props: {
 }): JSX.Element {
   const cask = props.cask;
   let version = cask.version;
-  let tintColor = null;
+  let tintColor: Color.ColorLike = tertiaryTextColor;
   let tooltip: string | undefined = undefined;
   let iconMark: Icon = Icon.Circle;
 
@@ -111,9 +108,6 @@ export function CaskListItem(props: {
     tintColor = cask.outdated ? Color.Red : Color.Green;
     iconMark = Icon.CheckCircle;
     tooltip = cask.outdated ? "Outdated" : "Up to date";
-  } else {
-    // not installed, set to tertiaryTextColor
-    tintColor = tertiaryTextColor;
   }
 
   const icon = { source: iconMark, tintColor: tintColor };
