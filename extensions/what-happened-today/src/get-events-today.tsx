@@ -109,7 +109,10 @@ export default function Command() {
           onChange={(newDate) => dateChanged(newDate)}
         >
           {validDates.map((date) => (
-            <List.Dropdown.Item title={ date.toDateString().substring(4, 11) + "(" + (date.getMonth()+1) + "/" + date.getDate() + ")"} value={date.toDateString()} />
+            <List.Dropdown.Item
+              title={date.toDateString().substring(4, 11) + "(" + (date.getMonth() + 1) + "/" + date.getDate() + ")"}
+              value={date.toDateString()}
+            />
           ))}
         </List.Dropdown>
       }
