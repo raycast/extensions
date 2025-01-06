@@ -1,12 +1,18 @@
-const IS_NUMBER_REGEX = /^[+-]?\d+(\.\d+)?$/g;
+const IS_FLOATING_NUMBER_REGEX = /^[+-]?\d+(\.\d+)?$/;
 
 /**
  * Determine whether a string can be safely converted to a number.
  */
-export function isNumber(v: string) {
-  if (Number.isNaN(Number(v))) return false;
+export function isNumberLike(v: string) {
+  const numberLike = v.trim();
 
-  if (!IS_NUMBER_REGEX.test(v)) return false;
+  if (Number.isNaN(Number(numberLike))) {
+    return false;
+  }
+
+  if (!IS_FLOATING_NUMBER_REGEX.test(numberLike)) {
+    return false;
+  }
 
   return true;
 }

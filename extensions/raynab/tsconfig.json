@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
-  "include": ["src/**/*"],
+  "display": "Node 20",
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["ES2021"],
+    "lib": ["ES2022"],
     "module": "commonjs",
-    "target": "ES2021",
+    "target": "ES2022",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
