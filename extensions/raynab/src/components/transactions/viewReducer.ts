@@ -18,12 +18,12 @@ import { formatToYnabAmount, isNumberLike } from '@lib/utils';
 const VALID_MODIFIERS = ['account', 'amount', 'type', 'category'] as const;
 const MODIFIERS_REGEX = new RegExp(
   `(-?(?:${VALID_MODIFIERS.join('|')}):[\\w.'"-\\s]+?)(?=\\s+(?:-?(?:${VALID_MODIFIERS.join('|')}):)|$)`,
-  'gi'
+  'gi',
 );
 
 export function transactionViewReducer(
   state: TransactionViewState,
-  action: TransactionViewAction
+  action: TransactionViewAction,
 ): TransactionViewState {
   switch (action.type) {
     case 'reset': {
@@ -212,7 +212,7 @@ function groupToMap(groupBy: GroupNames | null) {
     }
 
     const previousGroup = groupMap.get(groupName) as Group<TransactionDetail>;
-    groupMap.set(groupName, { ...previousGroup, items: [...previousGroup?.items, currentTransaction] });
+    groupMap.set(groupName, { ...previousGroup, items: [...previousGroup.items, currentTransaction] });
 
     return groupMap;
   };
@@ -269,7 +269,7 @@ function filterCollectionBy(newFilter: Filter) {
 function filterCollectionAndGroup(
   collection: TransactionDetail[],
   filter: Filter,
-  group: TransactionViewState['group']
+  group: TransactionViewState['group'],
 ) {
   return group
     ? (collection.filter(filterCollectionBy(filter)).reduce(groupToMap(group), new Map()) as TransactionDetailMap)

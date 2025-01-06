@@ -21,7 +21,7 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
 
   return (
     <Action
-      title="Delete transaction"
+      title="Delete Transaction"
       onAction={async () => {
         const options: Alert.Options = {
           title: 'Are you sure?',

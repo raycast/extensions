@@ -23,7 +23,7 @@ export function OpenInYnabAction(props: OpenInYnabActionProps) {
 
   return (
     <Action.OpenInBrowser
-      title={`Open ${props.accounts ? `Account${props.accountId ? '' : 's'}` : 'Budget'} in YNAB`}
+      title={`Open ${props.accounts ? `Account${props.accountId ? '' : 's'}` : 'Budget'} In YNAB`}
       url={constructUrl(activeBudgetId, props)}
       shortcut={Shortcuts.ViewInBrowser}
     />

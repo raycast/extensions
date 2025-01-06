@@ -32,7 +32,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
 
   return (
     <Action
-      title="Approve transaction"
+      title="Approve Transaction"
       onAction={async () => {
         // Does the transaction have a category
         const isSimpleTransaction =

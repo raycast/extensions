@@ -146,13 +146,13 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
             message: `The total is ${
               values.amount
             }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2
+              2,
             )}?`,
             primaryAction: {
               title: 'Auto-Distribute the amounts',
               onAction: () => {
                 const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
-                  amount.toString()
+                  amount.toString(),
                 );
                 setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
               },
@@ -188,7 +188,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
             return newData;
           },
           shouldRevalidateAfter: !preferences.quickRevalidate,
-        }
+        },
       )
         .then(() => {
           toast.style = Toast.Style.Success;
@@ -228,7 +228,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   });
 
   const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts
+    sub: SaveSubTransactionWithReadableAmounts,
   ): ((newValue: string) => void) | undefined => {
     const eventHandler = (newAmount: string) => {
       const oldList = [...subtransactions];
@@ -270,7 +270,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
             <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
           ) : null}
           <Action
-            title={selectOwnPayee ? 'Show Payee dropdown' : 'Show Payee Textfield'}
+            title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
             onAction={() => {
               setselectOwnPayee((v) => !v);
             }}
@@ -303,9 +303,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           isLoading={isLoadingPayees}
           info="Press Opt+P to add a payee not in the list"
         >
-          {payees?.map((payee) => (
-            <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
-          ))}
+          {payees?.map((payee) => <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />)}
         </Form.Dropdown>
       )}
 
@@ -324,11 +322,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
             ? (newCategories) => {
                 if (newCategories.length > 1) {
                   const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                    amount.toString()
+                    amount.toString(),
                   );
                   setCategoryList(newCategories);
                   setSubtransactions(
-                    newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
+                    newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] })),
                   );
                 } else {
                   setCategoryList(newCategories);
