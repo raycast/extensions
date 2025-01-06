@@ -111,10 +111,10 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
       } else {
         const tagsNumber = bookmark.tags.length - 1;
         const tagsDisplayNumber = parseInt(preferences.tagsDisplay, 10);
-        if (tagsNumber === tagsDisplayNumber) {
-          bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
-        } else {
-          bookmark.tags.slice(0, tagsDisplayNumber).forEach((tag) => accessories.push({ tag: `#${tag}` }));
+        const displayedTags = bookmark.tags.slice(0, tagsDisplayNumber).map((tag) => `#${tag}`);
+        accessories.push(...displayedTags.map((tag) => ({ tag })));
+
+        if (tagsNumber > tagsDisplayNumber) {
           accessories.push({ tag: `+${tagsNumber}`, tooltip: bookmark.tags.join("\n") });
         }
       }
