@@ -28,42 +28,41 @@ export default function ShowMonitors() {
 
   return (
     <List isLoading={isLoading && isWhoamiLoading}>
-      {data
-        .map((monitor) => (
-          <List.Item
-            key={monitor.id}
-            icon={{
-              tooltip: monitor.active ? "Monitor is active" : "Monitor is inactive",
-              value: { source: Icon.Dot, tintColor: monitor.active ? Color.Green : Color.Red },
-            }}
-            title={monitor.name}
-            subtitle={monitor.url}
-            accessories={[
-              { icon: monitor.public ? Icon.Eye : Icon.EyeDisabled, tooltip: monitor.public ? "Public" : "Private" },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="View Monitor"
-                  url={`https://www.openstatus.dev/app/${whoamiData?.slug}/monitors/${monitor.id}/overview`}
-                />
-                <Action
-                  icon={Icon.Hammer}
-                  title="Trigger Monitor Execution"
-                  onAction={async () => {
-                    await fetch(`https://api.openstatus.dev/v1/monitor/${monitor.id}/trigger`, {
-                      headers: {
-                        "x-openstatus-key": `${preferences.access_token}`,
-                      },
-                      method: "POST",
-                    });
-                    showToast({ title: "Trigger Run", message: "Run" });
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+      {data.map((monitor) => (
+        <List.Item
+          key={monitor.id}
+          icon={{
+            tooltip: monitor.active ? "Monitor is active" : "Monitor is inactive",
+            value: { source: Icon.Dot, tintColor: monitor.active ? Color.Green : Color.Red },
+          }}
+          title={monitor.name}
+          subtitle={monitor.url}
+          accessories={[
+            { icon: monitor.public ? Icon.Eye : Icon.EyeDisabled, tooltip: monitor.public ? "Public" : "Private" },
+          ]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="View Monitor"
+                url={`https://www.openstatus.dev/app/${whoamiData?.slug}/monitors/${monitor.id}/overview`}
+              />
+              <Action
+                icon={Icon.Hammer}
+                title="Trigger Monitor Execution"
+                onAction={async () => {
+                  await fetch(`https://api.openstatus.dev/v1/monitor/${monitor.id}/trigger`, {
+                    headers: {
+                      "x-openstatus-key": `${preferences.access_token}`,
+                    },
+                    method: "POST",
+                  });
+                  showToast({ title: "Trigger Run", message: "Run" });
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
