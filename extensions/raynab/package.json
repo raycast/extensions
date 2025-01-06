@@ -59,7 +59,7 @@
       "subtitle": "YNAB",
       "description": "Easily track unapproved or uncategorized transactions.",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "2h"
     }
   ],
   "keywords": [
