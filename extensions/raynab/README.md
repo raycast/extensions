@@ -23,11 +23,7 @@ Raynab is powered by the [YNAB API](https://api.youneedabudget.com/). In order f
 5. Open a Raynab command.
 6. Follow the instructions and paste your Access Token in the `token` field.
 
-<!-- Insert image here -->
-
 ### Budget Selection
-
-<!-- Insert image here -->
 
 Given that YNAB can be used to handle multiple budgets, in order to properly use the extension across its 5 commands, you must select the budget you would like to have access to.
 
