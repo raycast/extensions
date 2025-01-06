@@ -9,7 +9,7 @@ import { categoryViewReducer, initView } from './viewReducer';
 import { CategoriesProvider } from './budgetContext';
 
 export function BudgetView() {
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetId, isLoading: isLoadingBudgetId } = useLocalStorage('activeBudgetId', '');
   const { data: categoryGroups = [], isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const { data: budget, isLoading: isLoadingBudget } = useBudget(activeBudgetId);
 
@@ -19,13 +19,13 @@ export function BudgetView() {
       isDetailed: false,
       isShowingProgress: false,
     },
-    initView
+    initView,
   );
 
   return (
     <CategoriesProvider state={state} dispatch={dispatch}>
       <List
-        isLoading={isLoadingCategories || isLoadingBudget}
+        isLoading={isLoadingBudgetId || isLoadingCategories || isLoadingBudget}
         searchBarPlaceholder={`Search categories in ${getCurrentMonth()}`}
         isShowingDetail={state.isDetailed}
       >
