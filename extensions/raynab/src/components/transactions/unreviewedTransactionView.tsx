@@ -27,7 +27,7 @@ export function UnreviewedTransactionView() {
 
       return grouped;
     },
-    {}
+    {},
   );
 
   return (
@@ -36,16 +36,28 @@ export function UnreviewedTransactionView() {
       tooltip={`You have ${nTransactions} unreviewed transaction${rule === 'one' ? '' : 's'}`}
       icon={{ source: { light: 'ynab-tree-light.png', dark: 'ynab-tree-dark.png' } }}
     >
-      <MenuBarExtra.Item
-        title="Review all transactions"
-        onAction={() =>
-          launchCommand({
-            name: 'transactions',
-            type: LaunchType.UserInitiated,
-            context: { filter: { key: 'unreviewed' } },
-          })
-        }
-      />
+      {unreviewedTransactions.length > 0 ? (
+        <MenuBarExtra.Item
+          title="Review all transactions"
+          onAction={() =>
+            launchCommand({
+              name: 'transactions',
+              type: LaunchType.UserInitiated,
+              context: { filter: { key: 'unreviewed' } },
+            })
+          }
+        />
+      ) : (
+        <MenuBarExtra.Item
+          title="View all transactions"
+          onAction={() =>
+            launchCommand({
+              name: 'transactions',
+              type: LaunchType.UserInitiated,
+            })
+          }
+        />
+      )}
       <MenuBarExtra.Section>
         {Object.entries(txGroupedByAccountName).map(([accountName, items]) => (
           <Fragment key={accountName}>
