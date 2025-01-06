@@ -26,7 +26,7 @@ interface TransactionViewProps {
 export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
   const { value: activeBudgetCurrency, isLoading: isLoadingCurrency } = useLocalStorage<CurrencyFormat | null>(
     'activeBudgetCurrency',
-    null
+    null,
   );
   const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
   const {
@@ -49,7 +49,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
       isShowingDetails: false,
       initialCollection: transactions,
     },
-    initView
+    initView,
   );
 
   const { collection, group, sort, filter, search: query, isShowingDetails } = state;
@@ -159,6 +159,7 @@ export function TransactionView({ search = '', filter: defaultFilter = null }: T
           scheduledTransactions={scheduledTransactions}
           displayScheduled={displayScheduled}
           currency={activeBudgetCurrency}
+          activeFilter={dropDownValue}
         />
       </List>
     </TransactionProvider>
@@ -185,6 +186,7 @@ interface TransactionViewItemsProps {
   scheduledTransactions: ScheduledTransactionDetail[];
   displayScheduled: boolean;
   currency: CurrencyFormat;
+  activeFilter: 'unreviewed' | 'all';
 }
 
 function TransactionViewItems({
@@ -192,6 +194,7 @@ function TransactionViewItems({
   scheduledTransactions,
   displayScheduled: displaySchedule,
   currency,
+  activeFilter,
 }: TransactionViewItemsProps) {
   if (displaySchedule) {
     return scheduledTransactions.length > 0 ? (
@@ -208,7 +211,13 @@ function TransactionViewItems({
   const hasTransactions = isArray ? transactions.length > 0 : transactions.size > 0;
 
   if (!hasTransactions) {
-    return (
+    return activeFilter === 'unreviewed' ? (
+      <List.EmptyView
+        title="Good job!"
+        description="You don't have any unreviewed transactions."
+        icon={{ source: '🎊' }}
+      />
+    ) : (
       <List.EmptyView
         title="No Transactions"
         description="You don't have any transactions. Try adding some with the `Create Transaction` command."
