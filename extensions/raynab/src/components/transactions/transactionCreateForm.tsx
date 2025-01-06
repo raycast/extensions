@@ -1,5 +1,16 @@
 import { autoDistribute, easyGetColorFromId, formatToYnabAmount, getSubtransacionCategoryname } from '@lib/utils';
-import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, confirmAlert, Alert } from '@raycast/api';
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  getPreferenceValues,
+} from '@raycast/api';
 import { createTransaction } from '@lib/api';
 import { useAccounts } from '@hooks/useAccounts';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
@@ -11,6 +22,8 @@ import { useMemo, useState } from 'react';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
+
+const preferences = getPreferenceValues<Preferences>();
 
 interface FormValues {
   date: Date | null;
@@ -169,7 +182,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
       // If there are exactly 2 subtransactions, we can automatically calculate the second amount
       // based on the total transaction amount and the first subtransaction amount
       const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction) {
+      if (isDualSplitTransaction && preferences.liveDistribute) {
         const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
         const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
         const otherAmount = +amount - +newAmount;

@@ -241,7 +241,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       newList[previousSubtransactionIdx] = newSubtransaction;
 
       const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction) {
+      if (isDualSplitTransaction && preferences.liveDistribute) {
         const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
         const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
         const otherAmount = +amount - +newAmount;
