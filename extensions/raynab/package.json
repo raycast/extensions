@@ -98,6 +98,24 @@
       "title": "Token",
       "description": "Your YNAB Personal Access Token",
       "placeholder": "Enter your Personal access token"
+    },
+    {
+      "name": "quickRevalidate",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quick Revalidate",
+      "label": "Enable Quick Revalidate",
+      "description": "Revalidate the transaction list immediately after editing, approving, or deleting a transaction. Turning this off might help if you're reaching the API rate limit often."
+    },
+    {
+      "name": "liveDistribute",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Live Distribute",
+      "label": "Enable Live Distribute",
+      "description": "Automatically distribute 2-way split transaction amounts according to the total"
     }
   ],
   "scripts": {
