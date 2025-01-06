@@ -14,9 +14,9 @@ interface CalendarEvent {
 export default async function main() {
   try {
     const apiKey = getPreferenceValues().apiKey;
-    const endpoint = getPreferenceValues().endpoint;
-    const language = getPreferenceValues().language;
-    const model = getPreferenceValues().model;
+    const endpoint = getPreferenceValues().endpoint || "https://api.openai.com/v1";
+    const language = getPreferenceValues().language || "English";
+    const model = getPreferenceValues().model || "gpt-4o-mini";
 
     showToast({ style: Toast.Style.Animated, title: "Extracting..." });
     const selectedText = await getSelectedText();

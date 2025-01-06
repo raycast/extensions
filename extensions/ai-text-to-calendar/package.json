@@ -31,6 +31,7 @@
           "title": "Custom API Endpoint",
           "description": "Overide the default API endpoint",
           "type": "textfield",
+          "default": "https://api.openai.com/v1",
           "required": false
         },
         {
