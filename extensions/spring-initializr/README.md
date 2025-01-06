@@ -2,9 +2,9 @@
 
 Generate Spring Boot projects directly from Raycast, powered by the official Spring Initializr service.
 
-![Spring Initializr](./assets/spring-init-screenshot.png)
+![Spring Initializr](./metadata/spring-initializr-1.png)
 
-Here is a short preview of the extension 
+Here is a short preview of the extension
 
 https://youtu.be/uryzwaM-Ciw
 
