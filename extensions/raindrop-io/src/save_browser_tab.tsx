@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
 import { CreateForm } from "./components/CreateForm";
 import { useBrowserLink } from "./hooks/useBrowserLink";
 
@@ -12,8 +12,9 @@ const AddBrowserTab = () => {
       onWillCreate={() => {
         showToast(Toast.Style.Animated, "Adding Link...");
       }}
-      onCreated={() => {
-        showToast(Toast.Style.Success, "Link Added");
+      onCreated={async () => {
+        await closeMainWindow({ clearRootSearch: true });
+        await showHUD("Link added");
       }}
       onError={() => {
         showToast(Toast.Style.Failure, "Error Adding Link");

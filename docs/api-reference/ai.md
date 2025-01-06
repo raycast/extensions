@@ -152,25 +152,25 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.
 
 #### Enumeration members
 
-| Model | Description |
-|-------|-------------|
-| OpenAI_GPT4 | GPT-4 is OpenAI's most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. |
-| OpenAI_GPT4-turbo | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts. |
-| OpenAI_GPT4o | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations. |
-| OpenAI_GPT4o-mini | GPT-4o mini is a highly intelligent and fast model that is ideal for a variety of everyday tasks. |
-| Anthropic_Claude_Haiku | Claude 3 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text. |
-| Anthropic_Claude_Sonnet | Claude 3.5 Sonnet from Anthropic has enhanced intelligence with increased speed. It excels at complex tasks like visual reasoning or workflow orchestrations. |
-| Anthropic_Claude_Opus | Claude 3 Opus is Anthropic's most intelligent model, with best-in-market performance on highly complex tasks. It stands out for remarkable fluency. |
-| Perplexity_Llama3.1_Sonar_Small | Perplexity's Llama 3.1 Sonar Small is built for speed. It quickly gives you helpful answers using the latest internet knowledge while minimizing hallucinations. |
-| Perplexity_Llama3.1_Sonar_Large | Perplexity's advanced model. Can handle complex questions. It considers current web knowledge to provide well-reasoned, in-depth answers. |
-| Perplexity_Llama3.1_Sonar_Huge | Perplexity's most advanced model. Offers performance that is on par with state of the art models today. |
-| Llama3.1_70B | Llama 3.1 70B is a versatile open-source model from Meta suitable for complex reasoning tasks, multilingual interactions, and extensive text analysis. Powered by Groq. |
-| Llama3.1_8B | Llama 3.1 8B is an open-source model from Meta, optimized for instruction following and high-speed performance. Powered by Groq. |
-| Llama3_70B | Llama 3 70B from Meta is a highly capable open-source LLM that can serve as a tool for various text-related tasks. Powered by Groq. |
-| Llama3.1_405B | Llama 3.1 405B is Meta's flagship open-source model, offering unparalleled capabilities in general knowledge, steerability, math, tool use, and multilingual translation. Powered by together.ai |
-| MixtraL_8x7B | Mixtral 8x7B from Mistral is an open-source model that demonstrates high performance in generating code and text at an impressive speed. Powered by Groq. |
-| Mistral_Nemo | Mistral Nemo is a small model built in collaboration with NVIDIA, and released under the Apache 2.0 license. |
-| Mistral_Large2 | Mistral Large is Mistral's flagship model, capable of code generation, mathematics, and reasoning, with stronger multilingual support. |
+| Model                           | Description                                                                                                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OpenAI_GPT4                     | GPT-4 is the model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems. This model is the previous generation, use GPT-4o for better results.  |
+| OpenAI_GPT4-turbo               | GPT-4 Turbo is an evolution of the GPT-4 model with a larger context. This model is the previous generation, use gpt-4o for better results.                                                      |
+| OpenAI_GPT4o                    | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations.                                                      |
+| OpenAI_GPT4o-mini               | GPT-4o mini is a highly intelligent and fast model that is ideal for a variety of everyday tasks.                                                                                                |
+| Anthropic_Claude_Haiku          | Claude 3.5 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text.                                          |
+| Anthropic_Claude_Sonnet         | Claude 3.5 Sonnet from Anthropic has enhanced intelligence with increased speed. It excels at complex tasks like visual reasoning or workflow orchestrations.                                    |
+| Anthropic_Claude_Opus           | Claude 3 Opus is Anthropic's intelligent model designed to solve highly complex tasks. It stands out for its remarkable fluency.                                                                 |
+| Perplexity_Llama3.1_Sonar_Small | Perplexity's Llama 3.1 Sonar Small is built for speed. It quickly gives you helpful answers using the latest internet knowledge while minimizing hallucinations.                                 |
+| Perplexity_Llama3.1_Sonar_Large | Perplexity's advanced model. Can handle complex questions. It considers current web knowledge to provide well-reasoned, in-depth answers.                                                        |
+| Perplexity_Llama3.1_Sonar_Huge  | Perplexity's most advanced model. Offers performance that is on par with state of the art models today.                                                                                          |
+| Llama3.3_70B                    | Llama 3.3 70B is an open-source model from Meta, state-of-the-art in areas like reasoning, math, and general knowledge.                                                                          |
+| Llama3.1_8B                     | Llama 3.1 8B is an open-source model from Meta, optimized for instruction following and high-speed performance. Powered by Groq.                                                                 |
+| Llama3_70B                      | Llama 3 70B from Meta is a highly capable open-source LLM that can serve as a tool for various text-related tasks. Powered by Groq.                                                              |
+| Llama3.1_405B                   | Llama 3.1 405B is Meta's flagship open-source model, offering unparalleled capabilities in general knowledge, steerability, math, tool use, and multilingual translation. Powered by together.ai |
+| MixtraL_8x7B                    | Mixtral 8x7B from Mistral is an open-source model that demonstrates high performance in generating code and text at an impressive speed. Powered by Groq.                                        |
+| Mistral_Nemo                    | Mistral Nemo is a small model built in collaboration with NVIDIA, and released under the Apache 2.0 license.                                                                                     |
+| Mistral_Large2                  | Mistral Large is Mistral's flagship model, capable of code generation, mathematics, and reasoning, with stronger multilingual support.                                                           |
 
 If a model isn't available to the user, Raycast will fallback to a similar one:
 
@@ -178,6 +178,7 @@ If a model isn't available to the user, Raycast will fallback to a similar one:
 - `AI.Model.OpenAI_GPT4` and `AI.Model["OpenAI_GPT4-turbo"]` -> `AI.Model["OpenAI_GPT4o-mini"]`
 - `AI.Model["Perplexity_Llama3.1_Sonar_Large"]` and `AI.Model["Perplexity_Llama3.1_Sonar_Huge"]` -> `AI.Model["Perplexity_Llama3.1_Sonar_Small"]`
 - `AI.Model.Mistral_Large2` -> `AI.Model.Mistral_Nemo`
+- `AI.Model["Llama3.1_405B"]` -> `AI.Model["Llama3.3_70B"]`
 
 ### AI.AskOptions
 

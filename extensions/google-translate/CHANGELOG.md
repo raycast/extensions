@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2024-12-25
+
+- Fixed a typo for Traditional Chinese
+
 ## [Fix] - 2024-07-05
 
 - Keep language names consistent with `translate.google.com`

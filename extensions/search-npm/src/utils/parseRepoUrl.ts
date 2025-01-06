@@ -1,12 +1,11 @@
-import type { Result } from 'parse-github-url'
-import parsedGithubRepoUrl from 'parse-github-url'
-import type { ParseGitlabUrl } from 'gitlab-url-parse'
-import parsedGitlabRepoUrl from 'gitlab-url-parse'
+import gitUrlParse from 'git-url-parse'
+import { cleanGitUrl } from './cleanGitUrl'
 
 interface ParseRepoUrlResponse {
   owner: string | null | undefined
   name: string | null | undefined
   type?: 'github' | 'gitlab'
+  repoUrl?: string
 }
 
 export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
@@ -15,28 +14,21 @@ export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
       owner: null,
       name: null,
       type: undefined,
+      repoUrl: undefined,
     }
   }
-
-  const isGithubRepo = repoUrl.includes('github.com')
-  const isGitlabRepo = repoUrl.includes('gitlab.com')
-  const parsedRepo = isGithubRepo
-    ? parsedGithubRepoUrl(repoUrl)
-    : isGitlabRepo
-      ? parsedGitlabRepoUrl(repoUrl)
-      : null
+  const parsedUrl = gitUrlParse(repoUrl)
+  const cleanedUrl = cleanGitUrl(parsedUrl.toString('https'))
+  const isGithubRepo = cleanedUrl.includes('github.com')
+  const isGitlabRepo = cleanedUrl.includes('gitlab.com')
+  const owner = parsedUrl.owner
+  const name = parsedUrl.name
+  const type = isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined
 
   return {
-    owner: isGithubRepo
-      ? (parsedRepo as Result).owner
-      : isGitlabRepo
-        ? (parsedRepo as ParseGitlabUrl).user
-        : null,
-    name: isGithubRepo
-      ? (parsedRepo as Result).name
-      : isGitlabRepo
-        ? (parsedRepo as ParseGitlabUrl).project
-        : null,
-    type: isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined,
+    owner,
+    name,
+    type,
+    repoUrl: cleanedUrl,
   }
 }

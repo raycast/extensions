@@ -25,7 +25,9 @@ function isEqual<T>(before: T, after: T) {
 type FormField = keyof LinkFormState["values"];
 type LinkFormAction<Field extends FormField> =
   | { type: "changeField"; field: Field; value: LinkFormState["values"][Field] }
-  | { type: "updateWithLink"; link: Link | null };
+  | { type: "updateWithLink"; link: Link | null }
+  | { type: "setValues"; values: LinkFormState["values"] };
+
 function reducer<Field extends FormField>(state: LinkFormState, action: LinkFormAction<Field>): LinkFormState {
   switch (action.type) {
     case "changeField": {
@@ -48,6 +50,13 @@ function reducer<Field extends FormField>(state: LinkFormState, action: LinkForm
           title: action.link?.title ?? state.values.title,
           url: action.link?.url ?? state.values.url,
         },
+      };
+    }
+    case "setValues": {
+      return {
+        ...state,
+        dirty: true,
+        values: action.values,
       };
     }
   }
@@ -77,10 +86,11 @@ export default function useLinkForm(initialValues: Partial<LinkFormState["values
   return {
     loading: linkLoading,
     values: state.values,
+    setValues: (values: LinkFormState["values"]) => dispatch({ type: "setValues", values }),
     onChange:
       <Field extends FormField>(field: Field) =>
       (value: LinkFormState["values"][Field]) => {
-        dispatch({ type: "changeField", field, value: value });
+        dispatch({ type: "changeField", field, value });
       },
   };
 }

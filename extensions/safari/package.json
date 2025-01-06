@@ -16,7 +16,9 @@
     "iwex",
     "xilopaint",
     "marcjulian",
-    "ChangeHow"
+    "ChangeHow",
+    "ridemountainpig",
+    "1weiho"
   ],
   "license": "MIT",
   "commands": [
@@ -71,6 +73,14 @@
           "label": "Group by status",
           "default": true,
           "description": "Group items by Read/Unread status"
+        },
+        {
+          "name": "hideReadItems",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide read items",
+          "default": false,
+          "description": "Hide read items"
         }
       ]
     },
@@ -94,6 +104,20 @@
       "subtitle": "Safari",
       "description": "Browse your bookmarks",
       "mode": "view"
+    },
+    {
+      "name": "copy-to-clipboard",
+      "title": "Copy URL to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab URL to your clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-title-as-link-to-clipboard",
+      "title": "Copy Title as Link to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab title as Markdown link ([title](url)) to your clipboard",
+      "mode": "no-view"
     }
   ],
   "preferences": [

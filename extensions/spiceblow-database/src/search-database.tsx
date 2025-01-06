@@ -48,7 +48,7 @@ import { useGlobalState } from "./state";
 import { CustomQuery, CustomQueryType, GraphData, Json, StoredDatabase, TableInfo, TimeSeriesItem } from "./types";
 
 const pageSize = 20;
-const freeRequestsCount = 10;
+const freeRequestsCount = 50;
 
 let abortController = new AbortController();
 
@@ -127,7 +127,8 @@ function useSearchFilter(id: string) {
 function SearchTable({ table }: { table: string }) {
   const { searchText, setSearchText } = useSearchFilter(table);
   const currentConnectionString = useGlobalState((x) => x.connectionString);
-  const data = useCachedPromise(
+
+  const tableInfoData = useCachedPromise(
     async (table, _connectionString) => {
       const [schema, tableInfo] = await Promise.all([
         databaseFunctions.getDatabaseSchema({ schemas: [table], tables: [table] }),
@@ -140,8 +141,8 @@ function SearchTable({ table }: { table: string }) {
     {},
   );
 
-  const tableInfo = data.data?.tableInfo;
-  const schema = data.data?.schema;
+  const tableInfo = tableInfoData.data?.tableInfo;
+  const schema = tableInfoData.data?.schema;
 
   const { searchField, dropdown } = useTableFiltering({ tableInfo: tableInfo });
 
@@ -172,14 +173,52 @@ function SearchTable({ table }: { table: string }) {
     [currentConnectionString, searchText, table],
     { keepPreviousData: true },
   );
-
   const primaryKeyColumns = tableInfo?.columns.filter((col) => col.isPrimaryKey).map((col) => col.columnName) || [];
+  const currentRowIds = new Set(
+    rows.data?.map((row) => primaryKeyColumns.map((col) => row[col]).join(", ")).filter(Boolean) || [],
+  );
+  const selectedRows = useGlobalState((x) =>
+    Array.isArray(x.selectedRows) ? x.selectedRows.filter((row) => currentRowIds.has(row)) : [],
+  );
+
+  const toggleRowSelection = useGlobalState((x) => x.toggleRowSelection);
+  const { push } = useNavigation();
+
+  const handleDeleteSelectedRows = async () => {
+    const deleteQueries = (
+      await Promise.all(
+        selectedRows.map(async (primaryKeyValue) => {
+          const row = rows.data?.find((r) => {
+            return primaryKeyColumns.map((col) => r[col]).join(", ") === primaryKeyValue;
+          });
+          if (!row) {
+            throw new Error(`Could not find row with primary key ${primaryKeyValue}`);
+          }
+          const result = await databaseFunctions.prepareTableRowDelete({
+            allValues: tableInfo!.columns.map((col) => {
+              return { ...col, oldValue: row[col.columnName] };
+            }),
+          });
+          return result.deleteQueries;
+        }),
+      )
+    ).flat();
+
+    push(
+      <DeleteRows
+        revalidate={() => {
+          rows.revalidate();
+        }}
+        deleteQueries={deleteQueries}
+      />,
+    );
+  };
 
   return (
     <List
       pagination={{ hasMore: false, onLoadMore() {}, ...rows.pagination, pageSize }}
       searchText={searchText}
-      isLoading={rows.isLoading || data.isLoading}
+      isLoading={rows.isLoading || tableInfoData.isLoading}
       onSearchTextChange={setSearchText}
       isShowingDetail
       searchBarAccessory={dropdown}
@@ -193,15 +232,46 @@ function SearchTable({ table }: { table: string }) {
     >
       {rows.data?.map((row, index) => {
         const primaryKeyValue = primaryKeyColumns.map((col) => row[col]).join(", ") || String(index);
+        const isSelected = selectedRows?.includes(primaryKeyValue);
+
         return (
           <List.Item
             key={primaryKeyValue}
             title={primaryKeyValue}
+            icon={selectedRows.length > 0 ? { source: isSelected ? Icon.CheckCircle : Icon.Circle } : undefined}
             detail={<List.Item.Detail metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />} />}
             actions={
               <ActionPanel>
+                {selectedRows.length > 0 && (
+                  <>
+                    <Action
+                      title={isSelected ? "Deselect Row" : "Select Row"}
+                      icon={isSelected ? Icon.CheckCircle : Icon.Circle}
+                      onAction={() => toggleRowSelection(primaryKeyValue)}
+                    />
+                    <Action
+                      title={`Delete ${selectedRows.length} Selected Row${selectedRows.length > 1 ? "s" : ""}`}
+                      icon={Icon.Trash}
+                      onAction={handleDeleteSelectedRows}
+                      style={Action.Style.Destructive}
+                    />
+                    <Action
+                      title="Deselect All Rows"
+                      icon={Icon.XMarkCircle}
+                      onAction={() => useGlobalState.getState().setSelectedRows([])}
+                    />
+                  </>
+                )}
+
                 {tableInfo && (
                   <RowUpdatesActions revalidate={() => rows.revalidate()} tableInfo={tableInfo} row={row} />
+                )}
+                {!selectedRows.length && (
+                  <Action
+                    title={"Select Row"}
+                    icon={Icon.CheckCircle}
+                    onAction={() => toggleRowSelection(primaryKeyValue)}
+                  />
                 )}
                 <CountAction table={table} />
                 <RunTransactionQueries />
@@ -277,7 +347,7 @@ function RowUpdatesActions({
             }),
           });
 
-          push(<DeleteRow revalidate={revalidate} deleteQueries={deleteQueries} />);
+          push(<DeleteRows revalidate={revalidate} deleteQueries={deleteQueries} />);
         }}
       />
 
@@ -404,6 +474,9 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
   const { searchText, setSearchText } = useSearchFilter(id);
 
   const currentConnectionString = useGlobalState((x) => x.connectionString);
+
+  const toggleRowSelection = useGlobalState((x) => x.toggleRowSelection);
+
   const tables = [...new Set(tableInfo.columns.map((col) => col.tableName).filter(isTruthy))];
   const schema = useCachedPromise(
     async (_connectionString, selectedSchemas) => {
@@ -442,6 +515,44 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
     [currentConnectionString, searchText, query, searchField, tableInfo, schema.data],
     { keepPreviousData: true },
   );
+  const currentRowIds = new Set(rows.data?.map((row) => String(row[bestField])).filter(Boolean) || []);
+  const selectedRows = useGlobalState((x) =>
+    Array.isArray(x.selectedRows) ? x.selectedRows.filter((row) => currentRowIds.has(row)) : [],
+  );
+
+  const handleDeleteSelectedRows = async (tableName?: string) => {
+    const deleteQueries = (
+      await Promise.all(
+        selectedRows.map(async (primaryKeyValue) => {
+          const row = rows.data?.find((r) => {
+            return String(r[bestField]) === primaryKeyValue;
+          });
+          if (!row) {
+            throw new Error(
+              `Could not find row with value ${primaryKeyValue} in field ${bestField}. Full row data: ${JSON.stringify(rows.data)}`,
+            );
+          }
+          const result = await databaseFunctions.prepareTableRowDelete({
+            allValues: tableInfo.columns
+              .filter((col) => !tableName || col.tableName === tableName)
+              .map((col) => {
+                return { ...col, oldValue: row[col.columnName] };
+              }),
+          });
+          return result.deleteQueries;
+        }),
+      )
+    ).flat();
+
+    push(
+      <DeleteRows
+        revalidate={() => {
+          rows.revalidate();
+        }}
+        deleteQueries={deleteQueries}
+      />,
+    );
+  };
 
   if (args.type === "time-series") {
     return <Graph query={args} rows={rows.data} />;
@@ -465,18 +576,46 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
     >
       {rows.data?.map((row, index) => {
         const primaryKeyValue = String(row[bestField]) || String(index);
+        const isSelected = selectedRows?.includes(primaryKeyValue);
+
         return (
           <List.Item
             key={primaryKeyValue + index}
-            title={primaryKeyValue || " "} // JSON stringified object in the list title
-            detail={
-              <List.Item.Detail
-                // markdown={" "}
-                metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />}
-              />
-            }
+            title={primaryKeyValue || " "}
+            icon={selectedRows.length > 0 ? { source: isSelected ? Icon.CheckCircle : Icon.Circle } : undefined}
+            detail={<List.Item.Detail metadata={tableInfo && <RowMetadata tableInfo={tableInfo} row={row} />} />}
             actions={
               <ActionPanel>
+                {selectedRows.length > 0 && (
+                  <>
+                    <Action
+                      title={isSelected ? "Deselect Row" : "Select Row"}
+                      icon={isSelected ? Icon.CheckCircle : Icon.Circle}
+                      onAction={() => toggleRowSelection(primaryKeyValue)}
+                    />
+                    {tables.map((tableName) => (
+                      <Action
+                        key={tableName}
+                        title={`Delete ${selectedRows.length} in "${tableName}"`}
+                        icon={Icon.Trash}
+                        onAction={() => handleDeleteSelectedRows(tableName)}
+                        style={Action.Style.Destructive}
+                      />
+                    ))}
+                    <Action
+                      title={`Delete ${selectedRows.length} Row${selectedRows.length > 1 ? "s" : ""} in All Tables`}
+                      icon={Icon.Trash}
+                      onAction={() => handleDeleteSelectedRows()}
+                      style={Action.Style.Destructive}
+                    />
+                    <Action
+                      title="Deselect All Rows"
+                      icon={Icon.XMarkCircle}
+                      onAction={() => useGlobalState.getState().setSelectedRows([])}
+                    />
+                  </>
+                )}
+
                 <RowUpdatesActions
                   revalidate={() => {
                     rows.revalidate();
@@ -484,6 +623,15 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
                   tableInfo={tableInfo}
                   row={row}
                 />
+
+                {!selectedRows.length && (
+                  <Action
+                    title={"Select Row"}
+                    icon={Icon.CheckCircle}
+                    onAction={() => toggleRowSelection(primaryKeyValue)}
+                  />
+                )}
+
                 <CountAction query={query} />
                 {tables.map((tableName) => (
                   <Action
@@ -500,7 +648,7 @@ function SearchCustomQuery(args: CustomQuery & { revalidate: () => void }) {
                       });
 
                       push(
-                        <DeleteRow
+                        <DeleteRows
                           revalidate={() => {
                             rows.revalidate();
                           }}
@@ -1071,7 +1219,7 @@ function SearchTables() {
         return null;
       }
       const [schema, tableName] = table.schemaTable.split(".");
-      const schemaColor = getStringColor(schema || "", { saturation: 0.2 });
+      const schemaColor = getStringColor("_" + schema || "", { saturation: 0.4 });
       const tableColor = getStringColor(table.schemaTable);
 
       return {
@@ -1080,12 +1228,12 @@ function SearchTables() {
           <List.Item
             key={table.schemaTable}
             title={tableName}
-            subtitle={`about ${table.estimatedRowCount} rows`}
+            // subtitle={table.columns?.map((c) => c).join(", ") || ""}
             icon={{
               source: Icon.Document,
               tintColor: tableColor,
             }}
-            keywords={[schema]}
+            keywords={[schema, ...(table.columns || [])]}
             accessories={[
               {
                 tag: { value: schema, color: schemaColor },
@@ -1275,19 +1423,19 @@ function useDatabases() {
   return databases;
 }
 
-function DeleteRow({ revalidate, deleteQueries }: { revalidate: () => void; deleteQueries: SQLStatement[] }) {
+function DeleteRows({ revalidate, deleteQueries }: { revalidate: () => void; deleteQueries: SQLStatement[] }) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const { addQueriesToTransaction } = useGlobalState();
   const queriesMarkdown = getQueryMarkdown(deleteQueries);
-  const markdown = "Are you sure you want to delete this row?\n\n" + queriesMarkdown;
+  const markdown = "Are you sure you want to execute the following queries?\n\n" + queriesMarkdown;
 
   async function executeDeleteQuery() {
     try {
       setIsLoading(true);
       await databaseFunctions.executeQueries({ queries: deleteQueries });
       await revalidate();
-      showToast({ title: "Row deleted successfully", style: Toast.Style.Success });
+      showToast({ title: "Deleted successfully", style: Toast.Style.Success });
       pop();
     } catch (error) {
       notifyError(error);
@@ -1299,11 +1447,11 @@ function DeleteRow({ revalidate, deleteQueries }: { revalidate: () => void; dele
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle="Delete Row?"
+      navigationTitle="Delete Rows?"
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Delete Row" onAction={executeDeleteQuery} icon={Icon.Trash} style={Action.Style.Destructive} />
+          <Action title="Delete" onAction={executeDeleteQuery} icon={Icon.Trash} style={Action.Style.Destructive} />
           <Action
             title="Add to Transaction"
             onAction={() => {
@@ -1478,10 +1626,11 @@ function EditRow({
         const canBeUpdated = column.originalColumnName && column.tableName;
         const value = renderColumnValue(column, formValues[column.columnName]);
 
-        let C = Form.TextField;
+        let FormComponent = Form.TextField;
         if (value.split("\n").length > 1) {
-          C = Form.TextArea;
+          FormComponent = Form.TextArea;
         }
+
         let error = "";
         if (requiredFields.includes(column)) {
           if (!value) {
@@ -1501,14 +1650,34 @@ function EditRow({
         if (!requiredFields.includes(column)) {
           const col = tableInfo.columns.find((x) => x.columnName === column.columnName);
           if (col?.defaultValue) {
-            placeholder = `${col?.defaultValue}`;
+            placeholder = col?.defaultValue;
           } else {
             placeholder = `null`;
           }
         }
 
+        if (column.enumValues?.length) {
+          // console.log('column.enumValues', column.enumValues);
+          return (
+            <Form.Dropdown
+              key={column.columnName}
+              id={column.columnName}
+              error={error}
+              title={column.columnName}
+              info={info}
+              defaultValue={value || ""}
+              onChange={(newValue) => handleFieldChange(column.columnName, newValue)}
+            >
+              {column.isNullable && <Form.Dropdown.Item key="null" value="" title="null" />}
+              {column.enumValues?.map((enumValue) => (
+                <Form.Dropdown.Item key={enumValue} value={enumValue} title={enumValue} />
+              ))}
+            </Form.Dropdown>
+          );
+        }
+
         return (
-          <C
+          <FormComponent
             key={column.columnName}
             id={column.columnName}
             error={error}
