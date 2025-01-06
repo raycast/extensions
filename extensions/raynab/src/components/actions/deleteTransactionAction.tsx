@@ -2,9 +2,11 @@ import { Shortcuts } from '@constants';
 import { useTransactions } from '@hooks/useTransactions';
 import { deleteTransaction } from '@lib/api';
 import { formatToReadablePrice } from '@lib/utils';
-import { Action, confirmAlert, Icon, showToast, Toast, Alert } from '@raycast/api';
+import { Action, confirmAlert, Icon, showToast, Toast, Alert, getPreferenceValues } from '@raycast/api';
 import { useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, TransactionDetail } from '@srcTypes';
+
+const preferences = getPreferenceValues<Preferences>();
 
 interface DeleteTransactionActionProps {
   transaction: TransactionDetail;
@@ -49,7 +51,7 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
 
               return newData;
             },
-            shouldRevalidateAfter: true,
+            shouldRevalidateAfter: !preferences.quickRevalidate,
           })
             .then(() => {
               toast.style = Toast.Style.Success;

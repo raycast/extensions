@@ -20,6 +20,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  getPreferenceValues,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
@@ -30,6 +31,8 @@ import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 import { Shortcuts } from '@constants';
+
+const preferences = getPreferenceValues<Preferences>();
 
 interface FormValues {
   date: Date | null;
@@ -184,7 +187,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
 
             return newData;
           },
-          shouldRevalidateAfter: true,
+          shouldRevalidateAfter: !preferences.quickRevalidate,
         }
       )
         .then(() => {
