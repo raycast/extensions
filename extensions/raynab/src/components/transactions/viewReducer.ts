@@ -140,7 +140,12 @@ export function transactionViewReducer(
         modifiers && modifiers.size > 0 ? initialCollection.filter(filterByModifiers(modifiers)) : initialCollection;
 
       // If only modifiers exists within the query, do not bother searching for it
-      if (nonModifierString === '') return { ...state, collection: filteredCollection, search: query };
+      if (nonModifierString === '')
+        return {
+          ...state,
+          collection: filterCollectionAndGroup(filteredCollection, state.filter, group),
+          search: query,
+        };
 
       // Search within the reduced collection which satisfies the conditions of the modifiers
       const fuse = new Fuse(filteredCollection, { keys: ['payee_name'], threshold: 0 });
@@ -148,7 +153,6 @@ export function transactionViewReducer(
       const newCollection = fuse.search(nonModifierString).flatMap((result) => result.item);
 
       // Apply previous grouping and filtering to the new collection
-
       return {
         ...state,
         search: query,
