@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-01-07
 
 - Use `getIconSlug()` to keep slugs consistent
 - Add support for copying icon title
