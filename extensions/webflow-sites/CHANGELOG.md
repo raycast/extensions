@@ -1,6 +1,6 @@
 # Webflow Extension by Peeks Changelog
 
-## [API Update] - {PR_MERGE_DATE}
+## [API Update] - 2025-01-07
 
 - Extension now uses v2 of the Webflow API
 - ❗ Users will need to log in again since the previous OAuth has been deprecated
