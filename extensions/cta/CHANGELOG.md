@@ -1,6 +1,6 @@
 # CTA Tracker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-07
 
 - Add bus and train tracking functionality
 - Support for favorites management
