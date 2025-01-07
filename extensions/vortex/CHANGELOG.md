@@ -1,6 +1,7 @@
 # Alby Changelog
 
-## [Features] - 2024-12-23
+## [Features] - {PR_MERGE_DATE}
+
 - Removed View Balance function - it could be checked in last transactions. 
 - Modified Last Transactions function - now user can see details.
 - Added Cashu Tokens and LNURL redeeming support in Redeem function.
