@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add file order preference] - {PR_MERGE_DATE}
+## [Add file order preference] - 2025-01-07
 
 - Added a preference to sort files by added, modified, or created time in the `Manage Downloads` command.
 
