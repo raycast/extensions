@@ -5,6 +5,9 @@
   "description": "Script that closes all open apps",
   "icon": "close-all.png",
   "author": "guide",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "System"
