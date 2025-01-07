@@ -7,7 +7,7 @@ description: The Raycast CLI allows you to build, develop, and lint your extensi
 The CLI is part of the `@raycast/api` package and is automatically installed in your extension directory during setup. To get a list of the available CLI commands, run the following command inside your extension directory:
 
 ```bash
- npx ray -h
+ npx ray help
 ```
 
 ## Build
