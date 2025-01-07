@@ -204,7 +204,6 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
       <Form.TextField
         title="Password"
         id="password"
-        placeholder={password}
         value={password}
         error={displayFormErrors(itemProps.password.error)}
         onBlur={resetErrors}
