@@ -12,32 +12,20 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "en",
-      "title": "Meduza",
-      "subtitle": "News",
-      "description": "Latest daily news",
-      "mode": "view"
+      "name": "news-list",
+      "title": "Meduza - News",
+      "subtitle": "Latest news",
+      "description": "List of latest news from Meduza",
+      "mode": "view",
+      "path": "src/news-list.tsx"
     },
     {
-      "name": "ru",
-      "title": "Meduza",
-      "subtitle": "Новости",
-      "description": "Последние новости",
-      "mode": "view"
-    },
-    {
-      "name": "ru-summary",
-      "title": "Meduza",
-      "subtitle": "Сводка новостей",
-      "description": "AI-дайджест последних новостей",
-      "mode": "view"
-    },
-    {
-      "name": "en-summary",
-      "title": "Meduza",
-      "subtitle": "News Summary",
-      "description": "AI-powered news digest",
-      "mode": "view"
+      "name": "news-summary",
+      "title": "Meduza - News Summary",
+      "subtitle": "AI-digest of news",
+      "description": "AI-digest of latest news",
+      "mode": "view",
+      "path": "src/news-summary.tsx"
     }
   ],
   "keywords": [
@@ -57,8 +45,8 @@
     "timeago.js": "^4.0.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.17.10",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.17.12",
     "@types/react": "18.3.18",
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",
