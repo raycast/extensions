@@ -19,7 +19,7 @@ import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
  *
  * Folders are determined by the first element of each entry.
  * If the first element is empty, it is considered not a folder.
- * The folders are sorted case-insensitively.
+ * The folders are sorted case-sensitively.
  *
  * @param {string[][]} entries - The KeePass database entries.
  * @returns {string[]} - The unique folder names.
