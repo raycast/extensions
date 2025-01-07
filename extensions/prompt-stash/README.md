@@ -38,3 +38,7 @@ Prompt Stash is a Raycast extension that helps you manage your AI prompts effici
 ## Support
 
 If you encounter any issues or have feature suggestions, please open an issue on the GitHub repository.
+
+## Contributors
+
+- [@ridemountainpig](https://github.com/ridemountainpig)
