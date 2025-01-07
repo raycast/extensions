@@ -15,6 +15,51 @@ import {
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
 
 /**
+ * Get an array of unique folder names from the given entries.
+ *
+ * Folders are determined by the first element of each entry.
+ * If the first element is empty, it is considered not a folder.
+ * The folders are sorted case-insensitively.
+ *
+ * @param {string[][]} entries - The KeePass database entries.
+ * @returns {string[]} - The unique folder names.
+ */
+function getFolders(entries: string[][]): string[] {
+  return Array.from(new Set(entries.map((entry: string[]) => entry[0]).filter((v: string) => v !== ""))).sort((a, b) =>
+    (a as string).localeCompare(b as string)
+  );
+}
+
+/**
+ * A dropdown component to filter by folder.
+ *
+ * @param {Object} props - The component props.
+ * @param {string[]} props.folders - The list of unique folder names.
+ * @param {(newValue: string) => void} props.onFolderChange - The function to be called when the selected folder changes.
+ *
+ * @returns {JSX.Element} The dropdown component.
+ */
+function FolderFilterDropdown(props: { folders: string[]; onFolderChange: (newValue: string) => void }) {
+  const { folders, onFolderChange } = props;
+  return (
+    <List.Dropdown
+      tooltip="Filter by Folder"
+      defaultValue={""}
+      onChange={(newValue) => {
+        onFolderChange(newValue);
+      }}
+    >
+      <List.Dropdown.Item title="All" key="-1" value="" />
+      <List.Dropdown.Section title="Folder">
+        {folders.map((folder, index) => (
+          <List.Dropdown.Item key={index.toString()} title={folder} value={folder} icon={Icon.Folder} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
+/**
  * Component for searching and displaying KeePass database entries.
  *
  * @param {Object} props - The component props.
@@ -29,6 +74,8 @@ import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
  */
 export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUnlocked: boolean) => void }) {
   const [entries, setEntries] = useState<string[][]>([]);
+  const [folders, setFolders] = useState<string[]>([]);
+  const [entriesFolder, setEntriesFolder] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   const errorHandler = (e: { message: string }) => {
@@ -40,19 +87,29 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
     KeePassLoader.loadEntriesCache()
       .then((entries) => {
         setEntries(entries);
+        setFolders(getFolders(entries));
       })
       .then(KeePassLoader.refreshEntriesCache)
       .catch(errorHandler)
       .then((entries) => {
         setIsLoading(false);
         setEntries(entries);
+        setFolders(getFolders(entries));
       });
   }, []);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search in KeePassXC" throttle={true}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search in KeePassXC"
+      searchBarAccessory={
+        folders.length > 0 ? <FolderFilterDropdown folders={folders} onFolderChange={setEntriesFolder} /> : undefined
+      }
+      throttle={true}
+    >
       {entries.map(
         (entry, i) =>
+          entry[0].startsWith(entriesFolder) &&
           entry[1] !== "" && (
             <List.Item
               key={i}
