@@ -17,7 +17,8 @@
     "luarmr",
     "horumy",
     "santiago_perez",
-    "silv"
+    "silv",
+    "EyLuismi"
   ],
   "pastContributors": [
     "igor9silva"
@@ -145,6 +146,13 @@
       "description": "API Token",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
     }
   ],
   "dependencies": {
