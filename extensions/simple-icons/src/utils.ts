@@ -20,7 +20,7 @@ import { useAI } from "@raycast/utils";
 import { execa } from "execa";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
-import { titleToSlug } from "simple-icons/sdk";
+import { getIconSlug } from "simple-icons/sdk";
 import { JsDelivrNpmResponse, IconData, LaunchContext } from "./types.js";
 
 const cache = new Cache();
@@ -153,7 +153,7 @@ export const copySvg = async ({ version, icon }: { version: string; icon: IconDa
   const { svg } = await loadSvg({
     version,
     icon,
-    slug: icon.slug || titleToSlug(icon.title),
+    slug: getIconSlug(icon),
   });
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);
