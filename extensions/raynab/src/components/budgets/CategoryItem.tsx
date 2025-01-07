@@ -90,7 +90,7 @@ export function CategoryItem({ category, budget }: { category: Category; budget:
                     title="Percentage completed"
                     text={`${category.goal_percentage_complete ?? 0}%`}
                   />
-                  {category.goal_months_to_budget ?? 0 > 0 ? (
+                  {(category.goal_months_to_budget ?? 0 > 0) ? (
                     <List.Item.Detail.Metadata.Label title="Months to go" text={`${category.goal_months_to_budget}`} />
                   ) : null}
                 </>

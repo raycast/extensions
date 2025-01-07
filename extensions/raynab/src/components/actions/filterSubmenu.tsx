@@ -7,12 +7,12 @@ export function FilterBySubmenu({ onFilter, currentFilter }: { onFilter: onFilte
   return (
     <ActionPanel.Submenu title="Set Filter" shortcut={Shortcuts.Filter} icon={Icon.Filter}>
       <Action
-        title="Inflow (Positive)"
+        title="Inflow (positive)"
         icon={currentFilter?.value === 'inflow' ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.ChevronUp}
         onAction={onFilter({ key: 'amount', value: 'inflow' })}
       />
       <Action
-        title="Outflow (Negative)"
+        title="Outflow (negative)"
         icon={
           currentFilter?.value === 'outflow' ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.ChevronDown
         }

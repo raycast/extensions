@@ -125,13 +125,13 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
             message: `The total is ${
               values.amount
             }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2
+              2,
             )}?`,
             primaryAction: {
               title: 'Auto-Distribute the amounts',
               onAction: () => {
                 const distributedAmounts = autoDistribute(+values.amount, subtransactions.length).map((amount) =>
-                  amount.toString()
+                  amount.toString(),
                 );
                 setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
               },
@@ -180,7 +180,7 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
   });
 
   const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts
+    sub: SaveSubTransactionWithReadableAmounts,
   ): ((newValue: string) => void) | undefined => {
     const eventHandler = (newAmount: string) => {
       const oldList = [...subtransactions];
@@ -269,11 +269,11 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
           onChange={(newCategories) => {
             if (newCategories.length > 1) {
               const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                amount.toString()
+                amount.toString(),
               );
               setCategoryList(newCategories);
               setSubtransactions(
-                newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] }))
+                newCategories.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] })),
               );
             } else {
               setCategoryList(newCategories);

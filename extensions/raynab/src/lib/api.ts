@@ -121,7 +121,7 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
       selectedBudgetId,
       time()
         .subtract(1, period as time.ManipulateType)
-        .toISOString()
+        .toISOString(),
     );
     const transactions = transactionsResponse.data.transactions;
 
@@ -240,7 +240,7 @@ export async function createScheduledTransaction(selectedBudgetId: string, trans
       selectedBudgetId || 'last-used',
       {
         scheduled_transaction: transactionData,
-      }
+      },
     );
 
     const createdTransaction = transactionCreationResponse.data.scheduled_transaction;
@@ -269,7 +269,7 @@ export async function updateCategory(selectedBudgetId: string, categoryId: strin
       categoryId,
       {
         category: data,
-      }
+      },
     );
     const updatedCategory = updateResponse.data;
     return updatedCategory;

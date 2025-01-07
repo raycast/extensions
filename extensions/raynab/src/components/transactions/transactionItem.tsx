@@ -127,8 +127,8 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                   hasCleared
                     ? { source: Icon.CircleProgress100, tintColor: Color.Green }
                     : isReconciled
-                    ? { source: Icon.Lock, tintColor: Color.Green }
-                    : Icon.Circle
+                      ? { source: Icon.Lock, tintColor: Color.Green }
+                      : Icon.Circle
                 }
               />
               <List.Item.Detail.Metadata.Label

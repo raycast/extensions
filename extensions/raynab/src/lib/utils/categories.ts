@@ -29,8 +29,8 @@ export function assessGoalShape(category: Category): GoalShape {
       return category.goal_percentage_complete === 100
         ? 'funded'
         : Number(category.goal_percentage_complete) > 0
-        ? 'underfunded'
-        : 'neutral';
+          ? 'underfunded'
+          : 'neutral';
     case CategoryGoalTypeEnum.Tbd:
     case CategoryGoalTypeEnum.Need:
     case CategoryGoalTypeEnum.Mf:
@@ -99,7 +99,7 @@ function formatGoalType(category: Category, currency: CurrencyFormat): string {
     }
     case CategoryGoalTypeEnum.Tbd: {
       const deadline = new Intl.DateTimeFormat('en-us', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-        new Date(String(category.goal_target_month))
+        new Date(String(category.goal_target_month)),
       );
       return `Budget ${target} by ${deadline}`;
     }
@@ -167,7 +167,7 @@ export function isSplitTransaction(transaction: TransactionDetail): boolean {
 
 export function getSubtransacionCategoryname(
   categories: Category[] | undefined,
-  subtransaction: SaveSubTransactionWithReadableAmounts
+  subtransaction: SaveSubTransactionWithReadableAmounts,
 ): string {
   return categories?.find((c) => c.id === subtransaction.category_id)?.name ?? '';
 }

@@ -28,13 +28,13 @@ describe('properly format milliunit amounts to readable amounts', () => {
 
       test('positive amount with decimals', () => {
         expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
-          '$123.93'
+          '$123.93',
         );
       });
 
       test('negative amount with decimals', () => {
         expect(formatToReadablePrice({ amount: -1 * MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
-          '-$123.93'
+          '-$123.93',
         );
       });
     });
@@ -49,13 +49,13 @@ describe('properly format milliunit amounts to readable amounts', () => {
 
       test('positive amount with decimals', () => {
         expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
-          '123.93€'
+          '123.93€',
         );
       });
 
       test('negative amount with decimals', () => {
         expect(formatToReadablePrice({ amount: -1 * MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
-          '-123.93€'
+          '-123.93€',
         );
       });
     });

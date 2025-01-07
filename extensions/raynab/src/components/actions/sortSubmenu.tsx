@@ -12,10 +12,10 @@ export function SortBySubmenu({ onSort, currentSort }: { onSort: onSortType; cur
 
   return (
     <ActionPanel.Submenu icon={Icon.AppWindowList} title="Set Sorting" shortcut={Shortcuts.Sort}>
-      <Action title="Amount (Low To High)" icon={renderSortIcon('amount_asc')} onAction={onSort('amount_asc')} />
-      <Action title="Amount (High To Low)" icon={renderSortIcon('amount_desc')} onAction={onSort('amount_desc')} />
-      <Action title="Date (Old To New)" icon={renderSortIcon('date_asc')} onAction={onSort('date_asc')} />
-      <Action title="Date (New To Old)" icon={renderSortIcon('date_desc')} onAction={onSort('date_desc')} />
+      <Action title="Amount (low to High)" icon={renderSortIcon('amount_asc')} onAction={onSort('amount_asc')} />
+      <Action title="Amount (high to Low)" icon={renderSortIcon('amount_desc')} onAction={onSort('amount_desc')} />
+      <Action title="Date (old to New)" icon={renderSortIcon('date_asc')} onAction={onSort('date_asc')} />
+      <Action title="Date (new to Old)" icon={renderSortIcon('date_desc')} onAction={onSort('date_desc')} />
     </ActionPanel.Submenu>
   );
 }
