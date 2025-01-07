@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capture-context",
+  "title": "Capture Context",
+  "description": "Capture items with context (app, url, screenshot, etc.)",
+  "icon": "extension-icon.png",
+  "author": "markusstrasser",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture [Only Use By Hotkey!]",
+      "description": "Silently capture current context [USE HOTKEY!]",
+      "mode": "no-view",
+      "keywords": [
+        "snap",
+        "screenshot",
+        "save"
+      ]
+    },
+    {
+      "name": "clipboard-capture",
+      "title": "Clipboard Capture",
+      "description": "Capture text from clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "comment-capture",
+      "title": "Comment Captures",
+      "description": "Add comments to your captures",
+      "mode": "view"
+    },
+    {
+      "name": "comment-screenshot",
+      "title": "Comment Screenshots",
+      "description": "Add comments to recent Screenshots",
+      "mode": "view",
+      "keywords": [
+        "cleanshot",
+        "screenshot",
+        "comment"
+      ]
+    },
+    {
+      "name": "manage-directories",
+      "title": "Manage Capture Directories",
+      "description": "Configure screenshot (read only) and capture (writing new captures but not screenshots) directories",
+      "mode": "view",
+      "keywords": [
+        "settings",
+        "config",
+        "path",
+        "folder"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "screenshotsDirectory",
+      "title": "Screenshots Directory",
+      "description": "Directory where screenshots are stored",
+      "type": "directory",
+      "default": "~/Desktop/",
+      "required": true
+    },
+    {
+      "name": "captureDirectory",
+      "title": "Capture Directory",
+      "description": "Directory where captures are stored",
+      "type": "directory",
+      "default": "~/Downloads/",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "node-geocoder": "^4.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-geocoder": "^4.2.6",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
