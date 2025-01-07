@@ -1,6 +1,6 @@
 # YouTrack Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-07
 
 - Update YouTrack icon
 
