@@ -1,6 +1,6 @@
 # Search Shopify Theme Input Settings Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-07
 
 - Start with basic versions for resources including:
   - Input settings
