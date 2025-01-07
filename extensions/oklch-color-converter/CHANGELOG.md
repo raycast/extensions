@@ -1,6 +1,7 @@
 # OKLCH Color Converter Changelog
 
-## [Title Case Fix] - 2024-03-XX
+## [Title Case Fix] - {PR_MERGE_DATE}
+
 - Updated extension title to use consistent "OKLCH" capitalization
 - Updated command title to include "OKLCH"
 
