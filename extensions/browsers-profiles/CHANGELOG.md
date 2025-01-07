@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Fix Firefox] - {PR_MERGE_DATE}
+## [Fix Firefox] - 2025-01-07
 
 - Fix extensions error when `profiles.ini` is missing from the Firefox folder 
 
