@@ -4,7 +4,7 @@
      "version": "1.0.0",
      "description": "Query IP info from IPInfo.io",
      "icon": "ipinfo.png",
-     "author": "wzfukui",
+     "author": "ChrisWho",
      "categories": ["Developer Tools", "Security"],
      "license": "MIT",
      "commands": [
