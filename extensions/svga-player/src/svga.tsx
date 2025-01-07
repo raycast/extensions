@@ -1,4 +1,4 @@
-import { Clipboard, showHUD } from "@raycast/api";
+import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { playSvga } from "swift:../swift/svga-player";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
@@ -65,7 +65,10 @@ export default async function Main() {
         await playSvga(file);
         return true;
       } else {
-        showFailureToast(null, { title: "Not a valid SVGA file" });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Not a valid SVGA file",
+        });
         return true;
       }
     } else if (clipboardItem?.text) {
@@ -74,7 +77,10 @@ export default async function Main() {
         await playSvga(text);
         return true;
       } else {
-        showFailureToast(null, { title: " Not a valid SVGA file" });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Not a valid SVGA file",
+        });
         return true;
       }
     }
