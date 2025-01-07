@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Added Properties] - {PR_MERGE_DATE}
+## [Added Properties] - 2025-01-07
 
 - Add Terminal and Gate for Departure and Arrival
 - Add Baggage Belt
