@@ -40,7 +40,12 @@ export default function AppList({
               onAction={() => toggleWhitelistAction({ isWhitelisted, name })}
             />
 
-            <Action title="Close Non-whitelisted Apps" icon={Icon.XMarkCircle} onAction={closeAppsAction} />
+            <Action
+              title="Close Non-whitelisted Apps"
+              style={Action.Style.Destructive}
+              icon={Icon.XMarkCircle}
+              onAction={closeAppsAction}
+            />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
