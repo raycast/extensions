@@ -12,7 +12,7 @@ This extension requires an API token from ipinfo.io. You can get one by signing 
 
 > 📝 Get your API token at: https://ipinfo.io/account/token
 
-![How to set API token](metadata/quickview-how-to-set-apitoken.png)
+![How to set API token](images/quickview-how-to-set-apitoken.png)
 
 ## 🔧 Features
 
@@ -27,7 +27,7 @@ This extension requires an API token from ipinfo.io. You can get one by signing 
 2. Set your ipinfo.io API token
 3. Start typing an IP address to get instant information
 
-![How to query IP info](metadata/quickview-how-to-query-ipinfo.png)
+![How to query IP info](images/quickview-how-to-query-ipinfo.png)
 
 ## 🛠️ Commands
 

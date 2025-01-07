@@ -1,4 +1,13 @@
-import { ActionPanel, Action, List, showToast, Toast, Form, useNavigation, LocalStorage } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Form,
+  useNavigation,
+  LocalStorage,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
@@ -29,7 +38,9 @@ function TokenForm() {
 
   async function handleSubmit() {
     if (!/^[0-9a-fA-F]{10,}$/.test(token)) {
-      setError("Please enter a valid API token (at least 10 hexadecimal characters)");
+      setError(
+        "Please enter a valid API token (at least 10 hexadecimal characters)"
+      );
       return;
     }
     await LocalStorage.setItem("ipinfo_api_token", token);
@@ -41,7 +52,7 @@ function TokenForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save API Token" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Api Token" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -62,10 +73,8 @@ function TokenForm() {
 3. Copy your API token from the dashboard
 4. Paste it here to start using the extension"
       />
-      
-      <Form.Description
-        text="Need help? Visit https://ipinfo.io/account/token"
-      />
+
+      <Form.Description text="Need help? Visit https://ipinfo.io/account/token" />
     </Form>
   );
 }
@@ -94,11 +103,13 @@ export default function Command() {
     }
 
     try {
-      const response = await fetch(`https://ipinfo.io/${ip}/json?token=${apiToken}`);
+      const response = await fetch(
+        `https://ipinfo.io/${ip}/json?token=${apiToken}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json() as IPInfo;
+      const data = (await response.json()) as IPInfo;
       setIpInfo(data);
       showToast(Toast.Style.Success, "IP information fetched successfully");
     } catch (error) {
@@ -111,14 +122,17 @@ export default function Command() {
     // IPv4 validation
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (ipv4Regex.test(ip)) {
-      const parts = ip.split('.');
-      return parts.every(part => parseInt(part) >= 0 && parseInt(part) <= 255);
+      const parts = ip.split(".");
+      return parts.every(
+        (part) => parseInt(part) >= 0 && parseInt(part) <= 255
+      );
     }
-    
+
     // IPv6 validation
     // 支持完整格式、压缩格式（::）和混合格式
-    const ipv6Regex = /^(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
-    
+    const ipv6Regex =
+      /^(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+
     return ipv6Regex.test(ip);
   };
 
@@ -134,21 +148,27 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Fetch IP Info"
+              title="Fetch Ip Info"
               onAction={() => {
                 if (!searchText) {
-                  showToast(Toast.Style.Failure, "Please enter an IPv4 or IPv6 address");
+                  showToast(
+                    Toast.Style.Failure,
+                    "Please enter an IPv4 or IPv6 address"
+                  );
                   return;
                 }
                 if (!isValidIP(searchText)) {
-                  showToast(Toast.Style.Failure, "Invalid IPv4 or IPv6 address format");
+                  showToast(
+                    Toast.Style.Failure,
+                    "Invalid IPv4 or IPv6 address format"
+                  );
                   return;
                 }
                 fetchIPInfo(searchText);
               }}
             />
             <Action
-              title="Set API Token"
+              title="Set Api Token"
               onAction={() => push(<TokenForm />)}
             />
           </ActionPanel>
@@ -156,15 +176,9 @@ export default function Command() {
       />
       {ipInfo && (
         <List.Section title="IP information from IPInfo.io">
-          <List.Item
-            title="IP Address"
-            subtitle={ipInfo.ip}
-          />
+          <List.Item title="IP Address" subtitle={ipInfo.ip} />
           {ipInfo.hostname && (
-            <List.Item
-              title="Hostname"
-              subtitle={ipInfo.hostname}
-            />
+            <List.Item title="Hostname" subtitle={ipInfo.hostname} />
           )}
           {ipInfo.city && ipInfo.region && ipInfo.country && (
             <List.Item
@@ -173,28 +187,16 @@ export default function Command() {
             />
           )}
           {ipInfo.loc && (
-            <List.Item
-              title="Coordinates"
-              subtitle={ipInfo.loc}
-            />
+            <List.Item title="Coordinates" subtitle={ipInfo.loc} />
           )}
           {ipInfo.org && (
-            <List.Item
-              title="Organization"
-              subtitle={ipInfo.org}
-            />
+            <List.Item title="Organization" subtitle={ipInfo.org} />
           )}
           {ipInfo.postal && (
-            <List.Item
-              title="Postal Code"
-              subtitle={ipInfo.postal}
-            />
+            <List.Item title="Postal Code" subtitle={ipInfo.postal} />
           )}
           {ipInfo.timezone && (
-            <List.Item
-              title="Timezone"
-              subtitle={ipInfo.timezone}
-            />
+            <List.Item title="Timezone" subtitle={ipInfo.timezone} />
           )}
         </List.Section>
       )}
