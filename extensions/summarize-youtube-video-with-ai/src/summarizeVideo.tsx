@@ -30,6 +30,9 @@ export type Preferences = {
   openaiApiToken: string;
   anthropicApiToken: string;
   language: string;
+  openaiEndpoint: string;
+  openaiModel: string;
+  anthropicModel: string;
 };
 
 const SummarizeVideo = (
