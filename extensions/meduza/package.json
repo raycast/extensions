@@ -35,8 +35,8 @@
     "russian news",
     "english news",
     "world news",
-    "international news",
-    "independent media"
+    "insider",
+    "independent"
   ],
   "dependencies": {
     "@raycast/api": "^1.88.4",
