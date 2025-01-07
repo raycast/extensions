@@ -1,6 +1,6 @@
 # Purelymail Changelog
 
-## [Domain Enhancements] - {PR_MERGE_DATE}
+## [Domain Enhancements] - 2025-01-07
 
 - Change "Delete Domain" shortcut from `Cmd+d` to `Ctrl+x`
 - "Delete Domain" uses `optimisticUpdate` for improved UX (previously the deleted domain would stay in `List`)
