@@ -1,7 +1,9 @@
 import { Form, ActionPanel, Action, showHUD, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { FileService } from "../utils";
+import { FileService, CONFIG } from "../utils";
 import type { CapturedData } from "../utils";
+import * as path from "node:path";
+import * as fs from "node:fs/promises";
 
 interface FormValues {
   comment: string;
@@ -26,7 +28,39 @@ export function CommentForm({ data, filePath, onCommentSaved }: CommentFormProps
           comment: values.comment,
         },
       };
+
+      // Save comment to original metadata file
       await FileService.saveJSON(filePath, updatedData);
+
+      // If this is a screenshot (has a file path), copy it to capture directory
+      if (data.content.screenshot?.startsWith("file://")) {
+        const screenshotPath = data.content.screenshot.replace("file://", "");
+        const timestamp = new Date().toISOString().replace(/:/g, "-");
+        const newScreenshotName = `screenshot-${timestamp}.png`;
+        const newScreenshotPath = path.join(CONFIG.saveDir, newScreenshotName);
+
+        // Copy screenshot file
+        await fs.copyFile(screenshotPath, newScreenshotPath);
+
+        // Create capture data
+        const captureData: CapturedData = {
+          content: {
+            text: null,
+            html: null,
+            screenshot: newScreenshotPath,
+          },
+          source: data.source,
+          metadata: {
+            timestamp: new Date().toISOString(),
+            comment: values.comment,
+          },
+        };
+
+        // Save capture data
+        const jsonPath = path.join(CONFIG.saveDir, `screenshot-capture-${timestamp}.json`);
+        await FileService.saveJSON(jsonPath, captureData);
+      }
+
       await showHUD("✓ Added comment");
       onCommentSaved?.();
       await popToRoot();

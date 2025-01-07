@@ -1,19 +1,44 @@
-# Capture
+# Raycast Context Capture
 
-Quickly create records in Capture with Raycast.
+A Raycast extension for capturing and organizing content with context, including screenshots and clipboard content, while preserving metadata like source application, URLs, and timestamps.
 
-![Capture](metadata/demo-capture.png)
+## Features
 
-## Getting started
+- **Silent Capture**: Capture context without UI interruption.
+- **Clipboard Capture**: Save and annotate clipboard text.
+- **Screenshot Comments**: Add comments to screenshots.
+- **Capture Comments**: Annotate captures with context.
+- **Flexible Storage**: Configure directories for storage.
 
-To start using this extension, you will need to:
+## Commands
 
-1. **Get your Capture JWT.** Sign in to [capture.so](https://capture.so) then select "View JWT" in the options menu. You will see a prompt with a long piece of text. Copy this text to your clipboard.
+1. **Capture**: Silently capture context with a hotkey.
+2. **Clipboard Capture**: Capture clipboard text instantly.
+3. **Comment Captures**: Add/edit capture comments.
+4. **Comment Screenshots**: Comment on recent screenshots.
+5. **Manage Directories**: Set storage locations.
 
-![View your JWT](media/demo-view-jwt.png)
+## Configuration
 
-2. **Configure Raycast.** When you use this extension for the first time, Raycast will ask you for your Capture JWT. Paste the text from Step 1 into the text input labeled "JWT", then select `Continue`.
+- **Screenshots Directory**: Default `~/Desktop/`
+- **Capture Directory**: Default `~/Downloads/`
 
-![Configure your JWT](media/demo-configure-jwt.png)
+## Installation
 
-3. **That's it!** You're ready to start using the Capture extension for Raycast. :tada:
+1. Install from Raycast Store.
+2. Configure directories.
+3. Set up hotkeys for quick capture.
+
+## Troubleshooting
+
+If captures save to an old directory:
+
+1. Clear Raycast cache:
+   ```bash
+   rm -rf ~/Library/Application\ Support/com.raycast.macos/extensions-cache
+   ```
+2. Restart Raycast.
+
+## License
+
+MIT License
