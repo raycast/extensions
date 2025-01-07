@@ -5,6 +5,7 @@
 - Add a timer to lock the database after a user specified time of inactivity
 - Remove the password and the key file fields from the extension preference
 - Add TOTP indicators and usernames while searching entries
+- Add a folder filter on the search bar when folders exist in the database
 - Use the official KeePassXC.app icon as the extension icon
 - Use `keepassxc-cli export` to retrieve entries and most other data from the database instead of relying heavily on `keepassxc-cli show`
 - Update the README.md
