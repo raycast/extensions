@@ -13,16 +13,16 @@
   "commands": [
     {
       "name": "news-list",
-      "title": "Meduza - News",
-      "subtitle": "Latest news",
+      "title": "Read Latest news",
+      "subtitle": "Meduza",
       "description": "List of latest news from Meduza",
       "mode": "view",
       "path": "src/news-list.tsx"
     },
     {
       "name": "news-summary",
-      "title": "Meduza - News Summary",
-      "subtitle": "AI-digest of news",
+      "title": "Read News Summary",
+      "subtitle": "Meduza",
       "description": "AI-digest of latest news",
       "mode": "view",
       "path": "src/news-summary.tsx"
