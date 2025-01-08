@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { createNewSession, getAllSession } from "./utils/sessionUtils";
+import { Action, ActionPanel, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
+import { createNewSession, directoryExists, getAllSession } from "./utils/sessionUtils";
 
 export default function CreateNewTmuxSession() {
   const [loading, setLoading] = useState<boolean>(false);
   const [sessionNameError, setSessionNameError] = useState<string>("");
+  const [sessionDirectoryError, setSessionDirectoryError] = useState<string>("");
+  const preferences = getPreferenceValues();
 
   return (
     <Form
@@ -16,6 +18,7 @@ export default function CreateNewTmuxSession() {
             title="Create New Session"
             onSubmit={async (values) => {
               const sessionName = values.newSessionName;
+              const sessionDirectory = values.newSessionDirectory[0];
               setLoading(true);
 
               const toast = await showToast({
@@ -23,21 +26,42 @@ export default function CreateNewTmuxSession() {
                 title: "",
               });
 
-              createNewSession(sessionName, (error, _stdout, stderr) => {
-                if (error || stderr) {
-                  console.error(`exec error: ${error}`);
-                  setLoading(false);
-                  toast.style = Toast.Style.Failure;
-                  toast.message = "Failed to create new session";
-                  return;
-                }
-
-                toast.style = Toast.Style.Success;
-                toast.style = Toast.Style.Success;
-                toast.message = `New session ${sessionName} is setup successfully`;
+              if (!sessionName) {
+                const errorMessage = "Session name is required";
+                setSessionNameError(errorMessage);
+                toast.style = Toast.Style.Failure;
+                toast.message = errorMessage;
                 setLoading(false);
-                popToRoot();
-              });
+                return;
+              }
+
+              if (sessionDirectory && !directoryExists(sessionDirectory)) {
+                const errorMessage = "The directory you selected does not exist";
+                setSessionDirectoryError(errorMessage);
+                toast.style = Toast.Style.Failure;
+                toast.message = errorMessage;
+                setLoading(false);
+                return;
+              }
+
+              createNewSession(
+                sessionName,
+                sessionDirectory || preferences.defaultDirectory || "/",
+                (error, _stdout, stderr) => {
+                  if (error || stderr) {
+                    console.error(`exec error: ${error}`);
+                    setLoading(false);
+                    toast.style = Toast.Style.Failure;
+                    toast.message = "Failed to create new session";
+                    return;
+                  }
+
+                  toast.style = Toast.Style.Success;
+                  toast.message = `New session ${sessionName} is setup successfully`;
+                  setLoading(false);
+                  popToRoot();
+                },
+              );
             }}
           />
         </ActionPanel>
@@ -66,6 +90,20 @@ export default function CreateNewTmuxSession() {
               setSessionNameError("");
             }
           });
+        }}
+      />
+      <Form.FilePicker
+        title="New Session Directory"
+        id="newSessionDirectory"
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+        error={sessionDirectoryError}
+        onChange={(value) => {
+          if (!value || value.length === 0) {
+            return;
+          }
+          setSessionDirectoryError("");
         }}
       />
     </Form>
