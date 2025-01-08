@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { useState, useCallback, useRef } from "react";
+import { useState } from "react";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
@@ -23,78 +23,6 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
-  const inputRef = useRef<Form.TextField>(null);
-  const maskChar = "•";
-
-  const togglePasswordVisibility = useCallback(() => {
-    setShowPassword((prev) => !prev);
-  }, []);
-
-  const handlePasswordChange = useCallback(
-    (newValue: string) => {
-      if (!newValue.includes(maskChar)) {
-        setPassword(newValue);
-        return;
-      }
-
-      // DELETE: If the length decreased, it's a deletion
-      if (newValue.length < password.length) {
-        setPassword((prev) => prev.slice(0, newValue.length));
-        return;
-      }
-
-      // If last character is a maskedChar, then something changed in the middle of the password
-      const middleChange = newValue[newValue.length - 1] === maskChar;
-
-      // ADD: If the length increased, it's an addition
-      if (newValue.length > password.length) {
-        // It can be at the end or in the middle
-        if (middleChange) {
-          const indexOfAddedChar = nonMaskedPosition(newValue);
-          const newPassword = insertCharAtPosition(password, newValue[indexOfAddedChar]!, indexOfAddedChar);
-          setPassword(newPassword);
-        } else {
-          const newChar = newValue[newValue.length - 1];
-          const newPassword = password + newChar;
-          setPassword(newPassword);
-        }
-        return;
-      }
-
-      // MODIFY: If the length is the same, it's a replacement at non-masked position
-      const charPos = nonMaskedPosition(newValue);
-      const newChar = newValue[charPos];
-
-      if (charPos === -1) return;
-
-      const newPassword = replaceCharAtPosition(password, newChar!, charPos);
-      setPassword(newPassword);
-      return;
-    },
-    [password]
-  );
-
-  const nonMaskedPosition = (value: string): number => {
-    // Find the index of the first non-maskChar character
-    for (let i = 0; i < value.length; i++) {
-      if (value[i] !== maskChar) {
-        return i;
-      }
-    }
-    return -1;
-  };
-
-  const replaceCharAtPosition = (value: string, char: string, index: number) => {
-    return value.slice(0, index) + char + value.slice(index + 1);
-  };
-
-  const insertCharAtPosition = (value: string, char: string, index: number) => {
-    return value.slice(0, index) + char + value.slice(index);
-  };
-
-  const displayValue = useCallback(() => {
-    return showPassword ? password : maskChar.repeat(password.length);
-  }, [password, showPassword]);
 
   async function onSubmit() {
     if (password.length === 0) return;
@@ -159,7 +87,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               <Action
                 icon={showPassword ? Icon.EyeDisabled : Icon.Eye}
                 title={showPassword ? "Hide Password" : "Show Password"}
-                onAction={togglePasswordVisibility}
+                onAction={() => setShowPassword((prev) => !prev)}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
             </>
@@ -177,14 +105,25 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      <Form.TextField
-        ref={inputRef}
-        autoFocus
-        id="password"
-        title="Master Password"
-        value={displayValue()}
-        onChange={handlePasswordChange}
-      />
+      {showPassword ? (
+        <Form.TextField
+          autoFocus
+          id="plainPassword"
+          title="Master Password"
+          value={password}
+          onChange={setPassword}
+          ref={(field) => field?.focus()}
+        />
+      ) : (
+        <Form.PasswordField
+          autoFocus
+          id="password"
+          title="Master Password"
+          value={password}
+          onChange={setPassword}
+          ref={(field) => field?.focus()}
+        />
+      )}
       <Form.Description title="" text={`Press ⌘E to ${showPassword ? "hide" : "show"} password`} />
       {!!lockReason && (
         <>
