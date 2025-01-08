@@ -37,10 +37,6 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         return;
       }
 
-      // print the new value
-      console.log("new value:", newValue);
-      console.log("previous value:", password);
-
       // DELETE: If the length decreased, it's a deletion
       if (newValue.length < password.length) {
         setPassword((prev) => prev.slice(0, newValue.length));
