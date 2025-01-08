@@ -2,6 +2,8 @@
 
 Play SVGA animations with ease
 
+![cover](media/screenshot.png)
+
 # How to use
 
 ## Step 1: Configure the Shortcut Key
