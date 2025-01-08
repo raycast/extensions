@@ -153,6 +153,15 @@
       "title": "Open Issues in",
       "required": false,
       "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
   "dependencies": {
