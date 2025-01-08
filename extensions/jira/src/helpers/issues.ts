@@ -321,7 +321,7 @@ export function generateBranchName(issue: Issue | IssueDetail, nameFormat: strin
     const issueSummary = issue.fields.summary.toLowerCase();
     const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join("-");
 
-    // Supported fields: issue key, issue summary, issue summary short, issue type, project key
+    // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
     return nameFormat
         .replace("{issueKey}", issueKey)
         .replace("{issueSummary}", issueSummary)
