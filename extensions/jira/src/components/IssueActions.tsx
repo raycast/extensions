@@ -20,7 +20,7 @@ import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
-import {generateBranchName} from "../helpers/issues";
+import { generateBranchName } from "../helpers/issues";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
@@ -28,7 +28,6 @@ import IssueChildIssues from "./IssueChildIssues";
 import IssueCommentForm from "./IssueCommentForm";
 import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
-
 
 type IssueActionsProps = {
   issue: Issue | TIssueDetail;
