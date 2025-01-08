@@ -1,5 +1,8 @@
 # Jira Changelog
 
+## [Add ability to configuring Git branch name format] - 2025-01-08
+- Implemented the ability to configure the Git branch name format in the extension settings.
+
 ## [Add ability to open issues in other application defined in extension preferences] - 2024-12-25
 - Implemented the ability to open by default in any other application (e.g. other browser) any issue.
 
