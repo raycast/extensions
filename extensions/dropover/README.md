@@ -2,11 +2,11 @@
 
 # Dropover Raycast Extension
 
-Add selected files to [Drover](https://dropoverapp.com) with a single click from [Raycast](https://raycast.com).
+Add selected files to [Dropover](https://dropoverapp.com) with a single click from [Raycast](https://raycast.com).
 
 ## Installation
 
-[![Install dropover Raycast Extension](https://www.raycast.com/jag-k/dropover/install_button@2x.png)](https://www.raycast.com/jag-k/dropover)
+[![Install Dropover Raycast Extension](https://www.raycast.com/jag-k/dropover/install_button@2x.png)](https://www.raycast.com/jag-k/dropover)
 
 ## Screenshots
 
