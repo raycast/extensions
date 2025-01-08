@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-01-08
 
 - Suppress error message if argument is empty
 - Add Deeplinks usage to documentation
