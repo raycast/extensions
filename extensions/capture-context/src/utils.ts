@@ -30,17 +30,17 @@ export type BrowserApp = (typeof CONFIG.browserApps)[number];
 export interface CapturedData {
   // Content
   content: {
-    text: string | null; // Previously clipboardText
-    html: string | null; // Previously browserTabHTML
-    screenshot: string | null; // Previously screenshotPath
+    text: string | null;
+    html: string | null;
+    screenshot: string | null;
   };
 
   // Source info
   source: {
-    app: string | null; // Previously activeAppName
-    bundleId: string | null; // Previously activeAppBundleId
-    url: string | null; // Previously activeURL
-    window: string | null; // Previously frontAppName
+    app: string | null;
+    bundleId: string | null;
+    url: string | null;
+    window: string | null;
   };
 
   // Metadata
@@ -48,17 +48,6 @@ export interface CapturedData {
     timestamp: string;
     comment?: string;
   };
-
-  // Legacy fields for backward compatibility
-  timestamp?: string;
-  comment?: string;
-  clipboardText?: string | null;
-  browserTabHTML?: string | null;
-  screenshotPath?: string | null;
-  activeAppName?: string | null;
-  activeAppBundleId?: string | null;
-  activeURL?: string | null;
-  frontAppName?: string | null;
 }
 
 // Services
@@ -90,25 +79,6 @@ export const FileService = {
       }
     } catch (error) {
       console.error("Screenshot capture failed:", error);
-      return null;
-    }
-  },
-
-  async captureAreaScreenshot(saveDir: string, timestamp: string): Promise<string | null> {
-    try {
-      const outputPath = path.join(saveDir, `screenshot-${timestamp}.png`);
-      // -i for interactive (area selection), -s for silent mode
-      const script = `do shell script "screencapture -i -s '${outputPath}'"`;
-      await runAppleScript(script);
-
-      try {
-        await fs.access(outputPath);
-        return outputPath;
-      } catch {
-        return null;
-      }
-    } catch (error) {
-      console.error("Area screenshot capture failed:", error);
       return null;
     }
   },

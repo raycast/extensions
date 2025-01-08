@@ -1,42 +1,3 @@
-# Raycast Context Capture
-
-Capture content with extra screen and app context, including
-
-- selected text
-- an automatic screenshot
-- source
-- frontmost app
-- IF using browser: url, markdown/html of the active tab
-
-Plus, the option to add comments to captures and screenshots. Personally, I use this as a workflow to save and comment points of interest for an AI to analyze.
-
-## Commands
-
-I recommend using `Capture` and `Clipboard Capture` via hotkey.
-
-All captures are saved to the capture directory and have metadata and automatic screenshot added.
-
-1. **Capture**: Silently capture selection in any app.
-2. **Clipboard Capture**: Capture clipboard text instantly.
-3. **Comment Captures**: Add/edit capture comments.
-4. **Comment Screenshots**: Comment on recent screenshots -- once a screenshot is commented it moves to the capture directory.
-5. **Manage Directories**: Set capture directory (where to save) and your screenshot directory (where to interact with screenshots from).
-
-## Example
-
-Say I'm on a website and want to capture it + some selected text (bookmark+).
-
-`Capture` will produce these two files:
-
-![example](./example/screenshot-2025-01-08T12-09-55.951Z.png)
-
-And the context in json\*:
-
-\*html --> markdown in the newer version
-
-> Sorry, this should've been a flat json instead
-
-```json
 {
   "content": {
     "text": "The first step in the Transformer block is to apply layer normalization to this matrix. This is an operation that normalizes the values in each column of the matrix separately.",
@@ -53,18 +14,3 @@ And the context in json\*:
     "timestamp": "2025-01-08T12:09:56.303Z"
   }
 }
-```
-
-If I then want to add a comment to the capture I can use the `Comment Captures` command.
-
-![comment](./example/screenshot_Cursor_58.png)
-
-## Configuration
-
-- **Screenshots Directory**: Default `~/Desktop/`
-- **Capture Directory**: Default `~/Downloads/`
-
-## Troubleshooting
-
-- Make sure to double check your directories are correct and rerun the manage directories command.
-- For extra metadata browser captures (url, markdown) you need to have the raycast browser extension installed.
