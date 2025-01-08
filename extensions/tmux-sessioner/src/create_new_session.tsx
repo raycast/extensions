@@ -7,6 +7,7 @@ export default function CreateNewTmuxSession() {
   const [sessionNameError, setSessionNameError] = useState<string>("");
   const [sessionDirectoryError, setSessionDirectoryError] = useState<string>("");
   const preferences = getPreferenceValues();
+  const defaultDirectory = preferences.defaultDirectory ? [preferences.defaultDirectory] : ["/"];
 
   return (
     <Form
@@ -96,6 +97,7 @@ export default function CreateNewTmuxSession() {
         title="New Session Directory"
         id="newSessionDirectory"
         allowMultipleSelection={false}
+        defaultValue={defaultDirectory}
         canChooseDirectories
         canChooseFiles={false}
         error={sessionDirectoryError}

@@ -5,7 +5,7 @@
 ### Added
 
 - Configure default directory to start new session in
-- Optional select directory when creating new session
+- Optional: select directory when creating new session
 
 ## v0.0.7 - 2025-01-02
 
