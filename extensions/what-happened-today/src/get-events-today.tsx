@@ -57,8 +57,10 @@ export default function Command() {
     async function getWikipediaStories() {
       try {
         const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
+        let month: string | number = date.getMonth() + 1;
+        let day: string | number = date.getDate();
+        month = month < 10 ? "0" + month : month.toString();
+        day = day < 10 ? "0" + day : day.toString();
         const response = await fetch(`https://api.wikimedia.org/feed/v1/wikipedia/en/featured/${year}/${month}/${day}`);
         const data = (await response.json()) as ApiResponse;
         const onThisDay = data.onthisday;
@@ -78,6 +80,7 @@ export default function Command() {
         });
 
         setWikipediaStories(wikipediaPages);
+        setIsLoading(false);
       } catch (error) {
         setError(new Error("Error loading Wikipedia stories" + error));
         console.error("Error loading Wikipedia stories", error);
@@ -94,7 +97,8 @@ export default function Command() {
   function dateChanged(newDate: string): void {
     setIsLoading(true);
     setError(undefined);
-    setDate(new Date(newDate));
+    const newDateObj = new Date(`${newDate} 2024`);
+    setDate(newDateObj);
   }
 
   return (
@@ -105,13 +109,21 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a date (MM/DD)"
-          defaultValue={date.toDateString()}
+          value={dateGetMonthAndDay(date)}
           onChange={(newDate) => dateChanged(newDate)}
         >
-          {validDates.map((date) => (
+          {validDates.map((validDate) => (
             <List.Dropdown.Item
-              title={date.toDateString().substring(4, 11) + "(" + (date.getMonth() + 1) + "/" + date.getDate() + ")"}
-              value={date.toDateString()}
+              key={validDate.toDateString()}
+              title={
+                validDate.toDateString().substring(4, 11) +
+                "(" +
+                (validDate.getMonth() + 1) +
+                "/" +
+                validDate.getDate() +
+                ")"
+              }
+              value={dateGetMonthAndDay(validDate)}
             />
           ))}
         </List.Dropdown>
