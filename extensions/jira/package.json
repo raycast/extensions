@@ -18,7 +18,9 @@
     "horumy",
     "santiago_perez",
     "silv",
-    "EyLuismi"
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH"
   ],
   "pastContributors": [
     "igor9silva"
@@ -157,7 +159,7 @@
     {
       "name": "branch_name",
       "title": "Git Branch Name",
-      "description": "The format for copying Git branch names.",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
       "type": "textfield",
       "required": false,
       "default": "{issueKey}-{issueSummary}",
