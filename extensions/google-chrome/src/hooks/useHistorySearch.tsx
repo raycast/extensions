@@ -1,5 +1,8 @@
 import * as fs from "fs";
+import * as api from "@raycast/api";
 import { useSQL } from "@raycast/utils";
+import { handleErrorToastAction } from "@raycast/utils/dist/handle-error-toast-action";
+import { useState, useEffect } from "react";
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
@@ -36,10 +39,52 @@ const searchHistory = (profile: string, query?: string): SearchResult<HistoryEnt
     return { isLoading: false, data: [], errorView: <NotInstalledError /> };
   }
 
-  const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, queries);
+  const [retryWaiting, setRetryWaiting] = useState(false);
+  const [retryTimes, setRetryTimes] = useState(0);
+  const [retryTimer, setRetryTimer] = useState<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    return () => {
+      retryTimer && clearTimeout(retryTimer);
+    };
+  }, [retryTimer]);
+
+  const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, queries as unknown as string, {
+    onData() {
+      setRetryWaiting(false);
+      setRetryTimes(0);
+      setRetryTimer(null);
+    },
+    onError(error) {
+      // In rare cases, we encounter the SQLite error "database disk image is malformed (11)",
+      // and manual retries can resolve the issue.
+      // We implement an automatic retry here.
+      if (retryTimes < 1) {
+        setRetryWaiting(true);
+        setRetryTimes(retryTimes + 1);
+        const timer = setTimeout(() => {
+          revalidate();
+          clearTimeout(timer);
+        }, 1000);
+        setRetryTimer(timer);
+      } else {
+        setRetryWaiting(false);
+        setRetryTimes(0);
+        setRetryTimer(null);
+        // Default error handling copied from useSQL
+        if (api.environment.launchType !== api.LaunchType.Background) {
+          api.showToast({
+            style: api.Toast.Style.Failure,
+            title: "Failed to load history",
+            message: error.message,
+            primaryAction: handleErrorToastAction(error),
+          });
+        }
+      }
+    },
+  });
   return {
     data,
-    isLoading,
+    isLoading: isLoading || retryWaiting,
     errorView: permissionView,
     revalidate,
   };
