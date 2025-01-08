@@ -1,5 +1,12 @@
 # Tmux Sessioner Changelog
 
+## v0.0.8 - 2025-01-08
+
+### Added
+
+- Configure default directory to start new session in
+- Optional select directory when creating new session
+
 ## v0.0.7 - 2025-01-02
 
 ### Updated
