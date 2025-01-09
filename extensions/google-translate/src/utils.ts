@@ -2,15 +2,13 @@ import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageCodeSet } from "./types";
 
 export const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet) => {
-  return langSet1.langFrom === langSet2.langFrom && langSet1.langTo === langSet2.langTo;
+  return langSet1.langFrom === langSet2.langFrom && langSet1.langTo.join() === langSet2.langTo.join();
 };
 
 export const getLanguageSetObjects = (languageSet: LanguageCodeSet) => {
   return {
     langFrom: supportedLanguagesByCode[languageSet.langFrom],
-    langTo: Array.isArray(languageSet.langTo)
-      ? languageSet.langTo.map((l) => supportedLanguagesByCode[l])
-      : supportedLanguagesByCode[languageSet.langTo],
+    langTo: languageSet.langTo.map((l) => supportedLanguagesByCode[l]),
   };
 };
 

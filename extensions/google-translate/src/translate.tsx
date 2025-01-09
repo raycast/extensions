@@ -80,7 +80,7 @@ const TranslateItem: React.FC<{
   selectedLanguageSet: LanguageCodeSet;
   toggleShowingDetail: () => void;
 }> = ({ toggleShowingDetail, value, selectedLanguageSet }) => {
-  const { data: r, isLoading } = usePromise(simpleTranslate, [value, selectedLanguageSet], {
+  const { data: result, isLoading } = usePromise(simpleTranslate, [value, selectedLanguageSet], {
     onError(error) {
       showToast({
         style: Toast.Style.Failure,
@@ -90,8 +90,8 @@ const TranslateItem: React.FC<{
     },
   });
 
-  const langFromCode = r?.langFrom ?? selectedLanguageSet.langFrom;
-  const langToCode = r?.langTo ?? selectedLanguageSet.langTo[0];
+  const langFromCode = result?.langFrom ?? selectedLanguageSet.langFrom;
+  const langToCode = result?.langTo ?? selectedLanguageSet.langTo[0];
 
   const langFrom = supportedLanguagesByCode[langFromCode];
   const langTo = supportedLanguagesByCode[langToCode];
@@ -100,24 +100,24 @@ const TranslateItem: React.FC<{
 
   return (
     <List.Item
-      title={r?.translatedText ?? ""}
+      title={result?.translatedText ?? ""}
       subtitle={isLoading ? "Translating..." : undefined}
       accessories={[{ text: languages, tooltip: tooltip }]}
-      detail={<List.Item.Detail markdown={r?.translatedText ?? ""} />}
+      detail={<List.Item.Detail markdown={result?.translatedText ?? ""} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={r?.translatedText ?? ""} />
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={result?.translatedText ?? ""} />
             <ToggleFullTextAction onAction={() => toggleShowingDetail()} />
-            {r && (
+            {result && (
               <Action
                 title="Play Text-To-Speech"
                 icon={Icon.Play}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
-                onAction={() => playTTS(r.translatedText, langToCode)}
+                onAction={() => playTTS(result.translatedText, langToCode)}
               />
             )}
-            {r && <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />}
+            {result && <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={result} />}
           </ActionPanel.Section>
         </ActionPanel>
       }
