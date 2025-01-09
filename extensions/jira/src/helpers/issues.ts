@@ -316,10 +316,14 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
   }
 }
 
-export function generateBranchName(issue: Issue | IssueDetail, nameFormat: string): string {
+export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {
   const issueKey = issue.key;
   const issueSummary = issue.fields.summary.toLowerCase();
   const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join("-");
+
+  if (!nameFormat) {
+    nameFormat = '{issueKey}-{issueSummary}';
+  }
 
   // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
   return nameFormat
