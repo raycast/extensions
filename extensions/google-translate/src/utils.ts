@@ -8,11 +8,15 @@ export const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageC
 export const getLanguageSetObjects = (languageSet: LanguageCodeSet) => {
   return {
     langFrom: supportedLanguagesByCode[languageSet.langFrom],
-    langTo: supportedLanguagesByCode[languageSet.langTo],
+    langTo: Array.isArray(languageSet.langTo)
+      ? languageSet.langTo.map((l) => supportedLanguagesByCode[l])
+      : supportedLanguagesByCode[languageSet.langTo],
   };
 };
 
 export const formatLanguageSet = (languageSet: LanguageCodeSet) => {
   const { langFrom, langTo } = getLanguageSetObjects(languageSet);
-  return `${langFrom.name} ${getLanguageFlag(langFrom)} -> ${getLanguageFlag(langTo)} ${langTo.name}`;
+  const langToArr = Array.isArray(langTo) ? langTo : [langTo];
+  const languageLabels = langToArr.map((l) => `${getLanguageFlag(l)} ${l.name}`);
+  return `${langFrom.name} ${getLanguageFlag(langFrom)} -> ${languageLabels.join(", ")}`;
 };

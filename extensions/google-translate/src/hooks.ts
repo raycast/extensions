@@ -5,6 +5,16 @@ import { LanguageCode } from "./languages";
 import { LanguageCodeSet, TranslatePreferences } from "./types";
 import { AUTO_DETECT } from "./simple-translate";
 
+const transformLegacyLanguageSet = (legacy: {
+  langFrom: LanguageCode;
+  langTo: LanguageCode | LanguageCode[];
+}): LanguageCodeSet => {
+  return {
+    langFrom: legacy.langFrom,
+    langTo: Array.isArray(legacy.langTo) ? legacy.langTo : [legacy.langTo],
+  };
+};
+
 export const usePreferences = () => {
   return React.useMemo(() => getPreferenceValues<TranslatePreferences>(), []);
 };
@@ -36,20 +46,16 @@ export const useSelectedLanguagesSet = () => {
   const preferences = usePreferences();
   const [selectedLanguageSet, setSelectedLanguageSet] = useCachedState<LanguageCodeSet>("selectedLanguageSet", {
     langFrom: preferences.lang1,
-    langTo: preferences.lang2,
+    langTo: [preferences.lang2],
   });
 
-  return [selectedLanguageSet, setSelectedLanguageSet] as const;
+  return [transformLegacyLanguageSet(selectedLanguageSet), setSelectedLanguageSet] as const;
 };
 
 export const usePreferencesLanguageSet = () => {
   const preferences = usePreferences();
-  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: preferences.lang2 };
+  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: [preferences.lang2] };
   return preferencesLanguageSet;
-};
-
-export const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet) => {
-  return langSet1.langFrom === langSet2.langFrom && langSet1.langTo === langSet2.langTo;
 };
 
 export const useDebouncedValue = <T>(value: T, delay: number) => {
@@ -66,6 +72,19 @@ export const useDebouncedValue = <T>(value: T, delay: number) => {
   }, [value, delay]);
 
   return debouncedValue;
+};
+
+export const useAllLanguageSets = () => {
+  const [languages, setLanguages] = useCachedState<
+    {
+      langFrom: LanguageCode;
+      langTo: LanguageCode | LanguageCode[];
+    }[]
+  >("languages", []);
+
+  const finalLanguageSets = languages.map((langSet) => transformLegacyLanguageSet(langSet));
+
+  return [finalLanguageSets, setLanguages] as const;
 };
 
 export const useSourceLanguage = () => {
