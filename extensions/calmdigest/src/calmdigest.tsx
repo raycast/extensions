@@ -6,7 +6,6 @@ type Values = {
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    console.log(values);
     showToast({ title: "Your link has been digested", message: "See logs for submitted values" });
     popToRoot();
     open(`https://calmdigest.com/?q=${encodeURIComponent(values.textfield.toString())}`);
