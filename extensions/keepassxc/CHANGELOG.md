@@ -1,50 +1,84 @@
 # KeepassXC Extension Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+All notable changes to this project will be documented in this file.
 
-- Add a timer to lock the database after a user specified time of inactivity
-- Remove the password and the key file fields from the extension preference
-- Add TOTP indicators and usernames while searching entries
-- Add a folder filter on the search bar when folders exist in the database
-- Use the official KeePassXC.app icon as the extension icon
-- Use `keepassxc-cli export` to retrieve entries and most other data from the database instead of relying heavily on `keepassxc-cli show`
-- Update the README.md
-- Update the screenshots
-- Comment the code
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Fix] - 2023-10-23
+## [1.5.0] - {PR_MERGE_DATE}
 
-- Fix a logic bug
+### Added
 
-## [Enhancement] - 2023-10-21
+- A timer to lock the database after a user specified time of inactivity (#9600, #10634, #11107).
+- TOTP indicators and usernames while searching entries (#10709).
+- A folder filter on the search bar when folders exist in the database.
+- Comment the code.
 
-- Add Open URL action
-- Optimize performance: Using LocalStorage to cache entries and load entries from cache to improve load speed
+### Changed
 
-## [Fix] - 2023-10-03
+- Use the official KeePassXC.app icon as the extension icon.
+- Use `keepassxc-cli export` to retrieve entries and most other data from the database instead of relying heavily `keepassxc-cli show`.
 
-- New feature/action "Paste TOTP"
-- Respect the KeePassXC shortcut logic as much as possible since `cmd - p` isn't an available custom shortcut anymore for extensions
-- Fix "Copy Password" when the password contains a backslash
-- Update the README.md
-- Use the build in Clipboard.Copy's concealed type
+### Removed
 
-## [Fix] - 2023-06-20
+- The password and the key file fields from the extension preference.
 
-- Fix a logic bug
+## [1.4.1] - 2023-10-23
 
-## [Enhancement] - 2023-05-23
+### Fixed
 
-- New feature/action "Paste Username"
-- Improve the shortcut logic (e.g. `cmd - u` for copy the username instead of `cmd - b`)
-- Use more explicit action names (e.g. "Paste Password" instead of "Paste")
-- Update the README.md
+- Fix a logic bug.
 
-## [Enhancement] - 2022-09-27
+## [1.4.0] - 2023-10-21
 
-- Add the ability to hide passwords and TOTPs from clipboard managers
+### Added
 
-## [Enhancement] - 2022-07-27
+- `Open URL` action.
 
-- Add support for Key File protected Database file
-- Bump api version to 1.38.1
+### Changed
+
+- Use LocalStorage to cache entries and load entries from cache to improve load speed.
+
+## [1.3.0] - 2023-10-03
+
+### Added
+
+- `Paste TOTP` action.
+- Use the build in `Clipboard.Copy`'s concealed type.
+
+### Changed
+
+- Respect the KeePassXC shortcut logic as much as possible since `⌘ P` isn't an available custom shortcut anymore for extensions.
+
+### Fixed
+
+- `Copy Password` when the password contains a backslash.
+
+## [1.2.1] - 2023-06-20
+
+### Fixed
+
+- Fix a logic bug.
+
+## [1.2.0] - 2023-05-23
+
+### Added
+
+- `Paste Username` action.
+
+### Changed
+
+- Improve the shortcut logic (e.g. `⌘ U` for copy the username instead of `⌘ B`).
+- Use more explicit action names (e.g. `Paste Password` instead of `Paste`).
+
+## [1.1.0] - 2022-09-27
+
+### Added
+
+- Hide passwords and TOTPs from clipboard managers.
+
+## [1.0.0] - 2022-07-27
+
+### Added
+
+- Add support for Key File protected database file.
