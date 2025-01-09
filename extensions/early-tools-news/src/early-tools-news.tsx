@@ -52,7 +52,9 @@ export default function Command() {
             );
           }),
         );
-        const flattenedItems = allItems.flat();
+        const flattenedItems = allItems
+          .flat()
+          .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
         console.log(`Total items fetched: ${flattenedItems.length}`);
         setState({ items: flattenedItems, isLoading: false });
       } catch (error) {
