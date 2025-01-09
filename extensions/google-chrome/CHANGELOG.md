@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-01-09
 
 - Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
 - Fix bookmark list in the Search All command.
