@@ -5,10 +5,14 @@ import { LanguageCode } from "./languages";
 import { LanguageCodeSet, TranslatePreferences } from "./types";
 import { AUTO_DETECT } from "./simple-translate";
 
-const transformLegacyLanguageSet = (legacy: {
+type _LegacySingleLanguageCodeSet = {
   langFrom: LanguageCode;
-  langTo: LanguageCode | LanguageCode[];
-}): LanguageCodeSet => {
+  langTo: LanguageCode;
+};
+
+type _StoredLanguageCodeSet = _LegacySingleLanguageCodeSet | LanguageCodeSet;
+
+const unifyLegacyLanguageSet = (legacy: _StoredLanguageCodeSet): LanguageCodeSet => {
   return {
     langFrom: legacy.langFrom,
     langTo: Array.isArray(legacy.langTo) ? legacy.langTo : [legacy.langTo],
@@ -44,12 +48,15 @@ export const useTextState = () => {
 
 export const useSelectedLanguagesSet = () => {
   const preferences = usePreferences();
-  const [selectedLanguageSet, setSelectedLanguageSet] = useCachedState<LanguageCodeSet>("selectedLanguageSet", {
-    langFrom: preferences.lang1,
-    langTo: [preferences.lang2],
-  });
+  const [selectedLanguageSet, setSelectedLanguageSet] = useCachedState<_StoredLanguageCodeSet>(
+    "selectedLanguageSet",
+    unifyLegacyLanguageSet({
+      langFrom: preferences.lang1,
+      langTo: preferences.lang2,
+    }),
+  );
 
-  return [transformLegacyLanguageSet(selectedLanguageSet), setSelectedLanguageSet] as const;
+  return [unifyLegacyLanguageSet(selectedLanguageSet), setSelectedLanguageSet] as const;
 };
 
 export const usePreferencesLanguageSet = () => {
@@ -75,16 +82,9 @@ export const useDebouncedValue = <T>(value: T, delay: number) => {
 };
 
 export const useAllLanguageSets = () => {
-  const [languages, setLanguages] = useCachedState<
-    {
-      langFrom: LanguageCode;
-      langTo: LanguageCode | LanguageCode[];
-    }[]
-  >("languages", []);
+  const [languages, setLanguages] = useCachedState<_StoredLanguageCodeSet[]>("languages", []);
 
-  const finalLanguageSets = languages.map((langSet) => transformLegacyLanguageSet(langSet));
-
-  return [finalLanguageSets, setLanguages] as const;
+  return [languages.map(unifyLegacyLanguageSet), setLanguages] as const;
 };
 
 export const useSourceLanguage = () => {
