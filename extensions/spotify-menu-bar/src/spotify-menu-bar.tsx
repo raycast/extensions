@@ -14,29 +14,33 @@ export default function Command() {
       }
     });
   };
-  if (!track) {
-    return null;
-  }
+
   return (
     <MenuBarExtra
       icon={track?.artworkUrl ? { source: track.artworkUrl, mask: Image.Mask.RoundedRectangle } : spotifyIcon}
-      title={`${track.name} - ${track.artist}`}
+      title={track ? `${track.name} - ${track.artist}` : undefined}
       isLoading={isLoading}
-      tooltip={`${track.name} by ${track.artist}`}
+      tooltip={track ? `${track.name} by ${track.artist}` : "No song is currently playing on Spotify."}
     >
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Next Track"
-          icon={{ source: { dark: "skip-next-dark.svg", light: "skip-next-light.svg" } }}
-          onAction={() => changeSong("next")}
-        />
-        <MenuBarExtra.Item
-          title="Previous Track"
-          icon={{ source: { dark: "skip-previous-dark.svg", light: "skip-previous-light.svg" } }}
-          onAction={() => changeSong("previous")}
-        />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Item title="Open Spotify" icon={spotifyIcon} onAction={() => open("spotify://")} />
+      {track ? (
+        <>
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title="Next Track"
+              icon={{ source: { dark: "skip-next-dark.svg", light: "skip-next-light.svg" } }}
+              onAction={() => changeSong("next")}
+            />
+            <MenuBarExtra.Item
+              title="Previous Track"
+              icon={{ source: { dark: "skip-previous-dark.svg", light: "skip-previous-light.svg" } }}
+              onAction={() => changeSong("previous")}
+            />
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Item title="Open Spotify" icon={spotifyIcon} onAction={() => open("spotify://")} />
+        </>
+      ) : (
+        <MenuBarExtra.Item title="No song is currently playing on Spotify." />
+      )}
     </MenuBarExtra>
   );
 }
