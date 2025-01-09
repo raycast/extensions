@@ -11,60 +11,63 @@
     {
       "name": "screenshot",
       "title": "Take Screenshot",
+      "subtitle": "Inbox AI",
       "description": "Trigger an action with screenshot input",
       "mode": "view"
     },
     {
       "name": "audio",
       "title": "Record Audio",
+      "subtitle": "Inbox AI",
       "description": "Trigger an action with audio input",
       "mode": "view"
     },
     {
       "name": "audio_selected_text",
-      "title": "Record Audio",
-      "subtitle": "with Selected Text",
+      "title": "Record Audio with Selected Text",
+      "subtitle": "Inbox AI",
       "description": "Trigger an audio action with selected text",
       "mode": "view"
     },
     {
       "name": "audio_browser_content",
-      "title": "Record Audio",
-      "subtitle": "with Browser Content",
+      "title": "Record Audio with Browser Content",
+      "subtitle": "Inbox AI",
       "description": "Trigger an audio action with browser content",
       "mode": "view"
     },
     {
       "name": "queue_selected_text",
-      "title": "Attach",
-      "subtitle": "Selected Text",
+      "title": "Attach Selected Text",
+      "subtitle": "Inbox AI",
       "description": "Queue an action with selected text",
       "mode": "view"
     },
     {
       "name": "queue_browser_content",
-      "title": "Attach",
-      "subtitle": "Browser Content",
+      "title": "Attach Browser Content",
+      "subtitle": "Inbox AI",
       "description": "Queue an action with browser content",
       "mode": "view"
     },
     {
       "name": "execute",
       "title": "Process Text",
+      "subtitle": "Inbox AI",
       "description": "Execute an action with form input",
       "mode": "view"
     },
     {
       "name": "execute_selected_text",
-      "title": "Process Text",
-      "subtitle": "with Selected Text",
+      "title": "Process Text with Selected Text",
+      "subtitle": "Inbox AI",
       "description": "Trigger an action with selected text",
       "mode": "view"
     },
     {
       "name": "execute_browser_content",
-      "title": "Process Text",
-      "subtitle": "with Browser Content",
+      "title": "Process Text with Browser Content",
+      "subtitle": "Inbox AI",
       "description": "Trigger an action with browser content",
       "mode": "view"
     }
