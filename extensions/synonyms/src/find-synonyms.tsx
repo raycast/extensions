@@ -385,7 +385,7 @@ export default function Command() {
           <List.Item
             key={item.synonym + index}
             icon={item.emoji}
-            title={item.synonym}
+            title={item.synonym || ""}
             subtitle={item.meaning || ""}
             actions={
               <ActionPanel>
@@ -450,7 +450,7 @@ function HistoryView() {
         <List.Item
           key={index}
           title={item.query}
-          subtitle={`Language: ${item.language}`}
+          subtitle={`Language: ${item.language || ""}`}
           accessories={[{ text: new Date(item.timestamp).toLocaleString() }]}
           actions={
             <ActionPanel>
