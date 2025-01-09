@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Add ability to configuring Git branch name format] - {PR_MERGE_DATE}
+## [Add ability to configuring Git branch name format] - 2025-01-09
 - Implemented the ability to configure the Git branch name format in the extension settings.
 
 ## [Add ability to open issues in other application defined in extension preferences] - 2024-12-25
