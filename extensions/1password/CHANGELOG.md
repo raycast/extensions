@@ -3,6 +3,7 @@
 ## [Chore] - {PR_MERGE_DATE}
 
 - Moved contributor to past contributors
+- Bump all dependencies to the latest
 
 ## [Chore] - 2024-12-02
 
