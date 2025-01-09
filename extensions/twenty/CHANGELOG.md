@@ -1,6 +1,6 @@
 # Twenty Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-01-09
 
 - Added support for multi-select field type
 
