@@ -473,7 +473,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {kittyInstalled ? (
                     <Action
                       title="Execute in kitty.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/kitty.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -485,7 +485,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {iTermInstalled ? (
                     <Action
                       title="Execute in iTerm.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/iTerm.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -497,7 +497,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {GhosttyInstalled ? (
                     <Action
                       title="Execute in Ghostty.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/Ghostty.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -509,7 +509,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {WarpInstalled ? (
                     <Action
                       title="Execute in Warp.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/Warp.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -520,7 +520,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   ) : null}
                   <Action
                     title="Execute in Terminal.app"
-                    icon={Icon.Window}
+                    icon={{ fileIcon: "/System/Applications/Utilities/Terminal.app" }}
                     onAction={() => {
                       closeMainWindow();
                       popToRoot();
