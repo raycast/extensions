@@ -2,7 +2,6 @@
 
 ## [Minor Improvements] - {PR_MERGE_DATE}
 
-- [ ] use form instead of argument for `ask about selected text`
 - 🌏 Improvement of the translation command: add Frist and Second Language which help the translation more intelligent
 - ❌ Removed unused debug code
 
