@@ -86,9 +86,9 @@
       "mode": "view"
     },
     {
-      "name": "see-recent-mail",
-      "title": "See Recent Mail",
-      "description": "See recent unread messages.",
+      "name": "view-recent-mail",
+      "title": "View Recent Mail",
+      "description": "View recent unread messages.",
       "mode": "view",
       "preferences": [
         {
@@ -103,15 +103,15 @@
       ]
     },
     {
-      "name": "see-important-mail",
-      "title": "See Important Mail",
-      "description": "See messages in the important mailboxes.",
+      "name": "view-important-mail",
+      "title": "View Important Mail",
+      "description": "View messages in the important mailboxes.",
       "mode": "view"
     },
     {
-      "name": "see-mail-accounts",
-      "title": "See Mail Accounts",
-      "description": "See mail accounts.",
+      "name": "view-mail-accounts",
+      "title": "View Mail Accounts",
+      "description": "View mail accounts.",
       "mode": "view"
     },
     {

@@ -1,4 +1,4 @@
-import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useRef, useState } from "react";
 
@@ -8,9 +8,9 @@ import { getMessages } from "./scripts/messages";
 import { Account, Mailbox } from "./types";
 import { invoke } from "./utils";
 import { Cache } from "./utils/cache";
-import { isInbox } from "./utils/mailbox";
+import { isImportantMailbox } from "./utils/mailbox";
 
-export default function SeeRecentMail() {
+export default function ViewImportantMail() {
   const [account, setAccount] = useState<Account>();
 
   const fetchAccounts = useCallback(async () => {
@@ -22,11 +22,11 @@ export default function SeeRecentMail() {
 
     const messages = await Promise.all(
       accounts.map((account) => {
-        const mailbox = account.mailboxes.find(isInbox);
+        const mailbox = account.mailboxes.find(isImportantMailbox);
         if (!mailbox) {
           return [];
         }
-        return getMessages(account, mailbox, getPreferenceValues().unreadonly);
+        return getMessages(account, mailbox, true);
       }),
     );
 
@@ -45,7 +45,7 @@ export default function SeeRecentMail() {
     error,
   } = useCachedPromise(fetchAccounts, [], {
     abortable: accountsAbortController,
-    failureToastOptions: { title: "Could not get recent messages from accounts" },
+    failureToastOptions: { title: "Could not get important messages from accounts" },
   });
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
@@ -64,7 +64,7 @@ export default function SeeRecentMail() {
 
           return data.map((account) => {
             const messages = Cache.getMessages(account.id, mailbox.name);
-            account.messages = messages.filter((x) => !x.read);
+            account.messages = messages;
             return account;
           });
         },
@@ -80,8 +80,8 @@ export default function SeeRecentMail() {
   return (
     <List
       isLoading={isLoadingAccounts}
-      navigationTitle={`${account?.name || "All Accounts"} - Recent Mail`}
-      searchBarPlaceholder="Search for recent emails"
+      navigationTitle={`${account?.name || "All Accounts"} - Important Mail`}
+      searchBarPlaceholder="Search for important emails"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Choose Account"
@@ -107,17 +107,17 @@ export default function SeeRecentMail() {
         accounts
           ?.filter((a) => account === undefined || a.id === account.id)
           .map((account) => {
-            const recentMailbox = account.mailboxes.find(isInbox);
-            return recentMailbox ? (
+            const importantMailbox = account.mailboxes.find(isImportantMailbox);
+            return importantMailbox ? (
               <List.Section key={account.id} title={account.name} subtitle={account.email}>
                 {account.messages?.map((message) => (
                   <MessageListItem
                     key={message.id}
-                    mailbox={recentMailbox}
+                    mailbox={importantMailbox}
                     account={account}
                     message={message}
                     onAction={(action) => {
-                      handleAction(action, recentMailbox);
+                      handleAction(action, importantMailbox);
                     }}
                   />
                 ))}
@@ -126,8 +126,8 @@ export default function SeeRecentMail() {
           })}
       {!error && !numMessages && !isLoadingAccounts && (
         <List.EmptyView
-          title={"No Recent Unread Messages"}
-          description={"You're all caught up..."}
+          title={"No Important Messages"}
+          description={"You don't have any important messages..."}
           icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
         />
       )}

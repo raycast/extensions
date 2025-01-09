@@ -5,7 +5,7 @@ import { Account } from "./types";
 import { MailboxList } from "./components";
 import { getAccounts } from "./scripts/accounts";
 
-export default function SeeMailAccounts() {
+export default function ViewMailAccounts() {
   const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getAccounts);
 
   return (
