@@ -1,4 +1,5 @@
 export type RegexItem = {
+  id: string;
   key: string;
   regex: string;
 };

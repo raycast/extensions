@@ -12,7 +12,7 @@ export interface RegexItemFormProps {
 export default function RegexItemForm({ initialValues, isNew }: RegexItemFormProps) {
   const { pop } = useNavigation();
 
-  const emptyRegexItem: RegexItem = { regex: "", key: "" };
+  const emptyRegexItem: RegexItem = { regex: "", key: "", id: nanoid() };
   const { data: replacementOptions, isLoading } = usePromise(getSavedItems);
   const [regexItems, setRegexItems] = useState<RegexItem[]>(initialValues?.regexItems || [emptyRegexItem]);
 
@@ -84,18 +84,12 @@ export default function RegexItemForm({ initialValues, isNew }: RegexItemFormPro
         {...itemProps.description}
       />
       <Form.Separator />
-      <Form.TextArea
-        title="Output"
-        info="Use regex capture groups to insert string that was matched."
-        placeholder="<strong>{value}</strong>"
-        {...itemProps.output}
-      />
 
       {regexItems.map((option, index) => (
-        <Fragment key={option.key + index}>
+        <Fragment key={option.id}>
           <Form.Description text={"Item " + (index + 1)} />
           <Form.TextField
-            id={"key" + index}
+            id={option.id}
             title="Key"
             info="Use the Key name (e.g. KEY) without enclosing curly braces."
             placeholder="Enter key for regex item, e.g. KEY"
@@ -111,6 +105,12 @@ export default function RegexItemForm({ initialValues, isNew }: RegexItemFormPro
           />
         </Fragment>
       ))}
+      <Form.TextArea
+        title="Output"
+        info="Use regex capture groups to insert string that was matched."
+        placeholder="<strong>{value}</strong>"
+        {...itemProps.output}
+      />
     </Form>
   );
 }
