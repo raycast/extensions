@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
