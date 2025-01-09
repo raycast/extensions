@@ -315,3 +315,21 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
       return null;
   }
 }
+
+export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {
+  const issueKey = issue.key;
+  const issueSummary = issue.fields.summary.toLowerCase();
+  const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join("-");
+
+  if (!nameFormat) {
+    nameFormat = "{issueKey}-{issueSummary}";
+  }
+
+  // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
+  return nameFormat
+    .replace("{issueKey}", issueKey)
+    .replace("{issueSummary}", issueSummary)
+    .replace("{issueSummaryShort}", issueSummaryShort)
+    .replace("{issueType}", issue.fields.issuetype.name)
+    .replace("{projectKey}", issue.fields.project?.key || "");
+}
