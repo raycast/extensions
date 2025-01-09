@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Minor Improvements] - {PR_MERGE_DATE}
+## [Improvement] - {PR_MERGE_DATE}
 
 - 🌏 Improvement of the translation command: add Frist and Second Language which help the translation more intelligent
 - ❌ Removed unused debug code
