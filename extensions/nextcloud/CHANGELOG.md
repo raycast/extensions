@@ -1,6 +1,6 @@
 # Nextcloud Changelog
 
-## [WebDAV request Fix] - 2024-12-29
+## [WebDAV request Fix] - {PR_MERGE_DATE}
 - `200 OK` check with each items
 - Array check for `item["d:propstat"]`
 
