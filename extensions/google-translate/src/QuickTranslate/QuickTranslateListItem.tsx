@@ -13,7 +13,7 @@ export function QuickTranslateListItem(props: {
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
+  const langTo = supportedLanguagesByCode[props.languageSet.langTo[0]];
 
   const { data: result, isLoading: isLoading } = usePromise(simpleTranslate, [props.debouncedText, props.languageSet], {
     onWillExecute() {
