@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2025-01-09
 
 - Moved contributor to past contributors
 - Bump all dependencies to the latest
