@@ -1,22 +1,22 @@
 import {
-  Form,
-  Detail,
-  ActionPanel,
   Action,
-  Toast,
-  showToast,
-  getSelectedText,
+  ActionPanel,
+  Detail,
+  Form,
   getPreferenceValues,
-  popToRoot,
+  getSelectedText,
+  Icon,
   Keyboard,
   launchCommand,
   LaunchType,
-  Icon,
+  popToRoot,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-import Gemini from "gemini-ai";
 import fs from "fs";
+import Gemini from "gemini-ai";
+import fetch from "node-fetch";
+import { useEffect, useState } from "react";
 
 export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
   const Pages = {
@@ -27,7 +27,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
   const { apiKey, defaultModel, model } = getPreferenceValues();
-  console.log(defaultModel, model);
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +80,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
         );
       }
-      console.log(e);
     }
 
     setIsLoading(false);
@@ -89,16 +87,14 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
 
   useEffect(() => {
     (async () => {
-      if (context || useSelected) {
+      if (useSelected) {
         try {
           let selected = await getSelectedText();
-          if (useSelected) {
-            if (argQuery === "") {
-              setSelected(selected);
-              setPage(Pages.Form);
-            } else {
-              getResponse(`${argQuery}\n${selected}`);
-            }
+          if (argQuery === "") {
+            setSelected(selected);
+            setPage(Pages.Form);
+          } else {
+            getResponse(`${context}\n${argQuery}\n${selected}`);
             return;
           }
           getResponse(`${context}\n${selected}`);

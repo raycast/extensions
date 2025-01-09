@@ -1,11 +1,18 @@
 # Google Gemini Changelog
 
-## [Add Gemini 2.0exp and 1.5-8b options] - {PR_MERGE_DATE}
+## [Minor Improvements] - {PR_MERGE_DATE}
 
-- 🎄 New model options:
-  - 💪 Gemini 2.0exp: The latest and greatest model from Gemini AI.
-  - 🚀 Gemini 1.5-8b: Ask faster.
-- 💬 Refine `Summarize` command to show 2 levels of information density.
+- [ ] use form instead of argument for `ask about selected text`
+- 🌏 Improvement of the translation command: add Frist and Second Language which help the translation more intelligent
+- ❌ Removed unused debug code
+
+## [Gemini Flash 2.0 and More Customization] - 2025-01-02
+
+Features:
+
+- 🆕 Add new Models for Gemini 2.0 Flash Experimental, Gemini Experimental 1206, Gemini 2.0 Flash Thinking Experimental and LearnLM 1.5 Pro Experimental
+- 🧹 Allow prompts to be customizable in Raycast Settings
+- 🗯️ Add ability to add a default Translate language, and also ability to override with a parameter
 
 ## [Add Translate Command] - 2024-09-02
 
