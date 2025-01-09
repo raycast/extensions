@@ -1,8 +1,11 @@
 # shell Changelog
 
+## [Add Ghostty support] 2024-12-29
+
+Adds the option to run commands in `Ghostty` terminal.
+
 ## [Add result indication] 2024-07-26
 Fix partially [issue](https://github.com/raycast/extensions/issues/13496), displaying an indicator on command finishes, with success or failure.
-
 
 ## [Fix] 2024-07-18
 Fix [issue](https://github.com/raycast/extensions/issues/13015) to avoid UI hanging on large data from `child_process`. 

@@ -8,9 +8,13 @@
   "contributors": [
     "emiara",
     "kevin_manca",
-    "mohamedk1"
+    "mohamedk1",
+    "anirudh_gupta",
+    "pernielsentikaer"
   ],
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "keywords": [
     "command line",
@@ -49,10 +53,11 @@
       "required": false,
       "title": "Decide which Terminal Application you want to use",
       "description": "If iTerm, Warp or kitty is available, you can use them instead of Terminal.",
-      "data": [{
-        "title": "Terminal",
-        "value": "Terminal"
-      },
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
         {
           "title": "iTerm",
           "value": "iTerm"
@@ -64,6 +69,10 @@
         {
           "title": "Warp",
           "value": "Warp"
+        },
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
         }
       ],
       "default": "Terminal"
