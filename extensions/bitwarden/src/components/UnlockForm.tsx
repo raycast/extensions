@@ -72,6 +72,13 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
     await showToast(Toast.Style.Success, "Error copied to clipboard");
   };
 
+  let PasswordField = Form.PasswordField;
+  let passwordFieldId = "password";
+  if (showPassword) {
+    PasswordField = Form.TextField;
+    passwordFieldId = "plainPassword";
+  }
+
   return (
     <Form
       actions={
@@ -81,7 +88,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
               <Action.SubmitForm
                 icon={Icon.LockUnlocked}
                 title="Unlock"
-                onSubmit={() => onSubmit()}
+                onSubmit={onSubmit}
                 shortcut={{ key: "enter", modifiers: [] }}
               />
               <Action
@@ -105,25 +112,13 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
-      {showPassword ? (
-        <Form.TextField
-          autoFocus
-          id="plainPassword"
-          title="Master Password"
-          value={password}
-          onChange={setPassword}
-          ref={(field) => field?.focus()}
-        />
-      ) : (
-        <Form.PasswordField
-          autoFocus
-          id="password"
-          title="Master Password"
-          value={password}
-          onChange={setPassword}
-          ref={(field) => field?.focus()}
-        />
-      )}
+      <PasswordField
+        id={passwordFieldId}
+        title="Master Password"
+        value={password}
+        onChange={setPassword}
+        ref={(field) => field?.focus()}
+      />
       <Form.Description title="" text={`Press ⌘E to ${showPassword ? "hide" : "show"} password`} />
       {!!lockReason && (
         <>
