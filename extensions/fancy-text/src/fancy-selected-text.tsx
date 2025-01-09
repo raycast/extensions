@@ -14,13 +14,12 @@ export default function Command() {
   React.useEffect(() => {
     const fetchSelectedText = async () => {
       try {
-        await getSelectedText();
         const selectedText = await getSelectedText();
         if (selectedText) {
           setSearchText(selectedText);
         }
       } catch (error) {
-        setSearchText(defaultText);
+        setSearchText("");
         await showToast({
           style: Toast.Style.Failure,
           title: "No text selected",
@@ -62,6 +61,12 @@ export default function Command() {
     };
   }, [pinnedFonts]);
 
+  if (isLoading) {
+    return (
+      <List isLoading={true} searchBarPlaceholder="Loading..." searchText={searchText} onSearchTextChange={() => {}} />
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -70,37 +75,33 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Type your text here"
     >
-      {!isLoading && (
-        <>
-          {pinnedItems.length > 0 && (
-            <List.Section title="Pinned">
-              {pinnedItems.map((font) => (
-                <FontListItem
-                  key={font.fontName}
-                  font={font}
-                  searchText={searchText}
-                  defaultText={defaultText}
-                  isPinned={pinnedFonts.includes(font.fontName)}
-                  togglePin={togglePin}
-                />
-              ))}
-            </List.Section>
-          )}
-
-          <List.Section title="Fonts">
-            {unpinnedItems.map((font) => (
-              <FontListItem
-                key={font.fontName}
-                font={font}
-                searchText={searchText}
-                defaultText={defaultText}
-                isPinned={pinnedFonts.includes(font.fontName)}
-                togglePin={togglePin}
-              />
-            ))}
-          </List.Section>
-        </>
+      {pinnedItems.length > 0 && (
+        <List.Section title="Pinned">
+          {pinnedItems.map((font) => (
+            <FontListItem
+              key={font.fontName}
+              font={font}
+              searchText={searchText}
+              defaultText={defaultText}
+              isPinned={pinnedFonts.includes(font.fontName)}
+              togglePin={togglePin}
+            />
+          ))}
+        </List.Section>
       )}
+
+      <List.Section title="Fonts">
+        {unpinnedItems.map((font) => (
+          <FontListItem
+            key={font.fontName}
+            font={font}
+            searchText={searchText}
+            defaultText={defaultText}
+            isPinned={pinnedFonts.includes(font.fontName)}
+            togglePin={togglePin}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
