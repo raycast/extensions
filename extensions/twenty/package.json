@@ -1,88 +1,74 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twenty",
-  "title": "Twenty - the #1 Open-Source CRM",
-  "description": "Modern, powerful, affordable platform to manage your customer relationships",
+  "title": "Twenty",
+  "description": "Create Object Record Instantly",
   "icon": "logo.png",
-  "author": "chrisdadev13",
+  "author": "NabhagMotivaras",
   "contributors": [
+    "chrisdadev13",
     "xmok"
   ],
   "categories": [
     "Productivity",
-    "Communication",
-    "Applications"
+    "Other"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "list-people",
-      "title": "List People",
-      "subtitle": "Twenty CRM",
-      "description": "View all contacts in Twenty",
-      "mode": "view"
-    },
-    {
-      "name": "create-person",
-      "title": "Create Person",
-      "subtitle": "Twenty CRM",
-      "description": "Create a new contact",
-      "mode": "view"
-    },
-    {
-      "name": "create-company",
-      "title": "Create Company",
-      "subtitle": "Twenty CRM",
-      "description": "Create a new Company",
-      "mode": "view"
-    },
-    {
-      "name": "list-companies",
-      "title": "List Companies",
-      "subtitle": "Twenty CRM",
-      "description": "View all companies in Twenty",
+      "name": "create-object-record",
+      "title": "Create Object Record",
+      "description": "Create Object Record across Standard and Custom Objects",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "url",
-      "type": "textfield",
+      "name": "token",
+      "description": "Enter your Twenty API Key",
+      "type": "password",
+      "title": "API Key",
       "required": true,
-      "title": "API URL",
-      "description": "Enter your Twenty API URL",
-      "default": "https://api.twenty.com/",
-      "placeholder": "https://api.twenty.com/"
+      "placeholder": "Enter your Twenty API Key..."
     },
     {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "API Key",
-      "description": "Enter your Twenty API Key",
-      "link": "https://app.twenty.com/settings/developers",
-      "placeholder": "Twenty API Key"
+      "name": "url",
+      "description": "Enter your self-host API URL (Optional)",
+      "type": "textfield",
+      "title": "Self Host API URL",
+      "required": false,
+      "default": "https://api.twenty.com",
+      "placeholder": "https://api.twenty.com (default)"
+    },
+    {
+      "name": "object_creation_form_behaviour",
+      "description": "Enabling this option allows you to create multiple records for the same object without closing the form after each creation",
+      "title": "object creation behavior",
+      "label": "keep object form open after record creation",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.2",
-    "@raycast/utils": "^1.18.0",
-    "axios": "^1.7.7"
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

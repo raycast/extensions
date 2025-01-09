@@ -174,7 +174,7 @@ export function replaceSqlParameters(sql: string, parameters: Json[]) {
 export function getQueryMarkdown(finalUpdateQueries: SQLStatement[]) {
   const queryText = finalUpdateQueries
     .map((x) => {
-      let text = "The following query will be executed:\n\n";
+      let text = "";
       text += "```\n" + replaceSqlParameters(x.text, x.values) + "\n```";
       text += "\n\n";
       return text;

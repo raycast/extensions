@@ -1,8 +1,16 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Translate(props) {
+  // we allow user to override the prompt of translation
+  const { TranslateLanguage } = props["arguments"];
+  let { prompt, defaultTargetLanguage } = getPreferenceValues();
+  const targetLanguage = TranslateLanguage || defaultTargetLanguage;
+  prompt = prompt.replace("{targetLanguage}", targetLanguage);
+
   return useGemini(props, {
-    context: `Translate the following text to ${props["arguments"]["TranslateLanguage"]}. Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else.`,
+    context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

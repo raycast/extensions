@@ -22,7 +22,8 @@
     "tleo19",
     "lin",
     "yug2005",
-    "vatsalsanjay"
+    "vatsalsanjay",
+    "Tarocch1"
   ],
   "keywords": [
     "vscode",
@@ -147,10 +148,28 @@
       "required": false,
       "title": "Terminal App",
       "description": "Select which Terminal App to use when opening with a terminal"
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "gitBranchColor",
+      "type": "textfield",
+      "title": "Git Integration Color",
+      "required": false,
+      "label": "Git Branch Color",
+      "default": "",
+      "description": "Hexadecimal color code for Git branch tag (e.g., #00FF00). Leave empty to use default green"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.0",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.10.0",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
@@ -158,13 +177,14 @@
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash.get": "^4.4.7",
-    "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/sql.js": "^1.4.3",
     "eslint": "^7.32.0",
     "eslint-plugin-react": "^7.26.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

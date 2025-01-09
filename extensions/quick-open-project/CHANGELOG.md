@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2] - 2024-12-04
+
+- Fix conflicing keybinds for opening in alternative editor and opening both editor and terminal
+  - "open in alternate editor" remains `cmd-shift-e`
+  - "open in both editor and terminal" is now `cmd-shift-o`
+- Update keybinding for "copy path" to more standard `cmd-shift-c`
+
 ## [1.1.1] - 2023-05-22
 
 - Add optional second editor + open shortcut

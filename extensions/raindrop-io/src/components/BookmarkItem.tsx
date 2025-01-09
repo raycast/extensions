@@ -96,7 +96,29 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
   function accessories() {
     const accessories = [];
 
-    bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+    switch (preferences.displayDate) {
+      case "lastUpdated":
+        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+        break;
+      case "created":
+        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
+        break;
+    }
+
+    if (preferences.tagsDisplay !== "none") {
+      if (preferences.tagsDisplay === "all") {
+        bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
+      } else {
+        const tagsNumber = bookmark.tags.length - 1;
+        const tagsDisplayNumber = parseInt(preferences.tagsDisplay, 10);
+        const displayedTags = bookmark.tags.slice(0, tagsDisplayNumber).map((tag) => `#${tag}`);
+        accessories.push(...displayedTags.map((tag) => ({ tag })));
+
+        if (tagsNumber > tagsDisplayNumber) {
+          accessories.push({ tag: `+${tagsNumber}`, tooltip: bookmark.tags.join("\n") });
+        }
+      }
+    }
 
     switch (bookmark.type) {
       case "link":
@@ -116,15 +138,6 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
         break;
       case "document":
         accessories.push({ icon: Icon.Document });
-        break;
-    }
-
-    switch (preferences.displayDate) {
-      case "lastUpdated":
-        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
-        break;
-      case "created":
-        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
         break;
     }
 

@@ -20,14 +20,6 @@ Here is a typical manifest file:
       "description": "A command to send love to each other",
       "mode": "view"
     }
-  ],
-  "attachments": [
-    {
-      "title": "Get Raycast blog posts",
-      "name": "get-raycast-blog-posts",
-      "description": "Get the latest blog posts from the Raycast blog",
-      "mode": "submenu"
-    }
   ]
 }
 ```
@@ -59,7 +51,7 @@ All properties for a [command](./terminology.md#command).
 
 | Property                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                     |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name<mark style="color:red;">\*</mark>        | A unique id for the command. The name directly maps to the entry point file for the command. So a command named "index" would map to `src/index.ts` (or any other supported TypeScript or JavaScript file extension such as `.tsx`, `.js`, `.jsx)`.                                                                                                                                                             |
+| name<mark style="color:red;">\*</mark>        | A unique id for the command. The name directly maps to the entry point file for the command. So a command named "index" would map to `src/index.ts` (or any other supported TypeScript or JavaScript file extension such as `.tsx`, `.js`, `.jsx`).                                                                                                                                                             |
 | title<mark style="color:red;">\*</mark>       | The display name of the command, shown to the user in the Store, Preferences, and in Raycast's root search.                                                                                                                                                                                                                                                                                                     |
 | subtitle                                      | The optional subtitle of the command in the root search. Usually, this is the service or domain that your command is associated with. You can dynamically update this property using [`updateCommandMetadata`](../api-reference/command.md#updatecommandmetadata).                                                                                                                                              |
 | description<mark style="color:red;">\*</mark> | It helps users understand what the command does. It will be displayed in the Store and in Preferences.                                                                                                                                                                                                                                                                                                          |

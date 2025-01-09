@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.88.0 - 2024-12-16
+
+### 🐞 Fixes
+
+- **Markdown**: Fixed a crash when trying to print invalid surrogate code points
+- **Types**: Fixed an issue when generating the TypeScript definition for the preferences when one of their descriptions contained `*/`
+
+## 1.87.0 - 2024-12-04
+
+### ✨ New
+
+- **Docs**: You can now find a few txt files containing all the docs that you can feed to LLMs:
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt) → All the docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt) → The API docs
+  - [https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt](https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt) → The utils docs
+
+### 🐞 Fixes
+
+- **CLI**: Fix a couple of issues when trying to publish an extension or pull contributions
+
 ## 1.86.0 - 2024-11-20
 
 ### 💎 Improvements

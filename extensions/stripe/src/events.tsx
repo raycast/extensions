@@ -1,24 +1,11 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import omit from "lodash/omit";
 import snakeCase from "lodash/snakeCase";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { ListContainer, withEnvContext } from "./components";
-
-type EventResp = {
-  id: string;
-  created: number;
-  type: string;
-  data: {
-    object: {
-      id: string;
-      created: number;
-      metadata: any;
-    };
-  };
-};
 
 type Event = {
   id: string;
@@ -45,7 +32,7 @@ const resolvedData = (data: any) =>
     return { ...acc, [`data_${snakeCase(key)}`]: value };
   }, {});
 
-const resolveEvent = ({ created, data, ...rest }: EventResp): Event => {
+const resolveEvent = ({ created, data, ...rest }: Stripe.Event): Event => {
   return {
     ...rest,
     ...(resolvedData(data.object) as any),

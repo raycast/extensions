@@ -1,6 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
+  Formality,
+  SUPPORTED_FORMALITY_LANGUAGES,
   SourceLanguage,
   TargetLanguage,
   getSelection,
@@ -17,12 +19,13 @@ interface Values {
   to?: TargetLanguage;
   text?: string;
   translation?: string;
+  formality?: Formality;
 }
 
 function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   return (
     <Action
-      icon={Icon.ChevronUp}
+      icon={Icon.Switch}
       title="Switch Languages"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onSwitchLanguages}
@@ -42,13 +45,14 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     const sourceLanguage = props?.launchContext?.sourceLanguage;
     return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
-  const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
+  const { defaultTargetLanguage, showTransliteration, showFormalityConfig } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
+  const [formality, setFormality] = useState<Formality>("default");
 
   // set the source text to the selected text if no fallback text is provided
   // if there is no selected text, then just leave the source text empty
@@ -68,6 +72,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
       onTranslateAction: "none",
+      formality: values.formality ?? "default",
     });
 
     setLoading(false);
@@ -176,8 +181,29 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           <Form.Dropdown.Item value={value} title={title} key={value} />
         ))}
       </Form.Dropdown>
+      {SUPPORTED_FORMALITY_LANGUAGES.includes(targetLanguage) && showFormalityConfig && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="formality"
+            value={formality}
+            onChange={(value) => setFormality(value as Formality)}
+            storeValue={true}
+            title="Formality"
+          >
+            <Form.Dropdown.Item value="default" title="Default" />
+            <Form.Dropdown.Item value="prefer_more" title={(targetLanguage === "JA" && "Polite") || "More Formal"} />
+            <Form.Dropdown.Item value="prefer_less" title={(targetLanguage === "JA" && "Plain") || "Less Formal"} />
+          </Form.Dropdown>
+        </>
+      )}
       <Form.TextArea id="translation" value={translation} />
-      <Form.Description title="Transliteration" text={transliteration} />
+      {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
+        <>
+          <Form.TextArea id="translation" value={translation} />
+          <Form.Description title="Transliteration" text={transliteration} />
+        </>
+      )}
     </Form>
   );
 };

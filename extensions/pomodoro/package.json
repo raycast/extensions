@@ -4,6 +4,9 @@
   "title": "Pomodoro",
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
+  "crossExtensions": [
+    "yakitrak/do-not-disturb"
+  ],
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
@@ -15,14 +18,12 @@
     "cchalop1",
     "hayden_barnes",
     "j3lte",
-    "litomore"
+    "litomore",
+    "ridemountainpig"
   ],
   "keywords": [
     "pomodoro",
     "timer"
-  ],
-  "crossExtensions": [
-    "yakitrak/do-not-disturb"
   ],
   "categories": [
     "Productivity"
@@ -48,7 +49,27 @@
       "name": "stats-pomodoro-timer",
       "title": "View Pomodoro Stats",
       "mode": "view",
-      "description": "Shows the stats of the Pomodoro timer"
+      "description": "Shows the stats of the Pomodoro timer",
+      "preferences": [
+        {
+          "name": "showWeeklyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Weekly Stats",
+          "label": "Show weekly stats",
+          "description": "Shows the weekly stats of the Pomodoro timer",
+          "default": false
+        },
+        {
+          "name": "showDailyStats",
+          "type": "checkbox",
+          "required": false,
+          "title": "Daily Stats",
+          "label": "Show Daily stats",
+          "description": "Shows the daily stats of the Pomodoro timer",
+          "default": false
+        }
+      ]
     },
     {
       "name": "slack-pomodoro-menu-bar",
@@ -69,6 +90,32 @@
     }
   ],
   "preferences": [
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "hideTimeWhenStopped",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Time When Stopped",
+      "description": "Hide time on the Menu Bar when the timer is stopped",
+      "default": true,
+      "label": "Hide the time when stopped"
+    },
+    {
+      "name": "enableFocusWhileFocused",
+      "title": "Enable Mac Do Not Disturb while Focused",
+      "type": "checkbox",
+      "label": "Do Not Disturb while focused",
+      "required": false,
+      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+    },
     {
       "name": "focusIntervalDuration",
       "type": "dropdown",
@@ -310,12 +357,57 @@
       ]
     },
     {
-      "name": "enableFocusWhileFocused",
-      "title": "Enable Mac Do Not Disturb while Focused",
+      "name": "enableConfetti",
       "type": "checkbox",
-      "label": "Do Not Disturb while focused",
       "required": false,
-      "description": "Uses the do-not-disturb extension to enable Do Not Disturb mode when starting a focus interval. Disables Do Not Disturb mode when the focus interval ends."
+      "title": "Show Confetti (Deprecated)",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from zenquotes.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "sound",
+      "description": "Play sound",
+      "type": "dropdown",
+      "required": false,
+      "title": "Play Completion Sound",
+      "default": "",
+      "data": [
+        {
+          "title": "No Sound",
+          "value": ""
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        }
+      ]
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured below when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
     },
     {
       "name": "completionImage",
@@ -365,84 +457,22 @@
           "title": "R"
         }
       ]
-    },
-    {
-      "name": "sound",
-      "description": "Play sound",
-      "type": "dropdown",
-      "required": false,
-      "title": "Play Completion Sound",
-      "default": "",
-      "data": [
-        {
-          "title": "No Sound",
-          "value": ""
-        },
-        {
-          "title": "Submarine",
-          "value": "Submarine"
-        },
-        {
-          "title": "Tink",
-          "value": "Tink"
-        },
-        {
-          "title": "Ping",
-          "value": "Ping"
-        }
-      ]
-    },
-    {
-      "name": "enableTimeOnMenuBar",
-      "type": "checkbox",
-      "required": false,
-      "title": "Menu Bar Time",
-      "description": "Shows time on the Menu Bar",
-      "default": true,
-      "label": "Show time on Menu Bar"
-    },
-    {
-      "name": "enableConfetti",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Confetti",
-      "description": "Shows confetti when interval finishes",
-      "default": false,
-      "label": "Shows confetti when interval finishes"
-    },
-    {
-      "name": "enableQuote",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Quote",
-      "description": "Shows a random quote from zenquotes.io when interval finishes",
-      "default": false,
-      "label": "Shows quote when interval finishes"
-    },
-    {
-      "name": "enableImage",
-      "type": "checkbox",
-      "required": false,
-      "title": "Show Image",
-      "description": "Shows the image configured above when interval finishes",
-      "default": true,
-      "label": "Shows image when interval finishes"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.0",
-    "@raycast/utils": "^1.18.0",
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.18.1",
     "node-fetch": "^3.3.2",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.9.1",
+    "@types/node": "^22.10.1",
     "@types/react": "^18.3.12",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.1",
     "react": "^18.3.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

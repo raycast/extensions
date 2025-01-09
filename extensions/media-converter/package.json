@@ -5,6 +5,9 @@
   "description": "This extension converts video, image, and audio files using ffmpeg",
   "icon": "extension-icon.png",
   "author": "leandro.maia",
+  "contributors": [
+    "wattmalsh"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -13,6 +16,13 @@
     {
       "name": "convert",
       "title": "Convert Media",
+      "subtitle": "Media Converter",
+      "description": "Converts a media file to a different file format",
+      "mode": "view"
+    },
+    {
+      "name": "quick-convert",
+      "title": "Quick Convert",
       "subtitle": "Media Converter",
       "description": "Converts a media file to a different file format",
       "mode": "view"
