@@ -64,8 +64,6 @@ export const LanguagesManagerList: React.VFC = () => {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const [languages, setLanguages] = useAllLanguageSets();
 
-  console.log(" >>>> LANGUAGES", languages);
-
   return (
     <List
       actions={
