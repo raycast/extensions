@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Moved contributor to past contributors
+
 ## [Chore] - 2024-12-02
 
 - Add readme & FAQ
