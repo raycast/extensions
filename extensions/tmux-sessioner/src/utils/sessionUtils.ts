@@ -18,7 +18,9 @@ export function createNewSession(
   sessionDirectory: string,
   callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
-  return exec(`tmux new-session -d -s ${sessionName} -c ${sessionDirectory}`, { env }, callback);
+  const spaceEscapedSessionDirectory = sessionDirectory.replace(" ", "\\ ");
+
+  return exec(`tmux new-session -d -s ${sessionName} -c ${spaceEscapedSessionDirectory}`, { env }, callback);
 }
 
 export function renameSession(

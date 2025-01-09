@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## v0.0.9 - 2025-01-10
+
+### Fixed
+
+- Create session in iCloud Directory
+
 ## v0.0.8 - 2025-01-08
 
 ### Added
