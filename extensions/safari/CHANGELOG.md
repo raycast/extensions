@@ -2,9 +2,13 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Adds a preference to "Copy Title as Link to Clipboard" command to clean up titles with AI.
+
+## [Update] - 2025-01-07
+
 - Adds a "Copy Title as Link to Clipboard" command to copy the current Safari tab in Markdown format.
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-06
 
 - Adds a "Copy to Clipboard" command to copy the current Safari tab url.
 
