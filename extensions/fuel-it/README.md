@@ -11,5 +11,5 @@ Fuel-it is a Raycast extension designed to leverage the Fuel Agent kit, enabling
 Example Prompt:
 
 ```
-Send 0.001 ETH to 0x3764eD56dD996B8E262b0d28B4B9BdB8d4043E9445724ACa06A749De6dbff829
+Send 1 USDC to 0x3764eD56dD996B8E262b0d28B4B9BdB8d4043E9445724ACa06A749De6dbff829
 ```
