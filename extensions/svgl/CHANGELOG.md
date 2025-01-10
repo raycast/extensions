@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Add Angular Component Feature] - {PR_MERGE_DATE}
+## [Add Angular Component Feature] - 2025-01-10
 
 - Add the action `Copy Angular Component` to copy the Angular component code to the clipboard.
 - Remove duplicate action shortcuts.
