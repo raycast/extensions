@@ -1,6 +1,6 @@
 # Launchdarkly Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-10
 
 - 🔍 Search through all your feature flags
 - 🏷️ View flag details including variations, targeting rules, and prerequisites
