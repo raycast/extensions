@@ -2,6 +2,9 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+## [0.1.0] - 2025-01-06
+- Fixes broken port connector
+
 ## [Initial Version] - 2024-08-08
 
 - "Save Browser History to Pieces" command that will show a list of code blocks that are present in your browser, enriched with useful metadata. Simply highlight a code block and hit 'return' to save it to Pieces
