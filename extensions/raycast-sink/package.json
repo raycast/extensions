@@ -10,6 +10,9 @@
   ],
   "license": "MIT",
   "author": "luolei",
+  "contributors": [
+    "ARui"
+  ],
   "commands": [
     {
       "name": "listLink",
@@ -22,11 +25,18 @@
       "title": "Create Link",
       "description": "Create a new short link",
       "mode": "view"
+    },
+    {
+      "name": "quickCreateLink",
+      "title": "Quick Create Link",
+      "description": "Create a new short link with Clipboard content",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.84.3",
     "@raycast/utils": "^1.17.0",
+    "nanoid": "^5.0.9",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
@@ -71,6 +81,15 @@
       "description": "Display website preview icon in the list",
       "type": "checkbox",
       "default": true,
+      "required": false
+    },
+    {
+      "label": "Slug Default Length",
+      "name": "slugLength",
+      "title": "Slug Default Length",
+      "description": "The default length of the generated slug",
+      "type": "textfield",
+      "default": "6",
       "required": false
     },
     {
