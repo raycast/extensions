@@ -50,11 +50,7 @@ export default function SessionWithDuration() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Session"
-            onSubmit={submit}
-            icon={Icon.List}
-          />
+          <Action.SubmitForm title="Start Session" onSubmit={submit} icon={Icon.List} />
           <Action
             title="Select Hours"
             onAction={() => handleChangeDuration(Intervals.hours)}
