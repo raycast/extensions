@@ -15,7 +15,7 @@
       "title": "Spotify Menu Bar",
       "description": "Show the current playing song in the menu bar.",
       "mode": "menu-bar",
-      "interval": "1s"
+      "interval": "5s"
     }
   ],
   "dependencies": {
