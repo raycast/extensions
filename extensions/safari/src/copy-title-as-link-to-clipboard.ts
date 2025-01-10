@@ -1,8 +1,9 @@
 import { AI, Clipboard, closeMainWindow, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getCurrentTabName, getCurrentTabURL } from "./utils";
 
-const preferences: Preferences.CopyTitleAsLinkToClipboard = getPreferenceValues()
+const preferences: Preferences.CopyTitleAsLinkToClipboard = getPreferenceValues();
 
+/* eslint-disable no-useless-escape */
 async function cleanUpTitleWithAI(title: string) {
   if (!environment.canAccess(AI)) {
     return title;
@@ -36,19 +37,20 @@ async function cleanUpTitleWithAI(title: string) {
     Respond only with the cleaned up title.
     - Title: ${title}
     - Cleaned up title:
-  `)
+  `);
 }
 
 export default async function Command() {
   try {
     await closeMainWindow();
 
-    let [title, url] = await Promise.all([getCurrentTabName(), getCurrentTabURL()]);
+    let title = await getCurrentTabName();
+    const url = await getCurrentTabURL();
     if (preferences.cleanUpTitleWithAI) {
       await showToast({
         style: Toast.Style.Animated,
         title: "Cleaning up title with AI",
-      })
+      });
       title = await cleanUpTitleWithAI(title);
     }
 
