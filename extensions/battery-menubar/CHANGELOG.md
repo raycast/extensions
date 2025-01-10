@@ -1,5 +1,10 @@
 # Battery Menu Bar Changelog
 
+## [Added New Features] - {PR_MERGE_DATE}
+
+- 🪫 Add Low Power Mode item
+- 🍧 Minor fix
+
 ## [Added New Features] - 2023-09-30
 
 - Add battery cycle count

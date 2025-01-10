@@ -5,7 +5,7 @@ import { cpus, loadavg } from "os";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { BatteryState, getBatteryState } from "./BatteryState";
-import { CPUStats, getCPUStats, calculateCPUUsage } from "./CPUStats";
+import { calculateCPUUsage, CPUStats, getCPUStats } from "./CPUStats";
 
 export const execp = promisify(exec);
 
@@ -14,7 +14,7 @@ type BatteryAndCPUState = BatteryState & { cpu: CPUStats };
 const cacheKey = "batteryAndCPUState-V2";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [batt, setBattState] = useCachedState<{
     prev: BatteryAndCPUState | null;
     next: BatteryAndCPUState;
@@ -152,6 +152,12 @@ export default function Command() {
               icon={{ source: Icon.Clock, tintColor: remainingColor }}
               title={timeRemaining || "--:--"}
               subtitle={batt.latest.charging ? "Time until charged" : "Time remaining"}
+              onAction={openBatterySettings}
+            />
+            <MenuBarExtra.Item
+              icon={{ source: Icon.Bolt, tintColor: batt.latest.lowPowerMode ? Color.Yellow : undefined }}
+              title={batt.latest.lowPowerMode ? "On" : "Off"}
+              subtitle={"Low Power Mode"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
