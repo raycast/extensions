@@ -1,4 +1,4 @@
-# pieces-raycast Changelog
+# Pieces for Raycast Changelog
 
 ## [Update] - {PR_MERGE_DATE}
 
