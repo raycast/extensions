@@ -19,7 +19,7 @@ import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
  *
  * Folders are determined by the first element of each entry.
  * If the first element is empty, it is considered not a folder.
- * The folders are sorted case-sensitively.
+ * The folders are sorted case-insensitively.
  *
  * @param {string[][]} entries - The KeePass database entries.
  * @returns {string[]} - The unique folder names.
@@ -114,24 +114,23 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
             <List.Item
               key={i}
               title={entry[1]}
+              subtitle={{ value: entry[2], tooltip: "Username" }}
               accessories={[
-                entry[6] !== ""
-                  ? { icon: { source: Icon.Clock, tintColor: Color.Green }, tooltip: "TOTP Available" }
-                  : {},
-                entry[2] !== ""
-                  ? {
-                      text: { value: entry[2], color: Color.SecondaryText },
-                      tooltip: "Username",
-                      icon: { source: Icon.Person, tintColor: Color.SecondaryText },
-                    }
-                  : {},
                 entry[0] !== ""
-                  ? {
-                      text: { value: entry[0], color: Color.SecondaryText },
-                      tooltip: "Folder",
-                      icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
-                    }
+                  ? { tag: { value: entry[0], color: Color.SecondaryText }, icon: Icon.Folder, tooltip: "Folder" }
                   : {},
+                {
+                  icon: { source: Icon.Clock, tintColor: entry[6] !== "" ? Color.Green : Color.SecondaryText },
+                  tooltip: entry[6] !== "" ? "TOTP Set" : "TOTP Unset",
+                },
+                {
+                  icon: { source: Icon.Key, tintColor: entry[3] !== "" ? Color.Green : Color.SecondaryText },
+                  tooltip: entry[3] !== "" ? "Password Set" : "Password Unset",
+                },
+                {
+                  icon: { source: Icon.Link, tintColor: entry[4] !== "" ? Color.Green : Color.SecondaryText },
+                  tooltip: entry[3] !== "" ? "URL Set" : "URL Unset",
+                },
               ]}
               actions={
                 <ActionPanel>
