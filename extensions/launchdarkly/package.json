@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "launchdarkly",
-  "title": "Launchdarkly",
+  "title": "LaunchDarkly",
   "description": "A Raycast extension integrating with LaunchDarkly",
   "icon": "launchdarkly-transparent-bg.png",
   "author": "luarmr",
@@ -14,7 +14,7 @@
     {
       "name": "list-feature-flags",
       "title": "List Feature Flags",
-      "subtitle": "View and search LaunchDarkly feature flags",
+      "subtitle": "LaunchDarkly",
       "description": "List and search through your LaunchDarkly feature flags, view their details, and manage environments",
       "mode": "view"
     }
