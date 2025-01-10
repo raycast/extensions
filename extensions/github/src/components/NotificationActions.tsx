@@ -167,7 +167,12 @@ export default function NotificationActions({ notification, userId, mutateList }
         </>
       ) : null}
 
-      <Action title="Mark as Done" icon={Icon.Circle} onAction={markNotificationAsDone} />
+      <Action
+        title="Mark as Done"
+        icon={Icon.Circle}
+        onAction={markNotificationAsDone}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
 
       <Action
         title="Unsubscribe"
