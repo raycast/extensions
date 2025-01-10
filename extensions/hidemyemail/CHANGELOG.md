@@ -1,6 +1,6 @@
 # HideMyEmail Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-10
 
 - Improved user experience through caching and optimistic updates
 - Increased timeout limit for network requests to reduce failed requests
