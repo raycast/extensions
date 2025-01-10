@@ -13,23 +13,6 @@ Quick Image is a fast, text-based tool that allows you to convert, resize, conca
 - **Pipelining Commands**: Chain commands together to perform multiple operations at once
 - **Default Command**: Hit Enter to convert images to jpg with a large size, making it perfect for everyday use.
 
-## 🚧 Install
-
-1. Install the extension from the Raycast Store
-
-2. Install Dependencies
-
-You need build sharp from source to support HEIC format.
-
-```sh
-# Navigate to the directory containing the Quick Image extension
-cd $(dirname $(grep -l quick-image ~/.config/raycast/extensions/*/package.json | head -1))
-# Install libvips for HEIC support
-brew install libvips
-# Install the dependencies
-npm install --omit dev
-```
-
 ## ⚡ Using Quick Image
 
 1. Select the images you want to process in the Finder app.

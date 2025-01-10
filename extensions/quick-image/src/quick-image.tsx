@@ -1,5 +1,5 @@
 import { type LaunchProps, closeMainWindow, showToast, Toast } from "@raycast/api";
-import sharp from "sharp";
+import sharp from "@gutenye/sharp";
 import invariant from "tiny-invariant";
 import { getSelectedImages } from "#/utils";
 import { parseInput } from "#/parseInput";

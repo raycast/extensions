@@ -1,4 +1,4 @@
-import sharp from "sharp";
+import sharp from "@gutenye/sharp";
 import { maxBy } from "lodash";
 import invariant from "tiny-invariant";
 import { getOutputPath } from "#/utils";

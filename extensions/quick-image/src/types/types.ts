@@ -1,4 +1,4 @@
-import type sharp from "sharp";
+import type sharp from "@gutenye/sharp";
 
 export interface Image {
   path: string;

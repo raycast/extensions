@@ -1,4 +1,4 @@
-import sharp from "sharp";
+import sharp from "@gutenye/sharp";
 import { uniq } from "lodash";
 
 export function getInputExts(): string[] {
