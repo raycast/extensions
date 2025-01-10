@@ -15,10 +15,10 @@ import { showHUD } from "@raycast/api";
  * Copy snippet command. Shows a list of languages to open snippets
  */
 export default function Command() {
-  const { data: languages } = useFetch<Language[]>(languagesUrl);
+  const { data: languages, isLoading } = useFetch<Language[]>(languagesUrl);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {languages?.map((l) => (
         <List.Item
           key={l.lang}
@@ -41,10 +41,10 @@ export default function Command() {
  * @returns
  */
 function LanguageSnippets({ language }: { language: Language }) {
-  const { data: categories } = useFetch<Category[]>(categoriesUrlForLanguage(language.lang));
+  const { data: categories, isLoading } = useFetch<Category[]>(categoriesUrlForLanguage(language.lang));
 
   return (
-    <List navigationTitle={`Search for ${language.lang} snippets`} isShowingDetail>
+    <List navigationTitle={`Search for ${language.lang} snippets`} isLoading={isLoading} isShowingDetail>
       {categories?.map((category) => (
         <List.Section title={category.categoryName} key={category.categoryName}>
           {category.snippets.map((snippet) => (
