@@ -339,6 +339,14 @@
       "description": "Move the focused window to the top right of the current display",
       "subtitle": "Rectangle",
       "mode": "no-view"
+    },
+    {
+      "name": "cascade-all",
+      "title": "Cascade All",
+      "icon": "window-positions/cascadeAllTemplate.png",
+      "description": "Cascade all windows",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
