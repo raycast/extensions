@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## 1.0.0 - 2024-12-21
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Text-to-speech conversion using ElevenLabs API
