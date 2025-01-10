@@ -77,7 +77,7 @@ export default function Command() {
     return habit.completed
       ? { source: Icon.CheckCircle, tintColor: Color.Green }
       : { source: Icon.Circle, tintColor: Color.Red };
-  }
+  };
 
   const getHabitActions = (habit: Habit, markHabitAsCompleted: (habitId: number) => void) => {
     if (habit.repeatable === true) {
@@ -160,7 +160,11 @@ export default function Command() {
         title="Create Repeatable Habit"
         actions={
           <ActionPanel>
-            <Action.Push title="Create Repeatable Habit" icon={Icon.Wand} target={<CreateRepeatableHabitForm revalidate={revalidate} />} />
+            <Action.Push
+              title="Create Repeatable Habit"
+              icon={Icon.Wand}
+              target={<CreateRepeatableHabitForm revalidate={revalidate} />}
+            />
           </ActionPanel>
         }
       />
