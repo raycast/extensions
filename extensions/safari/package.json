@@ -125,7 +125,7 @@
           "title": "Advanced Settings",
           "required": false,
           "label": "Clean up title with AI",
-          "default": false,
+          "default": true,
           "description": "Cleans up the title with AI to make it more readable (Pro only)"
         }
       ]
