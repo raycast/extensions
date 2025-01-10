@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A timer to lock the database after a user specified time of inactivity (#9600, #10634, #11107).
-- Indicators (URL, Password and TOTP) and usernames while searching entries (#10709).
+- Indicators (TOTP, password and URL) and usernames while searching entries (#10709).
 - A folder filter on the search bar when folders exist in the database.
 
 ### Changed
