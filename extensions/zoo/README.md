@@ -14,6 +14,27 @@ You can define unlimited number of your own fast AI actions, which is missing fo
   - [ ] Google Gemini
   - [ ] ...
 
+
+## How to Use?
+
+The workflow should be like:
+
+1. create a gist (prompt) as you need
+2. select text and call the zoo `ask by prompt` command
+3. choose one prompt from the list (you can use navigate bar to filter prompt)
+4. execute the prompt on the selected text; you can copy the result as you want.
+
+<!-- insert a video here-->
+
+The workflow should be like:
+
+1. create a gist (prompt) as you need
+2. select text and call the zoo `ask by prompt` command
+3. choose one prompt from the list (you can use navigate bar to filter prompt)
+4. execute the prompt on the selected text; you can copy the result as you want.)
+
+![Zoo Demo](./media/demo.gif)
+
 #### Potential Features
 - [ ] 📚 Optimize Gist for better prompt use
   - [ ] 🎏 Add filter function - Distinguish prompts from normal gists.
