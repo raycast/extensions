@@ -1,6 +1,8 @@
 import { getPreferenceValues } from '@raycast/api';
 import fetch from 'node-fetch';
 
+export const getPreferences = getPreferenceValues;
+
 export interface MuteDeckStatus {
   running: boolean;
   inMeeting: boolean;
