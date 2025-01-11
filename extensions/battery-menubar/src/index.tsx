@@ -11,18 +11,18 @@ import { openActivityMonitor, openBatterySettings, openScreenTimeSettings } from
 
 export const execp = promisify(exec);
 
-type BatteryAndCPUAndScreen = BatteryState & { cpu: CPUStats } & { screen: ScreenTimeState };
+type SystemStats = BatteryState & { cpu: CPUStats } & { screen: ScreenTimeState };
 
-const cacheKey = "BatteryAndCPUAndScreen-V2";
+const cacheKey = "SystemStats-V2";
 
 export default function Command() {
   const preferences = getPreferenceValues();
 
   // define a useCachedState hook that store all states in cache
   const [stats, setBattState] = useCachedState<{
-    prev: BatteryAndCPUAndScreen | null;
-    next: BatteryAndCPUAndScreen;
-    latest: BatteryAndCPUAndScreen;
+    prev: SystemStats | null;
+    next: SystemStats;
+    latest: SystemStats;
   } | null>(cacheKey, null);
 
   // define a getStats function that call
