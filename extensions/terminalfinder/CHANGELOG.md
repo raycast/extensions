@@ -1,5 +1,9 @@
 # Terminal Finder Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Added support for Ghostty
+
 ## [Update] - 2024-02-05
 
 - Added support for WezTerm
