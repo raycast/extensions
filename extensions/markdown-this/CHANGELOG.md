@@ -1,6 +1,6 @@
 # Marked Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-01-11
 
 ### Added
 - Migrated from markdown-it to marked library for markdown processing
