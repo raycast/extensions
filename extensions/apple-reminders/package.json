@@ -11,7 +11,8 @@
     "jondelgado",
     "phil_s",
     "michalzuch",
-    "ridemountainpig"
+    "ridemountainpig",
+    "maxnyby"
   ],
   "owner": "raycast",
   "access": "public",
@@ -43,6 +44,14 @@
           "label": "Use Time of Day Grouping",
           "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
           "default": false
+        },
+        {
+          "name": "showTodoList",
+          "type": "checkbox",
+          "required": false,
+          "label": "Display Todo List",
+          "description": "When enabled, adds a new list showing only overdue reminders.",
+          "default": false
         }
       ]
     },
@@ -58,6 +67,14 @@
           "type": "checkbox",
           "label": "Initially select the default list",
           "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "selectTodayAsDefault",
+          "type": "checkbox",
+          "label": "Initially select today for new reminders",
+          "description": "When enabled, \"Today\" will be initially selected for new reminders.",
           "default": false,
           "required": false
         }
@@ -144,15 +161,6 @@
           "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
           "default": false,
           "required": false
-        },
-        {
-          "name": "sortMenuBarRemindersByDueDate",
-          "type": "checkbox",
-          "label": "Sort menu bar reminders by time",
-          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
-          "default": false,
-          "required": false,
-          "title": "Sort"
         }
       ],
       "interval": "10m"

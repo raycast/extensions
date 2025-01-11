@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
 const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
-import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
+import { displayDueDate, getDateString, isFullDay, isOverdue, isPast, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -210,7 +210,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     { execute: showCompletedReminders },
   );
 
-  const viewDefault = listId === "today" || listId === "scheduled" ? "dueDate" : "default";
+  const viewDefault = listId === "today" || listId === "scheduled" || listId === "todo" ? "dueDate" : "default";
 
   const [sortBy, setSortBy] = useCachedState<SortByOption>(`sort-by-${listId}`, viewDefault);
   const [groupBy, setGroupBy] = useCachedState<GroupByOption>(`group-by-${listId}`, viewDefault);
@@ -221,6 +221,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
       if (listId === "all") return true;
       if (listId === "today")
         return reminder.dueDate ? isOverdue(reminder.dueDate) || isToday(reminder.dueDate) : false;
+      if (listId === "todo") return reminder.dueDate ? isPast(reminder.dueDate) : false;
       if (listId === "scheduled") return !!reminder.dueDate;
       return reminder.list?.id === listId;
     };

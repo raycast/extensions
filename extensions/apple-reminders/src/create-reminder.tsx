@@ -13,7 +13,7 @@ import {
   PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { format } from "date-fns";
+import { addMilliseconds, format, startOfToday } from "date-fns";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
@@ -67,7 +67,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
-  const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
+  const { selectDefaultList, selectTodayAsDefault } = getPreferenceValues<Preferences.CreateReminder>();
   let initialListId;
   if (listId !== "all") {
     initialListId = listId;
@@ -77,11 +77,20 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     initialListId = defaultList.id;
   }
 
+  let initialDueDate;
+  if (draftValues?.dueDate) {
+    initialDueDate = draftValues?.dueDate;
+  } else if (selectTodayAsDefault) {
+    initialDueDate = addMilliseconds(startOfToday(), 1);
+  } else {
+    initialDueDate = draftValues?.dueDate;
+  }
+
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
       title: draftValues?.title ?? "",
       notes: draftValues?.notes ?? "",
-      dueDate: draftValues?.dueDate,
+      dueDate: initialDueDate,
       priority: draftValues?.priority,
       listId: initialListId,
       isRecurring: draftValues?.isRecurring ?? false,
