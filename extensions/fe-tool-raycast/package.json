@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fe-tool-raycast",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "title": "FE-Tool-Raycast",
   "description": "提供前端开发中常用的工具集合，包括网站导航、npm 包查询、MDN 文档查询以及实用工具（URL 解析、颜色转换、时间戳转换、UUID 生成），帮助开发者提升工作效率。",
-  "icon": "extension-icon.png",
+  "icon": "logo.png",
   "author": "xinhao_yang",
   "categories": [
     "Developer Tools"
@@ -58,7 +58,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }
