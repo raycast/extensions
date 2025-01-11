@@ -1,0 +1,82 @@
+# Nova Project Rules
+
+1. Package Management
+   - Use Poetry ONLY
+   - Direct pip usage is FORBIDDEN
+
+2. Vision Model
+   - Use "gpt-4o" model for vision recognition
+   - Do NOT use gpt-4-vision-preview or any other vision models 
+
+3 AI Commands
+When I submit a command to you, you MUST follow the procedure outlined in the command.
+
+- "update docs":
+    - procedure:
+        1. "Parse all Markdown files in docs/**/*.md and README.md"
+        2. "Extract relevant updates from conversation"
+        3. "Apply any relevant and useful updates"
+
+- "update plan":
+    - procedure:
+        1. "You MUST read the .Plan file"
+        2. "Extract relevant updates from conversation"
+        3. "Apply any relevant and useful updates to the .Plan file"
+
+- "update rules":
+    - procedure:
+        1. "Parse .cursorrules file"
+        2. "Extract rule updates from conversation"
+        3. "Apply any relevant and useful updates"
+
+- "capture thoughts":
+    - procedure:
+        1. "You MUST read the .cursorscratchpad file"
+        2. "Extract relevant insights from current context"
+        3. "Interleave your thoughts with previous thoughts in the <SCRATCHPAD> buffer"
+        4. "You MUST write your thoughts in the <SCRATCHPAD> buffer"
+        5. "Consolidate your thoughts as necessary, grouping related thoughts together"
+
+- "update cursornotes":
+    - procedure:
+        1. "You MUST read the .cursornotes and .cursorscratchpad files"
+        2. "Consolidate previous thoughts from <SCRATCHPAD>"
+        3. "Integrate new information from current conversation"
+        4. "Format as dated entry, request date from user"
+        5. "Append to .cursornotes file"
+        6. "Clear <SCRATCHPAD> section in .cursorscratchpad"
+
+- "run tests":
+    - procedure:
+        1. "You MUST poetry run pytest"    
+
+- "clean run":
+    - procedure:
+        1. "You MUST poetry run python -m nova.cleanup -a && poetry run python -m nova.cli --config config/nova.yaml"   
+
+- "fix pre-commit":
+    - procedure:
+        1. "You MUST poetry run pre-commit run mypy --all-files"  
+        2. "You MUST fix all the errors"
+
+- "create prompt":
+    - procedure:
+        1. "You MUST run the capture thoughts command first"
+        2. "You MUST run the update cursornotes command"
+        3. "You MUST ask the user if we are implementing a current plan"
+        4. "If yes, you MUST read the current plan file"
+        5. "You MUST create a comprehensive prompt that includes:"
+            - "Context from cursornotes"
+            - "Plan data if applicable"
+            - "Clear statement of current goal"
+            - "Instructions for getting context"
+            - "Next steps"
+            - "How to use Nova's file structure"
+            - "Required tools and commands"
+            - "You should summarize and link to the relevant docs, instead of just saying all the text that we ahve captured elsewhere."
+
+
+
+
+
+❯ 
