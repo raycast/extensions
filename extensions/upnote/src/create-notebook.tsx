@@ -19,6 +19,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      <Form.Description text="Empty form will bring up UpNote with a new notebook." />
       <Form.TextField id="notebook" title="Notebook" placeholder="Enter text" />
     </Form>
   );

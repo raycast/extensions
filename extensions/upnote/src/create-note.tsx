@@ -23,6 +23,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      <Form.Description text="Empty form will bring up UpNote with a new note." />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
       <Form.TextArea
         id="textarea"
