@@ -203,7 +203,6 @@ export default function Command() {
           </>
         ) : null}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Battery">{/* ...existing battery items... */}</MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Screen">
         <MenuBarExtra.Item
