@@ -24,6 +24,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
     <List isLoading={isLoading}>
       {filterContainers(containers, props.projectFilter)?.map((containerInfo) => (
         <List.Item
+          keywords={[containerInfo.Id, containerName(containerInfo), containerInfo.Image]}
           key={containerInfo.Id}
           title={containerName(containerInfo)}
           subtitle={containerInfo.Image}
