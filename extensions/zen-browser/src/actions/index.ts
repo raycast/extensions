@@ -27,7 +27,6 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
       end tell
     end tell
   `;
-  await checkAppInstalled();
 
   return await runAppleScript(script);
 }
@@ -63,7 +62,7 @@ export async function setActiveTab(tab: Tab): Promise<void> {
       repeat with w from 1 to count of windows
         set startTab to name of window 1
         repeat
-            if name of window 1 contains "${tab.title}" then 
+            if name of window 1 contains "${tab.title}" then
               exit repeat
             else
               tell application "System Events" to key code 48 using control down
@@ -74,18 +73,3 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     end tell
   `);
 }
-
-const checkAppInstalled = async () => {
-  const appInstalled = await runAppleScript(`
-set isInstalled to false
-try
-    do shell script "osascript -e 'exists application \\"Zen Browser\\"'"
-    set isInstalled to true
-end try
-
-return isInstalled`);
-  console.log(appInstalled);
-  if (appInstalled === "false") {
-    throw new Error(NOT_INSTALLED_MESSAGE);
-  }
-};
