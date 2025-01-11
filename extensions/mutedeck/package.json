@@ -109,7 +109,6 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
-    "husky": "^8.0.0",
     "prettier": "^3.1.1",
     "react-devtools": "^5.2.0",
     "typescript": "^5.3.3"
@@ -119,8 +118,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "precommit": "npm run lint",
-    "prepare": "husky install"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
