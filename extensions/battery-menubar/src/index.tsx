@@ -6,6 +6,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { BatteryState, getBatteryState } from "./BatteryState";
 import { calculateCPUUsage, CPUStats, getCPUStats } from "./CPUStats";
+import { getScreenState } from "./screenOn";
 
 export const execp = promisify(exec);
 
@@ -38,6 +39,12 @@ export default function Command() {
     },
   });
 
+  const { data: screenState } = useCachedPromise(getScreenState, [], {
+    onData(data) {
+      const screenState = data;
+    },
+  });
+
   const openBatterySettings = () => {
     open("x-apple.systempreferences:com.apple.preference.battery");
   };
@@ -46,6 +53,16 @@ export default function Command() {
     runAppleScript(`
       tell application "Activity Monitor"
         activate
+      end tell
+    `);
+  };
+
+  // open settings display panel
+  const openScreenTimeSettings = () => {
+    runAppleScript(`
+      tell application "System Settings"
+        activate
+        set current pane to pane "com.apple.preference.displays"
       end tell
     `);
   };
@@ -198,6 +215,16 @@ export default function Command() {
             ) : null}
           </>
         ) : null}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Battery">{/* ...existing battery items... */}</MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Screen">
+        <MenuBarExtra.Item
+          icon={Icon.Monitor}
+          title={screenState?.duration || "--:--"}
+          subtitle="Screen Waking Time"
+          onAction={openScreenTimeSettings}
+        />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="CPU">
         <MenuBarExtra.Item

@@ -3,6 +3,7 @@
 ## [Added New Features] - {PR_MERGE_DATE}
 
 - 🪫 Add Low Power Mode item
+- 🖥️ Add Scree Waking Time
 - 🍧 Minor fix
 
 ## [Added New Features] - 2023-09-30
