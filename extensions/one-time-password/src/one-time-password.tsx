@@ -13,6 +13,7 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  environment,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -21,7 +22,6 @@ import { MoveDir } from './store';
 import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
-import { config } from './config';
 
 type Preferences = {
   passwordVisibility?: boolean;
@@ -35,6 +35,8 @@ export default () => {
   const [timer, setTimer] = useState(0);
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
+
+  const { theme } = environment;
 
   async function loadAccounts() {
     if (accounts.length === 0) setLoading(true);
@@ -189,7 +191,12 @@ export default () => {
         {accounts.map((account, index) => (
           <List.Item
             key={account.id}
-            icon={{ source: Icon.Key, tintColor: config.colors.key }}
+            icon={{
+              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}/${
+                theme === 'dark' ? 'white' : 'black'
+              }`,
+              fallback: Icon.Key,
+            }}
             title={account.name}
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}

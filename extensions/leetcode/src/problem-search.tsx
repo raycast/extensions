@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
 import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
 import { formatProblemMarkdown } from './utils';
@@ -37,10 +37,12 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     },
   });
 
+  const problemMarkdown = useMemo(() => formatProblemMarkdown(problem), [problem]);
+
   return (
     <Detail
       isLoading={isLoading}
-      markdown={formatProblemMarkdown(problem)}
+      markdown={problemMarkdown}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com/problems/${props.titleSlug}`} />
@@ -48,6 +50,13 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
             title="Copy Link to Clipboard"
             content={`https://leetcode.com/problems/${props.titleSlug}`}
           />
+          {!problem?.isPaidOnly && (
+            <Action.CopyToClipboard
+              title="Copy Problem to Clipboard"
+              content={problemMarkdown}
+              shortcut={{ modifiers: ['cmd'], key: 'c' }}
+            />
+          )}
         </ActionPanel>
       }
     ></Detail>

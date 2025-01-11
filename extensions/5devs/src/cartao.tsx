@@ -57,16 +57,36 @@ export default function Command() {
             subtitle="Number"
             icon={Icon.CreditCard}
             actions={actions(card.numero)}
+            keywords={["numero", "number"]}
           />
-          <List.Item title={card.cvv} subtitle="CVV" icon={Icon.Hashtag} actions={actions(card.cvv)} />
-          <List.Item title={card.bandeira} subtitle="Brand" icon={Icon.Flag} actions={actions(card.bandeira)} />
+          <List.Item
+            title={card.cvv}
+            subtitle="CVV"
+            icon={Icon.Hashtag}
+            actions={actions(card.cvv)}
+            keywords={["cvv"]}
+          />
+          <List.Item
+            title={card.bandeira}
+            subtitle="Brand"
+            icon={Icon.Flag}
+            actions={actions(card.bandeira)}
+            keywords={["bandeira", "brand"]}
+          />
           <List.Item
             title={card.expiracao}
             subtitle="Expiration"
             icon={Icon.Calendar}
             actions={actions(card.expiracao)}
+            keywords={["validade", "validity", "expiration"]}
           />
-          <List.Item title={card.titular} subtitle="Holder" icon={Icon.Person} actions={actions(card.titular)} />
+          <List.Item
+            title={card.titular}
+            subtitle="Holder"
+            icon={Icon.Person}
+            actions={actions(card.titular)}
+            keywords={["holder", "name", "nome do portador"]}
+          />
         </List.Section>
       </List>
     </>

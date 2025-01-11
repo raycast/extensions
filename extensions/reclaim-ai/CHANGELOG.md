@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-10-25
+- Don't hardcode task category to "work"
+
 ## [Update] - 2024-10-16
 - Add Sentry support
 

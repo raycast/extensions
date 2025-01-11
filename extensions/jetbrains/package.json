@@ -7,7 +7,8 @@
   "author": "gdsmith",
   "contributors": [
     "adrienbaron",
-    "dima-m711"
+    "dima-m711",
+    "vette"
   ],
   "license": "MIT",
   "commands": [
@@ -55,13 +56,13 @@
       "label": "Enabled"
     },
     {
-      "name": "historic",
+      "name": "frecencySorting",
       "type": "checkbox",
       "required": false,
-      "title": "Use historic project files",
-      "description": "Add projects from previous app installs",
-      "default": false,
-      "label": "Use all"
+      "title": "Use Frecency sorting for projects",
+      "description": "Use Raycast's built in frecency sorting to order the list of projects",
+      "default": true,
+      "label": "Enabled"
     }
   ],
   "keywords": [
@@ -79,7 +80,8 @@
     "GoLand"
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
     "fast-glob": "^3.2.7",
     "raycast-hooks": "^1.0.4",
     "which": "^2.0.2",
@@ -88,10 +90,12 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/glob": "^7.1.4",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/which": "^2.0.1",
     "@types/xml2js": "^0.4.9",
     "eslint": "^7.31.0",
+    "react": "^18.2.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

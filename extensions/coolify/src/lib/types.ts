@@ -85,6 +85,7 @@ export type PrivateKey = {
   uuid: string;
   name: string;
   description: string;
+  fingerprint: string | null;
   private_key: string;
   is_git_related: true;
   team_id: number;
@@ -163,6 +164,10 @@ export type ProjectDetails = Project & {
   team_id: number;
   updated_at: string;
   created_at: string;
+};
+export type CreateProject = {
+  name: string;
+  description: string;
 };
 
 export type Environment = {

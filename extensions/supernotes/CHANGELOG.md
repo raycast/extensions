@@ -1,5 +1,12 @@
 # Supernotes Changelog
 
+## [Daily Append Local Time]
+- Use the local day when appending content to a daily card
+
+## [Quick Daily Command] - 2024-11-27
+- Add a new "Quick Daily" command which appends the "content" argument to your Daily card
+- Remove some unnecessary dependencies 
+
 ## [Send Clipping Command] - 2024-09-17
 - Add a new "Send Clipping" command to easily send clipboard or selected text to Supernotes
 - Improve error handling for all commands

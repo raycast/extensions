@@ -1,5 +1,9 @@
 # Custom folder Changelog
 
+## [Feat Create custom icons from emojis] - 2024-11-16
+- Added the ability to create custom icons from emojis.
+- Renamed `Output path` to `Download path`.
+
 ## [Fix First icon swap] - 2024-08-28
 - Fixed the issue with the first icon swap.
 - Now handles spaces in paths.

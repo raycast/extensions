@@ -35,4 +35,3 @@ This is a Raycast extension for [NameSilo](https://www.namesilo.com/). With this
 ## 🗒️ NOTES
 
 - Using `namesilo.com` as a query/parameter will almost always show an error e.g. running a `whois` for "namesilo.com" will error out. This is an issue with the API.
-- You can email the NameSilo team to get access to a Sandbox / OTE environment but the extension does not currently support OTE (this might change in the future). Once you have the OTE Key, you can enter this key in Preferences and enable OTE by ticking the box.

@@ -21,6 +21,7 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
           actions={
             <ActionPanel>
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
             </ActionPanel>
           }

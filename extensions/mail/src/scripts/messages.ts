@@ -283,7 +283,21 @@ export const getMessages = async (
     return output
   `;
 
-  const response: string[] = (await runAppleScript(script, { timeout: 30000 })).split("$end");
+  let data: string;
+  try {
+    data = await runAppleScript(script, {
+      humanReadableOutput: true,
+      timeout: 60000,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Command timed out")) {
+      console.error("AppleScript Timed Out");
+    } else {
+      console.error("Error Running AppleScript");
+    }
+    return undefined;
+  }
+  const response: string[] = data.split("$end");
   response.pop();
 
   const newMessages: Message[] = response.map((line: string) => {

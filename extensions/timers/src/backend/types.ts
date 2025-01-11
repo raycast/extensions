@@ -6,6 +6,18 @@ export interface Timer {
   timeLeft: number;
   originalFile: string;
   timeEnds: Date;
+  pid: number | undefined; // undefined when timer is paused
+  lastPaused: Date | "---"; // "---" when timer is unpaused
+  pauseElapsed: number;
+  selectedSound: string;
+}
+
+export interface RawTimer {
+  name: string;
+  pid: number | undefined; // undefined when timer is paused
+  lastPaused: Date | "---"; // "---" when timer is unpaused
+  pauseElapsed: number;
+  selectedSound: string;
 }
 
 export interface Stopwatch {
@@ -42,6 +54,7 @@ export interface Preferences {
   volumeSetting: string;
   showTitleInMenuBar: boolean;
   newTimerInputOrder: string;
+  customTimerFormBypass: boolean;
 }
 
 export interface CTInlineArgs {

@@ -35,6 +35,14 @@
           "label": "Display Completion Date",
           "description": "When enabled, the completion date will be displayed as a list item accessory.",
           "default": false
+        },
+        {
+          "name": "useTimeOfDayGrouping",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Time of Day Grouping",
+          "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
+          "default": false
         }
       ]
     },

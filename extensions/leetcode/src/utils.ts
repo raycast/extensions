@@ -19,10 +19,10 @@ export function formatProblemMarkdown(problem?: Problem, date?: string) {
   }
 
   const title = `# ${problem.questionFrontendId}. ${problem.title}`;
-  const header = `${date ? `**🗓️ Date**: ${date} ` : ' '}**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${
+  const header = `${date ? `**🗓️ Date**: ${date} ` : ''}**🧠 Difficulty**: ${problem.difficulty} | **👍 Likes**: ${
     problem.likes
   } | **👎 Dislikes**: ${problem.dislikes}
-	`;
+`;
   let content = 'The problem is paid only, currently preview is not supported.';
   if (problem.isPaidOnly) {
     showToast(Toast.Style.Failure, content);
@@ -32,6 +32,6 @@ export function formatProblemMarkdown(problem?: Problem, date?: string) {
   const stats: ProblemStats = JSON.parse(problem.stats);
   const footer = `
 > **Accepted** ${stats.totalAccepted} | **Submissions** ${stats.totalSubmission} | **Accepted Rate** ${stats.acRate}
-	`;
-  return `${title}\n${header}\n${content}\n${footer}`;
+`;
+  return `${title}\n\n${header}\n${content}\n${footer}`;
 }

@@ -11,7 +11,6 @@ export interface JackettParsedTorrent {
   Grabs: number;
   Guid: string;
   Languages: string[];
-  Link: string;
   MinimumRatio: number;
   MinimumSeedTime: number;
   Peers: number;
@@ -22,6 +21,8 @@ export interface JackettParsedTorrent {
   Title: string;
   TrackerType: string;
   UploadVolumeFactor: number;
+  Link?: string;
+  MagnetUri?: string;
   // Album?: string | null;
   // Artist?: string | null;
   // Author?: string | null;
@@ -32,7 +33,6 @@ export interface JackettParsedTorrent {
   // Imdb?: string | null;
   // InfoHash?: string | null;
   // Label?: string | null;
-  // MagnetUri?: string | null;
   // Poster?: string | null;
   // Publisher?: string | null;
   // RageID?: string | null;

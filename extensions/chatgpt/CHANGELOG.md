@@ -1,5 +1,17 @@
 # Changelog
 
+## [Feature] - 2025-01-01
+
+- Feature: Added import/export functionality to Conversations.
+
+## [Fix] - 2025-01-01
+
+- Fix: Fixed o1 models not working, and added a prompt warning for o1 models.
+
+## [Fix] - 2024-11-24
+
+- Fix: Fixed Images not rendering if their paths have spaces in them.
+
 ## [Feature] - 2024-10-09
 
 - Feature: Added import/export functionality to Models to prevent potential data loss and alleviate data anxiety.
@@ -18,11 +30,11 @@
 
 ## [Feature] - 2024-09-02
 
-- Feature:  Support for certain platforms that only accept simple string formats, such as DeepSeek.
+- Feature: Support for certain platforms that only accept simple string formats, such as DeepSeek.
 
 ## [Feature] - 2024-08-26
 
-- Feature:  Support custom vision model name
+- Feature: Support custom vision model name
 
 ## [Fix] - 2024-08-13
 

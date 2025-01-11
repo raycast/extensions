@@ -51,6 +51,13 @@ export function useConversations(): ConversationsHook {
     [setData, data]
   );
 
+  const setConversations = useCallback(
+    async (conversations: Conversation[]) => {
+      setData(conversations);
+    },
+    [setData]
+  );
+
   const remove = useCallback(
     async (conversation: Conversation) => {
       const toast = await showToast({
@@ -76,7 +83,7 @@ export function useConversations(): ConversationsHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, add, update, remove, clear }),
-    [data, isLoading, add, update, remove, clear]
+    () => ({ data, isLoading, add, update, remove, clear, setConversations }),
+    [data, isLoading, add, update, remove, clear, setConversations]
   );
 }

@@ -4,6 +4,7 @@ import {
   Detail,
   Form,
   Icon,
+  Keyboard,
   LaunchProps,
   List,
   Toast,
@@ -72,6 +73,7 @@ const { api_key } = getPreferenceValues<Preferences>();
 
 export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.RetrieveBrands }>) {
   const { push } = useNavigation();
+  const { action } = getPreferenceValues<Preferences.RetrieveBrands>();
   const { search } = props.arguments;
   const [searched, setSearched] = useState(!search);
 
@@ -141,19 +143,37 @@ export default function RetrieveBrand(props: LaunchProps<{ arguments: Arguments.
               actions={
                 <ActionPanel>
                   <Action.Push title="View Brand" icon={Icon.Eye} target={<ViewBrand brand={brand} />} />
-                  <Action
-                    icon={Icon.DeleteDocument}
-                    style={Action.Style.Destructive}
-                    title="Remove Brand"
-                    onAction={() => removeBrand(brand)}
-                  />
-                  <ActionPanel.Section>
+                  {action === "del" ? (
+                    <Action
+                      icon={Icon.DeleteDocument}
+                      style={Action.Style.Destructive}
+                      title="Remove Brand"
+                      onAction={() => removeBrand(brand)}
+                    />
+                  ) : (
                     <Action.Push
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
                       icon={Icon.MagnifyingGlass}
                       title="Search Brand"
                       target={<SearchBrand onSearched={updateBrands} />}
                     />
+                  )}
+                  <ActionPanel.Section>
+                    {action === "del" ? (
+                      <Action.Push
+                        shortcut={Keyboard.Shortcut.Common.New}
+                        icon={Icon.MagnifyingGlass}
+                        title="Search Brand"
+                        target={<SearchBrand onSearched={updateBrands} />}
+                      />
+                    ) : (
+                      <Action
+                        icon={Icon.DeleteDocument}
+                        style={Action.Style.Destructive}
+                        title="Remove Brand"
+                        onAction={() => removeBrand(brand)}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                      />
+                    )}
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -215,7 +235,7 @@ function SearchBrand({ search, onSearched }: SearchBrandProps) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />
+          {!isLoading && <Action.SubmitForm icon={Icon.Check} title="Retrieve Brand" onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >
@@ -302,6 +322,8 @@ function formatSocialType(type: string) {
       return "X (formerly Twitter)";
     case "linkedin":
       return "LinkedIn";
+    case "youtube":
+      return "YouTube";
     default:
       return type.charAt(0).toUpperCase() + type.slice(1);
   }

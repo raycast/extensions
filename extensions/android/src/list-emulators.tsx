@@ -272,7 +272,7 @@ function openEmulator(emulator: string) {
       popToRoot;
     },
     (error) => {
-      showToast(Toast.Style.Failure, error);
+      // showToast(Toast.Style.Failure, error);
     }
   );
 }

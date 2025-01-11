@@ -1,27 +1,30 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { keys } from "lodash";
 
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
-import { Data, Field, Instance, Record } from "../types";
+import { Data, Field, Record } from "../types";
+import useFavorites from "../hooks/useFavorites";
+import useInstances from "../hooks/useInstances";
+import FavoriteForm from "./FavoriteForm";
 
 export default function SearchResultListItem({
   result,
   icon,
   label,
   fields,
-  mutateSearchResults,
+  revalidateSearchResults,
 }: {
   result: Record;
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
-  mutateSearchResults: () => Promise<void>;
+  revalidateSearchResults: () => void;
 }) {
-  const [selectedInstance] = useCachedState<Instance>("instance");
+  const { selectedInstance } = useInstances();
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
@@ -100,6 +103,14 @@ export default function SearchResultListItem({
     result.record_url = "/" + result.record_url;
   }
 
+  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+  if (favoriteId) {
+    accessories.unshift({
+      icon: { source: Icon.Star, tintColor: Color.Yellow },
+      tooltip: "Favorite",
+    });
+  }
+
   return (
     <List.Item
       key={result.sys_id}
@@ -116,7 +127,37 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
-          <Actions mutate={mutateSearchResults} />
+          {!favoriteId && (
+            <Action
+              title="Add Favorite"
+              icon={Icon.Star}
+              onAction={() => addUrlToFavorites(name, result.record_url)}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+            />
+          )}
+          {favoriteId && (
+            <>
+              <Action.Push
+                title="Edit Favorite"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favoriteId={favoriteId} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Remove Favorite"
+                icon={Icon.StarDisabled}
+                style={Action.Style.Destructive}
+                onAction={() => removeFromFavorites(favoriteId, name, false)}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+              />
+            </>
+          )}
+          <Actions
+            revalidate={() => {
+              revalidateFavorites();
+              revalidateSearchResults();
+            }}
+          />
         </ActionPanel>
       }
       accessories={accessories}

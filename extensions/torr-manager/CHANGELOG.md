@@ -1,4 +1,13 @@
-# torr-manager Changelog
+# Torr Manager Changelog
+
+## [Fix Database Save] - 2024-11-04
+
+- Fixed issue with saving torrents permanently to the database.
+
+## [Improve Parser] - 2024-10-28
+
+- Expanded search functionality to support both magnet links and direct links.
+- Marked jackettApiKey as optional, as not all servers require an API key.
 
 ## [Initial Version] - 2024-10-25
 

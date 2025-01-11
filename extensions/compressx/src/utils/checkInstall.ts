@@ -11,11 +11,11 @@ export async function checkCompressXInstallation(): Promise<boolean> {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "CompressX is not installed.",
-      message: "Install it from: https://hieudinh.com/compressx",
+      message: "Install it from: https://compressx.app",
       primaryAction: {
-        title: "Go to https://hieudinh.com/compressx",
+        title: "Go to https://compressx.app",
         onAction: (toast) => {
-          open("https://hieudinh.com/compressx");
+          open("https://compressx.app");
           toast.hide();
         },
       },

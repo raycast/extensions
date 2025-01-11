@@ -58,28 +58,6 @@
       ]
     },
     {
-      "name": "ask",
-      "title": "Ask Workout AI",
-      "description": "Ask AI about your 100 most recent workouts",
-      "mode": "view",
-      "icon": "ask-ai-icon.png",
-      "arguments": [
-        {
-          "name": "question",
-          "title": "Question",
-          "description": "Ask a question to the Workout AI",
-          "type": "text",
-          "placeholder": "Mileage this week?",
-          "required": true
-        }
-      ],
-      "keywords": [
-        "strava",
-        "activities",
-        "exercise"
-      ]
-    },
-    {
       "name": "routes",
       "title": "Search Routes",
       "description": "See your routes from Strava",

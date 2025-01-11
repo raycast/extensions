@@ -1,5 +1,9 @@
 # LeetCode Changelog
 
+## [Features] - 2024-10-26
+
+- Add `Copy Problem to Clipboard` action to copy the problem as markdown to the clipboard.
+
 ## [Fixes] - 2024-10-07
 
 - Ensure proper newline handling for `<pre>` tags in problem details Markdown code blocks.

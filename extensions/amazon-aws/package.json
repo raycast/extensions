@@ -172,12 +172,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
-    "@typescript-eslint/parser": "^7.9.0",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.0.2",
     "typescript": "^5.4.5"
   },

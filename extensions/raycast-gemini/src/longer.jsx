@@ -1,9 +1,11 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Longer(props) {
+  const { prompt } = getPreferenceValues();
   return useGemini(props, {
-    context:
-      "Make the following text longer without providing any extra information than what's given. ONLY return the elongated text and nothing else.",
+    context: prompt,
     allowPaste: true,
+    useSelected: true,
   });
 }

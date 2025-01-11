@@ -14,7 +14,13 @@
     "literallyjustroy",
     "mheidinger",
     "mikybars",
-    "luarmr"
+    "luarmr",
+    "horumy",
+    "santiago_perez",
+    "silv",
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH"
   ],
   "pastContributors": [
     "igor9silva"
@@ -31,7 +37,17 @@
       "title": "Create Issue",
       "subtitle": "Jira",
       "description": "Create and assign new issues.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyURLtoClipboard",
+          "description": "If checked, copies the newly created issue URL to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy created issue URL to clipboard"
+        }
+      ]
     },
     {
       "name": "open-issues",
@@ -132,6 +148,22 @@
       "description": "API Token",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
   "dependencies": {

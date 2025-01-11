@@ -1,4 +1,17 @@
 import { Color, Icon, Image } from "@raycast/api";
+import { HOSTNAME } from "../constants";
+
+export function isValidApiUrl() {
+  try {
+    generateApiUrl();
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+export function generateApiUrl() {
+  return new URL("api/", HOSTNAME).toString();
+}
 
 export function getTextAndIconFromVal(val: string) {
   let icon = undefined;
