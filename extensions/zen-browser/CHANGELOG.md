@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## [Fix New Tab] - {{PR_COMMIT_DATE}}
+## [Fix New Tab] - {PR_MERGE_DATE}
 
 - Fix new tab command, by removing unnecessary app check.
 
