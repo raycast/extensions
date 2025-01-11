@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, Keyboard } from "@raycast/api";
 import { WorkspaceForm } from "./components/WorkspaceForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useFetchWorkspaces } from "./hooks/useFetchWorkspaces";
 

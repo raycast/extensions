@@ -38,7 +38,7 @@ export function WorkspaceForm({
 
   const { handleSubmit, itemProps, setValidationError } = useForm<WorkspaceConfig>({
     async onSubmit(values) {
-      setIsLoading(true)
+      setIsLoading(true);
       const newWorkspace = { ...values };
       if (currentWorkspace?.id) {
         newWorkspace.id = currentWorkspace.id;
@@ -68,7 +68,7 @@ export function WorkspaceForm({
 
       await saveWorkspace(newWorkspace);
       // Call the onCreate function if it exists
-      const title = !!currentWorkspace ? "Workspace edited" : "Workspace saved";
+      const title = currentWorkspace ? "Workspace edited" : "Workspace saved";
       await showToast(Toast.Style.Success, title, newWorkspace.workspaceName);
       setIsLoading(false);
       if (onCreate) {
@@ -114,13 +114,13 @@ export function WorkspaceForm({
         title: `You are about to remove the "${currentWorkspace?.workspaceName}" workspace from Raycast`,
         primaryAction: {
           title: "Confirm",
-          style: Alert.ActionStyle.Destructive
-        }
+          style: Alert.ActionStyle.Destructive,
+        },
       }))
     ) {
-      setIsLoading(true)
+      setIsLoading(true);
       await removeWorkspace(currentWorkspace?.id);
-      
+
       await showToast(Toast.Style.Success, "Workspace removed", currentWorkspace.workspaceName);
       if (onDelete) {
         onDelete();
@@ -131,16 +131,28 @@ export function WorkspaceForm({
   };
 
   return (
-    <Form isLoading={isLoading}
+    <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Workspace" icon={Icon.Pencil} onSubmit={handleSubmit} />
-          {currentWorkspace?.id && <Action style={Action.Style.Destructive} title="Delete Workspace" icon={Icon.Trash} onAction={handleDelete} />}
+          {currentWorkspace?.id && (
+            <Action
+              style={Action.Style.Destructive}
+              title="Delete Workspace"
+              icon={Icon.Trash}
+              onAction={handleDelete}
+            />
+          )}
         </ActionPanel>
       }
     >
       <Form.TextField title="Workspace Name" placeholder="Displayable name" {...itemProps.workspaceName} />
-      <Form.TextField title="Workspace Id" placeholder="Slug to uniquely identify your workspace" {...itemProps.workspaceId} />
+      <Form.TextField
+        title="Workspace Id"
+        placeholder="Slug to uniquely identify your workspace"
+        {...itemProps.workspaceId}
+      />
       <Form.TextField title="Workspace Remote URL" placeholder="https://app.windmill.dev/" {...itemProps.remoteURL} />
       <Form.PasswordField title="Workspace Token" placeholder="xXX...xxx" {...itemProps.workspaceToken} />
     </Form>

@@ -6,7 +6,7 @@
 - Show `toast` after Workspace changes
 - Keyboard Shortcut to `Copy` Workspace Config
 - View Workspace Settings if Workspace is Valid
-- "Delete Workspace" `Action` has `Destructive Style`
+- "Delete Workspace" `Action` now has `Destructive Style`
 - Show `isLoading` when Managing Workspace
 
 ## [Initial Version] - 2023-08-27
