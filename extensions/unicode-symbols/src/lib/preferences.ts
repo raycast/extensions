@@ -27,3 +27,5 @@ export const gridColumnNumber = (): number => {
 };
 
 export const dataSetName = raycastPreferences.dataSet === "full" && viewType === "grid" ? "full-dataset" : "dataset";
+
+export const primaryAction: "copy" | "paste" = raycastPreferences.primaryAction || "paste";

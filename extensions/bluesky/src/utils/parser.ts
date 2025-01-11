@@ -150,6 +150,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
     bskyFeed
       .filter((item) => item !== null && item.post !== null)
       .filter((item) => item.post.record)
+      .filter((item) => item.reply?.root.blocked !== true)
       .map(async (item) => {
         let postReason: PostReason = null;
 

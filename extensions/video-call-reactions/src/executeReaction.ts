@@ -24,7 +24,7 @@ export async function executeReaction(reactionCommand: string): Promise<void> {
         if not (window 1 exists) then
           return "${ERROR_VIDEO_MENU_NOT_VISIBLE}"
         end if
-        tell last group of group 1 of window 1
+        tell group -2 of group 1 of window 1
           tell checkbox 1
             if it exists then
               set savedValue to value

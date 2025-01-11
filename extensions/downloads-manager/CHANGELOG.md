@@ -1,5 +1,13 @@
 # Downloads Manager Changelog
 
+## [Add file order preference] - 2025-01-07
+
+- Added a preference to sort files by added, modified, or created time in the `Manage Downloads` command.
+
+## [Add show hidden files preference] - 2024-12-22
+
+- Added a preference to show hidden files in the `Manage Downloads` command
+
 ## [Add close window script] - 2024-10-29
 
 - Added a script to close the window to ensure it closes after the action is completed

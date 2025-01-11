@@ -3,6 +3,7 @@ import { DataModelField } from "../services/zod/schema/recordFieldSchema";
 import TextInput from "./TextInput";
 import Select from "./Select";
 import Rating from "./Rating";
+import MultiSelect from "./MultiSelect";
 
 type FieldComponentProps = {
   values: {
@@ -20,10 +21,13 @@ export default function FieldComponent({ values }: FieldComponentProps) {
       return <TextInput values={{ field, placeholder: `Enter ${field.name}...` }} {...itemProps} />;
     }
     case "SELECT": {
-      return <Select values={{ field }} />;
+      return <Select values={{ field }} {...itemProps} />;
     }
     case "RATING": {
       return <Rating values={{ field }} {...itemProps} />;
+    }
+    case "MULTI_SELECT": {
+      return <MultiSelect values={{ field, placeholder: `Select ${field.name}...` }} {...itemProps} />;
     }
     default:
       return <></>;

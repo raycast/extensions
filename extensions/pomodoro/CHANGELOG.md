@@ -1,5 +1,13 @@
 # Pomodoro Changelog
 
+## [Improvement] - 2025-01-07
+
+- Add support for hiding timer when stopped
+
+## [Chore] - 2025-01-03
+
+- Update preferences organization
+
 ## [Update] - 2024-12-12
 
 - Move timer to dropdown menu if it's hidden

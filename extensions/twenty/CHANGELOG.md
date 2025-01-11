@@ -1,5 +1,13 @@
 # Twenty Changelog
 
+## [Enhancements] - 2025-01-09
+
+- Added support for multi-select field type
+
+## [Enhancements] - 2024-12-18
+
+- Updated select field type with preference
+
 ## [Enhancements] - 2024-12-11
 
 - Added support for rating field type

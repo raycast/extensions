@@ -99,8 +99,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/api": "^1.87.5",
+    "@raycast/utils": "^1.18.1",
+    "@web3-storage/parse-link-header": "^3.1.0",
     "axios": "^0.24.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
@@ -121,6 +122,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

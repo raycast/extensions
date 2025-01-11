@@ -1,5 +1,6 @@
 import { popToRoot } from "@raycast/api";
 import { spawnSync } from "child_process";
+import { shellEnv } from "shell-env";
 
 interface Window {
   "app-name": string;
@@ -13,13 +14,22 @@ interface Window {
 
 export interface Windows extends Array<Window> {}
 
-export function env() {
-  return { PATH: "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:" };
+let cachedEnv: Record<string, string> | null = null;
+
+export async function env() {
+  if (cachedEnv) {
+    return cachedEnv;
+  }
+
+  const env = await shellEnv();
+
+  cachedEnv = env;
+  return cachedEnv;
 }
 
-function getAppPath(bundleId: string) {
+async function getAppPath(bundleId: string) {
   const appPath = spawnSync("mdfind", [`kMDItemCFBundleIdentifier="${bundleId}"`], {
-    env: env(),
+    env: await env(),
     encoding: "utf8",
     timeout: 15000,
   });
@@ -27,7 +37,7 @@ function getAppPath(bundleId: string) {
   return appPath.stdout.trim();
 }
 
-export function getWindows(workspace: string) {
+export async function getWindows(workspace: string) {
   const args = [
     "list-windows",
     "--json",
@@ -37,7 +47,7 @@ export function getWindows(workspace: string) {
   ];
 
   const aerospaceArr = spawnSync("aerospace", args, {
-    env: env(),
+    env: await env(),
     encoding: "utf8",
     timeout: 15000,
   });
@@ -46,10 +56,12 @@ export function getWindows(workspace: string) {
   try {
     const parsedWindows = JSON.parse(aerospaceArr.stdout);
 
-    windows = parsedWindows.map((window: Window) => ({
-      ...window,
-      "app-path": getAppPath(window["app-bundle-id"].toString()),
-    }));
+    windows = await Promise.all(
+      parsedWindows.map(async (window: Window) => ({
+        ...window,
+        "app-path": await getAppPath(window["app-bundle-id"].toString()),
+      })),
+    );
   } catch (error) {
     console.error("Error parsing JSON:", error);
   }
@@ -57,9 +69,9 @@ export function getWindows(workspace: string) {
   return windows;
 }
 
-export function focusWindow(windowId: string): void {
+export async function focusWindow(windowId: string) {
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
-    env: env(),
+    env: await env(),
     encoding: "utf8",
     timeout: 15000,
   });

@@ -1,29 +1,15 @@
-import { showToast, Toast, ActionPanel, Action, Form, popToRoot, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { createRoutingRule, getDomains } from "./utils/api";
-import { CreateRoutingRequest, Domain, Response } from "./utils/types";
-import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { ActionPanel, Action, Form, popToRoot, Icon } from "@raycast/api";
+import { useState } from "react";
+import { createRoutingRule } from "./utils/api";
+import { CreateRoutingRequest } from "./utils/types";
+import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
 import { EMAIL_REGEX } from "./utils/constants";
+import { useDomains } from "./utils/hooks";
 
 export default function CreateRoutingRule() {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [domains, setDomains] = useCachedState<Domain[]>("dmoains");
-
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getDomains(true);
-
-      if (response.type === "error") {
-        setError(response.message);
-      } else {
-        setDomains(response.result.domains);
-      }
-      setIsLoading(false);
-    }
-    getFromApi();
-  }, []);
+  const { isLoading: isLoadingDomains, data: domains, error } = useDomains({ includeShared: true });
 
   const description = () => {
     const { domainName, matchUser, targetAddresses, type } = itemProps;
@@ -118,10 +104,10 @@ TO: '${targets || "<TARGETS>"}'`;
   });
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDomains}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Routing Rule" icon={Icon.Check} onSubmit={handleSubmit} />

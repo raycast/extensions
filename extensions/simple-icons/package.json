@@ -89,25 +89,33 @@
       "required": false,
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "displaySimpleIconsFontFeatures",
+      "title": "Display Simple Icons Font Features",
+      "label": "Enabled",
+      "description": "Display Simple Icons Font Features, such as font Copy Character, Copy HTML Code, and Copy UTF Code",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.2",
-    "@raycast/utils": "^1.18.0",
-    "execa": "^9.4.0",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
+    "execa": "^9.5.2",
     "fast-fuzzy": "^1.12.0",
-    "got": "^14.4.3",
+    "got": "^14.4.5",
     "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3",
-    "simple-icons": "^13.13.0"
+    "simple-icons": "^14.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.10",
-    "@types/node": "^22.7.5",
-    "@types/react": "^18.3.11",
+    "@types/lodash": "^4.17.14",
+    "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.3"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   }
 }

@@ -1,5 +1,15 @@
 # Safari Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Adds a "Copy Title as Link to Clipboard" command to copy the current Safari tab in Markdown format.
+
+## [Update] - {PR_MERGE_DATE}
+
+- Adds a "Copy to Clipboard" command to copy the current Safari tab url.
+
+## [Chore: Renamed title in Dropdown] - 2024-12-20
+
 ## [Improve] - 2024-12-13
 
 - Add a preference for `Search Reading List` to hide items that have already been read.
