@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2025-01-02
+
+- Fix the issue where users cannot open a new window when using a language pack.
+
 ## [Update] - 2024-12-04
 
 - Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).

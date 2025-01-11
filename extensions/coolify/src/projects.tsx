@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { Environment, EnvironmentDetails, Project, ProjectDetails, Resource } from "./lib/types";
 import useCoolify from "./lib/use-coolify";
 import { isValidCoolifyUrl } from "./lib/utils";
@@ -6,11 +6,13 @@ import InvalidUrl from "./lib/components/invalid-url";
 import OpenInCoolify from "./lib/components/open-in-coolify";
 import { getAvatarIcon } from "@raycast/utils";
 import { useMemo } from "react";
+import CreateProject from "./lib/components/projects/create";
+import UpdateProject from "./lib/components/projects/update";
 
 export default function Projects() {
   if (!isValidCoolifyUrl()) return <InvalidUrl />;
 
-  const { isLoading, data: projects = [] } = useCoolify<Project[]>("projects");
+  const { isLoading, data: projects = [], revalidate } = useCoolify<Project[]>("projects");
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search project">
@@ -28,6 +30,18 @@ export default function Projects() {
                   icon={Icon.Eye}
                   title="View Environments"
                   target={<ViewEnvironments project={project} />}
+                />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Update Project"
+                  target={<UpdateProject project={project} onUpdated={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Add Project"
+                  target={<CreateProject onAdded={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
                 <OpenInCoolify url={`project/${project.uuid}`} />
               </ActionPanel>

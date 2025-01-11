@@ -1,5 +1,10 @@
 # 1Password Changelog
 
+## [Chore] - 2025-01-09
+
+- Moved contributor to past contributors
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-12-02
 
 - Add readme & FAQ

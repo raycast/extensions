@@ -76,18 +76,18 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Switch to Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
                 <Action
-                  title="Delete This Session"
-                  onAction={() =>
-                    deleteSession(session, setIsLoading, () => setSessions(sessions.filter((s) => s !== session)))
-                  }
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                />
-                <Action
                   title="Rename This Session"
                   onAction={() => {
                     push(<RenameTmuxSession session={session} callback={() => setupListSesssions()} />);
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+                <Action
+                  title="Delete This Session"
+                  onAction={() =>
+                    deleteSession(session, setIsLoading, () => setSessions(sessions.filter((s) => s !== session)))
+                  }
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 />
               </ActionPanel>
             }

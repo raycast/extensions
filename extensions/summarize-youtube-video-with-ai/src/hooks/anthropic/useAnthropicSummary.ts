@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import React from "react";
+import { ANTHROPIC_MODEL } from "../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../const/toast_messages";
 import { Preferences } from "../../summarizeVideo";
 import { getAiInstructionSnippet } from "../../utils/getAiInstructionSnippets";
@@ -17,7 +18,7 @@ export const useAnthropicSummary = async ({
   setSummary,
 }: GetAnthropicSummaryProps) => {
   const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, anthropicApiToken, language } = preferences;
+  const { chosenAi, anthropicApiToken, language, anthropicModel } = preferences;
 
   if (!transcript) return;
 
@@ -29,7 +30,7 @@ export const useAnthropicSummary = async ({
     showToast({
       title: ALERT.title,
       message:
-        "Anthropic Developer Account is required for this extension to work. You need to add your API token in preferences.",
+        "Anthropic Developer Account is required for this extension to work. You need to add your API key in preferences.",
       style: Toast.Style.Failure,
     });
     return;
@@ -50,7 +51,7 @@ export const useAnthropicSummary = async ({
   });
 
   const chatCompletion = anthropic.messages.stream({
-    model: "claude-3-5-sonnet-latest",
+    model: anthropicModel || ANTHROPIC_MODEL,
     max_tokens: 8192,
     stream: true,
     messages: [{ role: "user", content: aiInstructions }],

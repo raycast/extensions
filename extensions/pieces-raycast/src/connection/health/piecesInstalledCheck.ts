@@ -112,7 +112,7 @@ async function requestInstall(res: (val: boolean) => void) {
  */
 function performInstall() {
   const arch = os.arch();
-  const script = `PKG_URL="https://builds.pieces.app/stages/production/macos_packaging/pkg-pos-launch-only${arch === "arm64" ? "-arm64" : ""}/download"
+  const script = `PKG_URL="https://builds.pieces.app/stages/production/macos_packaging/pkg-pos-launch-only${arch === "arm64" ? "-arm64" : ""}/download?product=RAYCAST&download=true"
 TMP_PKG_PATH="/tmp/Pieces-OS-Launch.pkg"
 curl -L "$PKG_URL" -o "$TMP_PKG_PATH"
 if [ -f "$TMP_PKG_PATH" ]; then

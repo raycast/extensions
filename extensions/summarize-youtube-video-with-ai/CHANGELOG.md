@@ -1,5 +1,11 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2024-12-21
+
+- Added preferences to set a custom OpenAI API endpoint
+- Added preferences to set a custom OpenAI model
+- Added preferences to set a custom Anthropic model
+
 ## [New Features] - 2024-12-20
 
 ### Major Version update 🎉

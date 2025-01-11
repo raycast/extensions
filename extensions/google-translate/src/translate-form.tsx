@@ -10,9 +10,9 @@ import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction } from
 export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const langFrom = selectedLanguageSet.langFrom;
-  const langTo = selectedLanguageSet.langTo;
+  const langTo = Array.isArray(selectedLanguageSet.langTo) ? selectedLanguageSet.langTo[0] : selectedLanguageSet.langTo;
   const setLangFrom = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langFrom: l });
-  const setLangTo = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langTo: l });
+  const setLangTo = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langTo: [l] });
   const fromLangObj = supportedLanguagesByCode[langFrom];
   const toLangObj = supportedLanguagesByCode[langTo];
 
@@ -20,7 +20,7 @@ export default function TranslateForm() {
   const debouncedValue = useDebouncedValue(text, 500);
   const { data: translated, isLoading } = usePromise(
     simpleTranslate,
-    [debouncedValue, { langFrom: fromLangObj.code, langTo: toLangObj.code }],
+    [debouncedValue, { langFrom: fromLangObj.code, langTo: [toLangObj.code] }],
     {
       onError(error) {
         showToast({
@@ -78,7 +78,7 @@ export default function TranslateForm() {
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
-                setSelectedLanguageSet({ langFrom: langTo, langTo: langFrom });
+                setSelectedLanguageSet({ langFrom: langTo, langTo: [langFrom] });
               }}
               title={`${getLanguageFlag(toLangObj, toLangObj?.code)} <-> ${getLanguageFlag(
                 fromLangObj,

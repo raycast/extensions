@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Update] - 2025-01-07
+
+- Update YouTrack icon
+
 ## [Update] - 2024-07-08
 
 - Add Assignee to Issue Details page

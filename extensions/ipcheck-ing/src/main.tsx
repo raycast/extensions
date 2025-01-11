@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { getLocalIPs, isLocalIPAddress } from "./getLocalIPs";
 import { getExternalIP } from "./getExternalIP";
 import { getIPDetails } from "./getIPDetails";
+import { getPreferenceValues } from "@raycast/api";
 
+// Define types
 interface IPData {
   ip: string;
   source: string;
@@ -13,15 +15,23 @@ interface IPDetails {
   [key: string]: string;
 }
 
+interface Preferences {
+  [key: string]: boolean;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+
+// Main function
 export default function Command() {
-  const localIPs = getLocalIPs();
-  const [externalIPs, setExternalIPs] = useState<IPData[]>([]); // 明确指定数组中的对象类型
-  const [ipDetails, setIpDetails] = useState<IPDetails>({}); // 添加索引签名
+  const localIPs = preferences.getLocalIPs ? getLocalIPs() : { ipv4: [], ipv6: [] };
+  const [externalIPs, setExternalIPs] = useState<IPData[]>([]);
+  const [ipDetails, setIpDetails] = useState<IPDetails>({});
 
   useEffect(() => {
     const fetchIPs = async () => {
-      const sources = ["1", "2", "3", "4", "5"]; // Fetch from multiple sources
-      const ipRequests = sources.map((source) => getExternalIP(source));
+      // Get active sources
+      const activeSources = Object.keys(preferences).filter((key) => preferences[key] && key !== "getLocalIPs");
+      const ipRequests = activeSources.map(getExternalIP);
 
       try {
         const results = await Promise.allSettled(ipRequests);
@@ -46,15 +56,18 @@ export default function Command() {
     };
 
     fetchIPs();
-    localIPs.ipv4.concat(localIPs.ipv6).forEach((ipInfo) => {
-      if (isLocalIPAddress(ipInfo.address)) {
-        setIpDetails((current) => ({ ...current, [ipInfo.address]: "Local IP" }));
-      } else {
-        getIPDetails(ipInfo.address).then((details) =>
-          setIpDetails((current) => ({ ...current, [ipInfo.address]: details })),
-        );
-      }
-    });
+    // Fetch local IPs
+    if (preferences.getLocalIPs) {
+      localIPs.ipv4.concat(localIPs.ipv6).forEach((ipInfo) => {
+        if (isLocalIPAddress(ipInfo.address)) {
+          setIpDetails((current) => ({ ...current, [ipInfo.address]: "Local IP" }));
+        } else {
+          getIPDetails(ipInfo.address).then((details) =>
+            setIpDetails((current) => ({ ...current, [ipInfo.address]: details })),
+          );
+        }
+      });
+    }
   }, []);
 
   const copyIPToClipboard = async (ip: string) => {
