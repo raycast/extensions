@@ -2,7 +2,10 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
+- Fix addressing port migration that broke the extension
+
 ## [0.1.0] - 2025-01-06
+
 - Fixes broken port connector
 
 ## [Initial Version] - 2024-08-08
