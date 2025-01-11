@@ -1,4 +1,4 @@
-import { execp } from "./index";
+import { execSync } from "child_process";
 
 export type ScreenTimeState = {
   time: number;
@@ -6,9 +6,9 @@ export type ScreenTimeState = {
   duration: string;
 };
 
-export async function getScreenState(): Promise<ScreenTimeState> {
+export const getScreenState = (): ScreenTimeState => {
   try {
-    const { stdout } = await execp("pmset -g log | grep -e 'Wake.*due to' | tail -n 1");
+    const stdout = execSync("pmset -g log | grep -e 'Wake.*due to' | tail -n 1").toString();
     const timestamp = stdout.match(/\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/)?.[0];
 
     if (!timestamp) {
@@ -35,4 +35,4 @@ export async function getScreenState(): Promise<ScreenTimeState> {
       duration: "--:--",
     };
   }
-}
+};
