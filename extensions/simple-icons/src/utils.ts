@@ -20,14 +20,17 @@ import { useAI } from "@raycast/utils";
 import { execa } from "execa";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
-import { titleToSlug } from "simple-icons/sdk";
+import { getIconSlug } from "simple-icons/sdk";
 import { JsDelivrNpmResponse, IconData, LaunchContext } from "./types.js";
 
 const cache = new Cache();
 
+export const fontUnicodeStart = 0xea01;
+
 export const {
   defaultDetailAction = "OpenWith",
   defaultLoadSvgAction = "WithBrandColor",
+  displaySimpleIconsFontFeatures,
   enableAiSearch,
 } = getPreferenceValues<ExtensionPreferences>();
 
@@ -88,16 +91,11 @@ export const cacheAssetPack = async (version: string) => {
 export const loadCachedJson = async (version: string) => {
   const [major] = version.split(".");
   const isNewFormat = Number(major) >= 14;
-  const jsonPath = join(
-    environment.assetsPath,
-    "pack",
-    `simple-icons-${version}`,
-    isNewFormat ? "data" : "_data",
-    "simple-icons.json",
-  );
+  const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
   const jsonFile = await readFile(jsonPath, "utf8");
   const json = JSON.parse(jsonFile);
-  return isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
+  const icons = isNewFormat ? (json as IconData[]) : (json.icons as IconData[]);
+  return icons.map((icon, i) => ({ ...icon, code: fontUnicodeStart + i }));
 };
 
 export const loadCachedVersion = () => {
@@ -155,7 +153,7 @@ export const copySvg = async ({ version, icon }: { version: string; icon: IconDa
   const { svg } = await loadSvg({
     version,
     icon,
-    slug: icon.slug || titleToSlug(icon.title),
+    slug: getIconSlug(icon),
   });
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);

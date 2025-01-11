@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix un-escaping JSON values] - 2025-01-09
+
+- Adds a check to determine if the full payload is escaped before attemptiong to un-escape the entire payload
+
 ## [Adds formatSelectionAndShow] - 2024-12-06
 
 - Add a new command to format JSON selected in the foremost editor and show it in the viewer
