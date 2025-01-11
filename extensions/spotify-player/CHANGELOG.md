@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add Playing Song To Playlist] - 2025-1-11
+
+- update `getMyPlaylists.ts` to fetch all playlists.
+
 ## [Generate Playlist Improvement - Artists] - 2024-12-03
 
 - Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
