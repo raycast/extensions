@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fe-tool-raycast",
+  "version": "0.1.0",
+  "title": "FE-Tool-Raycast",
+  "description": "提供前端开发中常用的工具集合，包括网站导航、npm 包查询、MDN 文档查询以及实用工具（URL 解析、颜色转换、时间戳转换、UUID 生成），帮助开发者提升工作效率。",
+  "icon": "extension-icon.png",
+  "author": "xinhao_yang",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "website",
+      "title": "Fe-website",
+      "subtitle": "常用工具网站导航",
+      "description": "快速访问前端开发常用的工具网站，提升工作效率。",
+      "mode": "view"
+    },
+    {
+      "name": "npm",
+      "title": "Fe-npm包查询",
+      "subtitle": "快速查找 npm 包信息",
+      "description": "查询 npm 包的详细信息，包括版本、依赖和文档链接。",
+      "mode": "view"
+    },
+    {
+      "name": "mdn",
+      "title": "Fe-mdn查询",
+      "subtitle": "快速查找 MDN 文档",
+      "description": "查询 MDN 文档，获取前端开发相关的权威指南和示例。",
+      "mode": "view"
+    },
+    {
+      "name": "feTool",
+      "title": "Fe-Tool",
+      "subtitle": "前端开发实用工具集",
+      "description": "集成 URL 解析、颜色转换、时间戳转换和 UUID 生成等实用工具。",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
