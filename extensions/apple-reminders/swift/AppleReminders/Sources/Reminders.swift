@@ -175,26 +175,9 @@ struct Recurrence: Decodable {
     }
 
     var recurrenceFrequency: EKRecurrenceFrequency
-    var daysOfTheWeek: [EKRecurrenceDayOfWeek]? = nil
-
     switch recurrence.frequency {
     case "daily":
       recurrenceFrequency = .daily
-    case "weekdays":
-      recurrenceFrequency = .weekly
-      daysOfTheWeek = [
-        EKRecurrenceDayOfWeek(.monday),
-        EKRecurrenceDayOfWeek(.tuesday),
-        EKRecurrenceDayOfWeek(.wednesday),
-        EKRecurrenceDayOfWeek(.thursday),
-        EKRecurrenceDayOfWeek(.friday)
-      ]
-    case "weekends":
-      recurrenceFrequency = .weekly
-      daysOfTheWeek = [
-        EKRecurrenceDayOfWeek(.saturday),
-        EKRecurrenceDayOfWeek(.sunday)
-      ]
     case "weekly":
       recurrenceFrequency = .weekly
     case "monthly":
@@ -208,12 +191,6 @@ struct Recurrence: Decodable {
     let recurrenceRule = EKRecurrenceRule(
       recurrenceWith: recurrenceFrequency,
       interval: recurrence.interval,
-      daysOfTheWeek: daysOfTheWeek,
-      daysOfTheMonth: nil,
-      monthsOfTheYear: nil,
-      weeksOfTheYear: nil,
-      daysOfTheYear: nil,
-      setPositions: nil,
       end: recurrenceEnd
     )
     reminder.addRecurrenceRule(recurrenceRule)
