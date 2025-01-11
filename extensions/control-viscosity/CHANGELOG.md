@@ -1,6 +1,6 @@
 # Control Viscosity Changelog
 
-## [Small Fix] - {PR_MERGE_DATE}
+## [Small Fix] - 2025-01-11
 
 Added exception handling
 
