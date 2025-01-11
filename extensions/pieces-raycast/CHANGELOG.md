@@ -1,6 +1,6 @@
 # Pieces for Raycast Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-11
 
 - Fix addressing port migration that broke the extension
 
