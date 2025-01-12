@@ -1,6 +1,6 @@
 # Aegis Extension Changelog
 
-## [Aegis Search Enhance] - {PR_MERGE_DATE}
+## [Aegis Search Enhance] - 2025-01-12
 
 - Improves the seacher performance with React's `useMemo`
 
