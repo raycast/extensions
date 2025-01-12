@@ -13,8 +13,7 @@
   "commands": [
     {
       "name": "search-gists",
-      "title": "Search Prompt",
-      "subtitle": "Search your prompt from GitHub gists",
+      "title": "Search Gist Prompt",
       "description": "Search and display your prompt from GitHub gists",
       "mode": "view",
       "preferences": [
