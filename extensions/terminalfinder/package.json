@@ -40,6 +40,13 @@
       "mode": "no-view"
     },
     {
+      "name": "clipboardToGhostty",
+      "title": "Clipboard → Ghostty",
+      "subtitle": "Open Path",
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view"
+    },
+    {
       "name": "finderToITerm",
       "title": "Finder → iTerm",
       "subtitle": "Open Path",
