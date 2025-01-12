@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hugging-face-ai",
+  "title": "Hugging Face AI",
+  "description": "This extension allows you to directly interace with the Hugging Face Inference API. All you need is a free access token!",
+  "icon": "extension-icon.png",
+  "author": "william_de_rocco",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-question",
+      "title": "Ask Question",
+      "description": "Chat with Hugging Face Inference API.",
+      "mode": "view"
+    },
+    {
+      "name": "conversations",
+      "title": "Conversations",
+      "description": "View your previous conversations.",
+      "mode": "view"
+    },
+    {
+      "name": "models",
+      "title": "Models",
+      "description": "View and create custom chat models.",
+      "mode": "view"
+    },
+    {
+      "name": "import-data",
+      "title": "Import Data",
+      "description": "Import data from json file.",
+      "mode": "view"
+    },
+    {
+      "name": "export-data",
+      "title": "Export Data",
+      "description": "Export data to json file.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "access_token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Huggingface Inference API Token",
+      "link": "https://huggingface.co/settings/token"
+    }
+  ],
+  "dependencies": {
+    "@huggingface/inference": "^2.8.1",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
