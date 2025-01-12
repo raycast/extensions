@@ -1,6 +1,6 @@
 # Regex Replace Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-12
 
 - Initial replacement method
 - Regex system
