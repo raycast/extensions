@@ -55,6 +55,13 @@
       "subtitle": "Get a random hue palette",
       "description": "Quickly generate a random set of hues to inspire your design process or discover unexpected color combinations.",
       "mode": "view"
+    },
+    {
+      "name": "hue-generate-record",
+      "title": "Hue Generate Record",
+      "subtitle": "Hue Generate Record",
+      "description": "View your generated hues and color palettes.",
+      "mode": "view"
     }
   ],
   "dependencies": {
