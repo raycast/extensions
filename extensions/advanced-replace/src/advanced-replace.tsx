@@ -6,10 +6,11 @@ import RegexItemForm from "./components/RegexItemForm";
 import { performReplacement } from "./utilities/replacements";
 
 export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues: ReplacementOption }>>) {
-  const { data: replacementOptions, revalidate } = usePromise(getSavedItems);
+  const { data: replacementOptions, revalidate, isLoading } = usePromise(getSavedItems);
 
   return (
     <List
+      isLoading={isLoading}
       navigationTitle="Regex replace options"
       actions={
         <ActionPanel title="Manage item">
