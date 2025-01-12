@@ -104,7 +104,6 @@
     "@types/node": "^20.5.4",
     "@types/react": "^18.2.21",
     "eslint": "^8.47.0",
-    "husky": "^8.0.0",
     "lint-staged": "^14.0.1",
     "prettier": "^3.0.2",
     "typescript": "^5.1.6"
@@ -115,7 +114,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "prepare": "husky install"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
