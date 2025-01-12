@@ -1,6 +1,6 @@
 # Raycast Extension for LGTMeow
 
-![LGTMewo Image](./metadata/lgtmeow-1.png)
+![LGTMewo Image](./media/lgtmeow-1.png)
 
 This is a Raycast extension that allows you to easily select and paste cat images from LGTMeow (https://lgtmeow.com/) as LGTM images in Markdown format.
 
