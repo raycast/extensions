@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Action, ActionPanel, Clipboard, Grid } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
@@ -12,17 +11,7 @@ function formatImageMarkdown(imageUrl: string) {
 }
 
 export default function Command() {
-  const [items, setItems] = useState<Item[]>([]);
-
-  const { isLoading } = useFetch<Item[]>("https://lgtmeow.com/api/lgtm-images", {
-    onData: (data) => {
-      const newItems: Item[] = [];
-      for (const item of data) {
-        newItems.push(item);
-      }
-      setItems(newItems);
-    },
-  });
+  const { isLoading, data } = useFetch<Item[]>("https://lgtmeow.com/api/lgtm-images", { keepPreviousData: false });
 
   return (
     <Grid
@@ -32,7 +21,7 @@ export default function Command() {
       navigationTitle="Choose Image"
       searchBarPlaceholder=""
     >
-      {items.map((item) => (
+      {!isLoading && data?.map((item) => (
         <Grid.Item
           id={item.imageUrl}
           key={item.id}
