@@ -72,7 +72,7 @@
       "required": false,
       "title": "Profile Path",
       "type": "textfield",
-      "placeholder": "Application Support/Google/Chrome"
+      "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
     },
     {
       "default": false,
