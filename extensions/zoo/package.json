@@ -82,8 +82,7 @@
     },
     {
       "name": "ask-gist",
-      "title": "Ask by Prompt",
-      "subtitle": "Ask AI with your prompt on selected text",
+      "title": "Ask by Prompt on Selected Text",
       "description": "Search and use GitHub gists as prompt for AI.",
       "mode": "view",
       "preferences": [
