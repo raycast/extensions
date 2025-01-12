@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Show only installed Firefox editions] - {PR_MERGE_DATE}
+## [Show only installed Firefox editions] - 2025-01-12
 
 - Instead of showing every possible Firefox editions, show only those that are
   installed
