@@ -1,3 +1,3 @@
 # Search Blockchain Changelog
 
-## [Initial Version] - 2024-12-30
+## [Initial Version] - {PR_MERGE_DATE}
