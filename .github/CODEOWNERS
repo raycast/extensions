@@ -1413,6 +1413,7 @@
 /extensions/script-kit                                              @pomdtr
 /extensions/scss-compile                                            @SuoweiHu
 /extensions/search-astro-docs                                       @ElianCodes @pernielsentikaer
+/extensions/search-blockchain                                       @gutenye
 /extensions/search-chatwork                                         @nagauta @xmok
 /extensions/search-composer-packagist                               @danyelkeddah @macbookandrew
 /extensions/search-hexpm                                            @jordelver
