@@ -21,23 +21,24 @@ export default function Command() {
       navigationTitle="Choose Image"
       searchBarPlaceholder=""
     >
-      {!isLoading && data?.map((item) => (
-        <Grid.Item
-          id={item.imageUrl}
-          key={item.id}
-          content={item.imageUrl}
-          actions={
-            <ActionPanel title="Choose Image">
-              <Action.CopyToClipboard title="Copy URL" content={formatImageMarkdown(item.imageUrl)} />
-              <Action.CopyToClipboard
-                title="Copy URL & Paste to Frontmost App"
-                content={formatImageMarkdown(item.imageUrl)}
-                onCopy={Clipboard.paste}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {!isLoading &&
+        data?.map((item) => (
+          <Grid.Item
+            id={item.imageUrl}
+            key={item.id}
+            content={item.imageUrl}
+            actions={
+              <ActionPanel title="Choose Image">
+                <Action.CopyToClipboard title="Copy URL" content={formatImageMarkdown(item.imageUrl)} />
+                <Action.CopyToClipboard
+                  title="Copy URL & Paste to Frontmost App"
+                  content={formatImageMarkdown(item.imageUrl)}
+                  onCopy={Clipboard.paste}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </Grid>
   );
 }
