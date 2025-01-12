@@ -120,6 +120,85 @@
       ]
     },
     {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate or Lookup selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Translate Prompt",
+          "description": "The prompt for the translate command",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "model_translate",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "deepseek-chat",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        },
+        {
+          "name": "first_language",
+          "title": "First Language",
+          "description": "All languages are firstly translated to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "English"
+        },
+        {
+          "name": "second_language",
+          "title": "Second Language",
+          "description": "If the provided text is in First Language, then translate to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Chinese"
+        },
+        {
+          "name": "lookup",
+          "label": "Lookup Mode (Beta)",
+          "title": "Lookup Mode (Beta)",
+          "description": "Enable lookup mode to get the meaning of the selected single word",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
       "name": "fix",
       "title": "Fix Writing",
       "description": "Fix the writing of selected text",
