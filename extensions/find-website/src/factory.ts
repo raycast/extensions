@@ -26,10 +26,10 @@ export class Factory<T extends Record> {
     return "";
   }
   getRecentsAdapter(): Adapter<T> {
-    return new ChromeAdapterRecents();
+    return new Adapter();
   }
   getTopVisitedAdapter(): Adapter<T> {
-    return new ChromeAdapterTopVisited();
+    return new Adapter();
   }
 
   static create(browser: string, profile: string): Factory<Record> {

@@ -1,15 +1,22 @@
-import { Icon, Color } from "@raycast/api";
+import { Icon, Color, Image } from "@raycast/api";
 import { Record, OrionRecord, ChromeRecord, ArcRecord } from "./record";
 
 class Result {
   key: string;
   title: string;
   subtitle: string;
-  icon: object;
+  icon: { value: Image.ImageLike | null | undefined; tooltip: string };
   accessories: object[];
   url: string;
 
-  constructor(key: string, title: string, subtitle: string, icon: object, accessories: object[], url: string) {
+  constructor(
+    key: string,
+    title: string,
+    subtitle: string,
+    icon: { value: Image.ImageLike | null | undefined; tooltip: string },
+    accessories: object[],
+    url: string,
+  ) {
     this.key = key;
     this.title = title;
     this.subtitle = subtitle;
@@ -43,8 +50,8 @@ export class Adapter<T extends Record> {
     return record.url;
   }
 
-  getIcon(): object {
-    return {};
+  getIcon(): { value: Image.ImageLike | null | undefined; tooltip: string } {
+    return { value: Icon.Warning, tooltip: "" };
   }
 
   getAccessories(record: T): object[] {
@@ -61,7 +68,7 @@ class AdapterTopVisited<T extends Record> extends Adapter<T> {
     return `${record.id}_tv`;
   }
 
-  getIcon(): object {
+  getIcon(): { value: Image.ImageLike | null | undefined; tooltip: string } {
     return { value: Icon.Star, tooltip: "Top visited" };
   }
 
@@ -71,7 +78,7 @@ class AdapterTopVisited<T extends Record> extends Adapter<T> {
 }
 
 class AdapterRecents<T extends Record> extends Adapter<T> {
-  getIcon(): object {
+  getIcon(): { value: Image.ImageLike | null | undefined; tooltip: string } {
     return { value: Icon.RotateAntiClockwise, tooltip: "Recents" };
   }
 
