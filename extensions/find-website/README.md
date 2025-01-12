@@ -1,6 +1,6 @@
 # Find Website
 
-![screenshot](metadata/find-website-3.png)
+![screenshot](assets/find-website-2.png)
 
 This extension queries your last visited and most visited webites so you can quickly get to where you want to go.
 
