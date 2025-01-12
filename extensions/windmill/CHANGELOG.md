@@ -1,6 +1,6 @@
 # Windmill Changelog
 
-## [View Workspace Settings] - {PR_MERGE_DATE}
+## [View Workspace Settings] - 2025-01-12
 
 - Add `placeholders` to "Add Workspace Form"
 - Show `toast` after Workspace changes
