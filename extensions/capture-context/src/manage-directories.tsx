@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, openExtensionPreferences, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { CONFIG } from "./utils";
 
@@ -33,12 +33,12 @@ export default function Command() {
           <ActionPanel.Section>
             <Action.ShowInFinder
               title="Open Screenshots Directory"
-              path={CONFIG.screenshotsDir}
+              path={CONFIG.directories.screenshots}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
             <Action.ShowInFinder
               title="Open Capture Directory"
-              path={CONFIG.saveDir}
+              path={CONFIG.directories.captures}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           </ActionPanel.Section>
@@ -50,11 +50,14 @@ export default function Command() {
         text="These are your current capture directory settings. Use ⌘K to update or view them."
       />
 
-      <Form.Description title="Screenshots Directory" text={`${CONFIG.screenshotsDir}\n\nUse ⌘S to open in Finder`} />
+      <Form.Description
+        title="Screenshots Directory"
+        text={`${CONFIG.directories.screenshots}\n\nUse ⌘S to open in Finder`}
+      />
 
       <Form.Separator />
 
-      <Form.Description title="Capture Directory" text={`${CONFIG.saveDir}\n\nUse ⌘C to open in Finder`} />
+      <Form.Description title="Capture Directory" text={`${CONFIG.directories.captures}\n\nUse ⌘C to open in Finder`} />
 
       <Form.Separator />
 

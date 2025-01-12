@@ -1,19 +1,27 @@
 import { Clipboard } from "@raycast/api";
-import { CaptureService, FileService, CONFIG } from "./utils";
+import { createCapture, utils, CONFIG } from "./utils";
 
 export default async function Command() {
-  await CaptureService.capture({
-    type: "clipboard",
-    getData: async () => {
-      const timestamp = new Date().toISOString().replace(/:/g, "-");
-      const screenshotPath = await FileService.captureScreenshot(CONFIG.saveDir, timestamp);
+  await createCapture(
+    "clipboard",
+    async () => {
+      const timestamp = new Date().toISOString();
+      console.debug("Capturing with timestamp:", timestamp);
+
+      const screenshotPath = await utils.captureScreenshot(
+        CONFIG.directories.captures,
+        utils.sanitizeTimestamp(timestamp),
+      );
+      console.debug("Got screenshot path:", screenshotPath);
+
       const clipboardText = await Clipboard.readText();
+      console.debug("Got clipboard text:", clipboardText);
 
       return {
-        text: clipboardText,
-        screenshot: screenshotPath,
+        selectedText: clipboardText,
+        screenshotPath: screenshotPath ? utils.getFileUrl(screenshotPath) : null,
       };
     },
-    validate: (data) => (data.text ? true : "No text in clipboard"),
-  });
+    (data) => (data.selectedText ? true : "No text in clipboard"),
+  );
 }

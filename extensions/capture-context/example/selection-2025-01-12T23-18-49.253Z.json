@@ -1,0 +1,13 @@
+{
+  "id": "ae3919f5-d84d-491f-990f-ef98a692434d",
+  "type": "selection",
+  "timestamp": "2025-01-12T23:18:49.253Z",
+  "selectedText": "In theory, showing the feature visualizations of the basis neurons would give us the global view of a network that we are seeking. In practice, however, neurons are rarely used by the network in isolation, and it may be difficult to understand them that way. As an analogy, while the 26 letters in the alphabet provide a basis for English, seeing how letters are commonly combined to make words gives far more insight into the concepts that can be expressed than the letters alone. Similarly, activation atlases give us a bigger picture view by showing common combinations of neurons.",
+  "screenshotPath": "file:///Users/alien/.em/data/screenshot-2025-01-12T23-18-47.807Z.png",
+  "activeViewContent": "...{markdown of website...too long for README example}",
+  "app": "Orion",
+  "bundleId": "9173183",
+  "url": "https://distill.pub/2019/activation-atlas/",
+  "window": "Orion",
+  "title": "Activation Atlas"
+}

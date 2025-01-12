@@ -16,8 +16,8 @@ I recommend using `Capture` and `Clipboard Capture` via hotkey.
 
 All captures are saved to the capture directory and have metadata and automatic screenshot added.
 
-1. **Capture**: Silently capture selection in any app.
-2. **Clipboard Capture**: Capture clipboard text instantly.
+1. **Capture**: Capture selection in any app.
+2. **Clipboard Capture**: Capture clipboard text .
 3. **Comment Captures**: Add/edit capture comments.
 4. **Comment Screenshots**: Comment on recent screenshots -- once a screenshot is commented it moves to the capture directory.
 5. **Manage Directories**: Set capture directory (where to save) and your screenshot directory (where to interact with screenshots from).
@@ -28,36 +28,29 @@ Say I'm on a website and want to capture it + some selected text (bookmark+).
 
 `Capture` will produce these two files:
 
-![example](./example/screenshot-2025-01-08T12-09-55.951Z.png)
+![example](./example/screenshot-2025-01-12T23-18-47.807Z.png)
 
 And the context in json\*:
 
-\*html --> markdown in the newer version
-
-> Sorry, this should've been a flat json instead
-
 ```json
 {
-  "content": {
-    "text": "The first step in the Transformer block is to apply layer normalization to this matrix. This is an operation that normalizes the values in each column of the matrix separately.",
-    "html": "# LLM Visualization\n\nThe _input embedding_ matrix from the previous section is the input to our first Transformer block.\n\nThe first step in the Transformer block is to apply _layer normalization_ to this matrix. This is an operation that normalizes the values in each column of the matrix separately.\n\nNormalization is an important step in the training of deep neural networks, and it helps improve the stability of the model during training.\n\nWe can regard each column separately, so let's focus on the 4th column (t = 3) for now.\n\nThe goal is to make the average value in the column equal to 0 and the standard deviation equal to 1. To do this, we find both of these quantities (mean (μ) & std dev (σ)) for the column and then subtract the average and divide by the standard deviation.\n\nThe notation we use here is E\\[x\\] for the average and Var\\[x\\] for the variance (of the column of length C). The variance is simply the standard deviation squared. The epsilon term (ε = 1×10\\-5) is there to prevent division by zero.\n\nWe compute and store these values in our aggregation layer since we're applying them to all values in the column.\n\nFinally, once we have the normalized values, we multiply each element in the column by a learned weight (γ) and then add a bias (β) value, resulting in our normalized values.\n\nWe run this normalization operation on each column of the input embedding matrix, and the result is the normalized input embedding, which is ready to be passed into the Self-Attention layer.",
-    "screenshot": "/Users/alien/.em/data/screenshot-2025-01-08T12-09-55.951Z.png"
-  },
-  "source": {
-    "app": "Orion",
-    "bundleId": "446573",
-    "url": "https://bbycroft.net/llm",
-    "window": "Orion"
-  },
-  "metadata": {
-    "timestamp": "2025-01-08T12:09:56.303Z"
-  }
+  "id": "ae3919f5-d84d-491f-990f-ef98a692434d",
+  "type": "selection",
+  "timestamp": "2025-01-12T23:18:49.253Z",
+  "selectedText": "In theory, showing the feature visualizations of the basis neurons would give us the global view of a network that we are seeking. In practice, however, neurons are rarely used by the network in isolation, and it may be difficult to understand them that way. As an analogy, while the 26 letters in the alphabet provide a basis for English, seeing how letters are commonly combined to make words gives far more insight into the concepts that can be expressed than the letters alone. Similarly, activation atlases give us a bigger picture view by showing common combinations of neurons.",
+  "screenshotPath": "file:///Users/alien/.em/data/screenshot-2025-01-12T23-18-47.807Z.png",
+  "activeViewContent": "...{markdown of website...very long}",
+  "app": "Orion",
+  "bundleId": "9173183",
+  "url": "https://distill.pub/2019/activation-atlas/",
+  "window": "Orion",
+  "title": "Activation Atlas"
 }
 ```
 
-If I then want to add a comment to the capture I can use the `Comment Captures` command.
+If I then want to add a comment to the capture I can use the `Comment Captures` command. Comments are added to the metdata JSON for that capture in the capture directory
 
-![comment](./example/screenshot_Cursor_58.png)
+![comment](./example/screenshot_Finder_40.png)
 
 ## Configuration
 
