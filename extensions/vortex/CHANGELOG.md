@@ -1,6 +1,6 @@
 # Alby Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-01-12
 
 - Removed View Balance function - it could be checked in last transactions. 
 - Modified Last Transactions function - now user can see details.
