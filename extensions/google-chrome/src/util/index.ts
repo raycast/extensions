@@ -16,18 +16,20 @@ const getChromeFilePath = (fileName: ChromeFile, profile?: string) => {
   const { profilePath } = getPreferenceValues<Preferences>();
   let resolvedProfilePath;
   if (profilePath) {
-      resolvedProfilePath =path.join(profilePath, fileName);
+    resolvedProfilePath = path.join(profilePath, fileName);
+  } else {
+    resolvedProfilePath = path.join(
+      userLibraryDirectoryPath(),
+      ...defaultChromeProfilePath,
+      profile ?? DEFAULT_CHROME_PROFILE_ID,
+      fileName
+    );
   }
-  else {
-    resolvedProfilePath= path.join(
-    userLibraryDirectoryPath(),
-    ...defaultChromeProfilePath,
-    profile ?? DEFAULT_CHROME_PROFILE_ID,
-    fileName
-  );}
 
   if (!fs.existsSync(resolvedProfilePath)) {
-    throw new Error(`The profile path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path. Then update it in Extension Settings -> Profile Path.`);
+    throw new Error(
+      `The path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path.`
+    );
   }
 
   return resolvedProfilePath;
