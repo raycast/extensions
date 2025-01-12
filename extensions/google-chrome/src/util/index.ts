@@ -1,8 +1,10 @@
+import fs from "fs";
 import path from "path";
 import { DEFAULT_CHROME_PROFILE_ID, defaultChromeProfilePath, defaultChromeStatePath } from "../constants";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../interfaces";
 
+type ChromeFile = "History" | "Bookmarks";
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
@@ -10,17 +12,25 @@ const userLibraryDirectoryPath = () => {
 
   return path.join(process.env.HOME, "Library");
 };
-const getChromeFilePath = (fileName: string, profile?: string) => {
+const getChromeFilePath = (fileName: ChromeFile, profile?: string) => {
   const { profilePath } = getPreferenceValues<Preferences>();
+  let resolvedProfilePath;
   if (profilePath) {
-    return path.join(profilePath, fileName);
+      resolvedProfilePath =path.join(profilePath, fileName);
   }
-  return path.join(
+  else {
+    resolvedProfilePath= path.join(
     userLibraryDirectoryPath(),
     ...defaultChromeProfilePath,
     profile ?? DEFAULT_CHROME_PROFILE_ID,
     fileName
-  );
+  );}
+
+  if (!fs.existsSync(resolvedProfilePath)) {
+    throw new Error(`The path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path.`);
+  }
+
+  return resolvedProfilePath;
 };
 
 export const getHistoryDbPath = (profile?: string) => getChromeFilePath("History", profile);
