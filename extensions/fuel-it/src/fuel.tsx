@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { FuelAgent } from "fuel-agent-kit";
 import fetch from "node-fetch";
 import { useState } from "react";
@@ -31,7 +31,7 @@ export default function Command() {
             title="Execute Command"
             onSubmit={async (values) => {
               setLoading(true);
-              const toast = await showToast(Toast.Style.Animated, "Executing Command...");
+              const toast = await showToast(Toast.Style.Animated, "Executing your command, please wait...");
               try {
                 const response = await agent.execute(values.command);
                 console.log("Command response:", response);
@@ -42,7 +42,7 @@ export default function Command() {
 
                 toast.style = Toast.Style.Success;
                 toast.title = "Command executed successfully!";
-                // toast.message = `Transaction link: ${link}`;
+                toast.message = `Transaction link: ${link}`;
               } catch (error) {
                 console.error("Command error:", error);
                 toast.style = Toast.Style.Failure;
@@ -61,14 +61,20 @@ export default function Command() {
   );
 
   if (loading) {
-    return <Detail markdown="# Executing command..." />;
+    return <Detail markdown="# Executing your command, please wait..." />;
   }
 
   if (transactionLink) {
     const markdown = `
 # Transaction Executed Successfully!
 `;
-    return <Detail markdown={markdown} navigationTitle="Transaction Link" />;
+
+    open("raycast://confetti");
+    return (
+      <>
+        <Detail markdown={markdown} navigationTitle="Transaction Details" />
+      </>
+    );
   }
 
   return executeCommandForm;
