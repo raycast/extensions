@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-01-12
 
 - Add support for setting label to empty
 - Bump all dependencies to the latest
