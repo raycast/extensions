@@ -1,7 +1,7 @@
 // src/components/ai-result-view.tsx
 import { Action, ActionPanel, Detail, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { openai } from "./api";
+import { global_model, openai } from "./api";
 import { countToken, estimatePrice } from "./util";
 
 interface AIResultViewProps {
@@ -25,7 +25,7 @@ export function AIResultView({ content }: AIResultViewProps) {
         }
         const prompt = content || "You are a helpful assistant that analyzes and explains the provided content.";
         const stream = await openai.chat.completions.create({
-          model: "deepseek-chat",
+          model: global_model,
           messages: [
             { role: "system", content: prompt },
             { role: "user", content: selectedText || "" },
@@ -65,12 +65,12 @@ export function AIResultView({ content }: AIResultViewProps) {
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Model" text="deepseek-chat" />
+          <Detail.Metadata.Label title="Model" text={global_model} />
           <Detail.Metadata.Label title="Prompt Tokens" text={String(promptTokenCount)} />
           <Detail.Metadata.Label title="Response Tokens" text={String(responseTokenCount)} />
           <Detail.Metadata.Label
             title="Estimated Cost"
-            text={`${estimatePrice(promptTokenCount, responseTokenCount, "deepseek-chat")} cents`}
+            text={`${estimatePrice(promptTokenCount, responseTokenCount, global_model)} cents`}
           />
         </Detail.Metadata>
       }

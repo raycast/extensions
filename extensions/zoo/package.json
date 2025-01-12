@@ -177,8 +177,9 @@
       "name": "baseurl",
       "description": "Custom API endpoint for DeepSeek or ChatGPT, or more",
       "type": "textfield",
-      "required": true,
-      "title": "Custom API Endpoint"
+      "required": false,
+      "title": "Custom API Endpoint",
+      "default": "https://api.openai.com/v1"
     },
     {
       "name": "priceinput",
@@ -225,6 +226,7 @@
         }
       ],
       "required": true,
+      "default": "gpt-4o",
       "title": "LLM Model"
     }
   ],

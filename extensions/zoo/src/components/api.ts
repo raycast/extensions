@@ -1,8 +1,14 @@
 import OpenAI from "openai";
 
+// import preferences from package.json
+import { getPreferenceValues } from "@raycast/api";
+
+const endpoint = getPreferenceValues().baseurl || "https://api.openai.com/v1";
+const apiKey = getPreferenceValues().apikey;
+
 export const openai = new OpenAI({
-  baseURL: "https://api.deepseek.com/v1",
-  apiKey: "sk-a1aad8bd2a154c9792f7eb8aa46fc982",
+  baseURL: endpoint,
+  apiKey: apiKey,
 });
-// export const global_model = getPreferenceValues().model;
-export const global_model = "deepseek-chat";
+
+export const global_model = getPreferenceValues().model || "gpt-4o";
