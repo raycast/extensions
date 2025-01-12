@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add support for setting label to empty
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-10-01
 
 - Refactor duplicate codes
