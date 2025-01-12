@@ -20,7 +20,7 @@ export class QueryBuilder {
     return `(${titleFilter}) or (${hostFilter})`;
   }
 
-  filterBlock(words, op, column) {
+  filterBlock(words: string[], op: string, column: string) {
     return words.map((w) => `${column} like '${w}'`).join(` ${op} `);
   }
 
@@ -28,13 +28,13 @@ export class QueryBuilder {
     return text.split(" ").map((w) => `%${w}%`);
   }
 
-  queryTopVisited(size, text) {
+  queryTopVisited(size: number, text: string) {
     const order = `order by visit_count desc`;
 
     return this.buildQuery(size, text, order);
   }
 
-  queryRecents(size, text) {
+  queryRecents(size: number, text: string) {
     const order = `order by last_visit_time desc`;
 
     return this.buildQuery(size, text, order);
