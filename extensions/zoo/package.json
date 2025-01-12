@@ -171,14 +171,14 @@
       "description": "Your API Key",
       "type": "password",
       "required": true,
-      "title": "DeepSeek API Key"
+      "title": "LLM API Key"
     },
     {
       "name": "baseurl",
       "description": "Custom API endpoint for DeepSeek or ChatGPT, or more",
       "type": "textfield",
       "required": false,
-      "title": "Custom API Endpoint",
+      "title": "LLM API Endpoint",
       "default": "https://api.openai.com/v1"
     },
     {
@@ -197,7 +197,7 @@
     },
     {
       "name": "model",
-      "description": "DeepSeek LLM to use for your commands",
+      "description": "LLM to use for your commands",
       "type": "dropdown",
       "data": [
         {
@@ -227,7 +227,7 @@
       ],
       "required": true,
       "default": "gpt-4o",
-      "title": "LLM Model"
+      "title": "LLM Model Name"
     }
   ],
   "devDependencies": {
