@@ -151,8 +151,7 @@
     },
     {
       "name": "create-gist",
-      "title": "Create Prompt",
-      "subtitle": "Create prompts in GitHub Gist",
+      "title": "Create Gist Prompt",
       "description": "Create GitHub gist from selection or clipboard.",
       "mode": "view"
     }
