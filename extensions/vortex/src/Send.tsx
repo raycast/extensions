@@ -1,16 +1,14 @@
 import "cross-fetch/polyfill";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Form, ActionPanel, Action, Clipboard, getSelectedText, LaunchProps } from "@raycast/api";
-import { LightningAddress, Invoice } from "@getalby/lightning-tools";
+import { Action, ActionPanel, Clipboard, Form, getSelectedText, LaunchProps } from "@raycast/api";
+import { Invoice, LightningAddress } from "@getalby/lightning-tools";
 
-import ConnectionError from "./ConnectionError";
-import PayInvoice from "./PayInvoice";
-import PayToLightingAddress from "./PayLightningAddress";
-import { connectWallet } from "./wallet";
-
-const LN_ADDRESS_REGEX =
-  /^((?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*)|(?:".+"))@((?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(?:(?:[a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+import ConnectionError from "./components/ConnectionError";
+import PayInvoice from "./components/PayInvoice";
+import PayToLightingAddress from "./components/PayToLightningAddress";
+import { connectWallet } from "./utils/wallet";
+import { LN_ADDRESS_REGEX } from "./constants";
 
 export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) {
   const [lightningAddress, setLightningAddress] = useState("");

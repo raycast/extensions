@@ -55,6 +55,10 @@ export class Tab {
     return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
   }
 
+  realFavicon(): string {
+    return new URL(this.favicon || "/favicon.ico", this.url).href;
+  }
+
   googleFavicon(): Image.ImageLike {
     return getFavicon(this.url);
   }

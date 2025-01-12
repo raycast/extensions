@@ -5,7 +5,7 @@ A powerful and user-friendly media conversion tool that allows you to easily con
 ## Features
 
 - **Multi-Format Support**:
-  - Video: MP4, AVI, MKV, MOV, MPG
+  - Video: MP4, AVI, MKV, MOV, MPG, WEBM
   - Image: JPG, PNG, WebP, HEIC, TIFF
   - Audio: MP3, AAC, WAV, FLAC
 
@@ -39,7 +39,7 @@ A powerful and user-friendly media conversion tool that allows you to easily con
 ## Supported Formats
 
 ### Video
-- Input/Output: .mov, .mp4, .avi, .mkv, .mpg, .m4v
+- Input/Output: .mov, .mp4, .avi, .mkv, .mpg, .m4v, .webm
 - Video Codecs: H.264, XVID, ProRes, H.265, MPEG-2
 
 ### Image

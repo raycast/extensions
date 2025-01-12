@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 interface Credentials {
@@ -28,7 +28,11 @@ export function LoginForm({ submit }: { submit: (credentials: Credentials) => vo
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Login" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Login"
+            icon={{ source: Icon.Person, tintColor: "#4798FF" }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >

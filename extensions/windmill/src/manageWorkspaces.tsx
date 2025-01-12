@@ -1,11 +1,12 @@
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Keyboard } from "@raycast/api";
 import { WorkspaceForm } from "./components/WorkspaceForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useFetchWorkspaces } from "./hooks/useFetchWorkspaces";
 
 import { LaunchProps } from "@raycast/api";
 import { WorkspaceConfig } from "./types";
+import { WorkspaceSettingsDetail } from "./components/WorkspaceSettingsDetail";
 
 export default function ListWorkspacesCommand(props: LaunchProps) {
   const { workspaces, fetchWorkspaces, isLoading } = useFetchWorkspaces();
@@ -51,12 +52,18 @@ export default function ListWorkspacesCommand(props: LaunchProps) {
                   target={<WorkspaceForm workspace={workspace} onCreate={fetchWorkspaces} onDelete={fetchWorkspaces} />}
                 />
                 <Action.Push
+                  title="View Workspace Settings"
+                  icon={Icon.Eye}
+                  target={<WorkspaceSettingsDetail workspace={workspace} />}
+                />
+                <Action.Push
                   title="Add Workspace"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   target={<WorkspaceForm onCreate={fetchWorkspaces} onDelete={fetchWorkspaces} />}
                 />
                 <Action.CopyToClipboard
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                   title="Copy Config to Clipboard"
                   content={JSON.stringify({ ...workspace, id: undefined })}
                 />

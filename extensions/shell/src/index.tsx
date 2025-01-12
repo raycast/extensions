@@ -274,6 +274,88 @@ const runInWarp = (command: string) => {
   runAppleScript(script);
 };
 
+const runInGhostty = (command: string) => {
+  const script = `
+      -- Set this property to true to always open in a new window
+      property open_in_new_window : true
+
+      -- Set this property to true to always open in a new tab
+      property open_in_new_tab : false
+
+      -- Reset this property to false
+      property opened_new_window : false
+
+      -- Handlers
+      on new_window()
+          tell application "System Events" to tell process "Ghostty"
+              click menu item "New Window" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+      end new_window
+
+      on new_tab()
+          tell application "System Events" to tell process "Ghostty"
+              click menu item "New Tab" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+      end new_tab
+
+      on call_forward()
+          tell application "Ghostty" to activate
+      end call_forward
+
+      on is_running()
+          application "Ghostty" is running
+      end is_running
+
+      on has_windows()
+          if not is_running() then return false
+          tell application "System Events"
+              if windows of process "Ghostty" is {} then return false
+          end tell
+          true
+      end has_windows
+
+      on send_text(custom_text)
+          tell application "System Events"
+              keystroke custom_text
+          end tell
+      end send_text
+
+
+      -- Main
+      if not is_running() then
+          call_forward()
+          set opened_new_window to true
+      else
+          call_forward()
+          set opened_new_window to false
+      end if
+
+      if has_windows() then
+          if open_in_new_window and not opened_new_window then
+              new_window()
+          else if open_in_new_tab and not opened_new_window then
+              new_tab()
+          end if
+      else
+          new_window()
+      end if
+
+
+      -- Make sure a window exists before we continue, or the write may fail
+      repeat until has_windows()
+          delay 0.5
+      end repeat
+      delay 0.5
+
+      send_text("${command}")
+      call_forward()
+  `;
+
+  runAppleScript(script);
+};
+
 const runInTerminal = (command: string) => {
   const script = `
   tell application "Terminal"
@@ -292,6 +374,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
   const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
   const kittyInstalled = fs.existsSync("/Applications/kitty.app");
   const WarpInstalled = fs.existsSync("/Applications/Warp.app");
+  const GhosttyInstalled = fs.existsSync("/Applications/Ghostty.app");
 
   const addToRecentlyUsed = (command: string) => {
     setRecentlyUsed((list) => (list.find((x) => x === command) ? list : [command, ...list].slice(0, 10)));
@@ -321,6 +404,10 @@ export default function Command(props: { arguments?: ShellArguments }) {
 
         case "Warp":
           runInWarp(props.arguments.command);
+          break;
+
+        case "Ghostty":
+          runInGhostty(props.arguments.command);
           break;
 
         default:
@@ -386,7 +473,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {kittyInstalled ? (
                     <Action
                       title="Execute in kitty.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/kitty.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -398,7 +485,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   {iTermInstalled ? (
                     <Action
                       title="Execute in iTerm.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/iTerm.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -407,10 +494,22 @@ export default function Command(props: { arguments?: ShellArguments }) {
                       }}
                     />
                   ) : null}
+                  {GhosttyInstalled ? (
+                    <Action
+                      title="Execute in Ghostty.app"
+                      icon={{ fileIcon: "/Applications/Ghostty.app" }}
+                      onAction={() => {
+                        closeMainWindow();
+                        popToRoot();
+                        addToRecentlyUsed(command);
+                        runInGhostty(command);
+                      }}
+                    />
+                  ) : null}
                   {WarpInstalled ? (
                     <Action
                       title="Execute in Warp.app"
-                      icon={Icon.Window}
+                      icon={{ fileIcon: "/Applications/Warp.app" }}
                       onAction={() => {
                         closeMainWindow();
                         popToRoot();
@@ -421,7 +520,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
                   ) : null}
                   <Action
                     title="Execute in Terminal.app"
-                    icon={Icon.Window}
+                    icon={{ fileIcon: "/System/Applications/Utilities/Terminal.app" }}
                     onAction={() => {
                       closeMainWindow();
                       popToRoot();

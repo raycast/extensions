@@ -1,4 +1,12 @@
-# pieces-raycast Changelog
+# Pieces for Raycast Changelog
+
+## [Update] - 2025-01-11
+
+- Fix addressing port migration that broke the extension
+
+## [0.1.0] - 2025-01-06
+
+- Fixes broken port connector
 
 ## [Initial Version] - 2024-08-08
 
