@@ -2,13 +2,14 @@ import { LaunchProps, Form, ActionPanel, Action, open, showToast, Toast } from "
 import { useState } from "react";
 import ActionList from "./components/ActionList";
 import { SavedAction } from "./actions";
-
+import { checkInboxAIInstallation } from "./utils/checkInstall";
 interface CommandContext {
   actionId?: string;
   variables?: Record<string, string>;
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
+  checkInboxAIInstallation();
   const [showTextForm, setShowTextForm] = useState(false);
   const [selectedAction, setSelectedAction] = useState<SavedAction | null>(null);
   const [formParams] = useState<Record<string, string>>({});

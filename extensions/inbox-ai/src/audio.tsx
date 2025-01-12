@@ -1,5 +1,6 @@
 import { LaunchProps } from "@raycast/api";
 import ActionList from "./components/ActionList";
+import { checkInboxAIInstallation } from "./utils/checkInstall";
 
 interface CommandContext {
   actionId?: string;
@@ -7,6 +8,7 @@ interface CommandContext {
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
+  checkInboxAIInstallation();
   return (
     <ActionList
       commandName="audio"

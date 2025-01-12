@@ -1,6 +1,7 @@
 import { LaunchProps, showToast, Toast, BrowserExtension, open, Action, Icon } from "@raycast/api";
 import ActionList from "./components/ActionList";
 import { SavedAction } from "./actions";
+import { checkInboxAIInstallation } from "./utils/checkInstall";
 
 interface CommandContext {
   actionId?: string;
@@ -8,6 +9,7 @@ interface CommandContext {
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
+  checkInboxAIInstallation();
   const openInboxAI = async (url: string) => {
     try {
       await open(url);

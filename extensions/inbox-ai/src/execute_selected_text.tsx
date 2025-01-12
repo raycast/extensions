@@ -1,13 +1,14 @@
 import { LaunchProps, getSelectedText, showToast, Toast, open } from "@raycast/api";
 import ActionList from "./components/ActionList";
 import { SavedAction } from "./actions";
-
+import { checkInboxAIInstallation } from "./utils/checkInstall";
 interface CommandContext {
   actionId?: string;
   originalInput?: string;
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
+  checkInboxAIInstallation();
   const handleActionSelect = async (action: SavedAction) => {
     try {
       const selectedText = await getSelectedText().catch(() => null);
