@@ -25,7 +25,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
     isLoading,
     mutate,
   } = useCachedPromise(
-    (databaseId, searchText, sort) => queryDatabase(databaseId, searchText, sort),
+    (databaseId, searchText, sort) => queryDatabase(databaseId, searchText, sort).then((data) => data.pages),
     [databaseId, searchText, sort],
   );
   const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
