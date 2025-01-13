@@ -1,5 +1,5 @@
 # NZBGet Changelog
 
-## 1.0.0 - 2024-12-24
+## 1.0.0 - {PR_MERGE_DATE}
 
 - Initial release
