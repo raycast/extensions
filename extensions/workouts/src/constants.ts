@@ -52,3 +52,23 @@ export const sportIcons: { [key: string]: string } = {
   WeightTraining: "workout.svg",
   Yoga: "yoga.svg",
 };
+
+export const distancePresets = {
+  Marathon: { km: "42.195", mi: "26.219" },
+  "Half-Marathon": { km: "21.0975", mi: "13.1095" },
+  "10K": { km: "10", mi: "6.2137" },
+  "5K": { km: "5", mi: "3.1069" },
+} as const;
+
+export interface PaceCalculatorForm {
+  distance: string;
+  time: string;
+  pace: string;
+  distanceUnit: "km" | "mi";
+  preset?: string;
+  mode: CalculationMode;
+}
+
+export type DistancePreset = keyof typeof distancePresets;
+
+export type CalculationMode = "pace" | "time";
