@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Chore & Fixes] - {PR_MERGE_DATE}
+## [Chore & Fixes] - 2025-01-13
 
 - Hide toast when `historyCount` is zero
 - Suppress errors when search term is empty
