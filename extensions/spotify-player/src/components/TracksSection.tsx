@@ -1,32 +1,24 @@
 import { List } from "@raycast/api";
-import { SimplifiedTrackObject } from "../helpers/spotify.api";
+import { MinimalTrack } from "../api/getMySavedTracks";
 import TrackListItem from "./TrackListItem";
 
 type TracksSectionProps = {
-  tracks: SimplifiedTrackObject[] | undefined;
+  tracks: MinimalTrack[] | undefined;
   limit?: number;
   title?: string;
-  queueTracks?: boolean;
+  onRefresh?: () => void;
 };
 
-export function TracksSection({ tracks, limit, title = "Songs", queueTracks }: TracksSectionProps) {
+export function TracksSection({ tracks, limit, title = "Songs", onRefresh }: TracksSectionProps) {
   if (!tracks) return null;
 
-  const items = tracks.slice(0, limit || tracks.length);
+  // If limit is specified, only show that many tracks
+  const limitedTracks = limit ? tracks.slice(0, limit) : tracks;
 
   return (
-    <List.Section title={title}>
-      {items?.map((track) => {
-        return (
-          <TrackListItem
-            key={track.id}
-            track={track}
-            album={track.album}
-            showAddToSaved
-            showGoToAlbum
-            tracksToQueue={queueTracks ? tracks.filter((t) => t.id !== track.id) : undefined}
-          />
-        );
+    <List.Section title={`${title} (${limitedTracks.length} tracks)`}>
+      {limitedTracks.map((track) => {
+        return <TrackListItem key={track.id} track={track} onRefresh={onRefresh} />;
       })}
     </List.Section>
   );

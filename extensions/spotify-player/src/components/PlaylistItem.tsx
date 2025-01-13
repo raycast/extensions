@@ -6,27 +6,25 @@ import { PlaylistActionPanel } from "./PlaylistActionPanel";
 type PlaylistItemProps = {
   type: "grid" | "list";
   playlist: SimplifiedPlaylistObject;
-  actions?: JSX.Element;
+  onRefresh?: () => void;
 };
 
-export default function PlaylistItem({ type, playlist, actions }: PlaylistItemProps) {
-  const title = playlist.name as string;
-  const subtitle = playlist?.owner?.display_name ?? undefined;
-  const imageURL = playlist?.images?.[playlist.images.length - 1]?.url;
-  const icon: Image.ImageLike = {
-    source: imageURL ?? Icon.BlankDocument,
-  };
-  actions = actions ?? <PlaylistActionPanel title={title} playlist={playlist} />;
+export default function PlaylistItem({ type, playlist, onRefresh }: PlaylistItemProps) {
+  const title = playlist.name || "Untitled Playlist";
+  const icon: Image.ImageLike = playlist.images?.[0]?.url
+    ? {
+        source: playlist.images[0].url,
+      }
+    : { source: Icon.Music };
 
   return (
     <ListOrGridItem
       type={type}
       icon={icon}
       title={title}
-      subtitle={subtitle}
       content={icon}
-      accessories={[{ text: `${playlist?.tracks?.total} songs` }]}
-      actions={actions}
+      accessories={[{ text: `${playlist.tracks?.total || 0} tracks` }]}
+      actions={<PlaylistActionPanel title={title} playlist={playlist} onRefresh={onRefresh} />}
     />
   );
 }

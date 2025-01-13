@@ -1,50 +1,35 @@
 import { Image, List } from "@raycast/api";
-import { formatMs } from "../helpers/formatMs";
-import { SimplifiedAlbumObject, SimplifiedTrackObject } from "../helpers/spotify.api";
+import { MinimalTrack } from "../api/getMySavedTracks";
 import { TrackActionPanel } from "./TrackActionPanel";
+import { formatMs } from "../helpers/formatMs";
 
-type TrackListItemProps = {
-  track: SimplifiedTrackObject;
-  album?: SimplifiedAlbumObject;
-  showAddToSaved?: boolean;
+interface TrackListItemProps {
+  track: MinimalTrack;
   showGoToAlbum?: boolean;
-  playingContext?: string;
-  tracksToQueue?: SimplifiedTrackObject[];
-};
+  onRefresh?: () => void;
+}
 
-export default function TrackListItem({
-  track,
-  album,
-  showAddToSaved,
-  showGoToAlbum,
-  playingContext,
-  tracksToQueue,
-}: TrackListItemProps) {
-  const title = track.name || "";
-  const subtitle = track?.artists?.map((a) => a.name).join(", ");
-
-  let icon: Image.ImageLike | undefined = undefined;
-  if (album?.images) {
-    icon = {
-      source: album.images[album.images.length - 1]?.url,
-    };
-  }
+export default function TrackListItem({ track, showGoToAlbum, onRefresh }: TrackListItemProps) {
+  const artists = track.artists.map((a) => a.name).join(", ");
+  const icon: Image.ImageLike | undefined = track.album.images[0]?.url
+    ? {
+        source: track.album.images[0].url,
+      }
+    : undefined;
 
   return (
     <List.Item
+      title={track.name}
+      subtitle={artists}
       icon={icon}
-      title={title}
-      subtitle={subtitle}
-      accessories={[{ text: track.duration_ms ? formatMs(track.duration_ms) : undefined }]}
+      accessories={[{ text: formatMs(track.duration_ms) }]}
       actions={
         <TrackActionPanel
-          title={title}
+          title={track.name}
           track={track}
-          album={album}
-          showAddToSaved={showAddToSaved}
+          album={track.album}
           showGoToAlbum={showGoToAlbum}
-          playingContext={playingContext}
-          tracksToQueue={tracksToQueue}
+          onRefresh={onRefresh}
         />
       }
     />

@@ -1,33 +1,27 @@
-import { Image, List } from "@raycast/api";
-import { formatMs } from "../helpers/formatMs";
-import { ShowBase, SimplifiedEpisodeObject } from "../helpers/spotify.api";
+import { Image, Icon, List } from "@raycast/api";
+import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
 import { EpisodeActionPanel } from "./EpisodeActionPanel";
+import { formatMs } from "../helpers/formatMs";
 
 type EpisodeListItemProps = {
   episode: SimplifiedEpisodeObject;
-  show?: ShowBase;
+  onRefresh?: () => void;
 };
 
-export default function EpisodeListItem({ episode, show }: EpisodeListItemProps) {
-  const title = episode.name || "";
-
-  let icon: Image.ImageLike | undefined = undefined;
-  if (show?.images) {
-    icon = {
-      source: show.images[show.images.length - 1]?.url,
-    };
-  } else if (episode.images) {
-    icon = {
-      source: episode.images[episode.images.length - 1]?.url,
-    };
-  }
+export default function EpisodeListItem({ episode, onRefresh }: EpisodeListItemProps) {
+  const title = episode.name || "Untitled Episode";
+  const icon: Image.ImageLike = episode.images?.[0]?.url
+    ? {
+        source: episode.images[0].url,
+      }
+    : { source: Icon.Microphone };
 
   return (
     <List.Item
-      icon={icon}
       title={title}
-      accessories={[{ text: episode.duration_ms ? formatMs(episode.duration_ms) : undefined }]}
-      actions={<EpisodeActionPanel title={title} episode={episode} />}
+      icon={icon}
+      accessories={[{ text: formatMs(episode.duration_ms) }]}
+      actions={<EpisodeActionPanel title={title} episode={episode} onRefresh={onRefresh} />}
     />
   );
 }

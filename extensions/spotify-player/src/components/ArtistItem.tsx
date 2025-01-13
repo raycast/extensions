@@ -1,4 +1,4 @@
-import { Icon, Image } from "@raycast/api";
+import { Image, Icon } from "@raycast/api";
 import { ArtistObject } from "../helpers/spotify.api";
 import { ListOrGridItem } from "./ListOrGridItem";
 import { ArtistActionPanel } from "./ArtistActionPanel";
@@ -6,15 +6,16 @@ import { ArtistActionPanel } from "./ArtistActionPanel";
 type ArtistItemProps = {
   type: "grid" | "list";
   artist: ArtistObject;
+  onRefresh?: () => void;
 };
 
-export function ArtistItem({ type, artist }: ArtistItemProps) {
-  const icon: Image.ImageLike = {
-    source: artist?.images?.[0]?.url ?? Icon.Dot,
-    mask: Image.Mask.Circle,
-  };
-
-  const title = `${artist.name}`;
+export default function ArtistItem({ type, artist, onRefresh }: ArtistItemProps) {
+  const title = artist.name || "Unknown Artist";
+  const icon: Image.ImageLike = artist.images?.[0]?.url
+    ? {
+        source: artist.images[0].url,
+      }
+    : { source: Icon.Person };
 
   return (
     <ListOrGridItem
@@ -22,7 +23,8 @@ export function ArtistItem({ type, artist }: ArtistItemProps) {
       icon={icon}
       title={title}
       content={icon}
-      actions={<ArtistActionPanel title={title} artist={artist} />}
+      accessories={[{ text: `${artist.followers?.total || 0} followers` }]}
+      actions={<ArtistActionPanel title={title} artist={artist} onRefresh={onRefresh} />}
     />
   );
 }

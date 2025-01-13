@@ -1,5 +1,12 @@
 # Spotify Player Changelog
 
+## [Infinite Library Fetch] - {PR_MERGE_DATE}
+
+- Implemented infinite fetching for Your Library to support large music collections
+- Added intelligent caching to improve performance and reduce API calls
+- Optimized memory usage through data minification
+- Added progress indicators and refresh actions for better UX
+
 ## [Generate Playlist Improvement - Artists] - 2024-12-03
 
 - Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
@@ -22,7 +29,7 @@
 
 ## [Quicklink to Add Playing Song to Playlist] - 2024-08-29
 
-- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+- Adds an action to create a Quicklink to add the currently playing song to a specific playlist.
 
 ## [Add Preference to Only Show Music in Search Command] - 2024-08-26
 
@@ -73,7 +80,7 @@
 
 ## [New "Queue" Command] - 2023-01-31
 
-- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+- New `Queue` command allowing the user to view songs/episodes in the queue.
 
 ## [Bug fixes] - 2024-01-31
 
@@ -88,7 +95,7 @@
 
 - Fix showing the like/disliked state of the current track
 
-## [Feature & Optimisation] - 2023-12-02
+## [Feature & Optimization] - 2023-12-02
 
 - Added `Select Device` command to select the device to play music on.
 - Automatically select a device when no device is selected.
@@ -116,9 +123,9 @@
 
 - Fixed a bug that showed 25% when setting the volume to 75%
 
-## [Optimisation] - 2023-07-07
+## [Optimization] - 2023-07-07
 
-This update introduces a few optimisations to the Menu Bar Command. We've reduced the number of API calls, and we've also reduced the number of requests to the Spotify API. This should result in a faster and more responsive experience.
+This update introduces a few optimizations to the Menu Bar Command. We've reduced the number of API calls, and we've also reduced the number of requests to the Spotify API. This should result in a faster and more responsive experience.
 
 In order to achieve this, the extension now checks the Spotify Application for the current state of the player. This means that we only need to make API calls when the state changes. With this approach, you can still listen and control Spotify from any connected device.
 
@@ -267,7 +274,7 @@ We hope you enjoy the new and improved Spotify Player Extension — we've [obses
 ## [Feature] - 2022-05-24
 
 - Added OAuth Support
-- Introduce new command "Like Curent Song"
+- Introduce new command "Like Current Song"
 - Introduce new command "Search Artists"
 - Redesign for existing commands, add feature to preview albums
 

@@ -4,42 +4,59 @@ import { ListOrGridItem } from "./ListOrGridItem";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
-import { useYourLibrary } from "../hooks/useYourLibrary";
+import { MinimalTrack } from "../api/getMySavedTracks";
+import { RefreshAction } from "./RefreshAction";
+import { memo, useMemo } from "react";
 
+// Constants
+const LIKED_SONGS_ICON = "https://misc.scdn.co/liked-songs/liked-songs-64.png";
+const LIKED_SONGS_TITLE = "Liked Songs";
+const LIKED_SONGS_URL = "https://open.spotify.com/collection/tracks";
+
+// Types
 type PlaylistLikedTracksItemProps = {
   type: "grid" | "list";
+  tracks?: {
+    items: MinimalTrack[];
+    total: number;
+  };
+  onRefresh?: () => void;
 };
 
-export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksItemProps) {
+// Memoized action panel component
+const LikedTracksActions = memo(
+  ({ uri, tracks, onRefresh }: { uri: string; tracks?: MinimalTrack[]; onRefresh?: () => void }) => (
+    <ActionPanel>
+      <PlayAction playingContext={uri} />
+      <Action.Push
+        title="Show Songs"
+        icon={{ source: Icon.AppWindowList }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        target={<TracksList tracks={tracks} />}
+      />
+      {onRefresh && <RefreshAction onRefresh={onRefresh} />}
+      <FooterAction url={LIKED_SONGS_URL} uri={uri} title={LIKED_SONGS_TITLE} />
+    </ActionPanel>
+  ),
+);
+
+export default function PlaylistLikedTracksItem({ type, tracks, onRefresh }: PlaylistLikedTracksItemProps) {
   const { meData } = useMe();
-  const title = "Liked Songs";
-  const icon: Image.ImageLike = { source: "https://misc.scdn.co/liked-songs/liked-songs-64.png" };
-  const uri = `spotify:user:${meData?.id}:collection`;
-  const { myLibraryData } = useYourLibrary({
-    keepPreviousData: true,
-  });
+  const icon: Image.ImageLike = { source: LIKED_SONGS_ICON };
+
+  // Memoize URI to prevent unnecessary re-renders
+  const uri = useMemo(() => (meData?.id ? `spotify:user:${meData.id}:collection` : ""), [meData?.id]);
+
+  if (!meData?.id) return null;
 
   return (
     <ListOrGridItem
       type={type}
       icon={icon}
-      title={title}
+      title={LIKED_SONGS_TITLE}
       content={icon}
-      accessories={[{ text: `${myLibraryData?.tracks?.total} songs` }]}
-      actions={
-        <ActionPanel>
-          {meData?.id && <PlayAction playingContext={uri} />}
-          {meData?.id && (
-            <Action.Push
-              title="Show Songs"
-              icon={{ source: Icon.AppWindowList }}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-              target={<TracksList tracks={myLibraryData.tracks?.items} />}
-            />
-          )}
-          <FooterAction url={"https://open.spotify.com/collection/tracks"} uri={uri} title={title} />
-        </ActionPanel>
-      }
+      accessories={[{ text: `${tracks?.total || 0} songs` }]}
+      actions={<LikedTracksActions uri={uri} tracks={tracks?.items} onRefresh={onRefresh} />}
     />
   );
 }

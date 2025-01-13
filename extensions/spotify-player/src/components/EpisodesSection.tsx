@@ -6,16 +6,19 @@ type EpisodesSectionProps = {
   episodes: SimplifiedEpisodeObject[] | undefined;
   limit?: number;
   title?: string;
+  onRefresh?: () => void;
 };
 
-export function EpisodesSection({ episodes, limit, title = "Episodes" }: EpisodesSectionProps) {
+export function EpisodesSection({ episodes, limit, title = "Episodes", onRefresh }: EpisodesSectionProps) {
   if (!episodes) return null;
 
-  const items = episodes.slice(0, limit || episodes.length);
+  const items = limit ? episodes.slice(0, limit) : episodes;
 
   return (
-    <List.Section title={title}>
-      {items?.map((episode) => <EpisodeListItem key={episode.id} episode={episode} />)}
+    <List.Section title={`${title} (${items.length} episodes)`}>
+      {items.map((episode) => (
+        <EpisodeListItem key={episode.id} episode={episode} onRefresh={onRefresh} />
+      ))}
     </List.Section>
   );
 }
