@@ -4,8 +4,8 @@
 
 - When a masked email is created, it will now be in the `pending` state. This allows
   Fastmail to automatically delete the masked email after 24 hours if it is not used
-- Updated create command to show the masked email after creation and subsequently
-  allow creation of a new masked email if you do not like the one previously created
+- Updated create command to allow interactive creation of a new masked email (cmd+shift+enter)
+  so that you can create a new masked email if you do not like the one previously created
   (similar functionality to the 1Password's Fastmail integration)
 - Added email state filter to the list command and removed now redundant
   configurable preference for displaying `pending` & `deleted` masked emails
