@@ -138,6 +138,7 @@
       "title": "Calculate Time or Pace",
       "subtitle": "Workouts",
       "description": "Calculate the time or pace for a workout",
+      "icon": "calculator.png",
       "mode": "view"
     }
   ],
