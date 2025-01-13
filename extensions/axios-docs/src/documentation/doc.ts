@@ -53,7 +53,7 @@ export default {
     {
       title: "🆕 Multipart Bodies",
       url: "https://axios-http.com/docs/multipart",
-    }
+    },
   ],
   Other: [
     {
