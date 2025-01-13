@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Add Command to Calculate Time or Pace] - {PR_MERGE_DATE}
+## [Add Command to Calculate Time or Pace] - 2025-01-13
 
 Added a command to calculate the time or pace for a workout
 
