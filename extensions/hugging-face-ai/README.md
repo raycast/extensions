@@ -4,7 +4,7 @@
 
 The **Hugging Face AI** extension for Raycast allows users to interact with the Hugging Face Inference API seamlessly. With features like asking questions, tracking conversations, creating custom models, and exporting/importing data, this extension is a powerful tool for developers and AI enthusiasts. **All you need is a _free_ access token!**
 
-![Extension Commands](media/extension-commands.png)
+![Extension Commands](media/0-extension-commands.png)
 
 ## Features
 
@@ -42,9 +42,9 @@ To use the extension, you need to configure your Hugging Face API token:
 
 ## Screenshots
 
-![Ask Question Screenshot](metadata/ask-question-1.png)
-![Conversations Screenshot](metadata/conversations-2.png)
-![Custom Models Screenshot](metadata/models-3.png)
+![Ask Question Screenshot](media/1-ask-question.png)
+![Conversations Screenshot](media/2-conversations.png)
+![Custom Models Screenshot](media/3-models.png)
 
 ## Dependencies
 
