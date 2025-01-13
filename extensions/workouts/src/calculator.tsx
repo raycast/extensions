@@ -1,24 +1,33 @@
-import { Form } from "@raycast/api";
+import { Form, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { CalculationMode, distancePresets, PaceCalculatorForm, type DistancePreset } from "./constants";
+import { parseFlexibleTime } from "./utils";
 
 export default function Calculator() {
-  const [distance, setDistance] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [pace, setPace] = useState<string>("");
-  const [mode, setMode] = useState<CalculationMode>("pace");
-  const [unit, setUnit] = useCachedState<"km" | "mi">("unit", "km");
+  const [mode, setMode] = useCachedState<CalculationMode>("calculation_mode", "pace");
+  const [distance, setDistance] = useState<string>("");
   const [selectedPreset, setSelectedPreset] = useState<string>("");
 
-  const handlePresetChange = (preset: string) => {
-    setSelectedPreset(preset);
-    const isPreset = (p: string): p is DistancePreset => p in distancePresets;
+  const preferences: ExtensionPreferences = getPreferenceValues();
 
-    if (isPreset(preset)) {
-      setDistance(distancePresets[preset][unit]);
-    } else {
+  const handleDistanceChange = (value: string) => {
+    const isPreset = (p: string): p is DistancePreset => p in distancePresets;
+    if (isPreset(value)) {
+      setDistance(distancePresets[value][preferences.distance_unit]);
+      setSelectedPreset(value);
+    } else if (value === "") {
       setDistance("");
+      setSelectedPreset("");
+    } else {
+      // Try to parse the value as a number
+      const numValue = parseFloat(value.replace(",", "."));
+      if (!isNaN(numValue)) {
+        setDistance(value);
+        setSelectedPreset("");
+      }
     }
   };
 
@@ -26,8 +35,12 @@ export default function Calculator() {
     const distance = parseFloat(values.distance.replace(",", ".")) || 0;
     if (distance === 0) return "00:00";
 
+    // Parse time using flexible format
+    const parsedTime = parseFlexibleTime(values.time);
+    if (!parsedTime) return "00:00";
+
     // Parse time (HH:MM:SS format)
-    const [hours, minutes, seconds] = values.time.split(":").map(Number);
+    const [hours, minutes, seconds] = parsedTime.split(":").map(Number);
     const totalMinutes = hours * 60 + (minutes || 0) + (seconds || 0) / 60;
 
     // Calculate pace (minutes per unit)
@@ -45,9 +58,24 @@ export default function Calculator() {
     const distance = parseFloat(values.distance.replace(",", ".")) || 0;
     if (distance === 0) return "00:00:00";
 
-    // Parse pace (MM:SS format)
-    const [paceMinutes, paceSeconds] = values.pace.split(":").map(Number);
-    const paceInMinutes = (paceMinutes || 0) + (paceSeconds || 0) / 60;
+    // Parse pace using flexible format
+    let paceInMinutes = 0;
+    const paceValue = values.pace.toLowerCase().trim();
+
+    // Try MM:SS format first
+    const mmssMatch = paceValue.match(/^(\d{1,2}):(\d{1,2})$/);
+    if (mmssMatch) {
+      const [, minutes, seconds] = mmssMatch;
+      paceInMinutes = parseInt(minutes, 10) + parseInt(seconds, 10) / 60;
+    } else {
+      // Try other formats like "5min" or just "5"
+      const minMatch = paceValue.match(/^(\d+(?:\.\d+)?)\s*(?:min(?:utes?)?)?$/);
+      if (minMatch) {
+        paceInMinutes = parseFloat(minMatch[1]);
+      } else {
+        return "00:00:00";
+      }
+    }
 
     // Calculate total time
     const totalMinutes = distance * paceInMinutes;
@@ -65,72 +93,60 @@ export default function Calculator() {
     distance,
     time,
     pace,
-    distanceUnit: unit,
+    distanceUnit: preferences.distance_unit,
     mode,
   };
 
   const calculatedPace = mode === "pace" && distance && time ? calculatePace(values) : "00:00:00";
   const calculatedTime = mode === "time" && distance && pace ? calculateTime(values) : "00:00:00";
 
+  // console.log({ values, calculatedPace, calculatedTime });
   return (
     <Form>
       <Form.Dropdown
         id="mode"
-        title="Calculation Mode"
+        title="Calculate"
         value={mode}
         onChange={(newValue) => setMode(newValue as CalculationMode)}
       >
-        <Form.Dropdown.Item value="pace" title="Calculate Pace" />
-        <Form.Dropdown.Item value="time" title="Calculate Time from Pace" />
+        <Form.Dropdown.Item value="pace" title="Pace" />
+        <Form.Dropdown.Item value="time" title="Time from Pace" />
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="preset"
-        title="Preset Distances"
-        placeholder="Select a preset distance"
-        value={selectedPreset}
-        onChange={handlePresetChange}
-      >
-        <Form.Dropdown.Item value="" title="Custom" />
-        <Form.Dropdown.Item value="Marathon" title="Marathon" />
-        <Form.Dropdown.Item value="Half-Marathon" title="Half-Marathon" />
-        <Form.Dropdown.Item value="10K" title="10K" />
-        <Form.Dropdown.Item value="5K" title="5K" />
-      </Form.Dropdown>
-
-      <Form.TextField
         id="distance"
         title="Distance"
-        placeholder="Enter distance"
-        value={distance}
-        onChange={(newDistance) => {
-          setDistance(newDistance);
-          setSelectedPreset("");
-        }}
-      />
-      {mode === "pace" ? (
-        <Form.TextField id="time" title="Time" placeholder="HH:MM:SS" value={time} onChange={setTime} />
-      ) : (
-        <Form.TextField id="pace" title="Target Pace" placeholder="MM:SS" value={pace} onChange={setPace} />
-      )}
-      <Form.Dropdown
-        id="distanceUnit"
-        title="Unit"
-        value={unit}
-        onChange={(newValue) => {
-          const newUnit = newValue as "km" | "mi";
-          setUnit(newUnit);
-          if (selectedPreset in distancePresets) {
-            const value = distancePresets[selectedPreset as DistancePreset][newUnit];
-            setDistance(value);
-          }
-        }}
+        placeholder={`Enter or select distance in ${preferences.distance_unit}`}
+        value={selectedPreset || distance}
+        onChange={handleDistanceChange}
+        onSearchTextChange={handleDistanceChange}
+        storeValue
       >
-        <Form.Dropdown.Item value="km" title="Kilometers" />
-        <Form.Dropdown.Item value="mi" title="Miles" />
+        <Form.Dropdown.Section title="Custom">
+          {!distance && <Form.Dropdown.Item value={distance} title="Enter distance" />}
+          {distance && !selectedPreset && (
+            <Form.Dropdown.Item value={distance} title={`${distance} ${preferences.distance_unit}`} />
+          )}
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Presets">
+          {Object.entries(distancePresets).map(([presetName, presetValues]) => (
+            <Form.Dropdown.Item
+              key={presetName}
+              value={presetName}
+              title={`${presetName} (${presetValues[preferences.distance_unit]} ${preferences.distance_unit})`}
+            />
+          ))}
+        </Form.Dropdown.Section>
       </Form.Dropdown>
+
       {mode === "pace" ? (
-        <Form.Description title="Calculated Pace" text={`${calculatedPace}/${unit}`} />
+        <Form.TextField id="time" title="Time" placeholder="HH:MM:SS, 25min, 5h4m23s" value={time} onChange={setTime} />
+      ) : (
+        <Form.TextField id="pace" title="Target Pace" placeholder="MM:SS, 5min, or 5" value={pace} onChange={setPace} />
+      )}
+
+      {mode === "pace" ? (
+        <Form.Description title="Calculated Pace" text={`${calculatedPace}/${preferences.distance_unit}`} />
       ) : (
         <Form.Description title="Required Time" text={calculatedTime} />
       )}

@@ -56,8 +56,6 @@ export const sportIcons: { [key: string]: string } = {
 export const distancePresets = {
   Marathon: { km: "42.195", mi: "26.219" },
   "Half-Marathon": { km: "21.0975", mi: "13.1095" },
-  "10K": { km: "10", mi: "6.2137" },
-  "5K": { km: "5", mi: "3.1069" },
 } as const;
 
 export interface PaceCalculatorForm {
