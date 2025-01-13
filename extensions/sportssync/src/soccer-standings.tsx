@@ -2,12 +2,53 @@ import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Stats {
+  displayValue: string;
+  summary?: string;
+}
+
+interface Logo {
+  href: string;
+}
+
+interface Link {
+  href: string;
+}
+
+interface Team {
+  displayName: string;
+  logos: Logo[];
+  links: Link[];
+}
+
+interface StandingsEntry {
+  team: Team;
+  stats: Stats[];
+}
+
+interface StandingsData {
+  children: [
+    {
+      name: string;
+      standings: {
+        entries: StandingsEntry[];
+      };
+    },
+    {
+      name: string;
+      standings: {
+        entries: StandingsEntry[];
+      };
+    },
+  ];
+}
+
 export default function scoresAndSchedule() {
   // Fetch Driver Standings
 
   const [currentLeague, displaySelectLeague] = useState("EPL");
-  const { isLoading: eplStats, data: eplData } = useFetch(
-    "https://site.web.api.espn.com/apis/v2/sports/soccer/ENG.1/standings",
+  const { isLoading: eplStats, data: eplData } = useFetch<StandingsData>(
+    "http://site.web.api.espn.com/apis/v2/sports/soccer/ENG.1/standings",
   );
 
   const eplItems = eplData?.children?.[0]?.standings?.entries || [];
@@ -30,7 +71,7 @@ export default function scoresAndSchedule() {
 
   // Fetch Constructor Standings
 
-  const { isLoading: sllStats, data: sllData } = useFetch(
+  const { isLoading: sllStats, data: sllData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/ESP.1/standings",
   );
 
@@ -54,7 +95,7 @@ export default function scoresAndSchedule() {
 
   // Fetch NBA Standings
 
-  const { isLoading: gerStats, data: gerData } = useFetch(
+  const { isLoading: gerStats, data: gerData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/GER.1/standings",
   );
 
@@ -76,7 +117,7 @@ export default function scoresAndSchedule() {
     );
   });
 
-  const { isLoading: itaStats, data: itaData } = useFetch(
+  const { isLoading: itaStats, data: itaData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/ITA.1/standings",
   );
 
@@ -116,23 +157,23 @@ export default function scoresAndSchedule() {
     >
       {currentLeague === "EPL" && (
         <>
-          <List.Section title={`${eplData.children[0].name}`}>{eplTeams}</List.Section>
+          <List.Section title={`${eplData?.children[0]?.name}`}>{eplTeams}</List.Section>
         </>
       )}
 
       {currentLeague === "SLL" && (
         <>
-          <List.Section title={`${sllData.children[0].name}`}>{sllTeams}</List.Section>
+          <List.Section title={`${sllData?.children[0]?.name}`}>{sllTeams}</List.Section>
         </>
       )}
       {currentLeague === "GER" && (
         <>
-          <List.Section title={`${gerData.children[0].name}`}>{gerTeams}</List.Section>
+          <List.Section title={`${gerData?.children[0]?.name}`}>{gerTeams}</List.Section>
         </>
       )}
       {currentLeague === "ITA" && (
         <>
-          <List.Section title={`${itaData.children[0].name}`}>{itaTeams}</List.Section>
+          <List.Section title={`${itaData?.children[0]?.name}`}>{itaTeams}</List.Section>
         </>
       )}
     </List>

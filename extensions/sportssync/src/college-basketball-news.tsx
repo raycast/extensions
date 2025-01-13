@@ -2,11 +2,22 @@ import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Article {
+  headline: string;
+  published: string;
+  images: { url: string }[];
+  links: { web: { href: string } };
+}
+
+interface ArticlesResponse {
+  articles: Article[];
+}
+
 export default function scoresAndSchedule() {
   // Fetch Men's NCAA Articles
 
   const [currentLeague, displaySelectLeague] = useState("Men's NCAA Games");
-  const { isLoading: mncaaArticlesStatus, data: mncaaArticlesData } = useFetch(
+  const { isLoading: mncaaArticlesStatus, data: mncaaArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/news",
   );
 
@@ -38,7 +49,7 @@ export default function scoresAndSchedule() {
 
   // Fetch Women's NCAA Articles
 
-  const { isLoading: wncaaArticlesStatus, data: wncaaArticlesData } = useFetch(
+  const { isLoading: wncaaArticlesStatus, data: wncaaArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/news",
   );
 

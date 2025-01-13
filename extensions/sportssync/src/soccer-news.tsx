@@ -1,10 +1,21 @@
 import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+interface Article {
+  headline: string;
+  published: string;
+  images: { url: string }[];
+  links: { web: { href: string } };
+}
+
+interface ArticlesResponse {
+  articles: Article[];
+}
+
 export default function scoresAndSchedule() {
   // Fetch Soccer Articles
 
-  const { isLoading: soccerArticlesStatus, data: soccerArticlesData } = useFetch(
+  const { isLoading: soccerArticlesStatus, data: soccerArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/news",
   );
 
@@ -23,7 +34,9 @@ export default function scoresAndSchedule() {
       <List.Item
         key={index}
         title={`${soccerArticle.headline}`}
-        icon={soccerArticle.images && soccerArticle.images[0]?.url ? { source: soccerArticle.images[0].url } : null}
+        icon={
+          soccerArticle.images && soccerArticle.images[0]?.url ? { source: soccerArticle.images[0].url } : undefined
+        }
         accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
         actions={
           <ActionPanel>

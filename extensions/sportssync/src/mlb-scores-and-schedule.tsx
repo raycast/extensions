@@ -1,11 +1,49 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-export default function command() {
-  const { isLoading, data } = useFetch("https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard");
+interface Competitor {
+  team: {
+    abbreviation: string;
+    logo: string;
+    links: { href: string }[];
+  };
+  score: string;
+}
 
-  const games = data.events;
-  const gameItems = [];
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Game {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Game[];
+  day: { date: string };
+}
+
+export default function command() {
+  const { isLoading, data } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
+  );
+
+  const games = data?.events || [];
+  const gameItems: JSX.Element[] = [];
 
   games.forEach((game, index) => {
     const gameTime = new Date(game.date).toLocaleTimeString([], {
@@ -17,7 +55,8 @@ export default function command() {
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
 
-    function getPeriodWithSuffix(period) {
+    function getPeriodWithSuffix(period: number | undefined): string {
+      if (period === undefined) return "";
       if (period === 1) return `${period}st`;
       if (period === 2) return `${period}nd`;
       if (period === 3) return `${period}rd`;

@@ -1,8 +1,45 @@
 import { Detail, List, Color, Action, ActionPanel, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+interface Athlete {
+  shortName: string;
+}
+
+interface Competitor {
+  athlete: Athlete;
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+  status: Status;
+}
+
+interface Race {
+  id: string;
+  shortName: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Race[];
+  day: { date: string };
+  leagues: { logos: { href: string }[] }[];
+}
 export default function command() {
-  const { isLoading, data } = useFetch("https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard");
+  const { isLoading, data } = useFetch<Response>("https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard");
 
   if (isLoading) {
     return <Detail isLoading={true} />;
@@ -12,8 +49,8 @@ export default function command() {
     return <Detail markdown="No data found." />;
   }
 
-  const races = data.events;
-  const raceItems = [];
+  const races = data?.events || [];
+  const raceItems: JSX.Element[] = [];
 
   races.forEach((race, index) => {
     const gameTime = new Date(race.date).toLocaleTimeString([], {

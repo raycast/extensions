@@ -1,8 +1,43 @@
 import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+interface Stats {
+  displayValue: string;
+  summary?: string;
+}
+
+interface Team {
+  displayName: string;
+  logos: { href: string }[];
+  links: { href: string }[];
+}
+
+interface StandingsEntry {
+  team: Team;
+  stats: Stats[];
+}
+
+interface StandingsData {
+  children: [
+    {
+      name: string;
+      standings: {
+        entries: StandingsEntry[];
+      };
+    },
+    {
+      name: string;
+      standings: {
+        entries: StandingsEntry[];
+      };
+    },
+  ];
+}
+
 export default function command() {
-  const { isLoading, data } = useFetch("https://site.web.api.espn.com/apis/v2/sports/hockey/nhl/standings");
+  const { isLoading, data } = useFetch<StandingsData>(
+    "https://site.web.api.espn.com/apis/v2/sports/hockey/nhl/standings",
+  );
 
   if (isLoading) {
     return <Detail isLoading={true} />;

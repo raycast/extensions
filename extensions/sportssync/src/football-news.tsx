@@ -2,11 +2,22 @@ import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Article {
+  headline: string;
+  published: string;
+  images: { url: string }[];
+  links: { web: { href: string } };
+}
+
+interface ArticlesResponse {
+  articles: Article[];
+}
+
 export default function scoresAndSchedule() {
   // Fetch NFL Articles
 
   const [currentLeague, displaySelectLeague] = useState("NFL Articles");
-  const { isLoading: nflArticlesStatus, data: nflArticlesData } = useFetch(
+  const { isLoading: nflArticlesStatus, data: nflArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news",
   );
 
@@ -38,7 +49,7 @@ export default function scoresAndSchedule() {
 
   // Fetch NCAA Articles
 
-  const { isLoading: ncaaArticlesStatus, data: ncaaArticlesData } = useFetch(
+  const { isLoading: ncaaArticlesStatus, data: ncaaArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/football/college-football/news",
   );
 

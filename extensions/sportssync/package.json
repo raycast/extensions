@@ -138,13 +138,6 @@
       "title": "F1 News",
       "description": "View news articles across the F1",
       "mode": "view"
-    },
-    {
-      "name": "live-scores",
-      "title": "Live Scores",
-      "description": "View live scores from the NHL, NBA, WNBA, NCAA Basketball, NFL, NCAA Football, MLB, F1, and UFC directly from your menu bar",
-      "mode": "menu-bar",
-      "interval": "20s"
     }
   ],
   "dependencies": {

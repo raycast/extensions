@@ -2,14 +2,52 @@ import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Game {
+  date: string;
+  name: string;
+  competitions: Competition[];
+  status: gameStatus;
+  links: { href: string }[];
+  shortName: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Competitor {
+  team: Team;
+  score: string;
+}
+
+interface Team {
+  abbreviation: string;
+  logo: string;
+  links: { href: string }[];
+}
+
+interface gameStatus {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 export default function scoresAndSchedule() {
   // Fetch NFL Stats
   const [currentLeague, displaySelectLeague] = useState("NFL Games");
-  const { isLoading: nflScheduleStats, data: nflScoresAndSchedule } = useFetch(
-    "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
-  );
+  const { isLoading: nflScheduleStats, data: nflScoresAndSchedule } = useFetch<{
+    events: Game[];
+  }>("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
 
-  const nflDayItems = [];
+  const nflDayItems: DayItems[] = [];
   const nflGames = nflScoresAndSchedule?.events || [];
 
   nflGames.forEach((nflGame, index) => {
@@ -52,7 +90,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    nflDay.games.push(
+    nflDay?.games.push(
       <List.Item
         key={index}
         title={`${nflGame.name}`}
@@ -76,11 +114,11 @@ export default function scoresAndSchedule() {
   });
 
   // Fetch NCAA Stats
-  const { isLoading: ncaaScheduleStats, data: ncaaScoresAndSchedule } = useFetch(
-    "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard",
-  );
+  const { isLoading: ncaaScheduleStats, data: ncaaScoresAndSchedule } = useFetch<{
+    events: Game[];
+  }>("https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard");
 
-  const ncaaDayItems = [];
+  const ncaaDayItems: DayItems[] = [];
   const ncaaGames = ncaaScoresAndSchedule?.events || [];
 
   ncaaGames.forEach((ncaaGame, index) => {
@@ -125,7 +163,7 @@ export default function scoresAndSchedule() {
     }
 
     if (!ncaaGame.shortName.includes("TBD")) {
-      ncaaDay.games.push(
+      ncaaDay?.games?.push(
         <List.Item
           key={index}
           title={`${ncaaGame.name}`}
@@ -153,7 +191,7 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  ncaaDayItems.sort((a, b) => new Date(a.title) - new Date(b.title));
+  ncaaDayItems.sort((a, b) => new Date(a.title).getTime() - new Date(b.title).getTime());
 
   return (
     <List

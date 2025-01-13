@@ -2,11 +2,47 @@ import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Competitor {
+  team: {
+    abbreviation: string;
+    logo: string;
+    links: { href: string }[];
+  };
+  score: string;
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Game {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Game[];
+  day: { date: string };
+}
+
 export default function scoresAndSchedule() {
   // Fetch NBA Stats
 
   const [currentLeague, displaySelectLeague] = useState("NBA Games");
-  const { isLoading: nbaScheduleStats, data: nbaScoresAndSchedule } = useFetch(
+  const { isLoading: nbaScheduleStats, data: nbaScoresAndSchedule } = useFetch<Response>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
   );
 
@@ -63,7 +99,7 @@ export default function scoresAndSchedule() {
 
   // Fetch WNBA Stats
 
-  const { isLoading: wnbaScheduleStats, data: wnbaScoresAndSchedule } = useFetch(
+  const { isLoading: wnbaScheduleStats, data: wnbaScoresAndSchedule } = useFetch<Response>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard",
   );
   const wnbaGames = wnbaScoresAndSchedule?.events || [];
@@ -121,8 +157,8 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  const nbaGamesDate = nbaScoresAndSchedule.day.date;
-  const wnbaGamesDate = wnbaScoresAndSchedule.day.date;
+  const nbaGamesDate = nbaScoresAndSchedule?.day?.date ?? "No date available";
+  const wnbaGamesDate = wnbaScoresAndSchedule?.day?.date ?? "No date available";
 
   return (
     <List

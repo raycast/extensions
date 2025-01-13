@@ -1,15 +1,50 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+interface Competitor {
+  team: {
+    abbreviation: string;
+    logo: string;
+    links: { href: string }[];
+  };
+  score: string;
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Game {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Game[];
+  day: { date: string };
+}
+
 export default function scoresAndSchedule() {
   // Fetch NHL Stats
-
-  const { isLoading: nhlScheduleStats, data: nhlScoresAndSchedule } = useFetch(
+  const { isLoading: nhlScheduleStats, data: nhlScoresAndSchedule } = useFetch<Response>(
     "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
   );
 
   const nhlGames = nhlScoresAndSchedule?.events || [];
-  const nhlItems = [];
+  const nhlItems: JSX.Element[] = [];
 
   nhlGames.forEach((nhlGame, index) => {
     const gameTime = new Date(nhlGame.date).toLocaleTimeString([], {

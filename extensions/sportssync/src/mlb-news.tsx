@@ -1,10 +1,21 @@
 import { Detail, List, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
+interface Article {
+  headline: string;
+  published: string;
+  images: { url: string }[];
+  links: { web: { href: string } };
+}
+
+interface ArticlesResponse {
+  articles: Article[];
+}
+
 export default function scoresAndSchedule() {
   // Fetch MLB Articles
 
-  const { isLoading: mlbArticlesStatus, data: mlbArticlesData } = useFetch(
+  const { isLoading: mlbArticlesStatus, data: mlbArticlesData } = useFetch<ArticlesResponse>(
     "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/news",
   );
 

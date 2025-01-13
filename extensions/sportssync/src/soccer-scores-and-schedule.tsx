@@ -2,13 +2,50 @@ import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Competitor {
+  team: {
+    abbreviation: string;
+    logo: string;
+    links: { href: string }[];
+  };
+  score: string;
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Game {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Game[];
+  day: { date: string };
+}
+
 export default function scoresAndSchedule() {
   // Fetch EPL Stats
 
   const [currentLeague, displaySelectLeague] = useState("EPL");
-  const { isLoading: eplScheduleStats, data: eplScoresAndSchedule } = useFetch(
-    "http://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/scoreboard",
+  const { isLoading: eplScheduleStats, data: eplScoresAndSchedule } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/scoreboard",
   );
+
   const eplGames = eplScoresAndSchedule?.events || [];
   const eplItems = eplGames.map((eplGame, index) => {
     const gameTime = new Date(eplGame.date).toLocaleTimeString([], {
@@ -20,13 +57,14 @@ export default function scoresAndSchedule() {
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
 
-    function getSoccerHalfWithSuffix(half) {
+    function getSoccerHalfWithSuffix(half: number): string {
       if (half === 1) return `${half}st Half`;
       if (half === 2) return `${half}nd Half`;
-      return `${half} Half`;
+      if (half === 3) return `${half}rd Half`;
+      return `${half}th Half`;
     }
 
-    const half = eplGame.status.period;
+    const half = eplGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
     if (eplGame.status.type.state === "in") {
@@ -71,8 +109,8 @@ export default function scoresAndSchedule() {
 
   // Fetch SLL Stats
 
-  const { isLoading: sllScheduleStats, data: sllScoresAndSchedule } = useFetch(
-    "http://site.api.espn.com/apis/site/v2/sports/soccer/ESP.1/scoreboard",
+  const { isLoading: sllScheduleStats, data: sllScoresAndSchedule } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/ESP.1/scoreboard",
   );
   const sllGames = sllScoresAndSchedule?.events || [];
   const sllItems = sllGames.map((sllGame, index) => {
@@ -85,13 +123,13 @@ export default function scoresAndSchedule() {
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
 
-    function getSoccerHalfWithSuffix(half) {
+    function getSoccerHalfWithSuffix(half: number) {
       if (half === 1) return `${half}st Half`;
       if (half === 2) return `${half}nd Half`;
-      return `${half} Half`;
+      return `${half}th Half`;
     }
 
-    const half = sllGame.status.period;
+    const half = sllGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
     if (sllGame.status.type.state === "in") {
@@ -136,8 +174,8 @@ export default function scoresAndSchedule() {
 
   // Fetch Ger Games
 
-  const { isLoading: gerScheduleStats, data: gerScoresAndSchedule } = useFetch(
-    "http://site.api.espn.com/apis/site/v2/sports/soccer/GER.1/scoreboard",
+  const { isLoading: gerScheduleStats, data: gerScoresAndSchedule } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/GER.1/scoreboard",
   );
   const gerGames = gerScoresAndSchedule?.events || [];
   const gerItems = gerGames.map((gerGame, index) => {
@@ -150,13 +188,13 @@ export default function scoresAndSchedule() {
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
 
-    function getSoccerHalfWithSuffix(half) {
+    function getSoccerHalfWithSuffix(half: number) {
       if (half === 1) return `${half}st Half`;
       if (half === 2) return `${half}nd Half`;
-      return `${half} Half`;
+      return `${half}th Half`;
     }
 
-    const half = gerGame.status.period;
+    const half = gerGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
     if (gerGame.status.type.state === "in") {
@@ -201,8 +239,8 @@ export default function scoresAndSchedule() {
 
   // Fetch Ita Games
 
-  const { isLoading: itaScheduleStats, data: itaScoresAndSchedule } = useFetch(
-    "http://site.api.espn.com/apis/site/v2/sports/soccer/ITA.1/scoreboard",
+  const { isLoading: itaScheduleStats, data: itaScoresAndSchedule } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/ITA.1/scoreboard",
   );
   const itaGames = itaScoresAndSchedule?.events || [];
   const itaItems = itaGames.map((itaGame, index) => {
@@ -215,13 +253,13 @@ export default function scoresAndSchedule() {
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
 
-    function getSoccerHalfWithSuffix(half) {
+    function getSoccerHalfWithSuffix(half: number) {
       if (half === 1) return `${half}st Half`;
       if (half === 2) return `${half}nd Half`;
-      return `${half} Half`;
+      return `${half}th Half`;
     }
 
-    const half = itaGame.status.period;
+    const half = itaGame.status.period ?? 0;
     const halfWithSuffix = getSoccerHalfWithSuffix(half);
 
     if (itaGame.status.type.state === "in") {
@@ -268,10 +306,10 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  const eplGamesDate = eplScoresAndSchedule.day.date;
-  const sllGamesDate = sllScoresAndSchedule.day.date;
-  const gerGamesDate = gerScoresAndSchedule.day.date;
-  const itaGamesDate = itaScoresAndSchedule.day.date;
+  const eplGamesDate = eplScoresAndSchedule?.day?.date ?? "No date available";
+  const sllGamesDate = sllScoresAndSchedule?.day?.date ?? "No date available";
+  const gerGamesDate = gerScoresAndSchedule?.day?.date ?? "No date available";
+  const itaGamesDate = itaScoresAndSchedule?.day?.date ?? "No date available";
 
   return (
     <List

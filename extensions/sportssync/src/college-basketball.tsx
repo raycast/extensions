@@ -2,11 +2,48 @@ import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+interface Competitor {
+  team: {
+    abbreviation: string;
+    logo: string;
+    links: { href: string }[];
+  };
+  score: string;
+}
+
+interface Status {
+  type: {
+    state: string;
+    completed?: boolean;
+  };
+  period?: number;
+  displayClock?: string;
+}
+
+interface Competition {
+  competitors: Competitor[];
+}
+
+interface Game {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  competitions: Competition[];
+  links: { href: string }[];
+}
+
+interface Response {
+  events: Game[];
+  day: { date: string };
+  eventsDate?: { date: string };
+}
+
 export default function scoresAndSchedule() {
   // Fetch Men's NCAA Stats
 
   const [currentLeague, displaySelectLeague] = useState("Men's NCAA Games");
-  const { isLoading: mncaaScheduleStats, data: mncaaScoresAndSchedule } = useFetch(
+  const { isLoading: mncaaScheduleStats, data: mncaaScoresAndSchedule } = useFetch<Response>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
   );
   const mncaaGames = mncaaScoresAndSchedule?.events || [];
@@ -62,7 +99,7 @@ export default function scoresAndSchedule() {
 
   // Fetch Women's NCAA Stats
 
-  const { isLoading: wncaaScheduleStats, data: wncaaScoresAndSchedule } = useFetch(
+  const { isLoading: wncaaScheduleStats, data: wncaaScoresAndSchedule } = useFetch<Response>(
     "https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/scoreboard",
   );
 
@@ -121,14 +158,14 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  const mncaaGamesDate = mncaaScoresAndSchedule.eventsDate.date;
+  const mncaaGamesDate = mncaaScoresAndSchedule?.eventsDate?.date ?? "No date available";
   const mncaaSectionDate = new Date(mncaaGamesDate).toLocaleDateString([], {
     month: "long",
     day: "2-digit",
     year: "numeric",
   });
 
-  const wncaaGamesDate = wncaaScoresAndSchedule.eventsDate.date;
+  const wncaaGamesDate = wncaaScoresAndSchedule?.eventsDate?.date ?? "No date available";
   const wncaaSectionDate = new Date(wncaaGamesDate).toLocaleDateString([], {
     month: "long",
     day: "2-digit",
