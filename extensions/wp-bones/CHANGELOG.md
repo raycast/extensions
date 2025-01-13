@@ -1,5 +1,10 @@
 # WP Bones Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- 🩹 Addressed minor URL-related issues
+- 🐛 fixes the discord URL
+
 ## [News features and improvements] - 2024-11-23
 
 - ✨ Added `useVersion()` hooks with comprehensive error handling mechanisms
