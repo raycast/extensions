@@ -97,6 +97,7 @@ function Search() {
                   <Action.CopyToClipboard
                     title="Copy Huddle Link"
                     content={`https://app.slack.com/huddle/${workspaceId}/${conversationId}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
 
                   <ActionPanel.Section>
