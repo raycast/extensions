@@ -41,6 +41,18 @@ export default async function main() {
 }
 
 async function ai(text: string, openaiKey: string, language: string, endpoint: string, model: string) {
+  // get current date and time to string format, to let the LLM know the current date and time
+  // date format: YYYY-MM-DD
+  const date_str = new Date().toISOString().split("T")[0];
+  // time format: HH:MM:SS
+  const time_str = new Date().toISOString().split("T")[1].split(".")[0];
+  // current week day
+  const week_day = new Date().getDay().toString();
+
+  console.log("date_str:", date_str);
+  console.log("time_str:", time_str);
+  console.log("week_day:", week_day);
+
   const systemMessage = `\
 Extract schedule information from the text provided by the user.
 The output should be in the following JSON format.
@@ -57,10 +69,11 @@ The output should be in the following JSON format.
 
 Note:
 * Output in ${language}
+* Current date: ${date_str}, Current time: ${time_str}, Current week day: ${week_day}, try to set the event date and time based on the current date and time
 * Do not include any content other than JSON format in the output
 * If the organizer's name is known, include it in the title
 * Ensure the location is easily identifiable
-* If the end date and time are unknown, set it to 2 hours after the start date and time\
+* If the duration is not specified, assume it is 2 hours
 `;
   const openai = new OpenAI({ apiKey: openaiKey, baseURL: endpoint });
   const response = await openai.chat.completions.create({
@@ -78,6 +91,18 @@ Note:
 }
 
 function toURL(json: CalendarEvent) {
-  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${json.title}&dates=${json.start_date}T${json.start_time}/${json.end_date}T${json.end_time}&details=${json.details}&location=${json.location}&trp=false`;
+  // Clean up and format dates/times - remove any non-numeric characters
+  const startDateTime = `${json.start_date.replace(/-/g, "")}T${json.start_time.replace(/:/g, "")}00`;
+  const endDateTime = `${json.end_date.replace(/-/g, "")}T${json.end_time.replace(/:/g, "")}00`;
+
+  // Encode parameters for URL safety
+  const params = {
+    text: encodeURIComponent(json.title),
+    dates: `${startDateTime}/${endDateTime}`,
+    details: encodeURIComponent(json.details),
+    location: encodeURIComponent(json.location),
+  };
+
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${params.text}&dates=${params.dates}&details=${params.details}&location=${params.location}&trp=false`;
   return url;
 }
