@@ -2,14 +2,8 @@ import { showToast, Toast, getPreferenceValues, AI, BrowserExtension } from "@ra
 import { marked } from "marked";
 import fetch from "node-fetch";
 
-interface Preferences {
-  readwiseToken: string;
-  autoTranslate: boolean;
-  targetLanguage: string;
-}
-
 async function saveToReader(html: string, title: string, url: string) {
-  const { readwiseToken } = getPreferenceValues<Preferences>();
+  const { readwiseToken } = getPreferenceValues();
 
   try {
     const response = await fetch("https://readwise.io/api/v3/save/", {
@@ -50,7 +44,7 @@ If the content contains acronyms, names of people, places, product names, etc., 
 
 export default async function Command() {
   try {
-    const { autoTranslate, targetLanguage } = getPreferenceValues<Preferences>();
+    const { autoTranslate, targetLanguage } = getPreferenceValues();
     const content = await BrowserExtension.getContent({ format: "markdown" });
     const tabs = await BrowserExtension.getTabs();
     const activeTab = tabs.find((tab) => tab.active);
