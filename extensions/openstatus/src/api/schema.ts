@@ -26,7 +26,7 @@ export const WhoamiSchema = z.object({
 
 export const StatusEnum = ["investigating", "identified", "monitoring", "resolved"] as const;
 
-export const StatusReportSchema = z.object({
+export const StatusReportCreateSchema = z.object({
   title: z.string(),
   status: z.enum(StatusEnum),
   monitorIds: z.array(z.number()),
@@ -35,13 +35,34 @@ export const StatusReportSchema = z.object({
   message: z.string(),
 });
 
-export type StatusReport = z.infer<typeof StatusReportSchema>;
+export const StatusReportUpdateSchema = z.object({
+  status: z.enum(StatusEnum),
+  message: z.string(),
+  statusReportId: z.number(),
+  date: z.coerce.date().nullable(),
+});
+
+export type StatusReportUpdate = z.infer<typeof StatusReportUpdateSchema>;
+export const StatusReportSchema = z
+  .object({
+    id: z.number(),
+  })
+  .merge(
+    StatusReportCreateSchema.omit({
+      monitorIds: true,
+      date: true,
+      message: true,
+    }),
+  );
+
+export type StatusReport = z.infer<typeof StatusReportCreateSchema>;
 
 export const pageSchema = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(),
   slug: z.string(),
+  customDomain: z.string().optional().nullable(),
 });
 
 export type Page = z.infer<typeof pageSchema>;

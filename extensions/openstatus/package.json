@@ -26,6 +26,20 @@
       "subtitle": "OpenStatus",
       "description": "Create a new status report for your status page",
       "mode": "view"
+    },
+    {
+      "name": "show-status-page",
+      "title": "Show Status Page",
+      "subtitle": "OpenStatus",
+      "description": "View all your status page from your OpenStatus account",
+      "mode": "view"
+    },
+    {
+      "name": "create-status-report-update",
+      "title": "Create Status Report Update",
+      "subtitle": "OpenStatus",
+      "description": "Create a new Status Report Update for your Status Report",
+      "mode": "view"
     }
   ],
   "preferences": [
