@@ -136,7 +136,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   }
 
   const remindersOnDate = useTimeOfDayGrouping
-    ? allDueDates.filter((date) => isBefore(date, today))
+    ? allDueDates.filter((date) => !isBefore(date, today) && date !== today)
     : allDueDates.filter((date) => date);
 
   remindersOnDate.forEach((date) => {
@@ -299,6 +299,8 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
           title = "All";
         } else if (listId === "today") {
           title = "Today";
+        } else if (listId === "todo") {
+          title = "Todo";
         } else if (listId === "scheduled") {
           title = "Scheduled";
         } else {
