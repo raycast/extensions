@@ -15,11 +15,11 @@
     "axsuul",
     "iwex",
     "xilopaint",
-    "marcjulian",
     "ChangeHow",
     "ridemountainpig",
     "1weiho"
   ],
+    "pastContributors": ["marcjulian"],
   "license": "MIT",
   "commands": [
     {
