@@ -1,34 +1,15 @@
 import { Form } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CalculationMode, distancePresets, PaceCalculatorForm, type DistancePreset } from "./constants";
 
 export default function Calculator() {
-  const [calculatedPace, setCalculatedPace] = useState<string>("00:00:00");
-  const [calculatedTime, setCalculatedTime] = useState<string>("00:00:00");
   const [distance, setDistance] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [pace, setPace] = useState<string>("");
   const [mode, setMode] = useState<CalculationMode>("pace");
   const [unit, setUnit] = useCachedState<"km" | "mi">("unit", "km");
   const [selectedPreset, setSelectedPreset] = useState<string>("");
-
-  useEffect(() => {
-    const values = {
-      distance,
-      time,
-      pace,
-      distanceUnit: unit,
-      mode,
-    };
-    if (mode === "pace" && distance && time) {
-      const calculatedPace = calculatePace(values);
-      setCalculatedPace(calculatedPace);
-    } else if (mode === "time" && distance && pace) {
-      const calculatedTime = calculateTime(values);
-      setCalculatedTime(calculatedTime);
-    }
-  }, [distance, time, pace, unit, mode]);
 
   const handlePresetChange = (preset: string) => {
     setSelectedPreset(preset);
@@ -78,6 +59,18 @@ export default function Calculator() {
 
     return `${String(resultHours).padStart(2, "0")}:${String(resultMinutes).padStart(2, "0")}:${String(resultSeconds).padStart(2, "0")}`;
   };
+
+  // Calculate values during render
+  const values = {
+    distance,
+    time,
+    pace,
+    distanceUnit: unit,
+    mode,
+  };
+
+  const calculatedPace = mode === "pace" && distance && time ? calculatePace(values) : "00:00:00";
+  const calculatedTime = mode === "time" && distance && pace ? calculateTime(values) : "00:00:00";
 
   return (
     <Form>
