@@ -1,0 +1,38 @@
+{
+  "name": "cursors",
+  "title": "Cursors",
+  "description": "All macOS cursors at your fingertips",
+  "icon": "cursors.png",
+  "author": "storm",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Cursors",
+      "description": "All macOS cursors at your fingertips",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
