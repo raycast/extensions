@@ -15,8 +15,8 @@ import { extractCode } from "./utils";
  * Tracks processed messages to avoid duplicate processing
  */
 interface MessageStorage {
-  messages: Message[];      // Currently displayed messages
-  latestTimestamp: string | null;  // For incremental updates
+  messages: Message[]; // Currently displayed messages
+  latestTimestamp: string | null; // For incremental updates
   hasCode: Record<string, boolean>; // Cache of message ID -> has code
 }
 
@@ -29,14 +29,14 @@ interface MessageStorage {
 async function getEmails(searchType: SearchType, sinceDate?: Date, knownGuids: string[] = []): Promise<Message[]> {
   const prefs = getPreferenceValues<Preferences>();
   const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
-  
+
   // Calculate seconds since epoch for our cutoff date
-  const cutoffSeconds = sinceDate 
+  const cutoffSeconds = sinceDate
     ? Math.floor(sinceDate.getTime() / 1000)
-    : Math.floor(Date.now() / 1000) - (lookbackMinutes * 60);
+    : Math.floor(Date.now() / 1000) - lookbackMinutes * 60;
 
   // Convert known guids to AppleScript list
-  const knownGuidsStr = knownGuids.map(guid => `"${guid}"`).join(", ");
+  const knownGuidsStr = knownGuids.map((guid) => `"${guid}"`).join(", ");
 
   const script = `
     tell application "Mail"
@@ -82,22 +82,22 @@ async function getEmails(searchType: SearchType, sinceDate?: Date, knownGuids: s
   try {
     const result = await runAppleScript<string>(script, {
       humanReadableOutput: true,
-      timeout: 10000  
+      timeout: 10000,
     });
-    
+
     if (!result) return [];
-    
+
     return result
       .split("$end")
-      .filter(line => line.trim().length > 0)
-      .map(line => {
+      .filter((line) => line.trim().length > 0)
+      .map((line) => {
         const [guid, subject, sender, content, dateStr] = line.split("$break");
         return {
           guid,
           message_date: dateStr,
           sender,
           text: `${subject}\n${content}`,
-          source: "email" as const
+          source: "email" as const,
         };
       });
   } catch (error) {
@@ -110,14 +110,14 @@ async function getEmails(searchType: SearchType, sinceDate?: Date, knownGuids: s
  * Options for email hook configuration
  */
 interface UseEmailsOptions {
-  searchText?: string;    // Optional text to filter messages
+  searchText?: string; // Optional text to filter messages
   searchType: SearchType; // Type of search (all or code-only)
-  enabled?: boolean;      // Whether email source is enabled
+  enabled?: boolean; // Whether email source is enabled
 }
 
 /**
  * React hook for managing email messages and 2FA code detection
- * 
+ *
  * Architecture:
  * - Maintains cache of processed messages to avoid duplicates
  * - Uses incremental updates based on message timestamps
@@ -126,7 +126,7 @@ interface UseEmailsOptions {
 export function useEmails(options: UseEmailsOptions) {
   // UI and loading state management
   const [data, setData] = useState<Message[]>([]);
-  const [permissionView, setPermissionView] = useState<JSX.Element | null>(null);
+  const [permissionView] = useState<JSX.Element | null>(null);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
   const isLoadingRef = useRef(false);
@@ -135,60 +135,61 @@ export function useEmails(options: UseEmailsOptions) {
   const storage = useRef<MessageStorage>({
     messages: [],
     latestTimestamp: null,
-    hasCode: {}
+    hasCode: {},
   });
 
   // Process and filter new emails, update cache and state
-  const processNewEmails = useCallback((newEmails: Message[]) => {
-    if (!options.enabled) return;
+  const processNewEmails = useCallback(
+    (newEmails: Message[]) => {
+      if (!options.enabled) return;
 
-    const { messages, hasCode } = storage.current;
-    
-    // Process only new messages
-    const updatedMessages = [...messages];
-    let latestTimestamp = storage.current.latestTimestamp;
+      const { messages, hasCode } = storage.current;
 
-    newEmails.forEach(email => {
-      // Update latest timestamp if needed
-      if (!latestTimestamp || email.message_date > latestTimestamp) {
-        latestTimestamp = email.message_date;
-      }
+      // Process only new messages
+      const updatedMessages = [...messages];
+      let latestTimestamp = storage.current.latestTimestamp;
 
-      // Skip if we already have this message
-      if (hasCode[email.guid] !== undefined) return;
+      newEmails.forEach((email) => {
+        // Update latest timestamp if needed
+        if (!latestTimestamp || email.message_date > latestTimestamp) {
+          latestTimestamp = email.message_date;
+        }
 
-      // Check for code if in code search mode
-      if (options.searchType === "code") {
-        const code = extractCode(email.text);
-        hasCode[email.guid] = !!code;
-        if (!code) return;
-      } else {
-        hasCode[email.guid] = true;
-      }
+        // Skip if we already have this message
+        if (hasCode[email.guid] !== undefined) return;
 
-      // Filter by search text if provided
-      if (options.searchText && !email.text.toLowerCase().includes(options.searchText.toLowerCase())) {
-        return;
-      }
+        // Check for code if in code search mode
+        if (options.searchType === "code") {
+          const code = extractCode(email.text);
+          hasCode[email.guid] = !!code;
+          if (!code) return;
+        } else {
+          hasCode[email.guid] = true;
+        }
 
-      updatedMessages.push(email);
-    });
+        // Filter by search text if provided
+        if (options.searchText && !email.text.toLowerCase().includes(options.searchText.toLowerCase())) {
+          return;
+        }
 
-    // Sort messages by date
-    updatedMessages.sort((a, b) => 
-      new Date(b.message_date).getTime() - new Date(a.message_date).getTime()
-    );
+        updatedMessages.push(email);
+      });
 
-    // Update storage
-    storage.current = {
-      messages: updatedMessages,
-      latestTimestamp,
-      hasCode
-    };
+      // Sort messages by date
+      updatedMessages.sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
 
-    // Update state
-    setData(updatedMessages);
-  }, [options.searchText, options.searchType, options.enabled]);
+      // Update storage
+      storage.current = {
+        messages: updatedMessages,
+        latestTimestamp,
+        hasCode,
+      };
+
+      // Update state
+      setData(updatedMessages);
+    },
+    [options.searchText, options.searchType, options.enabled]
+  );
 
   // Main email fetching with initial load optimization
   const fetchEmails = useCallback(async () => {
@@ -199,17 +200,11 @@ export function useEmails(options: UseEmailsOptions) {
     try {
       isLoadingRef.current = true;
       const knownGuids = Object.keys(storage.current.hasCode);
-      const sinceDate = storage.current.latestTimestamp 
-        ? new Date(storage.current.latestTimestamp)
-        : undefined;
+      const sinceDate = storage.current.latestTimestamp ? new Date(storage.current.latestTimestamp) : undefined;
 
       // For initial load, only fetch last 5 messages to prevent timeout
-      const emails = await getEmails(
-        options.searchType, 
-        sinceDate, 
-        knownGuids
-      );
-      
+      const emails = await getEmails(options.searchType, sinceDate, knownGuids);
+
       if (emails.length > 0) {
         processNewEmails(emails);
       }
@@ -230,7 +225,7 @@ export function useEmails(options: UseEmailsOptions) {
   }, [options.searchType, options.enabled, processNewEmails, isInitialLoadComplete]);
 
   // Lifecycle Effects
-  
+
   // 1. Initial lightweight load
   useEffect(() => {
     if (!isInitialLoadStarted && options.enabled) {
@@ -244,7 +239,7 @@ export function useEmails(options: UseEmailsOptions) {
     storage.current = {
       messages: [],
       latestTimestamp: null,
-      hasCode: {}
+      hasCode: {},
     };
     setIsInitialLoadComplete(false);
     setIsInitialLoadStarted(false);
@@ -259,10 +254,10 @@ export function useEmails(options: UseEmailsOptions) {
     return () => clearInterval(intervalId);
   }, [fetchEmails, isInitialLoadComplete, options.enabled]);
 
-  return { 
-    data, 
+  return {
+    data,
     permissionView,
     revalidate: fetchEmails,
-    isInitialLoadComplete
+    isInitialLoadComplete,
   };
-} 
+}

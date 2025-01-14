@@ -17,23 +17,23 @@ const POLLING_INTERVAL = 1_000;
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
-  const [searchType, setSearchType] = useState<SearchType>("code");
+  const [searchType] = useState<SearchType>("code");
   const [selectedItemId, setSelectedItemId] = useState<string>();
-  
+
   // Initialize message source based on user preferences
   const [messageSource, setMessageSource] = useState<MessageSource>(() => {
     return preferences.defaultSource || "all";
   });
 
   // Fetch iMessage data if enabled
-  const { 
-    data: messageData, 
+  const {
+    data: messageData,
     permissionView: messagePermissionView,
-    revalidate: revalidateMessages
-  } = useMessages({ 
-    searchText, 
+    revalidate: revalidateMessages,
+  } = useMessages({
+    searchText,
     searchType,
-    enabled: preferences.enabledSources !== "email"
+    enabled: preferences.enabledSources !== "email",
   });
 
   // Fetch email data if enabled
@@ -41,28 +41,37 @@ export default function Command() {
     data: emailData,
     permissionView: emailPermissionView,
     revalidate: revalidateEmails,
-    isInitialLoadComplete: isEmailLoadComplete
-  } = useEmails({ 
-    searchText, 
+    isInitialLoadComplete: isEmailLoadComplete,
+  } = useEmails({
+    searchText,
     searchType,
-    enabled: preferences.enabledSources !== "imessage"
+    enabled: preferences.enabledSources !== "imessage",
   });
 
   // Combine and sort messages based on selected source and preferences
-  const data = messageSource === "imessage" 
-    ? (preferences.enabledSources !== "email" ? messageData?.map(m => ({ ...m, source: "imessage" as const })) || [] : [])
-    : messageSource === "email"
-    ? (preferences.enabledSources !== "imessage" ? emailData?.map(m => ({ ...m, source: "email" as const })) || [] : [])
-    : [
-        ...(preferences.enabledSources !== "email" ? messageData?.map(m => ({ ...m, source: "imessage" as const })) || [] : []),
-        ...(preferences.enabledSources !== "imessage" ? emailData?.map(m => ({ ...m, source: "email" as const })) || [] : [])
-      ].sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
+  const data =
+    messageSource === "imessage"
+      ? preferences.enabledSources !== "email"
+        ? messageData?.map((m) => ({ ...m, source: "imessage" as const })) || []
+        : []
+      : messageSource === "email"
+      ? preferences.enabledSources !== "imessage"
+        ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
+        : []
+      : [
+          ...(preferences.enabledSources !== "email"
+            ? messageData?.map((m) => ({ ...m, source: "imessage" as const })) || []
+            : []),
+          ...(preferences.enabledSources !== "imessage"
+            ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
+            : []),
+        ].sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
 
   // Update selected item whenever data changes
   useEffect(() => {
     if (data.length > 0) {
       // Find the most recent item that has a valid code
-      const mostRecentWithCode = data.find(message => extractCode(message.text));
+      const mostRecentWithCode = data.find((message) => extractCode(message.text));
       if (mostRecentWithCode) {
         const newSelectedId = `${mostRecentWithCode.source}-${mostRecentWithCode.guid}`;
         setSelectedItemId(newSelectedId);
@@ -89,17 +98,15 @@ export default function Command() {
     <List
       searchText={searchText}
       selectedItemId={selectedItemId}
-      searchBarAccessory={showSourceDropdown ? (
-        <List.Dropdown
-          tooltip="Filter by source"
-          storeValue
-          onChange={handleSourceChange}
-        >
-          <List.Dropdown.Item title="All Sources" value="all" />
-          <List.Dropdown.Item title="iMessage" value="imessage" />
-          <List.Dropdown.Item title="Email" value="email" />
-        </List.Dropdown>
-      ) : null}
+      searchBarAccessory={
+        showSourceDropdown ? (
+          <List.Dropdown tooltip="Filter by source" storeValue onChange={handleSourceChange}>
+            <List.Dropdown.Item title="All Sources" value="all" />
+            <List.Dropdown.Item title="iMessage" value="imessage" />
+            <List.Dropdown.Item title="Email" value="email" />
+          </List.Dropdown>
+        ) : null
+      }
       isShowingDetail
       onSearchTextChange={setSearchText}
     >
@@ -107,26 +114,25 @@ export default function Command() {
         data.map((message) => {
           const code = extractCode(message.text);
           if (!code) {
-            if (process.env.NODE_ENV === 'development') {
-              console.debug('no code found in message');
+            if (process.env.NODE_ENV === "development") {
+              console.debug("no code found in message");
             }
             return null;
           }
 
           const itemId = `${message.source}-${message.guid}`;
-          return (
-            <MessageItem
-              key={itemId}
-              id={itemId}
-              message={message}
-              code={code}
-            />
-          );
+          return <MessageItem key={itemId} id={itemId} message={message} code={code} />;
         })
       ) : (
-        <List.EmptyView 
-          title={!isEmailLoadComplete && preferences.enabledSources !== "imessage" ? "Loading emails..." : "No codes found"} 
-          description={!isEmailLoadComplete && preferences.enabledSources !== "imessage" ? "Initial email load in progress" : "Keeps refreshing every second"} 
+        <List.EmptyView
+          title={
+            !isEmailLoadComplete && preferences.enabledSources !== "imessage" ? "Loading emails..." : "No codes found"
+          }
+          description={
+            !isEmailLoadComplete && preferences.enabledSources !== "imessage"
+              ? "Initial email load in progress"
+              : "Keeps refreshing every second"
+          }
         />
       )}
     </List>
@@ -134,9 +140,13 @@ export default function Command() {
 }
 
 // Separate component for list items to prevent unnecessary re-renders
-function MessageItem({ message, code, id }: { 
-  message: Message & { source: "email" | "imessage" }; 
-  code: string; 
+function MessageItem({
+  message,
+  code,
+  id,
+}: {
+  message: Message & { source: "email" | "imessage" };
+  code: string;
   id: string;
 }) {
   return (
@@ -158,11 +168,11 @@ function Detail(props: { message: Message; code: string }) {
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Code" text={props.code} />
           <List.Item.Detail.Metadata.Label title="From" text={props.message.sender} />
-          <List.Item.Detail.Metadata.Label 
-            title="Date" 
-            text={formatDate(new Date(props.message.message_date))} 
+          <List.Item.Detail.Metadata.Label title="Date" text={formatDate(new Date(props.message.message_date))} />
+          <List.Item.Detail.Metadata.Label
+            title="Source"
+            text={props.message.source === "email" ? "Email" : "iMessage"}
           />
-          <List.Item.Detail.Metadata.Label title="Source" text={props.message.source === "email" ? "Email" : "iMessage"} />
         </List.Item.Detail.Metadata>
       }
     />

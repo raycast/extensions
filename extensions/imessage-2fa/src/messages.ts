@@ -17,9 +17,9 @@ const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
  * Options for message hook configuration
  */
 interface UseMessagesOptions {
-  searchText?: string;    // Optional text to filter messages
+  searchText?: string; // Optional text to filter messages
   searchType: SearchType; // Type of search (all or code-only)
-  enabled?: boolean;      // Whether iMessage source is enabled
+  enabled?: boolean; // Whether iMessage source is enabled
 }
 
 /**
@@ -97,7 +97,7 @@ export function useMessages(options: UseMessagesOptions) {
     return {
       data: [],
       permissionView: null,
-      revalidate: async () => {},
+      revalidate: async () => Promise.resolve(),
     };
   }
 
