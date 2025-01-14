@@ -197,6 +197,7 @@ export default function Command() {
                   icon={Icon.Trash}
                   onAction={() => removeSong(item)}
                   shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
                 />
                 <Action
                   title={"Clear Queue"}
