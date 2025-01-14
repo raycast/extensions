@@ -16,24 +16,6 @@
   ],
   "preferences": [
     {
-      "name": "version", 
-      "title": "SF Symbols Version",
-      "description": "Show symbols from specified SF Symbols version.",
-      "type": "dropdown",
-      "required": false,
-      "default": "beta",
-      "data": [
-        {
-          "value": "beta",
-          "title": "Beta"
-        },
-        {
-          "value": "stable",
-          "title": "Stable"
-        }
-      ]
-    },
-    {
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",

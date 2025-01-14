@@ -4,7 +4,6 @@ import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from
 import { readFileSync } from "node:fs";
 
 export interface Preferences {
-  version: "beta" | "stable";
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
   gridItemSize: Grid.ItemSize;
   showName: boolean;
@@ -30,10 +29,10 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { version, primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
+const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
 
 function getDataPath() {
-  return `${environment.assetsPath}/symbols/data${version === "beta" ? "_beta" : ""}.json`;
+  return `${environment.assetsPath}/symbols/data.json`;
 }
 
 function getImageURL(name: string) {
