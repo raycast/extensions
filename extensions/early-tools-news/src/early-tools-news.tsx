@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast, Image } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 
@@ -97,6 +97,19 @@ function truncateText(text: string, maxLength: number = 60): string {
   return text;
 }
 
+function getFavicon(url: string): Image.Source | undefined {
+  try {
+    const domain = new URL(url).hostname;
+    return {
+      light: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+      dark: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+    } as Image.Source;
+  } catch (error) {
+    console.error("Error getting favicon:", error);
+    return undefined;
+  }
+}
+
 function StoryListItem({ item, searchText }: { item: StoryItem; searchText: string }) {
   const title = truncateText(item.title || item.description);
   const subtitle = truncateText(item.sourceUrl);
@@ -113,7 +126,7 @@ function StoryListItem({ item, searchText }: { item: StoryItem; searchText: stri
 
   return (
     <List.Item
-      icon={favicon}
+      icon={favicon ? { source: favicon } : Icon.Globe}
       title={title}
       subtitle={subtitle}
       accessories={[{ date: new Date(item.pubDate) }]}
@@ -131,14 +144,4 @@ function Actions({ item }: { item: StoryItem }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-function getFavicon(url: string): Image.Source {
-  try {
-    const domain = new URL(url).hostname;
-    return { source: `https://www.google.com/s2/favicons?domain=${domain}&sz=64` };
-  } catch (error) {
-    console.error("Error getting favicon:", error);
-    return { source: "icon.png" };
-  }
 }
