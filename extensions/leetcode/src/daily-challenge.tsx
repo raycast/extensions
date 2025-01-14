@@ -39,7 +39,5 @@ export default function Command(): JSX.Element {
     linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
   });
 
-  return (
-    <Detail isLoading={isDailyChallengeLoading} markdown={problemMarkdown} actions={actions} />
-  );
+  return <Detail isLoading={isDailyChallengeLoading} markdown={problemMarkdown} actions={actions} />;
 }
