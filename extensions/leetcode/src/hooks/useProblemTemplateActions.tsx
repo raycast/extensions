@@ -35,10 +35,7 @@ export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPai
   return (
     <ActionPanel>
       <Action.OpenInBrowser title="Open in Browser" url={linkUrl} />
-      <Action.CopyToClipboard
-        title="Copy Link to Clipboard"
-        content={linkUrl}
-      />
+      <Action.CopyToClipboard title="Copy Link to Clipboard" content={linkUrl} />
       {!isPaidOnly && (
         <Action.CopyToClipboard
           title="Copy Problem to Clipboard"
@@ -48,10 +45,10 @@ export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPai
       )}
       {sortedSnippets.length > 0 && (
         <ActionPanel.Submenu title="Copy Code Template">
-          {sortedSnippets.map(snippet => (
+          {sortedSnippets.map((snippet) => (
             <Action.CopyToClipboard
               key={snippet.langSlug}
-              title={`${snippet.langSlug === preferences.defaultLanguage ? "⭐ " : ""}${snippet.lang} Code`}
+              title={`${snippet.langSlug === preferences.defaultLanguage ? '⭐ ' : ''}${snippet.lang} Code`}
               content={snippet.code}
             />
           ))}

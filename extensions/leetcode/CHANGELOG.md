@@ -19,8 +19,8 @@ Sort code templates to show preferred language first
 
 - Categories now have icons
 - Add 2 problem categories:
-    1. JavaScript
-    2. pandas
+  1. JavaScript
+  2. pandas
 - Show Loading (previously, no loading was shown while searching problems)
 - Allow Paid Problems Preview w/o content (now you can view stats of a paid problem - the content/markdown is still not
   shown)

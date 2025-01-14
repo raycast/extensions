@@ -47,16 +47,10 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     codeSnippets,
     problemMarkdown,
     isPaidOnly: problem?.isPaidOnly,
-    linkUrl: `https://leetcode.com/problems/${props.titleSlug}`
+    linkUrl: `https://leetcode.com/problems/${props.titleSlug}`,
   });
 
-  return (
-    <Detail
-      isLoading={isProblemLoading || isSnippetsLoading}
-      markdown={problemMarkdown}
-      actions={actions}
-    />
-  );
+  return <Detail isLoading={isProblemLoading || isSnippetsLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
 export default function Command(): JSX.Element {
