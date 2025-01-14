@@ -13,17 +13,12 @@ export type Problem = {
   topicTags: {
     name: string;
   };
-};
-
-export type ProblemStats = {
-  totalAccepted: string;
-  totalSubmission: string;
-  acRate: string;
+  codeSnippets: CodeSnippet[];
 };
 
 export type ProblemPreview = Pick<
   Problem,
-  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats'
+  'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats' | 'codeSnippets'
 >;
 
 export type DailyChallenge = {
@@ -46,7 +41,8 @@ export type DailyChallengeResponse = GraphQLResponse<{
 
 export type SearchProblemResponse = GraphQLResponse<{
   problemsetQuestionList: {
-    problems: ProblemPreview[];
+    total: number;
+    data: ProblemPreview[];
   } | null;
 }>;
 

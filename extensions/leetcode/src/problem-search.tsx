@@ -4,8 +4,7 @@ import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
 import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
 import { formatProblemMarkdown } from './utils';
-import { useCodeSnippets } from './hooks/useCodeSnippets';
-import { useProblemTemplateActions } from './hooks/useProblemTemplateActions';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
 
 function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   switch (difficulty) {
@@ -39,18 +38,16 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     },
   });
 
-  const { isLoading: isSnippetsLoading, data: codeSnippets } = useCodeSnippets(props.titleSlug);
-
   const problemMarkdown = useMemo(() => formatProblemMarkdown(problem), [problem]);
 
   const actions = useProblemTemplateActions({
-    codeSnippets,
+    codeSnippets: problem?.codeSnippets,
     problemMarkdown,
     isPaidOnly: problem?.isPaidOnly,
     linkUrl: `https://leetcode.com/problems/${props.titleSlug}`,
   });
 
-  return <Detail isLoading={isProblemLoading || isSnippetsLoading} markdown={problemMarkdown} actions={actions} />;
+  return <Detail isLoading={isProblemLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
 export default function Command(): JSX.Element {
@@ -76,7 +73,7 @@ export default function Command(): JSX.Element {
     },
     mapResult(result) {
       return {
-        data: result.data.problemsetQuestionList?.problems || [],
+        data: result.data.problemsetQuestionList?.data || [],
       };
     },
     onData: (data) => {

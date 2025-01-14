@@ -4,8 +4,7 @@ import { useMemo } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
-import { useCodeSnippets } from './hooks/useCodeSnippets';
-import { useProblemTemplateActions } from './hooks/useProblemTemplateActions';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
 
 export default function Command(): JSX.Element {
   const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<
@@ -28,21 +27,19 @@ export default function Command(): JSX.Element {
     },
   });
 
-  const { isLoading: isSnippetsLoading, data: codeSnippets } = useCodeSnippets(dailyChallenge?.problem.titleSlug);
-
   const problemMarkdown = useMemo(
     () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date),
     [dailyChallenge],
   );
 
   const actions = useProblemTemplateActions({
-    codeSnippets,
+    codeSnippets: dailyChallenge?.problem.codeSnippets,
     problemMarkdown,
     isPaidOnly: dailyChallenge?.problem.isPaidOnly,
     linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
   });
 
   return (
-    <Detail isLoading={isDailyChallengeLoading || isSnippetsLoading} markdown={problemMarkdown} actions={actions} />
+    <Detail isLoading={isDailyChallengeLoading} markdown={problemMarkdown} actions={actions} />
   );
 }

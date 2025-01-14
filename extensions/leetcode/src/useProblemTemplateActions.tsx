@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues } from '@raycast/api';
 import { useMemo } from 'react';
-import { CodeSnippet } from '../types';
+import { CodeSnippet } from './types';
 
 type Preferences = {
   defaultLanguage: string;
