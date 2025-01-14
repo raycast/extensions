@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { CodeSnippet } from './types';
 
 type Props = {
-  codeSnippets: CodeSnippet[];
+  codeSnippets?: CodeSnippet[];
   problemMarkdown: string;
   isPaidOnly?: boolean;
   linkUrl: string;
