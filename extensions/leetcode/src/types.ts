@@ -16,6 +16,12 @@ export type Problem = {
   codeSnippets: CodeSnippet[];
 };
 
+export type ProblemStats = {
+  totalAccepted: string;
+  totalSubmission: string;
+  acRate: string;
+};
+
 export type ProblemPreview = Pick<
   Problem,
   'difficulty' | 'questionFrontendId' | 'title' | 'titleSlug' | 'isPaidOnly' | 'stats' | 'codeSnippets'
