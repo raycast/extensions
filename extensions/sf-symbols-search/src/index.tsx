@@ -150,9 +150,12 @@ const SFSymbol = (props: SymbolProps) => {
       title={showName ? symbol.name : undefined}
       subtitle={subtitle}
       content={{
-        source: getImageURL(symbol.name),
-        fallback: Icon.Warning,
-        tintColor: Color.PrimaryText,
+        tooltip: symbol.name,
+        value: {
+          source: getImageURL(symbol.name),
+          fallback: Icon.Warning,
+          tintColor: Color.PrimaryText,
+        }
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
       actions={<SymbolActions {...props} />}
