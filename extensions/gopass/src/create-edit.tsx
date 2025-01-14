@@ -58,6 +58,15 @@ interface InputProps {
   inputPassword?: string;
 }
 
+interface PasswordConfig {
+  length: string;
+  digits: boolean;
+  symbols: boolean;
+  capitalize: boolean;
+  numbers: boolean;
+  type: string;
+}
+
 export default function ({ inputPassword = undefined }: InputProps): JSX.Element {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
@@ -65,36 +74,50 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [additionalAttributes, setAdditionalAttributes] = useState<string>("");
-  const [length, setLength] = useState<number>(randomPasswordLength);
-  const [digits, setDigits] = useState<boolean>(true);
-  const [symbols, setSymbols] = useState<boolean>(true);
-  const [capitalize, setCapitalize] = useState<boolean>(true);
-  const [numbers, setNumbers] = useState<boolean>(true);
-  const [type, setType] = useState<string>("random");
   const [showErrors, setShowErrors] = useState<boolean>(true);
+  const [passwordConfig, setPasswordConfig] = useState<PasswordConfig>({
+    length: randomPasswordLength.toString(),
+    digits: true,
+    symbols: true,
+    capitalize: true,
+    numbers: true,
+    type: "random",
+  });
+
+  const setNewPassword = async () => {
+    console.log("setting default password");
+    updatePassword(passwordConfig);
+    setLoading(false);
+  };
 
   const getInputPassword = async () => {
     if (!inputPassword) return;
+    console.log("setting password");
     const password = await gopass.show(inputPassword);
     setPassword(password.password);
+    setPasswordConfig({ ...passwordConfig, length: password.password.length.toString() });
     setAdditionalAttributes(password.attributes.join("\n"));
     setName(inputPassword);
     setOriginalName(inputPassword);
     setLoading(false);
   };
 
-  const updatePassword = async () => {
+  const updatePassword = async (config: PasswordConfig) => {
     setPassword(
       await renderPassword({
-        type: type,
-        length: length,
-        digits: digits,
-        symbols: symbols,
-        capitalize: capitalize,
-        numbers: numbers,
+        type: config.type,
+        length:
+          Number(config.length) > 0
+            ? Number(config.length)
+            : config.type === "xkcd"
+            ? xkcdPasswordLength
+            : randomPasswordLength,
+        digits: config.digits,
+        symbols: config.symbols,
+        capitalize: config.capitalize,
+        numbers: config.numbers,
       })
     );
-    setLoading(false);
   };
 
   const resetErrors = () => {
@@ -107,25 +130,11 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
     }
   };
 
-  if (isLoading) {
-    if (inputPassword) {
-      getInputPassword();
-    } else {
-      updatePassword();
-    }
-  }
-
   useEffect(() => {
-    if (!isLoading) {
-      type === "xkcd" ? setLength(xkcdPasswordLength) : setLength(randomPasswordLength);
+    if (isLoading) {
+      inputPassword ? getInputPassword() : setNewPassword();
     }
-  }, [type]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      updatePassword();
-    }
-  }, [length, digits, symbols, capitalize, numbers]);
+  }, [getInputPassword]);
 
   const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
     async onSubmit(values: SignUpFormValues) {
@@ -214,6 +223,7 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={inputPassword ? "Update" : "Create"} onSubmit={handleSubmit} />
@@ -232,32 +242,76 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
         error={displayFormErrors(itemProps.name.error)}
         onBlur={resetErrors}
       />
-      <Form.Dropdown id="style" title="Password Style" value={type} onChange={setType}>
+      <Form.Dropdown
+        id="style"
+        title="Password Style"
+        value={passwordConfig.type}
+        onChange={(value) => {
+          if (isLoading) return;
+          const newLength = value === "xkcd" ? xkcdPasswordLength.toString() : randomPasswordLength.toString();
+          setPasswordConfig({ ...passwordConfig, length: newLength, type: value });
+          updatePassword({ ...passwordConfig, length: newLength, type: value });
+        }}
+      >
         <Form.Dropdown.Item value="random" title="Random" icon="🎲" />
         <Form.Dropdown.Item value="xkcd" title="XKCD" icon="💬" />
       </Form.Dropdown>
       <Form.TextField
         title="Length"
         id="length"
-        value={length.toString()}
+        value={passwordConfig.length}
         onChange={(value) => {
-          if (!value || value === "") {
-            type === "xkcd" ? setLength(Number(xkcdPasswordLength)) : setLength(Number(randomPasswordLength));
-            return;
-          }
-          if (!isNaN(Number(value))) setLength(Number(value));
+          if (isLoading) return;
+          setPasswordConfig({ ...passwordConfig, length: value });
+          updatePassword({ ...passwordConfig, length: value });
         }}
       />
-      {type === "random" && (
+      {passwordConfig.type === "random" && (
         <>
-          <Form.Checkbox id="digits" label="Digits" value={digits} onChange={setDigits} />
-          <Form.Checkbox id="symbols" label="Special Symbols" value={symbols} onChange={setSymbols} />
+          <Form.Checkbox
+            id="digits"
+            label="Digits"
+            value={passwordConfig.digits}
+            onChange={(value) => {
+              if (isLoading) return;
+              setPasswordConfig({ ...passwordConfig, digits: value });
+              updatePassword({ ...passwordConfig, digits: value });
+            }}
+          />
+          <Form.Checkbox
+            id="symbols"
+            label="Special Symbols"
+            value={passwordConfig.symbols}
+            onChange={(value) => {
+              if (isLoading) return;
+              setPasswordConfig({ ...passwordConfig, symbols: value });
+              updatePassword({ ...passwordConfig, symbols: value });
+            }}
+          />
         </>
       )}
-      {type === "xkcd" && (
+      {passwordConfig.type === "xkcd" && (
         <>
-          <Form.Checkbox id="capitalize" label="Capitlize" value={capitalize} onChange={setCapitalize} />
-          <Form.Checkbox id="numbers" label="Numbers" value={numbers} onChange={setNumbers} />
+          <Form.Checkbox
+            id="capitalize"
+            label="Capitlize"
+            value={passwordConfig.capitalize}
+            onChange={(value) => {
+              if (isLoading) return;
+              setPasswordConfig({ ...passwordConfig, capitalize: value });
+              updatePassword({ ...passwordConfig, capitalize: value });
+            }}
+          />
+          <Form.Checkbox
+            id="numbers"
+            label="Numbers"
+            value={passwordConfig.numbers}
+            onChange={(value) => {
+              if (isLoading) return;
+              setPasswordConfig({ ...passwordConfig, numbers: value });
+              updatePassword({ ...passwordConfig, numbers: value });
+            }}
+          />
         </>
       )}
       {showPassword && (
