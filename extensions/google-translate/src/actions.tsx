@@ -1,5 +1,6 @@
 import React from "react";
-import { Action, getPreferenceValues } from "@raycast/api";
+import { Action, Icon, getPreferenceValues } from "@raycast/api";
+import { SimpleTranslateResult } from "./simple-translate";
 
 interface ActionsOpts {
   value: string;
@@ -30,5 +31,34 @@ export const ConfigurableCopyPasteActions = ({ defaultActionsPrefix, value }: Ac
       {copyAction}
       {pasteAction}
     </>
+  );
+};
+
+export const ToggleFullTextAction: React.VFC<{
+  onAction: () => void;
+}> = ({ onAction }) => {
+  return (
+    <Action title="Toggle Full Text" icon={Icon.Text} onAction={onAction} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+  );
+};
+
+export const OpenOnGoogleTranslateWebsiteAction: React.VFC<{
+  translation: Pick<SimpleTranslateResult, "langFrom" | "langTo">;
+  translationText: string;
+}> = ({ translationText, translation }) => {
+  return (
+    <Action.OpenInBrowser
+      title="Open in Google Translate"
+      shortcut={{ modifiers: ["opt"], key: "enter" }}
+      url={
+        "https://translate.google.com/?sl=" +
+        translation.langFrom +
+        "&tl=" +
+        translation.langTo +
+        "&text=" +
+        encodeURIComponent(translationText) +
+        "&op=translate"
+      }
+    />
   );
 };

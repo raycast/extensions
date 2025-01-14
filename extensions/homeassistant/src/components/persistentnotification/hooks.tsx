@@ -1,7 +1,7 @@
 import { getHAWSConnection } from "@lib/common";
 import { getErrorMessage } from "@lib/utils";
-import { HAPersistentNotification } from "./utils";
 import { useEffect, useState } from "react";
+import { HAPersistentNotification } from "./utils";
 
 export function useHAPersistentNotifications(): {
   error?: string;

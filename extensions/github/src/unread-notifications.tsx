@@ -1,25 +1,27 @@
 import {
   Color,
+  getPreferenceValues,
   Icon,
+  Image,
+  launchCommand,
   LaunchType,
   MenuBarExtra,
-  getPreferenceValues,
-  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
-  showHUD,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getGitHubClient } from "./api/githubClient";
-import { Notification } from "./components/NotificationListItem";
 import {
   getGitHubIcon,
   getGitHubURL,
   getNotificationIcon,
   getNotificationSubtitle,
   getNotificationTooltip,
+  Notification,
 } from "./helpers/notifications";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
@@ -32,38 +34,32 @@ function UnreadNotifications() {
   const viewer = useViewer();
 
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const response = await octokit.rest.activity.listNotificationsForAuthenticatedUser();
-    return response.data;
+    const response = await octokit.activity.listNotificationsForAuthenticatedUser();
+    return Promise.all(
+      response.data.map(async (notification: Notification) => {
+        let icon: { value: Image; tooltip: string };
+        try {
+          icon = await getNotificationIcon(notification);
+        } catch (error) {
+          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
+        }
+        return { ...notification, icon };
+      }),
+    );
   });
-
-  const { data: iconsData } = useCachedPromise(
-    async (notifications) => {
-      if (!notifications) {
-        return [];
-      }
-      const icons = await Promise.all(
-        notifications.map((notification: Notification) => getNotificationIcon(notification)),
-      );
-      return icons;
-    },
-    [data],
-    {
-      keepPreviousData: true,
-    },
-  );
 
   const hasUnread = data && data.length > 0;
 
   async function markAllNotificationsAsRead() {
     try {
-      await mutate(octokit.rest.activity.markNotificationsAsRead(), {
+      await mutate(octokit.activity.markNotificationsAsRead(), {
         optimisticUpdate() {
           return [];
         },
       });
-      showHUD("All have been marked as Read");
+      showToast({ style: Toast.Style.Success, title: "Marked all notifications as read" });
     } catch {
-      showHUD("❌ Could not mark all as read");
+      showToast({ style: Toast.Style.Failure, title: "Could not mark all notifications as read" });
     }
   }
 
@@ -74,29 +70,29 @@ function UnreadNotifications() {
           open(`${notification.repository.html_url}/invitations`);
         } else {
           await open(await getGitHubURL(notification, viewer?.id));
-          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+          await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
         }
       };
 
       await mutate(openAndMarkNotificationAsRead(), {
         optimisticUpdate(data) {
-          return data?.filter((n) => n.id !== notification.id) ?? [];
+          return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },
       });
     } catch {
-      showHUD("❌ Could not open the notification");
+      showToast({ style: Toast.Style.Failure, title: "Could not open notification" });
     }
   }
 
   async function markNotificationAsRead(notification: Notification) {
     try {
-      await mutate(octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
+      await mutate(octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) }), {
         optimisticUpdate(data) {
-          return data?.filter((n) => n.id !== notification.id) ?? [];
+          return data?.filter((n: Notification) => n.id !== notification.id) ?? [];
         },
       });
     } catch {
-      showHUD("❌ Could not mark notification as read");
+      showToast({ style: Toast.Style.Failure, title: "Could not mark notification as read" });
     }
   }
 
@@ -119,27 +115,21 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         {hasUnread ? (
-          data.map((notification, index) => {
-            const icon = iconsData?.[index];
+          data.map((notification: Notification & { icon: { value: Image; tooltip: string } }) => {
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);
             const tooltip = getNotificationTooltip(updatedAt);
-
-            if (!icon) {
-              return null;
-            }
-
             return (
               <MenuBarExtra.Item
                 key={notification.id}
-                icon={{ source: icon.value["source"], tintColor: Color.PrimaryText }}
+                icon={{ source: notification.icon.value["source"], tintColor: Color.PrimaryText }}
                 title={title}
                 subtitle={getNotificationSubtitle(notification)}
                 tooltip={tooltip}
                 onAction={() => openNotification(notification)}
                 alternate={
                   <MenuBarExtra.Item
-                    icon={{ source: icon.value["source"], tintColor: Color.PrimaryText }}
+                    icon={{ source: notification.icon.value["source"], tintColor: Color.PrimaryText }}
                     title={title}
                     subtitle="Mark as Read"
                     tooltip={tooltip}

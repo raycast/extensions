@@ -32,7 +32,12 @@ function SearchVaultComponent() {
   const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
 
   return (
-    <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
+    <List
+      searchBarPlaceholder="Search vault"
+      filtering={{ keepSectionOrder: true }}
+      isLoading={isLoading}
+      searchBarAccessory={<ListFolderDropdown />}
+    >
       {favoriteItems.length > 0 ? (
         <>
           <List.Section title="Favorites">

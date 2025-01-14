@@ -27,6 +27,7 @@ export interface SearchNotePreferences extends GlobalPreferences, AppendNotePref
   showDetail: boolean;
   showMetadata: boolean;
   searchContent: boolean;
+  fuzzySearch: boolean;
 }
 
 export interface RandomNotePreferences extends GlobalPreferences, AppendNotePreferences {}
@@ -49,4 +50,5 @@ export interface appendTaskPreferences {
   notePath?: string;
   noteTag?: string;
   silent?: boolean;
+  creationDate?: boolean;
 }

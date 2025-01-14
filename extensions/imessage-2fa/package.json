@@ -9,8 +9,10 @@
     "thomas",
     "arronhunt",
     "ronaldheft",
-    "navtoj",
     "hitolaus"
+  ],
+  "pastContributors": [
+    "navtoj"
   ],
   "categories": [
     "Productivity"
@@ -66,14 +68,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.9",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
     "@use-it/interval": "^1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.3.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

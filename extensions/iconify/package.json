@@ -8,7 +8,8 @@
   "contributors": [
     "sxn",
     "robert",
-    "kuddl"
+    "kuddl",
+    "kevinxo328"
   ],
   "categories": [
     "Design Tools",
@@ -54,8 +55,30 @@
           "value": "copy"
         },
         {
+          "title": "Copy Svg File to Clipboard",
+          "value": "copyFile"
+        },
+        {
           "title": "Paste <name> to Active App",
           "value": "pasteName"
+        }
+      ]
+    },
+    {
+      "name": "iconColor",
+      "type": "dropdown",
+      "required": false,
+      "title": "Monochromatic Icon Color",
+      "description": "Icon color to use in monochromatic icons",
+      "default": "currentColor",
+      "data": [
+        {
+          "title": "Default",
+          "value": "currentColor"
+        },
+        {
+          "title": "White",
+          "value": "#ffffff"
         }
       ]
     }
@@ -63,7 +86,8 @@
   "dependencies": {
     "@raycast/api": "^1.48.0",
     "axios": "^0.26.1",
-    "react-hooks-global-state": "^2.1.0"
+    "react-hooks-global-state": "^2.1.0",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",

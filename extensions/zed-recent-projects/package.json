@@ -8,7 +8,8 @@
   "contributors": [
     "tleo19",
     "jylamont",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "tm.wrnr"
   ],
   "categories": ["Developer Tools"],
   "license": "MIT",
@@ -41,7 +42,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Build",
-      "default": "Code",
+      "default": "Zed",
       "description": "Select which build of Zed to use",
       "data": [
         {
@@ -56,12 +57,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.76.1",
+    "@raycast/utils": "^1.16.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.8",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "^7.32.0",

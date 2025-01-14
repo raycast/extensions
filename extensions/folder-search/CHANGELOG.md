@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [New Features] - 2024-08-20
+
+- **added** Pins can now be ordered by `Move Pin Up` and `Move Pin Down` actions
+
 ## [Command rename] - 2023-06-16
 - attempt #2 at fixing the fall back command with duplicated query.
 - added Throttle to search to improve experience

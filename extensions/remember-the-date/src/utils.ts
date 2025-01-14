@@ -19,12 +19,19 @@ export function validateItem(item: Item) {
   return true;
 }
 
-export async function refreshMenuBar() {
+export async function refreshCommands() {
   try {
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
   } catch (e) {
     () => {
       console.error("An error occurred while updating the menu bar", e);
+    };
+  }
+  try {
+    await launchCommand({ name: "up-next", type: LaunchType.Background });
+  } catch (e) {
+    () => {
+      console.error("An error occurred while updating the up-next command", e);
     };
   }
 }

@@ -29,7 +29,7 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const response = await fetch("https://auth.stablecog.com/oauth/token", {
     method: "POST",

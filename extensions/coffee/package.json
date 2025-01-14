@@ -9,7 +9,9 @@
     "bibixx",
     "GastroGeek",
     "pernielsentikaer",
-    "oasaleh"
+    "oasaleh",
+    "xilopaint",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -65,6 +67,32 @@
       "title": "Caffeinate For",
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "Hours",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "placeholder": "Seconds",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "addSchedule",
+      "title": "Schedule Caffeination",
+      "description": "Schedule caffeination",
       "mode": "view"
     },
     {
@@ -72,7 +100,7 @@
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "15s"
     }
   ],
   "preferences": [
@@ -83,7 +111,7 @@
       "required": false,
       "default": true,
       "title": "Options",
-      "label": "Prevent Display Sleep"
+      "label": "Prevent display sleep"
     },
     {
       "name": "preventSystem",
@@ -91,7 +119,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Prevent System Sleep"
+      "label": "Prevent system sleep"
     },
     {
       "name": "preventDisk",
@@ -99,30 +127,30 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Prevent Disk Sleep"
+      "label": "Prevent disk sleep"
     },
     {
       "name": "icon",
       "description": "Select icon set for Menu Bar",
       "type": "dropdown",
       "required": false,
-      "default": "coffee-pot",
+      "default": "pot",
       "title": "Menu Bar Icon",
       "data": [
         {
-          "title": "Coffee Pot",
-          "value": "coffee-pot"
+          "title": "Pot",
+          "value": "pot"
         },
         {
-          "title": "Coffee Mug 1",
-          "value": "coffee-mug-1"
+          "title": "Mug",
+          "value": "mug"
         },
         {
-          "title": "Coffee Mug 2",
-          "value": "coffee-mug-2"
+          "title": "Cup",
+          "value": "cup"
         },
         {
-          "title": "Coffee Paper Cup",
+          "title": "Paper Cup",
           "value": "paper-cup"
         }
       ]

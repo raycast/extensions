@@ -1,49 +1,10 @@
-import React from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import get from "lodash/get";
 import omit from "lodash/omit";
+import type Stripe from "stripe";
 import { useStripeApi, useStripeDashboard } from "./hooks";
 import { STRIPE_ENDPOINTS } from "./enums";
 import { convertAmount, convertTimestampToDate, titleCase, resolveMetadataValue } from "./utils";
 import { ListContainer, withEnvContext } from "./components";
-
-type ChargeResp = {
-  id: string;
-  amount: number;
-  amount_captured: number;
-  amount_refunded: number;
-  payment_intent: string;
-  created: number;
-  currency: string;
-  description: string | null;
-  status: string;
-  receipt_url: string | null;
-  billing_details: {
-    address: {
-      city: string | null;
-      country: string | null;
-      line1: string | null;
-      line2: string | null;
-      postal_code: string | null;
-      state: string | null;
-    };
-    email: string | null;
-    name: string | null;
-    phone: string | null;
-  };
-  payment_method_details: {
-    card: {
-      brand: string | null;
-      country: string | null;
-      exp_month: number;
-      exp_year: number;
-      last4: string;
-      network: string | null;
-      three_d_secure: null;
-    };
-    type: string;
-  };
-};
 
 type Charge = {
   id: string;
@@ -70,42 +31,58 @@ type Charge = {
 
 const omittedFields = ["receipt_url"];
 
-const resolveCharge = ({
-  amount = 0,
-  amount_captured = 0,
-  amount_refunded = 0,
-  currency = "",
-  description = "",
-  created,
-  ...rest
-}: ChargeResp): Charge => {
-  const uppercaseCurrency = currency.toUpperCase();
-  const billingDetails = get(rest, "billing_details", {});
-  const billingAddressObj = get(billingDetails, "address", {});
-  const paymentMethodDetails = get(rest, "payment_method_details.card", {});
-  const { city, country, line1, postal_code, state } = billingAddressObj;
-  const billingAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
+const createBillingAddress = (charge: Stripe.Charge): string => {
+  const line1 = charge.billing_details.address?.line1;
+  const city = charge.billing_details.address?.city;
+  const state = charge.billing_details.address?.state;
+  const postal_code = charge.billing_details.address?.postal_code;
+  const country = charge.billing_details.address?.country;
 
-  return {
-    ...rest,
-    amount_captured: convertAmount(amount_captured),
-    amount_refunded: convertAmount(amount_refunded),
-    amount: convertAmount(amount),
-    currency: uppercaseCurrency,
-    description,
-    created_at: convertTimestampToDate(created),
-    billing_address: billingAddress,
-    billing_email: get(billingDetails, "email", ""),
-    billing_name: get(billingDetails, "name", ""),
-    payment_method_type: get(paymentMethodDetails, "type", ""),
-    payment_method_brand: get(paymentMethodDetails, "brand", ""),
-    payment_method_last4: get(paymentMethodDetails, "last4", ""),
-    payment_method_exp_month: get(paymentMethodDetails, "exp_month", ""),
-    payment_method_exp_year: get(paymentMethodDetails, "exp_year", ""),
-    payment_method_network: get(paymentMethodDetails, "network", ""),
-    payment_method_three_d_secure: get(paymentMethodDetails, "three_d_secure", false),
-    payment_method_country: get(paymentMethodDetails, "country", ""),
+  const billingAddress = [line1, city, state, postal_code, country].filter(Boolean).join(", ");
+  return billingAddress;
+};
+
+const getPaymentIntentId = (charge: Stripe.Charge): string => {
+  if (charge.payment_intent === null) {
+    return "";
+  }
+
+  if (typeof charge.payment_intent === "string") {
+    return charge.payment_intent;
+  }
+
+  if (typeof charge.payment_intent === "object") {
+    return charge.payment_intent.id;
+  }
+
+  return "";
+};
+
+const resolveCharge = (charge: Stripe.Charge): Charge => {
+  const resolvedCharge: Charge = {
+    ...charge,
+    amount: convertAmount(charge.amount),
+    amount_captured: convertAmount(charge.amount_captured),
+    amount_refunded: convertAmount(charge.amount_refunded),
+    payment_intent: getPaymentIntentId(charge),
+    currency: charge.currency.toUpperCase(),
+    description: charge.description ?? "",
+    receipt_url: charge.receipt_url ?? "",
+    created_at: convertTimestampToDate(charge.created),
+    billing_address: createBillingAddress(charge),
+    billing_email: charge.billing_details.email ?? "",
+    billing_name: charge.billing_details.name ?? "",
+    payment_method_type: charge.payment_method_details?.type ?? "",
+    payment_method_brand: charge.payment_method_details?.card?.brand ?? "",
+    payment_method_last4: charge.payment_method_details?.card?.last4 ?? "",
+    payment_method_exp_month: String(charge.payment_method_details?.card?.exp_month ?? ""),
+    payment_method_exp_year: String(charge.payment_method_details?.card?.exp_year ?? ""),
+    payment_method_network: charge.payment_method_details?.card?.network ?? "",
+    payment_method_three_d_secure: !!charge.payment_method_details?.card?.three_d_secure,
+    payment_method_country: charge.payment_method_details?.card?.country ?? "",
   };
+
+  return resolvedCharge;
 };
 
 const Charges = () => {

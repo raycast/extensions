@@ -3,9 +3,11 @@ import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
-import { Model } from "./type";
+import type { Model } from "./type";
 import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
+import { ExportData, ImportData } from "./utils/import-export";
+import { ImportForm } from "./views/import-form";
 
 export default function Model() {
   const models = useModel();
@@ -28,6 +30,25 @@ export default function Model() {
         icon={Icon.Text}
         onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
       />
+      <ActionPanel.Section title="Actions">
+        <Action title={"Export Models"} icon={Icon.Upload} onAction={() => ExportData(models.data, "Models")} />
+        <Action
+          title={"Import Models"}
+          icon={Icon.Download}
+          onAction={() =>
+            push(
+              <ImportForm
+                moduleName="Models"
+                onSubmit={async (file) => {
+                  ImportData<Model>("models", file).then((data) => {
+                    models.setModels(data);
+                  });
+                }}
+              />
+            )
+          }
+        />
+      </ActionPanel.Section>
       {model.id !== "default" && (
         <>
           <PinAction
@@ -73,7 +94,7 @@ export default function Model() {
 
   return (
     <List
-      isShowingDetail={filteredModels.length !== 0}
+      isShowingDetail // always show detail view, since the default model is always selected
       isLoading={models.isLoading || models.isFetching}
       filtering={false}
       throttle={false}
@@ -89,8 +110,6 @@ export default function Model() {
     >
       {models.isFetching ? (
         <List.EmptyView />
-      ) : models.data.length === 0 ? (
-        <List.EmptyView title="No custom models" description="Create new model with ⌘ + T shortcut" icon={Icon.Stars} />
       ) : (
         <>
           <ModelListItem

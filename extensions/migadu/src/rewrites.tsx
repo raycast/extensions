@@ -7,13 +7,14 @@ import {
   Alert,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import DomainSelector from "./components/DomainSelector";
 
 export default function Rewrites() {
@@ -24,7 +25,9 @@ export default function Rewrites() {
 
 function RewritesIndex({ domain }: { domain: string }) {
   const { push } = useNavigation();
-  const [rewrites, setRewrites] = useState<Rewrite[]>([]);
+  const [rewrites, setRewrites] = useCachedState<Rewrite[]>("rewrites", [], {
+    cacheNamespace: domain,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getDomainRewritesFromApi() {
@@ -95,7 +98,7 @@ function RewritesIndex({ domain }: { domain: string }) {
                 <Action
                   title="Delete Rewrite"
                   icon={Icon.Minus}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(rewrite)}
                 />
@@ -177,7 +180,7 @@ function RewritesCreate({ domain, onRewriteCreated }: RewritesCreateProps) {
         showToast(
           Toast.Style.Success,
           "Created Rewrite",
-          `${response.local_part_rule} -> ${response.destinations.join()}`
+          `${response.local_part_rule} -> ${response.destinations.join()}`,
         );
         onRewriteCreated();
         pop();

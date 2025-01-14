@@ -4,32 +4,28 @@ import { Color, Icon } from "@raycast/api";
 import { UnwrapArray, UnwrapPromise } from "../types";
 
 import { DatabaseProperty } from "./database/property";
-import { PagePropertyType } from "./page";
+import { PageProperty } from "./page";
 
 export * from "./database";
 export * from "./page";
+export * from "./user";
 
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
-export const _supportedPropTypes = [
-  "title",
-  "number",
-  "rich_text",
-  "url",
-  "email",
-  "phone_number",
-  "date",
-  "checkbox",
-  "select",
-  "multi_select",
-  "formula",
-  "people",
-  "relation",
-  "status",
-] satisfies PagePropertyType["type"][];
-export const supportedPropTypes: PagePropertyType["type"][] = _supportedPropTypes;
-
-export * from "./user";
+// prettier-ignore
+const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
+export type ReadablePropertyType = (typeof readablePropertyTypes)[number];
+export function isReadableProperty<T extends { type: PageProperty["type"] }>(
+  property: T,
+): property is Extract<T, { type: ReadablePropertyType }> {
+  return (readablePropertyTypes as readonly string[]).includes(property.type);
+}
+export function isType<P extends DatabaseProperty | PageProperty, T extends PageProperty["type"]>(
+  property: DatabaseProperty | PageProperty,
+  ...types: T[]
+): property is Extract<P, { type: T }> {
+  return types.includes(property.type as T);
+}
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration
@@ -51,7 +47,7 @@ export function notionColorToTintColor(notionColor: string | undefined): Color.C
   return notionColor ? colorMapper[notionColor] : colorMapper["default"];
 }
 
-export function getPropertyIcon(property: DatabaseProperty | PagePropertyType) {
+export function getPropertyIcon(property: DatabaseProperty | PageProperty) {
   switch (property.type) {
     case "checkbox":
       return Icon.Circle;

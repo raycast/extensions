@@ -1,5 +1,11 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.5.0] - 2024-06-17
+
+- Added language support for Filipino (tgl)
+  - The default version is Magandang Balita Biblia 2005 (MBB05)
+- Tweaked the casing of the "Look up Bible Reference" command per Raycast's conventions
+
 ## [v3.4.1] - 2024-02-20
 
 - Fixed a bug where verses containing line breaks (e.g. Psalm 23:1 NASB1995)

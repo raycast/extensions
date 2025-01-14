@@ -29,7 +29,7 @@ export default async function main() {
     await showToast({
       style: Toast.Style.Failure,
       title: `Error removing background`,
-      message: (error as Error).message,
+      message: String(error as Error).trim(),
     });
   }
 }

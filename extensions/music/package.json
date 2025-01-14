@@ -10,7 +10,8 @@
     "danpalmer",
     "itsjustxan",
     "Shpigford",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "michalzuch"
   ],
   "license": "MIT",
   "keywords": [
@@ -108,7 +109,8 @@
       "subtitle": "Apple Music",
       "description": "Get info about currently playing track.",
       "disabledByDefault": true,
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "30s"
     },
     {
       "name": "remove-current-playing-from-current-playlist",

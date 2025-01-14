@@ -14,7 +14,8 @@
     "Aiee",
     "nagauta",
     "a-laughlin",
-    "tleo19"
+    "tleo19",
+    "Tarocch1"
   ],
   "license": "MIT",
   "commands": [
@@ -44,6 +45,13 @@
       "title": "Search Bookmarks",
       "subtitle": "Google Chrome",
       "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "search-all",
+      "title": "Search All",
+      "subtitle": "Google Chrome",
+      "description": "Search browser all tabs and history,bookmarks.",
       "mode": "view"
     },
     {

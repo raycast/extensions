@@ -1,9 +1,9 @@
-import { Color, Icon, Action, ActionPanel } from "@raycast/api";
+import { HAOpenUrlInAction } from "@components/actions";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityStandardActionSections } from "@components/entity";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { callAutomationTriggerService, callAutomationTurnOffService, callAutomationTurnOnService } from "./utils";
-import { HAOpenUrlInAction } from "@components/actions";
 
 export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -26,7 +26,7 @@ export function AutomationTurnOnAction(props: { state: State }): JSX.Element | n
       <Action
         title="Turn On"
         onAction={() => callAutomationTurnOnService(s)}
-        icon={{ source: "power-btn.png", tintColor: Color.Green }}
+        icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
       />
     );
   }
@@ -40,7 +40,7 @@ export function AutomationTurnOffAction(props: { state: State }): JSX.Element | 
       <Action
         title="Turn Off"
         onAction={() => callAutomationTurnOffService(s)}
-        icon={{ source: "power-btn.png", tintColor: Color.Red }}
+        icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
       />
     );
   }

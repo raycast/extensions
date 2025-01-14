@@ -72,6 +72,7 @@ export interface NodeEntity {
   my_edit_time: number;
   activity_time: number;
   path_count: number;
+  icon_info?: string;
 }
 
 export interface ObjEntity {

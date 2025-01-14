@@ -13,7 +13,8 @@
     "Yamen",
     "undefinedzack",
     "anirudhganwal06",
-    "samuel_ivarsson"
+    "samuel_ivarsson",
+    "gaspihabif"
   ],
   "pastContributors": [
     "pomdtr"
@@ -216,7 +217,7 @@
       "subtitle": "Bitwarden",
       "description": "Receive a send from a URL",
       "arguments": [
-        { 
+        {
           "type": "text",
           "name": "url",
           "placeholder": "url"
@@ -364,8 +365,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.2",
-    "@raycast/utils": "^1.13.4",
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
     "execa": "^7.0.0",
     "node-fetch": "^3.3.2",
     "node-stream-zip": "^1.15.0"
@@ -375,23 +376,24 @@
     "@types/jest": "^29.5.0",
     "@types/node": "~18.14.2",
     "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^6.16.0",
-    "@typescript-eslint/parser": "^6.16.0",
-    "eslint": "^8.35.0",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.56.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "prettier": "^2.8.4",
-    "react-devtools": "^4.27.2",
+    "react-devtools": "^5.2.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "jest --verbose",

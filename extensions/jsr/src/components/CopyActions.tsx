@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
@@ -8,7 +9,7 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
       {item.runtimeCompat.node ? (
         <>
           <Action.CopyToClipboard
-            title="Npm (Node.js)"
+            title="npm (Node.js)"
             content={`npx jsr add ${item.id}`}
             icon={{ source: "npm.svg" }}
           />
@@ -18,7 +19,7 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
             icon={{ source: "yarn.svg" }}
           />
           <Action.CopyToClipboard
-            title="Pnpm (Node.js)"
+            title="pnpm (Node.js)"
             content={`pnpm dlx jsr add ${item.id}`}
             icon={{ source: "pnpm.svg" }}
           />

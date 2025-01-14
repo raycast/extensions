@@ -6,22 +6,26 @@ import { Item } from "../types";
 import {
   getCategoryIcon,
   actionsForItem,
-  usePasswords,
   useAccount,
   CommandLineMissingError,
   ConnectionError,
   ExtensionError,
+  usePasswords2,
 } from "../utils";
-import { Guide } from "./Guide";
+import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
 import { useMemo, useState } from "react";
 
-export function Items() {
+export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [passwords, setPasswords] = useState<Item[]>([]);
 
   const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
-  const { data: items, error: itemsError, isLoading: itemsIsLoading } = usePasswords();
+  const {
+    data: items,
+    error: itemsError,
+    isLoading: itemsIsLoading,
+  } = usePasswords2({ flags, account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading });
 
   useMemo(() => {
     if (!items) return;
@@ -34,7 +38,7 @@ export function Items() {
   };
 
   if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
-    return <Guide />;
+    return <ErrorGuide />;
 
   if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
     return (
@@ -59,26 +63,28 @@ export function Items() {
         description="Any items you have added in 1Password app will be listed here."
       />
       <List.Section title="Items" subtitle={`${passwords?.length}`}>
-        {passwords?.length &&
-          passwords.map((item) => (
-            <List.Item
-              key={item.id}
-              id={item.id}
-              icon={{
-                value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
-                tooltip: item.category,
-              }}
-              title={item.title}
-              subtitle={item.additional_information}
-              accessories={[
-                item?.favorite
-                  ? { icon: { source: Icon.Stars, tintColor: Color.Yellow }, tooltip: "Favorite item" }
-                  : {},
-                { text: item.vault?.name },
-              ]}
-              actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
-            />
-          ))}
+        {passwords?.length
+          ? passwords.map((item) => (
+              <List.Item
+                key={item.id}
+                id={item.id}
+                icon={{
+                  value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
+                  tooltip: item.category,
+                }}
+                title={item.title}
+                subtitle={item.additional_information}
+                accessories={[
+                  item?.favorite
+                    ? { icon: { source: Icon.Stars, tintColor: Color.Yellow }, tooltip: "Favorite item" }
+                    : {},
+                  { text: item.vault?.name },
+                ]}
+                keywords={item.additional_information ? [item.additional_information] : []}
+                actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
+              />
+            ))
+          : null}
       </List.Section>
     </List>
   );

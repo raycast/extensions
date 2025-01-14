@@ -1,43 +1,50 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { archiveMemo, deleteMemo, getAllMemos, getRequestUrl, restoreMemo } from "./api";
-import { MemoInfoResponse, ROW_STATUS, ROW_STATUS_KEY } from "./types";
+import { archiveMemo, deleteMemo, getAllMemos, getMe, getRequestUrl, restoreMemo } from "./api";
+import { MemoInfoResponse, ROW_STATUS } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const [rowStatus, setRowStatus] = useState<ROW_STATUS_KEY>(ROW_STATUS.NORMAL);
-  const { isLoading, data, revalidate } = getAllMemos(rowStatus);
+  const [currentUserId, setCurrentUserId] = useState<number>();
+  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId);
+  const { isLoading: isLoadingUser, data: user } = getMe();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
-  const rowStatusList: ROW_STATUS_KEY[] = [ROW_STATUS.NORMAL, ROW_STATUS.ARCHIVED];
-
-  const onRowStatusChange = (newValue: ROW_STATUS_KEY) => {
-    setRowStatus(newValue);
-    revalidate();
-  };
+  useEffect(() => {
+    if (!isLoadingUser && user.id) {
+      setCurrentUserId(user.id);
+    }
+  }, [isLoadingUser]);
 
   useEffect(() => {
-    const dataList = data?.data || data || [];
+    if (currentUserId) {
+      revalidate();
+    }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    const dataList = data || [];
+
     setFilterList(dataList.filter((item) => item.content.includes(searchText)) || []);
   }, [searchText]);
 
   useEffect(() => {
-    const dataList = data?.data || data || [];
+    const dataList = data || [];
     setFilterList(dataList);
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
-    const url = getRequestUrl(`/m/${item.name || item.id}`);
+    const url = getRequestUrl(`/m/${item.uid}`);
 
     return url;
   }
 
   function getItemMarkdown(item: MemoInfoResponse) {
-    const { content, resourceList } = item;
+    const { content, resources } = item;
     let markdown = content;
 
-    resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}?thumbnail=1`);
+    resources.forEach((resource, index) => {
+      const resourceUrl = getRequestUrl(`/file/${resource.name}/${resource.filename}`);
 
       if (index === 0) {
         markdown += "\n\n";
@@ -64,7 +71,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Archive...",
       });
-      const res = await archiveMemo(item.id).catch(() => {
+      const res = await archiveMemo(item.uid).catch(() => {
         //
       });
 
@@ -93,7 +100,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Delete...",
       });
-      const res = await deleteMemo(item.id).catch(() => {
+      const res = await deleteMemo(item.uid).catch(() => {
         //
       });
 
@@ -122,7 +129,7 @@ export default function MemosListCommand(): JSX.Element {
         style: Toast.Style.Animated,
         title: "Restore...",
       });
-      const res = await restoreMemo(item.id).catch(() => {
+      const res = await restoreMemo(item.uid).catch(() => {
         //
       });
 
@@ -156,25 +163,11 @@ export default function MemosListCommand(): JSX.Element {
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Row Status"
-          storeValue={true}
-          onChange={(newValue) => {
-            onRowStatusChange(newValue as ROW_STATUS_KEY);
-          }}
-        >
-          <List.Dropdown.Section title="Row Status">
-            {rowStatusList.map((status) => (
-              <List.Dropdown.Item key={status} title={status} value={status} />
-            ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
-      }
+      pagination={pagination}
     >
       {filterList.map((item) => (
         <List.Item
-          key={item.id}
+          key={item.uid}
           title={item.content}
           actions={
             <ActionPanel>

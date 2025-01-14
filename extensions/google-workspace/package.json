@@ -10,12 +10,24 @@
   "contributors": [
     "mathieudutour",
     "marcmagn1",
-    "meganpearson"
+    "meganpearson",
+    "jbjanot",
+    "ridemountainpig"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "displayFilePath",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Display the file path in the search results. ⚠️ This may slow down your search results.",
+      "label": "Display file path in search results"
+    }
+  ],
   "commands": [
     {
       "name": "create-google-document",
@@ -94,7 +106,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/utils": "^1.16.2",
     "date-fns": "^2.30.0",
     "jwt-decode": "^3.1.2",
     "node-fetch": "^3.3.2"

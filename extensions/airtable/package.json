@@ -7,7 +7,8 @@
   "author": "marks",
   "contributors": [
     "SeanKeenan-Airtable",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "xmok"
   ],
   "categories": [
     "Productivity"
@@ -21,7 +22,8 @@
       "label": "Airtable UI Base URL",
       "description": "The base URL for the Airtable UI (you probably don't need to change this)",
       "default": "https://airtable.com",
-      "required": false
+      "placeholder": "https://airtable.com",
+      "required": true
     },
     {
       "type": "textfield",
@@ -31,7 +33,8 @@
       "label": "Airtable API Base URL",
       "description": "The base URL for the Airtable API (you probably don't need to change this)",
       "default": "https://api.airtable.com",
-      "required": false
+      "placeholder": "https://api.airtable.com",
+      "required": true
     },
     {
       "type": "textfield",
@@ -40,8 +43,9 @@
       "title": "Airtable OAuth Client ID",
       "label": "Airtable OAuth Integration Client ID",
       "description": "The OAuth client ID for the Airtable integration",
-      "default": "76a7c93f-0834-41ba-82a5-e23e771fb19f",
-      "required": false
+      "default": "59e5ecce-9dc8-4881-89c8-98d44be1e68a",
+      "placeholder": "59e5ecce-9dc8-4881-89c8-98d44be1e68a",
+      "required": true
     }
   ],
   "commands": [
@@ -54,24 +58,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
+    "@raycast/api": "^1.84.7",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "license": "MIT"
 }

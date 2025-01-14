@@ -12,7 +12,9 @@ import TodayTasks from "./components/TodayTasks";
 import UpcomingTasks from "./components/UpcomingTasks";
 import View from "./components/View";
 import { getColorByKey } from "./helpers/colors";
-import { getProjectIcon } from "./helpers/projects";
+import { getFilterAppUrl, getFilterUrl } from "./helpers/filters";
+import { getLabelAppUrl, getLabelUrl } from "./helpers/labels";
+import { getProjectAppUrl, getProjectIcon, getProjectUrl } from "./helpers/projects";
 import { searchBarPlaceholder as defaultSearchBarPlaceholder } from "./helpers/tasks";
 import useSyncData from "./hooks/useSyncData";
 
@@ -28,6 +30,10 @@ export type ViewType =
 export type QuickLinkView = {
   title: string;
   view: string;
+  todoistLink?: {
+    app: string;
+    web: string;
+  };
 };
 
 export enum ViewMode {
@@ -46,46 +52,6 @@ export function Home({ launchContext }: LaunchProps) {
     handleError({ error, title: "Unable to get Todoist data" });
   }
 
-  const { component, searchBarPlaceholder, navigationTitle } = useMemo(() => {
-    let component: JSX.Element | null = null;
-    let searchBarPlaceholder = defaultSearchBarPlaceholder;
-    let navigationTitle = view as string;
-
-    if (view === "inbox") {
-      navigationTitle = "Inbox";
-      component = <InboxTasks quickLinkView={{ title: navigationTitle, view }} />;
-    } else if (view === "today") {
-      navigationTitle = "Today";
-      component = <TodayTasks quickLinkView={{ title: navigationTitle, view }} />;
-    } else if (view === "upcoming") {
-      navigationTitle = "Upcoming";
-      component = <UpcomingTasks quickLinkView={{ title: navigationTitle, view }} />;
-    } else if (view === "completed") {
-      searchBarPlaceholder = "Filter completed tasks by name";
-      navigationTitle = "Completed";
-      component = <CompletedTasks quickLinkView={{ title: navigationTitle, view }} />;
-    } else if (view.startsWith("project_")) {
-      const projectId = view.replace("project_", "");
-      searchBarPlaceholder = "Filter tasks by name, label, priority, or assignee";
-      const project = data?.projects.find((project) => project.id === projectId);
-      navigationTitle = project?.name ?? "Project";
-      component = <ProjectTasks projectId={projectId} quickLinkView={{ title: `Todoist ${navigationTitle}`, view }} />;
-    } else if (view.startsWith("label_")) {
-      const labelName = view.replace("label_", "");
-      searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
-      navigationTitle = labelName;
-      component = <LabelTasks name={labelName} quickLinkView={{ title: navigationTitle, view }} />;
-    } else if (view.startsWith("filter_")) {
-      const filterName = view.replace("filter_", "");
-
-      searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
-      navigationTitle = filterName;
-      component = <FilterTasks name={filterName} quickLinkView={{ title: navigationTitle, view }} />;
-    }
-
-    return { component, searchBarPlaceholder, navigationTitle };
-  }, [view, data]);
-
   const projects = useMemo(() => {
     return data?.projects.filter((p) => !p.inbox_project) ?? [];
   }, [data]);
@@ -97,6 +63,106 @@ export function Home({ launchContext }: LaunchProps) {
   const filters = useMemo(() => {
     return data?.filters.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
+
+  const { component, searchBarPlaceholder, navigationTitle } = useMemo(() => {
+    let component: JSX.Element | null = null;
+    let searchBarPlaceholder = defaultSearchBarPlaceholder;
+    let navigationTitle = view as string;
+
+    if (view === "inbox") {
+      navigationTitle = "Inbox";
+      component = (
+        <InboxTasks
+          quickLinkView={{
+            title: navigationTitle,
+            view,
+            todoistLink: { app: "todoist://inbox", web: "https://app.todoist.com/app/inbox" },
+          }}
+        />
+      );
+    } else if (view === "today") {
+      navigationTitle = "Today";
+      component = (
+        <TodayTasks
+          quickLinkView={{
+            title: navigationTitle,
+            view,
+            todoistLink: { app: "todoist://today", web: "https://app.todoist.com/app/today" },
+          }}
+        />
+      );
+    } else if (view === "upcoming") {
+      navigationTitle = "Upcoming";
+      component = (
+        <UpcomingTasks
+          quickLinkView={{
+            title: navigationTitle,
+            view,
+            todoistLink: { app: "todoist://upcoming", web: "https://app.todoist.com/app/upcoming" },
+          }}
+        />
+      );
+    } else if (view === "completed") {
+      searchBarPlaceholder = "Filter completed tasks by name";
+      navigationTitle = "Completed";
+      component = <CompletedTasks quickLinkView={{ title: navigationTitle, view }} />;
+    } else if (view.startsWith("project_")) {
+      const projectId = view.replace("project_", "");
+      searchBarPlaceholder = "Filter tasks by name, label, priority, or assignee";
+      const project = data?.projects.find((project) => project.id === projectId);
+      navigationTitle = project?.name ?? "Project";
+      component = (
+        <ProjectTasks
+          projectId={projectId}
+          quickLinkView={{
+            title: navigationTitle,
+            view,
+            todoistLink: { app: getProjectAppUrl(projectId), web: getProjectUrl(projectId) },
+          }}
+        />
+      );
+    } else if (view.startsWith("label_")) {
+      const labelId = view.replace("label_", "");
+      searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
+      const labelName = labels.find((label) => label.id === labelId)?.name;
+      if (!labelName) {
+        component = <List.EmptyView title="Label not found" />;
+      } else {
+        navigationTitle = labelName;
+        component = (
+          <LabelTasks
+            name={labelName}
+            quickLinkView={{
+              title: navigationTitle,
+              view,
+              todoistLink: { app: getLabelAppUrl(labelName), web: getLabelUrl(labelId) },
+            }}
+          />
+        );
+      }
+    } else if (view.startsWith("filter_")) {
+      const filterId = view.replace("filter_", "");
+      searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
+      const filterName = filters.find((filter) => filter.id === filterId)?.name;
+      if (!filterName) {
+        component = <List.EmptyView title="Filter not found" />;
+      } else {
+        navigationTitle = filterName;
+        component = (
+          <FilterTasks
+            name={filterName}
+            quickLinkView={{
+              title: navigationTitle,
+              view,
+              todoistLink: { app: getFilterAppUrl(filterId), web: getFilterUrl(filterId) },
+            }}
+          />
+        );
+      }
+    }
+
+    return { component, searchBarPlaceholder, navigationTitle };
+  }, [view, labels, filters, data]);
 
   // If task we return earlier the taskDetail component directly
   if (view.startsWith("task_")) {
@@ -146,7 +212,7 @@ export function Home({ launchContext }: LaunchProps) {
                   <List.Dropdown.Item
                     key={label.id}
                     title={label.name}
-                    value={`label_${label.name}`}
+                    value={`label_${label.id}`}
                     icon={{ source: Icon.Tag, tintColor: getColorByKey(label.color).value }}
                   />
                 );
@@ -161,7 +227,7 @@ export function Home({ launchContext }: LaunchProps) {
                   <List.Dropdown.Item
                     key={filter.id}
                     title={filter.name}
-                    value={`filter_${filter.name}`}
+                    value={`filter_${filter.id}`}
                     icon={{ source: Icon.Tag, tintColor: getColorByKey(filter.color).value }}
                   />
                 );

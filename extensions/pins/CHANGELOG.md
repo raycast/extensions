@@ -1,6 +1,37 @@
 # Pins Changelog
 
-## [Target Groups, Media Track Quick Pins, and Bug Fixes] - 2024-01-12
+## [1.9.0 - Pin Aliases & Per-Group Display Setting] - 2024-07-21
+
+- Added setting for pin aliases.
+- Added setting to control how individual groups are displayed in the menu bar dropdown.
+- Added support for using information placeholders in pin names.
+- Added support for importing multiple pin data files at once.
+
+## [1.8.2 - Group Visibility, Pin Expiration Actions] - 2024-07-11
+
+- Added ability to set custom expiration actions.
+- Added visibility setting for groups.
+- Added `{{pinName}}` and `{{pinTarget}}` placeholders for getting info about the current pin.
+
+## [1.8.1 - Visibility Setting] - 2024-07-07
+
+- Added visibility setting for pins.
+- Added ability to launch pins via deeplinks.
+- Fixed timeout error when running AppleScript scripts.
+
+## [1.8.0 - Bug Fixes, More AI Models, & Pin Management Placeholders] - 2024-06-22
+
+- Added support for new Raycast AI models.
+- Added setting for configuring the default AI model.
+- Added action to open all pins in a group in the "View Groups" command.
+- Added `{{createPin:pinName:pinTarget:pinGroup}}` directive for creating new pins.
+- Added `{{deletePin:pinName}}` directive for deleting pins.
+- Added `{{launchPin:pinName}}` directive for launching other pins.
+- Added `{{launchGroup:groupName}}` directive for launching all pins in a group.
+- Fixed bug where placeholders using values from LocalData would not update on time.
+- Fixed bug where non-document-based applications that expose an Applescript API could yield an error upon LocalData updates.
+
+## [1.7.0 - Target Groups, Media Track Quick Pins, and Bug Fixes] - 2024-01-12
 
 - Added ability to quick-add pins to a target group from the menu bar dropdown.
 - Added ability to quick-pin tracks in Music, TV, and Spotify.
@@ -8,7 +39,7 @@
 - Use gpt-3.5-turbo-instruct instead of text-davinci-003 for AI placeholder.
 - Fixed bug where non-document-based applications that expose an Applescript API could yield an error.
 
-## [Tooltips, Tag Filtering, and New Placeholders] - 2023-12-29
+## [1.6.0 - Tooltips, Tag Filtering, and New Placeholders] - 2023-12-29
 
 - Now using the placeholders-toolkit package.
 - Added pin tags and tag filtering.
@@ -21,11 +52,11 @@
 - Added link to the Placeholders Guide in the edit pin form header.
 - Adjusted behavior of `{{selectedText}}` placeholder to avoid triggering alert sounds each time the menu is opened.
 
-## [Bug fixes] - 2023-11-06
+## [1.5.1 - Bug fixes] - 2023-11-06
 
 - Fixed bug where pins with corrupted data from previous versions would cause themselves and others to disappear after editing. (Resolve SKaplanOfficial/Raycast-Pins4)
 
-## [Bug fixes & Quality of Life Improvements] - 2023-11-01
+## [1.5.0 - Bug fixes & Quality of Life Improvements] - 2023-11-01
 
 - Added group statistics, viewable when editing a group.
 - Added action to create a subgroup of the selected group
@@ -38,7 +69,7 @@
 - Fixed bug where inputting web URLs in the target field would prevent the list of 'Open With' applications from properly updating and leaving only a "None" option.
 - Fixed bug where empty groups would still get displayed in the menu bar dropdown.
 
-## [Subgroups, Sorting, Settings, Bug Fixes, and More] - 2023-09-05
+## [1.4.0 - Subgroups, Sorting, Settings, Bug Fixes, and More] - 2023-09-05
 
 - Added ability to create subgroups
 - Added ability to automatically sort pins using various criteria on a per-group basis
@@ -59,14 +90,14 @@
 - Fixed bug where leaving pin name blank did not use the target as the pin name, despite saying it would
 - Fixed bug where the `{{selectedText}}` placeholder caused an alert sound to play if no text was selected
 
-## [Bug fixes] - 2023-06-19
+## [1.3.1 - Bug fixes] - 2023-06-19
 
 - Fixed bug where pins without a group would not be treated as valid pins in some cases
 - Fixed bug where "Duplicate" action would overwrite the original pin
 - Fixed bug where script placeholders resolving to empty strings would show an error when used as the target of a pin
 - Changed "New Pin" to default to Favicon / File Icon instead of "None"
 
-## [Pinned Terminal Commands, Placeholders, Pin Expirations, and More] - 2023-06-16
+## [1.3.0 - Pinned Terminal Commands, Placeholders, Pin Expirations, and More] - 2023-06-16
 
 - Added per-pin "Open With" setting to allow you to choose which application to open the pin in
 - Added per-pin "Expiration Date" setting to automatically remove the pin after a given date & time
@@ -84,7 +115,7 @@
 - Fixed bug where "Pin This Tab" would fail if the tab name contained commas
 - Fixed bug where menu bar dropdown would not update after adding pins for the first time
 
-## [Minor Improvements] - 2023-05-22
+## [1.1.0 - Minor Improvements] - 2023-05-22
 
 - Added "Preferred Browser" setting to allow you to choose which browser to open links in
 - Added support for tilde expansion in paths
@@ -94,4 +125,4 @@
 - Added "Duplicate Pin" action
 - When adding a new pin, the icon dropdown will now show the favicon or file icon of the URL/path
 
-## [Initial Version] - 2022-10-05
+## [1.0.0 - Initial Version] - 2022-10-05

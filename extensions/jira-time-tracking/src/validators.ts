@@ -1,10 +1,30 @@
 import { IssueBody, ProjectBody, JiraErrorResponseBody, PaginationBody } from "./types";
 
 export const projectsValidator = (body: unknown): body is ProjectBody => {
-  if (typeof body === "object" && body !== null && "values" in body) {
+  if (Array.isArray(body)) {
+    // API v2 structure: an array of project objects
+    const isValid = body.every(
+      (project) => typeof project === "object" && project !== null && "key" in project && "name" in project,
+    );
+    if (!isValid) {
+      console.error("Invalid API v2 project response format:", body);
+    }
+    return isValid;
+  } else if (typeof body === "object" && body !== null && "values" in body) {
+    // API v3 structure: an object with a 'values' property containing an array of project objects
     const partial = body as { values: unknown };
-    return Array.isArray(partial.values);
+    const isValid =
+      Array.isArray(partial.values) &&
+      partial.values.every(
+        (project) => typeof project === "object" && project !== null && "key" in project && "name" in project,
+      );
+    if (!isValid) {
+      console.error("Invalid API v3 project response format:", body);
+    }
+    return isValid;
   }
+
+  console.error("Unexpected project response format:", body);
   return false;
 };
 

@@ -1,5 +1,29 @@
-# Microsoft Teams
-Easily manage your Microsoft Teams presence and status message with this [Raycast](https://raycast.com/) extension. Search chats and open them with a keystroke in the Teams app.
+<div align="center">
+  <img
+    src="./assets/teams-logo.png"
+    width="100"
+  />
+  <h1>
+    Microsoft Teams
+  </h1>
+Easily manage your presence and status message with this extension. Search chats and open them or perform audio or video calls with a keystroke in the Teams app.
+<p>
+    <a href="https://www.raycast.com/sven/microsoft-teams">
+      <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
+        alt="Find this extension on the Raycast store"
+      />
+    </a>
+    <img
+      src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
+      alt="PRs welcome!"
+    />
+    <a href="https://github.dev/raycast/extensions/extensions/microsoft-teams">
+      <img src="https://img.shields.io/badge/Open_in-GitHub.dev-red.svg"
+        alt="Open in GitHub.dev"
+      />
+    </a>
+  </p>
+</div>
 
 ![Screenshot of the "set presence" command](metadata/microsoft-teams-1.png)
 ![Screenshot of the "set status" command](metadata/microsoft-teams-2.png)
@@ -8,8 +32,10 @@ Easily manage your Microsoft Teams presence and status message with this [Raycas
 These features are currently available:
 
 - Set your presence
+- View presence of other users
 - Set your status
 - Find chats by name or member and open them in Teams
+- Call a user directly with audio or video
 
 ## Setup
 When starting the extension for the first time it will ask you for two IDs: The **Application ID** and the **Directory ID**. Your organization's Microsoft admin should be able to provide you these IDs after following the admin setup guide provided below. After you've entered them you'll be able to login with your Microsoft account.
@@ -37,6 +63,7 @@ These are the steps:
       - `offline_access`
       - `Presence.ReadWrite`
       - `User.Read.All`
+      - `Presence.Read.All` - needed for getting the presence of other users
    3. Click the button **Grant admin consent for undefined** to give these permissions to your users in the name of your organization. 
    
       There's nothing to fear here: Even with these permissions, your users will only be able to access things they are allowed to see.

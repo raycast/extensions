@@ -1,5 +1,6 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 import {
   fetchDatabaseProperties,
@@ -9,6 +10,7 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  isType,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
@@ -27,9 +29,11 @@ export function useRelations(properties: DatabaseProperty[]) {
 
       await Promise.all(
         properties.map(async (property) => {
-          if (property.type !== "relation" || !property.relation_id) return null;
-          const pages = await queryDatabase(property.relation_id, undefined);
-          relationPages[property.relation_id] = pages;
+          if (!isType(property, "relation")) return null;
+          const relationId = property.config.database_id;
+          if (!relationId) return null;
+          const pages = await queryDatabase(relationId, undefined);
+          relationPages[relationId] = pages;
           return pages;
         }),
       );
@@ -62,6 +66,24 @@ export function useDatabaseProperties(databaseId: string | null, filter?: (value
   return { ...value, data: value.data ?? [] };
 }
 
+export function useVisibleDatabasePropIds(
+  databaseId: string,
+  quicklinkProps?: string[],
+): {
+  visiblePropIds?: string[];
+  isLoading: boolean;
+  setVisiblePropIds: (value: string[]) => Promise<void> | void;
+} {
+  if (quicklinkProps) {
+    const [visiblePropIds, setVisiblePropIds] = useState(quicklinkProps);
+    return { visiblePropIds, isLoading: false, setVisiblePropIds };
+  } else {
+    const { data, isLoading, setDatabaseView } = useDatabasesView(databaseId);
+    const setVisiblePropIds = (props?: string[]) => setDatabaseView({ ...data, create_properties: props });
+    return { visiblePropIds: data.create_properties, isLoading, setVisiblePropIds };
+  }
+}
+
 export function useDatabasesView(databaseId: string) {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
     const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
@@ -82,7 +104,6 @@ export function useDatabasesView(databaseId: string) {
   return {
     data: data?.[databaseId] || {},
     isLoading,
-    mutate,
     setDatabaseView,
   };
 }

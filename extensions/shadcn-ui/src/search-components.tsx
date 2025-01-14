@@ -140,25 +140,25 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action.CopyToClipboard
               icon="npm-icon.png"
               title="Copy Add Component [Npm]"
-              content={`npx shadcn-ui@latest add ${searchResult.component}`}
+              content={`npx shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
-              content={`npx shadcn-ui@latest add ${searchResult.component}`}
+              content={`npx shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
             <Action.CopyToClipboard
               icon="pnpm-icon.png"
               title="Copy Add Component [Pnpm]"
-              content={`pnpm dlx shadcn-ui@latest add ${searchResult.component}`}
+              content={`pnpm dlx shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
             />
             <Action.CopyToClipboard
               icon="bun-icon.png"
               title="Copy Add Component [Bun]"
-              content={`bunx --bun shadcn-ui@latest add ${searchResult.component}`}
+              content={`bunx --bun shadcn@latest add ${searchResult.component}`}
               shortcut={{ modifiers: ["cmd"], key: "b" }}
             />
           </ActionPanel.Section>

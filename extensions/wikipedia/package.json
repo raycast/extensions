@@ -7,14 +7,18 @@
   "author": "vimtor",
   "contributors": [
     "shubzkothekar",
-    "JonathanWbn",
     "nikos",
     "menahishayan",
     "pernielsentikaer",
-    "igor9silva",
     "Ek217",
     "sergiivelykodnyi",
-    "j3lte"
+    "j3lte",
+    "peterbrinck",
+    "r22"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "JonathanWbn"
   ],
   "license": "MIT",
   "preferences": [
@@ -108,7 +112,7 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.1",
+    "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.14.0",
     "node-fetch": "^3.3.2",
     "wikijs": "^6.4.1"
@@ -117,7 +121,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/debug": "^4.1.12",
     "@types/node": "20.11.17",
-    "@types/react": "18.2.55",
+    "@types/react": "^18.3.3",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.2.5",

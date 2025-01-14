@@ -13,7 +13,8 @@
     "madza",
     "bkeys818",
     "pernielsentikaer",
-    "telmen"
+    "telmen",
+    "ridemountainpig"
   ],
   "scripts": {
     "build": "ray build -e dist",

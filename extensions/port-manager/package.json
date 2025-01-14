@@ -11,7 +11,9 @@
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "contributors": [
-    "Sheraff"
+    "Sheraff",
+    "ridemountainpig",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -39,7 +41,51 @@
       "name": "open-ports",
       "title": "Open Ports",
       "description": "Show and Close Opened Ports",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryPortAction",
+          "type": "dropdown",
+          "default": "kill",
+          "required": false,
+          "data": [
+            {
+              "title": "Kill",
+              "value": "kill"
+            },
+            {
+              "title": "Kill All",
+              "value": "killAll"
+            },
+            {
+              "title": "Kill Parent",
+              "value": "killParent"
+            },
+            {
+              "title": "Show Details",
+              "value": "showDetails"
+            },
+            {
+              "title": "Show In Finder",
+              "value": "showInFinder"
+            },
+            {
+              "title": "Copy Info",
+              "value": "copyInfo"
+            },
+            {
+              "title": "Copy Commands",
+              "value": "copyCommands"
+            },
+            {
+              "title": "Reload",
+              "value": "reload"
+            }
+          ],
+          "title": "Primary Port Action",
+          "description": "Choose which action to perform when selecting an port."
+        }
+      ]
     },
     {
       "name": "open-ports-menu-bar",

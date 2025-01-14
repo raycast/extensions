@@ -2,6 +2,7 @@ export enum MATCH_RESULT {
   LOST = 0,
   DRAW = 1,
   WON = 2,
+  UNKNOWN = 3,
 }
 
 export type Standing = {

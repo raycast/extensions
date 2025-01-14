@@ -1,5 +1,21 @@
 # Tailscale Changelog
 
+## [Add new features] - 2025-01-02
+
+- Add `netcheck` command
+
+## [Improvement] - 2024-11-08
+
+- Provide UI indicator, and HUD message on `connect (tailscale up)` and `disconnect (tailscale down)` commands
+
+## [Custom Admin Console URL] - 2024-07-05
+
+- Add support for custom Admin Console URLs ([#12048](https://github.com/raycast/extensions/issues/12048))
+
+## [Improvement] - 2024-05-23
+
+- Remove trailing `.` from the end of MagicDNS addresses ([#12451](https://github.com/raycast/extensions/issues/12451))
+
 ## [Fixes] - 2024-04-09
 
 - Increase default max buffers for `execSync` ([#10698](https://github.com/raycast/extensions/issues/10698))

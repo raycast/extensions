@@ -1,13 +1,16 @@
-import { captureException, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execa, execaCommand } from "execa";
-import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
 import {
   CLINotFoundError,
+  CLINotLoggedInError,
   CLIVersionNotSupportedError,
+  MasterPasswordMissingError,
   ParseError,
+  TimeoutError,
+  captureException,
   getErrorAction,
   getErrorString,
 } from "@/helper/error";
@@ -15,8 +18,7 @@ import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } fr
 
 const preferences = getPreferenceValues<Preferences>();
 
-const CLI_PATH =
-  preferences.cliPath || ["/usr/local/bin/dcli", "/opt/homebrew/bin/dcli"].find((path) => existsSync(path));
+const CLI_PATH = preferences.cliPath;
 const CLI_VERSION = getCLIVersion();
 
 async function dcli(...args: string[]) {
@@ -29,12 +31,26 @@ async function dcli(...args: string[]) {
   }
 
   const { stdout } = await execa(CLI_PATH, args, {
-    timeout: 30_000,
+    timeout: 15_000,
     ...(preferences.masterPassword && {
       env: {
         DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
       },
     }),
+  }).catch((error) => {
+    if (error.timedOut) {
+      if (error.stderr.includes("Please enter your master password")) {
+        throw new MasterPasswordMissingError(error.stack ?? error.message);
+      }
+
+      if (error.stderr.includes("Please enter your email address")) {
+        throw new CLINotLoggedInError(error.stack ?? error.message);
+      }
+
+      throw new TimeoutError(error.stack ?? error.message);
+    }
+
+    throw error;
   });
 
   if (preferences.biometrics) {

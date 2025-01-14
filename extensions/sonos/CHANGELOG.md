@@ -1,5 +1,9 @@
 # Sonos Changelog
 
+## [Improvement] - 2024-05-10
+
+- Display the volume change after executing increase and decrease volume commands
+
 ## [Bug fix] - 2024-04-24
 
 - Handle the case where the explicit group choice is no longer available to control

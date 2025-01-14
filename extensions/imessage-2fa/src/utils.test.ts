@@ -2,6 +2,11 @@ import { extractCode } from "./utils";
 
 describe("Testing matching logic", () => {
   test("Alphanumeric codes", () => {
+    expect(
+      extractCode(
+        "Chase: DON'T share. Use code 41646271 to complete Extra Security at Sign In. We'll NEVER call to ask for this code. Call us if you didn't request it."
+      )
+    ).toBe("41646271");
     expect(extractCode("2773 is your Microsoft account verification code")).toBe("2773");
     expect(extractCode("Your Airbnb verification code is: 1234.")).toBe("1234");
     expect(extractCode("Your verification code is: 1234, use it to log in")).toBe("1234");
@@ -33,6 +38,15 @@ describe("Testing matching logic", () => {
     expect(extractCode("CWGUG8")).toBe("CWGUG8");
     expect(extractCode("CWGUG8 is your code")).toBe("CWGUG8");
     expect(extractCode("7645W453")).toBe("7645W453");
+    expect(
+      extractCode(
+        "Chase: DON'T share. Use code 89050683. Only use this online. Code expires in 10 min. We'll NEVER call to ask for this code. Call us if you didn't request it."
+      )
+    ).toBe("89050683");
+    expect(extractCode("Código de Autorização: 12345678")).toBe("12345678");
+    expect(extractCode("O seu código: 12345678")).toBe("12345678");
+    expect(extractCode("Codigo de Autorizacao: 87654321")).toBe("87654321");
+    expect(extractCode("O seu codigo: 87654321")).toBe("87654321");
   });
 
   test("Codes with dash", () => {

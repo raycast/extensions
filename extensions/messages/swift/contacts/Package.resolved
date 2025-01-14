@@ -5,8 +5,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/raycast/extensions-swift-tools",
       "state" : {
-        "revision" : "020a9eaa3c8ce18c32d127f6886809dd4907847c",
-        "version" : "1.0.0"
+        "revision" : "72d4ac7bc5cc7e3fdf04fdce416b593ddfec8c00",
+        "version" : "1.0.4"
+      }
+    },
+    {
+      "identity" : "sqlite.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stephencelis/SQLite.swift.git",
+      "state" : {
+        "revision" : "a95fc6df17d108bd99210db5e8a9bac90fe984b8",
+        "version" : "0.15.3"
       }
     },
     {

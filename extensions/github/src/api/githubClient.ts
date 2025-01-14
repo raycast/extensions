@@ -1,8 +1,8 @@
+import { Octokit } from "@octokit/rest";
 import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { GraphQLClient } from "graphql-request";
 import fetch from "node-fetch";
-import { Octokit } from "octokit";
 
 import { getSdk } from "../generated/graphql";
 
@@ -20,7 +20,7 @@ function onAuthorize({ token, type }: { token: string; type: string }) {
 
 export const githubOAuthService = OAuthService.github({
   personalAccessToken: preferences.personalAccessToken,
-  scope: "notifications repo read:org read:user read:project",
+  scope: "notifications repo project read:org read:user",
   onAuthorize,
 });
 

@@ -36,7 +36,7 @@ async function parseFetchResponse(response: Response) {
     return data.found.map((item) => ({
       id: item.id,
       word: item[data.from],
-      translation: item[data.to],
+      translation: item[data.to].replace(/\r|\n|\t/g, ""),
       from: data.from,
       to: data.to,
     }));

@@ -1,4 +1,16 @@
-import { ActionPanel, List, Action, Icon, Image, Color, showToast, Toast, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  Image,
+  Color,
+  showToast,
+  Toast,
+  confirmAlert,
+  Detail,
+  openExtensionPreferences,
+} from "@raycast/api";
 import {
   PveVm,
   PveVmStatus,
@@ -11,7 +23,7 @@ import {
   suspendVm,
   useVmList,
 } from "./api";
-import { MutatePromise } from "@raycast/utils";
+import { MutatePromise, showFailureToast } from "@raycast/utils";
 import VmDetail from "./components/VmDetail";
 import { useState } from "react";
 
@@ -128,7 +140,14 @@ function VmActionPannel({
       style: Toast.Style.Animated,
     });
 
-    await mutate(func(vm));
+    try {
+      await mutate(func(vm));
+    } catch (e) {
+      await showFailureToast(e, {
+        title: `Failed to ${title} ${vm.name}`,
+      });
+      return;
+    }
 
     toast.style = Toast.Style.Success;
     toast.message = `${labels.ended} ${vm.name}`;
@@ -257,7 +276,24 @@ function getMockData(): PveVm[] {
 const USE_MOCK_DATA = process.env.NODE_ENV === "development";
 
 export default function Command() {
-  const { isLoading, data, revalidate, mutate } = useVmList();
+  let vmListData;
+  try {
+    vmListData = useVmList();
+  } catch (e) {
+    showFailureToast(e);
+    return (
+      <Detail
+        markdown="Something went wrong, check your preferences."
+        actions={
+          <ActionPanel>
+            <Action title="Open Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  const { isLoading, data, revalidate, mutate } = vmListData;
   const [type, setType] = useState<string>("all");
 
   // it's not safe to use hooks inside a condition, but it's fine for dev

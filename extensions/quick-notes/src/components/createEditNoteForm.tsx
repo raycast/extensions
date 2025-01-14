@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { notesAtom, tagsAtom } from "../services/atoms";
 import CreateTag from "./createTag";
 import { useEffect, useRef } from "react";
-import { colors } from "../utils/utils";
+import { getTintColor } from "../utils/utils";
 import { useForm } from "@raycast/utils";
 
 type NoteForm = {
@@ -47,6 +47,7 @@ const CreateEditNoteForm = ({
                 body: values.note,
                 tags: values.tags,
                 createdAt: n.createdAt,
+                summary: n.summary,
                 updatedAt: new Date(),
                 is_draft: false,
               }
@@ -153,18 +154,18 @@ const CreateEditNoteForm = ({
             title={"Save Note"}
             icon={{
               source: Icon.SaveDocument,
-              tintColor: colors.find((c) => c.name === "green")?.tintColor,
+              tintColor: getTintColor("green"),
             }}
             onSubmit={handleSubmit}
           />
           <Action.Push
             icon={{
               source: Icon.Tag,
-              tintColor: colors.find((c) => c.name === "turquoise")?.tintColor,
+              tintColor: getTintColor("turquoise"),
             }}
             target={<CreateTag />}
             title="Create Tag"
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
         </ActionPanel>
       }
@@ -172,13 +173,13 @@ const CreateEditNoteForm = ({
       <Form.Description text={createdAt && !isDraft ? "Edit Note" : "Create New Note"} />
       <Form.TextField title="Title" placeholder="Note Title" {...itemProps.title} />
       <Form.TextArea title="Note" placeholder="Enter Markdown" enableMarkdown {...itemProps.note} />
-      <Form.TagPicker title="Tags" info="⌘ + T to create new tag" {...itemProps.tags}>
+      <Form.TagPicker title="Tags" info="⌘+⇧+T = new tag" {...itemProps.tags}>
         {tagStore.map((t, i) => (
           <Form.TagPicker.Item
             key={i}
             value={t.name}
             title={t.name}
-            icon={{ source: "dot.png", tintColor: colors.find((c) => c.name === t.color)?.tintColor }}
+            icon={{ source: "dot.png", tintColor: getTintColor(t.color) }}
           />
         ))}
       </Form.TagPicker>

@@ -200,7 +200,7 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   const maxRetries = 3;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt, { model: "openai-gpt-4-turbo" });
+      const result = await AI.ask(prompt, { model: AI.Model.OpenAI_GPT4o });
       const jsonMatch = result.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
       if (!jsonMatch) {
         throw new Error("Invalid result returned from AI");

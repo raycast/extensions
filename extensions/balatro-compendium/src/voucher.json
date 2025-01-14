@@ -1,0 +1,98 @@
+[
+  {
+    "Name": "Overstock",
+    "Appearance": "1-overstock.png",
+    "Effect": "+1 card slot available in shop",
+    "Upgrade": "Overstock Plus"
+  },
+  {
+    "Name": "Clearance Sale",
+    "Appearance": "4-clearance-sale.png",
+    "Effect": "All cards and packs in shop are 25% off",
+    "Upgrade": "Liquidation"
+  },
+  {
+    "Name": "Hone",
+    "Appearance": "5-hone.png",
+    "Effect": "Foil, Holographic, and Polychrome cards appear 2X more often",
+    "Upgrade": "Glow Up"
+  },
+  {
+    "Name": "Reroll Surplus",
+    "Appearance": "9-reroll-surplus.png",
+    "Effect": "Rerolls cost $2 less",
+    "Upgrade": "Reroll Glut"
+  },
+  {
+    "Name": "Crystal Ball",
+    "Appearance": "11-crystal-ball.png",
+    "Effect": "+1 consumable slot",
+    "Upgrade": "Omen Globe"
+  },
+  {
+    "Name": "Telescope",
+    "Appearance": "12-telescope.png",
+    "Effect": "Celestial Packs always contain the Planet card for your most played Poker Hand",
+    "Upgrade": "Observatory"
+  },
+  {
+    "Name": "Grabber",
+    "Appearance": "6-grabber.png",
+    "Effect": "Permanently gain +1 hand per round",
+    "Upgrade": "Nacho Tong"
+  },
+  {
+    "Name": "Wasteful",
+    "Appearance": "7-wasteful.png",
+    "Effect": "Permanently gain +1 discard per round",
+    "Upgrade": "Recyclomancy"
+  },
+  {
+    "Name": "Tarot Merchant",
+    "Appearance": "2-tarot-merchant.png",
+    "Effect": "Tarot cards appear 2X more frequently in the shop",
+    "Upgrade": "Tarot Tycoon"
+  },
+  {
+    "Name": "Planet Merchant",
+    "Appearance": "3-planet-merchant.png",
+    "Effect": "Planet cards appear 2X more frequently in the shop",
+    "Upgrade": "Planet Tycoon"
+  },
+  {
+    "Name": "Seed Money",
+    "Appearance": "10-seed-money.png",
+    "Effect": "Raise the cap on interest earned per round to $10",
+    "Upgrade": "Money Tree"
+  },
+  {
+    "Name": "Blank",
+    "Appearance": "8-blank.png",
+    "Effect": "Does nothing? ",
+    "Upgrade": "Antimatter"
+  },
+  {
+    "Name": "Magic Trick",
+    "Appearance": "13-magic-trick.png",
+    "Effect": "Playing cards can be purchased from the Shop",
+    "Upgrade": "Illusion"
+  },
+  {
+    "Name": "Hieroglyph",
+    "Appearance": "14-hieroglyph.png",
+    "Effect": "-1 Ante, -1 hand per round",
+    "Upgrade": "Petroglyph"
+  },
+  {
+    "Name": "Director’s Cut",
+    "Appearance": "15-directors-cut.png",
+    "Effect": "Reroll Boss Blind 1 time per Ante. $10 per roll",
+    "Upgrade": "Retcon"
+  },
+  {
+    "Name": "Paint Brush",
+    "Appearance": "vourcher_paintbrush.png",
+    "Effect": "+1 hand size",
+    "Upgrade": "Palette"
+  }
+]

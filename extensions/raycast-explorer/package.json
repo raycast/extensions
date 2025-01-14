@@ -10,7 +10,8 @@
     "EvanZhouDev",
     "mil3na",
     "xilopaint",
-    "samuelkraft"
+    "samuelkraft",
+    "abnershang"
   ],
   "icon": "extension-icon.png",
   "owner": "raycast",
@@ -30,6 +31,13 @@
       "title": "Explore Presets",
       "icon": "presets-icon.png",
       "description": "Find some inspiration in our AI Presets base.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-quicklinks",
+      "title": "Explore Quicklinks",
+      "icon": "quicklinks-icon.png",
+      "description": "Browse quicklinks",
       "mode": "view"
     },
     {

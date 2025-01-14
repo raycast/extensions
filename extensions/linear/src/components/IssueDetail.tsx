@@ -23,11 +23,10 @@ type IssueDetailProps = {
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   showAttachmentsAction?: boolean;
   priorities: IssuePriorityValue[] | undefined;
-  users: User[] | undefined;
   me: User | undefined;
 };
 
-export default function IssueDetail({ issue: existingIssue, mutateList, priorities, users, me }: IssueDetailProps) {
+export default function IssueDetail({ issue: existingIssue, mutateList, priorities, me }: IssueDetailProps) {
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(existingIssue);
 
   let markdown = `# ${issue?.title}`;
@@ -158,7 +157,6 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   priorities={priorities}
                   showAttachmentsAction={linksCount > 0}
                   attachments={issue.attachments?.nodes ?? []}
-                  users={users}
                   me={me}
                 />
               </ActionPanel>

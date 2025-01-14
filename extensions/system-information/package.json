@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "system-information",
   "title": "System Information",
-  "description": "Gives you quick access to your system information so that you never have to open System Settings.",
+  "description": "Quick access to your system information so you never have to open System Settings.",
   "icon": "command-icon.png",
   "author": "Visual-Studio-Coder",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "air-rn"
   ],
   "categories": [
     "Developer Tools",

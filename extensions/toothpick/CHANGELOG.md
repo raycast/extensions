@@ -1,5 +1,13 @@
 # Toothpick Changelog
 
+## [Hotfix] - 2024-05-15
+
+- Fixed device not disconnecting sometimes on AppleScript backend.
+
+## [QoL Improvements] - 2024-05-06
+
+- Extended favorite devices functionality to toggle specific devices
+
 ## [Update] - 2024-05-02
 
 - Fixed an error when using deeplink in background

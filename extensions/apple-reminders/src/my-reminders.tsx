@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, clearSearchBar, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import ReminderListItem from "./components/ReminderListItem";
@@ -9,10 +9,26 @@ import useViewReminders from "./hooks/useViewReminders";
 export default function Command() {
   const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
   const [listId, setListId] = useCachedState<string>("today");
+  const [newReminderTitle, setNewReminderTitle] = useCachedState<string>("");
 
   const { data, isLoading, mutate } = useData();
 
   const { sections, viewProps } = useViewReminders(listId ?? "today", { data });
+
+  const draftValues = {
+    title: newReminderTitle ?? "",
+    notes: "",
+    dueDate: null,
+    priority: "",
+    listId: "",
+    isRecurring: false,
+    frequency: "",
+    interval: "",
+    location: "",
+    address: "",
+    proximity: "",
+    radius: "",
+  };
 
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";
@@ -21,6 +37,8 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder={placeholder}
+      onSearchTextChange={setNewReminderTitle}
+      filtering={true}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by List" onChange={setListId} value={listId}>
           {data?.lists && data.lists.length > 0 ? (
@@ -82,7 +100,8 @@ export default function Command() {
             <Action.Push
               title="Create Reminder"
               icon={Icon.Plus}
-              target={<CreateReminderForm listId={listId} mutate={mutate} />}
+              target={<CreateReminderForm draftValues={draftValues} listId={listId} mutate={mutate} />}
+              onPush={() => clearSearchBar()}
             />
 
             <Action

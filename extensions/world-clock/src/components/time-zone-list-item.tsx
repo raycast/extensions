@@ -1,5 +1,4 @@
-import { List } from "@raycast/api";
-import { Dispatch, SetStateAction } from "react";
+import { Image, List } from "@raycast/api";
 import { TimeInfo, Timezone } from "../types/types";
 import { TimeInfoDetail } from "./time-info-detail";
 import {
@@ -11,21 +10,23 @@ import {
 } from "../utils/common-utils";
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
-import { getAvatarIcon } from "@raycast/utils";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
+import Mask = Image.Mask;
 
 export function TimeZoneListItem(props: {
+  index: number;
   timezone: string;
   timeInfo: TimeInfo;
   detailLoading: boolean;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined>;
   showDetail: boolean;
 }) {
-  const { timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, detailLoading, starTimezones, mutate, showDetailMutate, showDetail } = props;
   return (
     <List.Item
-      id={JSON.stringify({ type: "all", region: timezone })}
+      id={JSON.stringify({ type: "all", index: index, region: timezone })}
       icon={getAvatarIcon(timezone.replace("/", " "))}
       title={timezone}
       accessories={[
@@ -42,9 +43,9 @@ export function TimeZoneListItem(props: {
           timeInfo={timeInfo}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
+          mutate={mutate}
           showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          showDetailMutate={showDetailMutate}
         />
       }
     />
@@ -57,16 +58,16 @@ export function StarredTimeZoneListItem(props: {
   timeInfo: TimeInfo;
   detailLoading: boolean;
   starTimezones: Timezone[];
-  setRefresh: Dispatch<SetStateAction<number>>;
-  setRefreshDetail: Dispatch<SetStateAction<number>>;
+  mutate: () => Promise<void>;
+  showDetailMutate: MutatePromise<boolean | undefined, boolean | undefined>;
   showDetail: boolean;
 }) {
-  const { index, timezone, timeInfo, detailLoading, starTimezones, setRefresh, setRefreshDetail, showDetail } = props;
+  const { index, timezone, timeInfo, detailLoading, starTimezones, mutate, showDetailMutate, showDetail } = props;
   const keywords = timezone.toLowerCase().split("/");
 
   return (
     <List.Item
-      id={JSON.stringify({ type: "star", region: timezone })}
+      id={JSON.stringify({ type: "star", index: index, region: timezone })}
       icon={{
         source: {
           light: buildDayAndNightIcon(starTimezones[index].unixtime, true),
@@ -82,7 +83,12 @@ export function StarredTimeZoneListItem(props: {
               tooltip: timezone,
             }
       }
-      accessories={[
+      accessories={(starTimezones[index].avatar
+        ? (starTimezones[index].avatar.map((value) => {
+            return { icon: { source: value, mask: Mask.RoundedRectangle } };
+          }) as [])
+        : [{}]
+      ).concat([
         !isEmpty(starTimezones[index].memo) && showDetail
           ? {
               icon: starTimezones[index].memoIcon,
@@ -102,7 +108,7 @@ export function StarredTimeZoneListItem(props: {
                 buildFullDateTime(new Date(starTimezones[index].unixtime)) +
                 buildIntervalTime(starTimezones[index].unixtime),
             },
-      ]}
+      ])}
       subtitle={
         !isEmpty(starTimezones[index].memo) && !showDetail
           ? {
@@ -118,9 +124,9 @@ export function StarredTimeZoneListItem(props: {
           index={index}
           starTimezones={starTimezones}
           timezone={timezone}
-          setRefresh={setRefresh}
+          mutate={mutate}
           showDetail={showDetail}
-          setRefreshDetail={setRefreshDetail}
+          showDetailMutate={showDetailMutate}
         />
       }
     />

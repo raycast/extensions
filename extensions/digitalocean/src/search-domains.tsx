@@ -3,9 +3,12 @@ import { ActionPanel, Action, Detail, List, Icon } from "@raycast/api";
 import { useMemo } from "react";
 import DomainRecordDetail from "./details/DomainRecordDetail";
 import DomainRecordForm from "./forms/DomainRecordForm";
+import { getFavicon } from "@raycast/utils";
+import { DO } from "./config";
 
 export default function Command() {
   const { data, error, isLoading } = useDomains();
+  const domains = data?.domains || [];
 
   if (error) {
     return <Detail markdown={`Failed to list domains: ${error.message}`} />;
@@ -13,13 +16,26 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {data?.domains.map((domain) => (
+      {!isLoading && !domains.length && (
+        <List.EmptyView
+          icon={DO.LOGO}
+          title="Resilient network"
+          description="Add your first domain now"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={DO.ICON} title="Add Domain" url={DO.LINKS.networking.domains} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {domains.map((domain) => (
         <List.Item
           key={domain.name}
+          icon={getFavicon(`https://${domain.name}`, { fallback: Icon.Globe })}
           title={domain.name}
           actions={
             <ActionPanel>
-              <Action.Push title="View Records" target={<DomainRecords domain={domain} />} />
+              <Action.Push title="View Records" icon={Icon.Eye} target={<DomainRecords domain={domain} />} />
               <Action.OpenInBrowser url={`https://cloud.digitalocean.com/networking/domains/${domain.name}`} />
               <Action.Push
                 icon={Icon.Plus}
@@ -94,6 +110,7 @@ function DomainRecords({ domain }: { domain: Domain }) {
                       <ActionPanel>
                         <Action.Push
                           title="View Details"
+                          icon={Icon.Eye}
                           target={<DomainRecordDetail domain={domain} record={record} />}
                         />
                       </ActionPanel>

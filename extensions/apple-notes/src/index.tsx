@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useState } from "react";
 
 import { createNote } from "./api";
 import NoteListItem from "./components/NoteListItem";
@@ -11,6 +12,7 @@ export type NoteTitle = {
 
 export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
+  const [searchText, setSearchText] = useState<string>("");
 
   if (permissionView) {
     return permissionView;
@@ -23,8 +25,9 @@ export default function Command() {
 
   return (
     <List
+      onSearchTextChange={setSearchText}
       isLoading={isLoading}
-      searchBarPlaceholder="Search notes by title, folder, description, or accessories"
+      searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
       filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Pinned">
@@ -50,7 +53,7 @@ export default function Command() {
         description="Create a new note by pressing ⏎"
         actions={
           <ActionPanel>
-            <Action icon={Icon.Plus} title="Create New Note" onAction={createNote} />
+            <Action icon={Icon.Plus} title="Create New Note" onAction={() => createNote(searchText)} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}

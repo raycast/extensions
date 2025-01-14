@@ -1,6 +1,6 @@
 import { closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { getTimers, stopTimer } from "./timerUtils";
-import { Timer } from "./types";
+import { getTimers, stopTimer } from "./backend/timerBackend";
+import { Timer } from "./backend/types";
 
 export default async () => {
   if (!getPreferenceValues().ringContinuously) {

@@ -40,7 +40,7 @@ export const initForm = (listData: ListData[], onSubmit: (values: Values) => voi
       },
       user: (value) => {
         if (!value) return Message.Required;
-        else if (!value.match(/^[a-z_][a-z0-9_-]*$/)) return "Invalid username";
+        else if (!value.match(/^[a-z_][a-z0-9_.-]*$/)) return "Invalid username";
       },
       remoteHost: (value) => {
         if (value && !value.match(hostRegex)) return Message.InvalidHost;

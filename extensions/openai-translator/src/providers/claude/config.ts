@@ -9,7 +9,7 @@ const config: IConfig = {
   supportCustomModel: false,
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  async listModels(apikey: string | undefined): Promise<IModel[]> {
+  async listModels(apikey: string | undefined, _: string | undefined): Promise<IModel[]> {
     const models = [
       "claude-3-opus-20240229",
       "claude-3-sonnet-20240229",

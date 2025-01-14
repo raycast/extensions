@@ -2,10 +2,10 @@ import fs from "fs";
 import { homedir } from "os";
 import { useSQL } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { getZedDbName, type ZedBuild } from "./zed";
+import { getZedDbName } from "./zed";
 
-const preferences: Record<string, string> = getPreferenceValues();
-const zedBuild: ZedBuild = preferences.build as ZedBuild;
+const preferences = getPreferenceValues<Preferences>();
+const zedBuild = preferences.build;
 
 export interface ZedEntry {
   uri: string;
@@ -47,7 +47,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           .map<ZedEntry>((d) => {
             const pathStart = d.local_paths.indexOf("/");
             return {
-              uri: "file://" + d.local_paths.substring(pathStart),
+              uri: "file://" + d.local_paths.substring(pathStart).replace(/\/$/, ""),
               lastOpened: new Date(d.timestamp).getTime(),
             };
           })
@@ -55,6 +55,10 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
             if (!d.uri) {
               return acc;
             }
+
+            const existing = acc[d.uri];
+            if (existing && existing.lastOpened > d.lastOpened) return acc;
+
             return {
               ...acc,
               [d.uri]: d,

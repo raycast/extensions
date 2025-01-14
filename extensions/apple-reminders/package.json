@@ -9,7 +9,9 @@
     "tm.wrnr",
     "ir4n",
     "jondelgado",
-    "phil_s"
+    "phil_s",
+    "michalzuch",
+    "ridemountainpig"
   ],
   "owner": "raycast",
   "access": "public",
@@ -32,6 +34,14 @@
           "required": false,
           "label": "Display Completion Date",
           "description": "When enabled, the completion date will be displayed as a list item accessory.",
+          "default": false
+        },
+        {
+          "name": "useTimeOfDayGrouping",
+          "type": "checkbox",
+          "required": false,
+          "label": "Use Time of Day Grouping",
+          "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
           "default": false
         }
       ]
@@ -134,6 +144,15 @@
           "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
           "default": false,
           "required": false
+        },
+        {
+          "name": "sortMenuBarRemindersByDueDate",
+          "type": "checkbox",
+          "label": "Sort menu bar reminders by time",
+          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
+          "default": false,
+          "required": false,
+          "title": "Sort"
         }
       ],
       "interval": "10m"
@@ -188,7 +207,7 @@
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.71.3",
+    "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.14.0",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",

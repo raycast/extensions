@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
-  "version": "1.6.0",
+  "version": "1.9.0",
   "description": "Create pins for paths and URLs and display them in the menu bar",
   "keywords": [
     "pin",
@@ -154,6 +154,14 @@
             {
               "title": "Copy",
               "value": "copy"
+            },
+            {
+              "title": "Hide",
+              "value": "hide"
+            },
+            {
+              "title": "Disable",
+              "value": "disable"
             }
           ]
         }
@@ -190,7 +198,15 @@
           "name": "showSubtitles",
           "type": "checkbox",
           "label": "Show Subtitles",
-          "description": "Whether to pin targets (e.g. URLs) as subtitles in the list view.",
+          "description": "Whether to show pin targets (e.g. URLs) as subtitles in the list view.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showVisibility",
+          "type": "checkbox",
+          "label": "Show Visibility",
+          "description": "Whether to show the visibility for each pin.",
           "default": true,
           "required": false
         },
@@ -235,6 +251,14 @@
           "required": false
         },
         {
+          "name": "showLinkCount",
+          "type": "checkbox",
+          "label": "Show Link Count",
+          "description": "Whether to show the number of linked pins for each pin",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "showFrequency",
           "type": "checkbox",
           "label": "Show Frequency",
@@ -266,6 +290,14 @@
       "description": "View and modify groups for pins",
       "mode": "view",
       "preferences": [
+        {
+          "name": "showVisibility",
+          "type": "checkbox",
+          "label": "Show Visibility",
+          "description": "Whether to show the visibility for each group.",
+          "default": true,
+          "required": false
+        },
         {
           "name": "showIDs",
           "type": "checkbox",
@@ -347,7 +379,7 @@
     },
     {
       "name": "check-expirations",
-      "title": "Check For Expirations",
+      "title": "Check for Expirations",
       "description": "Check for expired pins and remove them",
       "mode": "no-view",
       "interval": "1m"
@@ -422,12 +454,67 @@
       "description": "The browser to use when opening URLs.",
       "default": "Safari",
       "required": false
+    },
+    {
+      "name": "defaultAIModel",
+      "title": "Default AI Model",
+      "type": "dropdown",
+      "label": "Default AI Model",
+      "description": "The default AI model to use for the Ask AI directive. Requires access to Raycast AI. Override this setting by specifying the model argument in the directive, e.g. {{ai model=\"OpenAI_GPT4\":...}}.",
+      "default": "OpenAI_GPT3.5-turbo",
+      "required": false,
+      "data": [
+        {
+          "title": "OpenAI GPT-3.5 Turbo",
+          "value": "OpenAI_GPT3.5-turbo"
+        },
+        {
+          "title": "OpenAI GPT-4",
+          "value": "OpenAI_GPT4"
+        },
+        {
+          "title": "OpenAI GPT-4 Turbo",
+          "value": "OpenAI_GPT4-turbo"
+        },
+        {
+          "title": "OpenAI GPT-4o",
+          "value": "OpenAI_GPT4o"
+        },
+        {
+          "title": "Anthropic Claude Haiku",
+          "value": "Anthropic_Claude_Haiku"
+        },
+        {
+          "title": "Anthropic Claude Sonnet",
+          "value": "Anthropic_Claude_Sonnet"
+        },
+        {
+          "title": "Anthropic Claude Opus",
+          "value": "Anthropic_Claude_Opus"
+        },
+        {
+          "title": "Perplexity Llama3 Sonar (Small)",
+          "value": "Perplexity_Llama3_Sonar_Small"
+        },
+        {
+          "title": "Perplexity Llama3 Sonar (Large)",
+          "value": "Perplexity_Llama3_Sonar_Large"
+        },
+        {
+          "title": "Llama3 70B",
+          "value": "Llama3_70B"
+        },
+        {
+          "title": "MixtraL 8x7B",
+          "value": "MixtraL_8x7B"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.77.1",
+    "@raycast/utils": "^1.16.1",
     "@types/papaparse": "^5.3.8",
     "@types/xml-js": "^1.0.0",
     "papaparse": "^5.4.1",
@@ -436,12 +523,12 @@
     "yaml": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

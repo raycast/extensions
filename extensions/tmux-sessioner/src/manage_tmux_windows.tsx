@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, Icon, Action, ActionPanel, launchCommand, LaunchType, Color } from "@raycast/api";
 import { checkTerminalSetup } from "./utils/terminalUtils";
-import { getAllWindow, switchToWindow, TmuxWindow, deleteWindow } from "./utils/windowUtils";
+import { getAllWindow, switchToWindow, type TmuxWindow, deleteWindow } from "./utils/windowUtils";
 
 export default function ManageTmuxWindows() {
   const [windows, setWindows] = useState<Array<TmuxWindow & { keyIndex: number }>>([]);
@@ -27,7 +27,7 @@ export default function ManageTmuxWindows() {
           return {
             keyIndex,
             sessionName,
-            windowIndex: parseInt(windowIndex),
+            windowIndex: Number.parseInt(windowIndex),
             windowName,
           };
         });
@@ -94,15 +94,15 @@ export default function ManageTmuxWindows() {
           ]}
           actions={
             <ActionPanel>
-              <Action title="Switch To Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
+              <Action title="Switch to Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
               <Action
                 title="Delete This Window"
                 onAction={() =>
                   deleteWindow(window, setIsLoading, () =>
-                    setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex))
+                    setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex)),
                   )
                 }
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
             </ActionPanel>
           }

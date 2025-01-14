@@ -2,32 +2,73 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "messages",
   "title": "Messages",
-  "description": "Quickly send a message to one of your contacts.",
+  "description": "Quickly read your latest messages, open your chats, or send messages to your contacts.",
   "icon": "apple-messages-icon.png",
   "author": "thomaslombart",
   "contributors": [
-    "timothy_gray"
+    "timothy_gray",
+    "ramsay",
+    "thomas"
   ],
   "license": "MIT",
   "commands": [
     {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "description": "Quickly open a chat in the Messages app.",
+      "mode": "view"
+    },
+    {
+      "name": "my-messages",
+      "title": "My Latest Messages",
+      "description": "Search through your latest messages.",
+      "mode": "view"
+    },
+    {
       "name": "send-message",
       "title": "Send Message",
-      "description": "Quickly send a message through the Messages app.",
-      "mode": "view"
+      "description": "Quickly send a message.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "unread-messages",
+      "title": "Unread Messages",
+      "description": "Check out your unread messages from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "2m"
+    },
+    {
+      "name": "paste-latest-otp-code",
+      "title": "Paste Latest OTP Code",
+      "description": "Paste the most recent OTP code from your messages.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.11.1"
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.18.0",
+    "date-fns": "^4.1.0",
+    "libphonenumber-js": "^1.11.9"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.6",
-    "@types/react": "18.2.48",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.7.4",
+    "@types/react": "18.3.10",
+    "eslint": "^8.57.1",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
   },
   "scripts": {
     "build": "ray build -e dist",

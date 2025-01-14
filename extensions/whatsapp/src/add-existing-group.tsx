@@ -16,6 +16,11 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
+    if (!formValues.groupCode) {
+      await showToast(Toast.Style.Failure, "Group Code is required");
+      return;
+    }
+
     const savedChat: GroupChat = {
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,

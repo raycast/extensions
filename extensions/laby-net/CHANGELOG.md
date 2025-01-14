@@ -1,5 +1,9 @@
 # Laby.net Changelog
 
+## [API Adjustments] - 2024-10-14
+- Adjust models to match the latest API changes
+- Add icon and link to profile badges
+
 ## [Upgrade to v3 API] - 2023-12-19
 
 - Update laby.net api to v3

@@ -6,7 +6,7 @@ import fs from "fs";
 
 const userEnv = `env USER=${userInfo().username}`;
 
-export const runYabaiCommand = async (command: string) => {
+export const runYabaiCommand = async (command: string, opt?: { shell?: boolean }) => {
   const preferences = getPreferenceValues<Preferences>();
   const yabaiPath: string =
     preferences.yabaiPath && preferences.yabaiPath.length > 0
@@ -20,5 +20,5 @@ export const runYabaiCommand = async (command: string) => {
     return { stdout: "", stderr: "Yabai executable not found" };
   }
 
-  return await execaCommand([userEnv, yabaiPath, command].join(" "));
+  return await execaCommand([userEnv, yabaiPath, command].join(" "), opt);
 };

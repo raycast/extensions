@@ -1,5 +1,9 @@
 # Feedly Changelog
 
+## [Fix] - 2024-05-31
+
+- Added to `README` that a PRO account is needed
+
 ## [Fix] - 2023-08-03
 
 - Resolved an issue resulting in extension crashes when no title was detected.

@@ -18,6 +18,8 @@ export default function CommandList() {
   const addToFavorites = useActionsState((state) => state.addToFavorites);
   const removeFromFavorites = useActionsState((state) => state.removeFromFavorites);
 
+  const handleBack = () => navigation.pop();
+
   const remove = async (id: string) => {
     if (
       await confirmAlert({
@@ -65,7 +67,7 @@ export default function CommandList() {
                 title="Edit"
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
-                onAction={() => navigation.push(<CommandForm id={action.id} />)}
+                onAction={() => navigation.push(<CommandForm id={action.id} afterSubmit={handleBack} />)}
               />
               <Action
                 title="Duplicate"
@@ -119,7 +121,11 @@ export default function CommandList() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Create Your First Action" icon={Icon.Plus} onAction={() => navigation.push(<CommandForm />)} />
+            <Action
+              title="Create Your First Action"
+              icon={Icon.Plus}
+              onAction={() => navigation.push(<CommandForm afterSubmit={handleBack} />)}
+            />
             <Action title="Import Actions" icon={Icon.Upload} onAction={() => Backup.import()} />
           </ActionPanel.Section>
         </ActionPanel>

@@ -28,9 +28,9 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
 
   useEffect(() => {
     (async () => {
-      const pinnedVideos = await getVideos(getPinnedVideos());
+      const pinnedVideos = await getVideos(await getPinnedVideos());
       setPinnedVideos(pinnedVideos.filter((v) => !channelId || v.channelId === channelId));
-      const recentVideos = await getVideos(getRecentVideos());
+      const recentVideos = await getVideos(await getRecentVideos());
       setRecentVideos(recentVideos.filter((v) => !channelId || v.channelId === channelId));
       setLoading(false);
     })();

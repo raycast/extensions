@@ -1,5 +1,20 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2024-10-25
+
+- Add frecency sorting to passwords
+- Only capture unexpected errors
+- Update dependencies
+
+## [Improvements] - 2024-05-22
+
+- The CLI path is now required to reduce errors
+- Improved error handling:
+  - Displays an error if the user is not logged in to the CLI
+  - Displays an error if the user needs to set a master password in the preferences
+  - Displays an error for timeouts
+- Added a troubleshooting page on the error page
+
 ## [Improvements] - 2024-04-23
 
 - Master password for Dashlane CLI can be saved in the extensions settings to lock your vault by default (Dashlane CLI version 6.2416.0 or newer required)

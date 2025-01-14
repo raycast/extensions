@@ -43,3 +43,12 @@ export function createStore<T>({ name, version, state, migrate }: StoreOptions<T
     }),
   );
 }
+
+export function truncateText(text: string, maxLength: number): string {
+  text = text.trim().replace(/\s+/g, " ");
+  if (text.length <= maxLength) {
+    return text;
+  } else {
+    return text.slice(0, maxLength) + "...";
+  }
+}

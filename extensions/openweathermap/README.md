@@ -8,7 +8,7 @@
     OpenWeatherMap
   </h1>
 
-Show current weather + forecast via [https://.](https://openweathermap.org).
+Show current weather + forecast via [https://openweathermap.org](https://openweathermap.org).
 
   <p>
     <a href="https://www.raycast.com/tonka3000/openweathermap">
@@ -34,16 +34,11 @@ Show current weather + forecast via [https://.](https://openweathermap.org).
         alt="Follow @tonka_2000"
       />
     </a>
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
-      />
-    </a>
   </p>
 </div>
 
 ## How to get the API Key
+A subscription is required where the first 1000 api calls are free per day.
 
 - Goto to https://openweathermap.org
 - Login with your OpenWeatherMap account (if you don't have one create it)

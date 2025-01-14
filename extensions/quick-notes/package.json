@@ -45,32 +45,6 @@
       "type": "directory",
       "required": false,
       "label": "File Location"
-    },
-    {
-      "name": "sort",
-      "title": "Sort Notes By",
-      "description": "Sort notes by created or updated",
-      "type": "dropdown",
-      "required": false,
-      "data": [
-        {
-          "title": "Time Updated",
-          "value": "updated"
-        },
-        {
-          "title": "Time Created",
-          "value": "created"
-        },
-        {
-          "title": "Alphabetical",
-          "value": "alphabetical"
-        },
-        {
-          "title": "Tags",
-          "value": "tags"
-        }
-      ],
-      "defaultValue": "updated"
     }
   ],
   "dependencies": {
@@ -79,7 +53,10 @@
     "date-fns": "^3.3.1",
     "jotai": "^2.7.0",
     "lodash": "^4.17.21",
-    "slugify": "^1.6.6"
+    "marked": "^12.0.2",
+    "slugify": "^1.6.6",
+    "striptags": "^3.2.0",
+    "update": "^0.7.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

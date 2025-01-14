@@ -4,14 +4,12 @@ import { MutatePromise, usePromise } from "@raycast/utils";
 import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
-import { NotificationsResponse } from "../notifications";
-
-export type Notification = NotificationsResponse["data"][0];
+import { NotificationWithIcon } from "../notifications";
 
 type NotificationActionsProps = {
-  notification: Notification;
+  notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<Notification[] | undefined>;
+  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {
@@ -26,7 +24,7 @@ export default function NotificationActions({ notification, userId, mutateList }
     await showToast({ style: Toast.Style.Animated, title: "Marking notification as read" });
 
     try {
-      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
       await mutateList();
       await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
 
@@ -43,6 +41,27 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
+  async function markNotificationAsDone() {
+    await showToast({ style: Toast.Style.Animated, title: "Marking notification as done" });
+
+    try {
+      await octokit.activity.markThreadAsDone({ thread_id: parseInt(notification.id) });
+      await mutateList();
+      await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Marked notification as done",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed marking notification as done",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function openNotification(isUnreadNotification: boolean) {
     try {
       if (url) {
@@ -50,7 +69,7 @@ export default function NotificationActions({ notification, userId, mutateList }
       }
 
       if (isUnreadNotification) {
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        await octokit.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
         await mutateList();
       }
     } catch (error) {
@@ -64,13 +83,13 @@ export default function NotificationActions({ notification, userId, mutateList }
 
   async function acceptInvitation() {
     try {
-      const invitations = await octokit.rest.repos.listInvitationsForAuthenticatedUser();
+      const invitations = await octokit.repos.listInvitationsForAuthenticatedUser();
 
       const invitation = invitations.data.find(
-        (invitation) => invitation.repository.url === notification.repository.url,
+        (invitation: { repository: { url: string } }) => invitation.repository.url === notification.repository.url,
       );
 
-      await octokit.rest.repos.acceptInvitationForAuthenticatedUser({
+      await octokit.repos.acceptInvitationForAuthenticatedUser({
         invitation_id: invitation?.id || 0,
       });
 
@@ -89,7 +108,7 @@ export default function NotificationActions({ notification, userId, mutateList }
     await showToast({ style: Toast.Style.Animated, title: "Marking all notifications as read" });
 
     try {
-      await octokit.rest.activity.markNotificationsAsRead();
+      await octokit.activity.markNotificationsAsRead();
       await mutateList();
       await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
 
@@ -110,7 +129,7 @@ export default function NotificationActions({ notification, userId, mutateList }
     await showToast({ style: Toast.Style.Animated, title: "Unsubscribing" });
 
     try {
-      await octokit.rest.activity.deleteThreadSubscription({ thread_id: parseInt(notification.id) });
+      await octokit.activity.deleteThreadSubscription({ thread_id: parseInt(notification.id) });
       await mutateList();
 
       await showToast({
@@ -147,6 +166,13 @@ export default function NotificationActions({ notification, userId, mutateList }
           />
         </>
       ) : null}
+
+      <Action
+        title="Mark as Done"
+        icon={Icon.Circle}
+        onAction={markNotificationAsDone}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
 
       <Action
         title="Unsubscribe"

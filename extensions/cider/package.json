@@ -62,6 +62,13 @@
       "mode": "no-view"
     },
     {
+      "name": "favourite-track",
+      "title": "Favourite Track",
+      "subtitle": "Cider",
+      "description": "Favourites the currently playing track",
+      "mode": "no-view"
+    },
+    {
       "name": "play-pause",
       "title": "Play/Pause",
       "subtitle": "Cider",
@@ -89,6 +96,20 @@
       "subtitle": "Cider",
       "description": "Completely stops playing anything in Cider",
       "mode": "no-view"
+    },
+    {
+      "name": "show-queue",
+      "title": "Queue",
+      "subtitle": "Cider",
+      "description": "Shows the current queue in Cider",
+      "mode": "view"
+    },
+    {
+      "name": "synced-lyrics",
+      "title": "Synced Lyrics",
+      "subtitle": "Cider",
+      "description": "Shows synced lyrics for the current track",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -105,7 +126,8 @@
   "dependencies": {
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.9.0",
-    "cross-fetch": "^4.0.0"
+    "cross-fetch": "^4.0.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

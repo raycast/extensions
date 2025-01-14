@@ -1,56 +1,40 @@
-import { Detail, environment, getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { getPreferenceValues, OAuth } from "@raycast/api";
+import { OAuthService, withAccessToken } from "@raycast/utils";
 import axios, { AxiosInstance } from "axios";
-import { useMemo, useState } from "react";
-
-import { authorize } from "../oauth";
 
 let todoistApi: AxiosInstance | null = null;
 let todoistRestApi: AxiosInstance | null = null;
 
-export async function initializeApi() {
-  const { token } = getPreferenceValues<Preferences>();
+const client = new OAuth.PKCEClient({
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "Todoist",
+  providerIcon: "todoist.png",
+  providerId: "todoist",
+  description: "Connect your Todoist account",
+});
 
-  const accessToken = token || (await authorize());
+const { token } = getPreferenceValues<Preferences>();
 
-  todoistApi = axios.create({
-    baseURL: "https://api.todoist.com/sync/v9",
-    headers: { authorization: `Bearer ${accessToken}` },
-  });
-  todoistRestApi = axios.create({
-    baseURL: "https://api.todoist.com/rest/v2",
-    headers: { authorization: `Bearer ${accessToken}` },
-  });
-}
+export const todoist = new OAuthService({
+  client,
+  clientId: "9c06463da9ea494aa21fd881140b9dd4",
+  scope: "data:read_write,data:delete,project:delete",
+  authorizeUrl: "https://todoist.oauth-proxy.raycast.com/authorize",
+  tokenUrl: "https://todoist.oauth-proxy.raycast.com/token",
+  personalAccessToken: token || undefined,
+  onAuthorize({ token }) {
+    todoistApi = axios.create({
+      baseURL: "https://api.todoist.com/sync/v9",
+      headers: { authorization: `Bearer ${token}` },
+    });
+    todoistRestApi = axios.create({
+      baseURL: "https://api.todoist.com/rest/v2",
+      headers: { authorization: `Bearer ${token}` },
+    });
+  },
+});
 
-export function withTodoistApi(component: JSX.Element) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [x, forceRerender] = useState(0);
-
-  // we use a `useMemo` instead of `useEffect` to avoid a render
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useMemo(() => {
-    (async function () {
-      await initializeApi();
-
-      forceRerender(x + 1);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (!todoistApi) {
-    if (environment.commandMode === "view") {
-      // Using the <List /> component makes the placeholder buggy
-      return <Detail isLoading />;
-    } else if (environment.commandMode === "menu-bar") {
-      return <MenuBarExtra isLoading />;
-    } else {
-      console.error("`withTodoistApi` is only supported in `view` and `menu-bar` mode");
-      return null;
-    }
-  }
-
-  return component;
-}
+export const withTodoistApi = withAccessToken(todoist);
 
 export function getTodoistApi() {
   if (!todoistApi) {

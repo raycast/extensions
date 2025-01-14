@@ -1,5 +1,14 @@
 # Google Chrome Changelog
 
+## [Fix] - 2025-01-09
+
+- Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
+- Fix bookmark list in the Search All command.
+
+## [Add Search All Command] - 2024-08-01
+
+- Add Google Chrome tabs and history, bookmarks search.
+
 ## [Fix Search History window] - 2023-12-19
 
 - Fix Search History window not opening when the app is open but no window is opened.

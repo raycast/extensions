@@ -1,8 +1,13 @@
 # Stripe Changelog
 
+## [Fill Checkout] - 2024-12-04
+
+Added the `Fill Checkout` command that uses Stripe's test cards to automatically fill in a checkout form.
+
 ## [Added Commands] - 2022-08-05
 
-Added Commands for:
+Added commands:
+
 - Balance Transactions
 - Balance
 - Charges

@@ -18,7 +18,9 @@ export default function ResultView(props: ResultViewProps) {
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
     sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText}"` : ""}`;
+    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${
+      selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""
+    }`;
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -105,10 +107,16 @@ export default function ResultView(props: ResultViewProps) {
     }
   }, [loading]);
 
+  const formatUserMessage = (message: string): string => {
+    return message
+      .split("\n")
+      .map((line) => `>${line}`)
+      .join("\n");
+  };
+
   return (
     <Detail
-      // markdown={(user_extra_msg ? `\`\`\`\n${user_extra_msg}\n\`\`\`\n\n` : "") + response}
-      markdown={(user_extra_msg ? `>${user_extra_msg}\n\n` : "") + response}
+      markdown={`${user_extra_msg ? formatUserMessage(user_extra_msg) + "\n\n" : ""}${response}`}
       isLoading={loading}
       actions={
         !loading && (
@@ -143,9 +151,12 @@ export default function ResultView(props: ResultViewProps) {
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
               <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
-              <Action icon={{ source: Icon.Signal2 }} title="0.5" onAction={() => retry({ newTemp: 0.5 })} />
+              <Action icon={{ source: Icon.Signal1 }} title="0.4" onAction={() => retry({ newTemp: 0.4 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.6" onAction={() => retry({ newTemp: 0.6 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.8" onAction={() => retry({ newTemp: 0.8 })} />
               <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
-              <Action icon={{ source: Icon.FullSignal }} title="1.5" onAction={() => retry({ newTemp: 1.5 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.2" onAction={() => retry({ newTemp: 1.2 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.4" onAction={() => retry({ newTemp: 1.4 })} />
             </ActionPanel.Submenu>
           </ActionPanel>
         )

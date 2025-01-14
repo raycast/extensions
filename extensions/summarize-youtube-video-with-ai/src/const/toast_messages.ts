@@ -13,6 +13,11 @@ export const SUCCESS_SUMMARIZING_VIDEO = {
   message: "Video summarized!",
 };
 
-export const ERROR_SUMMARIZING_VIDEO = {
+export const ALERT = {
   title: "🚨",
+};
+
+export const FINDING_ANSWER = {
+  title: "🔍",
+  message: "Answering your question",
 };

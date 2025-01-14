@@ -17,6 +17,7 @@ export function useStreamJSON<T, U>(
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
     onWillExecute?: (args: [string, RequestInit]) => void;
+    failureToastOptions?: Partial<Pick<Toast.Options, "title" | "primaryAction" | "message">>;
   },
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
@@ -48,7 +49,8 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
-- `options.onWillExecute` is a function called when an execution will start..
+- `options.onWillExecute` is a function called when an execution will start.
+- `options.failureToastOptions` are the options to customize the title, message, and primary action of the failure toast.
 
 ### Return
 

@@ -1,15 +1,81 @@
 # Spotify Player Changelog
 
-## [Feature] - 2024-02-02
+## [Generate Playlist Improvement - Artists] - 2024-12-03
+
+- Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
+
+## [Fix Search Command] - 2024-11-22
+
+- Even though it's not documented, the Spotify API can return null items in some cases when searching for items. This has now been fixed.
+
+## [Minor Fixes] - 2024-09-20
+
+- Fixed an issue when "Nothing is playing" popped up after commands `next`, `previous` and `like` having `Current Track` command disabled
+
+## [Generate Playlist Improvement] - 2024-09-06
+
+- Use GPT-4o mini instead of GPT-4o to make it faster.
+
+## [Add "Start DJ" Command] - 2024-09-05
+
+- Added a command to start the DJ using AppleScript, because the Spotify API doesn't support it.
+
+## [Quicklink to Add Playing Song to Playlist] - 2024-08-29
+
+- Adds an action to create a quicklink to add the currently playing song to a specific playlist.
+
+## [Add Preference to Only Show Music in Search Command] - 2024-08-26
+
+- Added a preference to only show music results in the search command for users who don't want to see podcasts and episodes.
+
+## [Add "Remove All Searches" Action in Search Command] - 2024-08-22
+
+- Added `Remove All Searches` action to remove all search history in one click.
+
+## [Log out the user if re-authentication fails] - 2024-07-11
+
+- Automatically log out users if re-authentication fails, instead of displaying an error message.
+
+## [Generate Playlist Fixes] - 2024-06-11
+
+- Removed automatic copying to clipboard after AI generates a result.
+- Improved the error message displayed when the playlist generation fails.
+
+## [Generate Playlist] - 2024-06-04
+
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+
+## [New Album Actions] - 2024-05-30
+
+- Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
+## [Automatically Trigger Current Track] - 2024-05-28
+
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous).
+
+## [New Actions Added] - 2024-05-27
+
+- Added `Like` and `Dislike` actions for tracks.
+
+## [Improvements] - 2024-05-27
+
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
+
+## [New "Remove Playing Song from Playlist" command] - 2024-05-27
+
+- New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
+
+## [New "Add Playing Song to Playlist" command] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
 - Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
 
-## [New Command] - 2023-01-31
+## [New "Queue" Command] - 2023-01-31
 
 - New `Queue` command allowing the user to view songs/epsiodes in the queue.
 
-## [Fix] - 2024-01-31
+## [Bug fixes] - 2024-01-31
 
 - Fixed a bug that caused launching the Spotify app to not work properly
 - Modified the device selection preference for playback

@@ -14,17 +14,38 @@ export type Replacement = {
   replace: string;
 };
 
+export type Label = {
+  label?: string;
+};
+
+export type Form = {
+  form?: string;
+};
+
+export type FilePath = {
+  filePath: string;
+};
+
 type BaseMatch = Replacement & (SingleTrigger | MultiTrigger | RegexTrigger);
 
-export type EspansoMatch = {
-  label?: string;
-} & BaseMatch;
+export type EspansoMatch = BaseMatch & Label & Form;
 
-export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger;
+export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger & FilePath;
 
 export type EspansoConfig = {
   config: string;
   packages: string;
   runtime: string;
   match: string;
+};
+
+export type FormattedMatch = NormalizedEspansoMatch & {
+  category: string;
+  subcategory?: string;
+  triggers: string[];
+};
+
+export type CategoryDropdownProps = {
+  readonly categories: string[];
+  readonly onCategoryChange: (newValue: string) => void;
 };

@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
 import { useAtom } from "jotai";
 import { tagsAtom } from "../services/atoms";
-import { colors, getRandomColor } from "../utils/utils";
+import { colors, getRandomColor, getTintColor } from "../utils/utils";
 import { useState } from "react";
 import { useForm } from "@raycast/utils";
 
@@ -17,12 +17,6 @@ const CreateTag = () => {
 
   const { handleSubmit, itemProps } = useForm<TagForm>({
     async onSubmit(values) {
-      // if tag already exists, don't do anything
-      if (tags.find((tag) => tag.name === values.name)) {
-        showToast({ title: "Tag Exists" });
-        pop();
-        return;
-      }
       setTag([...tags, { name: values.name, color }]);
       showToast({ title: "Tag Saved" });
       pop();
@@ -33,6 +27,8 @@ const CreateTag = () => {
           return "Tag is required";
         } else if (value.length > 100) {
           return "Tag < 100 chars";
+        } else if (tags.find((tag) => tag.name.toLocaleLowerCase() === value.toLocaleLowerCase())) {
+          return "Tag already exists";
         }
       },
     },
@@ -67,7 +63,7 @@ const CreateTag = () => {
             key={i}
             value={t.name}
             title={t.name}
-            icon={{ source: "dot.png", tintColor: colors.find((c) => c.name === t.color)?.tintColor }}
+            icon={{ source: "dot.png", tintColor: getTintColor(t.color) }}
           />
         ))}
       </Form.Dropdown>

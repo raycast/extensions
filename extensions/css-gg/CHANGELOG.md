@@ -1,5 +1,9 @@
 # CSS.GG Changelog
 
+## [Update] - 2024-08-27
+
+Fetch icons and glpyhs from the package
+
 ## [Update] - 2023-06-23
 
 - Added Grid view
