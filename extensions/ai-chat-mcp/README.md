@@ -8,7 +8,7 @@
 Interact with MCP servers right from your command bar
 </h3>
 
-![All Commands](metadata/mcp-browsing-history.png)
+![All Commands](doc/mcp-browsing-history.png)
 
 # Features
 
@@ -31,13 +31,13 @@ Technically speaking this extension is an MCP host, which manages a number of MC
 
 Straight from your command bar, ask anything you want answered.
 
-![Ask anything](metadata/mcp-calendar.png)
+![Ask anything](doc/mcp-calendar.png)
 
 # How to use
 
 This package requires a valid API key from [Anthropic](https://docs.anthropic.com/claude/reference/getting-started-with-the-api).
 
-![Initial set-up](metadata/set-up.png)
+![Initial set-up](doc/set-up.png)
 
 > All the preference values will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
 
