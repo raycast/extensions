@@ -170,7 +170,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     paste: (
       <Action.Paste
         key="paste"
-        title="Paste sfsymbol"
+        title="Paste Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "opt"], key: "v" }}
         onPaste={() => {
@@ -182,7 +182,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     copy: (
       <Action.CopyToClipboard
         key="copy"
-        title="Copy sfsymbol"
+        title="Copy Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "opt"], key: "c" }}
         onCopy={() => {
