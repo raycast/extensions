@@ -2,10 +2,6 @@ import { Action, ActionPanel, getPreferenceValues, Icon } from '@raycast/api';
 import { useMemo } from 'react';
 import { CodeSnippet } from './types';
 
-type Preferences = {
-  defaultLanguage: string;
-};
-
 type Props = {
   codeSnippets: CodeSnippet[] | undefined;
   problemMarkdown: string;
