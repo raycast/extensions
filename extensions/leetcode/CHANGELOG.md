@@ -1,5 +1,12 @@
 # LeetCode Changelog
 
+## [Code Template Features] - {PR_MERGE_DATE}
+
+Add Copy Code Template submenu action to copy problem's code template to clipboard
+Add preference setting for default programming language
+Show star (⭐) indicator for preferred language in template list
+Sort code templates to show preferred language first
+
 ## [Features] - 2024-10-26
 
 - Add `Copy Problem to Clipboard` action to copy the problem as markdown to the clipboard.
@@ -15,7 +22,8 @@
     1. JavaScript
     2. pandas
 - Show Loading (previously, no loading was shown while searching problems)
-- Allow Paid Problems Preview w/o content (now you can view stats of a paid problem - the content/markdown is still not shown)
+- Allow Paid Problems Preview w/o content (now you can view stats of a paid problem - the content/markdown is still not
+  shown)
 - modify components to prefer `useFetch` props over `useState` and `useEffect`
 
 ## [Initial Version] - 2023-01-25

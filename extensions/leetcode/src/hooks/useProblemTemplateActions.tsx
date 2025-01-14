@@ -1,0 +1,62 @@
+import { Action, ActionPanel, getPreferenceValues } from '@raycast/api';
+import { useMemo } from 'react';
+import { CodeSnippet } from '../types';
+
+type Preferences = {
+  defaultLanguage: string;
+};
+
+type Props = {
+  codeSnippets: CodeSnippet[] | undefined;
+  problemMarkdown: string;
+  isPaidOnly?: boolean;
+  linkUrl: string;
+};
+
+export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPaidOnly, linkUrl }: Props) {
+  const preferences = getPreferenceValues<Preferences>();
+
+  const sortedSnippets = useMemo(() => {
+    if (!codeSnippets) return [];
+
+    return [...codeSnippets].sort((a, b) => {
+      // 기본 언어를 먼저 정렬
+      const aIsDefault = a.langSlug === preferences.defaultLanguage;
+      const bIsDefault = b.langSlug === preferences.defaultLanguage;
+
+      if (aIsDefault && !bIsDefault) return -1;
+      if (!aIsDefault && bIsDefault) return 1;
+
+      // 같은 카테고리 내에서는 언어 이름으로 정렬
+      return a.lang.localeCompare(b.lang);
+    });
+  }, [codeSnippets, preferences.defaultLanguage]);
+
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser title="Open in Browser" url={linkUrl} />
+      <Action.CopyToClipboard
+        title="Copy Link to Clipboard"
+        content={linkUrl}
+      />
+      {!isPaidOnly && (
+        <Action.CopyToClipboard
+          title="Copy Problem to Clipboard"
+          content={problemMarkdown}
+          shortcut={{ modifiers: ['cmd'], key: 'c' }}
+        />
+      )}
+      {sortedSnippets.length > 0 && (
+        <ActionPanel.Submenu title="Copy Code Template">
+          {sortedSnippets.map(snippet => (
+            <Action.CopyToClipboard
+              key={snippet.langSlug}
+              title={`${snippet.langSlug === preferences.defaultLanguage ? "⭐ " : ""}${snippet.lang} Code`}
+              content={snippet.code}
+            />
+          ))}
+        </ActionPanel.Submenu>
+      )}
+    </ActionPanel>
+  );
+}

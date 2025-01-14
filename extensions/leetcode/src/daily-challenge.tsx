@@ -1,12 +1,14 @@
-import { Action, ActionPanel, Detail } from '@raycast/api';
+import {  Detail } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { useMemo } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
+import { useCodeSnippets } from './hooks/useCodeSnippets';
+import { useProblemTemplateActions } from './hooks/useProblemTemplateActions';
 
 export default function Command(): JSX.Element {
-  const { isLoading, data: dailyChallenge } = useFetch<DailyChallengeResponse, undefined, DailyChallenge>(endpoint, {
+  const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<DailyChallengeResponse, undefined, DailyChallenge>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: dailyChallengeQuery,
@@ -22,29 +24,25 @@ export default function Command(): JSX.Element {
     },
   });
 
+  const { isLoading: isSnippetsLoading, data: codeSnippets } = useCodeSnippets(dailyChallenge?.problem.titleSlug);
+
   const problemMarkdown = useMemo(
     () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date),
     [dailyChallenge],
   );
 
+  const actions = useProblemTemplateActions({
+    codeSnippets,
+    problemMarkdown,
+    isPaidOnly: dailyChallenge?.problem.isPaidOnly,
+    linkUrl: `https://leetcode.com${dailyChallenge?.link}`
+  });
+
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={isDailyChallengeLoading || isSnippetsLoading}
       markdown={problemMarkdown}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com${dailyChallenge?.link}`} />
-          <Action.CopyToClipboard
-            title="Copy Link to Clipboard"
-            content={`https://leetcode.com${dailyChallenge?.link}`}
-          />
-          <Action.CopyToClipboard
-            title="Copy Problem to Clipboard"
-            content={problemMarkdown}
-            shortcut={{ modifiers: ['cmd'], key: 'c' }}
-          />
-        </ActionPanel>
-      }
-    ></Detail>
+      actions={actions}
+    />
   );
 }

@@ -32,6 +32,12 @@ export type DailyChallenge = {
   problem: Problem;
 };
 
+export type CodeSnippet = {
+  lang: string;
+  langSlug: string;
+  code: string;
+};
+
 export type GraphQLResponse<T> = { data: T };
 
 export type DailyChallengeResponse = GraphQLResponse<{
@@ -46,4 +52,10 @@ export type SearchProblemResponse = GraphQLResponse<{
 
 export type GetProblemResponse = GraphQLResponse<{
   problem: Problem;
+}>;
+
+export type GetCodeSnippetsResponse = GraphQLResponse<{
+  question: {
+    codeSnippets: CodeSnippet[];
+  }
 }>;

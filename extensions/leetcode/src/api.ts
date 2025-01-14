@@ -61,3 +61,15 @@ query problem($titleSlug: String!) {
   }
 }
 `;
+
+export const getCodeSnippetsQuery = `
+query questionEditorData($titleSlug: String!) {
+  question(titleSlug: $titleSlug) {
+    codeSnippets {
+      lang
+      langSlug
+      code
+    }
+  }
+}
+`;
