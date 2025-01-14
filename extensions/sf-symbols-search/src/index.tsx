@@ -7,6 +7,7 @@ export interface Preferences {
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
   gridItemSize: Grid.ItemSize;
   showName: boolean;
+  minimumVersionOS: "iOS" | "macOS" | "watchOS" | "tvOS" | "visionOS" | "disabled";
 }
 
 export type sfsymbol = {
@@ -14,12 +15,21 @@ export type sfsymbol = {
   symbol: string;
   categories: string[];
   searchTerms: string[];
+  availableFrom: number;
 };
 
 export type category = {
   name: string;
   title: string;
   symbol: string;
+};
+
+export type version = {
+  iOS: string;
+  macOS: string;
+  tvOS: string;
+  visionOS: string;
+  watchOS: string;
 };
 
 export interface SymbolProps {
@@ -29,7 +39,7 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
+const { primaryAction, gridItemSize, showName, minimumVersionOS }: Preferences = getPreferenceValues();
 
 function getDataPath() {
   return `${environment.assetsPath}/symbols/data.json`;
@@ -42,6 +52,7 @@ function getImageURL(name: string) {
 const data: {
   symbols: sfsymbol[];
   categories: category[];
+  versions: {[key: string]: version}
 } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
 export default function Command() {
@@ -126,9 +137,18 @@ export default function Command() {
 
 const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
+  
+  let subtitle;
+  if(minimumVersionOS != 'disabled') {
+    subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
+  } else {
+    subtitle = undefined;
+  }
+  
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
+      subtitle={subtitle}
       content={{
         source: getImageURL(symbol.name),
         fallback: Icon.Warning,

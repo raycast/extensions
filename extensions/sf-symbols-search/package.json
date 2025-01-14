@@ -62,12 +62,28 @@
     {
       "name": "showName", 
       "type": "checkbox", 
-      "title": "Show SF Symbols Name",
+      "title": "Show Symbol Names",
       "label": "Show Name", 
       "description": "Show SF Symbols name in grid view",
       "required": false, 
       "default": true
-    }, 
+    },
+    {
+      "name": "minimumVersionOS", 
+      "type": "dropdown",
+      "title": "Show Minimum OS Version (Show Name required)",
+      "description": "Show the minimum OS version that's required for an SF Symbol below its name",
+      "data": [
+        { "title": "iOS", "value": "iOS"},
+        { "title": "macOS", "value": "macOS"},
+        { "title": "watchOS", "value": "watchOS"},
+        { "title": "tvOS", "value": "tvOS"},
+        { "title": "visionOS", "value": "visionOS"},
+        { "title": "Disabled", "value": "disabled"}
+      ],
+      "required": false,
+      "default": "iOS"
+    },
     {
       "name": "showRecent", 
       "type": "checkbox", 
