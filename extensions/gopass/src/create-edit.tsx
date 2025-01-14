@@ -85,14 +85,12 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
   });
 
   const setNewPassword = async () => {
-    console.log("setting default password");
     updatePassword(passwordConfig);
     setLoading(false);
   };
 
   const getInputPassword = async () => {
     if (!inputPassword) return;
-    console.log("setting password");
     const password = await gopass.show(inputPassword);
     setPassword(password.password);
     setPasswordConfig({ ...passwordConfig, length: password.password.length.toString() });
