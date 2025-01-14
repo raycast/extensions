@@ -37,7 +37,7 @@ function getDataPath() {
 }
 
 function getImageURL(name: string) {
-  return `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${name}.png`;
+  return `https://raw.githubusercontent.com/ndckj/sf-symbols/main/images/100/${name}.png`;
 }
 
 export default function Command() {
