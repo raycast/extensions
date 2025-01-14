@@ -77,7 +77,6 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
     if (!inputPassword) return;
     const password = await gopass.show(inputPassword);
     setPassword(password.password);
-    setLength(password.password.length);
     setAdditionalAttributes(password.attributes.join("\n"));
     setName(inputPassword);
     setOriginalName(inputPassword);
