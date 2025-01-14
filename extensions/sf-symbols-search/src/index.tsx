@@ -52,7 +52,7 @@ function getImageURL(name: string) {
 const data: {
   symbols: sfsymbol[];
   categories: category[];
-  versions: {[key: string]: version}
+  versions: { [key: string]: version };
 } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
 export default function Command() {
@@ -137,14 +137,14 @@ export default function Command() {
 
 const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
-  
+
   let subtitle;
-  if(minimumVersionOS != 'disabled') {
+  if (minimumVersionOS != "disabled") {
     subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
   } else {
     subtitle = undefined;
   }
-  
+
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
@@ -155,7 +155,7 @@ const SFSymbol = (props: SymbolProps) => {
           source: getImageURL(symbol.name),
           fallback: Icon.Warning,
           tintColor: Color.PrimaryText,
-        }
+        },
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
       actions={<SymbolActions {...props} />}
