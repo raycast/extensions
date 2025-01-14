@@ -39,12 +39,12 @@ function getImageURL(name: string) {
   return `https://raw.githubusercontent.com/ndckj/sf-symbols/main/images/100/${name}.png`;
 }
 
-export default function Command() {
-  const data: {
-    symbols: sfsymbol[];
-    categories: category[];
-  } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
+const data: {
+  symbols: sfsymbol[];
+  categories: category[];
+} = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
+export default function Command() {
   const [pinned, setPinned] = useState(getPinnedSymbols());
   const [recent, setRecent] = useState(getRecentSymbols());
 
