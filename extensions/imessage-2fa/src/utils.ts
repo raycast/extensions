@@ -121,3 +121,12 @@ export function calculateLookBackMinutes(lookBackUnit: LookBackUnitType, lookBac
   const unitMinutes = unitToMinutesMap[lookBackUnit] || 0;
   return unitMinutes * lookBackAmount;
 }
+
+/**
+ * Format a date using the system's locale settings
+ * @param date The date to format
+ * @returns A localized date string
+ */
+export function formatDate(date: Date): string {
+  return date.toLocaleString();
+}
