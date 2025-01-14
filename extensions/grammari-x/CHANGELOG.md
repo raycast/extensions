@@ -1,5 +1,9 @@
 # GrammariX Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Add the `Improve Selected Text` command to enhance the selected text.
+
 ## [Improvements] - 2024-02-10
 
 - Add arguments support
