@@ -20,14 +20,12 @@ export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPai
     if (!codeSnippets) return [];
 
     return [...codeSnippets].sort((a, b) => {
-      // 기본 언어를 먼저 정렬
       const aIsDefault = a.langSlug === preferences.defaultLanguage;
       const bIsDefault = b.langSlug === preferences.defaultLanguage;
 
       if (aIsDefault && !bIsDefault) return -1;
       if (!aIsDefault && bIsDefault) return 1;
 
-      // 같은 카테고리 내에서는 언어 이름으로 정렬
       return a.lang.localeCompare(b.lang);
     });
   }, [codeSnippets, preferences.defaultLanguage]);
