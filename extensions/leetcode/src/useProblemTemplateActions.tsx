@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues } from '@raycast/api';
+import { Action, ActionPanel, getPreferenceValues, Icon } from '@raycast/api';
 import { useMemo } from 'react';
 import { CodeSnippet } from './types';
 
@@ -42,7 +42,7 @@ export function useProblemTemplateActions({ codeSnippets, problemMarkdown, isPai
         />
       )}
       {sortedSnippets.length > 0 && (
-        <ActionPanel.Submenu title="Copy Code Template">
+        <ActionPanel.Submenu title="Copy Code Template" icon={Icon.CodeBlock}>
           {sortedSnippets.map((snippet) => (
             <Action.CopyToClipboard
               key={snippet.langSlug}
