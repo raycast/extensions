@@ -11,12 +11,16 @@ import {
   closeMainWindow,
   showHUD,
   popToRoot,
+  confirmAlert,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 const createFormText =
   "Provide name for password and set desired password attributes. Password will be saved to clipboard on creation.";
 const editFormText = "Update desired password attributes. Password will be saved to clipboard on update.";
+
+const randomPasswordLength = 20;
+const xkcdPasswordLength = 5;
 
 interface SignUpFormValues {
   name: string;
@@ -25,7 +29,8 @@ interface SignUpFormValues {
   symbols: boolean;
   digits: boolean;
   capitalize: boolean;
-  password: string;
+  visiblePassword: string; // note both of these passwords are the same - used to show/hide password value
+  hiddenPassword: string; // note both of these passwords are the same - used to show/hide password value
   additionalAttributes: string;
 }
 
@@ -56,9 +61,11 @@ interface InputProps {
 export default function ({ inputPassword = undefined }: InputProps): JSX.Element {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
+  const [originalName, setOriginalName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [additionalAttributes, setAdditionalAttributes] = useState<string>("");
-  const [length, setLength] = useState<number>(12);
+  const [length, setLength] = useState<number>(randomPasswordLength);
   const [digits, setDigits] = useState<boolean>(true);
   const [symbols, setSymbols] = useState<boolean>(true);
   const [capitalize, setCapitalize] = useState<boolean>(true);
@@ -68,10 +75,13 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
 
   const getInputPassword = async () => {
     if (!inputPassword) return;
-    const password = await gopass.showAll(inputPassword);
+    const password = await gopass.show(inputPassword);
     setPassword(password.password);
+    setLength(password.password.length);
     setAdditionalAttributes(password.attributes.join("\n"));
     setName(inputPassword);
+    setOriginalName(inputPassword);
+    setLoading(false);
   };
 
   const updatePassword = async () => {
@@ -85,6 +95,7 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
         numbers: numbers,
       })
     );
+    setLoading(false);
   };
 
   const resetErrors = () => {
@@ -103,21 +114,46 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
     } else {
       updatePassword();
     }
-    setLoading(false);
   }
 
   useEffect(() => {
-    !isLoading && type === "xkcd" ? setLength(5) : setLength(12);
+    if (!isLoading) {
+      type === "xkcd" ? setLength(xkcdPasswordLength) : setLength(randomPasswordLength);
+    }
   }, [type]);
 
   useEffect(() => {
-    if (!isLoading) updatePassword();
-  }, [type, length, digits, symbols, capitalize, numbers]);
+    if (!isLoading) {
+      updatePassword();
+    }
+  }, [length, digits, symbols, capitalize, numbers]);
 
   const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
     async onSubmit(values: SignUpFormValues) {
-      const inputString = `${values.password}\n${values.additionalAttributes}\n`;
-      console.log(inputString);
+      if (isLoading) return; // ignore submissions until ready
+
+      // if a update and name has changed confirm with user the needed dual save and move operation
+      if (
+        originalName &&
+        values.name !== originalName &&
+        !(await confirmAlert({
+          title: `Updating a password name requires a save and move operation, confirm this is expected?`,
+        }))
+      ) {
+        await showToast({ title: `Password update canceled`, style: Toast.Style.Success });
+        return;
+      }
+      // on new passwords check password exists or not and prompt if it does for overwrite
+      if (
+        !originalName &&
+        (await gopass.exists(values.name)) &&
+        !(await confirmAlert({ title: `Password "${values.name}" already exists, overwrite?` }))
+      ) {
+        await showToast({ title: `Password creation canceled`, style: Toast.Style.Success });
+        return;
+      }
+
+      const inputString = `${password}\n${values.additionalAttributes}\n`; // ignore the password field values as we dont know which one is active
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: `${inputPassword ? "Updating" : "Creating"} password...`,
@@ -125,8 +161,21 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
       await gopass.insert(values.name, inputString, true);
       toast.style = Toast.Style.Success;
       toast.title = `Successfully ${inputPassword ? "updated" : "created"} password`;
-      await Clipboard.copy(values.password);
       await toast.hide();
+
+      // perform move if required.
+      if (originalName && values.name !== originalName) {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: `Moving password from ${originalName} to ${values.name}...`,
+        });
+        await gopass.move(originalName, values.name, true);
+        toast.style = Toast.Style.Success;
+        toast.title = `Successfully moved password`;
+        await toast.hide();
+      }
+
+      await Clipboard.copy(password);
       await closeMainWindow();
       await popToRoot();
       await showHUD("Password copied to clipboard");
@@ -138,15 +187,23 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
           return "Value Required";
         }
       },
-      password: (value: string | undefined) => {
-        if (value === undefined || value === "") {
+      hiddenPassword: () => {
+        // we ignore the field value as we dont know which one is active
+        if (password === undefined || password === "") {
+          setShowErrors(true);
+          return "Value Required";
+        }
+      },
+      visiblePassword: () => {
+        // we ignore the field value as we dont know which one is active
+        if (password === undefined || password === "") {
           setShowErrors(true);
           return "Value Required";
         }
       },
       additionalAttributes: (value: string | undefined) => {
         if (value !== undefined && value !== "") {
-          const rAttributes = /^(?:(?:[^:,\n]+:[^:,\n]+)\n)*(?:[^:,\n]+:[^:,\n]+)$/;
+          const rAttributes = /^(?:(?:[^:,\n]+:[^\n]+)\n)*(?:[^:,\n]+:[^\n]+)$/;
           if (!rAttributes.test(value)) {
             setShowErrors(true);
             return "Attributes must be key/value pairs in format `foo:bar` - one per line";
@@ -185,6 +242,10 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
         id="length"
         value={length.toString()}
         onChange={(value) => {
+          if (!value || value === "") {
+            type === "xkcd" ? setLength(Number(xkcdPasswordLength)) : setLength(Number(randomPasswordLength));
+            return;
+          }
           if (!isNaN(Number(value))) setLength(Number(value));
         }}
       />
@@ -200,15 +261,27 @@ export default function ({ inputPassword = undefined }: InputProps): JSX.Element
           <Form.Checkbox id="numbers" label="Numbers" value={numbers} onChange={setNumbers} />
         </>
       )}
-
-      <Form.TextField
-        title="Password"
-        id="password"
-        value={password}
-        error={displayFormErrors(itemProps.password.error)}
-        onBlur={resetErrors}
-        onChange={setPassword}
-      />
+      {showPassword && (
+        <Form.TextField
+          title="Password"
+          id="visiblePassword"
+          value={password}
+          error={displayFormErrors(itemProps.visiblePassword.error)}
+          onBlur={resetErrors}
+          onChange={setPassword}
+        />
+      )}
+      {!showPassword && (
+        <Form.PasswordField
+          title="Password"
+          id="hiddenPassword"
+          value={password}
+          error={displayFormErrors(itemProps.hiddenPassword.error)}
+          onBlur={resetErrors}
+          onChange={setPassword}
+        />
+      )}
+      <Form.Checkbox id="passwordVisible" label="Show Password?" value={showPassword} onChange={setShowPassword} />
       <Form.Separator />
       <Form.Description
         title="Additional Password Attributes"

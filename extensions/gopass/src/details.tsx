@@ -24,7 +24,7 @@ export default function ({ entry }: { entry: string }): JSX.Element {
   useEffect((): void => {
     gopass
       .show(entry)
-      .then(setDetails)
+      .then((value) => setDetails(value.attributes))
       .catch(async (error) => {
         console.error(error);
         await showToast({ title: "Could not load passwords", style: Toast.Style.Failure });

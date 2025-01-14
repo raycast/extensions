@@ -52,18 +52,18 @@ async function pwgen(
   numbers: boolean
 ): Promise<string[]> {
   if (type === "xkcd") {
-    return await gopass([
+    return gopass([
       "pwgen",
       "--xkcd",
       `--sep=-`,
       `--xkcdcapitalize=${capitalize}`,
       `--xkcdnumbers=${numbers}`,
       `${length}`,
-    ]).then((data) => data.split(`\n`));
+    ]).then((data) => data.split(`\n`).slice(0, -1)); // last line is empty
   }
-  return await gopass(["pwgen", `--symbols=${symbols}`, `--no-numerals=${!digits}`, `${length}`]).then((data) =>
-    data.split(`\n`)
-  );
+  return gopass(["pwgen", `--symbols=${symbols}`, `--no-numerals=${!digits}`, `${length}`]).then((data) =>
+    data.split(`\n`).slice(0, -1)
+  ); // last line is empty
 }
 
 async function password(entry: string): Promise<string> {
@@ -72,6 +72,16 @@ async function password(entry: string): Promise<string> {
 
 async function otp(entry: string): Promise<string> {
   return gopass(["otp", "--password", entry]);
+}
+
+async function exists(entry: string): Promise<boolean> {
+  // gopass has no exist command - we can use `list` and base the result on catching the error (doesnt exist)
+  try {
+    await gopass(["list", entry]);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 async function sync(): Promise<void> {
@@ -86,15 +96,19 @@ async function remove(entry: string, force = false): Promise<void> {
   await gopass(["remove", `--force=${force}`, entry]);
 }
 
+async function move(from: string, to: string, force = false): Promise<void> {
+  await gopass(["move", `--force=${force}`, from, to]);
+}
+
 async function insert(entry: string, data: string, force = false): Promise<void> {
   await gopass(["insert", `--force=${force}`, entry], data);
 }
 
-interface showAllResponse {
+interface showResponse {
   password: string;
   attributes: string[];
 }
-async function showAll(entry: string): Promise<showAllResponse> {
+async function show(entry: string): Promise<showResponse> {
   const data = await gopass(["show", entry]).then((data) => data.split(`\n`));
   return {
     password: data[0],
@@ -102,12 +116,4 @@ async function showAll(entry: string): Promise<showAllResponse> {
   };
 }
 
-async function show(entry: string): Promise<string[]> {
-  // gopass has no option to disable printing the password in the first, therefor we use `slice`
-  return await gopass(["show", entry])
-    .then((data) => data.split(`\n`).slice(1))
-    // Filter out details not in YAML colon syntax "key: value", such as GOPASS-SECRET-1.0
-    .then((data) => data.filter((item) => item.includes(":")));
-}
-
-export default { list, password, clip, show, otp, sync, pwgen, showAll, insert, remove };
+export default { list, password, clip, show, otp, sync, pwgen, insert, remove, move, exists };
