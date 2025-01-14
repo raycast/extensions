@@ -12,7 +12,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
-      let updatedModel: Model = {
+      const updatedModel: Model = {
         ...model,
         updated_at: new Date().toISOString(),
       };

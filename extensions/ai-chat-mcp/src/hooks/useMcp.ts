@@ -131,8 +131,6 @@ export function useMcp() {
       prevServers.map((s) => (s.id === server.id ? { ...s, client, tools, isConnected: true } : s))
     );
 
-    console.log(`Connected to MCP server: ${server.id}`, server);
-
     return tools;
   }, []);
 
