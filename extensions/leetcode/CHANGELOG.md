@@ -2,10 +2,10 @@
 
 ## [Code Template Features] - {PR_MERGE_DATE}
 
-Add Copy Code Template submenu action to copy problem's code template to clipboard
-Add preference setting for default programming language
-Show star (⭐) indicator for preferred language in template list
-Sort code templates to show preferred language first
+- Add Copy Code Template submenu action to copy problem's code template to clipboard
+- Add preference setting for default programming language
+- Show star (⭐) indicator for preferred language in template list
+- Sort code templates to show preferred language first
 
 ## [Features] - 2024-10-26
 
@@ -19,8 +19,8 @@ Sort code templates to show preferred language first
 
 - Categories now have icons
 - Add 2 problem categories:
-  1. JavaScript
-  2. pandas
+    1. JavaScript
+    2. pandas
 - Show Loading (previously, no loading was shown while searching problems)
 - Allow Paid Problems Preview w/o content (now you can view stats of a paid problem - the content/markdown is still not
   shown)

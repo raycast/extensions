@@ -55,9 +55,3 @@ export type SearchProblemResponse = GraphQLResponse<{
 export type GetProblemResponse = GraphQLResponse<{
   problem: Problem;
 }>;
-
-export type GetCodeSnippetsResponse = GraphQLResponse<{
-  question: {
-    codeSnippets: CodeSnippet[];
-  };
-}>;
