@@ -1,6 +1,6 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-01-14
 
 - 🌐 Add Translate Action - Auto translate selected text into target language as setting
 
