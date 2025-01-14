@@ -15,13 +15,7 @@ export function getDateString(date: string) {
 export function getTodayInLocalTime() {
   return formatISO(new Date(), { representation: "date" });
 }
-export function getTimeInLocalTime() {
-  return formatISO(new Date());
-}
 
-export function isPast(date: string) {
-  return isBefore(date, isFullDay(date) ? getTimeInLocalTime() : new Date());
-}
 export function isOverdue(date: string) {
   return isBefore(date, isFullDay(date) ? getTodayInLocalTime() : new Date());
 }
