@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, confirmAlert, Keyboard, List, useNavigation } from "@raycast/api";
+/**
+ * "Conversations" Command
+ *
+ * Enables users to view and manage their conversations
+ * with various questions and models.
+ *
+ * Key Features:
+ * - CRUD
+ * - List questions in conversation and pop to `AskQuestion` component
+ */
+
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useConversations } from "./hooks/useConversations";
 import { formatFullTime, formatRelativeTime } from "./utils/date/time";
 import AskQuestion from "./ask-question";
@@ -49,6 +60,7 @@ ${questionsList}
     <ActionPanel>
       <Action
         title="New Conversation"
+        icon={Icon.PlusCircle}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={() =>
           push(<AskQuestion />, async () => {
@@ -64,6 +76,7 @@ ${questionsList}
     <ActionPanel>
       <Action
         title="Open Conversation"
+        icon={Icon.ArrowRight}
         onAction={() =>
           push(<AskQuestion conversationId={conversation.id} />, async () => {
             await refresh();
@@ -73,6 +86,7 @@ ${questionsList}
       />
       <Action
         title="New Conversation"
+        icon={Icon.PlusCircle}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={() =>
           push(<AskQuestion />, async () => {
@@ -83,6 +97,7 @@ ${questionsList}
       />
       <Action
         title="Update Conversation"
+        icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.Edit}
         onAction={() =>
           push(<ConversationForm conversationId={conversation.id} />, async () => {
@@ -93,6 +108,7 @@ ${questionsList}
       />
       <Action
         title="Delete Conversation"
+        icon={Icon.Trash}
         style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.Remove}
         onAction={() => handleConfirmDelete(conversation)}

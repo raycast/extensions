@@ -1,11 +1,14 @@
 /**
- * models Command
+ * "Models" Command
  *
- * This file defines a...
+ * Enables users to create and manage custom models to use when asking questions.
+ * Users can select from a variety of Hugging Face "warm" models.
  *
+ * Key Features:
+ * - CRUD
  */
 
-import { Action, ActionPanel, Alert, Color, confirmAlert, Keyboard, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import ModelForm from "./views/models/model-form";
 import { useModels } from "./hooks/useModels";
 import { Model } from "./types/model";
@@ -42,6 +45,7 @@ export default function Models() {
     <ActionPanel>
       <Action
         title="New Model"
+        icon={Icon.PlusCircle}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={() =>
           push(<ModelForm />, async () => {
@@ -56,6 +60,7 @@ export default function Models() {
     <ActionPanel>
       <Action
         title="New Model"
+        icon={Icon.PlusCircle}
         shortcut={Keyboard.Shortcut.Common.New}
         onAction={() =>
           push(<ModelForm />, async () => {
@@ -65,6 +70,7 @@ export default function Models() {
       />
       <Action
         title="Update Model"
+        icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.Edit}
         onAction={() =>
           push(<ModelForm modelId={model.id} />, async () => {
@@ -73,7 +79,8 @@ export default function Models() {
         }
       />
       <Action
-        title="Delete Conversation"
+        title="Delete Model"
+        icon={Icon.Trash}
         style={Action.Style.Destructive}
         shortcut={Keyboard.Shortcut.Common.Remove}
         onAction={() => handleConfirmDelete(model)}

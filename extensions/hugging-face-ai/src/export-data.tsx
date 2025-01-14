@@ -1,11 +1,15 @@
 /**
- * export-data Command
+ * "Export Data" Command
  *
- * This file defines a...
+ * Enables users to export all of their questions, conversations,
+ * and models to a specified JSON file.
  *
+ * Key Features:
+ * - Export data to JSON
+ * - Data validation
  */
 
-import { ActionPanel, Form, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, showToast, Toast, Icon } from "@raycast/api";
 import fs from "fs";
 import { exportToFile } from "./utils/storage";
 
@@ -16,6 +20,7 @@ export default function ExportData() {
         <ActionPanel>
           <Action.SubmitForm
             title="Export"
+            icon={Icon.Upload}
             onSubmit={async (values: { folders: string[] }) => {
               const folder = values.folders[0];
               try {
