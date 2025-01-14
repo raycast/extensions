@@ -1,6 +1,6 @@
 # Android Changelog
 
-## [Feature Update] - 2025-01-11
+## [Feature Update] - {PR_MERGE_DATE}
 
 - Add shake emulator action
 
