@@ -8,9 +8,9 @@ Calmdigest is a [Raycast](https://www.raycast.com/) extension that generates a C
 
 Straight from your command bar, generate a Calmdigest article from a given URL you can send to your kindle in seconds.
 
-![Open extension](metadata/open-command.png)
-![Paste your link](metadata/detail-command.png)
-![Read your article](metadata/article-example.png)
+![Open extension](media/open-command.png)
+![Paste your link](media/detail-command.png)
+![Read your article](media/article-example.png)
 
 ## Installation
 
