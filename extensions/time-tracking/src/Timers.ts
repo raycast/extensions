@@ -1,4 +1,12 @@
-import { getPreferenceValues, LocalStorage, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  getPreferenceValues,
+  LocalStorage,
+  openExtensionPreferences,
+  Preferences,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
@@ -107,6 +115,22 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
 }
 
 export async function exportTimers() {
+  const exportDirectory = getPreferenceValues<ExtensionPreferences>().exportDirectory;
+  if (!exportDirectory) {
+    await showToast({
+      title: "Export directory not set",
+      message: "Please set the export directory in the extension preferences",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Open Preferences",
+        onAction: () => {
+          openExtensionPreferences();
+        },
+      },
+    });
+    return;
+  }
+
   const toast = await showToast(Toast.Style.Animated, "Fetching Timers");
   const timers = await getTimers();
   toast.title = "Exporting CSV";
@@ -119,10 +143,7 @@ export async function exportTimers() {
       })
       .join("\n");
 
-  const file = join(
-    getPreferenceValues<Preferences>().exportDirectory,
-    `projecttimer.runningTimer-${new Date().getTime()}.csv`,
-  );
+  const file = join(exportDirectory, `projecttimer.runningTimer-${new Date().getTime()}.csv`);
   try {
     await writeFile(file, csv, "utf8");
     toast.message = file;
