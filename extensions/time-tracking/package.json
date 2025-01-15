@@ -18,7 +18,7 @@
       "name": "exportDirectory",
       "title": "Export Directory",
       "type": "directory",
-      "required": true,
+      "required": false,
       "description": "CSVs will be exported here"
     }
   ],
