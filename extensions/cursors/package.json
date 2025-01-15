@@ -4,17 +4,74 @@
   "description": "All macOS cursors at your fingertips",
   "icon": "cursors.png",
   "author": "storm",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Cursors",
+      "title": "Search Cursors",
       "description": "All macOS cursors at your fingertips",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Number of columns to display in the grid",
+      "type": "dropdown",
+      "required": false,
+      "default": "8",
+      "data": [
+        {
+          "title": "3 Columns",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns",
+          "value": "5"
+        },
+        {
+          "title": "6 Columns",
+          "value": "6"
+        },
+        {
+          "title": "7 Columns",
+          "value": "7x"
+        },
+        {
+          "title": "8 Columns",
+          "value": "8"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.64.4"
+    "@raycast/api": "^1.88.0"
   },
   "devDependencies": {
     "@raycast/api": "^1.64.4",
