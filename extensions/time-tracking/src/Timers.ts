@@ -2,7 +2,6 @@ import {
   getPreferenceValues,
   LocalStorage,
   openExtensionPreferences,
-  Preferences,
   showInFinder,
   showToast,
   Toast,
