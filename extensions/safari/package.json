@@ -19,7 +19,9 @@
     "ridemountainpig",
     "1weiho"
   ],
-    "pastContributors": ["marcjulian"],
+  "pastContributors": [
+    "marcjulian"
+  ],
   "license": "MIT",
   "commands": [
     {
