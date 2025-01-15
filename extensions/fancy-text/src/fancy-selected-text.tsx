@@ -14,6 +14,7 @@ export default function Command() {
   React.useEffect(() => {
     const fetchSelectedText = async () => {
       try {
+        await getSelectedText();
         const selectedText = await getSelectedText();
         if (selectedText) {
           setSearchText(selectedText);
@@ -26,7 +27,7 @@ export default function Command() {
           message: "Please select some text to fancy.",
         });
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 500);
       }
     };
     fetchSelectedText();
@@ -62,9 +63,7 @@ export default function Command() {
   }, [pinnedFonts]);
 
   if (isLoading) {
-    return (
-      <List isLoading={true} searchBarPlaceholder="Loading..." searchText={searchText} onSearchTextChange={() => {}} />
-    );
+    return <List isLoading={true} searchBarPlaceholder="Loading..." searchText="" onSearchTextChange={() => {}} />;
   }
 
   return (
