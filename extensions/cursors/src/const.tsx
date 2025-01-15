@@ -1,5 +1,5 @@
 import { ActionPanel, Action } from "@raycast/api";
-import { Cursor, CursorData } from "./interface";
+import { Cursor } from "./interface";
 
 export const getActions = (cursor: Cursor, primaryAction: ExtensionPreferences["primaryAction"]) => {
   const actions = {
@@ -24,7 +24,7 @@ export const getActions = (cursor: Cursor, primaryAction: ExtensionPreferences["
   );
 };
 
-export const cursors: CursorData[] = [
+export const cursors: Cursor[] = [
   {
     id: "default",
     name: "Default",
