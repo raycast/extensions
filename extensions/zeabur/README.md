@@ -1,13 +1,21 @@
-# Zeabur Docs
+# Zeabur
 
-Raycast extension to search Zeabur docs directly in Raycast.
+The Raycast extension for [Zeabur](https://www.zeabur.com/).
 
-## Installation
+## ✨ Features
 
-Install the [ Zeabur Docs ](https://www.raycast.com/ridemountainpig/zeabur-docs) Raycast extension from the Raycast store.
+- **Search Zeabur Documentation**: Quickly find and access relevant information in the Zeabur docs.
+- **Deploy Projects**: Deploy your projects to Zeabur in just a few clicks.
 
-## Screenshots
+## 🚀 Installation
 
-![zeabur-docs-screenshot](./metadata/zeabur-docs-1.png)
+1. Open the Zeabur Raycast Extension in the Raycast Store.
+2. Click Install Extension to add it to your Raycast app.
 
-![zeabur-docs-screenshot](./metadata/zeabur-docs-2.png)
+## ⚙️ Preferences
+
+**Deploy Projects**
+
+  - **Zeabur API Key**: Your Zeabur API key, which you can find in your Zeabur settings.
+
+
