@@ -5,7 +5,7 @@ The Raycast extension for [Zeabur](https://www.zeabur.com/).
 ## ✨ Features
 
 - **Search Zeabur Documentation**: Quickly find and access relevant information in the Zeabur docs.
-- **Deploy Projects**: Deploy your projects to Zeabur in just a few clicks.
+- **Deploy Project**: Deploy your projects to Zeabur in just a few clicks.
 
 ## 🚀 Installation
 

@@ -15,14 +15,14 @@
     {
       "name": "search-documentation",
       "title": "Search Documentation",
-      "subtitle": "Zeabur Docs",
+      "subtitle": "Zeabur",
       "description": "Search Zeabur Docs",
       "mode": "view"
     },
     {
       "name": "deploy-project",
       "title": "Deploy Project",
-      "subtitle": "Zeabur Deploy",
+      "subtitle": "Zeabur",
       "description": "Deploy a project to Zeabur",
       "mode": "view",
       "preferences": [

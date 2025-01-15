@@ -2,7 +2,7 @@
 
 ## [Feature] - {PR_MERGE_DATE}
 
-- Added the deploy project command to Zeabur.
+- Added the deploy project command to deploy the project to Zeabur.
 
 ## [Feature] - 2024-09-12
 
