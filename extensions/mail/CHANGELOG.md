@@ -1,6 +1,6 @@
 # Mail Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-01-15
 
 - Add preference for `See Recent Mail`: `unreadonly` to show whether only unread messages.
 
