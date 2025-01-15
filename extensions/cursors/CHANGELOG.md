@@ -1,6 +1,6 @@
 # Cursors Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-15
 
 Updated and rearranged all cursor/names to the html/css names
 
