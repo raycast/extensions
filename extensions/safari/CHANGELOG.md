@@ -1,5 +1,7 @@
 # Safari Changelog
 
+## [Chore: Moved contributor to past contributors list] - 2025-01-15
+
 ## [Update] - 2025-01-12
 
 - Adds a preference to "Copy Title as Link to Clipboard" command to clean up titles with AI.
