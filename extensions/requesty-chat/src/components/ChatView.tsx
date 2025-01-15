@@ -85,7 +85,11 @@ export function ChatView({ model }: ChatViewProps) {
 						actions={
 							<ActionPanel>
 								<Action.CopyToClipboard content={message.content} />
-								<Action title="Send Message" shortcut={{ modifiers: ['cmd'], key: 'return' }} onAction={handleSendMessage} />
+								<Action
+									title="Send Message"
+									shortcut={{ modifiers: ['cmd'], key: 'return' }}
+									onAction={handleSendMessage}
+								/>
 							</ActionPanel>
 						}
 					/>

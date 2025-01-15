@@ -85,7 +85,9 @@ export async function getAvailableModels(): Promise<string[]> {
 						: m.output_tokens_price_per_million;
 				return inputPrice > 0 && outputPrice > 0;
 			})
-			.map((m) => (m.provider === 'together' ? `${m.provider}/${m.model.split('/').pop()!}` : `${m.provider}/${m.model}`));
+			.map((m) =>
+				m.provider === 'together' ? `${m.provider}/${m.model.split('/').pop()!}` : `${m.provider}/${m.model}`,
+			);
 	}
 
 	const apiKey = await getAPIKey();
@@ -136,8 +138,10 @@ export async function getAvailableModels(): Promise<string[]> {
 			(item: ApiModelItem) =>
 				typeof item.provider === 'string' &&
 				typeof item.model === 'string' &&
-				(typeof item.input_tokens_price_per_million === 'number' || typeof item.input_tokens_price_per_million === 'string') &&
-				(typeof item.output_tokens_price_per_million === 'number' || typeof item.output_tokens_price_per_million === 'string') &&
+				(typeof item.input_tokens_price_per_million === 'number' ||
+					typeof item.input_tokens_price_per_million === 'string') &&
+				(typeof item.output_tokens_price_per_million === 'number' ||
+					typeof item.output_tokens_price_per_million === 'string') &&
 				typeof item.updated_at === 'string',
 		);
 

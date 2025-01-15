@@ -112,7 +112,12 @@ export function Chat({ model, newChat = false }: ChatProps) {
 			navigationTitle={`Chat with ${model} • $${totalCost.toFixed(4)}`}
 			actions={
 				<ActionPanel>
-					<Action title="Send Message" icon={Icon.Message} shortcut={{ modifiers: [], key: 'return' }} onAction={handleSendMessage} />
+					<Action
+						title="Send Message"
+						icon={Icon.Message}
+						shortcut={{ modifiers: [], key: 'return' }}
+						onAction={handleSendMessage}
+					/>
 					<Action
 						title="Switch to Detail View"
 						icon={Icon.Sidebar}
@@ -160,7 +165,9 @@ export function Chat({ model, newChat = false }: ChatProps) {
 													<Detail.Metadata>
 														<Detail.Metadata.Label title="Time" text={message.timestamp.toLocaleTimeString()} />
 														<Detail.Metadata.Label title="Role" text={message.role === 'user' ? 'You' : 'AI'} />
-														{message.cost && <Detail.Metadata.Label title="Cost" text={`$${message.cost.toFixed(4)}`} />}
+														{message.cost && (
+															<Detail.Metadata.Label title="Cost" text={`$${message.cost.toFixed(4)}`} />
+														)}
 													</Detail.Metadata>
 												}
 											/>

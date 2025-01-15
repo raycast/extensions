@@ -48,7 +48,13 @@ export function RecentChats() {
 	}
 
 	if (recentChats.length === 0 && !isLoading) {
-		return <List.Item icon={Icon.Message} title="No recent chats" accessories={[{ text: 'Start a new chat to get going!' }]} />;
+		return (
+			<List.Item
+				icon={Icon.Message}
+				title="No recent chats"
+				accessories={[{ text: 'Start a new chat to get going!' }]}
+			/>
+		);
 	}
 
 	return recentChats.map((chat) => (

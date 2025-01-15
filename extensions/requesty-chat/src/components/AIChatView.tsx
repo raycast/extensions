@@ -11,7 +11,10 @@ interface AIChatViewProps {
 export function AIChatView({ initialMessage = '' }: AIChatViewProps) {
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [selectedModels, setSelectedModels] = useState<string[]>(['anthropic/claude-3-5-sonnet-latest', 'openai/gpt-4']);
+	const [selectedModels, setSelectedModels] = useState<string[]>([
+		'anthropic/claude-3-5-sonnet-latest',
+		'openai/gpt-4',
+	]);
 	const [availableModels, setAvailableModels] = useState<string[]>([]);
 
 	useEffect(() => {

@@ -45,8 +45,18 @@ ${message.cost ? `Cost: $${message.cost.toFixed(4)}` : ''}
 			isLoading={isLoading}
 			actions={
 				<ActionPanel>
-					<Action title="Send Message" icon={Icon.Message} shortcut={{ modifiers: [], key: 'return' }} onAction={onSendMessage} />
-					<Action title="Switch to List View" icon={Icon.List} shortcut={{ modifiers: ['cmd'], key: 'l' }} onAction={onSwitchView} />
+					<Action
+						title="Send Message"
+						icon={Icon.Message}
+						shortcut={{ modifiers: [], key: 'return' }}
+						onAction={onSendMessage}
+					/>
+					<Action
+						title="Switch to List View"
+						icon={Icon.List}
+						shortcut={{ modifiers: ['cmd'], key: 'l' }}
+						onAction={onSwitchView}
+					/>
 					<Action.CopyToClipboard
 						title="Copy Last Message"
 						icon={Icon.Clipboard}

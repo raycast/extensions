@@ -25,6 +25,7 @@
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^1.0.11",
+		"@raycast/utils": "^1.18.1",
 		"@types/node": "~20.8.0",
 		"@types/node-fetch": "^2.6.12",
 		"@types/react": "^18.2.21",
@@ -32,7 +33,7 @@
 		"@typescript-eslint/parser": "^6.7.0",
 		"eslint": "^8.49.0",
 		"eslint-config-prettier": "^9.0.0",
-		"prettier": "^3.0.3",
+		"prettier": "^3.4.2",
 		"typescript": "^5.2.2"
 	},
 	"scripts": {
@@ -40,7 +41,8 @@
 		"dev": "ray develop",
 		"fix-lint": "ray lint --fix",
 		"lint": "ray lint",
-		"publish": "npx @raycast/api@latest publish"
+		"publish": "npx @raycast/api@latest publish",
+		"format": "prettier --write 'src/**/*.{ts,tsx}'"
 	},
 	"preferences": [
 		{

@@ -38,7 +38,13 @@ export function SettingsView() {
 				</ActionPanel>
 			}
 		>
-			<Form.PasswordField id="apiKey" title="Requesty API Key" placeholder="Enter your API key" value={apiKey} onChange={setApiKey} />
+			<Form.PasswordField
+				id="apiKey"
+				title="Requesty API Key"
+				placeholder="Enter your API key"
+				value={apiKey}
+				onChange={setApiKey}
+			/>
 			<Form.Description text="Get your API key from requesty.ai" />
 		</Form>
 	);
