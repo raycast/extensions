@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Language, Documentation } from "./type";
-import { getLanguages, getDocumentation } from "./util";
+import { getLanguages, getDocumentation } from "./utils/documentation";
 
 export default function Command() {
   const [currentLanguage, setCurrentLanguage] = useCachedState<string>("language", "");
@@ -28,7 +28,7 @@ export default function Command() {
           }}
         >
           {data?.lang.map((lang: Language) => (
-            <List.Dropdown.Item key={lang.locale} title={lang.text} value={lang.locale} />
+            <List.Dropdown.Item key={lang.locale} title={lang.name} value={lang.locale} />
           ))}
         </List.Dropdown>
       }
