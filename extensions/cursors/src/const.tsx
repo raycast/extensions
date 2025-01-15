@@ -24,7 +24,7 @@ export const getActions = (cursor: Cursor, primaryAction: ExtensionPreferences["
   );
 };
 
-const cursors: CursorData[] = [
+export const cursors: Cursor[] = [
   {
     id: "default",
     name: "default",
