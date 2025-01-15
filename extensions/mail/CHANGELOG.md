@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Improvement] - 2025-01-15
+
+- Add preference for `See Recent Mail`: `unreadonly` to show whether only unread messages.
+
 ## [Fix] - 2024-12-10
 
 [#15571](https://github.com/raycast/extensions/issues/15571): Properly handle the timeout error for loading messages for mailboxes and increase timeout.
