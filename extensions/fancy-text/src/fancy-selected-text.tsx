@@ -1,5 +1,5 @@
 import React from "react";
-import { List } from "@raycast/api";
+import { List, getSelectedText, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import fonts from "./fonts.json";
 import { PseudoFont } from "./pseudo-font";
@@ -7,8 +7,31 @@ import FontListItem from "./font-list-item";
 
 export default function Command() {
   const defaultText = "Stay in the flow";
-  const [searchText, setSearchText] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [searchText, setSearchText] = React.useState<string>("");
   const [pinnedFonts, setPinnedFonts] = useCachedState<string[]>("pinned-fonts", []);
+
+  React.useEffect(() => {
+    const fetchSelectedText = async () => {
+      try {
+        await getSelectedText();
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setSearchText(selectedText);
+        }
+      } catch (error) {
+        setSearchText("");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No text selected",
+          message: "Please select some text to fancy.",
+        });
+      } finally {
+        setTimeout(() => setIsLoading(false), 500);
+      }
+    };
+    fetchSelectedText();
+  }, []);
 
   const togglePin = (fontName: string) => {
     setPinnedFonts((current) =>
@@ -39,8 +62,13 @@ export default function Command() {
     };
   }, [pinnedFonts]);
 
+  if (isLoading) {
+    return <List isLoading={true} searchBarPlaceholder="Loading..." searchText="" onSearchTextChange={() => {}} />;
+  }
+
   return (
     <List
+      isLoading={isLoading}
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
