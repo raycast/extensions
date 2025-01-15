@@ -45,15 +45,26 @@ function endpointEndpoints(endpoint: V1Endpoints) {
     return "<none>";
   }
 
-  return endpoint.subsets
-    ?.flatMap((subset) =>
-      subset.addresses
-        ?.filter((address) => address.ip)
-        .map(
-          (address) =>
-            `${address.ip}:${subset.ports?.map((port) => (port.protocol === "TCP" ? port.port : `${port.port}/${port.protocol}`)).join(",")}`,
-        ),
-    )
-    .slice(0, 5)
-    .join(", ");
+  const formattedEndpoints = [];
+  for (const subset of endpoint.subsets) {
+    if (!subset.addresses) {
+      continue;
+    }
+
+    for (const address of subset.addresses) {
+      if (!address.ip) {
+        continue;
+      }
+
+      const ports = subset.ports
+        ?.map((port) => (port.protocol === "TCP" ? port.port : `${port.port}/${port.protocol}`))
+        .join(", ");
+      if (formattedEndpoints.length >= 5) {
+        return `${formattedEndpoints.join(", ")}, ...`;
+      }
+      formattedEndpoints.push(`${address.ip}:${ports}`);
+    }
+  }
+
+  return formattedEndpoints.join(", ");
 }
