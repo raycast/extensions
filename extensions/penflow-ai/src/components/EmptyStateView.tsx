@@ -9,8 +9,8 @@ interface EmptyStateViewProps {
 
 export function EmptyStateView({
   icon = Icon.Text,
-  title = "开始输入",
-  description = "输入英文或中文以获取建议",
+  title = "Start Typing",
+  description = "Type English or Chinese text to get suggestions",
 }: EmptyStateViewProps) {
   return <List.EmptyView icon={icon} title={title} description={description} />;
 }

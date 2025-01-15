@@ -5,7 +5,7 @@ interface WritingSuggestionsProps {
   suggestions: Suggestion[];
 }
 
-// 类型守卫函数
+// Type guard function
 function isValidSuggestion(suggestion: any): suggestion is Suggestion {
   return (
     suggestion &&
@@ -18,7 +18,7 @@ function isValidSuggestion(suggestion: any): suggestion is Suggestion {
 export function WritingSuggestions({ suggestions }: WritingSuggestionsProps) {
   console.log("WritingSuggestions - received suggestions:", JSON.stringify(suggestions, null, 2));
 
-  // 过滤无效的建议
+  // Filter invalid suggestions
   const validSuggestions = suggestions.filter(isValidSuggestion);
   console.log("WritingSuggestions - valid suggestions:", JSON.stringify(validSuggestions, null, 2));
 

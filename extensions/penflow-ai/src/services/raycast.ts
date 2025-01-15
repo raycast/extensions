@@ -6,7 +6,7 @@ export class RaycastService {
     "openai-gpt-4o-mini": AI.Model["OpenAI_GPT4o-mini"],
   };
 
-  constructor(private config: { provider: AIProvider }) {}
+  constructor(private config: { provider: AIProvider }) { }
 
   async chat(request: ChatRequest): Promise<ChatResponse> {
     try {
@@ -65,7 +65,7 @@ export class RaycastService {
 
       return {
         success: true,
-        message: "连接测试成功",
+        message: "Connection test successful",
         details: {
           provider: this.config.provider,
           model: model.id,
@@ -76,10 +76,10 @@ export class RaycastService {
       console.error("Test connection error:", error);
       return {
         success: false,
-        message: "连接测试失败",
+        message: "Connection test failed",
         details: {
           provider: this.config.provider,
-          error: error instanceof Error ? error.message : "未知错误",
+          error: error instanceof Error ? error.message : "Unknown error",
         },
       };
     }

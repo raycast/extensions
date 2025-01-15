@@ -3,10 +3,10 @@ import { handleError } from "../utils/helpers";
 import { aiManager } from "./aiManager";
 import { Message, getWordCompletionPrompt, getTranslationPrompt } from "../utils/prompts";
 
-// 使用固定的默认模型
+// Use fixed default model
 const DEFAULT_MODEL = "openai-gpt-4o-mini";
 
-// 添加日志函数
+// Add logging function
 function logAICall(type: string, input: string, messages: Message[], response?: string) {
   console.log("\n=== AI Call Log ===");
   console.log("Type:", type);
@@ -28,7 +28,7 @@ export async function processWithModel(messages: Message[], _options?: AIRequest
 
     const service = aiManager.getService(modelConfig.provider);
 
-    // 记录请求
+    // Log request
     logAICall("Request", "", messages);
 
     const response = await service.chat({
@@ -38,7 +38,7 @@ export async function processWithModel(messages: Message[], _options?: AIRequest
       maxTokens: modelConfig.maxTokens,
     });
 
-    // 记录响应
+    // Log response
     logAICall("Response", "", messages, response.content.trim());
 
     return response.content.trim();
@@ -55,7 +55,7 @@ export async function getWordCompletions(input: string, options?: AIRequestOptio
 
     const response = await processWithModel(messages, options);
 
-    // 修改为返回5个补全建议
+    // Modified to return 5 completion suggestions
     const completions = response
       .split("\n")
       .map((s) => s.trim())
@@ -76,7 +76,7 @@ export async function translateMixedText(text: string, options?: AIRequestOption
 
     const response = await processWithModel(messages, options);
 
-    // 解析所有变体
+    // Parse all variants
     const results = response
       .split("\n")
       .filter((line) => line.includes(": "))

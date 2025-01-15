@@ -20,9 +20,9 @@ class AIManager {
 
   private initializeServices() {
     AI_SERVICES.forEach((config) => {
-      // 注册服务
+      // Register service
       this.registerService(config);
-      // 缓存模型配置
+      // Cache model configuration
       config.models.forEach((model) => {
         this.modelConfigs.set(model.id, model);
       });

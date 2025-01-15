@@ -12,7 +12,7 @@ export function useWritingLogic() {
   const [loadingText, setLoadingText] = useState("Loading suggestions...");
   const [hasAIPro, setHasAIPro] = useState<boolean | null>(null);
 
-  // 权限检查逻辑
+  // Permission check logic
   useEffect(() => {
     const checkAIAccess = async () => {
       const hasAccess = environment.canAccess(AI);

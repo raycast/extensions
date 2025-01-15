@@ -3,7 +3,7 @@ import { AIRequestOptions, Suggestion } from "../utils/types";
 import { AI } from "@raycast/api";
 import { getPolishPrompt } from "../utils/prompts";
 
-// 辅助函数
+// Helper functions
 function containsChinese(text: string): boolean {
   return /[\u4e00-\u9fa5]/.test(text);
 }
@@ -22,7 +22,7 @@ function needsCompletion(text: string): boolean {
   return lastSegment.length >= 2;
 }
 
-// 主要的输入处理函数
+// Main input processing function
 export async function processInput(input: string, options?: AIRequestOptions): Promise<Suggestion[]> {
   console.log("processInput - received input:", input);
 
@@ -37,7 +37,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
   };
 
   try {
-    // 如果包含中文，返回翻译和润色结果
+    // If contains Chinese, return translation and refinement results
     if (containsChinese(input)) {
       console.log("processInput - Chinese text detected, getting translations");
       const translatedTexts = await translateMixedText(input, aiOptions);
@@ -54,7 +54,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
     const lastSegment = getLastEnglishSegment(input);
     const suggestions: Suggestion[] = [];
 
-    // 如果最后一个词不完整且总词数<=2，仅返回补全建议
+    // If the last word is incomplete and total words <= 2, only return completion suggestions
     if (needsCompletion(input) && totalWords <= 2) {
       console.log("processInput - getting word completions for:", lastSegment);
       const completions = await getWordCompletions(lastSegment, aiOptions);
@@ -67,7 +67,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
       return results;
     }
 
-    // 其他情况，同时返回补全和润色建议
+    // Other cases, return both completion and refinement suggestions
     if (needsCompletion(input)) {
       console.log("processInput - getting word completions for:", lastSegment);
       const completions = await getWordCompletions(lastSegment, aiOptions);
@@ -80,7 +80,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
       );
     }
 
-    // 如果不是单纯的补全场景，添加润色建议
+    // If not a simple completion scenario, add refinement suggestions
     if (totalWords > 1) {
       console.log("processInput - getting polish suggestions for:", input);
       const polishResults = await polishText(input, aiOptions);
@@ -101,7 +101,7 @@ export async function processInput(input: string, options?: AIRequestOptions): P
   }
 }
 
-// 新增润色功能
+// New refinement function
 async function polishText(text: string, options?: AIRequestOptions): Promise<string[]> {
   console.log("polishText - received text:", text);
 
@@ -111,7 +111,7 @@ async function polishText(text: string, options?: AIRequestOptions): Promise<str
     const response = await processWithModel(messages, options);
     console.log("polishText - received response:", response);
 
-    // 解析所有变体
+    // Parse all variants
     const results = response
       .split("\n")
       .filter((line: string) => line.includes(": "))
