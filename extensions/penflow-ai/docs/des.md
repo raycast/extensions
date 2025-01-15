@@ -46,7 +46,7 @@
     content: "You are a professional English-Chinese translator..."
   }
   ```
-  2. 补��提示词:
+  2. 补全提示词:
   ```typescript
   {
     role: "system",
@@ -91,7 +91,7 @@
   3. 结果缓存
 
 ### 4. 错误处理
-- **实现位置**: `src/utils/errorHandler.ts`
+- **实现位置**: `src/utils/helpers.ts`
 - **处理策略**:
   1. 控制台日志
   2. 用户提示

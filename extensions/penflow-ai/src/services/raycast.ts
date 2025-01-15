@@ -1,11 +1,12 @@
-import { BaseService } from "./baseService";
-import { ChatRequest, ChatResponse, TestResult, Message } from "../utils/types";
+import { ChatRequest, ChatResponse, TestResult, Message, AIProvider } from "../utils/types";
 import { AI } from "@raycast/api";
 
-export class RaycastService extends BaseService {
+export class RaycastService {
   private modelMapping: Record<string, AI.Model> = {
     "openai-gpt-4o-mini": AI.Model["OpenAI_GPT4o-mini"],
   };
+
+  constructor(private config: { provider: AIProvider }) { }
 
   async chat(request: ChatRequest): Promise<ChatResponse> {
     try {
@@ -32,7 +33,7 @@ export class RaycastService extends BaseService {
       const model = {
         id: "openai-gpt-4o-mini",
         name: "GPT-4o Mini",
-        provider: "raycast" as const,
+        provider: "raycast" as AIProvider,
         enabled: true,
       };
 
@@ -64,7 +65,7 @@ export class RaycastService extends BaseService {
 
       return {
         success: true,
-        message: "连���测试成功",
+        message: "连接测试成功",
         details: {
           provider: this.config.provider,
           model: model.id,

@@ -4,7 +4,6 @@
   "title": "Penflow AI",
   "version": "1.0.0",
   "description": "Think & Write in English, Not your First Language - AI-powered writing assistant",
-  "isProRequired": true,
   "icon": "icon.png",
   "author": "Fchen",
   "categories": [

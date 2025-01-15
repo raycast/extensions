@@ -10,7 +10,6 @@ export interface TestResult {
     model?: string;
     response?: string;
     error?: string;
-    apiKey?: string;
   };
 }
 
@@ -19,8 +18,8 @@ export interface AIModelConfig {
   name: string;
   provider: AIProvider;
   enabled: boolean;
-  contextWindow: number;
   maxTokens: number;
+  contextWindow: number;
   pricing: {
     input: number;
     output: number;
@@ -34,8 +33,6 @@ export interface AIModelConfig {
 
 export interface AIServiceConfig {
   provider: AIProvider;
-  apiKey?: string;
-  baseURL?: string;
   models: AIModelConfig[];
 }
 
@@ -48,11 +45,6 @@ export interface ChatRequest {
 
 export interface ChatResponse {
   content: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
 }
 
 export interface Message {
@@ -60,33 +52,10 @@ export interface Message {
   content: string;
 }
 
-export interface ServiceStatus {
-  provider: AIProvider;
-  isAvailable: boolean;
-  activeModels: string[];
-  successfulRequests: number;
-  failedRequests: number;
-  totalTokensUsed: number;
-  lastChecked: Date;
-}
-
-export interface ServiceLog {
-  timestamp: number;
-  provider: AIProvider;
-  model: string;
-  input: string;
-  output?: string;
-  error?: string;
-}
-
 export enum WritingStyle {
   Professional = "professional",
   Casual = "casual",
   Academic = "academic",
-}
-
-export interface AIPreferences {
-  style: WritingStyle;
 }
 
 export interface AIRequestOptions {

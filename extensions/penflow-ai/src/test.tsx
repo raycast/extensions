@@ -15,7 +15,7 @@ export default function Command() {
         const results = await aiManager.testAllConnections(true);
         setTestResults(results);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "未知错误");
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setIsLoading(false);
       }
@@ -27,7 +27,7 @@ export default function Command() {
   if (error) {
     return (
       <List>
-        <List.EmptyView title="测试失败" description={error} icon={{ source: "error.png" }} />
+        <List.EmptyView title="Test Failed" description={error} icon={{ source: "error.png" }} />
       </List>
     );
   }
