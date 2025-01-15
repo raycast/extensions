@@ -13,8 +13,8 @@ Think & Write in English, Not your First Language - AI-powered writing assistant
 
 - Raycast v1.67.1 or higher
 - Node.js v16 or higher
-- Raycast Pro subscription required
-- Default model: GPT-4omini
+- **Raycast Pro subscription with AI access required**
+- Recommended model: GPT-4omini (tested to provide the best results)
 
 ## Installation
 

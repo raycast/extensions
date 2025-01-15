@@ -1,12 +1,22 @@
 import React from "react";
 import { List, Icon } from "@raycast/api";
 
-export function EmptyStateView() {
+interface EmptyStateViewProps {
+  icon?: Icon;
+  title?: string;
+  description?: string;
+}
+
+export function EmptyStateView({
+  icon = Icon.Text,
+  title = "开始输入",
+  description = "输入英文或中文以获取建议"
+}: EmptyStateViewProps) {
   return (
     <List.EmptyView
-      icon={Icon.Text}
-      title="Start Writing"
-      description="Type English or Chinese to get suggestions"
+      icon={icon}
+      title={title}
+      description={description}
     />
   );
 }
