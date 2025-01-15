@@ -1106,6 +1106,7 @@
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
 /extensions/openfortivpn                                            @rafalpetryka
+/extensions/openstatus                                              @thibaultleouay @xmok
 /extensions/openstreetmap-search                                    @crisboarna
 /extensions/openverse                                               @dhruvkb
 /extensions/openvpn                                                 @benekuehn
