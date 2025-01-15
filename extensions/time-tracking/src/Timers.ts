@@ -1,4 +1,6 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showInFinder, showToast, Toast } from "@raycast/api";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
 export type Timer = {
   id: string;
@@ -102,4 +104,39 @@ export async function deleteTimer(timerId: string): Promise<TimerList> {
   }
 
   return timers;
+}
+
+export async function exportTimers() {
+  const toast = await showToast(Toast.Style.Animated, "Fetching Timers");
+  const timers = await getTimers();
+  toast.title = "Exporting CSV";
+  const csv =
+    "id,name,start,end,duration,formatted\n" +
+    Object.values(timers)
+      .map((timer) => {
+        const duration = getDuration(timer);
+        return [...Object.values(timer), duration, formatDuration(duration)].join();
+      })
+      .join("\n");
+
+  const file = join(
+    getPreferenceValues<Preferences>().exportDirectory,
+    `projecttimer.runningTimer-${new Date().getTime()}.csv`,
+  );
+  try {
+    await writeFile(file, csv, "utf8");
+    toast.message = file;
+    toast.style = Toast.Style.Success;
+    toast.title = "Exported CSV";
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    };
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Export failed";
+    toast.message = `${error}`;
+  }
 }
