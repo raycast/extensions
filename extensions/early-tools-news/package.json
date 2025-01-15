@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "early-tools-news",
-      "title": "early.tools news",
+      "title": "Show News",
+      "subtitle": "early.tools",
       "description": "Long-form updates from 80+ of the greatest entrepreneurs on the web.",
       "mode": "view"
     }
