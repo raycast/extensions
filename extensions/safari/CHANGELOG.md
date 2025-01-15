@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Chore: Moved contributor to past contributors list] - {PR_MERGE_DATE}
+## [Chore: Moved contributor to past contributors list] - 2025-01-15
 
 ## [Update] - 2025-01-12
 
