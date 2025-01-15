@@ -1,5 +1,9 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- 🙋 Add `Ask LLM` command using pure user query input.
+
 ## [New Features] - 2025-01-14
 
 - 🌐 Add Translate Action - Auto translate selected text into target language as setting

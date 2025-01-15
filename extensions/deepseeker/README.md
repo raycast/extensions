@@ -19,6 +19,7 @@ Enjoy using DeepSeeker! 🚀
 - [x] 📄 Custom prompt for each action
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
+- [ ] 🔍 Fix Fallback Feature, e.g., ASK LLM
 - [ ] Fix notes
 - [ ] Interaction with Zoo using deeplinks?
 - [ ] 📦 More flexibility for personal needs

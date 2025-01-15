@@ -360,6 +360,68 @@
         }
       ]
     },
+        {
+      "name": "ask",
+      "title": "Ask LLM",
+      "description": "Ask LLM directly with input argument",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter your question",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt_ask",
+          "title": "Ask Prompt",
+          "description": "The prompt prefix for the ask command",
+          "type": "textfield",
+          "required": false,
+          "default": "Answer the following question concisely: \n\n"
+        },
+        {
+          "name": "model_ask", 
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "deepseek-chat",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo", 
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "customa",
       "title": "Custom Action A",
