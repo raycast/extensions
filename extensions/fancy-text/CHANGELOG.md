@@ -1,6 +1,6 @@
 # Fancy Text Changelog
 
-## [Feature]
+## [Feature] - {PR_MERGE_DATE}
 
 - Added a new command, `Fancy Selected Text`, to turn selected text into fancy text.
 
