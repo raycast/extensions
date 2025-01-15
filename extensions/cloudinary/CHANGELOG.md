@@ -1,6 +1,6 @@
 # Cloudinary Changelog
 
-## [Cache Enhancements] - {PR_MERGE_DATE}
+## [Cache Enhancements] - 2025-01-15
 
 - View more than 30 results at a time in "Search" via `Pagination`
 - `Cache` "Search" through `useCachedPromise`
