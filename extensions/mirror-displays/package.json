@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "mirror-displays",
-      "title": "Mirror Displays",
+      "title": "Toggle Mirror Displays",
       "description": "Toggle the mirroring of external displays on and off",
       "mode": "no-view"
     }
