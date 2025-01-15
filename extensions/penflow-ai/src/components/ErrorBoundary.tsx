@@ -30,7 +30,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           <List.EmptyView
             icon={Icon.ExclamationMark}
             title="An Error Occurred"
-            description={`Something went wrong. ${this.state.error?.message || 'Please try again.'}`}
+            description={`Something went wrong. ${this.state.error?.message || "Please try again."}`}
           />
         </List>
       );

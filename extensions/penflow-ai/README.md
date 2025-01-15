@@ -2,6 +2,8 @@
 
 Think & Write in English, Not your First Language - AI-powered writing assistant
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 ## Features
 
 - Professional writing assistance

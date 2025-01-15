@@ -1,13 +1,11 @@
-import { BaseService } from "./baseService";
 import { RaycastService } from "./raycast";
 import { AI_SERVICES } from "../config/aiConfig";
-import { AIProvider, AIServiceConfig, AIModelConfig, ServiceLog, TestResult } from "../utils/types";
+import { AIProvider, AIServiceConfig, AIModelConfig, TestResult } from "../utils/types";
 
 class AIManager {
   private static instance: AIManager;
-  private services: Map<AIProvider, BaseService> = new Map();
+  private services: Map<AIProvider, RaycastService> = new Map();
   private modelConfigs: Map<string, AIModelConfig> = new Map();
-  private logs: ServiceLog[] = [];
 
   private constructor() {
     this.initializeServices();
@@ -32,20 +30,15 @@ class AIManager {
   }
 
   private registerService(config: AIServiceConfig) {
-    let service: BaseService;
-
-    switch (config.provider) {
-      case "raycast":
-        service = new RaycastService(config);
-        break;
-      default:
-        throw new Error(`Unknown provider: ${config.provider}`);
+    if (config.provider === "raycast") {
+      const service = new RaycastService({ provider: config.provider });
+      this.services.set(config.provider, service);
+    } else {
+      throw new Error(`Unknown provider: ${config.provider}`);
     }
-
-    this.services.set(config.provider, service);
   }
 
-  public getService(provider: AIProvider): BaseService {
+  public getService(provider: AIProvider): RaycastService {
     const service = this.services.get(provider);
     if (!service) {
       throw new Error(`Service not found for provider: ${provider}`);
@@ -67,22 +60,6 @@ class AIManager {
 
   public getModelsByProvider(provider: AIProvider): AIModelConfig[] {
     return this.getAllModels().filter((model) => model.provider === provider);
-  }
-
-  public getAllLogs(): ServiceLog[] {
-    return [...this.logs].sort((a, b) => b.timestamp - a.timestamp);
-  }
-
-  public logServiceCall(provider: AIProvider, model: string, input: string, output?: string, error?: string) {
-    const log: ServiceLog = {
-      timestamp: Date.now(),
-      provider,
-      model,
-      input,
-      output,
-      error,
-    };
-    this.logs.push(log);
   }
 
   public async testConnection(provider: AIProvider, debug: boolean = false): Promise<TestResult> {

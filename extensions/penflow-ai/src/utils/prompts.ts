@@ -19,7 +19,7 @@ export function getWordCompletionPrompt(input: string, style: WritingStyle): Mes
     {
       role: "system",
       content:
-        "You are an advanced English writing assistant specializing in vocabulary enhancement. Focus on providing contextually appropriate word completions that are:\n" +
+        `You are an advanced English writing assistant specializing in vocabulary enhancement ${getStylePrompt(style)}. Focus on providing contextually appropriate word completions that are:\n` +
         "- Commonly used in professional or academic contexts\n" +
         "- Upper-intermediate to advanced level (CEFR B2-C1)\n" +
         "- Frequently appearing in formal writing and business communications\n" +

@@ -6,7 +6,7 @@ export class RaycastService {
     "openai-gpt-4o-mini": AI.Model["OpenAI_GPT4o-mini"],
   };
 
-  constructor(private config: { provider: AIProvider }) { }
+  constructor(private config: { provider: AIProvider }) {}
 
   async chat(request: ChatRequest): Promise<ChatResponse> {
     try {

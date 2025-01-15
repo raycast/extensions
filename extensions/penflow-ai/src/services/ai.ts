@@ -1,4 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
 import { AIRequestOptions, WritingStyle } from "../utils/types";
 import { handleError } from "../utils/helpers";
 import { aiManager } from "./aiManager";

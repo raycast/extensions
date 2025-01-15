@@ -22,12 +22,6 @@ function needsCompletion(text: string): boolean {
   return lastSegment.length >= 2;
 }
 
-function isCompleteSentence(text: string): boolean {
-  // 检查是否是一个完整的句子（至少包含两个单词且以标点符号结尾）
-  const words = text.trim().split(/\s+/);
-  return words.length >= 2 && /[.!?]$/.test(text.trim());
-}
-
 // 主要的输入处理函数
 export async function processInput(input: string, options?: AIRequestOptions): Promise<Suggestion[]> {
   console.log("processInput - received input:", input);
