@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "choose-lgtm-image",
-      "title": "Choose LGTM Image",
+      "title": "Search LGTMeow Images",
       "description": "Display a list of cat images from LGTMeow and copy the URL of the selected image to the clipboard in Markdown format.",
       "mode": "view"
     }
