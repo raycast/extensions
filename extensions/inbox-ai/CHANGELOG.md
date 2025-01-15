@@ -1,6 +1,6 @@
 # Inbox AI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-15
 
 - Audio processing command with three variants:
   - Basic audio input processing
