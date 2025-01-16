@@ -15,16 +15,11 @@ const command = async () => {
       return;
     }
 
-    const urlParts = url.split("/");
+    const browserURL = new URL(url);
+    const storeDomain = browserURL.origin;
+    const path = encodeURIComponent(browserURL.pathname);
 
-    if (urlParts.length < 2) {
-      await showToast({ title: "It is not a Shopify store", style: Toast.Style.Failure });
-    }
-
-    const storeDomain = urlParts[2];
-    const path = encodeURIComponent("/" + urlParts.slice(3).join("/"));
-
-    const editorURL = `https://${storeDomain}/admin/themes/current/editor?previewPath=${path}`;
+    const editorURL = `${storeDomain}/admin/themes/current/editor?previewPath=${path}`;
 
     await openURL({ appName: frontmostApp.name, url: editorURL });
   }
