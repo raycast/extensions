@@ -97,7 +97,7 @@ export default function Command() {
       isLoading={isLoading}
       selectedItemId={selectedItemId}
       searchBarAccessory={
-        <List.Dropdown tooltip="Dropdown With Items" onChange={(value) => setView(value as View)}>
+        <List.Dropdown tooltip="Dropdown With Items" value={view} onChange={(value) => setView(value as View)}>
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Item title="Active" value="active" />
           <List.Dropdown.Item title="Archived" value="archived" />
