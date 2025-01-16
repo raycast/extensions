@@ -26,11 +26,9 @@ Easily manage and interact with projects and tickets from Capmo directly in Rayc
   </p>
 </div>
 
-![Screenshot of the "List Projects" command](screenshots/screenshot_3.png)
-![Screenshot of the "List Tickets" command](screenshots/screenshot_1.png)
-![Actions in the "List Tickets" command](screenshots/screenshot_2.png)
-
-This extension offers the following functionalities:
+![Screenshot of the "List Projects" command](/screenshots/screenshot_3.png)
+![Screenshot of the "List Tickets" command](/screenshots/screenshot_1.png)
+![Actions in the "List Tickets" command](/screenshots/screenshot_2.png)
 
  <h2>
 Commands
