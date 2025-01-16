@@ -1,8 +1,6 @@
 import { runAppleScript } from "@raycast/utils";
 
 export const getBrowserURL = async (appName: string) => {
-  console.log("appName", appName);
-
   try {
     const getBrowserURLScript = `
 		tell application "${appName}" to activate

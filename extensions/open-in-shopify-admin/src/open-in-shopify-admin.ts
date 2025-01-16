@@ -7,22 +7,20 @@ const command = async () => {
 
   const frontmostApp = await getFrontmostApplication();
 
-  if (frontmostApp.bundleId !== "com.apple.finder") {
-    const url = await getBrowserURL(frontmostApp.name);
+  const url = await getBrowserURL(frontmostApp.name);
 
-    if (!url) {
-      await showToast({ title: "You don't have any website open", style: Toast.Style.Failure });
-      return;
-    }
-
-    const browserURL = new URL(url);
-    const storeDomain = browserURL.origin;
-    const path = encodeURIComponent(browserURL.pathname);
-
-    const editorURL = `${storeDomain}/admin/themes/current/editor?previewPath=${path}`;
-
-    await openURL({ appName: frontmostApp.name, url: editorURL });
+  if (!url) {
+    await showToast({ title: "You don't have any website open", style: Toast.Style.Failure });
+    return;
   }
+
+  const browserURL = new URL(url);
+  const storeDomain = browserURL.origin;
+  const path = encodeURIComponent(browserURL.pathname);
+
+  const editorURL = `${storeDomain}/admin/themes/current/editor?previewPath=${path}`;
+
+  await openURL({ appName: frontmostApp.name, url: editorURL });
 };
 
 export default command;
