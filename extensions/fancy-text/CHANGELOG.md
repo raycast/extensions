@@ -2,7 +2,7 @@
 
 ## [Improvement] - {PR_MERGE_DATE}
 
-- Merged the `Fancy Selected Text` Text command into the `Fancy Text` command
+- Merged the `Fancy Selected Text` command into the `Fancy Text` command
 
 ## [Feature] - 2025-01-15
 
