@@ -39,6 +39,28 @@
       "type": "textfield",
       "required": false,
       "default": "node_modules,.next,.vercel/output"
+    },
+    {
+      "name": "defaultView",
+      "title": "Default View",
+      "description": "The view to display when the extension is opened",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Active",
+          "value": "active"
+        },
+        {
+          "title": "Archived",
+          "value": "archived"
+        }
+      ]
     }
   ],
   "dependencies": {
