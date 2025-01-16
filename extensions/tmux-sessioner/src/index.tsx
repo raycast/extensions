@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, useNavigation, launchCommand, LaunchType } from "@raycast/api";
-import { RenameTmuxSession } from "./RenameTmuxSession";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { RenameTmux } from "./RenameTmux";
 import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
 import { checkTerminalSetup } from "./utils/terminalUtils";
 
@@ -78,7 +78,14 @@ export default function Command() {
                 <Action
                   title="Rename This Session"
                   onAction={() => {
-                    push(<RenameTmuxSession session={session} callback={() => setupListSesssions()} />);
+                    push(
+                      <RenameTmux
+                        sessionName={session}
+                        windowName=""
+                        type="Session"
+                        callback={() => setupListSesssions()}
+                      />,
+                    );
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
