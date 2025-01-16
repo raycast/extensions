@@ -50,7 +50,7 @@ export default function ListTickets() {
       if (fetchedProjects.length > 0) {
         await fetchAllTickets(fetchedProjects);
       }
-    } catch (error) {
+    } catch {
       showToast({
         style: Toast.Style.Failure,
         title: "Initialization Error",
@@ -59,7 +59,7 @@ export default function ListTickets() {
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   const fetchProjects = async (): Promise<Project[]> => {
     const token = getCapmoToken();
@@ -140,11 +140,7 @@ export default function ListTickets() {
       setAllTickets(combinedTickets);
       setTickets(combinedTickets);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Ticket Fetching Error",
-        message: "An error occurred while fetching tickets. Please try again.",
-      });
+      console.error(error); // Example usage
     }
   };
 
@@ -279,8 +275,8 @@ export default function ListTickets() {
     setTickets(filteredTickets);
   };
 
-  const formatDate = (date: string | null): string => {
-    if (!date) return "N/A";
+  const formatDate = (date: string | null | undefined): string => {
+    if (!date) return "N/A"; // Handle undefined here
     const d = new Date(date);
     return d.toLocaleDateString("de-DE").replace(/\./g, ".");
   };
