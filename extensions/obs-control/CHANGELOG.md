@@ -1,5 +1,9 @@
 # OBS Control Changelog
 
+## [New Command] - {PR_MERGE_DATE}
+
+Added Toggle Replay Buffer command
+
 ## [Improvements] - 2024-08-01
 
 - Updated dependencies
