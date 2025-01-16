@@ -1,4 +1,11 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { getCapmoToken } from "./auth";
@@ -24,21 +31,29 @@ export default function ListProjects() {
     try {
       const token = getCapmoToken();
 
-      const response = await axios.get<{ data: { items: Project[] } }>("https://api.capmo.de/api/v1/projects", {
-        headers: { Authorization: token },
-      });
+      const response = await axios.get<{ data: { items: Project[] } }>(
+        "https://api.capmo.de/api/v1/projects",
+        {
+          headers: { Authorization: token },
+        },
+      );
 
       // Validate and filter projects
       const projects = response.data?.data?.items;
       if (projects && Array.isArray(projects)) {
-        const nonArchivedProjects = projects.filter((project) => !project.is_archived);
+        const nonArchivedProjects = projects.filter(
+          (project) => !project.is_archived,
+        );
         setProjects(nonArchivedProjects);
       } else {
         throw new Error("Unexpected response format for projects.");
       }
     } catch (error: any) {
       console.error("Error fetching projects:", error);
-      const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "An unknown error occurred.";
       showToast({
         style: Toast.Style.Failure,
         title: "Error Fetching Projects",

@@ -7,7 +7,9 @@
   "description": "List and filter tickets from Capmo.",
   "icon": "extension-icon.png",
   "author": "justus_feldhaus",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -45,11 +47,11 @@
   },
   "devDependencies": {
     "@types/axios": "^0.9.36",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.3",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0"
+    "typescript": "5.3"
   },
   "scripts": {
     "build": "ray build",

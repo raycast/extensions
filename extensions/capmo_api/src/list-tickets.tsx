@@ -1,4 +1,12 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  showToast,
+  Toast,
+  Icon,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { getCapmoToken } from "./auth";
@@ -59,7 +67,7 @@ export default function ListTickets() {
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
 
   const fetchProjects = async (): Promise<Project[]> => {
     const token = getCapmoToken();
@@ -71,7 +79,7 @@ export default function ListTickets() {
     try {
       const response = await axios.get<{ data: { items: Project[] } }>(
         "https://api.capmo.de/api/v1/projects",
-        { headers: { Authorization: token } }
+        { headers: { Authorization: token } },
       );
 
       if (response.data?.data?.items) {
@@ -80,7 +88,7 @@ export default function ListTickets() {
             typeof project.id === "string" &&
             typeof project.project_key === "string" &&
             !project.is_archived && // Exclude archived projects
-            !excludedProjectIds.includes(project.id)
+            !excludedProjectIds.includes(project.id),
         );
         setProjects(sanitizedProjects);
         return sanitizedProjects;
@@ -110,7 +118,7 @@ export default function ListTickets() {
         try {
           const response = await axios.get<{ data: { items: Ticket[] } }>(
             `https://api.capmo.de/api/v1/projects/${project.id}/tickets`,
-            { headers: { Authorization: token } }
+            { headers: { Authorization: token } },
           );
 
           if (response.data?.data?.items) {
@@ -119,7 +127,8 @@ export default function ListTickets() {
               project_id: project.id,
               project_key: project.project_key,
               type_id: ticketTypes[ticket.type_id] || ticket.type_id,
-              category_id: ticketCategories[ticket.category_id] || ticket.category_id,
+              category_id:
+                ticketCategories[ticket.category_id] || ticket.category_id,
               company_id: companies[ticket.company_id] || ticket.company_id,
               created_at: formatDate(ticket.created_at),
               updated_at: formatDate(ticket.updated_at),
@@ -130,7 +139,10 @@ export default function ListTickets() {
             return [];
           }
         } catch (error) {
-          console.error(`Error fetching tickets for project ${project.id}:`, error);
+          console.error(
+            `Error fetching tickets for project ${project.id}:`,
+            error,
+          );
           return [];
         }
       });
@@ -144,76 +156,108 @@ export default function ListTickets() {
     }
   };
 
-  const fetchTicketTypes = async (projectId: string): Promise<{ [key: string]: string }> => {
+  const fetchTicketTypes = async (
+    projectId: string,
+  ): Promise<{ [key: string]: string }> => {
     const token = getCapmoToken();
 
     try {
-      const response = await axios.get<{ data: { items: { id: string; name: string }[] } }>(
-        `https://api.capmo.de/api/v1/projects/${projectId}/ticket-types`,
-        { headers: { Authorization: token } }
-      );
+      const response = await axios.get<{
+        data: { items: { id: string; name: string }[] };
+      }>(`https://api.capmo.de/api/v1/projects/${projectId}/ticket-types`, {
+        headers: { Authorization: token },
+      });
 
       if (response.data?.data?.items) {
-        return response.data.data.items.reduce((map, type) => {
-          map[type.id] = type.name;
-          return map;
-        }, {} as { [key: string]: string });
+        return response.data.data.items.reduce(
+          (map, type) => {
+            map[type.id] = type.name;
+            return map;
+          },
+          {} as { [key: string]: string },
+        );
       } else {
         return {};
       }
     } catch (error) {
-      console.error(`Error fetching ticket types for project ${projectId}:`, error);
+      console.error(
+        `Error fetching ticket types for project ${projectId}:`,
+        error,
+      );
       return {};
     }
   };
 
-  const fetchTicketCategories = async (projectId: string): Promise<{ [key: string]: string }> => {
+  const fetchTicketCategories = async (
+    projectId: string,
+  ): Promise<{ [key: string]: string }> => {
     const token = getCapmoToken();
 
     try {
-      const response = await axios.get<{ data: { items: { id: string; name: string }[] } }>(
+      const response = await axios.get<{
+        data: { items: { id: string; name: string }[] };
+      }>(
         `https://api.capmo.de/api/v1/projects/${projectId}/ticket-categories`,
-        { headers: { Authorization: token } }
+        { headers: { Authorization: token } },
       );
 
       if (response.data?.data?.items) {
-        return response.data.data.items.reduce((map, category) => {
-          map[category.id] = category.name;
-          return map;
-        }, {} as { [key: string]: string });
+        return response.data.data.items.reduce(
+          (map, category) => {
+            map[category.id] = category.name;
+            return map;
+          },
+          {} as { [key: string]: string },
+        );
       } else {
         return {};
       }
     } catch (error) {
-      console.error(`Error fetching ticket categories for project ${projectId}:`, error);
+      console.error(
+        `Error fetching ticket categories for project ${projectId}:`,
+        error,
+      );
       return {};
     }
   };
 
-  const fetchCompanies = async (projectId: string): Promise<{ [key: string]: string }> => {
+  const fetchCompanies = async (
+    projectId: string,
+  ): Promise<{ [key: string]: string }> => {
     const token = getCapmoToken();
 
     try {
-      const response = await axios.get<{ data: { items: { id: string; name: string }[] } }>(
-        `https://api.capmo.de/api/v1/projects/${projectId}/companies`,
-        { headers: { Authorization: token } }
-      );
+      const response = await axios.get<{
+        data: { items: { id: string; name: string }[] };
+      }>(`https://api.capmo.de/api/v1/projects/${projectId}/companies`, {
+        headers: { Authorization: token },
+      });
 
       if (response.data?.data?.items) {
-        return response.data.data.items.reduce((map, company) => {
-          map[company.id] = company.name;
-          return map;
-        }, {} as { [key: string]: string });
+        return response.data.data.items.reduce(
+          (map, company) => {
+            map[company.id] = company.name;
+            return map;
+          },
+          {} as { [key: string]: string },
+        );
       } else {
         return {};
       }
     } catch (error) {
-      console.error(`Error fetching companies for project ${projectId}:`, error);
+      console.error(
+        `Error fetching companies for project ${projectId}:`,
+        error,
+      );
       return {};
     }
   };
 
-  const updateTicketStatus = async (ticket: Ticket, newStatus: string, displayStatus: string) => {
+  const updateTicketStatus = async (
+    ticket: Ticket,
+    newStatus: string,
+    displayStatus: string,
+  ) => {
     try {
       const token = getCapmoToken();
       await axios.patch(
@@ -224,7 +268,7 @@ export default function ListTickets() {
             Authorization: token,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       showToast({
         style: Toast.Style.Success,
@@ -233,10 +277,14 @@ export default function ListTickets() {
       });
 
       setTickets((prevTickets) =>
-        prevTickets.map((t) => (t.id === ticket.id ? { ...t, status: displayStatus } : t))
+        prevTickets.map((t) =>
+          t.id === ticket.id ? { ...t, status: displayStatus } : t,
+        ),
       );
       setAllTickets((prevAllTickets) =>
-        prevAllTickets.map((t) => (t.id === ticket.id ? { ...t, status: displayStatus } : t))
+        prevAllTickets.map((t) =>
+          t.id === ticket.id ? { ...t, status: displayStatus } : t,
+        ),
       );
     } catch (error) {
       console.error(`Error updating ticket status to ${newStatus}:`, error);
@@ -252,7 +300,9 @@ export default function ListTickets() {
     let filteredTickets = allTickets;
 
     if (selectedProject !== "all") {
-      filteredTickets = filteredTickets.filter((ticket) => ticket.project_id === selectedProject);
+      filteredTickets = filteredTickets.filter(
+        (ticket) => ticket.project_id === selectedProject,
+      );
     }
 
     if (searchText) {
@@ -267,7 +317,7 @@ export default function ListTickets() {
         ];
 
         return searchableFields.some((field) =>
-          field.toLowerCase().includes(searchText.toLowerCase())
+          field.toLowerCase().includes(searchText.toLowerCase()),
         );
       });
     }
@@ -308,7 +358,11 @@ export default function ListTickets() {
             .filter((project) => !project.is_archived) // Exclude archived projects
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((project) => (
-              <List.Dropdown.Item key={project.id} title={project.name} value={project.id} />
+              <List.Dropdown.Item
+                key={project.id}
+                title={project.name}
+                value={project.id}
+              />
             ))}
         </List.Dropdown>
       }
@@ -322,16 +376,46 @@ export default function ListTickets() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Name" text={ticket.name || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Abteilung" text={ticket.type_id || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Kategorie" text={ticket.category_id || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Status" text={ticket.status || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Firma" text={ticket.company_id || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Kosten" text={ticket.cost?.toString() || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Frist" text={ticket.deadline || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Beschreibung" text={ticket.description || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Erstellt am" text={ticket.created_at || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Geändert am" text={ticket.updated_at || "N/A"} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Name"
+                    text={ticket.name || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Abteilung"
+                    text={ticket.type_id || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Kategorie"
+                    text={ticket.category_id || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Status"
+                    text={ticket.status || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Firma"
+                    text={ticket.company_id || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Kosten"
+                    text={ticket.cost?.toString() || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Frist"
+                    text={ticket.deadline || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Beschreibung"
+                    text={ticket.description || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Erstellt am"
+                    text={ticket.created_at || "N/A"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Geändert am"
+                    text={ticket.updated_at || "N/A"}
+                  />
                 </List.Item.Detail.Metadata>
               }
             />
@@ -351,19 +435,25 @@ export default function ListTickets() {
                 title="Ticket freimelden"
                 icon={Icon.CheckCircle}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
-                onAction={() => updateTicketStatus(ticket, "SIGNED_OFF", "Freigemeldet")}
+                onAction={() =>
+                  updateTicketStatus(ticket, "SIGNED_OFF", "Freigemeldet")
+                }
               />
               <Action
                 title="Ticket bearbeiten"
                 icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd"], key: "b" }}
-                onAction={() => updateTicketStatus(ticket, "IN_PROGRESS", "In Bearbeitung")}
+                onAction={() =>
+                  updateTicketStatus(ticket, "IN_PROGRESS", "In Bearbeitung")
+                }
               />
               <Action
                 title="Ticket schließen"
                 icon={Icon.Lock}
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
-                onAction={() => updateTicketStatus(ticket, "CLOSED", "Geschlossen")}
+                onAction={() =>
+                  updateTicketStatus(ticket, "CLOSED", "Geschlossen")
+                }
               />
               <Action
                 title="Ticket öffnen"
