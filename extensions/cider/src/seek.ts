@@ -50,10 +50,10 @@ export default async function Command(
   }
 
   try {
-    await fetch("http://localhost:10769/active");
+    await fetch("http://localhost:10767/api/v1/playback/active");
     try {
       const { info } = (await fetch(
-        "http://localhost:10769/currentPlayingSong",
+        "http://localhost:10767/api/v1/playback/now-playing",
       ).then((res) => res.json())) as currentPlaying;
 
       const { durationInMillis } = info;
@@ -67,7 +67,11 @@ export default async function Command(
           message: "Timestamp must be less than the duration of the song.",
         });
 
-      await fetch(`http://localhost:10769/seekto/${timestampInSeconds}`);
+      await fetch(`http://localhost:10767/api/v1/playback/seek`, {
+        method: "POST",
+        body: JSON.stringify({ position: timestampInSeconds }),
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (exitOnSuccess) await showHUD("⏩ Seeked to Timestamp");
       else

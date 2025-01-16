@@ -1,5 +1,19 @@
 # Safari Changelog
 
+## [Chore: Moved contributor to past contributors list] - 2025-01-15
+
+## [Update] - 2025-01-12
+
+- Adds a preference to "Copy Title as Link to Clipboard" command to clean up titles with AI.
+
+## [Update] - 2025-01-07
+
+- Adds a "Copy Title as Link to Clipboard" command to copy the current Safari tab in Markdown format.
+
+## [Update] - 2025-01-06
+
+- Adds a "Copy to Clipboard" command to copy the current Safari tab url.
+
 ## [Chore: Renamed title in Dropdown] - 2024-12-20
 
 ## [Improve] - 2024-12-13

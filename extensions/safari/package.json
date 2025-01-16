@@ -15,9 +15,12 @@
     "axsuul",
     "iwex",
     "xilopaint",
-    "marcjulian",
     "ChangeHow",
-    "ridemountainpig"
+    "ridemountainpig",
+    "1weiho"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "license": "MIT",
   "commands": [
@@ -103,6 +106,31 @@
       "subtitle": "Safari",
       "description": "Browse your bookmarks",
       "mode": "view"
+    },
+    {
+      "name": "copy-to-clipboard",
+      "title": "Copy URL to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab URL to your clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-title-as-link-to-clipboard",
+      "title": "Copy Title as Link to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab title as Markdown link ([title](url)) to your clipboard",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "cleanUpTitleWithAI",
+          "type": "checkbox",
+          "title": "Advanced Settings",
+          "required": false,
+          "label": "Clean up title with AI",
+          "default": true,
+          "description": "Cleans up the title with AI to make it more readable (Pro only)"
+        }
+      ]
     }
   ],
   "preferences": [

@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Improvement] - 2025-01-07
+
+- Add support for hiding timer when stopped
+
 ## [Chore] - 2025-01-03
 
 - Update preferences organization

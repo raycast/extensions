@@ -1,6 +1,6 @@
 import { MenuBarExtra, showToast, Toast, environment, LaunchType } from "@raycast/api";
 import { NetworkService, normalizeHardwarePort, openNetworkSettings, useNetworkServices } from "./network-services";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export default function Command() {
   const {
@@ -14,13 +14,24 @@ export default function Command() {
     fetchServiceStatus,
   } = useNetworkServices();
 
+  // Indicates, if we need to keep background process running
+  // Sets false when `startRefresh` ends
+  const [isBackgroundRunning, setIsBackgroundRunning] = useState(environment.launchType === LaunchType.Background);
   const isChecking = useRef(false);
 
   useEffect(() => {
     if (environment.launchType === LaunchType.Background) {
-      startRefresh();
+      // Run these conditions only in background mode
+
+      // If all services are loaded in useNetworkServices - start refreshing
+      if (!isLoading) {
+        startRefresh();
+      }
     }
-  }, [environment.launchType, favoriteServices, otherServices, invalidServices]);
+
+    // Check services array's length because of state changing in `fetchServiceStatus` function
+    // That function changes `networkServices` state and updates whole effect, if we shallow check array memory address
+  }, [environment.launchType, favoriteServices.length, otherServices.length, invalidServices.length, isLoading]);
 
   const startRefresh = async () => {
     if (!isChecking.current) {
@@ -35,6 +46,9 @@ export default function Command() {
       } finally {
         console.log("Resetting isChecking flag");
         isChecking.current = false;
+
+        // Stop running background process
+        setIsBackgroundRunning(false);
       }
     } else {
       console.log("Refresh already in progress, skipping...");
@@ -53,7 +67,7 @@ export default function Command() {
     <MenuBarExtra
       icon={isConnected ? "network-connected.png" : "network-disconnected.png"}
       tooltip="Network Services"
-      isLoading={isLoading}
+      isLoading={isLoading || isBackgroundRunning}
     >
       {favoriteServices.length > 0 && (
         <MenuBarExtra.Section title="Favorites">

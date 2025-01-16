@@ -32,6 +32,11 @@ const config = {
       audioCodec: "mp3",
       fileExtension: ".mpg",
     },
+    webm: {
+      videoCodec: "libvpx-vp9",
+      audioCodec: "libopus",
+      fileExtension: ".webm",
+    },
   },
 };
 
@@ -211,7 +216,7 @@ export async function optimizeImage(filePath: string, quality: number = 100): Pr
 
 export async function convertVideo(
   filePath: string,
-  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg",
+  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm",
 ): Promise<string> {
   const formatOptions = config.ffmpegOptions[outputFormat];
   const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);

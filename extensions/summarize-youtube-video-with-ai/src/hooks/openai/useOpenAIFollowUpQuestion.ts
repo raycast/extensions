@@ -1,5 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
+import { OPENAI_MODEL } from "../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
 import { Preferences } from "../../summarizeVideo";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
@@ -11,7 +12,7 @@ export const useOpenAIFollowUpQuestion = async (
   pop: () => void,
 ) => {
   const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, openaiApiToken } = preferences;
+  const { chosenAi, openaiApiToken, openaiEndpoint, openaiModel } = preferences;
   setSummary(undefined);
 
   if (chosenAi !== "openai") {
@@ -22,6 +23,10 @@ export const useOpenAIFollowUpQuestion = async (
     apiKey: openaiApiToken,
   });
 
+  if (openaiEndpoint !== "") {
+    openai.baseURL = openaiEndpoint;
+  }
+
   const toast = showToast({
     style: Toast.Style.Animated,
     title: FINDING_ANSWER.title,
@@ -29,7 +34,7 @@ export const useOpenAIFollowUpQuestion = async (
   });
 
   const answer = openai.beta.chat.completions.stream({
-    model: "gpt-4o",
+    model: openaiModel || OPENAI_MODEL,
     messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
     stream: true,
   });

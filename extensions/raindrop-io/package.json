@@ -12,7 +12,8 @@
     "sh-cho",
     "tdkn",
     "j3lte",
-    "rien7"
+    "rien7",
+    "teziovsky"
   ],
   "license": "MIT",
   "commands": [
@@ -124,6 +125,36 @@
       "title": "Display Date",
       "description": "Select date to display in list.",
       "default": "lastUpdated"
+    },
+    {
+      "name": "tagsDisplay",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "0",
+          "title": "0"
+        },
+        {
+          "value": "1",
+          "title": "1"
+        },
+        {
+          "value": "2",
+          "title": "2"
+        },
+        {
+          "value": "all",
+          "title": "All"
+        }
+      ],
+      "title": "Tags Display",
+      "description": "Select number of tags to display in list.",
+      "default": "1"
     }
   ],
   "dependencies": {

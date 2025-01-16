@@ -1,5 +1,10 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - 2025-01-08
+
+- Suppress error message if argument is empty
+- Add Deeplinks usage to documentation
+
 ## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest

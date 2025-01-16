@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { exec } from "child_process";
 import { Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { execSync } from "node:child_process";
 
 type Preferences = {
   hideInvalidDevices: boolean;
@@ -70,6 +71,8 @@ export function useNetworkServices() {
         ...currentServices,
         [service.id]: { ...service, status },
       }));
+
+      return status;
     } catch (err) {
       console.error(`Error fetching service status for ${service.name}:`, err);
       setError(err as Error);
@@ -338,27 +341,15 @@ const saveFavoriteOrder = async (order: Record<string, number>) => {
 
 const execPromise = (command: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    const child = exec(command, (err, stdout, stderr) => {
-      if (err) {
-        console.error(`Error executing command: ${command}`, err);
-        reject(err);
-      } else if (stderr) {
-        console.warn(`Command stderr: ${stderr}`);
-        resolve(stdout.trim());
-      } else {
-        resolve(stdout.trim());
-      }
-    });
+    try {
+      const child = execSync(command);
+      const result = child.toString();
 
-    // Ensure the child process is cleaned up
-    child.on("exit", (code) => {
-      console.log(`Command exited with code: ${code}`);
-    });
-
-    child.on("error", (err) => {
-      console.error(`Failed to start command: ${command}`, err);
-      reject(err);
-    });
+      resolve(result.trim());
+    } catch (e) {
+      console.error(`Command ${command} thrown an error`, e);
+      reject(e);
+    }
   });
 
 const listNetworkServiceOrder = (): Promise<string> => execPromise("/usr/sbin/networksetup -listnetworkserviceorder");

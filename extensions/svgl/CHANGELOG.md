@@ -1,5 +1,10 @@
 # svgl Changelog
 
+## [Add Angular Component Feature] - 2025-01-10
+
+- Add the action `Copy Angular Component` to copy the Angular component code to the clipboard.
+- Remove duplicate action shortcuts.
+
 ## [Add Copy Vue & Svelte Component Feature] - 2024-11-04
 
 - Add the actions `Copy Vue Component` and `Copy Svelte Component` to copy the Vue and Svelte component code to the clipboard.

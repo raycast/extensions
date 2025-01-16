@@ -1,5 +1,9 @@
 # Media Converter Changelog
 
+## [Enhancement] - 2024-12-24
+
+- Add support for webm file format conversion
+
 ## [Enhancement] - 2024-12-13
 
 - Fix HEIC file format conversion not working as expected.

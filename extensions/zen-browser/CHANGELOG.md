@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix New Tab] - 2025-01-11
+
+- Fix new tab command, by removing unnecessary app check.
+
 ## [Update Logo] - 2024-12-11
 
 - Updated to latest logo since rebrand.

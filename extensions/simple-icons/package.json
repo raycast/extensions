@@ -108,13 +108,12 @@
     "got": "^14.4.5",
     "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3",
-    "simple-icons": "^13.21.0"
+    "simple-icons": "^14.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.13",
-    "@types/node": "^22.10.2",
-    "@types/react": "^18.3.11",
+    "@types/lodash": "^4.17.14",
+    "@types/react": "^18.3.18",
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2"
