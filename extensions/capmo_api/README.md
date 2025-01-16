@@ -7,7 +7,7 @@
     Capmo
   </h1>
 Easily manage and interact with projects and tickets from Capmo directly in Raycast. List tickets, update their status, filter projects, and more – all with quick keystrokes.
-
+</br></br>
 <p>
     <a href="https://www.raycast.com/sven/microsoft-teams">
       <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
@@ -27,8 +27,8 @@ Easily manage and interact with projects and tickets from Capmo directly in Rayc
 </div>
 
 ![Screenshot of the "List Projects" command](assets/screenshots/screenshot_3.png)
-![Screenshot of the "List Tickets" command](assets/extensions/capmo_api/assets/screenshots/screenshot_1.png)
-![Actions in the "List Tickets" command](assets/extensions/capmo_api/assets/screenshots/screenshot_2.png)
+![Screenshot of the "List Tickets" command](assets/screenshots/screenshot_1.png)
+![Actions in the "List Tickets" command](assets/screenshots/screenshot_2.png)
 
  <h2>
 Commands
