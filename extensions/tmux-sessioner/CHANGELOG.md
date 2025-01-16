@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## [v0.0.10] - 2025-01-12
+
+### Fixed
+
+- Add support for renaming tmux windows
+
 ## [v0.0.9] - 2025-01-10
 
 ### Fixed
