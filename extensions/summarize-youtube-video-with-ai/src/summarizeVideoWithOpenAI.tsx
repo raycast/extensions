@@ -1,14 +1,13 @@
 import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
-import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@raycast/api";
+import { showToast, Toast, type LaunchProps } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
 import ActionOpenAIFollowUp from "./components/openai/ActionOpenAIFollowUp";
 import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
-import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryMetadata";
+import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
@@ -33,7 +32,6 @@ export default function SummarizeVideoWithOpenAI(
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const { pop } = useNavigation();
   const { video } = props.arguments;
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
@@ -71,8 +69,7 @@ export default function SummarizeVideoWithOpenAI(
   }, [transcript]);
 
   if (!videoData || !transcript) return null;
-  const { duration, ownerChannelName, ownerProfileUrl, publishDate, thumbnail, title, video_url, viewCount } =
-    videoData;
+  const { thumbnail, title } = videoData;
 
   const markdown = summary
     ? `${summary}
@@ -82,30 +79,13 @@ export default function SummarizeVideoWithOpenAI(
     : undefined;
 
   return (
-    <Detail
-      actions={
-        <SummaryActions
-          transcript={transcript}
-          setSummary={setSummary}
-          markdown={markdown}
-          video_url={video_url}
-          ownerProfileUrl={ownerProfileUrl}
-          AskFollowUpQuestion={<ActionOpenAIFollowUp transcript={transcript} setSummary={setSummary} pop={pop} />}
-        />
-      }
-      isLoading={summaryIsLoading}
+    <SummaryDetails
+      AskFollowUpQuestion={ActionOpenAIFollowUp}
       markdown={markdown}
-      metadata={
-        <SummaryDetails
-          title={title}
-          ownerChannelName={ownerChannelName}
-          ownerProfileUrl={ownerProfileUrl}
-          publishDate={publishDate}
-          duration={duration}
-          viewCount={viewCount}
-        />
-      }
-      navigationTitle={videoData && `${title} by ${ownerChannelName}`}
+      setSummary={setSummary}
+      summaryIsLoading={summaryIsLoading}
+      transcript={transcript}
+      videoData={videoData}
     />
   );
 }

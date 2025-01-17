@@ -1,14 +1,12 @@
 import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
-import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@raycast/api";
-
+import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
 import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
 import { useRaycastAISummary } from "./components/raycast/hooks/useRaycastAISummary";
-import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryMetadata";
+import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
@@ -31,7 +29,6 @@ export default function SummarizeVideoWithRaycastAI(
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const { video } = props.arguments;
-  const { pop } = useNavigation();
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
     showToast({
@@ -68,8 +65,7 @@ export default function SummarizeVideoWithRaycastAI(
   }, [transcript]);
 
   if (!videoData || !transcript) return null;
-  const { duration, ownerChannelName, ownerProfileUrl, publishDate, thumbnail, title, video_url, viewCount } =
-    videoData;
+  const { thumbnail, title } = videoData;
 
   const markdown = summary
     ? `${summary}
@@ -79,30 +75,13 @@ export default function SummarizeVideoWithRaycastAI(
     : undefined;
 
   return (
-    <Detail
-      actions={
-        <SummaryActions
-          transcript={transcript}
-          setSummary={setSummary}
-          markdown={markdown}
-          video_url={video_url}
-          ownerProfileUrl={ownerProfileUrl}
-          AskFollowUpQuestion={<ActionRaycastFollowUp transcript={transcript} setSummary={setSummary} pop={pop} />}
-        />
-      }
-      isLoading={summaryIsLoading}
+    <SummaryDetails
+      AskFollowUpQuestion={ActionRaycastFollowUp}
       markdown={markdown}
-      metadata={
-        <SummaryDetails
-          title={title}
-          ownerChannelName={ownerChannelName}
-          ownerProfileUrl={ownerProfileUrl}
-          publishDate={publishDate}
-          duration={duration}
-          viewCount={viewCount}
-        />
-      }
-      navigationTitle={videoData && `${title} by ${ownerChannelName}`}
+      setSummary={setSummary}
+      summaryIsLoading={summaryIsLoading}
+      transcript={transcript}
+      videoData={videoData}
     />
   );
 }

@@ -1,20 +1,20 @@
 import { Detail } from "@raycast/api";
 
 type SummaryMetadataProps = {
-  title: string;
-  ownerProfileUrl: string;
-  ownerChannelName: string;
-  publishDate: string;
   duration: string;
+  ownerChannelName: string;
+  ownerProfileUrl: string;
+  publishDate: string;
+  title: string;
   viewCount: string;
 };
 
 export default function SummaryMetadata({
-  title,
-  ownerProfileUrl,
-  ownerChannelName,
-  publishDate,
   duration,
+  ownerChannelName,
+  ownerProfileUrl,
+  publishDate,
+  title,
   viewCount,
 }: SummaryMetadataProps) {
   return (

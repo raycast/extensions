@@ -1,14 +1,13 @@
 import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
-import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@raycast/api";
+import { showToast, Toast, type LaunchProps } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
 import ActionAnthropicFollowUp from "./components/anthropic/ActionAnthropicFollowUp";
 import { useAnthropicSummary } from "./components/anthropic/hooks/useAnthropicSummary";
-import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryMetadata";
+import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
@@ -32,7 +31,6 @@ export default function SummarizeVideoWithAnthropic(
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const { pop } = useNavigation();
   const { video } = props.arguments;
 
   if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
@@ -70,8 +68,7 @@ export default function SummarizeVideoWithAnthropic(
   }, [transcript]);
 
   if (!videoData || !transcript) return null;
-  const { duration, ownerChannelName, ownerProfileUrl, publishDate, thumbnail, title, video_url, viewCount } =
-    videoData;
+  const { thumbnail, title } = videoData;
 
   const markdown = summary
     ? `${summary}
@@ -81,30 +78,13 @@ export default function SummarizeVideoWithAnthropic(
     : undefined;
 
   return (
-    <Detail
-      actions={
-        <SummaryActions
-          transcript={transcript}
-          setSummary={setSummary}
-          markdown={markdown}
-          video_url={video_url}
-          ownerProfileUrl={ownerProfileUrl}
-          AskFollowUpQuestion={<ActionAnthropicFollowUp transcript={transcript} setSummary={setSummary} pop={pop} />}
-        />
-      }
-      isLoading={summaryIsLoading}
+    <SummaryDetails
+      AskFollowUpQuestion={ActionAnthropicFollowUp}
       markdown={markdown}
-      metadata={
-        <SummaryDetails
-          title={title}
-          ownerChannelName={ownerChannelName}
-          ownerProfileUrl={ownerProfileUrl}
-          publishDate={publishDate}
-          duration={duration}
-          viewCount={viewCount}
-        />
-      }
-      navigationTitle={videoData && `${title} by ${ownerChannelName}`}
+      setSummary={setSummary}
+      summaryIsLoading={summaryIsLoading}
+      transcript={transcript}
+      videoData={videoData}
     />
   );
 }

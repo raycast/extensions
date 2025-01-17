@@ -18,8 +18,6 @@ export const useRaycastAIFollowUpQuestion = async (
 
   const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
 
-  pop();
-
   answer.on("data", (data) => {
     setSummary((result) => {
       if (result === undefined) return data;
@@ -38,4 +36,5 @@ export const useRaycastAIFollowUpQuestion = async (
       t.message = error.message;
     });
   });
+  pop();
 };
