@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { getProgressIcon, useCachedPromise, useFrecencySorting } from "@raycast/utils";
-import { ErrorType, getTokens } from "./utils/get-tokens";
-import { useEffect, useState } from "react";
-import { calculateTimeLeft, generateOtp } from "./utils/totp";
-import { Image } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { getProgressIcon, useCachedPromise, useFrecencySorting } from '@raycast/utils';
+import { ErrorType, getTokens } from './utils/get-tokens';
+import { useEffect, useState } from 'react';
+import { calculateTimeLeft, generateOtp } from './utils/totp';
+import { Image } from '@raycast/api';
 
 function searchToken() {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(30));
@@ -71,7 +71,7 @@ function searchToken() {
                 },
                 {
                   icon: {
-                    source: getProgressIcon(progress, "#CCC", {
+                    source: getProgressIcon(progress, '#CCC', {
                       background: Color.PrimaryText,
                     }),
                   },
