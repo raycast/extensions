@@ -16,14 +16,14 @@ interface JournalEntry {
   data: {
     reminderData?: {
       textContent: string;
-    }
+    };
     memoryData?: {
       textContent: string;
-    }
+    };
     betaRabbitData?: {
       titleImageUrl?: string;
       textContent: string;
-    }
+    };
     magicCameraData?: {
       originalImage: {
         url: string;
