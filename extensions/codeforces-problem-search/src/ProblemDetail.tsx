@@ -36,16 +36,34 @@ function htmlToMarkdown(html: string): string {
     $(elem).replaceWith(`\`${$(elem).text()}\``);
   });
 
+  $(".sample-test .input").each((_, inputDiv) => {
+    let inputContent = "";
+
+    // single pre wala format
+    const preContent = $(inputDiv).find("pre").text().trim();
+
+    // alag alag div wala format
+    const exampleLines = $(inputDiv).find(".test-example-line");
+
+    if (exampleLines.length > 0) {
+      const lines: string[] = [];
+      exampleLines.each((_, line) => {
+        lines.push($(line).text().trim());
+      });
+      inputContent = lines.join("\n");
+    } else {
+      inputContent = preContent;
+    }
+
+    $(inputDiv).replaceWith(`\n### Input\n\`\`\`\n${inputContent}\n\`\`\`\n`);
+  });
+
   $("pre").each((_, elem) => {
     $(elem).replaceWith(`\n\`\`\`\n${$(elem).text().trim()}\n\`\`\`\n`);
   });
 
   $("p").each((_, elem) => {
     $(elem).replaceWith(`\n\n${$(elem).text()}\n\n`);
-  });
-
-  $(".input .title").each((_, elem) => {
-    $(elem).replaceWith("\n### Input\n");
   });
 
   $(".output .title").each((_, elem) => {

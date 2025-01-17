@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { ProblemDetail } from "./ProblemDetail";
 
@@ -103,14 +103,63 @@ async function searchProblems(query: string): Promise<Problem[]> {
   }
 }
 
+async function getRandomProblems(count: number = 15): Promise<Problem[]> {
+  try {
+    const response = await fetch("https://codeforces.com/api/problemset.problems", {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        Accept: "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+
+    const data = (await response.json()) as CodeforcesResponse;
+
+    if (data.status === "OK") {
+      const allProblems = data.result.problems.map((problem: CodeforcesAPIProblem) => ({
+        id: `${problem.contestId}${problem.index}`,
+        name: problem.name,
+        contestId: problem.contestId,
+        index: problem.index,
+        rating: problem.rating,
+        tags: problem.tags,
+      }));
+
+      return allProblems.sort(() => Math.random() - 0.5).slice(0, count);
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error fetching random problems:", error);
+    return [];
+  }
+}
+
 export default function Command() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    async function loadInitialProblems() {
+      const randomProblems = await getRandomProblems(15);
+      setProblems(randomProblems);
+      setIsLoading(false);
+    }
+
+    loadInitialProblems();
+  }, []);
+
   const handleSearch = async (query: string) => {
     setIsLoading(true);
-    const results = await searchProblems(query);
-    setProblems(results);
+    if (query.length === 0) {
+      // sirf jab search bar khali ho
+      const randomProblems = await getRandomProblems(15);
+      setProblems(randomProblems);
+    } else {
+      const results = await searchProblems(query);
+      setProblems(results);
+    }
     setIsLoading(false);
   };
 
