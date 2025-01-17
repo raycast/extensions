@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "summarizeVideo",
-      "title": "Summarize YouTube Video",
-      "description": "Use AI to create a summary of any YouTube video.",
+      "title": "Check Changes pls",
+      "description": "Breaking Changes Placeholder",
       "mode": "view",
       "arguments": [
         {
@@ -29,27 +29,113 @@
       ],
       "preferences": [
         {
-          "name": "chosenAi",
-          "title": "Choose AI",
-          "description": "Choose between Raycast AI, OpenAI ChatGPT or Anthropic Claude.",
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
           "type": "dropdown",
-          "default": "raycastai",
+          "default": "0.5",
           "data": [
             {
-              "value": "anthropic",
-              "title": "Anthropic Claude"
+              "value": "0",
+              "title": "None"
             },
             {
-              "value": "openai",
-              "title": "OpenAI ChatGPT"
+              "value": "0.5",
+              "title": "Low"
             },
             {
-              "value": "raycastai",
-              "title": "Raycast AI"
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
             }
           ],
-          "required": true
+          "required": false
         },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarizeVideoWithRaycastAI",
+      "title": "Summarize YouTube Video with Raycast AI",
+      "description": "Use RaycastAI to create a summary of any YouTube video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
+          "type": "dropdown",
+          "default": "0.5",
+          "data": [
+            {
+              "value": "0",
+              "title": "None"
+            },
+            {
+              "value": "0.5",
+              "title": "Low"
+            },
+            {
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
+            }
+          ],
+          "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarizeVideoWithOpenAI",
+      "title": "Summarize YouTube Video with OpenAI",
+      "description": "Use OpenAI to create a summary of any YouTube video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
         {
           "name": "creativity",
           "title": "Creativity",
@@ -101,6 +187,60 @@
           "title": "OpenAI Model",
           "description": "Choose the OpenAI model to use. Defaults to `chatgpt-4o-latest`.",
           "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Define the language which the AI should use to summarize the video.",
+          "type": "textfield",
+          "default": "english",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarizeVideoWithAnthropic",
+      "title": "Summarize YouTube Video with Anthropic",
+      "description": "Use Anthropic to create a summary of any YouTube video.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "video",
+          "placeholder": "Video URL or ID",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "creativity",
+          "title": "Creativity",
+          "description": "Choose how creative the AI should be.",
+          "type": "dropdown",
+          "default": "0.5",
+          "data": [
+            {
+              "value": "0",
+              "title": "None"
+            },
+            {
+              "value": "0.5",
+              "title": "Low"
+            },
+            {
+              "value": "1",
+              "title": "Medium"
+            },
+            {
+              "value": "1.5",
+              "title": "High"
+            },
+            {
+              "value": "2",
+              "title": "Maximum"
+            }
+          ],
           "required": false
         },
         {
