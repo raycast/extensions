@@ -1,21 +1,21 @@
 import { getNotificationHtmlUrl, Notification } from "../../../notification";
 import { Detail, ActionPanel, Action } from "@raycast/api";
-import { LinearProject } from "../types";
+import { SlackThread } from "../types";
 import { useMemo } from "react";
 
-interface LinearProjectPreviewProps {
+interface SlackThreadPreviewProps {
   notification: Notification;
-  linearProject: LinearProject;
+  slack_thread: SlackThread;
 }
 
-export function LinearProjectPreview({ notification, linearProject }: LinearProjectPreviewProps) {
+export function SlackThreadPreview({ notification }: SlackThreadPreviewProps) {
   const notificationHtmlUrl = useMemo(() => {
     return getNotificationHtmlUrl(notification);
   }, [notification]);
 
   return (
     <Detail
-      markdown={`# ${linearProject.name}`}
+      markdown={`# ${notification.title}`}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={notificationHtmlUrl} />
