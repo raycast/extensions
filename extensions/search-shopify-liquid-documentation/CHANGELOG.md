@@ -6,6 +6,7 @@
 - New Filters: `avatar`, `structured_data`, `class_list`, `inline_asset_content`
 - New Objects: `product_option_value`, `swatch`, `taxonomy_category`
 - Fix typo and Reorder Change Log History
+- Renamed extenion to `Shopify Liquid Documentation`
 
 ## [New Additions] - 2023-12-11
 
