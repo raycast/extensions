@@ -14,6 +14,16 @@ interface JournalEntry {
   type: string;
   title: string;
   data: {
+    reminderData?: {
+      textContent: string;
+    }
+    memoryData?: {
+      textContent: string;
+    }
+    betaRabbitData?: {
+      titleImageUrl?: string;
+      textContent: string;
+    }
     magicCameraData?: {
       originalImage: {
         url: string;
@@ -174,14 +184,23 @@ export default function Command() {
         if (item.data?.magicCameraData?.originalImage?.url) {
           markdown += RabbitAsset(item.data.magicCameraData.originalImage.url);
         }
-        markdown += disclaimer;
+        markdown += disclaimer || "";
         break;
       case "vision":
         if (item.data?.visionData?.files?.[0]?.url) {
           markdown += RabbitAsset(item.data.visionData.files[0].url);
+          markdown += "\n\n";
         }
-        markdown += "\n\n";
         markdown += item.data?.visionData?.textContent || "No vision analysis available";
+        break;
+      case "beta-rabbit":
+        markdown += item.data?.betaRabbitData?.textContent || "No search results available";
+        break;
+      case "reminder":
+        markdown += item.data?.reminderData?.textContent || "No reminder details available";
+        break;
+      case "search-memory":
+        markdown += item.data?.memoryData?.textContent || "No results found in your journal";
         break;
       default:
         markdown += "Sorry, that intent type is not supported yet.";
