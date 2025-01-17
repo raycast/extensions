@@ -1,5 +1,11 @@
 # 1Password Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Remove unused Bun lockfile
+- Fix types
+- Bump all dependencies to the latest
+
 ## [Chore] - 2025-01-09
 
 - Moved contributor to past contributors
