@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Improved Translate Command] - {PR_MERGE_DATE}
+## [Improved Translate Command] - 2025-01-17
 
 - 🔄 Translate Selected Text: now you can set first and second target language.
   - All languages are by default translated to first target language.
