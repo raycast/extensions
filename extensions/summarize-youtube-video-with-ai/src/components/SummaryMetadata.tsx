@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 
-type SummaryDetailsProps = {
+type SummaryMetadataProps = {
   title: string;
   ownerProfileUrl: string;
   ownerChannelName: string;
@@ -9,14 +9,14 @@ type SummaryDetailsProps = {
   viewCount: string;
 };
 
-export default function SummaryDetails({
+export default function SummaryMetadata({
   title,
   ownerProfileUrl,
   ownerChannelName,
   publishDate,
   duration,
   viewCount,
-}: SummaryDetailsProps) {
+}: SummaryMetadataProps) {
   return (
     <Detail.Metadata>
       <Detail.Metadata.Label title="Title" text={title} />

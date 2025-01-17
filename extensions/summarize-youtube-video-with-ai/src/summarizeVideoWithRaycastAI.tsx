@@ -8,7 +8,7 @@ import ytdl from "ytdl-core";
 import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
 import { useRaycastAISummary } from "./components/raycast/hooks/useRaycastAISummary";
 import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryDetails";
+import SummaryDetails from "./components/SummaryMetadata";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";

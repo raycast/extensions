@@ -8,7 +8,7 @@ import ytdl from "ytdl-core";
 import ActionAnthropicFollowUp from "./components/anthropic/ActionAnthropicFollowUp";
 import { useAnthropicSummary } from "./components/anthropic/hooks/useAnthropicSummary";
 import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryDetails";
+import SummaryDetails from "./components/SummaryMetadata";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";

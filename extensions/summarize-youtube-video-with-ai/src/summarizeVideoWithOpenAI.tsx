@@ -8,7 +8,7 @@ import ytdl from "ytdl-core";
 import ActionOpenAIFollowUp from "./components/openai/ActionOpenAIFollowUp";
 import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
 import SummaryActions from "./components/SummaryActions";
-import SummaryDetails from "./components/SummaryDetails";
+import SummaryDetails from "./components/SummaryMetadata";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
