@@ -51,13 +51,18 @@ export default function SearchDocumentation() {
   }, [algoliaClient, INDEX]);
 
   const [searchText, setSearchText] = useState("");
-  
-  const { isLoading, data: searchResults, pagination } = useCachedPromise(
+
+  const {
+    isLoading,
+    data: searchResults,
+    pagination,
+  } = useCachedPromise(
     (query: string) => async (options: { page: number }) => {
-      if (!query) return {
-        data: [],
-        hasMore: false
-      };
+      if (!query)
+        return {
+          data: [],
+          hasMore: false,
+        };
       const res = await algoliaIndex.search<PackagistHit>(query, {
         hitsPerPage: 30,
         page: options.page,
@@ -65,16 +70,23 @@ export default function SearchDocumentation() {
       });
       return { data: res.hits, hasMore: res.page < res.nbPages };
     },
-    [searchText], {
+    [searchText],
+    {
       failureToastOptions: {
-        title: "Error Searching Composer Packagist."
+        title: "Error Searching Composer Packagist.",
       },
-      initialData: []
-    }
+      initialData: [],
+    },
   );
 
-return (
-    <List searchBarPlaceholder="Search packages" throttle={true} isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+  return (
+    <List
+      searchBarPlaceholder="Search packages"
+      throttle={true}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      pagination={pagination}
+    >
       {searchResults.map((hit: PackagistHit) => {
         return (
           <List.Item
