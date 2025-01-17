@@ -1,6 +1,6 @@
 # WP Bones Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-01-17
 
 - 🩹 Addressed minor URL-related issues
 - 🐛 fixes the discord URL
