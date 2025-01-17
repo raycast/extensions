@@ -22,11 +22,8 @@ export async function getClient() {
     cachedCredentials?.password === password &&
     cachedCredentials?.url === url
   ) {
-    console.log("returning existing client");
     return cachedClient;
   }
-
-  console.log("creating new client");
 
   cachedClient = createClient({ url, username, password });
   cachedCredentials = { url, username, password };
