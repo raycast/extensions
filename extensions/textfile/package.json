@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "textfile",
   "title": "TextFile",
-  "description": "Make pasteboard into text file",
+  "description": "Make clipboard content into text file",
   "icon": "command-icon.png",
   "author": "brian_sunter",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Run Script",
-      "description": "Template for running a script without any view",
+      "title": "Save Clipboard",
+      "description": "Save clipboard content to new file",
       "mode": "no-view"
     }
   ],
