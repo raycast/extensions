@@ -1,5 +1,5 @@
 import axios from "axios";
-import $ from "cheerio";
+import * as $ from 'cheerio';
 import fetch from "node-fetch";
 
 import { ResultData, PriceData } from "../types";
@@ -27,14 +27,16 @@ export async function fetchPrice(slug: string): Promise<PriceData | null> {
     .then((html) => {
       const $html = $.load(html);
 
-      const priceValue = $html(".priceValue");
+      const priceSelector = '[data-test="text-cdp-price-display"]';
+      const priceValueElement = $html(priceSelector);
 
-      // get price diff element className
-      const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr("class");
-      const isUp = !!(priceDirectionClassName && priceDirectionClassName.split("-").includes("up"));
-      const priceDiff = priceValue.next("span").text();
+      const targetCoinDataChange = priceValueElement.next("");
+      const priceDiff = targetCoinDataChange.text();
+      const changeDirection = targetCoinDataChange.attr("data-change");
+      
+      const isUp = !!changeDirection && changeDirection.includes("up");
 
-      const currencyPrice = priceValue.text();
+      const currencyPrice = $html(priceValueElement).text();
 
       if (!currencyPrice) {
         return null;
