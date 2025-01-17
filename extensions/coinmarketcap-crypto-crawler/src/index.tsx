@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  Color,
-  CopyToClipboardAction,
-  showToast,
-  ToastStyle,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, showToast, Toast, Icon, List, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
@@ -71,13 +60,13 @@ function CoinListItem({
         tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
       }}
       subtitle={`$${symbol.toUpperCase()}`}
-      accessoryTitle={accessoryTitle}
+      accessories={[{ text: accessoryTitle }]}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
+          <Action.OpenInBrowser url={`${BASE_URL}${slug}`} />
 
           {!!price && (
-            <ActionPanelItem
+            <Action
               title="Convert Currency"
               icon={Icon.QuestionMark}
               onAction={() => {
@@ -86,7 +75,7 @@ function CoinListItem({
             />
           )}
 
-          <ActionPanelItem
+          <Action
             title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={Icon.Star}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -98,12 +87,8 @@ function CoinListItem({
               }
             }}
           />
-          <ActionPanelItem title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
-          <ActionPanelItem
-            title="Refresh Crypto List"
-            onAction={() => refreshCryptoList()}
-            icon={Icon.ArrowClockwise}
-          />
+          <Action title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
+          <Action title="Refresh Crypto List" onAction={() => refreshCryptoList()} icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
     />
@@ -144,10 +129,10 @@ function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) 
         {usdPrice && (
           <List.Item
             title={`${inputNumber} ${symbol.toUpperCase()}`}
-            accessoryTitle={`${usdPrice} USD`}
+            accessories={[{ text: `${usdPrice} USD` }]}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={usdPrice.toString()} />
+                <Action.CopyToClipboard content={usdPrice.toString()} />
               </ActionPanel>
             }
           />
@@ -156,10 +141,10 @@ function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) 
         {currencyPrice && (
           <List.Item
             title={`${inputNumber} USD`}
-            accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`}
+            accessories={[{ text: `${currencyPrice} ${symbol.toUpperCase()}` }]}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={currencyPrice.toString()} />
+                <Action.CopyToClipboard content={currencyPrice.toString()} />
               </ActionPanel>
             }
           />
@@ -198,7 +183,7 @@ export default function SearchCryptoList() {
         refreshExistingCache((err, cryptoList) => {
           if (err) {
             console.error("WriteFileError:" + err);
-            showToast(ToastStyle.Failure, "Refresh failed", (err as Error)?.message);
+            showToast(Toast.Style.Failure, "Refresh failed", (err as Error)?.message);
             return;
           }
 
@@ -234,7 +219,7 @@ export default function SearchCryptoList() {
     setIsLoading(false);
   };
 
-  const onSelectChange = (id?: string) => {
+  const onSelectChange = (id: string | null) => {
     if (!id) return;
 
     const [slug] = id.split("_");
