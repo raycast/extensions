@@ -1,14 +1,14 @@
-import * as fs from 'fs/promises';
-import { Decryptor } from 'decrypt-otpauth-ts/dist/decryptor';
-import { getPreferenceValues } from '@raycast/api';
+import * as fs from "fs/promises";
+import { Decryptor } from "decrypt-otpauth-ts/dist/decryptor";
+import { getPreferenceValues } from "@raycast/api";
 
 export enum ErrorType {
-  OTP_AUTH_NOT_INSTALLED = 'OTP Auth app not installed',
+  OTP_AUTH_NOT_INSTALLED = "OTP Auth app not installed",
 }
 
 async function checkOTPAuthInstalled() {
   try {
-    const globalStats = await fs.stat('/Applications/OTP Auth.app');
+    const globalStats = await fs.stat("/Applications/OTP Auth.app");
     if (globalStats.isDirectory()) return true;
   } catch {
     // Ignore error and try user Applications folder
