@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "empty-downloads",
-      "title": "Empty Downloads",
-      "subtitle": "Delete All files in Downlods Folder",
+      "title": "Empty Downloads Folder",
       "description": "Deletes All the files in the Downlods Folder",
       "mode": "no-view"
     }
