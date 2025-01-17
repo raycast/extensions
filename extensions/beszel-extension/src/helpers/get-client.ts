@@ -56,9 +56,7 @@ async function createClient({ url, username, password }: Preferences.SearchSyste
   client.autoCancellation(false);
 
   if (!client.authStore.isValid) {
-    await client.collection("users").authWithPassword(username, password, {
-      fetch: fetch as Fetch,
-    });
+    await client.collection("users").authWithPassword(username, password);
   }
 
   return client;
