@@ -2,7 +2,7 @@ import { AI, showToast, Toast } from "@raycast/api";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-export const useRaycastAIFollowUpQuestion = async (
+export const useRaycastFollowUpQuestion = async (
   question: string,
   transcript: string,
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,

@@ -2,27 +2,23 @@ import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } fro
 import React from "react";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 
-import { RaycastAIPreferences } from "../../../summarizeVideoWithRaycastAI";
+import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-type GetRaycastAISummaryProps = {
+type GetRaycastSummaryProps = {
   transcript?: string;
   setSummaryIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useRaycastAISummary = async ({
-  transcript,
-  setSummaryIsLoading,
-  setSummary,
-}: GetRaycastAISummaryProps) => {
-  const preferences = getPreferenceValues() as RaycastAIPreferences;
+export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
+  const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity, language } = preferences;
 
   if (!environment.canAccess(AI)) {
     showToast({
-      title: "No access to Raycast AI",
-      message: "Raycast AI is required for this extension to work. You need Raycast Pro.",
+      title: "No access to Raycast Pro",
+      message: "Raycast Pro is required for this extension to work. You need Raycast Pro.",
       style: Toast.Style.Failure,
     });
     popToRoot();

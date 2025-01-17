@@ -5,7 +5,7 @@ const markdown = `
 
 We introduced new commands to summarize YouTube videos with AI. The one you are used to is now deprecated and split into three. You can run the following commands:
 
-- Summarize with RaycastAI: \`summarizeVideoWithRaycastAI\`
+- Summarize with Raycast: \`summarizeVideoWithRaycast\`
 - Summarize with OpenAI: \`summarizeVideoWithOpenAI\`
 - Summarize with Anthropic: \`summarizeVideoWithAnthropic\`
 

@@ -5,23 +5,23 @@ import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
 import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
-import { useRaycastAISummary } from "./components/raycast/hooks/useRaycastAISummary";
+import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
 import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
-interface SummarizeVideoWithRaycastAIProps {
+interface SummarizeVideoWithRaycastProps {
   video: string;
 }
-export type RaycastAIPreferences = {
+export type RaycastPreferences = {
   creativity: "0" | "0.5" | "1" | "1.5" | "2";
   language: string;
 };
 
-export default function SummarizeVideoWithRaycastAI(
+export default function SummarizeVideoWithRaycast(
   props: LaunchProps<{
-    arguments: SummarizeVideoWithRaycastAIProps;
+    arguments: SummarizeVideoWithRaycastProps;
   }>,
 ) {
   const [summary, setSummary] = useState<string | undefined>();
@@ -61,7 +61,7 @@ export default function SummarizeVideoWithRaycastAI(
   }, [video]);
 
   useEffect(() => {
-    useRaycastAISummary({ transcript, setSummaryIsLoading, setSummary });
+    useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
   }, [transcript]);
 
   if (!videoData || !transcript) return null;

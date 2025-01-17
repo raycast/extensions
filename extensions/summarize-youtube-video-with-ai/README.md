@@ -1,12 +1,12 @@
 # Summarize YouTube Video
 
-Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast AI, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension.
+Summarize any YouTube Video with AI and ask follow up questions to get all the details. Choose between Raycast, OpenAI ChatGPT or Anthropic Claude. You have to either be a [Raycast Pro](https://www.raycast.com/pro) Member, have access to an [OpenAI API Key](https://platform.openai.com/account/api-keys) or [Anthropic API Key](https://www.anthropic.com/api) to use this extension.
 
 ## Preferences
 
 ### Choose AI
 
-Choose between Raycast AI (default), OpenAI ChatGPT or Anthropic Claude.
+Choose between Raycast (default), OpenAI ChatGPT or Anthropic Claude.
 
 ### Creativity
 
