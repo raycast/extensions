@@ -26,7 +26,7 @@
       "mode": "view"
     },
     {
-      "name": "createTransaction",
+      "name": "transaction",
       "title": "Create Transaction",
       "subtitle": "YNAB",
       "description": "Create a new transaction in the selected budget.",
