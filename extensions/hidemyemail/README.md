@@ -20,12 +20,11 @@ A quick way to generate a new iCloud Hide My Email address.
 </p>
 <p align="center">
   <img src="metadata/hidemyemail-3.png" alt="Screenshot 3" width="49%">
-  <img src="metadata/hidemyemail-4.png" alt="Screenshot 4" width="49%">
 </p>
 
 ## Chinese Apple ID
 
-To use a Chinese Apple ID, please enable the `Use Chinese Account` checkbox in the extension settings.
+To use the extension with a Chinese Apple ID, please enable the `Use Chinese Account` checkbox in the extension settings.
 
 ## Acknowledgments
 

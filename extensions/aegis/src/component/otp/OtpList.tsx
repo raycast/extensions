@@ -5,7 +5,7 @@ import {
   List,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Searcher } from "fast-fuzzy";
 import OtpListItems from "./OtpListItems";
 import { Service } from "../../util/service";
@@ -31,12 +31,16 @@ export function OtpList() {
   }, [items]);
 
   // Create searcher when items load
-  const searcher = new Searcher(items.otpList, {
-    keySelector: (item) =>
-      [item.name, item.issuer, item.accountType].filter((x): x is string =>
-        Boolean(x)
-      ),
-  });
+  const searcher = useMemo(
+    () =>
+      new Searcher(items.otpList, {
+        keySelector: (item) =>
+          [item.name, item.issuer, item.accountType].filter((x): x is string =>
+            Boolean(x)
+          ),
+      }),
+    [items.otpList]
+  );
 
   // Get filtered items based on search
   const filteredItems = searchText

@@ -1,5 +1,9 @@
 # Workouts Changelog
 
+## [Add Command to Calculate Time or Pace] - 2025-01-13
+
+Added a command to calculate the time or pace for a workout
+
 ## [Removed AI features] - 2024-11-28
 
 Removed AI features after Strava updated their terms to not allow it.

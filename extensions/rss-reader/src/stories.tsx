@@ -163,9 +163,7 @@ export function StoriesList(props: { feeds?: Feed[] }) {
     >
       {data?.stories
         .filter((story) => filter === "all" || story.fromFeed === filter)
-        .map((story) => (
-          <StoryListItem key={story.guid} item={story} refresh={revalidate} />
-        ))}
+        .map((story) => <StoryListItem key={story.guid} item={story} refresh={revalidate} />)}
     </List>
   );
 }

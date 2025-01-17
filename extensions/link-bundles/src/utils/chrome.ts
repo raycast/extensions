@@ -80,14 +80,15 @@ export const openLinksInChrome = async (bundle: Bundle): Promise<void> => {
 
   const args = [];
 
+  if (bundle.openInNewWindow) {
+    args.push("--new-window");
+  }
+
   if (bundle.openInIncognitoWindow) {
     args.push("--incognito");
   } else {
     const chromeProfileDirectory = getProfileByDirectory(bundle.chromeProfileDirectory)?.directory || "Default";
     args.push(`--profile-directory="${chromeProfileDirectory}"`);
-    if (bundle.openInNewWindow) {
-      args.push("--new-window");
-    }
   }
 
   args.push(urls);

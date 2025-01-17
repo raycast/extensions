@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Bug Fixes] - 2025-01-10
+
+- Fix issue with `aerospace` not found if installed in a non-standard location (e.g. managed by `nix-darwin`)
+
 ## [Bug Fixes] - 2024-11-14
 
 - Update shortcut description to allow for fuzzy finding without dashes

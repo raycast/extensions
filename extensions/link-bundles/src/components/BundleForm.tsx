@@ -150,6 +150,8 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       />
       <Form.TextField id="description" title="Bundle Description" value={description} onChange={setDescription} />
       <Form.Separator />
+
+      <Form.Checkbox id="newWindow" label="Open in New Window" value={openInNewWindow} onChange={setOpenInNewWindow} />
       <Form.Checkbox
         id="incognito"
         label="Open in Incognito Window"
@@ -158,24 +160,16 @@ export function BundleForm({ bundle, onSubmit }: BundleFormProps) {
       />
 
       {!openInIncognitoWindow && (
-        <>
-          <Form.Checkbox
-            id="newWindow"
-            label="Open in New Window"
-            value={openInNewWindow}
-            onChange={setOpenInNewWindow}
-          />
-          <Form.Dropdown
-            id="chromeProfile"
-            title="Chrome Profile"
-            value={chromeProfileDirectory}
-            onChange={setChromeProfileDirectory}
-          >
-            {getChromeProfiles().map((profile) => (
-              <Form.Dropdown.Item key={profile.directory} value={profile.directory} title={profile.name} />
-            ))}
-          </Form.Dropdown>
-        </>
+        <Form.Dropdown
+          id="chromeProfile"
+          title="Chrome Profile"
+          value={chromeProfileDirectory}
+          onChange={setChromeProfileDirectory}
+        >
+          {getChromeProfiles().map((profile) => (
+            <Form.Dropdown.Item key={profile.directory} value={profile.directory} title={profile.name} />
+          ))}
+        </Form.Dropdown>
       )}
       <Form.Separator />
 

@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Chore] - 2025-01-14
+
+- Moved contributor to past contributors list
+
 ## [Pausable timers, custom timer form bypass] - 2025-01-03
 
 - Timers can now be paused/unpaused!

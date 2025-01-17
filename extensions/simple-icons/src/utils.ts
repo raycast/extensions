@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createWriteStream } from "node:fs";
 import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -219,20 +219,21 @@ export const aiSearch = async (icons: IconData[], searchString: string) => {
   return AI.ask(searchPrompt).catch(() => []);
 };
 
+export const getKeywords = (icon: IconData) =>
+  [
+    icon.title,
+    icon.slug,
+    icon.aliases?.aka,
+    icon.aliases?.dup?.map((duplicate) => duplicate.title),
+    Object.values(icon.aliases?.loc ?? {}),
+  ]
+    .flat()
+    .filter(Boolean) as string[];
+
 export const useSearch = ({ icons }: { icons: IconData[] }) => {
   const [searchString, setSearchString] = useState("");
   const $searchString = searchString.trim().toLowerCase();
-  const getKeywords = (icon: IconData) =>
-    [
-      icon.title,
-      icon.slug,
-      icon.aliases?.aka,
-      icon.aliases?.dup?.map((duplicate) => duplicate.title),
-      Object.values(icon.aliases?.loc ?? {}),
-    ]
-      .flat()
-      .filter(Boolean) as string[];
-  const searcher = new Searcher(icons, { keySelector: getKeywords });
+  const searcher = useMemo(() => new Searcher(icons, { keySelector: getKeywords }), [icons]);
 
   const filteredIcons = $searchString
     ? enableAiSearch && hasAccessToAi

@@ -10,7 +10,7 @@ export interface TmuxWindow {
 }
 
 export function getAllWindow(
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
   return exec('tmux list-windows -aF "#{session_name}:#{window_name}:#{window_index}"', { env }, callback);
 }
