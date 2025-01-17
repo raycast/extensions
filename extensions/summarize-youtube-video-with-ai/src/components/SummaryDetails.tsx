@@ -1,0 +1,30 @@
+import { Detail } from "@raycast/api";
+
+type SummaryDetailsProps = {
+  title: string;
+  ownerProfileUrl: string;
+  ownerChannelName: string;
+  publishDate: string;
+  duration: string;
+  viewCount: string;
+};
+
+export default function SummaryDetails({
+  title,
+  ownerProfileUrl,
+  ownerChannelName,
+  publishDate,
+  duration,
+  viewCount,
+}: SummaryDetailsProps) {
+  return (
+    <Detail.Metadata>
+      <Detail.Metadata.Label title="Title" text={title} />
+      <Detail.Metadata.Link title="Channel" target={ownerProfileUrl} text={ownerChannelName} />
+      <Detail.Metadata.Separator />
+      <Detail.Metadata.Label title="Published" text={publishDate} />
+      <Detail.Metadata.Label title="Duration" text={duration} />
+      <Detail.Metadata.Label title="Views" text={viewCount} />
+    </Detail.Metadata>
+  );
+}
