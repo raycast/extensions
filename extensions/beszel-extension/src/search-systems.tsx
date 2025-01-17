@@ -1,7 +1,27 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { fetch } from "undici";
+import { EventSource } from "eventsource";
+
+// Raycast doesn't provide a fetch global or EventSource global.
+
+// @ts-expect-error - types are expecting node fetch but undici is compatible.
+global.fetch = fetch;
+global.EventSource = EventSource;
+
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 import { type BeszelSystem, useSystems } from "./hooks/use-systems";
 import { secondsToUptime } from "./helpers/seconds-to-uptime";
+import { useEffect } from "react";
 
 function getSystemIconTintColor(system: BeszelSystem): Color {
   switch (system.status) {
@@ -18,7 +38,23 @@ function getSystemIconTintColor(system: BeszelSystem): Color {
 
 export default function Command() {
   const { url } = getPreferenceValues<Preferences.SearchSystems>();
-  const { systems, isLoading } = useSystems();
+  const { systems, isLoading, error } = useSystems();
+
+  useEffect(() => {
+    if (!error) return;
+
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: error,
+      primaryAction: {
+        title: "Open Extension Preferences",
+        onAction: () => {
+          openExtensionPreferences();
+        },
+      },
+    });
+  }, [error]);
 
   return (
     <List isLoading={isLoading} isShowingDetail>
