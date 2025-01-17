@@ -3,6 +3,7 @@
 ## [New Features] - {PR_MERGE_DATE}
 
 - 🙋 Add `Ask LLM` command using pure user query input.
+- ✨ Add `Google Gemini` model support.
 
 ## [New Features] - 2025-01-14
 
