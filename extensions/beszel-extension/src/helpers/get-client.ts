@@ -12,8 +12,6 @@ global.EventSource = EventSource;
 let cachedClient: Promise<PocketBase> | null = null;
 let cachedCredentials: Preferences.SearchSystems | null = null;
 
-export type Fetch = (url: RequestInfo | URL, config?: RequestInit) => Promise<Response>;
-
 export async function getClient() {
   const { url, username, password } = getPreferenceValues<Preferences.SearchSystems>();
 
