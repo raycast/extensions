@@ -1,45 +1,34 @@
 import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  type LaunchProps,
-} from "@raycast/api";
+import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
+import SummaryActions from "./components/SummaryActions";
+import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
-import { useFollowUpQuestion } from "./hooks/useFollowUpQuestion";
-import { useGetSummary } from "./hooks/useGetSummary";
+import ActionOpenAIFollowUp from "./hooks/openai/ActionOpenAIFollowUp";
+import { useOpenAISummary } from "./hooks/openai/useOpenAISummary";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
-interface SummarizeVideoProps {
+interface SummarizeVideoWithOpenAIProps {
   video: string;
 }
-export type Preferences = {
-  chosenAi: "anthropic" | "openai" | "raycastai";
+export type OpenAIPreferences = {
   creativity: "0" | "0.5" | "1" | "1.5" | "2";
   openaiApiToken: string;
-  anthropicApiToken: string;
   language: string;
   openaiEndpoint: string;
   openaiModel: string;
-  anthropicModel: string;
 };
 
-const SummarizeVideo = (
+export default function SummarizeVideoWithOpenAI(
   props: LaunchProps<{
-    arguments: SummarizeVideoProps;
+    arguments: SummarizeVideoWithOpenAIProps;
   }>,
-) => {
+) {
   const [summary, setSummary] = useState<string | undefined>();
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string | undefined>();
@@ -78,20 +67,10 @@ const SummarizeVideo = (
   }, [video]);
 
   useEffect(() => {
-    if (transcript === undefined) return;
-    useGetSummary({
-      transcript,
-      setSummaryIsLoading,
-      setSummary,
-    });
+    useOpenAISummary({ transcript, setSummaryIsLoading, setSummary });
   }, [transcript]);
 
-  const askQuestion = (question: string) => {
-    if (question === undefined || transcript === undefined) return;
-    useFollowUpQuestion(question, transcript, setSummary, pop);
-  };
-
-  if (!videoData) return null;
+  if (!videoData || !transcript) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, thumbnail, title, video_url, viewCount } =
     videoData;
 
@@ -105,44 +84,30 @@ const SummarizeVideo = (
   return (
     <Detail
       actions={
-        <ActionPanel title="Video Actions">
-          <Action.Push
-            icon={Icon.QuestionMark}
-            title="Ask Follow-up Question"
-            target={
-              <Form
-                actions={
-                  <ActionPanel>
-                    <Action.SubmitForm title="Ask" onSubmit={({ question }) => askQuestion(question)} />
-                  </ActionPanel>
-                }
-              >
-                <Form.TextField id="question" title="Your Question" />
-              </Form>
-            }
-          />
-          <Action.CopyToClipboard title="Copy Result" content={markdown ?? ""} />
-          <Action.OpenInBrowser title="Go to Video" url={video_url} />
-          <Action.OpenInBrowser title="Go to Channel" url={ownerProfileUrl} />
-        </ActionPanel>
+        <SummaryActions
+          transcript={transcript}
+          setSummary={setSummary}
+          markdown={markdown}
+          video_url={video_url}
+          ownerProfileUrl={ownerProfileUrl}
+          AskFollowUpQuestion={<ActionOpenAIFollowUp transcript={transcript} setSummary={setSummary} pop={pop} />}
+        />
       }
       isLoading={summaryIsLoading}
       markdown={markdown}
       metadata={
         videoData && (
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Title" text={title} />
-            <Detail.Metadata.Link title="Channel" target={ownerProfileUrl} text={ownerChannelName} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Published" text={publishDate} />
-            <Detail.Metadata.Label title="Duration" text={duration} />
-            <Detail.Metadata.Label title="Views" text={viewCount} />
-          </Detail.Metadata>
+          <SummaryDetails
+            title={title}
+            ownerChannelName={ownerChannelName}
+            ownerProfileUrl={ownerProfileUrl}
+            publishDate={publishDate}
+            duration={duration}
+            viewCount={viewCount}
+          />
         )
       }
       navigationTitle={videoData && `${title} by ${ownerChannelName}`}
     />
   );
-};
-
-export default SummarizeVideo;
+}

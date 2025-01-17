@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
 import { OPENAI_MODEL } from "../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
-import { Preferences } from "../../summarizeVideo";
+import { OpenAIPreferences } from "../../summarizeVideoWithOpenAI";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
 
 export const useOpenAIFollowUpQuestion = async (
@@ -11,13 +11,9 @@ export const useOpenAIFollowUpQuestion = async (
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,
   pop: () => void,
 ) => {
-  const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, openaiApiToken, openaiEndpoint, openaiModel } = preferences;
+  const preferences = getPreferenceValues() as OpenAIPreferences;
+  const { openaiApiToken, openaiEndpoint, openaiModel } = preferences;
   setSummary(undefined);
-
-  if (chosenAi !== "openai") {
-    return;
-  }
 
   const openai = new OpenAI({
     apiKey: openaiApiToken,

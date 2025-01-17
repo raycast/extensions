@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import React from "react";
 import { OPENAI_MODEL } from "../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../const/toast_messages";
-import { Preferences } from "../../summarizeVideo";
+
+import { OpenAIPreferences } from "../../summarizeVideoWithOpenAI";
 import { getAiInstructionSnippet } from "../../utils/getAiInstructionSnippets";
 
 type GetOpenAISummaryProps = {
@@ -13,14 +14,10 @@ type GetOpenAISummaryProps = {
 };
 
 export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
-  const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
+  const preferences = getPreferenceValues() as OpenAIPreferences;
+  const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
   if (!transcript) return;
-
-  if (chosenAi !== "openai") {
-    return;
-  }
 
   if (openaiApiToken === "") {
     showToast({
