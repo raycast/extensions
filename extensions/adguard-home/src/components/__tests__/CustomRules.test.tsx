@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor, act, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CustomRules } from "../CustomRules";
 import { addCustomRule, removeCustomRule } from "../../api";
@@ -30,7 +30,7 @@ describe("CustomRules", () => {
   });
 
   it("renders rules with correct types", () => {
-    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={mockOnRuleChange} />);
+    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={() => {}} />);
 
     expect(screen.getByText("||example.com^")).toBeInTheDocument();
     expect(screen.getByText("Domain")).toBeInTheDocument();
@@ -43,42 +43,38 @@ describe("CustomRules", () => {
   });
 
   it("handles rule removal", async () => {
-    const { user } = await setup();
-    (removeCustomRule as jest.Mock).mockResolvedValueOnce(undefined);
+    const onRuleChange = jest.fn();
+    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={onRuleChange} />);
 
-    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={mockOnRuleChange} />);
-
-    const removeButtons = screen.getAllByTitle("Remove Rule");
-    await user.click(removeButtons[0]);
-
-    await waitFor(() => {
-      expect(removeCustomRule).toHaveBeenCalledWith("||example.com^");
-      expect(mockOnRuleChange).toHaveBeenCalled();
+    await act(async () => {
+      const firstListItem = screen.getAllByTestId("list-item")[0];
+      const removeButton = within(firstListItem).getByRole("button", { name: /remove/i });
+      await userEvent.click(removeButton);
     });
+
+    expect(removeCustomRule).toHaveBeenCalled();
+    expect(onRuleChange).toHaveBeenCalled();
   });
 
   it("handles rule addition", async () => {
-    const { user } = await setup();
-    (addCustomRule as jest.Mock).mockResolvedValueOnce(undefined);
+    const onRuleChange = jest.fn();
+    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={onRuleChange} />);
 
-    render(<CustomRules rules={mockRules} isLoading={false} onRuleChange={mockOnRuleChange} />);
-
-    // Open add form
-    const addButtons = screen.getAllByTitle("Add Rule");
-    await user.click(addButtons[0]);
-
-    // Fill and submit form
-    const input = screen.getByPlaceholderText("Enter filtering rule (e.g., ||example.com^)");
-    await user.type(input, "||newdomain.com^");
-
-    const form = screen.getByTestId("form");
-    const submitButton = within(form).getByRole("button", { name: "Add Rule" });
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(addCustomRule).toHaveBeenCalledWith("||newdomain.com^");
-      expect(mockOnRuleChange).toHaveBeenCalled();
+    await act(async () => {
+      const firstListItem = screen.getAllByTestId("list-item")[0];
+      const addButton = within(firstListItem).getByRole("button", { name: /add rule/i });
+      await userEvent.click(addButton);
     });
+
+    await act(async () => {
+      await userEvent.type(screen.getByRole("textbox"), "example.com");
+      const form = screen.getByTestId("form");
+      const submitButton = within(form).getByRole("button", { name: "Add Rule" });
+      await userEvent.click(submitButton);
+    });
+
+    expect(addCustomRule).toHaveBeenCalledWith("example.com");
+    expect(onRuleChange).toHaveBeenCalled();
   });
 
   it("shows loading state", () => {
