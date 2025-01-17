@@ -8,151 +8,11 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
 import refreshCryptoList from "./utils/refreshCryptoList";
 import useFavoriteCoins from "./utils/useFavoriteCoins";
-import { CryptoCurrency, PriceData } from "./types";
+import { CryptoCurrency } from "./types";
+import CoinListItem from "./components/CoinListItem";
 import useCoinPriceStore from "./utils/useCoinPriceStore";
 
 dayjs.extend(relativeTime);
-
-const BASE_URL = "https://coinmarketcap.com/currencies/";
-
-type CoinListItemProps = {
-  name: string;
-  slug: string;
-  symbol: string;
-  coinPriceStore: { [key: string]: PriceData };
-  addFavoriteCoin: (coin: CryptoCurrency) => void;
-  removeFavoriteCoin: (coin: CryptoCurrency) => void;
-  refreshCoinPrice: () => void;
-  isFavorite: boolean;
-};
-
-function CoinListItem({
-  name,
-  slug,
-  symbol,
-  coinPriceStore,
-  addFavoriteCoin,
-  refreshCoinPrice,
-  isFavorite,
-  removeFavoriteCoin,
-}: CoinListItemProps) {
-  const coinPrice = coinPriceStore[slug];
-  const { push } = useNavigation();
-
-  let accessoryTitle;
-  if (coinPrice) {
-    const symbol = coinPrice.isUp ? "+" : "-";
-    accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
-  }
-
-  const price = useMemo(() => {
-    if (coinPrice?.currencyPrice) {
-      return parseFloat(coinPrice.currencyPrice.replace(/[$,]/g, ""));
-    }
-  }, [coinPrice]);
-
-  return (
-    <List.Item
-      id={`${slug}_${symbol}`}
-      title={name}
-      icon={{
-        source: Icon.Star,
-        tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
-      }}
-      subtitle={`$${symbol.toUpperCase()}`}
-      accessories={[{ text: accessoryTitle }]}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={`${BASE_URL}${slug}`} />
-
-          {!!price && (
-            <Action
-              title="Convert Currency"
-              icon={Icon.QuestionMark}
-              onAction={() => {
-                push(<CurrencyConverter coinPrice={price} symbol={symbol} name={name} />);
-              }}
-            />
-          )}
-
-          <Action
-            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-            icon={Icon.Star}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-            onAction={() => {
-              if (isFavorite) {
-                removeFavoriteCoin({ name, slug, symbol });
-              } else {
-                addFavoriteCoin({ name, slug, symbol });
-              }
-            }}
-          />
-          <Action title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
-          <Action title="Refresh Crypto List" onAction={() => refreshCryptoList()} icon={Icon.ArrowClockwise} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-type CurrencyConverterProps = {
-  coinPrice: number;
-  name: string;
-  symbol: string;
-};
-
-function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) {
-  const [inputText, setInputText] = useState("");
-  const inputNumber = useMemo(() => {
-    if (inputText !== "") {
-      return parseFloat(inputText.replace(/[$,]/g, ""));
-    } else {
-      return 1;
-    }
-  }, [inputText]);
-
-  const usdPrice = useMemo(() => {
-    if (inputNumber) {
-      return inputNumber * coinPrice;
-    }
-  }, [inputNumber, coinPrice]);
-
-  const currencyPrice = useMemo(() => {
-    if (inputNumber && inputNumber > 0) {
-      return inputNumber / coinPrice;
-    }
-  }, [inputNumber, coinPrice]);
-
-  return (
-    <List onSearchTextChange={(text) => setInputText(text)}>
-      <List.Section title={`Convert ${name} with USD`}>
-        {usdPrice && (
-          <List.Item
-            title={`${inputNumber} ${symbol.toUpperCase()}`}
-            accessories={[{ text: `${usdPrice} USD` }]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={usdPrice.toString()} />
-              </ActionPanel>
-            }
-          />
-        )}
-
-        {currencyPrice && (
-          <List.Item
-            title={`${inputNumber} USD`}
-            accessories={[{ text: `${currencyPrice} ${symbol.toUpperCase()}` }]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={currencyPrice.toString()} />
-              </ActionPanel>
-            }
-          />
-        )}
-      </List.Section>
-    </List>
-  );
-}
 
 export default function SearchCryptoList() {
   const [isLoading, setIsLoading] = useState(false);
@@ -219,7 +79,7 @@ export default function SearchCryptoList() {
     setIsLoading(false);
   };
 
-  const onSelectChange = (id: string | null) => {
+  const onSelectChange = (id?: string | null) => {
     if (!id) return;
 
     const [slug] = id.split("_");
