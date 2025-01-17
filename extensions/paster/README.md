@@ -7,7 +7,6 @@ A Raycast extension that helps you paste text with the desired formatting and op
 - **Clean Text**: Remove all formatting, extra whitespace, and unwanted characters
 - **Markdown Conversion**: Convert text to clean Markdown format
 - **HTML Conversion**: Convert text to clean HTML format
-- **Grammar Fix**: Use AI to fix grammar and improve text clarity (requires API key)
 
 ## Setup
 
@@ -24,7 +23,6 @@ A Raycast extension that helps you paste text with the desired formatting and op
 - `Paste Clean Text`: Paste clipboard content with all formatting removed
 - `Paste as Markdown`: Convert and paste clipboard content as clean Markdown
 - `Paste as HTML`: Convert and paste clipboard content as clean HTML
-- `Paste with Grammar Fix`: Fix grammar and improve text clarity using AI before pasting
 
 ## Requirements
 
