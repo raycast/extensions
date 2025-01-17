@@ -1,5 +1,9 @@
 # Spotify Controls Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+Allow the user to dynamically enter the steps when increasing or decreasing the volume.
+
 ## [Enhancement] - 2024-05-06
 
 Add Mute Volume command.
