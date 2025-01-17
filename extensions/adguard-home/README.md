@@ -59,9 +59,10 @@ The extension requires the following preferences to be set:
 
 ## Screenshots
 
-![Statistics](./images/statistics.png)
-![Top Blocked](./images/top_blocked.png)
-![Query Log](./images/query_log.png)
+![Statistics](./images/adguard-home-view-statistics.png)
+![Top Blocked](./images/adguard-home-top-blocked-domains.png)
+![Query Log](./images/adguard-home-query-log.png)
+![Toggle Protection](./images/adguard-home-toggle-protection.png)
 
 ## License
 
