@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { useOpenAIFollowUpQuestion } from "./useOpenAIFollowUpQuestion";
+import { useRaycastAIFollowUpQuestion } from "./hooks/useRaycastAIFollowUpQuestion";
 
-export default function ActionOpenAIFollowUp({
+export default function ActionRaycastFollowUp({
   transcript,
   setSummary,
   pop,
@@ -11,7 +11,7 @@ export default function ActionOpenAIFollowUp({
   pop: () => void;
 }) {
   const askQuestion = (question: string) => {
-    useOpenAIFollowUpQuestion(question, transcript, setSummary, pop);
+    useRaycastAIFollowUpQuestion(question, transcript, setSummary, pop);
   };
 
   return (

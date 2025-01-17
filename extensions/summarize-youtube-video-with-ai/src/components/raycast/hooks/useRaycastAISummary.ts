@@ -1,9 +1,9 @@
 import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import React from "react";
-import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../const/toast_messages";
+import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 
-import { RaycastAIPreferences } from "../../summarizeVideoWithRaycastAI";
-import { getAiInstructionSnippet } from "../../utils/getAiInstructionSnippets";
+import { RaycastAIPreferences } from "../../../summarizeVideoWithRaycastAI";
+import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type GetRaycastAISummaryProps = {
   transcript?: string;

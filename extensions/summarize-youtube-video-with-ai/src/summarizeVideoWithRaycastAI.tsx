@@ -5,11 +5,11 @@ import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@rayc
 
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
+import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
+import { useRaycastAISummary } from "./components/raycast/hooks/useRaycastAISummary";
 import SummaryActions from "./components/SummaryActions";
 import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
-import ActionRaycastFollowUp from "./hooks/raycast/ActionRaycastFollowUp";
-import { useRaycastAISummary } from "./hooks/raycast/useRaycastAISummary";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
@@ -93,16 +93,14 @@ export default function SummarizeVideoWithRaycastAI(
       isLoading={summaryIsLoading}
       markdown={markdown}
       metadata={
-        videoData && (
-          <SummaryDetails
-            title={title}
-            ownerChannelName={ownerChannelName}
-            ownerProfileUrl={ownerProfileUrl}
-            publishDate={publishDate}
-            duration={duration}
-            viewCount={viewCount}
-          />
-        )
+        <SummaryDetails
+          title={title}
+          ownerChannelName={ownerChannelName}
+          ownerProfileUrl={ownerProfileUrl}
+          publishDate={publishDate}
+          duration={duration}
+          viewCount={viewCount}
+        />
       }
       navigationTitle={videoData && `${title} by ${ownerChannelName}`}
     />

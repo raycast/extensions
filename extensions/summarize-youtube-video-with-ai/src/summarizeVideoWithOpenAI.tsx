@@ -5,11 +5,11 @@ import { Detail, showToast, Toast, useNavigation, type LaunchProps } from "@rayc
 
 import { useEffect, useState } from "react";
 import ytdl from "ytdl-core";
+import ActionOpenAIFollowUp from "./components/openai/ActionOpenAIFollowUp";
+import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
 import SummaryActions from "./components/SummaryActions";
 import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
-import ActionOpenAIFollowUp from "./hooks/openai/ActionOpenAIFollowUp";
-import { useOpenAISummary } from "./hooks/openai/useOpenAISummary";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
@@ -96,16 +96,14 @@ export default function SummarizeVideoWithOpenAI(
       isLoading={summaryIsLoading}
       markdown={markdown}
       metadata={
-        videoData && (
-          <SummaryDetails
-            title={title}
-            ownerChannelName={ownerChannelName}
-            ownerProfileUrl={ownerProfileUrl}
-            publishDate={publishDate}
-            duration={duration}
-            viewCount={viewCount}
-          />
-        )
+        <SummaryDetails
+          title={title}
+          ownerChannelName={ownerChannelName}
+          ownerProfileUrl={ownerProfileUrl}
+          publishDate={publishDate}
+          duration={duration}
+          viewCount={viewCount}
+        />
       }
       navigationTitle={videoData && `${title} by ${ownerChannelName}`}
     />

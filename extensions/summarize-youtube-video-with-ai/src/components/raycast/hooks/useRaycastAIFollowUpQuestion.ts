@@ -1,6 +1,6 @@
 import { AI, showToast, Toast } from "@raycast/api";
-import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
-import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
+import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
+import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 export const useRaycastAIFollowUpQuestion = async (
   question: string,

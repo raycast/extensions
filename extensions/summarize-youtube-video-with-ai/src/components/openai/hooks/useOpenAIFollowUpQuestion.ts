@@ -1,9 +1,9 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
-import { OPENAI_MODEL } from "../../const/defaults";
-import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
-import { OpenAIPreferences } from "../../summarizeVideoWithOpenAI";
-import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
+import { OPENAI_MODEL } from "../../../const/defaults";
+import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
+import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 export const useOpenAIFollowUpQuestion = async (
   question: string,
