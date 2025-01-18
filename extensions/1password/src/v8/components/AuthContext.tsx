@@ -11,6 +11,7 @@ import {
   PopToRootType,
   showToast,
   Toast,
+  environment,
 } from "@raycast/api";
 import {
   checkZsh,
@@ -41,6 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [accountSelected, setAccountSelected] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { data, error, isLoading } = useAccounts(!accountSelected);
+  const raycastProtocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
 
   const onSubmit = async (values: Form.Values) => {
     const toast = await showToast({
@@ -109,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       toast.style = Toast.Style.Failure;
       toast.title = "Error Authenticating.";
     } finally {
-      await open("raycast://"); // Password prompt causes Raycast to close, so we reopen it here
+      await open(raycastProtocol); // Password prompt causes Raycast to close, so we reopen it here
     }
   };
 

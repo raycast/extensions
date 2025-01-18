@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
 ## 1.88.0 - 2024-12-16
 
 ### 🐞 Fixes

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kubernetes",
+  "title": "Kubernetes",
+  "description": "Kubernetes Client in Raycast",
+  "icon": "kubernetes.png",
+  "author": "justin0u0",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-pods",
+      "title": "Get Pods",
+      "subtitle": "Kubernetes",
+      "description": "List Pods in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-deployments",
+      "title": "Get Deployments",
+      "subtitle": "Kubernetes",
+      "description": "List Deployments in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-statefulsets",
+      "title": "Get StatefulSets",
+      "subtitle": "Kubernetes",
+      "description": "List StatefulSets in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-nodes",
+      "title": "Get Nodes",
+      "subtitle": "Kubernetes",
+      "description": "Get Nodes in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-daemonsets",
+      "title": "Get Daemonsets",
+      "subtitle": "Kubernetes",
+      "description": "List DaemonSets in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-services",
+      "title": "Get Services",
+      "subtitle": "Kubernetes",
+      "description": "List Services in Kubernetes Cluster.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@kubernetes/client-node": "^1.0.0",
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.17.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

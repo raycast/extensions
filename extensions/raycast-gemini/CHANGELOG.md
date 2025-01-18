@@ -1,5 +1,12 @@
 # Google Gemini Changelog
 
+## [Improved Translate Command] - 2025-01-17
+
+- 🔄 Translate Selected Text: now you can set first and second target language.
+  - All languages are by default translated to first target language.
+  - First target language is translated to second target language.
+  - Force Target Language overrides first target language.
+
 ## [Gemini Flash 2.0 and More Customization] - 2025-01-02
 
 Features:

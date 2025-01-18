@@ -61,19 +61,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1",
     "css-color-converter": "^2.0.0",
     "lodash": "^4.17.21",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.9",
-    "@types/node": "^22.7.3",
+    "@types/lodash": "^4.17.14",
+    "@types/node": "^22.10.5",
     "@types/react": "^18.3.9",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   }
 }

@@ -22,39 +22,41 @@ type FirefoxProfile = {
 export const getFirefoxProfiles = () => {
   const profiles: FirefoxProfiles[] = [];
 
-  browsers.firefox.forEach((browser) => {
-    const path = join(os.homedir(), browser.path, "profiles.ini");
-    const exists = fs.existsSync(path);
+  browsers.firefox
+    .filter((browser) => fs.existsSync(browser.app))
+    .forEach((browser) => {
+      const path = join(os.homedir(), browser.path, "profiles.ini");
+      const exists = fs.existsSync(path);
 
-    if (!exists) {
-      return null;
-    }
-
-    const file = fs.readFileSync(path, "utf-8");
-    const config = ini.parse(file);
-
-    const browserProfiles: FirefoxProfile[] = [];
-
-    Object.values(config).forEach((profile) => {
-      if (!profile.Name) {
+      if (!exists) {
         return null;
       }
 
-      browserProfiles.push({
-        type: browser.type,
-        browser: browser.title,
-        app: browser.app,
-        path: profile.Name,
-        name: profile.Name,
-        icon: browser.icon,
+      const file = fs.readFileSync(path, "utf-8");
+      const config = ini.parse(file);
+
+      const browserProfiles: FirefoxProfile[] = [];
+
+      Object.values(config).forEach((profile) => {
+        if (!profile.Name) {
+          return null;
+        }
+
+        browserProfiles.push({
+          type: browser.type,
+          browser: browser.title,
+          app: browser.app,
+          path: profile.Name,
+          name: profile.Name,
+          icon: browser.icon,
+        });
+      });
+
+      profiles.push({
+        name: browser.title,
+        profiles: browserProfiles,
       });
     });
-
-    profiles.push({
-      name: browser.title,
-      profiles: browserProfiles,
-    });
-  });
 
   return profiles;
 };
