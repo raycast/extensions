@@ -11,7 +11,7 @@ export default function useCoinPriceStore(slug: string) {
   useEffect(() => {
     if (slug && !priceStore[slug]) {
       fetchPrice(slug).then((data) => {
-        setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data } as PriceStore));
+        setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data }) as PriceStore);
       });
     }
   }, [slug]);
@@ -21,7 +21,7 @@ export default function useCoinPriceStore(slug: string) {
       fetchPrice(slug)
         .then((data) => {
           if (!data) return;
-          setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data } as PriceStore));
+          setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data }) as PriceStore);
           showToast(ToastStyle.Success, "Refreshed successfully");
         })
         .catch((error) => {

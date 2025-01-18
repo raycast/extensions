@@ -38,7 +38,7 @@ export function refreshExistingCache(callback: (err: NodeJS.ErrnoException | nul
         },
         (writeFileError) => {
           callback(writeFileError, cryptoList);
-        }
+        },
       );
     })
     .catch((error) => {

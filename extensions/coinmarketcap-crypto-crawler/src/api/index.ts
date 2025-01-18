@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as $ from 'cheerio';
+import * as $ from "cheerio";
 import fetch from "node-fetch";
 import { PriceDirection } from "../types";
 import { ResultData, PriceData } from "../types";
@@ -33,7 +33,7 @@ export async function fetchPrice(slug: string): Promise<PriceData | null> {
       const targetCoinDataChange = priceValueElement.next().find(".change-text");
       const priceDiff = targetCoinDataChange.text();
       const direction = targetCoinDataChange.attr("data-change") as PriceDirection;
-      
+
       const currencyPrice = $html(priceValueElement).text();
 
       if (!currencyPrice) {
