@@ -208,13 +208,13 @@
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
     "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/utils": "^1.18.1",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.12.4",
     "@types/react": "^18.2.74",
