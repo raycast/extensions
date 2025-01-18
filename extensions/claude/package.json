@@ -89,6 +89,15 @@
       "required": false
     },
     {
+      "name": "isHistoryPaused",
+      "label": "Enable pause history",
+      "description": "Pause the history of the conversation",
+      "type": "checkbox",
+      "title": "Pause History",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "isAutoFullInput",
       "label": "Enable full text input initially",
       "description": "Use full text input form when asking question for the first time",
