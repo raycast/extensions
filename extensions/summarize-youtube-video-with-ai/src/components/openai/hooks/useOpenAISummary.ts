@@ -1,6 +1,6 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import OpenAI from "openai";
-import React from "react";
+import React, { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 
@@ -17,8 +17,6 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
-  if (!transcript) return;
-
   if (openaiApiToken === "") {
     showToast({
       title: ALERT.title,
@@ -28,53 +26,57 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
     return;
   }
 
-  const openai = new OpenAI({
-    apiKey: openaiApiToken,
-  });
+  useEffect(() => {
+    if (!transcript) return;
 
-  if (openaiEndpoint !== "") {
-    openai.baseURL = openaiEndpoint;
-  }
+    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
-  setSummaryIsLoading(true);
-
-  const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
-
-  showToast({
-    style: Toast.Style.Animated,
-    title: SUMMARIZING_VIDEO.title,
-    message: SUMMARIZING_VIDEO.message,
-  });
-
-  const chatCompletion = openai.beta.chat.completions.stream({
-    model: openaiModel || OPENAI_MODEL,
-    temperature: parseInt(creativity),
-    messages: [{ role: "user", content: aiInstructions }],
-    stream: true,
-  });
-
-  chatCompletion.on("content", (delta) => {
-    setSummary((result) => {
-      if (result === undefined) return delta || undefined;
-      return result + delta || result;
+    const openai = new OpenAI({
+      apiKey: openaiApiToken,
     });
-  });
 
-  chatCompletion.finalChatCompletion().then(() => {
-    setSummaryIsLoading(false);
+    if (openaiEndpoint !== "") {
+      openai.baseURL = openaiEndpoint;
+    }
+
+    setSummaryIsLoading(true);
+
     showToast({
-      style: Toast.Style.Success,
-      title: SUCCESS_SUMMARIZING_VIDEO.title,
-      message: SUCCESS_SUMMARIZING_VIDEO.message,
+      style: Toast.Style.Animated,
+      title: SUMMARIZING_VIDEO.title,
+      message: SUMMARIZING_VIDEO.message,
     });
-  });
 
-  chatCompletion.on("error", (error) => {
-    setSummaryIsLoading(false);
-    showToast({
-      style: Toast.Style.Failure,
-      title: ALERT.title,
-      message: error.message,
+    const chatCompletion = openai.beta.chat.completions.stream({
+      model: openaiModel || OPENAI_MODEL,
+      temperature: parseInt(creativity),
+      messages: [{ role: "user", content: aiInstructions }],
+      stream: true,
     });
-  });
+
+    chatCompletion.on("content", (delta) => {
+      setSummary((result) => {
+        if (result === undefined) return delta || undefined;
+        return result + delta || result;
+      });
+    });
+
+    chatCompletion.finalChatCompletion().then(() => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Success,
+        title: SUCCESS_SUMMARIZING_VIDEO.title,
+        message: SUCCESS_SUMMARIZING_VIDEO.message,
+      });
+    });
+
+    chatCompletion.on("error", (error) => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: ALERT.title,
+        message: error.message,
+      });
+    });
+  }, [transcript]);
 };

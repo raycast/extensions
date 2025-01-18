@@ -12,7 +12,7 @@ import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
 interface SummarizeVideoWithRaycastProps {
-  video: string;
+  video: string | undefined | null;
 }
 export type RaycastPreferences = {
   creativity: "0" | "0.5" | "1" | "1.5" | "2";
@@ -28,10 +28,9 @@ export default function SummarizeVideoWithRaycast(
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const { video } = props.arguments;
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  useGetVideoUrl(video).then((url) => setVideoURL(url));
+  useGetVideoUrl({ input: props.arguments.video, setVideoURL }).then((url) => setVideoURL(url));
 
   useEffect(() => {
     if (!videoURL) return;

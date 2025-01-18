@@ -34,6 +34,8 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       creativity: parseInt(creativity),
     });
 
+    setSummaryIsLoading(true);
+
     showToast({
       style: Toast.Style.Animated,
       title: SUMMARIZING_VIDEO.title,
@@ -64,6 +66,4 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
       });
     });
   }, [transcript]);
-
-  return null;
 };

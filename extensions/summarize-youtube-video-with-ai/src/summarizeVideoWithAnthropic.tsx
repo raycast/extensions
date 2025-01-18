@@ -4,11 +4,11 @@ import nodeFetch from "node-fetch";
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
 
 import { useEffect, useState } from "react";
-import ytdl from "ytdl-core";
 import ActionAnthropicFollowUp from "./components/anthropic/ActionAnthropicFollowUp";
 import { useAnthropicSummary } from "./components/anthropic/hooks/useAnthropicSummary";
 import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
+import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
@@ -31,19 +31,13 @@ export default function SummarizeVideoWithAnthropic(
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
-  const { video } = props.arguments;
+  const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid URL/ID",
-      message: "The passed URL/ID is invalid, please check your input.",
-    });
-    return null;
-  }
+  useGetVideoUrl({ input: props.arguments.video, setVideoURL }).then((url) => setVideoURL(url));
 
   useEffect(() => {
-    getVideoData(video)
+    if (!videoURL) return;
+    getVideoData(videoURL)
       .then(setVideoData)
       .catch((error) => {
         showToast({
@@ -52,7 +46,7 @@ export default function SummarizeVideoWithAnthropic(
           message: "Error fetching video data: " + error.message,
         });
       });
-    getVideoTranscript(video)
+    getVideoTranscript(videoURL)
       .then(setTranscript)
       .catch((error) => {
         showToast({
@@ -61,11 +55,9 @@ export default function SummarizeVideoWithAnthropic(
           message: "Error fetching video transcript: " + error.message,
         });
       });
-  }, [video]);
+  }, [videoURL]);
 
-  useEffect(() => {
-    useAnthropicSummary({ transcript, setSummaryIsLoading, setSummary });
-  }, [transcript]);
+  useAnthropicSummary({ transcript, setSummaryIsLoading, setSummary });
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;

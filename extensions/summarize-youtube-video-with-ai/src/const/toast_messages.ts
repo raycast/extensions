@@ -26,3 +26,13 @@ export const GETTING_VIDEO_URL = {
   title: "🔗",
   message: "Checking video URL",
 };
+
+export const GETTING_VIDEO_URL_FROM_BROWSER = {
+  title: "🔗",
+  message: "Checking Browser Extension",
+};
+
+export const GETTING_VIDEO_URL_FROM_CLIPBOARD = {
+  title: "🔗",
+  message: "Checking Clipboard",
+};

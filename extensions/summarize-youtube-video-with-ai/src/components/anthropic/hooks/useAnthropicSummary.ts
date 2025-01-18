@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import React from "react";
+import React, { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 
@@ -21,8 +21,6 @@ export const useAnthropicSummary = async ({
   const preferences = getPreferenceValues() as AnthropicPreferences;
   const { anthropicApiToken, language, anthropicModel } = preferences;
 
-  if (!transcript) return;
-
   if (anthropicApiToken === "") {
     showToast({
       title: ALERT.title,
@@ -33,49 +31,53 @@ export const useAnthropicSummary = async ({
     return;
   }
 
-  const anthropic = new Anthropic({
-    apiKey: anthropicApiToken,
-  });
+  useEffect(() => {
+    if (!transcript) return;
 
-  setSummaryIsLoading(true);
-
-  const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
-
-  showToast({
-    style: Toast.Style.Animated,
-    title: SUMMARIZING_VIDEO.title,
-    message: SUMMARIZING_VIDEO.message,
-  });
-
-  const chatCompletion = anthropic.messages.stream({
-    model: anthropicModel || ANTHROPIC_MODEL,
-    max_tokens: 8192,
-    stream: true,
-    messages: [{ role: "user", content: aiInstructions }],
-  });
-
-  chatCompletion.on("text", (delta) => {
-    setSummary((result) => {
-      if (result === undefined) return delta || undefined;
-      return result + delta || result;
+    const anthropic = new Anthropic({
+      apiKey: anthropicApiToken,
     });
-  });
 
-  chatCompletion.finalMessage().then(() => {
-    setSummaryIsLoading(false);
+    setSummaryIsLoading(true);
+
+    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
+
     showToast({
-      style: Toast.Style.Success,
-      title: SUCCESS_SUMMARIZING_VIDEO.title,
-      message: SUCCESS_SUMMARIZING_VIDEO.message,
+      style: Toast.Style.Animated,
+      title: SUMMARIZING_VIDEO.title,
+      message: SUMMARIZING_VIDEO.message,
     });
-  });
 
-  chatCompletion.on("error", (error) => {
-    setSummaryIsLoading(false);
-    showToast({
-      style: Toast.Style.Failure,
-      title: ALERT.title,
-      message: error.message,
+    const chatCompletion = anthropic.messages.stream({
+      model: anthropicModel || ANTHROPIC_MODEL,
+      max_tokens: 8192,
+      stream: true,
+      messages: [{ role: "user", content: aiInstructions }],
     });
-  });
+
+    chatCompletion.on("text", (delta) => {
+      setSummary((result) => {
+        if (result === undefined) return delta || undefined;
+        return result + delta || result;
+      });
+    });
+
+    chatCompletion.finalMessage().then(() => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Success,
+        title: SUCCESS_SUMMARIZING_VIDEO.title,
+        message: SUCCESS_SUMMARIZING_VIDEO.message,
+      });
+    });
+
+    chatCompletion.on("error", (error) => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: ALERT.title,
+        message: error.message,
+      });
+    });
+  }, [transcript]);
 };

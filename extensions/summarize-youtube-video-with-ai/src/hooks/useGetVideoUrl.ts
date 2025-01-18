@@ -1,51 +1,69 @@
-import { BrowserExtension, Clipboard, environment, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { BrowserExtension, Clipboard, environment, popToRoot, showToast, Toast } from "@raycast/api";
+import { useEffect } from "react";
 import ytdl from "ytdl-core";
-import { GETTING_VIDEO_URL } from "../const/toast_messages";
+import {
+  GETTING_VIDEO_URL,
+  GETTING_VIDEO_URL_FROM_BROWSER,
+  GETTING_VIDEO_URL_FROM_CLIPBOARD,
+} from "../const/toast_messages";
 
-export const useGetVideoUrl = async (input: string | undefined) => {
-  const [videoURL, setVideoURL] = useState<string | undefined>();
-
+export const useGetVideoUrl = async ({
+  input,
+  setVideoURL,
+}: {
+  input: string | undefined | null;
+  setVideoURL: React.Dispatch<React.SetStateAction<string | null | undefined>>;
+}) => {
   useEffect(() => {
-    showToast({
-      style: Toast.Style.Animated,
-      title: GETTING_VIDEO_URL.title,
-      message: GETTING_VIDEO_URL.message,
-    });
-
-    if (input && ytdl.validateURL(input)) {
-      setVideoURL(input);
-      return;
-    }
-
     const fetchData = async () => {
+      showToast({
+        style: Toast.Style.Animated,
+        title: GETTING_VIDEO_URL.title,
+        message: GETTING_VIDEO_URL.message,
+      });
+
+      if (input && ytdl.validateURL(input)) {
+        setVideoURL(input);
+        return;
+      }
+
+      const clipboardText = await Clipboard.readText();
+      const clipboardIsYTUrl = clipboardText && ytdl.validateURL(clipboardText);
+
+      if (!input && clipboardIsYTUrl) {
+        showToast({
+          style: Toast.Style.Animated,
+          title: GETTING_VIDEO_URL_FROM_CLIPBOARD.title,
+          message: GETTING_VIDEO_URL_FROM_CLIPBOARD.message,
+        });
+        setVideoURL(clipboardText);
+        return;
+      }
+
       if (!input && environment.canAccess(BrowserExtension)) {
         const tabs = await BrowserExtension.getTabs();
-        tabs.forEach((tab) => {
-          if (tab.active && ytdl.validateURL(tab.url)) {
-            setVideoURL(tab.url);
-          }
-        });
+        const activeTab = tabs.find((tab) => tab.active && ytdl.validateURL(tab.url));
+        if (activeTab) {
+          showToast({
+            style: Toast.Style.Animated,
+            title: GETTING_VIDEO_URL_FROM_BROWSER.title,
+            message: GETTING_VIDEO_URL_FROM_BROWSER.message,
+          });
+          setVideoURL(activeTab.url);
+          return;
+        }
       }
 
-      const text = await Clipboard.readText();
-
-      if (!input && text && (ytdl.validateURL(text) || ytdl.validateID(text))) {
-        setVideoURL(text);
-      }
-
-      if (!input && !videoURL && !text) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid URL/ID",
-          message: "The passed URL/ID is invalid, please check your input.",
-        });
-        return null;
-      }
+      showToast({
+        style: Toast.Style.Failure,
+        title: "No video URL found",
+        message: "Please provide a valid YouTube video URL or ID.",
+      });
+      popToRoot();
     };
 
     fetchData();
   }, []);
 
-  return videoURL;
+  return input;
 };
