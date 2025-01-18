@@ -1,6 +1,5 @@
-import { showHUD } from "@raycast/api";
+import { showHUD, getPreferenceValues, Application } from "@raycast/api";
 import { exec } from "child_process";
-import { preferences } from "./types/preferences";
 import { promisify } from "util";
 import { Connection } from "./types/connection";
 
@@ -8,6 +7,12 @@ export interface ExecResult {
   stdout: string;
   stderr: string;
 }
+
+export const preferences: {
+  connectionId: string;
+  connectionPin: string;
+  pritunlApp: Application;
+} = getPreferenceValues();
 
 const execp = promisify(exec);
 
