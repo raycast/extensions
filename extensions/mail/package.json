@@ -13,7 +13,8 @@
     "lukah",
     "stelo",
     "StevenRCE0",
-    "ridemountainpig"
+    "ridemountainpig",
+    "ViGeng"
   ],
   "categories": [
     "Applications",
@@ -88,7 +89,18 @@
       "name": "see-recent-mail",
       "title": "See Recent Mail",
       "description": "See recent unread messages.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "unreadonly",
+          "label": "Only show unread messages",
+          "title": "Unread-Only",
+          "description": "Only show unread messages.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "see-important-mail",

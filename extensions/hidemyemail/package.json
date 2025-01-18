@@ -26,7 +26,7 @@
           "description": "If enabled, the email list is sorted on most recently created.",
           "type": "checkbox",
           "required": false,
-          "default": false
+          "default": true
         }
       ]
     },

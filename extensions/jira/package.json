@@ -13,14 +13,17 @@
     "lusit",
     "literallyjustroy",
     "mheidinger",
-    "mikybars",
     "luarmr",
     "horumy",
     "santiago_perez",
-    "silv"
+    "silv",
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH"
   ],
   "pastContributors": [
-    "igor9silva"
+    "igor9silva",
+    "mikybars"
   ],
   "owner": "raycast",
   "access": "public",
@@ -145,6 +148,22 @@
       "description": "API Token",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
   "dependencies": {

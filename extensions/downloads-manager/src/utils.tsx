@@ -4,19 +4,37 @@ import { join } from "path";
 import { ComponentType } from "react";
 import untildify from "untildify";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues();
 export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
+const showHiddenFiles = preferences.showHiddenFiles;
+const fileOrder = preferences.fileOrder;
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
   return files
-    .filter((file) => !file.startsWith("."))
+    .filter((file) => showHiddenFiles || !file.startsWith("."))
     .map((file) => {
       const path = join(downloadsFolder, file);
-      const lastModifiedAt = statSync(path).mtime;
-      return { file, path, lastModifiedAt };
+      const stats = statSync(path);
+      return {
+        file,
+        path,
+        lastModifiedAt: stats.mtime,
+        createdAt: stats.ctime,
+        addedAt: stats.atime,
+      };
     })
-    .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+    .sort((a, b) => {
+      switch (fileOrder) {
+        case "addTime":
+          return b.addedAt.getTime() - a.addedAt.getTime();
+        case "createTime":
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        case "modifiedTime":
+        default:
+          return b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime();
+      }
+    });
 }
 
 export function getLatestDownload() {

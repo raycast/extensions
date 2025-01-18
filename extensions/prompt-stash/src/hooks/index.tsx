@@ -4,6 +4,19 @@ import { Prompt, SuccessCallback, UseLocalPromptsReturn, UsePromptReturn } from 
 
 const PROMPTS_KEY = "prompts";
 
+const sortPrompts = (prompts: Prompt[]) => {
+  return prompts.sort((a: Prompt, b: Prompt) => {
+    if (a?.updatedAt && b?.updatedAt) {
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }
+    if (a.updatedAt) return -1;
+    if (b.updatedAt) return 1;
+    if (a.isFavorite && !b.isFavorite) return -1;
+    if (!a.isFavorite && b.isFavorite) return 1;
+    return 0;
+  });
+};
+
 export function useLocalPrompts(): UseLocalPromptsReturn {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,11 +30,7 @@ export function useLocalPrompts(): UseLocalPromptsReturn {
       const storedPrompts = await LocalStorage.getItem<string>(PROMPTS_KEY);
       if (storedPrompts) {
         const parsedPrompts = JSON.parse(storedPrompts);
-        const orderedPrompts = parsedPrompts.sort((a: Prompt, b: Prompt) => {
-          if (a.isFavorite && !b.isFavorite) return -1;
-          if (!a.isFavorite && b.isFavorite) return 1;
-          return 0;
-        });
+        const orderedPrompts = sortPrompts(parsedPrompts);
         setPrompts(orderedPrompts);
       }
     } catch (error) {
@@ -77,6 +86,23 @@ export function usePrompt(): UsePromptReturn {
       await showToast({ title: "Error", message: "Failed to delete prompt" });
     }
   }
+  async function update(promptId: string, updatedPrompt: Prompt, onSuccess?: SuccessCallback, onError?: ErrorCallback) {
+    try {
+      const storedPrompts = await LocalStorage.getItem<string>(PROMPTS_KEY);
+      const currentPrompts = storedPrompts ? JSON.parse(storedPrompts) : [];
 
-  return [create, destroy];
+      const updatedPrompts = currentPrompts.map((p: Prompt) =>
+        p.id === promptId ? { ...updatedPrompt, updatedAt: new Date() } : p,
+      );
+
+      const sortedPrompts = sortPrompts(updatedPrompts);
+      await LocalStorage.setItem(PROMPTS_KEY, JSON.stringify(sortedPrompts));
+      onSuccess?.();
+      loadPrompts();
+    } catch (error) {
+      onError?.(error as DOMException);
+    }
+  }
+
+  return [create, destroy, update];
 }

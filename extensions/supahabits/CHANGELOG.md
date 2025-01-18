@@ -1,5 +1,9 @@
 # SupaHabits Changelog
 
+### [Create and track repeatable habits] - 2025-01-10
+
+Added the ability to create and track repeatable habits.
+
 ## [Link to track past habits] - 2024-11-14
 
 Added link to track past habits.
