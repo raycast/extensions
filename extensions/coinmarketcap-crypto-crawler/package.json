@@ -30,7 +30,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
+    "@raycast/api": "^1.25.0",
     "@raycast/utils": "^1.18.1",
     "axios": "^0.21.1",
     "bignumber.js": "^9.1.2",
