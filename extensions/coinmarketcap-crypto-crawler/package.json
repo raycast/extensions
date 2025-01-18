@@ -30,7 +30,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.89.0",
     "@raycast/utils": "^1.18.1",
     "axios": "^0.21.1",
     "bignumber.js": "^9.1.2",
@@ -43,7 +43,7 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -53,6 +53,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "eslint src/**/*.ts"
   }
 }

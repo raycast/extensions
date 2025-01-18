@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useState, useMemo } from "react";
+import React, { useState } from "react";
 import fuzzysort from "fuzzysort";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -50,24 +50,28 @@ export default function SearchCryptoList() {
       onSearchTextChange={onSearchChange}
       onSelectionChange={onSelectChange}
     >
-      {searchResult.length !== 0 && (
+      {searchResult.length === 0 ? (
+        <List.EmptyView title="No results found" />
+      ) : (
         <List.Section title="Search results">
-          {searchResult.map(({ name, symbol, slug }) => {
-            const isWatchList = watchList.some(({ slug: watchListSlug }) => slug === watchListSlug);
-            return (
-              <CoinListItem
-                key={slug + "_" + name}
-                name={name}
-                slug={slug}
-                symbol={symbol}
-                coinPriceStore={coinPriceStore}
-                addToWatchList={addToWatchList}
-                removeFromWatchList={removeFromWatchList}
-                isWatchList={isWatchList}
-                refreshCoinPrice={refreshCoinPrice}
-              />
-            );
-          })}
+          {
+            searchResult.map(({ name, symbol, slug }) => {
+              const isWatchList = watchList.some(({ slug: watchListSlug }) => slug === watchListSlug);
+              return (
+                <CoinListItem
+                  key={slug + "_" + name}
+                  name={name}
+                  slug={slug}
+                  symbol={symbol}
+                  coinPriceStore={coinPriceStore}
+                  addToWatchList={addToWatchList}
+                  removeFromWatchList={removeFromWatchList}
+                  isWatchList={isWatchList}
+                  refreshCoinPrice={refreshCoinPrice}
+                />
+              );
+            }) as React.ReactNode
+          }
         </List.Section>
       )}
     </List>
