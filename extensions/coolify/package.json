@@ -53,6 +53,12 @@
       "title": "View Projects",
       "description": "View Projects, Environments and Resources",
       "mode": "view"
+    },
+    {
+      "name": "private-keys",
+      "title": "View Private Keys",
+      "description": "View Private Keys",
+      "mode": "view"
     }
   ],
   "dependencies": {

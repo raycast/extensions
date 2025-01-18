@@ -86,6 +86,13 @@ export default function Chat({ launchContext }) {
           <Form.Dropdown.Item title="Default" value="default" />
           <Form.Dropdown.Item title="Gemini 1.5 Pro" value="gemini-1.5-pro-latest" />
           <Form.Dropdown.Item title="Gemini 1.5 Flash" value="gemini-1.5-flash-latest" />
+          <Form.Dropdown.Item title="Gemini 2.0 Flash Experimental" value="gemini-2.0-flash-exp" />
+          <Form.Dropdown.Item title="Gemini Experimental 1206" value="gemini-exp-1206" />
+          <Form.Dropdown.Item
+            title="Gemini 2.0 Flash Thinking Experimental"
+            value="gemini-2.0-flash-thinking-exp-1219"
+          />
+          <Form.Dropdown.Item title="LearnLM 1.5 Pro Experimental" value="learnlm-1.5-pro-experimental" />
         </Form.Dropdown>
       </Form>
     );

@@ -14,7 +14,9 @@
     "Aiee",
     "nagauta",
     "a-laughlin",
-    "tleo19"
+    "tleo19",
+    "Tarocch1",
+    "santiago_perez"
   ],
   "license": "MIT",
   "commands": [
@@ -62,6 +64,16 @@
     }
   ],
   "preferences": [
+    {
+      "description": "Find the full path to the Google Chrome Profile path via chrome://version/. If empty, the default profile will be used.",
+      "label": "Profile",
+      "default": "",
+      "name": "profilePath",
+      "required": false,
+      "title": "Profile Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
+    },
     {
       "default": false,
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Chrome profile.",

@@ -12,6 +12,7 @@ import https from "https";
 // Define interfaces
 interface ExtensionPreferences {
   defaultDownloadFolder: string;
+  defaultLanguage: string;
 }
 
 interface TranscriptResult {
@@ -58,48 +59,71 @@ function extractVideoId(url: string): string | null {
 
 // Function to fetch video transcript
 async function getVideoTranscript(videoId: string): Promise<TranscriptResult> {
+  const { defaultLanguage } = getPreferenceValues<ExtensionPreferences>();
+
+  // Try with preferred language
   try {
-    // Fetch transcript using youtube-captions-scraper
     const transcriptItems = await getSubtitles({
       videoID: videoId,
-      lang: "en", // Default to English
+      lang: defaultLanguage || "en",
+    });
+
+    if (transcriptItems && transcriptItems.length > 0) {
+      const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+      const title = await getVideoTitle(videoId);
+      return { transcript, title };
+    }
+  } catch (error) {
+    console.warn(`Failed to get captions in preferred language: ${defaultLanguage}`);
+  }
+
+  // Try with English
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "en",
+    });
+
+    if (transcriptItems && transcriptItems.length > 0) {
+      const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
+      const title = await getVideoTitle(videoId);
+      return { transcript, title };
+    }
+  } catch (error) {
+    console.warn("Failed to get English captions");
+  }
+
+  // Try auto-generated captions
+  try {
+    const transcriptItems = await getSubtitles({
+      videoID: videoId,
+      lang: "auto",
     });
 
     if (!transcriptItems || transcriptItems.length === 0) {
-      return {
-        transcript: "No transcript available",
-        title: `Video ${videoId}`,
-      };
+      throw new Error("Transcript Not Available");
     }
 
-    // Process transcript items into readable text
     const transcript = transcriptItems.map((item: TranscriptItem) => item.text).join("\n\n");
-
-    // Try to fetch video title using https
-    let title = `YouTube Video ${videoId}`;
-    try {
-      const html = await fetchUrl(`https://www.youtube.com/watch?v=${videoId}`);
-      const titleMatch = html.match(/<title>(.*?)<\/title>/);
-      if (titleMatch && titleMatch[1]) {
-        title = titleMatch[1].replace(" - YouTube", "");
-      }
-    } catch (error) {
-      console.warn("Could not fetch video title, using default");
-    }
-
-    return {
-      transcript,
-      title,
-    };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Detailed error:", error);
-      throw new Error(`Failed to fetch transcript: ${error.message}`);
-    } else {
-      console.error("Unknown error:", error);
-      throw new Error("Failed to fetch transcript: Unknown error occurred");
-    }
+    const title = await getVideoTitle(videoId);
+    return { transcript, title };
+  } catch (error) {
+    throw new Error("Transcript Not Available");
   }
+}
+
+// Helper function to get video title
+async function getVideoTitle(videoId: string): Promise<string> {
+  try {
+    const html = await fetchUrl(`https://www.youtube.com/watch?v=${videoId}`);
+    const titleMatch = html.match(/<title>(.*?)<\/title>/);
+    if (titleMatch && titleMatch[1]) {
+      return titleMatch[1].replace(" - YouTube", "");
+    }
+  } catch (error) {
+    console.warn("Could not fetch video title");
+  }
+  return `YouTube Video ${videoId}`;
 }
 
 // Sanitize filename to remove invalid characters
@@ -164,8 +188,8 @@ export default async function Command(props: { arguments: { videoUrl: string } }
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Error fetching transcript",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
+      title: "Error",
+      message: error instanceof Error ? error.message : "Transcript Not Available",
     });
   }
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
+## 1.88.0 - 2024-12-16
+
+### 🐞 Fixes
+
+- **Markdown**: Fixed a crash when trying to print invalid surrogate code points
+- **Types**: Fixed an issue when generating the TypeScript definition for the preferences when one of their descriptions contained `*/`
+
 ## 1.87.0 - 2024-12-04
 
 ### ✨ New

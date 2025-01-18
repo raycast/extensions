@@ -8,7 +8,9 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await fetch("http://localhost:10769/previous");
+    await fetch("http://localhost:10767/api/v1/playback/previous", {
+      method: "POST",
+    });
     if (exitOnSuccess) await showHUD("⏮️ Returned to the Previous Track");
     else
       await showToast({

@@ -94,7 +94,9 @@ export default function main() {
 
     return Object.entries(dateTimeFormats)
       .filter(([key]) => preferences[key])
-      .map(([_, value]) => dTime.format(value).toString());
+      .map(([key, value]) =>
+        key === "utcIsoFormat" ? dTime.utc().format(value).toString() : dTime.format(value).toString()
+      );
   }
 
   type ActionItem = {

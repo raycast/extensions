@@ -9,10 +9,18 @@ export class ChromeListItems {
   public static TabHistory = HistoryItem;
 }
 
-function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
+function HistoryItem({
+  profile,
+  entry: { url, title, id },
+  type,
+}: {
+  entry: HistoryEntry;
+  profile: string;
+  type: "History" | "Bookmark";
+}): ReactElement {
   return (
     <List.Item
-      id={`${profile}-${id}`}
+      id={`${profile}-${type}-${id}`}
       title={title}
       subtitle={url}
       icon={getFavicon(url)}
@@ -28,7 +36,7 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed
       subtitle={props.tab.urlWithoutScheme()}
       keywords={[props.tab.urlWithoutScheme()]}
       actions={<ChromeActions.TabList tab={props.tab} onTabClosed={props.onTabClosed} />}
-      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
+      icon={props.useOriginalFavicon ? props.tab.realFavicon() : props.tab.googleFavicon()}
     />
   );
 }
