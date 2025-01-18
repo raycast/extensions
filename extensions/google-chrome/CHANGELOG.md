@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Allow to configure profile path] - {PR_MERGE_DATE}
+## [Allow to configure profile path] - 2025-01-18
 - The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
 ## [Fix] - 2025-01-09
