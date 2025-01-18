@@ -30,7 +30,7 @@
           "name": "video",
           "placeholder": "Video URL or ID",
           "type": "text",
-          "required": true
+          "required": false
         }
       ],
       "preferences": [

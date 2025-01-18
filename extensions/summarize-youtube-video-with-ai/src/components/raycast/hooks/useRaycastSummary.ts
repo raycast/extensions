@@ -1,5 +1,5 @@
 import { AI, environment, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import React from "react";
+import React, { useEffect } from "react";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 
 import { RaycastPreferences } from "../../../summarizeVideoWithRaycast";
@@ -25,43 +25,45 @@ export const useRaycastSummary = async ({ transcript, setSummaryIsLoading, setSu
     return;
   }
 
-  if (!transcript) return;
+  useEffect(() => {
+    if (!transcript) return;
 
-  const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
+    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 
-  const raycastSummary = AI.ask(aiInstructions, {
-    creativity: parseInt(creativity),
-  });
-
-  showToast({
-    style: Toast.Style.Animated,
-    title: SUMMARIZING_VIDEO.title,
-    message: SUMMARIZING_VIDEO.message,
-  });
-
-  raycastSummary.on("data", (data) => {
-    setSummary((result) => {
-      if (result === undefined) return data;
-      return result + data;
+    const raycastSummary = AI.ask(aiInstructions, {
+      creativity: parseInt(creativity),
     });
-  });
 
-  raycastSummary.finally(() => {
-    setSummaryIsLoading(false);
     showToast({
-      style: Toast.Style.Success,
-      title: SUCCESS_SUMMARIZING_VIDEO.title,
-      message: SUCCESS_SUMMARIZING_VIDEO.message,
+      style: Toast.Style.Animated,
+      title: SUMMARIZING_VIDEO.title,
+      message: SUMMARIZING_VIDEO.message,
     });
-  });
 
-  raycastSummary.catch((error) => {
-    showToast({
-      style: Toast.Style.Failure,
-      title: ALERT.title,
-      message: error.message,
+    raycastSummary.on("data", (data) => {
+      setSummary((result) => {
+        if (result === undefined) return data;
+        return result + data;
+      });
     });
-  });
+
+    raycastSummary.finally(() => {
+      setSummaryIsLoading(false);
+      showToast({
+        style: Toast.Style.Success,
+        title: SUCCESS_SUMMARIZING_VIDEO.title,
+        message: SUCCESS_SUMMARIZING_VIDEO.message,
+      });
+    });
+
+    raycastSummary.catch((error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: ALERT.title,
+        message: error.message,
+      });
+    });
+  }, [transcript]);
 
   return null;
 };

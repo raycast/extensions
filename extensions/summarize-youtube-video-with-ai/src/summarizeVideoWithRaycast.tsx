@@ -3,11 +3,11 @@ import nodeFetch from "node-fetch";
 
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import ytdl from "ytdl-core";
 import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
 import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
 import SummaryDetails from "./components/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
+import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
 import { getVideoTranscript } from "./utils/getVideoTranscript";
 
@@ -29,18 +29,13 @@ export default function SummarizeVideoWithRaycast(
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const { video } = props.arguments;
+  const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  if (!ytdl.validateURL(video) && !ytdl.validateID(video)) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid URL/ID",
-      message: "The passed URL/ID is invalid, please check your input.",
-    });
-    return null;
-  }
+  useGetVideoUrl(video).then((url) => setVideoURL(url));
 
   useEffect(() => {
-    getVideoData(video)
+    if (!videoURL) return;
+    getVideoData(videoURL)
       .then(setVideoData)
       .catch((error) => {
         showToast({
@@ -49,7 +44,7 @@ export default function SummarizeVideoWithRaycast(
           message: "Error fetching video data: " + error.message,
         });
       });
-    getVideoTranscript(video)
+    getVideoTranscript(videoURL)
       .then(setTranscript)
       .catch((error) => {
         showToast({
@@ -58,11 +53,9 @@ export default function SummarizeVideoWithRaycast(
           message: "Error fetching video transcript: " + error.message,
         });
       });
-  }, [video]);
+  }, [videoURL]);
 
-  useEffect(() => {
-    useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
-  }, [transcript]);
+  useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;

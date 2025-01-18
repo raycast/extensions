@@ -21,3 +21,8 @@ export const FINDING_ANSWER = {
   title: "🔍",
   message: "Answering your question",
 };
+
+export const GETTING_VIDEO_URL = {
+  title: "🔗",
+  message: "Checking video URL",
+};
