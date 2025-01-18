@@ -10,10 +10,10 @@ type CoinListItemProps = {
   slug: string;
   symbol: string;
   coinPriceStore: { [key: string]: PriceData };
-  addFavoriteCoin: (coin: CryptoCurrency) => void;
-  removeFavoriteCoin: (coin: CryptoCurrency) => void;
+  addToWatchList: (coin: CryptoCurrency) => void;
+  removeFromWatchList: (coin: CryptoCurrency) => void;
   refreshCoinPrice: () => void;
-  isFavorite: boolean;
+  isWatchList: boolean;
 };
 
 export default function CoinListItem({
@@ -21,10 +21,10 @@ export default function CoinListItem({
   slug,
   symbol,
   coinPriceStore,
-  addFavoriteCoin,
+  addToWatchList,
   refreshCoinPrice,
-  isFavorite,
-  removeFavoriteCoin,
+  isWatchList,
+  removeFromWatchList,
 }: CoinListItemProps) {
   const coinPrice = coinPriceStore[slug];
   const { push } = useNavigation();
@@ -47,7 +47,7 @@ export default function CoinListItem({
       title={name}
       icon={{
         source: Icon.Star,
-        tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
+        tintColor: isWatchList ? Color.Yellow : Color.PrimaryText,
       }}
       subtitle={`$${symbol.toUpperCase()}`}
       accessories={[{ text: accessoryTitle }]}
@@ -66,14 +66,14 @@ export default function CoinListItem({
           )}
 
           <Action
-            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            title={isWatchList ? "Remove from Watchlist" : "Add to Watchlist"}
             icon={Icon.Star}
             shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={() => {
-              if (isFavorite) {
-                removeFavoriteCoin({ name, slug, symbol });
+              if (isWatchList) {
+                removeFromWatchList({ name, slug, symbol });
               } else {
-                addFavoriteCoin({ name, slug, symbol });
+                addToWatchList({ name, slug, symbol });
               }
             }}
           />

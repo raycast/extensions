@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, showToast, Toast, Icon, List, useNavigation } from "@raycast/api";
+import { showToast, Toast, List } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
@@ -6,8 +6,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
-import refreshCryptoList from "./utils/refreshCryptoList";
-import useFavoriteCoins from "./utils/useFavoriteCoins";
+import useCoinWatchList from "./utils/useCoinWatchList";
 import { CryptoCurrency } from "./types";
 import CoinListItem from "./components/CoinListItem";
 import useCoinPriceStore from "./utils/useCoinPriceStore";
@@ -23,12 +22,12 @@ export default function SearchCryptoList() {
 
   const { store: coinPriceStore, refresh: refreshCoinPrice } = useCoinPriceStore(selectedSlug);
 
-  const { favoriteCoins, addFavoriteCoin, removeFavoriteCoin, loading: favoriteLoading } = useFavoriteCoins();
+  const { watchList, addToWatchList, removeFromWatchList, loading: favoriteLoading } = useCoinWatchList();
 
-  const favoriteCoinSlugs = useMemo(() => favoriteCoins.map(({ slug }) => slug), [favoriteCoins]);
+  const favoriteCoinSlugs = useMemo(() => watchList.map(({ slug }) => slug), [watchList]);
   const displayedSearchResult = useMemo<CryptoCurrency[]>(() => {
     return searchResult.filter(({ slug }) => !favoriteCoinSlugs.includes(slug));
-  }, [favoriteCoins, searchResult]);
+  }, [watchList, searchResult]);
 
   useEffect(() => {
     getListFromFile((err, data) => {
@@ -95,18 +94,18 @@ export default function SearchCryptoList() {
       onSearchTextChange={onSearchChange}
       onSelectionChange={onSelectChange}
     >
-      {!favoriteLoading && favoriteCoins.length > 0 && (
+      {!favoriteLoading && watchList.length > 0 && (
         <List.Section title="Favorite Coins">
-          {favoriteCoins.map(({ name, symbol, slug }) => (
+          {watchList.map(({ name, symbol, slug }) => (
             <CoinListItem
               key={`FAV_${name}`}
               name={name}
               slug={slug}
               symbol={symbol}
               coinPriceStore={coinPriceStore}
-              addFavoriteCoin={addFavoriteCoin}
-              removeFavoriteCoin={removeFavoriteCoin}
-              isFavorite
+              addToWatchList={addToWatchList}
+              removeFromWatchList={removeFromWatchList}
+              isWatchList
               refreshCoinPrice={refreshCoinPrice}
             />
           ))}
@@ -122,9 +121,9 @@ export default function SearchCryptoList() {
               slug={slug}
               symbol={symbol}
               coinPriceStore={coinPriceStore}
-              addFavoriteCoin={addFavoriteCoin}
-              removeFavoriteCoin={removeFavoriteCoin}
-              isFavorite={false}
+              addToWatchList={addToWatchList}
+              removeFromWatchList={removeFromWatchList}
+              isWatchList={false}
               refreshCoinPrice={refreshCoinPrice}
             />
           ))}
