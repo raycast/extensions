@@ -1,12 +1,12 @@
-import { refreshExistingCacheAsync } from ".";
-import { showToast, ToastStyle } from "@raycast/api";
+import { refreshExistingCacheAsync } from "./utils";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
   try {
     await refreshExistingCacheAsync();
 
-    await showToast(ToastStyle.Success, "Refreshed successfully");
+    await showToast(Toast.Style.Success, "Refreshed successfully");
   } catch (error) {
-    showToast(ToastStyle.Failure, "Refresh failed", (error as Error)?.message);
+    showToast(Toast.Style.Failure, "Refresh failed", (error as Error)?.message);
   }
 };

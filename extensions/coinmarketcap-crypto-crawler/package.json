@@ -9,14 +9,29 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Crypto",
-      "subtitle": "CoinMarketCap",
-      "description": "Search for Coin Prices",
+      "title": "Search",
+      "subtitle": "Search Crypto",
+      "description": "Search for Coin Prices from CoinMarketCap",
       "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "View Watchlist",
+      "description": "View your crypto watchlist",
+      "mode": "view"
+    },
+    {
+      "name": "refresh",
+      "title": "Refresh",
+      "subtitle": "Refresh Crypto List",
+      "description": "Refresh existing Crypto List cache from CoinMarketCap",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
     "dayjs": "^1.10.7",

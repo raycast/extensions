@@ -21,13 +21,8 @@ export default function SearchCryptoList() {
 
   const { store: coinPriceStore, refresh: refreshCoinPrice } = useCoinPriceStore(selectedSlug);
 
-  const { watchList, addToWatchList, removeFromWatchList, loading: favoriteLoading } = useCoinWatchList();
+  const { watchList, addToWatchList, removeFromWatchList } = useCoinWatchList();
   const { cryptoList } = useCryptoList();
-
-  const favoriteCoinSlugs = useMemo(() => watchList.map(({ slug }) => slug), [watchList]);
-  const displayedSearchResult = useMemo<CryptoCurrency[]>(() => {
-    return searchResult.filter(({ slug }) => !favoriteCoinSlugs.includes(slug));
-  }, [watchList, searchResult]);
 
   const onSearchChange = (search: string) => {
     setIsLoading(true);
@@ -55,39 +50,24 @@ export default function SearchCryptoList() {
       onSearchTextChange={onSearchChange}
       onSelectionChange={onSelectChange}
     >
-      {!favoriteLoading && watchList.length > 0 && (
-        <List.Section title="Favorite Coins">
-          {watchList.map(({ name, symbol, slug }) => (
-            <CoinListItem
-              key={`FAV_${name}`}
-              name={name}
-              slug={slug}
-              symbol={symbol}
-              coinPriceStore={coinPriceStore}
-              addToWatchList={addToWatchList}
-              removeFromWatchList={removeFromWatchList}
-              isWatchList
-              refreshCoinPrice={refreshCoinPrice}
-            />
-          ))}
-        </List.Section>
-      )}
-
-      {displayedSearchResult.length === 0 ? null : (
+      {searchResult.length !== 0 && (
         <List.Section title="Search results">
-          {displayedSearchResult.map(({ name, symbol, slug }) => (
-            <CoinListItem
-              key={slug}
-              name={name}
-              slug={slug}
-              symbol={symbol}
-              coinPriceStore={coinPriceStore}
-              addToWatchList={addToWatchList}
-              removeFromWatchList={removeFromWatchList}
-              isWatchList={false}
-              refreshCoinPrice={refreshCoinPrice}
-            />
-          ))}
+          {searchResult.map(({ name, symbol, slug }) => {
+            const isWatchList = watchList.some(({ slug }) => slug === slug);
+            return (
+              <CoinListItem
+                key={slug + "_" + name}
+                name={name + slug}
+                slug={slug}
+                symbol={symbol}
+                coinPriceStore={coinPriceStore}
+                addToWatchList={addToWatchList}
+                removeFromWatchList={removeFromWatchList}
+                isWatchList={isWatchList}
+                refreshCoinPrice={refreshCoinPrice}
+              />
+            );
+          })}
         </List.Section>
       )}
     </List>

@@ -51,6 +51,7 @@ export default function useCoinWatchlist() {
     watchList,
     addToWatchList,
     removeFromWatchList,
+    clearWatchList,
     loading,
   };
 }

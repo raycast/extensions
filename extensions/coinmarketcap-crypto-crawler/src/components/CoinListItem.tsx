@@ -2,6 +2,7 @@ import { CryptoCurrency, PriceData } from "../types";
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useMemo } from "react";
 import CurrencyConverter from "./CurrencyConverter";
+import useCoinWatchList from "../utils/useCoinWatchList";
 
 const BASE_URL = "https://coinmarketcap.com/currencies/";
 
@@ -28,7 +29,7 @@ export default function CoinListItem({
 }: CoinListItemProps) {
   const coinPrice = coinPriceStore[slug];
   const { push } = useNavigation();
-
+  const { clearWatchList } = useCoinWatchList();
   let accessoryTitle;
   if (coinPrice) {
     const symbol = coinPrice.isUp ? "+" : "-";
@@ -43,7 +44,7 @@ export default function CoinListItem({
 
   return (
     <List.Item
-      id={`${slug}_${symbol}`}
+      id={`${slug}_${symbol}_${name}`}
       title={name}
       icon={{
         source: Icon.Star,
@@ -77,6 +78,16 @@ export default function CoinListItem({
               }
             }}
           />
+
+          {isWatchList && (
+            <Action
+              title="Clear Watchlist"
+              icon={Icon.Trash}
+              onAction={() => {
+                clearWatchList();
+              }}
+            />
+          )}
           <Action title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
