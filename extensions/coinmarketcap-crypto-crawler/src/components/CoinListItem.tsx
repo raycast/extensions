@@ -1,4 +1,4 @@
-import { CryptoCurrency, PriceData } from "../types";
+import { CryptoCurrency, PriceData, PriceDirection } from "../types";
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useMemo } from "react";
 import CurrencyConverter from "./CurrencyConverter";
@@ -31,10 +31,19 @@ export default function CoinListItem({
   const { push } = useNavigation();
   const { clearWatchList } = useCoinWatchList();
   let accessoryTitle;
+  let directionSymbol;
+  let directionColor;
 
   if (coinPrice) {
-    const symbol = coinPrice.isUp ? "+" : "-";
-    accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
+    if (coinPrice.direction) {
+      directionSymbol = coinPrice.direction === PriceDirection.UP ? "+" : "-";
+      directionColor = coinPrice.direction === PriceDirection.UP ? Color.Green : Color.Red;
+    } else {
+      directionSymbol = "";
+      directionColor = Color.PrimaryText;
+    }
+
+    accessoryTitle = `${coinPrice.currencyPrice}, ${directionSymbol}${coinPrice.priceDiff}`;
   }
 
   const price = useMemo(() => {
@@ -58,7 +67,7 @@ export default function CoinListItem({
               {
                 tag: {
                   value: accessoryTitle,
-                  color: coinPrice?.isUp ? Color.Green : Color.Red,
+                  color: directionColor,
                 },
               },
             ]

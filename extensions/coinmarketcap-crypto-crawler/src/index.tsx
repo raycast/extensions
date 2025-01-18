@@ -57,7 +57,7 @@ export default function SearchCryptoList() {
             return (
               <CoinListItem
                 key={slug + "_" + name}
-                name={name + slug}
+                name={name}
                 slug={slug}
                 symbol={symbol}
                 coinPriceStore={coinPriceStore}

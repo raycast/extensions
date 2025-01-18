@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as $ from 'cheerio';
 import fetch from "node-fetch";
-
+import { PriceDirection } from "../types";
 import { ResultData, PriceData } from "../types";
 
 type FetchParameters = {
@@ -30,18 +30,16 @@ export async function fetchPrice(slug: string): Promise<PriceData | null> {
       const priceSelector = '[data-test="text-cdp-price-display"]';
       const priceValueElement = $html(priceSelector);
 
-      const targetCoinDataChange = priceValueElement.next("");
+      const targetCoinDataChange = priceValueElement.next().find(".change-text");
       const priceDiff = targetCoinDataChange.text();
-      const changeDirection = targetCoinDataChange.attr("data-change");
+      const direction = targetCoinDataChange.attr("data-change") as PriceDirection;
       
-      const isUp = !!changeDirection && changeDirection.includes("up");
-
       const currencyPrice = $html(priceValueElement).text();
 
       if (!currencyPrice) {
         return null;
       }
 
-      return { currencyPrice, priceDiff, isUp };
+      return { currencyPrice, priceDiff, direction };
     });
 }

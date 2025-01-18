@@ -4,7 +4,7 @@
   "title": "CoinMarketCap Crypto Search",
   "description": "A price crawler to search crypto price from Coinmarketcap.",
   "icon": "coinmarketcap-icon.png",
-  "author": "SonicSpark",
+  "author": "SonicSpark (moojing)",
   "license": "MIT",
   "commands": [
     {
