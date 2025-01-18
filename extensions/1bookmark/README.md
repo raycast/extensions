@@ -8,3 +8,4 @@ We support Raycast extension as our top priority client and are developing a web
 
 - Add Bookmark: Create a new Bookmark.
 - Bookmarks: Search Bookmarks and Open it.
+
