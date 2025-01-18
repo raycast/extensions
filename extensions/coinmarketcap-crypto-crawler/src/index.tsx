@@ -53,7 +53,7 @@ export default function SearchCryptoList() {
       {searchResult.length !== 0 && (
         <List.Section title="Search results">
           {searchResult.map(({ name, symbol, slug }) => {
-            const isWatchList = watchList.some(({ slug }) => slug === slug);
+            const isWatchList = watchList.some(({ slug: watchListSlug }) => slug === watchListSlug);
             return (
               <CoinListItem
                 key={slug + "_" + name}
