@@ -4,6 +4,7 @@
 
 - fix the crawler issue caused by page structure change.
 - add a separated watchlist page to keep track of your favorite coins.
+- remove the original `favorite` section in the search result.
 - change the shortcut of add to watchlist to be `cmd + w`
 - use bignumber.js to handle the price calculation in the currency converter.
 - add colored tag with the price direction for each coin in the watchlist and search result.
