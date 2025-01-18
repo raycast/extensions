@@ -71,7 +71,7 @@
       "name": "profilePath",
       "required": false,
       "title": "Profile Path",
-      "type": "directory",
+      "type": "textfield",
       "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Profile 1"
     },
     {
