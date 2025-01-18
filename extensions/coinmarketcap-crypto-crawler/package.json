@@ -33,6 +33,7 @@
     "@raycast/api": "^1.89.0",
     "@raycast/utils": "^1.18.1",
     "axios": "^0.21.1",
+    "bignumber.js": "^9.1.2",
     "cheerio": "^1.0.0-rc.10",
     "dayjs": "^1.10.7",
     "fs-extra": "^10.0.0",

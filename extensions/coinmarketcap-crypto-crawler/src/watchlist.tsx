@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { List } from "@raycast/api";
 import useCoinWatchList from "./utils/useCoinWatchList";
 import CoinListItem from "./components/CoinListItem";
@@ -9,7 +9,7 @@ import { useFrecencySorting } from "@raycast/utils";
 export default function WatchList() {
   const [selectedSlug, setSelectedSlug] = useState<string>("");
 
-  const { store: coinPriceStore, refresh: refreshCoinPrice } = useCoinPriceStore(selectedSlug);
+  const { store: coinPriceStore, refresh: refreshCoinPrice, batchFetchPrice } = useCoinPriceStore(selectedSlug);
   const { watchList, addToWatchList, removeFromWatchList, loading: watchListLoading } = useCoinWatchList();
 
   const { data: sortedWatchList, visitItem } = useFrecencySorting<CryptoCurrency>(watchList, {
@@ -17,6 +17,10 @@ export default function WatchList() {
       return item.slug;
     },
   });
+
+  useEffect(() => {
+    batchFetchPrice(sortedWatchList.map(({ slug }) => slug));
+  }, [sortedWatchList]);
 
   const onSelectChange = (id?: string | null) => {
     if (!id) return;

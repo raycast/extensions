@@ -6,26 +6,28 @@ type CurrencyConverterProps = {
   name: string;
   symbol: string;
 };
+import BigNumber from "bignumber.js";
 
 export default function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) {
   const [inputText, setInputText] = useState("");
+
   const inputNumber = useMemo(() => {
     if (inputText !== "") {
-      return parseFloat(inputText.replace(/[$,]/g, ""));
+      return new BigNumber(inputText.replace(/[$,]/g, ""));
     } else {
-      return 1;
+      return new BigNumber(1);
     }
   }, [inputText]);
 
   const usdPrice = useMemo(() => {
-    if (inputNumber) {
-      return inputNumber * coinPrice;
+    if (!inputNumber.isNaN()) {
+      return inputNumber.multipliedBy(coinPrice).toFixed(2);
     }
   }, [inputNumber, coinPrice]);
 
   const currencyPrice = useMemo(() => {
-    if (inputNumber && inputNumber > 0) {
-      return inputNumber / coinPrice;
+    if (!inputNumber.isNaN() && inputNumber.gt(0)) {
+      return inputNumber.dividedBy(coinPrice).toFixed(8);
     }
   }, [inputNumber, coinPrice]);
 
@@ -34,11 +36,11 @@ export default function CurrencyConverter({ coinPrice, name, symbol }: CurrencyC
       <List.Section title={`Convert ${name} with USD`}>
         {usdPrice && (
           <List.Item
-            title={`${inputNumber} ${symbol.toUpperCase()}`}
+            title={`${inputNumber.toString()} ${symbol.toUpperCase()}`}
             accessories={[{ text: `${usdPrice} USD` }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={usdPrice.toString()} />
+                <Action.CopyToClipboard content={usdPrice} />
               </ActionPanel>
             }
           />
@@ -46,11 +48,11 @@ export default function CurrencyConverter({ coinPrice, name, symbol }: CurrencyC
 
         {currencyPrice && (
           <List.Item
-            title={`${inputNumber} USD`}
+            title={`${inputNumber.toString()} USD`}
             accessories={[{ text: `${currencyPrice} ${symbol.toUpperCase()}` }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={currencyPrice.toString()} />
+                <Action.CopyToClipboard content={currencyPrice} />
               </ActionPanel>
             }
           />

@@ -30,5 +30,18 @@ export default function useCoinPriceStore(slug: string) {
     }
   };
 
-  return { store: priceStore, refresh };
+  const batchFetchPrice = async (slugs: string[]) => {
+    const result = await Promise.all(slugs.map((slug) => fetchPrice(slug).then((data) => ({ slug, data }))));
+    setPriceStore((prev: PriceStore) => {
+      const newPriceStore = { ...prev };
+      result.forEach(({ slug, data }) => {
+        if (data) {
+          newPriceStore[slug] = data;
+        }
+      });
+      return newPriceStore;
+    });
+  };
+
+  return { store: priceStore, refresh, batchFetchPrice };
 }

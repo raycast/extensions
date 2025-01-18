@@ -31,6 +31,7 @@ export default function CoinListItem({
   const { push } = useNavigation();
   const { clearWatchList } = useCoinWatchList();
   let accessoryTitle;
+
   if (coinPrice) {
     const symbol = coinPrice.isUp ? "+" : "-";
     accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
@@ -51,7 +52,18 @@ export default function CoinListItem({
         tintColor: isWatchList ? Color.Yellow : Color.PrimaryText,
       }}
       subtitle={`$${symbol.toUpperCase()}`}
-      accessories={[{ tag: { value: accessoryTitle, color: coinPrice?.isUp ? Color.Green : Color.Red } }]}
+      accessories={
+        accessoryTitle
+          ? [
+              {
+                tag: {
+                  value: accessoryTitle,
+                  color: coinPrice?.isUp ? Color.Green : Color.Red,
+                },
+              },
+            ]
+          : []
+      }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${BASE_URL}${slug}`} />
@@ -69,7 +81,7 @@ export default function CoinListItem({
           <Action
             title={isWatchList ? "Remove from Watchlist" : "Add to Watchlist"}
             icon={Icon.Star}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
             onAction={() => {
               if (isWatchList) {
                 removeFromWatchList({ name, slug, symbol });
