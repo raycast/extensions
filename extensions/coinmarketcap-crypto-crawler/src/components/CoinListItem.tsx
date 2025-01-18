@@ -51,7 +51,7 @@ export default function CoinListItem({
         tintColor: isWatchList ? Color.Yellow : Color.PrimaryText,
       }}
       subtitle={`$${symbol.toUpperCase()}`}
-      accessories={[{ text: accessoryTitle }]}
+      accessories={[{ tag: { value: accessoryTitle, color: coinPrice?.isUp ? Color.Green : Color.Red } }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`${BASE_URL}${slug}`} />
