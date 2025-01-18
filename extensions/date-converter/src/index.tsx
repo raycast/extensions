@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import "@total-typescript/ts-reset";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
+import dayjs from "dayjs";
+
+const DEFAULT_DATE_FORMAT = "dddd, MMMM D, YYYY hh:mm:ss";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -24,21 +27,24 @@ interface DateFormatter {
 interface Preferences {
   defaultFormat: string;
   copyAction: "copy" | "paste" | "both";
-  hour24: boolean;
+  displayFormat: string;
+  humanFormat: string;
 }
 
-const humanFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "full",
-  timeStyle: "medium",
-  hour12: !getPreferenceValues<Preferences>().hour24,
-});
+const displayFormatter = (date: Date): string => {
+  return dayjs(date).format(getPreferenceValues<Preferences>().displayFormat.trim() || DEFAULT_DATE_FORMAT);
+};
+
+const humanFormatter = (date: Date): string => {
+  return dayjs(date).format(getPreferenceValues<Preferences>().humanFormat.trim() || DEFAULT_DATE_FORMAT);
+};
 
 const DATE_FORMATS: DateFormatter[] = [
   {
     id: "human",
     title: "Human Date",
     human: true,
-    format: (date) => humanFormatter.format(date),
+    format: (date) => humanFormatter(date),
   },
   {
     id: "unix-ms",
@@ -201,7 +207,7 @@ export default function Command() {
       {results.map(({ date, label, human }) => (
         <List.Item
           key={date.toISOString()}
-          title={humanFormatter.format(date)}
+          title={displayFormatter(date)}
           subtitle={`${label} - ${timeAgo.format(date)}`}
           actions={
             <ActionPanel>

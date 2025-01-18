@@ -1,5 +1,9 @@
 # Date Converter Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Support configuring the displayed date format and the format of "Human Date"
+
 ## [Update] - 2025-01-03
 
 - Support hexadecimal numbers for seconds/ms
