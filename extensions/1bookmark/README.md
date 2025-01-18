@@ -6,6 +6,5 @@ We support Raycast extension as our top priority client and are developing a web
 
 ## Commands
 
-- Add Bookmark: Create a new Bookmark.
-- Bookmarks: Search Bookmarks and Open it.
-
+- ➕ Add Bookmark: Create a new Bookmark.
+- 🔍 Bookmarks: Search Bookmarks and Open it.
