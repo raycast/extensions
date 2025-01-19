@@ -1,6 +1,6 @@
 # Kubernetes Changelog
 
-## [Support more Kubernetes resources] - {PR_MERGE_DATE}
+## [Support more Kubernetes resources] - 2025-01-19
 
 Added the following commands:
 
