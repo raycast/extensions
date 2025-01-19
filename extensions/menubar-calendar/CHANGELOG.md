@@ -1,6 +1,6 @@
 # Menubar Calendar Changelog
 
-## [Fix Bug] - {PR_MERGE_DATE}
+## [Fix Bug] - 2025-01-19
 
 - Fix bug: Open the Calendar List in the menubar calendar
 
