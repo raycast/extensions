@@ -67,7 +67,7 @@ export default function Command() {
               ? formatInTimeZone(
                   targetTime,
                   resolution.timezone,
-                  "EEE, MMM d, yyyy h:mm a",
+                  "EEE, MMM d, yyyy h:mm a"
                 )
               : formatInTimeZone(targetTime, resolution.timezone, "h:mm a");
 
@@ -140,7 +140,7 @@ export default function Command() {
         (r) =>
           r.success &&
           (r.location.toLowerCase().includes(normalized) ||
-            normalized.includes(r.location.toLowerCase())),
+            normalized.includes(r.location.toLowerCase()))
       )
       .forEach((r) => matches.add(r.location));
 
@@ -207,6 +207,7 @@ export default function Command() {
       <Form.Dropdown
         id="outputFormat"
         title="Format"
+        info="Choose the format of the output, newline for list, inline for comma separated"
         defaultValue={preferences.defaultFormat}
       >
         <Form.Dropdown.Item
