@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, launchCommand, LaunchType, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { checkTerminalSetup } from "./utils/terminalUtils";
-import { getAllWindow, switchToWindow, type TmuxWindow, deleteWindow } from "./utils/windowUtils";
+import { deleteWindow, getAllWindow, switchToWindow, type TmuxWindow } from "./utils/windowUtils";
+import { RenameTmux } from "./RenameTmux";
 
 export default function ManageTmuxWindows() {
   const [windows, setWindows] = useState<Array<TmuxWindow & { keyIndex: number }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
+
+  const { push } = useNavigation();
 
   // Init list of windows
   const setupListWindows = () => {
@@ -96,13 +99,27 @@ export default function ManageTmuxWindows() {
             <ActionPanel>
               <Action title="Switch to Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
               <Action
+                title="Rename this Window"
+                onAction={() => {
+                  push(
+                    <RenameTmux
+                      sessionName={window.sessionName}
+                      windowName={window.windowName}
+                      type="Window"
+                      callback={() => setupListWindows()}
+                    />,
+                  );
+                }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+              />
+              <Action
                 title="Delete This Window"
                 onAction={() =>
                   deleteWindow(window, setIsLoading, () =>
                     setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex)),
                   )
                 }
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
               />
             </ActionPanel>
           }
