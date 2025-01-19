@@ -1,6 +1,6 @@
 # Search Composer Packagist Changelog
 
-## [Add Pagination] - {PR_MERGE_DATE}
+## [Add Pagination] - 2025-01-19
 
 - Fix Extension `Title`
 - View more than 30 results at a time thanks to `Pagination`
