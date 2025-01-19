@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-01-19
 
 - Remove unused Bun lockfile
 - Fix types
