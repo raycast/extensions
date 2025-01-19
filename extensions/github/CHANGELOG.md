@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Fix base clone path] - {PR_MERGE_DATE}
+
+- Move `baseClonePath` to extension root level
+- Fix `Clone and Open` path
+
 ## [Mark notification as done] - 2025-01-09
 
 - Add a new action to mark a notification as done.
