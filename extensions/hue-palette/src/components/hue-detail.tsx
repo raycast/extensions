@@ -24,7 +24,7 @@ export default function HueDetail({
             title={color}
             content={{
               value: {
-                source: `https://hue-palette.com/api/hue-color-image/${color.replace("#", "")}`,
+                source: `https://hue-palette.zeabur.app/hue-color-image/${color.replace("#", "")}`,
               },
               tooltip: "",
             }}
