@@ -1,0 +1,34 @@
+
+root: true
+
+extends:
+  - "@raycast"
+  - "eslint:recommended"
+  - "plugin:react-hooks/recommended"
+
+plugins:
+  - only-warn
+
+globals:
+  React: true
+  JSX: true
+
+env:
+  browser: true
+
+settings:
+  import/resolver:
+    typescript:
+      project: tsconfig.json
+
+ignorePatterns:
+  # Ignore dotfiles
+  - ".*.js"
+  - "node_modules/"
+  - "dist/"
+
+rules:
+  react-hooks/exhaustive-deps: warn
+
+overrides:
+  - files: ["*.js?(x)", "*.ts?(x)"]
