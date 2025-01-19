@@ -1,5 +1,10 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - 2025-01-19
+
+- 🙋 Add `Ask LLM` command using pure user query input.
+- ✨ Add `Google Gemini` model support.
+
 ## [New Features] - 2025-01-14
 
 - 🌐 Add Translate Action - Auto translate selected text into target language as setting
