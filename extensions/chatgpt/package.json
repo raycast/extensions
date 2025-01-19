@@ -138,20 +138,6 @@
       "description": "Search AI commands",
       "mode": "view",
       "icon": "icon.png"
-    },
-    {
-      "name": "fix-spelling-and-grammar",
-      "title": "Fix Spelling and Grammar",
-      "description": "Fix mistakes in a text",
-      "mode": "view",
-      "icon": "icon.png"
-    },
-    {
-      "name": "improve-writing",
-      "title": "Improve Writing",
-      "description": "Improves the text by correcting errors, improving clarity, while maintaining the original tone and meaning",
-      "mode": "view",
-      "icon": "icon.png"
     }
   ],
   "keywords": [
