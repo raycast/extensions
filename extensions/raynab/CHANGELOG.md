@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Major Features & Improvements] - {PR_MERGE_DATE}
+## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features
 
