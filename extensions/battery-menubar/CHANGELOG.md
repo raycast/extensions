@@ -1,6 +1,6 @@
 # Battery Menu Bar Changelog
 
-## [Added New Features and Code Improvements] - {PR_MERGE_DATE}
+## [Added New Features and Code Improvements] - 2025-01-19
 
 - 🪫 Add Low Power Mode item
 - 🖥️ Add Scree Waking Time
