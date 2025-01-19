@@ -136,7 +136,7 @@
           "title": "Playback Speed",
           "description": "Speed of speech playback",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "default": "1.00",
           "data": [
             {
