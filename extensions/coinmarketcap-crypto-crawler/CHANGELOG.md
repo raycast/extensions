@@ -1,6 +1,6 @@
 # CoinMarketCap Crypto Crawler Changelog
 
-## [Improve User Experience] - {PR_MERGE_DATE}
+## [Improve User Experience] - 2025-01-19
 
 - fix the crawler issue caused by page structure change.
 - add a separated watchlist page to keep track of your favorite coins.
