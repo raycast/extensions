@@ -1,6 +1,6 @@
 # Zoo Changelog
 
-## [Add Google Gemini Support] - {PR_MERGE_DATE}
+## [Add Google Gemini Support] - 2025-01-19
 
 - ✨ **Google Gemini** support added.
 
