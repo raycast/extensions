@@ -360,7 +360,7 @@
         }
       ]
     },
-        {
+    {
       "name": "ask",
       "title": "Ask LLM",
       "description": "Ask LLM directly with input argument",
