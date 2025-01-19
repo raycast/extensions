@@ -3,6 +3,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Support configuring the displayed date format and the format of "Human Date"
+- Support configuring the base time zone
 
 ## [Update] - 2025-01-03
 
