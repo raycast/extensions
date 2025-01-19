@@ -1,6 +1,6 @@
 # Spotify Controls Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-01-19
 
 Allow the user to dynamically enter the steps when increasing or decreasing the volume.
 
