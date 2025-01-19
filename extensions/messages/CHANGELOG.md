@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Direct link to System Settings] - {PR_MERGE_DATE}
+## [Direct link to System Settings] - 2025-01-19
 
 Added a direct link to System Settings when full disk access is required for the `Paste Latest OTP Code` command.
 
