@@ -1637,6 +1637,7 @@
   "Envl/tiktoken": "tiktoken",
   "tm.wrnr/tim": "tim",
   "g0d/time": "time",
+  "alex_jones/time-converter": "time-converter",
   "aramikuto/time-logger": "time-logger",
   "SuoweiHu/time-machine": "time-machine",
   "ickas/time-teller": "time-teller",
