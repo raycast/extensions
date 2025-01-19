@@ -110,7 +110,7 @@ export default function ManageTmuxWindows() {
                     />,
                   );
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
               />
               <Action
                 title="Delete This Window"
@@ -119,7 +119,7 @@ export default function ManageTmuxWindows() {
                     setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex)),
                   )
                 }
-                shortcut={{ modifiers: ["cmd"], key: "x" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
               />
             </ActionPanel>
           }

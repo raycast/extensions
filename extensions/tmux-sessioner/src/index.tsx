@@ -87,14 +87,14 @@ export default function Command() {
                       />,
                     );
                   }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
                 />
                 <Action
                   title="Delete This Session"
                   onAction={() =>
                     deleteSession(session, setIsLoading, () => setSessions(sessions.filter((s) => s !== session)))
                   }
-                  shortcut={{ modifiers: ["cmd"], key: "x" }}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
                 />
               </ActionPanel>
             }
