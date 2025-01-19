@@ -9,11 +9,7 @@ You can define unlimited number of your own fast AI actions, which is missing fo
 
 - [x] 😻 GitHub Gist Support - Custom your own prompt library with reliable and favorable GitHub Gist.
 - [x] 🚀 Fast Actions - Perform fast actions with your prompt library on selected text.
-- [x] 🤖 AI Models - Interact with most existing AI models with ease.
-  - [x] DeepSeek
-  - [x] OpenAI ChatGPT
-  - [ ] Google Gemini
-  - [ ] ...
+- [x] 🤖 AI Models - Interact with most existing AI models with ease, including DeepSeek, OpenAI ChatGPT, Google Gemini.
 
 ### Roadmap
 
@@ -28,6 +24,7 @@ You can define unlimited number of your own fast AI actions, which is missing fo
 ### Issues
 
 - [ ] 🐞 Fix 'Refusing to paginate further as it could cause the extension to run out of memory. Currently using: xx.xxMB`
+
 ```shell
 event -  changed file package.json
 info  -  entry points [src/search-gists.tsx src/ask-gist.tsx src/create-gist.tsx]
