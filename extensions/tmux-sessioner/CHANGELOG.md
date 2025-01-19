@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Add support for renaming tmux windows] - {PR_MERGE_DATE}
+## [Add support for renaming tmux windows] - 2025-01-19
 
 - Created a new Component to handle both renaming windows and sessions
 - Added a new command to rename windows, with shortcut `⌥⌘R`
