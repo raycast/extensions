@@ -1,6 +1,6 @@
 # Shell History Changelog
 
-## [Respect HISTFILE] - {PR_MERGE_DATE}
+## [Respect HISTFILE] - 2025-01-19
 
 - Support [Ghostty](https://ghostty.org) Terminal app
 - Refactor keybinding of running in terminal
