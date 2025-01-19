@@ -1,6 +1,6 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-01-19
 
 - 🙋 Add `Ask LLM` command using pure user query input.
 - ✨ Add `Google Gemini` model support.
