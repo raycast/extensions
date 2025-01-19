@@ -119,7 +119,7 @@ export default function ManageTmuxWindows() {
                     setWindows(windows.filter((w) => w.keyIndex !== window.keyIndex)),
                   )
                 }
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={{ modifiers: ["cmd"], key: "x" }}
               />
             </ActionPanel>
           }
