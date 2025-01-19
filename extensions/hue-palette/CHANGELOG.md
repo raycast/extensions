@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-01-19
 
 - Added the `Search Hue Palette History` feature to track the history of generated Hue palette.
 
