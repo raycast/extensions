@@ -76,7 +76,7 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Switch to Selected Session" onAction={() => switchToSession(session, setIsLoading)} />
                 <Action
-                  title="Rename This Session"
+                  title="Rename this Session"
                   onAction={() => {
                     push(
                       <RenameTmux
