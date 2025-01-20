@@ -16,9 +16,9 @@ You can also add your favorite coins to the watchlist by pressing `ctrl + shift 
 
 ![Watchlist](screenshots/Coin-Watchlist.png)
 
-## Calculate value
+## Calculate Token Value
 
-You can also calculate the value of your favorite coins by the amount of coins you entered.
+You can also calculate the value of the coin you're searching for by the amount of coins you entered.
 Just open the action panel and select `Calculate Value`, or press `command + enter` to enter the calculation panel.
 
 ![Calculate Value](screenshots/Currency-Converter.png)
