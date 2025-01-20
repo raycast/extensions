@@ -90,12 +90,11 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
         setFolders(getFolders(entries));
       })
       .then(KeePassLoader.refreshEntriesCache)
-      .catch(errorHandler)
       .then((entries) => {
         setIsLoading(false);
         setEntries(entries);
         setFolders(getFolders(entries));
-      });
+      }, errorHandler);
   }, []);
 
   return (
