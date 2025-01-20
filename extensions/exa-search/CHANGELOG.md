@@ -15,6 +15,5 @@
   - Copy URLs with ⌘C shortcut
 - User preferences:
   - Secure API key storage
-  - Search mode configuration (real-time/manual)
 - Documentation link in actions panel
 - Date display for results when available

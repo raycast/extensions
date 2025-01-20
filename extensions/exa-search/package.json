@@ -27,24 +27,6 @@
       "title": "Exa API Key",
       "description": "Your Exa API key (obtain from https://exa.ai)",
       "link": "https://exa.ai/dashboard"
-    },
-    {
-      "name": "searchMode",
-      "type": "dropdown",
-      "required": true,
-      "title": "Search Mode",
-      "description": "Choose when to trigger the search",
-      "data": [
-        {
-          "title": "Search as you type",
-          "value": "realtime"
-        },
-        {
-          "title": "Search on Enter",
-          "value": "manual"
-        }
-      ],
-      "default": "realtime"
     }
   ],
   "dependencies": {
