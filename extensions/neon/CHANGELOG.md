@@ -4,3 +4,4 @@
 
 - List, Revoke, Create API Keys
 - List Projects
+    - List Project Branches
