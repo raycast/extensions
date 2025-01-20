@@ -12,7 +12,7 @@ export function AppNotInstallView(props: { extensionPreferences: boolean }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title={"Get n8n"}
+            title={"Get N8n"}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
             url={"https://n8n.io/get-started/"}
           />
