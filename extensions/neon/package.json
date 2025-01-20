@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "neon",
   "title": "Neon",
-  "description": "",
+  "description": "Manage Neon Projects and API Keys",
   "icon": "neon.png",
   "author": "xmok",
   "categories": [
@@ -16,20 +16,20 @@
       "required": true,
       "type": "password",
       "placeholder": "xx...xx",
-      "description": ""
+      "description": "API Key from Neon Settings"
     }
   ],
   "commands": [
     {
       "name": "list-api-keys",
       "title": "List API Keys",
-      "description": "",
+      "description": "List, Revoke, Create API Keys",
       "mode": "view"
     },
     {
       "name": "list-projects",
       "title": "List Projects",
-      "description": "",
+      "description": "List Projects and Branches",
       "mode": "view"
     }
   ],
