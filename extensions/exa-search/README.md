@@ -23,3 +23,5 @@ Search the web using Exa's AI-powered semantic search engine right from Raycast.
 4. Press Enter again to open any result in your browser
 5. Use ⌘C to copy result URLs
 6. Use ⌘K to access additional actions
+
+![Exa AI Search Screenshot](./screenshot.png)
