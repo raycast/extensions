@@ -1,6 +1,6 @@
 # Time Converter Changelog
 
-## [Added missing screenshots] - {PR_MERGE_DATE}
+## [Added missing screenshots] - 2025-01-20
 
 Three screenshots for the store were missing form the initial commit
 
