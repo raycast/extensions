@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exa-search",
+  "title": "Exa AI Search",
+  "description": "Search the web using Exa's AI-powered search. Get relevant results instantly via the Exa AI API.",
+  "icon": "extension-icon.png",
+  "author": "joshuaoliphant",
+  "categories": [
+    "Web",
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "exa-search",
+      "title": "Search Exa",
+      "description": "Search the web using Exa's AI-powered semantic search",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exaApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Exa API Key",
+      "description": "Your Exa API key (obtain from https://exa.ai)",
+      "link": "https://exa.ai/dashboard"
+    },
+    {
+      "name": "searchMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Search Mode",
+      "description": "Choose when to trigger the search",
+      "data": [
+        {
+          "title": "Search as you type",
+          "value": "realtime"
+        },
+        {
+          "title": "Search on Enter",
+          "value": "manual"
+        }
+      ],
+      "default": "realtime"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.10",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
