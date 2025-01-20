@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-01-20
 
 - Add new command to list all tabs and go to the selected
 
