@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raymemos",
+  "title": "Raymemos ♥️ Memos & Raycast",
+  "description": "Raycast And Memos. Add a new memo, list your memos, archive memos, add resources or comments, pin memos and more. You'll need Memos => 0.22",
+  "icon": "extension-icon.png",
+  "author": "gummipunkt",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-memo",
+      "title": "Add Memo",
+      "description": "Add a new memo to your memos",
+      "mode": "view"
+    },
+    {
+      "name": "list-memos",
+      "title": "List Memos",
+      "description": "Lists all your memos",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Memos API Key"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Memos URL",
+      "description": "URL of your Memos instance (e.g. https://memos.domain.dev)",
+      "default": "https://memos.domain.dev"
+    },
+    {
+      "name": "uid",
+      "type": "textfield",
+      "required": true,
+      "title": "User UID",
+      "description": "User UID of your Memos instance"
+    }
+  ]
+}
