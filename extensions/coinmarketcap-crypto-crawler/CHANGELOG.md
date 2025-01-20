@@ -1,5 +1,10 @@
 # CoinMarketCap Crypto Crawler Changelog
 
+## [Update metadata] - 2025-01-19
+
+- add README.md to let user easily understand the extension.
+- add screenshots in `metadata` folder.
+
 ## [Improve User Experience] - 2025-01-19
 
 - fix the crawler issue caused by page structure change.
