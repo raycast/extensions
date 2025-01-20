@@ -42,13 +42,15 @@ const showToastCliErrors = (e: { message: string }) => {
 class KeePassLoader {
   private static database: string;
   private static databasePassword: string;
-  private static keepassxcCli: string;
+  private static keepassxcCli: string | undefined;
   private static keyFile: string;
   private static spawn = child_process.spawn;
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli");
+    this.keepassxcCli = preferences.keepassxcRootPath?.path
+      ? path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli")
+      : undefined;
   }
 
   /**
