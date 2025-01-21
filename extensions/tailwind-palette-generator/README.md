@@ -10,7 +10,9 @@
 
 A raycast extension that generates a color palette out of a given color, 
 
-![screenshot](./metadata/tailwind-palette-generator-2.png)
+![screenshot](./screenshots/tailwind-palette-generator-1.png)
+
+![screenshot](./screenshots/tailwind-palette-generator-2.png)
 
 ## Example output
 
