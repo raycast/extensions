@@ -1,5 +1,0 @@
-[http]
-    timeout = 300
-    proxy = http://127.0.0.1:7890  # 如果使用代理
-[https]
-    proxy = http://127.0.0.1:7890  # 如果使用代理 
