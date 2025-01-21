@@ -1,6 +1,11 @@
 # File Manager Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- Added the preference to show files hidden by the `chflags hidden` command.
+
 ## [Gitignore and Rayignore] - 2024-07-24
+
 - Added support respecting `.gitignore` and `.rayignore` files.
 
 ## [Features] - 2023-02-22
