@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "anytype",
   "title": "Anytype",
-  "description": "Create, browse and search in Anytype - right at your fingertips, anywhere on your Mac.",
+  "description": "Create, browse and search in Anytype - right at your fingertips, anywhere on your Mac",
   "icon": "anytype-icon.png",
   "author": "jmetrikat",
   "owner": "any",
