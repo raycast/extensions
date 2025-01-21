@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search-templates",
-      "title": "Search Flake Temlpates",
+      "title": "Search Flake Templates",
       "description": "Choose a flake template for your project",
       "mode": "view"
     }
