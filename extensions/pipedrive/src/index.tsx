@@ -8,7 +8,6 @@ interface Preferences {
   limit: string;
 }
 
-
 export default function PipedriveSearch() {
   const { state, search } = useSearch();
   const [filterValue, setFilterValue] = useState<string>("");
@@ -23,9 +22,9 @@ export default function PipedriveSearch() {
   }, [state.results, filterValue]);
 
   const emojiMap: { [key: string]: string } = {
-    deal: '💰 ',
-    person: '🅿️ ',
-    organization: '🅾️ ',
+    deal: "💰 ",
+    person: "🅿️ ",
+    organization: "🅾️ ",
   };
 
   return (
@@ -45,19 +44,29 @@ export default function PipedriveSearch() {
     >
       <List.Section title="Results" subtitle={`${filteredResults.length} `}>
         {filteredResults.map((searchResult) => (
-          <SearchListItem key={`${searchResult.type}${searchResult.id}`} searchResult={searchResult} emojiMap={emojiMap} />
+          <SearchListItem
+            key={`${searchResult.type}${searchResult.id}`}
+            searchResult={searchResult}
+            emojiMap={emojiMap}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult, emojiMap }: { searchResult: SearchResult; emojiMap: { [key: string]: string } }) {
+function SearchListItem({
+  searchResult,
+  emojiMap,
+}: {
+  searchResult: SearchResult;
+  emojiMap: { [key: string]: string };
+}) {
   const preferences: Preferences = getPreferenceValues();
   const itemUrl = `https://${preferences.domain}/${searchResult.type}/${searchResult.id}`;
   const subtitle = searchResult.subtitle;
   const accessoryTitle = searchResult.accessoryTitle;
-  const emoji = emojiMap[searchResult.type] || '';
+  const emoji = emojiMap[searchResult.type] || "";
 
   return (
     <List.Item
@@ -72,35 +81,43 @@ function SearchListItem({ searchResult, emojiMap }: { searchResult: SearchResult
               <Action.CopyToClipboard
                 title="Copy Name"
                 content={searchResult.name}
-                shortcut={{ modifiers: ['cmd'], key: 'n' }}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             )}
             {searchResult.email && ( // Conditionally render if person email exists
               <Action.CopyToClipboard
                 title="Copy Email"
                 content={searchResult.email}
-                shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
             )}
             {searchResult.phone && ( // Conditionally render if person phone exists
               <Action.CopyToClipboard
                 title="Copy Phone"
                 content={searchResult.phone}
-                shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             )}
             {searchResult.organization && ( // Conditionally render if organization exists for deal or person
               <Action.CopyToClipboard
                 title="Copy Organization"
                 content={searchResult.organization}
-                shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             )}
             {searchResult.ccEmail && ( // Conditionally render if deal exists
-              <Action.CopyToClipboard title="Copy Deal Name" content={searchResult.title as string} shortcut={{ modifiers: ["cmd"], key: "n" }}/>
+              <Action.CopyToClipboard
+                title="Copy Deal Name"
+                content={searchResult.title as string}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
             )}
             {searchResult.subtitle === "org" && ( // Conditionally render if organization exists
-              <Action.CopyToClipboard title="Copy Organization Name" content={searchResult.title as string} shortcut={{ modifiers: ["cmd"], key: "n" }}/>
+              <Action.CopyToClipboard
+                title="Copy Organization Name"
+                content={searchResult.title as string}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -174,56 +191,75 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     throw new Error(response.statusText);
   }
 
-  const { data } = await response.json() as { data: { items: any[] } }; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { data } = (await response.json()) as { data: { items: any[] } }; // eslint-disable-line @typescript-eslint/no-explicit-any
   const items = data?.items || [];
 
-  return items.map(({ item: { id, type, title, organization, status, cc_email: ccEmail, name, primary_email: primaryEmail, stages, phones } }) => {
-    const organizationName = organization?.name || "";
+  return items.map(
+    ({
+      item: {
+        id,
+        type,
+        title,
+        organization,
+        status,
+        cc_email: ccEmail,
+        name,
+        primary_email: primaryEmail,
+        stages,
+        phones,
+      },
+    }) => {
+      const organizationName = organization?.name || "";
 
-    const common = {
-      id,
-      title,
-      type,
-      organization: organizationName,
-      status,
-      ccEmail,
-    };
+      const common = {
+        id,
+        title,
+        type,
+        organization: organizationName,
+        status,
+        ccEmail,
+      };
 
-    switch (type) {
-      case "deal":
-        return {
-          ...common,
-          subtitle: `${status} ${type}`,
-          accessoryTitle: organizationName,
-          stage: stages?.[0]?.name || "",
-        };
-      case "person":
-        const email = primaryEmail || "";
-        const phone = phones?.[0] || "";
-        return {
-          ...common,
-          title: name,
-          subtitle: `${email} ${phone}`,
-          accessoryTitle: organizationName,
-          name,
-          email,
-          phone,
-        };
-      case "organization":
-        return {
-          ...common,
-          title: name,
-          subtitle: "org",
-          accessoryTitle: "",
-        };
-      default:
-        return {
-          ...common,
-          email: "no-email",
-          phone: "no-phone",
-        };
-    }
-  });
+      switch (type) {
+        case "deal": {
+          return {
+            ...common,
+            subtitle: `${status} ${type}`,
+            accessoryTitle: organizationName,
+            stage: stages?.[0]?.name || "",
+          };
+        }
+        case "person": {
+          const email = primaryEmail || "";
+          const phone = phones?.[0] || "";
+          return {
+            ...common,
+            title: name,
+            subtitle: `${email} ${phone}`,
+            accessoryTitle: organizationName,
+            name,
+            email,
+            phone,
+          };
+        }
+        case "organization": {
+          return {
+            ...common,
+            title: name,
+            subtitle: "org",
+            accessoryTitle: "",
+          };
+        }
+        default: {
+          return {
+            ...common,
+            email: "no-email",
+            phone: "no-phone",
+          };
+        }
+      }
+    },
+  );
 }
 
 interface SearchState {

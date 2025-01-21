@@ -35,7 +35,7 @@
     {
       "name": "limit",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "title": "Result Limit",
       "description": "Maximum number of results",
       "placeholder": "20"
@@ -46,18 +46,18 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
-    "@types/react": "^19.0.7",
-    "@typescript-eslint/eslint-plugin": "^8.21.0",
-    "@typescript-eslint/parser": "^8.21.0",
-    "eslint": "^9.18.0",
-    "eslint-config-prettier": "^10.0.1",
-    "react": "^19.0.0",
-    "react-devtools": "^6.0.1",
-    "typescript": "^5.7.3"
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
+    
   }
 }
