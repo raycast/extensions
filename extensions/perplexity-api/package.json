@@ -35,19 +35,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -81,19 +77,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -110,7 +102,7 @@
           "title": "Prompt",
           "description": "Enter instructions for correcting spelling and grammar.",
           "type": "textfield",
-          "default": "Fix spelling, grammar, and punctuation. It is important that you only correct the text and do not write any explanations.",
+          "default": "Fix spelling, grammar, and punctuation. Only write the corrected version without explanations and without wrapping it in quotation marks.",
           "required": false
         },
         {
@@ -127,19 +119,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -173,19 +161,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -219,19 +203,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -265,19 +245,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -334,20 +310,20 @@
               "title": "Sonar Large 70B Online"
             },
             {
+              "value": "llama-3.1-sonar-huge-128k-online",
+              "title": "Sonar Huge 405B Online"
+            },
+            {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -398,19 +374,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -445,19 +417,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -492,19 +460,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -539,19 +503,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -586,19 +546,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -633,19 +589,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -680,19 +632,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -727,19 +675,15 @@
             },
             {
               "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "title": "Sonar Small 8B 128k"
             },
             {
               "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "title": "Sonar Large 70B 128k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "llama-3.3-70b-instruct",
+              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -761,23 +705,19 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.1-sonar-small-128k-chat",
+      "default": "llama-3.3-70b-instruct",
       "data": [
         {
           "value": "llama-3.1-sonar-small-128k-chat",
-          "title": "Sonar Small 8B 132k"
+          "title": "Sonar Small 8B 128k"
         },
         {
           "value": "llama-3.1-sonar-large-128k-chat",
-          "title": "Sonar Large 70B 132k"
+          "title": "Sonar Large 70B 128k"
         },
         {
-          "value": "llama-3.1-8b-instruct",
-          "title": "Llama3.1 8B 132k"
-        },
-        {
-          "value": "llama-3.1-70b-instruct",
-          "title": "Llama3.1 70B 132k"
+          "value": "llama-3.3-70b-instruct",
+          "title": "Llama 3.3 70B 128k"
         }
       ]
     },
