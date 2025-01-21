@@ -2,7 +2,7 @@
 
 ## [Features] - {PR_MERGE_DATE}
 
-- Added the preference to show files hidden by the `chflags hidden` command.
+- Added the preference to show hidden files.
 
 ## [Gitignore and Rayignore] - 2024-07-24
 

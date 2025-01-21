@@ -57,9 +57,9 @@
     },
     {
       "default": false,
-      "description": "Show the file hidden by the chflags hidden command.",
-      "label": "Show Chflags Hidden Files",
-      "name": "showChflagsHiddenFiles",
+      "description": "Show the hidden file.",
+      "label": "Show Hidden Files",
+      "name": "showHiddenFiles",
       "required": true,
       "type": "checkbox"
     },

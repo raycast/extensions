@@ -46,12 +46,15 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
           return false;
         }
       }
-      if (
-        !preferences.showChflagsHiddenFiles &&
-        f.type == "file" &&
-        execSync(`ls -lO "${props.path}/${f.name}"`, { encoding: "utf8" }).toLowerCase().includes("hidden")
-      ) {
-        return false;
+      if (!preferences.showHiddenFiles) {
+        const statOutput = execSync(`stat -f%f "${props.path}/${f.name}"`, {
+          encoding: "utf8",
+        }).trim();
+        const fileFlags = parseInt(statOutput, 10);
+
+        if (fileFlags == 32768) {
+          return false;
+        }
       }
       return true;
     });
