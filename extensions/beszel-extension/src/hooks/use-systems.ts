@@ -1,80 +1,13 @@
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
+import type Pocketbase from "pocketbase";
+import type { BeszelSystem } from "../types/beszel";
 
-import { getClient } from "../helpers/get-client";
-
-interface SystemInfo {
-  /**
-   * Network
-   */
-  b: number;
-
-  /**
-   * CPU Cores
-   */
-  c: number;
-
-  /**
-   * CPU
-   */
-  cpu: number;
-
-  /**
-   * Disk
-   */
-  dp: number;
-
-  /**
-   * Hostname
-   */
-  h: string;
-
-  /**
-   * Kernel
-   */
-  k: string;
-
-  /**
-   * CPU Chip
-   */
-  m: string;
-
-  /**
-   * Memory
-   */
-  mp: number;
-
-  /**
-   * Thread Count
-   */
-  t: number;
-
-  /**
-   * Uptime
-   */
-  u: number;
-
-  /**
-   * Agent Version
-   */
-  v: string;
+function sortSystems(systems: BeszelSystem[]) {
+  return systems.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export interface BeszelSystem {
-  collectionId: string;
-  collectionName: string;
-  created: string;
-  host: string;
-  id: string;
-  info: SystemInfo;
-  name: string;
-  port: string;
-  status: "up" | "down" | "paused" | "pending";
-  updated: string;
-  users: string[];
-}
-
-export function useSystems() {
+export function useSystems(client: Pocketbase | undefined) {
   const [state, setState] = useCachedState<{
     isLoading: boolean;
     systems: BeszelSystem[] | undefined;
@@ -82,22 +15,23 @@ export function useSystems() {
   }>("beszel-systems", { isLoading: true, systems: undefined, error: undefined });
 
   useEffect(() => {
+    if (!client) return;
+
     const controller = new AbortController();
 
-    let unsubscribe: (() => void) | undefined;
     async function subscribe() {
+      if (!client) return;
+
       setState(({ ...rest }) => ({ ...rest, isLoading: true }));
 
       try {
-        const client = await getClient();
-
         const systems = await client.collection("systems").getFullList<BeszelSystem>({
           signal: controller.signal,
         });
 
         setState({ isLoading: false, systems, error: undefined });
 
-        unsubscribe = await client.collection("systems").subscribe<BeszelSystem>(
+        await client.collection("systems").subscribe<BeszelSystem>(
           "*",
           (event) => {
             setState(({ systems, ...rest }) => {
@@ -109,10 +43,12 @@ export function useSystems() {
                 case "update":
                   return {
                     ...rest,
-                    systems: systems.map((system) => (system.id === event.record.id ? event.record : system)),
+                    systems: sortSystems(
+                      systems.map((system) => (system.id === event.record.id ? event.record : system)),
+                    ),
                   };
                 case "create":
-                  return { ...rest, systems: [...systems, event.record] };
+                  return { ...rest, systems: sortSystems([...systems, event.record]) };
                 default:
                   return { ...rest, systems };
               }
@@ -138,10 +74,9 @@ export function useSystems() {
     subscribe();
 
     return () => {
-      unsubscribe?.();
       controller.abort();
     };
-  }, [setState]);
+  }, [client, setState]);
 
   return state;
 }
