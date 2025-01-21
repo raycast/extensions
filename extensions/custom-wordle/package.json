@@ -13,7 +13,6 @@
     {
       "name": "create-custom-wordle",
       "title": "Create Custom Wordle",
-      "subtitle": "Words can be of any length",
       "description": "Create a wordle with your own word and share it with your friends to have them guess your word.",
       "mode": "no-view",
       "arguments": [
