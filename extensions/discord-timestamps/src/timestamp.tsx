@@ -1,17 +1,17 @@
 import {
   Action,
   ActionPanel,
-  List,
-  Detail,
   Clipboard,
-  Toast,
-  Icon,
-  getPreferenceValues,
-  showToast,
+  Detail,
   getFrontmostApplication,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { generateTimestamp, prettyPreview, TimestampType, validateSnowflake } from "./timestamps";
 import Style = Toast.Style;
 
@@ -100,11 +100,12 @@ export default function Command() {
                     if (text) {
                       try {
                         isCurrentRef.current = false;
-                        setDate(validateSnowflake(text));
+                        const snowflakeDate = validateSnowflake(text);
+                        setDate(snowflakeDate);
                         await showToast({
                           style: Style.Success,
                           title: "Success",
-                          message: `Date Set To ` + date.toLocaleString(),
+                          message: `Date Set To ${snowflakeDate.toLocaleString()}`,
                         });
                       } catch (e: unknown) {
                         await showToast({
@@ -156,6 +157,7 @@ export default function Command() {
         <List.Item title={"Long Date/Time"} subtitle={`${prettyPreview(date, "F")}`} actions={<Actions type={"F"} />} />
         <List.Item title={"Relative Time"} subtitle={`${prettyPreview(date, "R")}`} actions={<Actions type={"R"} />} />
         <List.Item title={"Epoch Time"} subtitle={`${prettyPreview(date, "E")}`} actions={<Actions type={"E"} />} />
+        <List.Item title={"ISO Date/Time"} subtitle={`${prettyPreview(date, "I")}`} actions={<Actions type={"I"} />} />
       </List.Section>
     </List>
   );
