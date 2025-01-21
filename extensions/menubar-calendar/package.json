@@ -306,20 +306,20 @@
   ],
   "dependencies": {
     "date-fns": "^4.1.0",
-    "@raycast/api": "^1.83.1",
+    "@raycast/api": "^1.89.0",
     "calendar": "^0.1.1",
     "unicode-text-decorator": "^0.1.1",
     "weeknumber": "^1.2.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/calendar": "^0.1.4",
-    "@types/node": "22.7.3",
-    "@types/react": "18.3.9",
+    "@types/node": "22.10.7",
+    "@types/react": "18.3.18",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

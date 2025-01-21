@@ -30,6 +30,29 @@
           "description": "Show hidden files in the folder",
           "required": false,
           "default": false
+        },
+        {
+          "type": "dropdown",
+          "name": "fileOrder",
+          "label": "File Order",
+          "title": "File Order",
+          "description": "The order of the files in the folder",
+          "required": false,
+          "default": "modifiedTime",
+          "data": [
+            {
+              "title": "Modified Time",
+              "value": "modifiedTime"
+            },
+            {
+              "title": "Add Time",
+              "value": "addTime"
+            },
+            {
+              "title": "Create Time",
+              "value": "createTime"
+            }
+          ]
         }
       ]
     },

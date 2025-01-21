@@ -6,14 +6,14 @@ import { execPromise } from "./utils/exec";
 
 // Comprehensive list of allowed file extensions
 const FILE_TYPE_EXTENSIONS = {
-  video: [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".m4v"],
+  video: [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".m4v", ".webm"],
   image: [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff", ".heic"],
   audio: [".mp3", ".aac", ".wav", ".m4a", ".flac", ".ogg", ".wma"],
 };
 
 // Mapping of file types to conversion formats
 const CONVERSION_FORMATS = {
-  video: ["mp4", "avi", "mkv", "mov", "mpg"],
+  video: ["mp4", "avi", "mkv", "mov", "mpg", "webm"],
   image: ["jpg", "png", "webp", "heic", "tiff"],
   audio: ["mp3", "aac", "wav", "flac"],
 };
@@ -110,7 +110,7 @@ export default function QuickConvert() {
           outputPath = await convertAudio(selectedFile, format as "mp3" | "aac" | "wav" | "flac");
           break;
         case "video":
-          outputPath = await convertVideo(selectedFile, format as "mp4" | "avi" | "mkv" | "mov" | "mpg");
+          outputPath = await convertVideo(selectedFile, format as "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm");
           break;
         default:
           throw new Error("Unsupported file type");

@@ -22,7 +22,7 @@ const ErrorTable = new Map([
   ['403.1', 'The subscription for your account has lapsed.'],
   ['403.2', 'Your YNAB Trial has expired.'],
   ['409', 'There was a conflict when trying to process this request.'],
-  ['429', 'You have reached the request limit for the API. Try again in'],
+  ['429', 'You have reached the request limit for the API. Try again in the next hour.'],
   ['500', 'Something went wrong internally with YNAB.'],
   ['503', 'The YNAB API is disabled for maintenance. Try again later.'],
 ]);

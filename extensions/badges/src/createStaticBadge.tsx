@@ -26,7 +26,7 @@ export default function Command({
 
   const badgeContent = encodeBadgeContentParameters(
     [badge.label ?? "", badge.message ?? "", badge.color ?? ""].filter(Boolean),
-  ).join("-");
+  );
 
   const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$") || ["label", "message", "color"].includes(k));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();

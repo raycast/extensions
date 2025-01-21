@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ANTHROPIC_MODEL } from "../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
 import { Preferences } from "../../summarizeVideo";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
@@ -11,7 +12,7 @@ export const useAnthropicFollowUpQuestion = async (
   pop: () => void,
 ) => {
   const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, anthropicApiToken } = preferences;
+  const { chosenAi, anthropicApiToken, anthropicModel } = preferences;
   setSummary(undefined);
 
   if (chosenAi !== "anthropic") {
@@ -29,7 +30,7 @@ export const useAnthropicFollowUpQuestion = async (
   });
 
   const answer = anthropic.messages.stream({
-    model: "claude-3-5-sonnet-latest",
+    model: anthropicModel || ANTHROPIC_MODEL,
     max_tokens: 8192,
     stream: true,
     messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
