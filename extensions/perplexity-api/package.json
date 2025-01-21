@@ -705,7 +705,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.3-70b-instruct",
+      "default": "llama-3.1-sonar-large-128k-chat",
       "data": [
         {
           "value": "llama-3.1-sonar-small-128k-chat",
