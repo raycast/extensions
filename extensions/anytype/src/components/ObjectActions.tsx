@@ -3,7 +3,7 @@ import { MutatePromise } from "@raycast/utils";
 import ObjectDetail from "./ObjectDetail";
 import TemplateList from "./TemplateList";
 import { SpaceObject, Type, Member, Template } from "../helpers/schemas";
-import { Detail, Export } from "../helpers/schemas";
+import { Export } from "../helpers/schemas";
 import { deleteObject } from "../api/deleteObject";
 import { pluralize } from "../helpers/strings";
 
@@ -11,10 +11,10 @@ type ObjectActionsProps = {
   spaceId: string;
   objectId: string;
   title: string;
-  details?: Detail[];
   objectExport?: Export;
   mutate?: MutatePromise<SpaceObject[] | Type[] | Member[]>;
   mutateTemplates?: MutatePromise<Template[]>;
+  mutateObject?: MutatePromise<SpaceObject | null | undefined>;
   mutateExport?: MutatePromise<Export | undefined>;
   viewType: string;
 };
@@ -23,10 +23,10 @@ export default function ObjectActions({
   spaceId,
   objectId,
   title,
-  details,
   mutate,
   objectExport,
   mutateTemplates,
+  mutateObject,
   mutateExport,
   viewType,
 }: ObjectActionsProps) {
@@ -78,6 +78,9 @@ export default function ObjectActions({
         if (mutateTemplates) {
           await mutateTemplates();
         }
+        if (mutateObject) {
+          await mutateObject();
+        }
         if (mutateExport) {
           await mutateExport();
         }
@@ -109,6 +112,9 @@ export default function ObjectActions({
       if (mutateTemplates) {
         await mutateTemplates();
       }
+      if (mutateObject) {
+        await mutateObject();
+      }
       if (mutateExport) {
         await mutateExport();
       }
@@ -129,11 +135,11 @@ export default function ObjectActions({
   return (
     <ActionPanel title={title}>
       <ActionPanel.Section>
-        {details && details.length > 0 && (
+        {!isType && (
           <Action.Push
             icon={{ source: Icon.Sidebar }}
             title="Show Details"
-            target={<ObjectDetail spaceId={spaceId} objectId={objectId} title={title} details={details || []} />}
+            target={<ObjectDetail spaceId={spaceId} objectId={objectId} title={title} />}
           />
         )}
         {isType && (

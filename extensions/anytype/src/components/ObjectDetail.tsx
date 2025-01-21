@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { format } from "date-fns";
 import { Detail, showToast, Toast, Image, Icon } from "@raycast/api";
+import { useObject } from "../hooks/useObject";
 import { useExport } from "../hooks/useExport";
 import ObjectActions from "./ObjectActions";
 import type { Detail as ObjectDetail, Member } from "../helpers/schemas";
@@ -9,15 +10,17 @@ type ObjectDetailProps = {
   spaceId: string;
   objectId: string;
   title: string;
-  details: ObjectDetail[];
 };
 
-export default function ObjectDetail({ spaceId, objectId, title, details }: ObjectDetailProps) {
+export default function ObjectDetail({ spaceId, objectId, title }: ObjectDetailProps) {
+  const { object, objectError, isLoadingObject, mutateObject } = useObject(spaceId, objectId);
   const { objectExport, objectExportError, isLoadingObjectExport, mutateObjectExport } = useExport(
     spaceId,
     objectId,
     "markdown",
   );
+
+  const details = object?.details || [];
 
   const createdDateDetail = details.find((detail) => detail.id === "created_date");
   const createdDate = createdDateDetail?.details?.created_date;
@@ -34,6 +37,12 @@ export default function ObjectDetail({ spaceId, objectId, title, details }: Obje
   const tags = details.flatMap((detail) => detail.details.tags || []);
 
   useEffect(() => {
+    if (objectError) {
+      showToast(Toast.Style.Failure, "Failed to fetch object", objectError.message);
+    }
+  }, [objectError]);
+
+  useEffect(() => {
     if (objectExportError) {
       showToast(Toast.Style.Failure, "Failed to fetch object as markdown", objectExportError.message);
     }
@@ -42,7 +51,7 @@ export default function ObjectDetail({ spaceId, objectId, title, details }: Obje
   return (
     <Detail
       markdown={objectExport?.markdown}
-      isLoading={isLoadingObjectExport}
+      isLoading={isLoadingObject || isLoadingObjectExport}
       metadata={
         <Detail.Metadata>
           {lastModifiedDate ? (
@@ -96,6 +105,7 @@ export default function ObjectDetail({ spaceId, objectId, title, details }: Obje
           spaceId={spaceId}
           objectId={objectId}
           title={title}
+          mutateObject={mutateObject}
           mutateExport={mutateObjectExport}
           objectExport={objectExport}
           viewType="object"

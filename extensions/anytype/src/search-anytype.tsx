@@ -179,7 +179,6 @@ function Search() {
                   tooltip: `Space: ${spaces?.find((space) => space.id === object.space_id)?.name}`,
                 },
               ]}
-              details={object.details}
               mutate={mutateObjects}
               viewType={viewType}
             />

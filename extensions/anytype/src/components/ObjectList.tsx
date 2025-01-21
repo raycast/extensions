@@ -82,7 +82,6 @@ export default function ObjectList({ spaceId }: ObjectListProps) {
                 tooltip: `Last Modified: ${format(new Date(object.details[0]?.details.last_modified_date as string), "EEEE d MMMM yyyy 'at' HH:mm")}`,
               },
             ]}
-            details={object.details}
             mutate={mutateObjects}
             viewType="object"
           />
