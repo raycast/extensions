@@ -52,7 +52,7 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
         }).trim();
         const fileFlags = parseInt(statOutput, 10);
 
-        if (fileFlags == 32768) {
+        if (fileFlags & (1 << 15)) {
           return false;
         }
       }
