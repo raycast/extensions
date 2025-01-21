@@ -48,7 +48,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
 
   const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
-  const categories = categoryGroups?.flatMap((group) => group.categories);
+  const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
   const [categoryList, setCategoryList] = useState([categoryId ?? '']);
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>([]);

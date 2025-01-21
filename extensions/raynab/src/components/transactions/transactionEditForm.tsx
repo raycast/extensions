@@ -62,7 +62,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { mutate } = useTransactions(activeBudgetId, timeline);
   const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
-  const categories = categoryGroups?.flatMap((group) => group.categories);
+  const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
   const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
