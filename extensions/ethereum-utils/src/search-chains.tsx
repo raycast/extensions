@@ -85,7 +85,7 @@ function ChainView(props: ChainProps) {
 
   [${chain.infoURL}](${chain.infoURL})
   
-  ## RPC Urls
+  ## RPC URLs
 
   ${chain.rpc.map((url) => `- ${url}`).join('\n')}
 `;
