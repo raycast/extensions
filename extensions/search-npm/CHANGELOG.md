@@ -1,5 +1,8 @@
 # Search npm Changelog
 
+## [Added a shortcut] - {PR_MERGE_DATE}
+- Added a shortcut to copy the package version
+
 ## [Chore & Fixes] - 2025-01-13
 
 - Hide toast when `historyCount` is zero
