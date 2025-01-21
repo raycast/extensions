@@ -1,36 +1,37 @@
 import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
-import { useState, ReactElement } from "react";
+import React from "react";
 import fetch from "node-fetch";
 
-type Preferences = {
+interface Preferences {
   exaApiKey: string;
-};
+}
 
-type ExaSearchResult = {
+interface ExaSearchResult {
   id: string;
   title: string;
   url: string;
   snippet: string;
   score: number;
   published_date?: string;
-};
+}
 
 interface ExaSearchResponse {
   results: ExaSearchResult[];
 }
 
-export default function Command(): ReactElement {
-  const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<ExaSearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function Command() {
+  const [searchText, setSearchText] = React.useState("");
+  const [results, setResults] = React.useState<ExaSearchResult[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const minQueryLength = 3;
 
-  // Get preferences
   const preferences = getPreferenceValues<Preferences>();
 
   async function searchExa(query: string) {
+    console.log("Searching with query:", query);
     if (!query || query.trim().length < minQueryLength) {
+      console.log("Query too short, skipping search");
       return;
     }
 
@@ -38,6 +39,7 @@ export default function Command(): ReactElement {
     setError(null);
 
     try {
+      console.log("Making API request...");
       const response = await fetch("https://api.exa.ai/search", {
         method: "POST",
         headers: {
@@ -56,13 +58,16 @@ export default function Command(): ReactElement {
 
       if (!response.ok) {
         const errorBody = await response.text();
+        console.error("API error:", response.status, errorBody);
         throw new Error(`API error ${response.status}: ${errorBody}`);
       }
 
       const data = (await response.json()) as ExaSearchResponse;
+      console.log("Got results:", data.results?.length ?? 0);
       setResults(data.results || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      console.error("Search error:", errorMessage);
       setError(errorMessage);
       showToast(Toast.Style.Failure, "Search failed", errorMessage);
     } finally {
@@ -71,61 +76,64 @@ export default function Command(): ReactElement {
   }
 
   function handleSearchTextChange(newText: string) {
+    console.log("Search text changed:", newText);
     setSearchText(newText);
     if (!newText.trim()) {
       setResults([]);
     }
   }
 
-  const searchAction = (
-    <Action
-      title="Search"
-      onAction={() => searchExa(searchText)}
-      shortcut={{ modifiers: [], key: "return" }}
-      icon={Icon.MagnifyingGlass}
-    />
+  // Add a search trigger when the component mounts if there's initial search text
+  React.useEffect(() => {
+    if (searchText.trim().length >= minQueryLength) {
+      searchExa(searchText);
+    }
+  }, []); // Only run once on mount
+
+  const emptyView = React.useMemo(() => {
+    if (error) {
+      return <List.EmptyView icon={Icon.ExclamationMark} title="Error" description={error} />;
+    }
+
+    return (
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title={
+          !searchText.trim()
+            ? "Enter your search terms"
+            : searchText.trim().length < minQueryLength
+            ? `Type at least ${minQueryLength} characters`
+            : "Press ↵ to search"
+        }
+        description="Press ↵ to search"
+      />
+    );
+  }, [error, searchText, minQueryLength]);
+
+  const searchAction = React.useMemo(
+    () => (
+      <Action
+        title="Search"
+        onAction={() => {
+          console.log("Search action triggered");
+          searchExa(searchText);
+        }}
+        shortcut={{ modifiers: [], key: "return" }}
+        icon={Icon.MagnifyingGlass}
+      />
+    ),
+    [searchText]
   );
 
-  const docsAction = (
-    <Action.OpenInBrowser
-      title="View Exa Api Documentation"
-      url="https://docs.exa.ai/reference/search"
-      icon={Icon.Document}
-    />
-  );
-
-  const mainActions = (
-    <ActionPanel>
-      <ActionPanel.Section>
-        {searchAction}
-        {docsAction}
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-
-  const resultActions = (url: string) => (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action.OpenInBrowser url={url} />
-        <Action.CopyToClipboard content={url} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "c" }} />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-
-  const emptyView = error ? (
-    <List.EmptyView icon={Icon.ExclamationMark} title="Error" description={error} />
-  ) : (
-    <List.EmptyView
-      icon={Icon.MagnifyingGlass}
-      title={
-        !searchText.trim()
-          ? "Enter your search terms"
-          : searchText.trim().length < minQueryLength
-          ? `Type at least ${minQueryLength} characters`
-          : "Press ↵ to search"
-      }
-      description="Press ↵ to search"
-    />
+  const docsAction = React.useMemo(
+    () => (
+      <Action.OpenInBrowser
+        title="View Exa Api Documentation"
+        url="https://docs.exa.ai/reference/search"
+        icon={Icon.Document}
+      />
+    ),
+    []
   );
 
   return (
@@ -134,7 +142,14 @@ export default function Command(): ReactElement {
       onSearchTextChange={handleSearchTextChange}
       searchBarPlaceholder="Type and press ↵ to search with Exa AI..."
       throttle
-      actions={mainActions}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            {searchAction}
+            {docsAction}
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     >
       {results.length === 0
         ? emptyView
@@ -149,7 +164,22 @@ export default function Command(): ReactElement {
                   text: item.published_date ? new Date(item.published_date).toLocaleDateString() : undefined,
                 },
               ]}
-              actions={resultActions(item.url)}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.OpenInBrowser url={item.url} />
+                    <Action.CopyToClipboard
+                      content={item.url}
+                      title="Copy Link"
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    {searchAction}
+                    {docsAction}
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
             />
           ))}
     </List>
