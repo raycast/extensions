@@ -110,30 +110,31 @@ export default function Command() {
     );
   }, [error, searchText, minQueryLength]);
 
-  const searchAction = React.useMemo(
-    () => (
-      <Action
-        title="Search"
-        onAction={() => {
-          console.log("Search action triggered");
-          searchExa(searchText);
-        }}
-        shortcut={{ modifiers: [], key: "return" }}
-        icon={Icon.MagnifyingGlass}
-      />
-    ),
-    [searchText]
-  );
-
-  const docsAction = React.useMemo(
-    () => (
-      <Action.OpenInBrowser
-        title="View Exa Api Documentation"
-        url="https://docs.exa.ai/reference/search"
-        icon={Icon.Document}
-      />
-    ),
-    []
+  const renderActionPanel = (item?: ExaSearchResult) => (
+    <ActionPanel>
+      <ActionPanel.Section>
+        {item && (
+          <>
+            <Action.OpenInBrowser url={item.url} />
+            <Action.CopyToClipboard content={item.url} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          </>
+        )}
+        <Action
+          title="Search"
+          onAction={() => {
+            console.log("Search action triggered");
+            searchExa(searchText);
+          }}
+          shortcut={{ modifiers: [], key: "return" }}
+          icon={Icon.MagnifyingGlass}
+        />
+        <Action.OpenInBrowser
+          title="View Exa Api Documentation"
+          url="https://docs.exa.ai/reference/search"
+          icon={Icon.Document}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 
   return (
@@ -142,14 +143,7 @@ export default function Command() {
       onSearchTextChange={handleSearchTextChange}
       searchBarPlaceholder="Type and press ↵ to search with Exa AI..."
       throttle
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            {searchAction}
-            {docsAction}
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={renderActionPanel()}
     >
       {results.length === 0
         ? emptyView
@@ -164,22 +158,7 @@ export default function Command() {
                   text: item.published_date ? new Date(item.published_date).toLocaleDateString() : undefined,
                 },
               ]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.OpenInBrowser url={item.url} />
-                    <Action.CopyToClipboard
-                      content={item.url}
-                      title="Copy Link"
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    {searchAction}
-                    {docsAction}
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
+              actions={renderActionPanel(item)}
             />
           ))}
     </List>
