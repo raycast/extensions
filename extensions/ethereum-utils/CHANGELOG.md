@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add RPC URLs to search chain] - {PR_MERGE_DATE}
+## [Add RPC URLs to search chain] - 2025-01-21
 
 ## [Added "Convert Decimal Units" command] - 2024-09-08
 
