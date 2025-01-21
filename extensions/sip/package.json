@@ -5,6 +5,9 @@
   "description": "Access these Sip color management app features from Raycast: show color picker, open contrast checker, open settings, check contrast between two hex values, and add hex color to history.",
   "icon": "sip-icon.png",
   "author": "jameslyons",
+  "contributors": [
+    "megaroeny"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -64,6 +67,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
