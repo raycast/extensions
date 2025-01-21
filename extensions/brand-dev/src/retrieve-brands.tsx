@@ -292,7 +292,7 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
           ) : (
             <>
               {Object.entries(brand.address).map(([key, val]) => (
-                <Detail.Metadata.Label key={key} title={key} text={val} />
+                <Detail.Metadata.Label key={key} title={key.split("_").map(t => capitalize(t)).join(" ")} text={val} />
               ))}
             </>
           )}
@@ -316,6 +316,10 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
   );
 }
 
+function capitalize(txt: string) {
+  return txt.charAt(0).toUpperCase() + txt.slice(1);
+}
+
 function formatSocialType(type: string) {
   switch (type) {
     case "x":
@@ -325,6 +329,6 @@ function formatSocialType(type: string) {
     case "youtube":
       return "YouTube";
     default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
+      return capitalize(type);
   }
 }

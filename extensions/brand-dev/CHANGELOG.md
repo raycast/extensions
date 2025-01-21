@@ -1,5 +1,9 @@
 # Brand.dev Changelog
 
+## [Proper Case Address Items] - {PR_MERGE_DATE}
+
+- In `Detail` view the proper Address item title is shown e.g. "Country Code" instead of "country_code"
+
 ## [Choose Preferred Secondary Action] - 2024-11-24
 
 - You can choose in Preferences whether to keep the secondary acton as "Delete" or "New". The other action will be moved to its own Section with a keyboard shortcut.
