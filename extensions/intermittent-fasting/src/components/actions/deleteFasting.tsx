@@ -10,8 +10,8 @@ interface DeleteFastingProps {
 export function DeleteFasting({ item, revalidate }: DeleteFastingProps) {
   const handleDelete = async () => {
     const options = {
-      title: "Delete Period",
-      message: "Are you sure you want to delete this period?",
+      title: "Delete Fast",
+      message: "Are you sure you want to delete this fast?",
       icon: Icon.Trash,
       style: Alert.ActionStyle.Destructive,
       primaryAction: {
@@ -23,14 +23,14 @@ export function DeleteFasting({ item, revalidate }: DeleteFastingProps) {
 
     if (await confirmAlert(options)) {
       await deleteItem(item);
-      await showToast({ title: "Period deleted", style: Toast.Style.Success });
+      await showToast({ title: "Fast deleted", style: Toast.Style.Success });
       revalidate();
     }
   };
 
   return (
     <Action
-      title="Delete Period"
+      title="Delete Fast"
       icon={Icon.Trash}
       shortcut={Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}

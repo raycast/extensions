@@ -116,3 +116,14 @@ export async function updateItem(itemId: string, updates: Partial<EnhancedItem>,
     await saveItems(allItems, key);
   }
 }
+
+export async function mergeItems(importedItems: EnhancedItem[]): Promise<number> {
+  const existingItems = await getItems();
+  const existingIds = new Set(existingItems.map((item) => item.id));
+  const newItems = importedItems.filter((item) => !existingIds.has(item.id));
+  const combinedItems = [...existingItems, ...newItems];
+
+  await saveItems(combinedItems);
+
+  return newItems.length;
+}

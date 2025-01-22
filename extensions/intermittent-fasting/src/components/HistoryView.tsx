@@ -1,7 +1,9 @@
-import { List } from "@raycast/api";
+import { List, ActionPanel } from "@raycast/api";
 import React from "react";
 import { ListItem } from "./ListItem";
 import { EnhancedItem } from "../types";
+import { ExportHistory } from "./actions/exportHistory";
+import { ImportHistory } from "./actions/importHistory";
 
 interface HistoryViewProps {
   fastingHistory: EnhancedItem[] | undefined;
@@ -20,7 +22,21 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ fastingHistory, revali
 
   return (
     <List isLoading={isLoading}>
-      {items?.map((item, index) => <ListItem key={index} item={item} revalidate={handleRevalidate} />)}
+      <List.Section title="History">
+        {items?.map((item) => (
+          <ListItem
+            key={item.id}
+            item={item}
+            revalidate={handleRevalidate}
+            actions={
+              <ActionPanel.Section>
+                <ExportHistory data={items} />
+                <ImportHistory revalidate={handleRevalidate} />
+              </ActionPanel.Section>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 };

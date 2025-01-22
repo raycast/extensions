@@ -36,7 +36,13 @@ function getItemAccessories(item: Item) {
   return accessories;
 }
 
-export function ListItem({ item, revalidate }: { item: Item; revalidate: () => Promise<EnhancedItem[]> }) {
+interface ListItemProps {
+  item: EnhancedItem;
+  revalidate: () => Promise<EnhancedItem[]>;
+  actions?: React.ReactNode;
+}
+
+export const ListItem: React.FC<ListItemProps> = ({ item, revalidate, actions }) => {
   const percentage = calculateFastingProgress(
     new Date(item.start),
     item.end ? new Date(item.end) : null,
@@ -57,23 +63,26 @@ export function ListItem({ item, revalidate }: { item: Item; revalidate: () => P
       accessories={getItemAccessories(item)}
       actions={
         <ActionPanel>
-          {item.end == null && (
-            <Action
-              title="Stop Period"
-              onAction={async () => {
-                await stopTimer(item, revalidate);
-              }}
+          <ActionPanel.Section>
+            {item.end == null && (
+              <Action
+                title="Stop Fast"
+                onAction={async () => {
+                  await stopTimer(item, revalidate);
+                }}
+              />
+            )}
+            <Action.Push
+              title="Edit Fast"
+              icon={Icon.Pencil}
+              target={<EditTimerForm item={item} onEdit={revalidate} />}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
-          )}
-          <Action.Push
-            title="Edit Period"
-            icon={Icon.Pencil}
-            target={<EditTimerForm item={item} onEdit={revalidate} />}
-            shortcut={Keyboard.Shortcut.Common.Edit}
-          />
-          <DeleteFasting item={item} revalidate={revalidate} />
+            <DeleteFasting item={item} revalidate={revalidate} />
+          </ActionPanel.Section>
+          {actions}
         </ActionPanel>
       }
     />
   );
-}
+};
