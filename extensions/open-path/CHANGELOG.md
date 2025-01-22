@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Add Folder Action Settings] - {PR_MERGE_DATE}
+## [Add Folder Action Settings] - 2025-01-22
 
 -  Add Folder Action settings
 
