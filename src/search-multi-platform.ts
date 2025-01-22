@@ -1,8 +1,8 @@
-import { getSearchUrl, openUrl, PlatformCode, platformMap, searchOnPlatform } from './lib/platform-searcher';
+import { PlatformCode, platformMap, searchOnPlatform } from './lib/platform-searcher';
 import { subMonths, format } from 'date-fns';
 import { LaunchProps, showHUD } from "@raycast/api";
-import { isNotEmpty, readtext } from "./lib/utils";
-import { randomSelect } from "./lib/utils";
+import { isNotEmpty, readTextWithFallback } from "./lib/utils";
+import { getRandomElement } from "./lib/utils";
 
 // 默认的可选平台列表
 const OPTIONAL_PLATFORMS: PlatformCode[] = ['h', 'r', 'm', 'z', 'b', 'y'];
@@ -25,7 +25,7 @@ async function searchMultiPlatform(keyword: string, platformCodes?: string): Pro
 
   if (!platformCodes) {
     // 如果未指定平台，使用默认平台加一个随机平台
-    const randomPlatform = randomSelect(OPTIONAL_PLATFORMS);
+    const randomPlatform = getRandomElement(OPTIONAL_PLATFORMS);
     platforms = [...DEFAULT_PLATFORMS, randomPlatform];
   } else {
     // 将输入的平台代码转换为有效的平台代码数组
@@ -57,7 +57,7 @@ async function searchMultiPlatform(keyword: string, platformCodes?: string): Pro
 export default async function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
   try {
     // 优先使用命令参数中的关键词，如果没有则尝试获取选中文本或剪贴板内容
-    const searchText = props.arguments.keyword ?? await readtext(props.fallbackText);
+    const searchText = props.arguments.keyword ?? await readTextWithFallback(props.fallbackText);
 
     if (isNotEmpty(searchText)) {
       await searchMultiPlatform(searchText, props.arguments.platforms);

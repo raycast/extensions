@@ -1,12 +1,12 @@
 import { showHUD } from "@raycast/api";
-import { randomSelect } from "./lib/utils";
+import { getRandomElement } from "./lib/utils";
 import { Platform, searchOnPlatform } from "./lib/platform-searcher";
 import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
 export default async function main() {
   try {
     const keywords = readKeywords(KEYWORDS_FILE_PATH);
-    const randomKeyword = randomSelect(keywords);
+    const randomKeyword = getRandomElement(keywords);
 
     // 计算两个月前的日期
     const twoMonthsAgo = new Date();
@@ -19,7 +19,7 @@ export default async function main() {
 
     // 从其他平台中随机选择一个
     const otherPlatforms: Platform[] = ['reddit', 'medium', 'hackernews', 'youtube', 'bilibili', 'zhihu'];
-    const randomPlatform = randomSelect(otherPlatforms);
+    const randomPlatform = getRandomElement(otherPlatforms);
     await searchOnPlatform(randomPlatform, randomKeyword);
 
     await showHUD(`Searching for "${randomKeyword}" on multiple platforms`);

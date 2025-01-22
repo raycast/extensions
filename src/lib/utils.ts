@@ -17,7 +17,7 @@ export const isNotEmpty = (string: string | null | undefined): string is string 
  * @param fallbackText 回退文本
  * @returns Promise<string | undefined>
  */
-export const readtext = (fallbackText?: string) =>
+export const readTextWithFallback = (fallbackText?: string) =>
   isNotEmpty(fallbackText)
     ? fallbackText?.trim()
     : getSelectedText()
@@ -29,6 +29,6 @@ export const readtext = (fallbackText?: string) =>
  * @param array 输入数组
  * @returns 随机选中的元素
  */
-export function randomSelect<T>(array: T[]): T {
+export function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 } 
