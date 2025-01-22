@@ -37,3 +37,8 @@ A raycast extension that generates a color palette out of a given color,
 1. Paste color in HEX format into the form when prompted. _Example_: `#FF0000`
 2. Click `Generate a Palette` action button or press `Cmd + Enter`
 3. Copy generated palette JSON and paste it into your `tailwind.config.js` file
+
+## Checklist
+
+- [ ] Add tailwindcss v4 support
+- [ ] Add colors preview (if that's even possible)
