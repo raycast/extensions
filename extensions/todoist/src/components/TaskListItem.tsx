@@ -87,6 +87,20 @@ export default function TaskListItem({
     });
   }
 
+  if (task.deadline?.date) {
+    const text = displayDeadlineDate(task.deadline.date);
+    const overdue = isOverdue(task.deadline.date);
+
+    accessories.unshift({
+      icon: {
+        source: overdue ? Icon.BullsEyeMissed : Icon.BullsEye,
+        tintColor: overdue ? Color.Red : Color.PrimaryText,
+      },
+      tooltip: `Deadline: ${text}`,
+      text,
+    });
+  }
+
   if (task.due?.date) {
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
@@ -103,20 +117,6 @@ export default function TaskListItem({
       const text = format(new Date(time), "HH:mm");
 
       accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
-    }
-
-    if (task.deadline?.date) {
-      const text = displayDeadlineDate(task.deadline.date);
-      const overdue = isOverdue(task.deadline.date);
-
-      accessories.unshift({
-        icon: {
-          source: overdue ? Icon.BullsEyeMissed : Icon.BullsEye,
-          tintColor: overdue ? Color.Red : Color.PrimaryText,
-        },
-        tooltip: `Deadline: ${text}`,
-        text,
-      });
     }
 
     if (isOverdue(task.due.date) || mode !== ViewMode.date) {
