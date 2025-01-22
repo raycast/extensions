@@ -1,5 +1,10 @@
 # 1bookmark Changelog
 
+## [Add Screenshots] - 0.2.3 - 2025-01-23
+
+- 📸 Add screenshots shown in extension store description.
+- 💻 Improve publish to production workflow.
+
 ## [Hide incomplete features] - 0.2.2 - 2025-01-20
 
 - 💻 Enhance some code quality, CI test.
