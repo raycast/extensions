@@ -1,6 +1,6 @@
 # Axios Docs Changelog
 
-## [Add "Multipart Bodies"] - {PR_MERGE_DATE}
+## [Add "Multipart Bodies"] - 2025-01-22
 
 - Add "🆕 Multipart Bodies"
 - Change category from "Other" to "Documentation"
