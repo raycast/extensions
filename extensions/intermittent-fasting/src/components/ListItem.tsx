@@ -40,7 +40,6 @@ export function ListItem({ item, revalidate }: { item: Item; revalidate: () => P
   const now = new Date();
   const startDate = new Date(item.start);
   const endDate = item.end ? new Date(item.end) : now;
-  const actualFastDuration = endDate.getTime() - startDate.getTime();
   const percentage = calculateFastingProgress(
     new Date(item.start),
     item.end ? new Date(item.end) : null,
