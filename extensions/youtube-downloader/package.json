@@ -41,7 +41,7 @@
       "description": "Path to the yt-dlp executable",
       "type": "textfield",
       "default": "/opt/homebrew/bin/yt-dlp",
-      "required": true
+      "required": false
     },
     {
       "name": "ffmpegPath",
@@ -49,7 +49,7 @@
       "description": "Path to the ffmpeg executable",
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffmpeg",
-      "required": true
+      "required": false
     },
     {
       "name": "ffprobePath",
@@ -57,7 +57,7 @@
       "description": "Path to the ffprobe executable. Usually installed alog with ffmpeg.",
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffprobe",
-      "required": true
+      "required": false
     }
   ],
   "dependencies": {
