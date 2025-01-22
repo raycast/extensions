@@ -5,11 +5,6 @@ import { Step } from "./step";
 import { copyFileSync } from "fs";
 import { Factory } from "./factory";
 
-interface Preferences {
-  browser;
-  profile;
-}
-
 export default function Command() {
   const [data, setData] = useState<JSX.Element[]>([]);
   const [loading, setLoading] = useState(false);
