@@ -49,32 +49,37 @@
             {
               "title": "Icon with Text",
               "value": "full"
+            },
+            {
+              "title": "Show Eating Window",
+              "value": "eating"
             }
           ],
-          "default": "full"
+          "default": "eating"
         }
       ]
     }
   ],
   "preferences": [
     {
-    "name": "fastingHours",
-    "type": "textfield",
-    "required": false,
-    "title": "Fasting Hours",
-    "description": "Number of hours to fast (e.g., 16)",
-    "placeholder": "16",
-    "default": "16"
-  },
-  {
-    "name": "eatingHours",
-    "type": "textfield",
-    "required": false,
-    "title": "Eating Window Hours",
-    "description": "Number of hours for eating window (e.g., 8)",
-    "placeholder": "8",
-    "default": "8"
-  }],
+      "name": "fastingHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Fasting Hours",
+      "description": "Number of hours to fast (e.g., 16)",
+      "placeholder": "16",
+      "default": "16"
+    },
+    {
+      "name": "eatingHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Eating Window Hours",
+      "description": "Number of hours for eating window (e.g., 8)",
+      "placeholder": "8",
+      "default": "8"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.84.0",
     "@raycast/utils": "^1.18.0",

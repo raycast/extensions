@@ -10,18 +10,25 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, getProgressIcon } from "@raycast/utils";
 import { getItems, startItem, updateItem } from "./storage";
-import { TIME_FORMAT_OPTIONS, FASTING_DURATION_MS, FASTING_COLOR } from "./constants";
-import { formatTime, calculateFastingProgress } from "./utils";
+import { TIME_FORMAT_OPTIONS, FASTING_DURATION_MS, FASTING_COLOR, EATING_DURATION_MS, EATING_COLOR } from "./constants";
+import { formatTime, calculateFastingProgress, calculateEatingProgress } from "./utils";
 //import { getLastStoppedFast } from "./utils";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCachedPromise(getItems);
   const runningFast = data?.find((item) => item.end == null);
+  const lastCompletedFast = data?.find((item) => item.end != null);
   const preferences = getPreferenceValues<Preferences.Menubar>();
   //const { lastStoppedItem, hoursSinceStopped } = getLastStoppedFast(data);
 
   const formatMenubarTitle = (fast: typeof runningFast) => {
-    if (!fast) return "Not Fasting";
+    if (!fast) {
+      if (preferences.idleDisplay === "eating" && lastCompletedFast?.end) {
+        const eatingProgress = calculateEatingProgress(lastCompletedFast.end, EATING_DURATION_MS);
+        return `Eating: ${eatingProgress}%`;
+      }
+      return "Not Fasting";
+    }
 
     const percentage = calculateFastingProgress(fast.start, null, fast.fastingDuration || FASTING_DURATION_MS);
     const timeLeft = `${fast.remainingHours}h ${fast.remainingMinutes}m`;
@@ -48,10 +55,20 @@ export default function Command() {
       return null;
     }
 
+    const showEatingWindow = preferences.idleDisplay === "eating" && lastCompletedFast?.end;
+    const eatingProgress = showEatingWindow ? calculateEatingProgress(lastCompletedFast.end!, EATING_DURATION_MS) : 0;
+    const progress = Math.min(eatingProgress / 100, 1);
+
     return (
       <MenuBarExtra
-        icon={getProgressIcon(0, Color.Green)}
-        title={preferences.idleDisplay === "full" ? "Not Fasting" : ""}
+        icon={getProgressIcon(showEatingWindow ? progress : 0, showEatingWindow ? EATING_COLOR : Color.Green)}
+        title={
+          preferences.idleDisplay === "full"
+            ? "Not Fasting"
+            : preferences.idleDisplay === "eating" && showEatingWindow
+              ? `Eating: ${eatingProgress}%`
+              : ""
+        }
       >
         <MenuBarExtra.Item
           title="Start New Fast"
@@ -61,6 +78,17 @@ export default function Command() {
             await revalidate();
           }}
         />
+        {showEatingWindow && (
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title={`Started: ${formatTime(lastCompletedFast.end!, TIME_FORMAT_OPTIONS)}`} />
+            <MenuBarExtra.Item
+              title={`Ends: ${formatTime(
+                new Date(lastCompletedFast.end!.getTime() + EATING_DURATION_MS),
+                TIME_FORMAT_OPTIONS,
+              )}`}
+            />
+          </MenuBarExtra.Section>
+        )}
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
             title="Preferences"
