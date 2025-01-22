@@ -1,28 +1,18 @@
-import { getSearchUrl, openUrl, Platform } from './lib/platform-searcher';
+import { getSearchUrl, openUrl, PlatformCode, platformMap, searchOnPlatform } from './lib/platform-searcher';
 import { subMonths, format } from 'date-fns';
 import { LaunchProps, showHUD } from "@raycast/api";
 import { isNotEmpty, readtext } from "./lib/utils";
 import { randomSelect } from "./lib/utils";
-type PlatformCode = 'x' | 'v' | 'h' | 'r' | 'm' | 'z' | 'b' | 'y';
-type PlatformMap = {
-  [K in PlatformCode]: Platform;
-};
+
+// 默认的可选平台列表
+const OPTIONAL_PLATFORMS: PlatformCode[] = ['h', 'r', 'm', 'z', 'b', 'y'];
+// 默认总是包含的平台
+const DEFAULT_PLATFORMS: PlatformCode[] = ['x', 'v'];
 
 // 参数类型定义
 type SearchArguments = {
   keyword?: string;
   platforms?: string;
-};
-
-const platformMap: PlatformMap = {
-  x: 'x',
-  v: 'v2ex',
-  h: 'hackernews',
-  r: 'reddit',
-  m: 'medium',
-  z: 'zhihu',
-  b: 'bilibili',
-  y: 'youtube'
 };
 
 /**
@@ -31,27 +21,37 @@ const platformMap: PlatformMap = {
  * @param platformCodes 平台代码字符串 (例如: "xvh")
  */
 async function searchMultiPlatform(keyword: string, platformCodes?: string): Promise<void> {
-  // 如果未指定平台，随机选择一个平台与 x.com 和 v2ex 组合
+  let platforms: PlatformCode[];
+
   if (!platformCodes) {
-    const randomPlatform = randomSelect(['h', 'r', 'm', 'z', 'b', 'y'] as PlatformCode[]);
-    platformCodes = `xv${randomPlatform}`;
+    // 如果未指定平台，使用默认平台加一个随机平台
+    const randomPlatform = randomSelect(OPTIONAL_PLATFORMS);
+    platforms = [...DEFAULT_PLATFORMS, randomPlatform];
+  } else {
+    // 将输入的平台代码转换为有效的平台代码数组
+    platforms = Array.from(platformCodes.toLowerCase())
+      .filter((code): code is PlatformCode => code in platformMap);
   }
 
-  // 计算6个月前的日期
+  if (platforms.length === 0) {
+    throw new Error("No valid platforms specified");
+  }
+
+  // 计算6个月前的日期（仅用于 X 平台）
   const sixMonthsAgo = format(subMonths(new Date(), 6), 'yyyy-MM-dd');
 
-  // 处理每个平台代码
-  const promises = Array.from(platformCodes.toLowerCase()).map(async (code) => {
-    const platformCode = code as PlatformCode;
-    if (platformCode in platformMap) {
+  // 并行处理所有平台的搜索
+  const searchPromises = platforms.map(async (platformCode) => {
+    try {
       const platform = platformMap[platformCode];
-      const url = getSearchUrl(platform, keyword, platform === 'x' ? sixMonthsAgo : undefined);
-      return openUrl(url);
+      const date = platform === 'x' ? sixMonthsAgo : undefined;
+      await searchOnPlatform(platform, keyword, date);
+    } catch (error) {
+      console.error(`Failed to search on platform ${platformCode}:`, error);
     }
   });
 
-  // 并行打开所有URL
-  await Promise.all(promises);
+  await Promise.all(searchPromises);
 }
 
 export default async function Command(props: LaunchProps<{ arguments: SearchArguments }>) {

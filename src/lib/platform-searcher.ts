@@ -1,6 +1,25 @@
 import { open } from "@raycast/api";
 
-export type Platform = 'x' | 'v2ex' | 'reddit' | 'medium' | 'hackernews' | 'youtube' | 'bilibili' | 'zhihu';
+// 平台配置对象
+export const PLATFORMS = {
+  x: { code: 'x' as const, name: 'x' as const },
+  v: { code: 'v' as const, name: 'v2ex' as const },
+  h: { code: 'h' as const, name: 'hackernews' as const },
+  r: { code: 'r' as const, name: 'reddit' as const },
+  m: { code: 'm' as const, name: 'medium' as const },
+  z: { code: 'z' as const, name: 'zhihu' as const },
+  b: { code: 'b' as const, name: 'bilibili' as const },
+  y: { code: 'y' as const, name: 'youtube' as const },
+} as const;
+
+// 从配置对象派生类型
+export type PlatformCode = (typeof PLATFORMS)[keyof typeof PLATFORMS]['code'];
+export type Platform = (typeof PLATFORMS)[keyof typeof PLATFORMS]['name'];
+
+// 从配置对象派生映射
+export const platformMap: Record<PlatformCode, Platform> = Object.fromEntries(
+  Object.values(PLATFORMS).map(({ code, name }) => [code, name])
+) as Record<PlatformCode, Platform>;
 
 /**
  * 获取搜索URL
