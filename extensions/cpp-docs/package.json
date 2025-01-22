@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpp-docs",
   "title": "C++ Docs",
-  "description": "Search cppreference.com and cplusplus.com from Raycast",
+  "description": "Search C++ documentation from Raycast",
   "icon": "cpp.png",
   "author": "charliesabino",
   "categories": [
     "Developer Tools",
-    "Productivity",
     "Documentation"
   ],
   "license": "MIT",
@@ -22,19 +21,28 @@
     "preferences": [
     {
       "name": "arguments_terminal",
-      "type": "checkbox",
-      "required": false,
-      "title": "Arguments Settings:",
-      "description": "Decide if you want to run commands inside raycast or inside a terminal application",
-      "default": false,
-      "label": "Use Terminal/iTerm"
+      "type": "dropdown",
+      "required": true,
+      "title": "Display In:",
+      "description": "Decide if you want to display the documentation in Raycast or a terminal application",
+      "default": "Raycast",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "Raycast"
+        },
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        }
+      ]
     },
     {
       "name": "arguments_terminal_type",
       "type": "dropdown",
-      "required": false,
-      "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm, Warp or kitty is available, you can use them instead of Terminal.",
+      "required": true,
+      "title": "Terminal Application for Display:",
+      "description": "Choose the terminal application you want to use to display the documentation (if you chose Terminal in the previous option)",
       "data": [
         {
           "title": "Terminal",
@@ -62,8 +70,8 @@
     {
       "name": "documentation_source",
       "type": "dropdown",
-      "required": false,
-      "title": "Documentation Source",
+      "required": true,
+      "title": "Documentation Source:",
       "description": "Choose the source for C++ documentation",
       "data": [
         {

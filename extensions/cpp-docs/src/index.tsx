@@ -9,6 +9,7 @@ import {
   showToast,
   getPreferenceValues,
   closeMainWindow,
+  updateCommandMetadata,
 } from "@raycast/api";
 import { shellEnv } from "shell-env";
 import { exec } from "child_process";
@@ -23,7 +24,7 @@ interface EnvType {
 }
 
 interface Preferences {
-  arguments_terminal: boolean;
+  arguments_terminal: string;
   arguments_terminal_type: string;
   documentation_source: string;
 }
@@ -335,7 +336,7 @@ const SearchResult = ({ query }: { query: string }) => {
         const execEnv = await getCachedEnv();
         await execAsync(`cppman -s "${documentation_source}"`, { env: execEnv.env });
 
-        if (arguments_terminal) {
+        if (arguments_terminal === "Terminal") {
           // Handle terminal execution based on preference
           const command = `cppman "${query}"`;
           switch (arguments_terminal_type) {
@@ -377,7 +378,7 @@ const SearchResult = ({ query }: { query: string }) => {
   }, [query, arguments_terminal, arguments_terminal_type, documentation_source]);
 
   // If using terminal, we don't need to render anything
-  if (arguments_terminal) {
+  if (arguments_terminal === "Terminal") {
     return null;
   }
 
@@ -395,7 +396,10 @@ const SearchResult = ({ query }: { query: string }) => {
   );
 };
 
-export default function Command(props: { arguments?: { query?: string } }) {
+export default async function Command(props: { arguments?: { query?: string } }) {
+  const { documentation_source } = getPreferenceValues<Preferences>();
+  await updateCommandMetadata({ subtitle: documentation_source });
+
   const [searchText, setSearchText] = useState<string>("");
   const [isCppmanInstalled, setIsCppmanInstalled] = useState<boolean>(true);
 
@@ -433,7 +437,7 @@ brew install cppman
 
   // Otherwise show search interface
   return (
-    <List searchBarPlaceholder="Search C++ documentation..." onSearchTextChange={setSearchText} throttle>
+    <List searchBarPlaceholder="std::vector, std::string, ..." onSearchTextChange={setSearchText} throttle>
       {searchText && (
         <List.Item
           icon={Icon.MagnifyingGlass}
