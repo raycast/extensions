@@ -3,7 +3,7 @@ import { format } from "date-fns";
 
 import { Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
-import { displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { displayDueDate, isExactTimeTask, displayDeadlineDate } from "../helpers/dates";
 import { getTaskLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
@@ -33,11 +33,18 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
   const subTasks = data?.items.filter((item) => item.parent_id === taskId);
 
   let displayedDate = "No due date";
+  let displayedDeadline = "No deadline";
 
   if (task?.due) {
     const dueDate = displayDueDate(task.due.date);
 
     displayedDate = isExactTimeTask(task) ? `${dueDate} ${format(new Date(task.due.date), "HH:mm")}` : dueDate;
+  }
+
+  if (task?.deadline) {
+    const deadlineDate = displayDeadlineDate(task.deadline.date);
+
+    displayedDeadline = deadlineDate;
   }
 
   const reminders =
@@ -72,6 +79,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
                 ) : null}
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
+                <Detail.Metadata.Label title="Deadline" text={displayedDeadline} icon={Icon.BullsEye} />
 
                 {subTasks && subTasks?.length > 0 ? (
                   <Detail.Metadata.Label

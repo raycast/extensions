@@ -216,6 +216,12 @@ export type DueDate = {
   is_recurring: boolean;
 };
 
+export type DeadlineDate = {
+  date: string;
+  timezone: string | null;
+  lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
+};
+
 export type Task = {
   id: string;
   user_id: string;
@@ -223,6 +229,7 @@ export type Task = {
   content: string;
   description: string;
   due: DueDate | null;
+  deadline: DeadlineDate | null;
   priority: number;
   parent_id: string | null;
   child_order: number;
@@ -261,6 +268,7 @@ export type AddTaskArgs = {
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   duration?: {
     unit: "minute" | "day";
     amount: number;
@@ -312,6 +320,7 @@ export type UpdateTaskArgs = {
   content?: string;
   description?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   priority?: number;
   collapsed?: boolean;
   labels?: string[];
