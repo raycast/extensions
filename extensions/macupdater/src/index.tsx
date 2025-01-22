@@ -7,17 +7,19 @@ import { useState } from "react";
 
 export default function Command() {
   const [date] = useState(format(subDays(new Date(), 1), "yyyy-MM-dd"));
-  const { isLoading, data: updates } = useCachedPromise(async () => scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`), [], {
-    initialData: [], execute: false
-  })
+  const { isLoading, data: updates } = useCachedPromise(
+    async () => scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`),
+    [],
+    {
+      initialData: [],
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by title...">
-      <List.Section title="Daily Mac App Updates" subtitle={date}>
       {updates.map((update) => (
         <UpdateListItem key={update.name + update.version} update={update} />
       ))}
-      </List.Section>
     </List>
   );
 }

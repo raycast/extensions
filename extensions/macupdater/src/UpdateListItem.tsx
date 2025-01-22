@@ -9,7 +9,7 @@ function UpdateListItem({ update }: { update: Update }) {
       subtitle={update.description}
       accessories={[
         { text: update.version },
-        {icon:update.major ? { source: Icon.Star } : undefined, tooltip: "MAJOR"}
+        { icon: update.major ? { source: Icon.Star } : undefined, tooltip: "MAJOR" },
       ]}
       actions={
         <ActionPanel>

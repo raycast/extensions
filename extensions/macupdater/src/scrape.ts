@@ -11,7 +11,7 @@ export interface Update {
 }
 
 async function scrapeMacUpdater(url: string, columnOffset = 0): Promise<Update[]> {
-  const { data } = await scrape<{updates: Update[]}>(url, {
+  const { data } = await scrape<{ updates: Update[] }>(url, {
     updates: {
       listItem: "tr.t_content",
       data: {
