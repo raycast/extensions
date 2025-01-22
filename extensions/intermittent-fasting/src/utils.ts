@@ -1,6 +1,7 @@
 import { showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { getItems, updateItem } from "./storage";
 import { Item, EnhancedItem } from "./types";
+import { showFailureToast } from "@raycast/utils";
 
 export async function hasTimerRunning() {
   const items = await getItems();
@@ -54,6 +55,10 @@ export async function stopTimer(item: Item, revalidate: () => Promise<EnhancedIt
     });
     return []; // Return an empty array in case of error
   } finally {
-    launchCommand({ name: "menubar", type: LaunchType.Background });
+    try {
+      await launchCommand({ name: "menubar", type: LaunchType.Background });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to run menubar" });
+    }
   }
 }
