@@ -5,6 +5,7 @@ import { getProgressIcon } from "@raycast/utils";
 import { startItem } from "../storage";
 import { StartFasting } from "./actions/startFasting";
 import { ViewHistory } from "./actions/viewHistory";
+import { calculateEatingProgress, formatTime } from "../utils";
 
 export const EatingView: React.FC<{
   data: EnhancedItem[];
@@ -14,17 +15,15 @@ export const EatingView: React.FC<{
   const lastItem = data[0];
 
   if (lastItem.end) {
-    const now = new Date();
-    const startDate = lastItem?.end ? new Date(lastItem.end) : now;
+    const startDate = new Date(lastItem.end);
     const eatingEndTime = new Date(startDate.getTime() + EATING_DURATION_MS);
-    const elapsedTime = now.getTime() - startDate.getTime();
-    const progress = Math.min(elapsedTime / EATING_DURATION_MS, 1);
-    const progressPercentage = Math.round(progress * 100);
+    const progressPercentage = calculateEatingProgress(startDate, EATING_DURATION_MS);
+    const progress = Math.min(progressPercentage / 100, 1);
 
     return (
       <List.EmptyView
         title={`Eating Window: ${progressPercentage}%`}
-        description={`Started at ${startDate.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)} ・ Ends at ${eatingEndTime.toLocaleTimeString(undefined, TIME_FORMAT_OPTIONS)}`}
+        description={`Started at ${formatTime(startDate, TIME_FORMAT_OPTIONS)} ・ Ends at ${formatTime(eatingEndTime, TIME_FORMAT_OPTIONS)}`}
         icon={getProgressIcon(progress, EATING_COLOR)}
         actions={
           <ActionPanel>

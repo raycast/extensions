@@ -18,7 +18,6 @@ export const EmptyView: FC<EmptyViewProps> = ({ startItem, revalidate }) => {
       actions={
         <ActionPanel>
           <StartFasting startItem={startItem} revalidate={revalidate} />
-          <ViewHistory fastingHistory={[]} revalidate={revalidate} isLoading={false} />
         </ActionPanel>
       }
     />

@@ -3,7 +3,7 @@ import { getProgressIcon } from "@raycast/utils";
 import { DATE_FORMAT_OPTIONS, FASTING_DURATION_MS, TIME_FORMAT_OPTIONS } from "../constants";
 import { EditTimerForm } from "./EditTimerForm";
 import { EnhancedItem, Item, FastingItem } from "../types";
-import { stopTimer } from "../utils";
+import { stopTimer, calculateFastingProgress } from "../utils";
 import { DeleteFasting } from "./actions/deleteFasting";
 
 function getItemAccessories(item: Item) {
@@ -22,7 +22,11 @@ function getItemAccessories(item: Item) {
         (item.end ? new Date(item.end) : new Date()).getTime() - new Date(item.start).getTime();
       const actualFastHours = Math.floor(actualFastDuration / (1000 * 60 * 60));
       const targetFastHours = Math.floor((item.fastingDuration || FASTING_DURATION_MS) / (1000 * 60 * 60));
-      const percentage = Math.round((actualFastHours / targetFastHours) * 100);
+      const percentage = calculateFastingProgress(
+        new Date(item.start),
+        item.end ? new Date(item.end) : null,
+        item.fastingDuration || FASTING_DURATION_MS,
+      );
       accessories.push({
         tag: `${actualFastHours}h fasted • ${percentage}% of ${targetFastHours}h`,
       });
@@ -39,7 +43,11 @@ export function ListItem({ item, revalidate }: { item: Item; revalidate: () => P
   const actualFastDuration = endDate.getTime() - startDate.getTime();
   const actualFastHours = Math.floor(actualFastDuration / (1000 * 60 * 60));
   const targetFastHours = Math.floor((item.fastingDuration || FASTING_DURATION_MS) / (1000 * 60 * 60));
-  const percentage = Math.round((actualFastHours / targetFastHours) * 100);
+  const percentage = calculateFastingProgress(
+    new Date(item.start),
+    item.end ? new Date(item.end) : null,
+    item.fastingDuration || FASTING_DURATION_MS,
+  );
   const progress = Math.min(percentage / 100, 1);
 
   return (

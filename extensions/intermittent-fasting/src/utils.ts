@@ -61,3 +61,16 @@ export async function stopTimer(item: Item, revalidate: () => Promise<EnhancedIt
     }
   }
 }
+
+export function calculateFastingProgress(startTime: Date, endTime: Date | null, targetDurationMs: number): number {
+  const now = new Date();
+  const actualEndTime = endTime || now;
+  const actualFastDuration = actualEndTime.getTime() - startTime.getTime();
+  return Math.round((actualFastDuration / targetDurationMs) * 100);
+}
+
+export function calculateEatingProgress(startTime: Date, targetDurationMs: number): number {
+  const now = new Date();
+  const actualDuration = now.getTime() - startTime.getTime();
+  return Math.round((actualDuration / targetDurationMs) * 100);
+}
