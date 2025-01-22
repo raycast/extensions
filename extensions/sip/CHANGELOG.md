@@ -1,6 +1,6 @@
 # Sip Changelog
 
-## [Check Contrast fix] - {PR_MERGE_DATE}
+## [Check Contrast fix] - 2025-01-22
 
 - Fixed the Foreground/Background submitted colors from being reversed in Sip.
 
