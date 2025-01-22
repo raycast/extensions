@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Add Folder Action Settings] - {PR_MERGE_DATE}
+
+-  Add Folder Action settings
+
 ## [Update Command Metadata] - 2024-06-18
 
 -  Fix the problem of not updating the command metadata
