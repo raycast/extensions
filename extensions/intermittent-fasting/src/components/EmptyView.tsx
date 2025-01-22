@@ -1,7 +1,6 @@
 import { List, ActionPanel, Icon } from "@raycast/api";
 import { FC } from "react";
 import { StartFasting } from "./actions/startFasting";
-import { ViewHistory } from "./actions/viewHistory";
 import { EnhancedItem } from "../types";
 
 interface EmptyViewProps {
