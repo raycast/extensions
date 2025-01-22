@@ -1,6 +1,6 @@
 # Glide Changelog
 
-## New Grid mode - 2025-01-20 
+## [New Grid mode] - 2025-01-20 
 
 - Add a new default grid view
 - Add a preferences option where the user can select between grid and list view
