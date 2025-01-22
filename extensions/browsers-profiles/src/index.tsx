@@ -8,7 +8,15 @@ export default function Command() {
   const chromiumProfiles = getChromiumProfiles();
   const firefoxProfiles = getFirefoxProfiles();
 
-  const browsers = [...chromiumProfiles, ...firefoxProfiles];
+  const browsers = [...chromiumProfiles, ...firefoxProfiles].sort((profileA, profileB) => {
+    if (profileA.name < profileB.name) {
+      return -1;
+    }
+    if (profileA.name > profileB.name) {
+      return 1;
+    }
+    return 0;
+  });
 
   return (
     <List>
