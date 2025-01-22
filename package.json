@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "roam-search",
+      "name": "roam-and-search",
       "title": "Roam & Search",
       "description": "Search a random keyword on X, Reddit, Medium and other platforms.",
       "mode": "no-view"
