@@ -1,8 +1,7 @@
-import { PlatformCode, platformMap, searchOnPlatform } from './lib/platform-searcher';
 import { subMonths, format } from 'date-fns';
 import { LaunchProps, showHUD } from "@raycast/api";
-import { isNotEmpty, readTextWithFallback } from "./lib/utils";
-import { getRandomElement } from "./lib/utils";
+import { isNotEmpty, readTextWithFallback, getRandomElement } from "./lib/utils";
+import { PlatformCode, platformMap, searchOnPlatform } from './lib/platform-searcher';
 
 // 默认的可选平台列表
 const OPTIONAL_PLATFORMS: PlatformCode[] = ['h', 'r', 'm', 'z', 'b', 'y'];

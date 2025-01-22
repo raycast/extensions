@@ -1,9 +1,9 @@
-import { showHUD } from "@raycast/api";
+import { showHUD, LaunchProps } from "@raycast/api";
 import { getRandomElement } from "./lib/utils";
 import { Platform, searchOnPlatform } from "./lib/platform-searcher";
 import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
-export default async function main() {
+export default async function Command(props: LaunchProps) {
   try {
     const keywords = readKeywords(KEYWORDS_FILE_PATH);
     const randomKeyword = getRandomElement(keywords);
