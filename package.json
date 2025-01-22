@@ -19,19 +19,19 @@
       "mode": "no-view"
     },
     {
-      "name": "add-roam-keyword",
+      "name": "add-keyword",
       "title": "Add Roam Keyword",
       "description": "Add a new keyword to keywords list",
       "mode": "no-view"
     },
     {
-      "name": "remove-roam-keyword",
+      "name": "remove-keyword",
       "title": "Remove Roam Keyword",
       "description": "Remove a keyword from keyword list",
       "mode": "no-view"
     },
     {
-      "name": "edit-roam-keywords",
+      "name": "edit-keywords",
       "title": "Edit Roam Keywords",
       "description": "Edit keyword list",
       "mode": "view"

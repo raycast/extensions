@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
-import { randomSelect } from "./utils";
-import { Platform, searchOnPlatform } from "./platform-search";
-import { readKeywords, KEYWORDS_FILE_PATH } from "./keywords-manager";
+import { randomSelect } from "./lib/utils";
+import { Platform, searchOnPlatform } from "./lib/platform-searcher";
+import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
 export default async function main() {
   try {

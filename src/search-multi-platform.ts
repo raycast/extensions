@@ -1,8 +1,8 @@
-import { getSearchUrl, openUrl, Platform } from './platform-search';
+import { getSearchUrl, openUrl, Platform } from './lib/platform-searcher';
 import { subMonths, format } from 'date-fns';
 import { LaunchProps, showHUD } from "@raycast/api";
-import { isNotEmpty, readtext } from "./utils";
-import { randomSelect } from "./utils";
+import { isNotEmpty, readtext } from "./lib/utils";
+import { randomSelect } from "./lib/utils";
 type PlatformCode = 'x' | 'v' | 'h' | 'r' | 'm' | 'z' | 'b' | 'y';
 type PlatformMap = {
   [K in PlatformCode]: Platform;
