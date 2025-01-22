@@ -1,5 +1,8 @@
 # YouTube Downloader Changelog
 
+## [Simplify Extension] - 2025-01-22
+
+- Simplified the extension by focusing on core functionality and relying on the `yt-dlp` executable instead of fork libraries which give so many issues.
 
 ## [Enhancement] - 2024-11-25
 

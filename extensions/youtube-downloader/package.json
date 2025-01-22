@@ -36,6 +36,14 @@
       "required": true
     },
     {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/yt-dlp",
+      "required": true
+    },
+    {
       "name": "ffmpegPath",
       "title": "ffmpeg Path",
       "description": "Path to the ffmpeg executable",
@@ -53,19 +61,14 @@
     }
   ],
   "dependencies": {
-    "@distube/ytdl-core": "^4.14.4",
+    "execa": "^7.2.0",
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
     "date-fns": "^2.30.0",
-    "fluent-ffmpeg": "2.1.3",
-    "pretty-bytes": "^6.1.0",
-    "sanitize-filename": "^1.6.3",
-    "tempfile": "^4.0.0",
-    "unused-filename": "^4.0.1"
+    "pretty-bytes": "^6.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/fluent-ffmpeg": "^2.1.21",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
