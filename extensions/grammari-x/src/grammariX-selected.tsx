@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Clipboard, showToast, Toast, environment, AI, LaunchProps } from "@raycast/api";
+import { List, Clipboard, showToast, Toast, environment, AI, getSelectedText } from "@raycast/api";
 import { OpenAIModule } from "./utils/grammerUtil";
 import { CommandType, ToneType, State } from "./types";
 import { Chat } from "./types";
@@ -25,24 +25,50 @@ if (!isValidKey) {
 
 const openAI = new OpenAIModule(openAIKey);
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.GrammariX }>) {
+export default function Command() {
   const { add } = useHistory();
-  const { text, grammarType } = props.arguments;
 
   const [state, setState] = useState<State>({
-    command: getEnumKeyByEnumValue(CommandType, grammarType) ?? CommandType.Fix,
+    command: CommandType.Fix,
     toneType: ToneType.Professional,
-    isLoading: false,
-    chat: { id: uuidv4(), question: text, answer: "", created_at: new Date().toISOString() } as Chat,
+    isLoading: true,
+    chat: { id: uuidv4(), question: "", answer: "", created_at: new Date().toISOString() } as Chat,
   });
-
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   useEffect(() => {
-    if (text) {
-      onExecute(state.command);
-    }
-  }, [text]);
+    const fetchSelectedText = async () => {
+      try {
+        await getSelectedText();
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          setState((previous) => ({
+            ...previous,
+            chat: { id: uuidv4(), question: selectedText, answer: "", created_at: new Date().toISOString() } as Chat,
+          }));
+        }
+      } catch (error) {
+        setState((previous) => ({
+          ...previous,
+          chat: { id: uuidv4(), question: "", answer: "", created_at: new Date().toISOString() } as Chat,
+        }));
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No text selected",
+        });
+      } finally {
+        setTimeout(() => {
+          setState((previous) => ({
+            ...previous,
+            isLoading: false,
+          }));
+        }, 500);
+      }
+    };
+
+    fetchSelectedText();
+  }, []);
+
   useEffect(() => {
     if (state.chat && state.chat.answer && !isHistoryPaused) {
       add(state.chat);
@@ -108,11 +134,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Gramma
     setState((previous) => ({ ...previous, toneType }));
   }
 
-  function getEnumKeyByEnumValue(myEnum: any, enumValue: string): CommandType | null {
-    const keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
-    return keys.length > 0 ? myEnum[keys[0]] : null;
-  }
   if (isValidKey) {
+    if (state.isLoading) {
+      return (
+        <List
+          isLoading={true}
+          searchBarPlaceholder="Loading..."
+          searchText=""
+          onSearchTextChange={() => {
+            return;
+          }}
+        />
+      );
+    }
+
     return (
       <List
         searchText={state.chat.question}
