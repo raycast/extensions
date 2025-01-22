@@ -13,6 +13,7 @@ interface Preferences {
   layoutSwitchModifier: string;
   enLayoutName: string;
   ruLayoutName: string;
+  showSuccessHUD: boolean;
 }
 
 enum Layout {
@@ -27,7 +28,7 @@ export default async function main() {
   try {
     input = await getSelectedText();
   } catch (error) {
-    console.log("unable to get selected text");
+    console.log("unable to get selected text", error);
   }
 
   if (input === "" || input.trim() === "") {
@@ -87,9 +88,9 @@ async function switchKeyboardLayout(
         ` down'`,
     );
     const activeLayoutName = await getActiveLayoutName();
-    // console.log("active layout after switch is " +  activeLayoutName);
+    // console.log("active layout after switch is " + activeLayoutName);
     if (activeLayoutName === targetLayoutName) {
-      await showHUD("Layout switched!");
+      if (preferences.showSuccessHUD) await showHUD("Layout switched!");
       // console.log("layout switched");
       return;
     }

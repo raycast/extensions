@@ -10,6 +10,9 @@
     "System"
   ],
   "license": "MIT",
+  "screenshots": [
+    "metadata/example.png"
+  ],
   "commands": [
     {
       "name": "index",
@@ -56,6 +59,15 @@
       "type": "textfield",
       "required": true,
       "default": "ABC"
+    },
+    {
+      "name": "showSuccessHUD",
+      "title": "Show Success HUD",
+      "description": "Show a HUD when the layout is switched",
+      "type": "checkbox",
+      "label": "Show Success HUD",
+      "default": false,
+      "required": true
     }
   ],
   "dependencies": {
@@ -66,7 +78,7 @@
     "@types/react": "19.0.7",
     "@typescript-eslint/eslint-plugin": "^8.21.0",
     "@typescript-eslint/parser": "^8.21.0",
-    "eslint": "^9.18.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
