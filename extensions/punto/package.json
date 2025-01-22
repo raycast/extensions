@@ -10,9 +10,6 @@
     "System"
   ],
   "license": "MIT",
-  "screenshots": [
-    "metadata/example.png"
-  ],
   "commands": [
     {
       "name": "index",
