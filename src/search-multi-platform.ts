@@ -1,9 +1,8 @@
-import { getSearchUrl, openUrl, randomSelect } from './utils';
-import { Platform } from './utils';  // 导入 Platform 类型
+import { getSearchUrl, openUrl, Platform } from './platform-search';
 import { subMonths, format } from 'date-fns';
 import { LaunchProps, showHUD } from "@raycast/api";
-import { isNotEmpty, readtext } from "./readtxt";
-
+import { isNotEmpty, readtext } from "./utils";
+import { randomSelect } from "./utils";
 type PlatformCode = 'x' | 'v' | 'h' | 'r' | 'm' | 'z' | 'b' | 'y';
 type PlatformMap = {
   [K in PlatformCode]: Platform;

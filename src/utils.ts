@@ -1,46 +1,28 @@
-
-import { open } from "@raycast/api";
-
-export type Platform = 'x' | 'v2ex' | 'reddit' | 'medium' | 'hackernews' | 'youtube' | 'bilibili' | 'zhihu';
+import { getSelectedText, Clipboard } from "@raycast/api";
 
 /**
- * 获取搜索URL
- * @param platform 平台名称
- * @param keyword 搜索关键词
- * @param date 日期（仅用于X平台）
- * @returns 搜索URL
+ * 检查字符串是否非空
+ * @param string 要检查的字符串
+ * @returns 如果字符串非空则返回 true
  */
-export function getSearchUrl(platform: Platform, keyword: string, date?: string): string {
-  const encodedKeyword = encodeURIComponent(keyword);
-
-  switch (platform) {
-    case 'x':
-      return `https://x.com/search?q=${encodedKeyword}+min_replies:2+min_retweets:1+lang:zh-cn+since:${date}&src=typed_query&f=live`;
-    case 'v2ex':
-      return `https://google.com/search?q=${encodedKeyword}+site:v2ex.com&newwindow=1&tbs=qdr:m`;
-    case 'reddit':
-      return `https://reddit.com/search?q=${encodedKeyword}&t=month`;
-    case 'medium':
-      return `https://medium.com/search?q=${encodedKeyword}`;
-    case 'hackernews':
-      return `https://google.com/search?q=${encodedKeyword}+site:news.ycombinator.com&newwindow=1&tbs=qdr:m`;
-    case 'youtube':
-      return `https://www.youtube.com/results?search_query=${encodedKeyword}`;
-    case 'bilibili':
-      return `https://search.bilibili.com/all?keyword=${encodedKeyword}&from_source=webtop_search`;
-    case 'zhihu':
-      return `https://www.zhihu.com/search?q=${encodedKeyword}`;
-  }
-}
+export const isNotEmpty = (string: string | null | undefined): string is string => {
+  return string != null && String(string).trim().length > 0;
+};
 
 /**
- * 打开URL
- * @param url 要打开的URL
- * @returns Promise
+ * 读取文本，优先级：
+ * 1. 传入的回退文本
+ * 2. 选中的文本
+ * 3. 剪贴板中的文本
+ * @param fallbackText 回退文本
+ * @returns Promise<string | undefined>
  */
-export async function openUrl(url: string): Promise<void> {
-  await open(url);
-}
+export const readtext = (fallbackText?: string) =>
+  isNotEmpty(fallbackText)
+    ? fallbackText?.trim()
+    : getSelectedText()
+      .then((text) => (isNotEmpty(text) ? text : Clipboard.readText()))
+      .catch(() => undefined);
 
 /**
  * 从数组中随机选择一个元素

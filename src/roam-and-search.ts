@@ -1,14 +1,7 @@
 import { showHUD } from "@raycast/api";
-import { getSearchUrl, openUrl, randomSelect, Platform } from "./utils";
+import { randomSelect } from "./utils";
+import { Platform, searchOnPlatform } from "./platform-search";
 import { readKeywords, KEYWORDS_FILE_PATH } from "./keywords-manager";
-
-async function searchOnPlatform(platform: Platform, keyword: string, date?: string) {
-  try {
-    await openUrl(getSearchUrl(platform, keyword, date));
-  } catch (error) {
-    console.error(`Error searching on ${platform}:`, error);
-  }
-}
 
 export default async function main() {
   try {
