@@ -6,8 +6,8 @@ import { copyFileSync } from "fs";
 import { Factory } from "./factory";
 
 interface Preferences {
-  browser: string;
-  profile: string;
+  browser;
+  profile;
 }
 
 export default function Command() {
