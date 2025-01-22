@@ -52,6 +52,32 @@
       ]
     },
     {
+      "name": "emailSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Email Source",
+      "description": "Choose between Apple Mail or Gmail for email source",
+      "default": "applemail",
+      "data": [
+        {
+          "title": "Apple Mail",
+          "value": "applemail"
+        },
+        {
+          "title": "Gmail",
+          "value": "gmail"
+        }
+      ]
+    },
+    {
+      "name": "gmailClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Gmail OAuth Client ID",
+      "description": "OAuth Client ID for Gmail API access (only needed if using Gmail as email source)",
+      "placeholder": "your-client-id.apps.googleusercontent.com"
+    },
+    {
       "name": "defaultSource",
       "type": "dropdown",
       "required": false,
@@ -113,13 +139,16 @@
     }
   ],
   "dependencies": {
+    "@googleapis/gmail": "^1.2.0",
     "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.15.0",
-    "@use-it/interval": "^1.0.0"
+    "@use-it/interval": "^1.0.0",
+    "googleapis-common": "^7.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "16.10.3",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "18.3.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

@@ -25,7 +25,7 @@ export default function Command() {
     return preferences.defaultSource || "all";
   });
 
-  // Fetch iMessage data if enabled
+  // Fetch messages from enabled sources (iMessage and/or Email)
   const {
     data: messageData,
     permissionView: messagePermissionView,
@@ -36,7 +36,6 @@ export default function Command() {
     enabled: preferences.enabledSources !== "email",
   });
 
-  // Fetch email data if enabled
   const {
     data: emailData,
     permissionView: emailPermissionView,
@@ -48,7 +47,7 @@ export default function Command() {
     enabled: preferences.enabledSources !== "imessage",
   });
 
-  // Combine and sort messages based on selected source and preferences
+  // Combine and sort messages based on selected source
   const data =
     messageSource === "imessage"
       ? preferences.enabledSources !== "email"
@@ -59,6 +58,7 @@ export default function Command() {
         ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []
         : []
       : [
+          // When showing all sources, combine and sort by date
           ...(preferences.enabledSources !== "email"
             ? messageData?.map((m) => ({ ...m, source: "imessage" as const })) || []
             : []),
@@ -67,10 +67,9 @@ export default function Command() {
             : []),
         ].sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
 
-  // Update selected item whenever data changes
+  // Auto-select the most recent message containing a code
   useEffect(() => {
     if (data.length > 0) {
-      // Find the most recent item that has a valid code
       const mostRecentWithCode = data.find((message) => extractCode(message.text));
       if (mostRecentWithCode) {
         const newSelectedId = `${mostRecentWithCode.source}-${mostRecentWithCode.guid}`;
@@ -79,7 +78,7 @@ export default function Command() {
     }
   }, [messageData, emailData]);
 
-  // Only start polling after initial email load is complete
+  // Poll for new messages, waiting for initial email load to complete
   useInterval(() => {
     if (preferences.enabledSources !== "email") revalidateMessages();
     if (preferences.enabledSources !== "imessage" && isEmailLoadComplete) revalidateEmails();
@@ -89,6 +88,7 @@ export default function Command() {
     setMessageSource(value as MessageSource);
   }, []);
 
+  // Show permission views if needed
   if (messagePermissionView && preferences.enabledSources !== "email") return messagePermissionView;
   if (emailPermissionView && preferences.enabledSources !== "imessage") return emailPermissionView;
 
@@ -114,8 +114,9 @@ export default function Command() {
         data.map((message) => {
           const code = extractCode(message.text);
           if (!code) {
+            // Only log in development for debugging
             if (process.env.NODE_ENV === "development") {
-              console.debug("no code found in message");
+              console.debug("No code found in message:", message.guid);
             }
             return null;
           }
@@ -133,6 +134,7 @@ export default function Command() {
               ? "Initial email load in progress"
               : "Keeps refreshing every second"
           }
+          icon={!isEmailLoadComplete && preferences.enabledSources !== "imessage" ? Icon.Clock : Icon.MagnifyingGlass}
         />
       )}
     </List>

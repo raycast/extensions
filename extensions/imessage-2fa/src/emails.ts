@@ -1,23 +1,25 @@
 /**
  * Email handling module for 2FA code detection
- * Provides functionality to fetch and process 2FA codes from Apple Mail messages
+ * Provides functionality to fetch and process 2FA codes from both Apple Mail and Gmail
  */
 
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, List, Icon, Color } from "@raycast/api";
 import { Message, Preferences, SearchType } from "./types";
 import { calculateLookBackMinutes } from "./utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { runAppleScript } from "@raycast/utils";
 import { extractCode } from "./utils";
+import { getGmailMessages, checkGmailAuth } from "./gmail";
+import { ErrorView } from "./components/ErrorView";
+import React from "react";
 
 /**
  * Storage interface for managing email message state
  * Tracks processed messages to avoid duplicate processing
  */
 interface MessageStorage {
-  messages: Message[]; // Currently displayed messages
-  latestTimestamp: string | null; // For incremental updates
-  hasCode: Record<string, boolean>; // Cache of message ID -> has code
+  hasCode: Record<string, boolean>; // Maps message IDs to whether they contain codes
+  latestTimestamp?: number; // Most recent message timestamp for incremental updates
 }
 
 /**
@@ -26,7 +28,11 @@ interface MessageStorage {
  * - Stops when reaching a known message ID or cutoff date
  * - Returns messages as delimited string for parsing
  */
-async function getEmails(searchType: SearchType, sinceDate?: Date, knownGuids: string[] = []): Promise<Message[]> {
+async function getAppleMailMessages(
+  searchType: SearchType,
+  sinceDate?: Date,
+  knownGuids: string[] = []
+): Promise<Message[]> {
   const prefs = getPreferenceValues<Preferences>();
   const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
 
@@ -47,7 +53,7 @@ async function getEmails(searchType: SearchType, sinceDate?: Date, knownGuids: s
         set output to ""
         set messageCount to 0
         
-        -- Get messages until we hit a known one or reach cutoff
+        -- Get messages until we've hit a known one or reach cutoff
         repeat with i from 1 to 50
           try
             set m to message i of inb
@@ -117,81 +123,52 @@ interface UseEmailsOptions {
 
 /**
  * React hook for managing email messages and 2FA code detection
- *
- * Architecture:
  * - Maintains cache of processed messages to avoid duplicates
  * - Uses incremental updates based on message timestamps
  * - Integrates with Raycast's search and filtering capabilities
  */
 export function useEmails(options: UseEmailsOptions) {
+  const preferences = getPreferenceValues<Preferences>();
+  const emailSource = preferences.emailSource || "applemail";
+  const storage = useRef<MessageStorage>({ hasCode: {} });
+  const messageCache = useRef<Map<string, boolean>>(new Map());
+
   // UI and loading state management
   const [data, setData] = useState<Message[]>([]);
-  const [permissionView] = useState<JSX.Element | null>(null);
+  const [permissionView, setPermissionView] = useState<JSX.Element | null>(null);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
   const isLoadingRef = useRef(false);
 
-  // Persistent cache for messages and incremental updates
-  const storage = useRef<MessageStorage>({
-    messages: [],
-    latestTimestamp: null,
-    hasCode: {},
-  });
-
-  // Process and filter new emails, update cache and state
+  // Process new emails and update state, avoiding duplicates
   const processNewEmails = useCallback(
     (newEmails: Message[]) => {
-      if (!options.enabled) return;
+      setData((prevData) => {
+        const uniqueEmails = newEmails.filter((email) => {
+          // Skip if already processed
+          if (messageCache.current.has(email.guid)) {
+            return false;
+          }
 
-      const { messages, hasCode } = storage.current;
+          // For code-only search, check if message contains a code
+          if (options.searchType === "code") {
+            const code = extractCode(email.text);
+            const hasCode = code !== null;
+            messageCache.current.set(email.guid, hasCode);
+            return hasCode;
+          }
 
-      // Process only new messages
-      const updatedMessages = [...messages];
-      let latestTimestamp = storage.current.latestTimestamp;
+          messageCache.current.set(email.guid, true);
+          return true;
+        });
 
-      newEmails.forEach((email) => {
-        // Update latest timestamp if needed
-        if (!latestTimestamp || email.message_date > latestTimestamp) {
-          latestTimestamp = email.message_date;
-        }
-
-        // Skip if we already have this message
-        if (hasCode[email.guid] !== undefined) return;
-
-        // Check for code if in code search mode
-        if (options.searchType === "code") {
-          const code = extractCode(email.text);
-          hasCode[email.guid] = !!code;
-          if (!code) return;
-        } else {
-          hasCode[email.guid] = true;
-        }
-
-        // Filter by search text if provided
-        if (options.searchText && !email.text.toLowerCase().includes(options.searchText.toLowerCase())) {
-          return;
-        }
-
-        updatedMessages.push(email);
+        return uniqueEmails.length > 0 ? [...prevData, ...uniqueEmails] : prevData;
       });
-
-      // Sort messages by date
-      updatedMessages.sort((a, b) => new Date(b.message_date).getTime() - new Date(a.message_date).getTime());
-
-      // Update storage
-      storage.current = {
-        messages: updatedMessages,
-        latestTimestamp,
-        hasCode,
-      };
-
-      // Update state
-      setData(updatedMessages);
     },
-    [options.searchText, options.searchType, options.enabled]
+    [options.searchType]
   );
 
-  // Main email fetching with initial load optimization
+  // Main email fetching logic with initial load and incremental update support
   const fetchEmails = useCallback(async () => {
     if (!options.enabled || isLoadingRef.current) {
       return;
@@ -199,34 +176,114 @@ export function useEmails(options: UseEmailsOptions) {
 
     try {
       isLoadingRef.current = true;
-      const knownGuids = Object.keys(storage.current.hasCode);
-      const sinceDate = storage.current.latestTimestamp ? new Date(storage.current.latestTimestamp) : undefined;
 
-      // For initial load, only fetch last 5 messages to prevent timeout
-      const emails = await getEmails(options.searchType, sinceDate, knownGuids);
+      // Determine time window: full window for initial load, incremental for updates
+      let cutoffTime: Date;
+      if (!isInitialLoadComplete) {
+        const prefs = getPreferenceValues<Preferences>();
+        const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
+        cutoffTime = new Date(Date.now() - lookbackMinutes * 60 * 1000);
+      } else {
+        // For updates, only look for messages newer than our latest known message
+        cutoffTime = storage.current.latestTimestamp
+          ? new Date(storage.current.latestTimestamp)
+          : new Date(Date.now() - 60 * 1000); // Fallback to 1 minute if no timestamp
+      }
+
+      let emails: Message[] = [];
+
+      // Fetch from selected email source (Gmail or Apple Mail)
+      if (emailSource === "gmail") {
+        if (!preferences.gmailClientId) {
+          console.error("Gmail OAuth Client ID not configured");
+          setData([]);
+          setPermissionView(
+            React.createElement(ErrorView, {
+              icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+              title: "Gmail Configuration Required",
+              description: "Please add your Gmail OAuth Client ID in the extension preferences.",
+            })
+          );
+          return;
+        }
+
+        try {
+          const isAuthed = await checkGmailAuth();
+          if (!isAuthed) {
+            setData([]);
+            setPermissionView(
+              React.createElement(ErrorView, {
+                icon: { source: Icon.Person, tintColor: Color.Blue },
+                title: "Gmail Authorization Required",
+                description: "Please authorize access to your Gmail account.",
+              })
+            );
+            return;
+          }
+          emails = await getGmailMessages(options.searchType, cutoffTime);
+        } catch (error) {
+          console.error("Gmail error:", error);
+          setData([]);
+          setPermissionView(
+            React.createElement(ErrorView, {
+              icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+              title: "Gmail Error",
+              description: "Failed to fetch messages from Gmail. Please try again.",
+            })
+          );
+          return;
+        }
+      } else {
+        const knownGuids = Object.keys(storage.current.hasCode);
+        emails = await getAppleMailMessages(options.searchType, cutoffTime, knownGuids);
+      }
+
+      setPermissionView(null);
 
       if (emails.length > 0) {
         processNewEmails(emails);
+
+        // Track latest message timestamp for future incremental updates
+        const latestEmail = emails.reduce((latest: number, email: Message) => {
+          const emailDate = new Date(email.message_date).getTime();
+          return emailDate > latest ? emailDate : latest;
+        }, storage.current.latestTimestamp || 0);
+
+        if (latestEmail > (storage.current.latestTimestamp || 0)) {
+          storage.current.latestTimestamp = latestEmail;
+        }
       }
 
-      // Mark initial load as complete if this was the first fetch
       if (!isInitialLoadComplete) {
         setIsInitialLoadComplete(true);
       }
     } catch (error) {
       console.error("Failed to get emails:", error);
-      // If initial load fails, we still want to mark it as complete to allow retries
       if (!isInitialLoadComplete) {
         setIsInitialLoadComplete(true);
       }
     } finally {
       isLoadingRef.current = false;
     }
-  }, [options.searchType, options.enabled, processNewEmails, isInitialLoadComplete]);
+  }, [
+    emailSource,
+    options.searchType,
+    options.enabled,
+    processNewEmails,
+    isInitialLoadComplete,
+    preferences.gmailClientId,
+  ]);
 
-  // Lifecycle Effects
+  // Reset state when search parameters change
+  useEffect(() => {
+    messageCache.current.clear();
+    storage.current = { hasCode: {} };
+    setData([]);
+    setIsInitialLoadComplete(false);
+    setIsInitialLoadStarted(false);
+  }, [options.searchText, options.searchType]);
 
-  // 1. Initial lightweight load
+  // Start initial load when enabled
   useEffect(() => {
     if (!isInitialLoadStarted && options.enabled) {
       setIsInitialLoadStarted(true);
@@ -234,30 +291,21 @@ export function useEmails(options: UseEmailsOptions) {
     }
   }, [fetchEmails, options.enabled, isInitialLoadStarted]);
 
-  // 2. Reset cache on search parameter changes
+  // Set up polling for updates
   useEffect(() => {
-    storage.current = {
-      messages: [],
-      latestTimestamp: null,
-      hasCode: {},
-    };
-    setIsInitialLoadComplete(false);
-    setIsInitialLoadStarted(false);
-    isLoadingRef.current = false;
-  }, [options.searchText, options.searchType, options.enabled]);
+    if (!options.enabled) {
+      return;
+    }
 
-  // 3. Background refresh every 10s after initial load
-  useEffect(() => {
-    if (!isInitialLoadComplete || !options.enabled) return;
-
-    const intervalId = setInterval(fetchEmails, 10000);
-    return () => clearInterval(intervalId);
-  }, [fetchEmails, isInitialLoadComplete, options.enabled]);
+    const interval = setInterval(fetchEmails, 1000);
+    return () => clearInterval(interval);
+  }, [fetchEmails, options.enabled]);
 
   return {
     data,
+    isLoading: !isInitialLoadComplete,
     permissionView,
-    revalidate: fetchEmails,
     isInitialLoadComplete,
+    revalidate: fetchEmails,
   };
 }

@@ -1,0 +1,22 @@
+{
+  "preferences": [
+    {
+      "name": "emailSource",
+      "title": "Email Source",
+      "description": "Choose between Mail.app or Gmail",
+      "type": "dropdown",
+      "required": false,
+      "default": "mail-app",
+      "data": [
+        {
+          "title": "Mail.app",
+          "value": "mail-app"
+        },
+        {
+          "title": "Gmail",
+          "value": "gmail"
+        }
+      ]
+    }
+  ]
+} 

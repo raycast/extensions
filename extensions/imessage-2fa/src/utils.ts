@@ -7,7 +7,7 @@ import { LookBackUnitType } from "./types";
  * @returns
  * @see https://github.com/squatto/alfred-imessage-2fa/blob/master/find-messages.php
  */
-export function extractCode(original: string) {
+export function extractCode(original: string): string | null {
   // remove URLs
   const urlRegex = new RegExp(
     "\\b((https?|ftp|file):\\/\\/|www\\.)[-A-Z0-9+&@#\\/%?=~_|$!:,.;]*[A-Z0-9+&@#\\/%=~_|$]",
@@ -15,7 +15,7 @@ export function extractCode(original: string) {
   );
   let message = original.replaceAll(urlRegex, "");
 
-  if (message.trim() === "") return "";
+  if (message.trim() === "") return null;
 
   let m;
   let code;
@@ -95,12 +95,10 @@ export function extractCode(original: string) {
       // examples:
       //   "Please enter code 548 on Zocdoc."
       code = m[2];
-    } else {
-      console.log("no code found in message");
     }
   }
 
-  return code;
+  return code || null;
 }
 
 // This object maps each unit of time to the number of minutes it contains.
@@ -115,10 +113,10 @@ const unitToMinutesMap: { [unit in LookBackUnitType]: number } = {
  *
  * @param lookBackUnit - The time unit ('DAYS', 'HOURS', 'MINUTES') for the look back period.
  * @param lookBackAmount - The quantity of the specified unit, defaults to 1.
- * @returns The total minutes for the look back period. Returns 0 for unrecognized units.
+ * @returns The total minutes for the look back period. Returns 10 for unrecognized units.
  */
 export function calculateLookBackMinutes(lookBackUnit: LookBackUnitType, lookBackAmount = 1): number {
-  const unitMinutes = unitToMinutesMap[lookBackUnit] || 0;
+  const unitMinutes = unitToMinutesMap[lookBackUnit] || 1;
   return unitMinutes * lookBackAmount;
 }
 

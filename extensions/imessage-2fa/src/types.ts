@@ -3,25 +3,24 @@ export interface Message {
   message_date: string;
   sender: string;
   text: string;
-  source?: MessageSource;
+  source?: "email" | "imessage";
 }
 
-export enum LookBackUnitType {
-  DAYS = "DAYS",
-  HOURS = "HOURS",
-  MINUTES = "MINUTES",
-}
+export type LookBackUnitType = "DAYS" | "HOURS" | "MINUTES";
 
 export type EnabledSourcesType = "both" | "imessage" | "email";
 
 export interface Preferences {
-  lookBackUnit: LookBackUnitType;
-  lookBackAmount?: string;
-  ignoreRead: boolean;
-  defaultSource?: MessageSource;
   enabledSources: EnabledSourcesType;
+  defaultSource: MessageSource;
+  lookBackUnit: LookBackUnitType;
+  lookBackAmount: string;
+  ignoreRead: boolean;
+  emailSource: EmailSource;
+  gmailClientId?: string;
 }
 
 export type SearchType = "all" | "code";
 
-export type MessageSource = "imessage" | "email" | "all";
+export type MessageSource = "all" | "imessage" | "email";
+export type EmailSource = "applemail" | "gmail";
