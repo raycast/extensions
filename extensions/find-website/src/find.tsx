@@ -12,7 +12,7 @@ interface Preferences {
 
 export default function Command() {
   const [data, setData] = useState<JSX.Element[]>([]);
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const prefs = getPreferenceValues<Preferences>();
   const factory = Factory.create(prefs.browser, prefs.profile);
@@ -24,6 +24,7 @@ export default function Command() {
   const dir = environment.supportPath + "/data";
 
   function onChange(newText: string) {
+    setLoading(true);
     copyFileSync(src, dir);
 
     const flow = new Step(
@@ -36,6 +37,7 @@ export default function Command() {
     async function run() {
       const payload = await flow.process();
       setData(payload.render());
+      setLoading(false);
     }
 
     run();
@@ -43,6 +45,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={loading}
       navigationTitle="Find Website"
       searchBarPlaceholder="Quickly find the website you're looking for..."
       filtering={false}
