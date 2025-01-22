@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Added a shortcut] - {PR_MERGE_DATE}
+## [Added a shortcut] - 2025-01-22
 
 - Added a shortcut to copy the package version
 
