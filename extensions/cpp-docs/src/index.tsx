@@ -396,12 +396,18 @@ const SearchResult = ({ query }: { query: string }) => {
   );
 };
 
-export default async function Command(props: { arguments?: { query?: string } }) {
+export default function Command(props: { arguments?: { query?: string } }) {
   const { documentation_source } = getPreferenceValues<Preferences>();
-  await updateCommandMetadata({ subtitle: documentation_source });
-
   const [searchText, setSearchText] = useState<string>("");
   const [isCppmanInstalled, setIsCppmanInstalled] = useState<boolean>(true);
+
+  // Move the async operation into useEffect
+  useEffect(() => {
+    const updateMetadata = async () => {
+      await updateCommandMetadata({ subtitle: documentation_source });
+    };
+    updateMetadata();
+  }, [documentation_source]);
 
   useEffect(() => {
     checkCppman().then(setIsCppmanInstalled);
