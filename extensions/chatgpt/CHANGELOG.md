@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-01-22
 
 - Feature: Introduced a method to dynamically create new commands for processing user text input from various sources, including selected text, clipboard text, and open web pages.
 - Feature: Added new commands: "Fix Spelling and Grammar" and "Improve Writing".
