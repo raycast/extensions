@@ -5,7 +5,7 @@ import { TIME_FORMAT_OPTIONS, FASTING_DURATION_MS, FASTING_COLOR } from "../cons
 import { StopFasting } from "./actions/stopFasting";
 import { EditFasting } from "./actions/editFasting";
 import { FastingViewProps } from "../types";
-import { formatTime } from "../utils";
+import { formatTime, calculateFastingProgress } from "../utils";
 import { ViewHistory } from "./actions/viewHistory";
 import { deleteItem } from "../storage";
 
