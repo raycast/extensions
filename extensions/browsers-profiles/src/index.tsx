@@ -9,10 +9,10 @@ export default function Command() {
   const firefoxProfiles = getFirefoxProfiles();
 
   const browsers = [...chromiumProfiles, ...firefoxProfiles].sort((profileA, profileB) => {
-    if (profileA.name < profileB.name) {
+    if (profileA.name.toLowerCase() < profileB.name.toLowerCase()) {
       return -1;
     }
-    if (profileA.name > profileB.name) {
+    if (profileA.name.toLowerCase() > profileB.name.toLowerCase()) {
       return 1;
     }
     return 0;
