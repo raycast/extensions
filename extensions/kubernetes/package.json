@@ -51,6 +51,41 @@
       "subtitle": "Kubernetes",
       "description": "List Services in Kubernetes Cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-configmaps",
+      "title": "Get ConfigMaps",
+      "subtitle": "Kubernetes",
+      "description": "List ConfigMaps in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-endpoints",
+      "title": "Get Endpoints",
+      "subtitle": "Kubernetes",
+      "description": "List Endpoints in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-namespaces",
+      "title": "Get Namespaces",
+      "subtitle": "Kubernetes",
+      "description": "List Namespaces in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumes",
+      "title": "Get PersistentVolumes",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumes in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumeclaims",
+      "title": "Get PersistentVolumeClaims",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumeClaims in a Kubernetes Cluster.",
+      "mode": "view"
     }
   ],
   "dependencies": {

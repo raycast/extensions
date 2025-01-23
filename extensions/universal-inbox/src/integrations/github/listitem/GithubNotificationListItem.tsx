@@ -3,12 +3,14 @@ import { GithubDiscussionNotificationListItem } from "./GithubDiscussionNotifica
 import { NotificationListItemProps } from "../../../notification";
 
 export function GithubNotificationListItem({ notification, mutate }: NotificationListItemProps) {
-  switch (notification.details?.type) {
+  if (notification.source_item.data.type !== "GithubNotification") return null;
+
+  switch (notification.source_item.data.content.item?.type) {
     case "GithubPullRequest":
       return (
         <GithubPullRequestNotificationListItem
           notification={notification}
-          githubPullRequest={notification.details.content}
+          githubPullRequest={notification.source_item.data.content.item.content}
           mutate={mutate}
         />
       );
@@ -16,7 +18,7 @@ export function GithubNotificationListItem({ notification, mutate }: Notificatio
       return (
         <GithubDiscussionNotificationListItem
           notification={notification}
-          githubDiscussion={notification.details.content}
+          githubDiscussion={notification.source_item.data.content.item.content}
           mutate={mutate}
         />
       );

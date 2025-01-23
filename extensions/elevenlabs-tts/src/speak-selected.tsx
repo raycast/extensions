@@ -59,6 +59,7 @@ export default async function Command() {
       voiceId: preferences.voiceId,
       apiKey: preferences.elevenLabsApiKey,
       settings,
+      playbackSpeed: preferences.playbackSpeed,
     });
 
     await showToast({

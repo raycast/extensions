@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { showToast, Toast, Clipboard } from "@raycast/api";
+import { open, showToast, Toast, Clipboard } from "@raycast/api";
 import { executeSQL, showFailureToast } from "@raycast/utils";
 
 import { extractOTP, decodeHexString } from "./helpers";
@@ -49,6 +49,25 @@ export default async function Command() {
       title: "No OTP code found in recent messages",
     });
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === "PermissionError") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to paste OTP code",
+          message: "Raycast needs full disk access.",
+          primaryAction: {
+            title: "Open System Settings → Privacy",
+            onAction: (toast) => {
+              open("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
+              toast.hide();
+            },
+          },
+        });
+
+        return;
+      }
+    }
+
     await showFailureToast(error, { title: "Failed to paste OTP code" });
   }
 }
