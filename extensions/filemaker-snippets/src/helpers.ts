@@ -29,7 +29,7 @@ function parseFilePath(raw: string): ParsedFilePath {
     raw,
     locationName: local ? host : locationName,
     fileName,
-    id: fileName,
+    id: raw,
   };
 }
 

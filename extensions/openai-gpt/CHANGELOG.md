@@ -1,5 +1,11 @@
 # AI Assistant Changelog
 
+## [Version: 1.7.0] - 2024-03-17
+
+- Add support for `gpt-4-0125-preview` and `gpt-3.5-turbo-0125` models
+- Remove support for `text-ada-001`, `text-babbage-001`, and `text-curie-001` models
+- Update README.md
+
 ## [Version: 1.6.1] - 2023-12-01
 
 - Add support for `OpenAI Base Path` configuration

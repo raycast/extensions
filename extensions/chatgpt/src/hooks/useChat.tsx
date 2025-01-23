@@ -1,9 +1,9 @@
 import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
-import { chatTransfomer } from "../utils";
+import { buildUserMessage, chatTransformer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
@@ -15,12 +15,14 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [isAborted, setIsAborted] = useState<boolean>(false);
   const [useStream] = useState<boolean>(() => {
     return getPreferenceValues<{
       useStream: boolean;
     }>().useStream;
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -33,7 +35,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const proxy = useProxy();
   const chatGPT = useChatGPT();
 
-  async function ask(question: string, model: Model) {
+  async function ask(question: string, files: string[], model: Model) {
     clearSearchBar();
 
     setLoading(true);
@@ -41,10 +43,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       title: "Getting your answer...",
       style: Toast.Style.Animated,
     });
-
     let chat: Chat = {
       id: uuidv4(),
       question,
+      files,
       answer: "",
       created_at: new Date().toISOString(),
     };
@@ -68,12 +70,18 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       };
     };
 
+    abortControllerRef.current = new AbortController();
+    const { signal: abortSignal } = abortControllerRef.current;
+
     await chatGPT.chat.completions
       .create(
         {
           model: model.option,
           temperature: Number(model.temperature),
-          messages: [...chatTransfomer(data.reverse(), model.prompt), { role: "user", content: question }],
+          messages: [
+            ...chatTransformer(data.reverse(), model.prompt),
+            { role: "user", content: buildUserMessage(question, files) },
+          ],
           stream: useStream,
         },
         {
@@ -82,7 +90,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
           query: { ...getHeaders().params },
           headers: { ...getHeaders().apiKey },
-        }
+          signal: abortSignal,
+        },
       )
       .then(async (res) => {
         if (useStream) {
@@ -97,8 +106,14 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 setStreamData({ ...chat, answer: chat.answer });
               }
             } catch (error) {
-              toast.title = "Error";
-              toast.message = `Couldn't stream message: ${error}`;
+              if (abortSignal.aborted) {
+                toast.title = "Request canceled";
+                toast.message = undefined;
+                setIsAborted(true);
+              } else {
+                toast.title = "Error";
+                toast.message = `Couldn't stream message: ${error}`;
+              }
               toast.style = Toast.Style.Failure;
               setLoading(false);
             }
@@ -110,15 +125,20 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         } else {
           const completion = res as ChatCompletion;
           chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
-
-          if (isAutoTTS) {
-            say.stop();
-            say.speak(chat.answer);
-          }
+        }
+        if (isAutoTTS) {
+          say.stop();
+          say.speak(chat.answer);
         }
         setLoading(false);
-        toast.title = "Got your answer!";
-        toast.style = Toast.Style.Success;
+        if (abortSignal.aborted) {
+          toast.title = "Request canceled";
+          toast.style = Toast.Style.Failure;
+          setIsAborted(true);
+        } else {
+          toast.title = "Got your answer!";
+          toast.style = Toast.Style.Success;
+        }
 
         setData((prev) => {
           return prev.map((a) => {
@@ -133,7 +153,11 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         }
       })
       .catch((err) => {
-        if (err?.message) {
+        if (abortSignal.aborted) {
+          toast.title = "Request canceled";
+          toast.message = undefined;
+          setIsAborted(true);
+        } else if (err?.message) {
           if (err.message.includes("429")) {
             toast.title = "You've reached your API limit";
             toast.message = "Please upgrade to pay-as-you-go";
@@ -147,12 +171,44 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       });
   }
 
+  const abort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
   const clear = useCallback(async () => {
     setData([]);
   }, [setData]);
 
   return useMemo(
-    () => ({ data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData }),
-    [data, setData, isLoading, setLoading, selectedChatId, setSelectedChatId, ask, clear, streamData]
+    () => ({
+      data,
+      setData,
+      isLoading,
+      setLoading,
+      isAborted,
+      setIsAborted,
+      selectedChatId,
+      setSelectedChatId,
+      ask,
+      clear,
+      streamData,
+      abort,
+    }),
+    [
+      data,
+      setData,
+      isLoading,
+      setLoading,
+      isAborted,
+      setIsAborted,
+      selectedChatId,
+      setSelectedChatId,
+      ask,
+      clear,
+      streamData,
+      abort,
+    ],
   );
 }

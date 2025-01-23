@@ -1,8 +1,8 @@
 import { Grid, ActionPanel, Action, Image, Cache } from "@raycast/api";
-import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 import { getAvatarIcon } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
+import * as glyphsData from "css.gg/glyphs/glyphs.json";
 
 interface Icon {
   name: string;
@@ -35,17 +35,13 @@ export default function Glyphs() {
     if (cachedResponse) {
       setCategories(JSON.parse(cachedResponse));
     } else {
-      fetch("https://cdn.css.gg/glyphs.json")
-        .then((response) => response.json())
-        .then((data) => {
-          const apiResponse = data as ApiResponse;
-          setCategories(apiResponse.categories.category);
-          cache.set("glyphs", JSON.stringify(apiResponse.categories.category));
-        });
+      const apiResponse = glyphsData as ApiResponse;
+      setCategories(apiResponse.categories.category);
+      cache.set("glyphs", JSON.stringify(apiResponse.categories.category));
     }
   }, []);
 
-  const getSymbolUrl = (symbol: Icon) => `https://glyphs.css.gg/${encodeURIComponent(symbol.name.toLowerCase())}`;
+  const getSymbolUrl = (symbol: Icon) => `https://glyf.app/${encodeURIComponent(symbol.name.toLowerCase())}`;
 
   const sections = categories
     .filter((category) => selectedCategory === "all" || category.slug === selectedCategory)
@@ -93,7 +89,7 @@ export default function Glyphs() {
                       <Action.OpenInBrowser
                         title="Astrit"
                         icon={{ source: "https://github.com/astrit.png", mask: Image.Mask.Circle }}
-                        url="https://github .com/astrit"
+                        url="https://github.com/astrit"
                       />
                     </ActionPanel.Section>
                   </ActionPanel>

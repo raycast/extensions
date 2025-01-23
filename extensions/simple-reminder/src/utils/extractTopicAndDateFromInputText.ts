@@ -1,5 +1,6 @@
 import { WordPunctTokenizer } from "natural/lib/natural/tokenizers/index";
 import * as chrono from "chrono-node";
+import { removeWhiteSpacesFromQuotedWords } from "./removeWhiteSpacesFromQuotedWords";
 
 const tokenizer = new WordPunctTokenizer();
 const EXCLUDED_INITIAL_TOKENS_REGEX = /(remind me to|remind me)\s*/i;
@@ -17,6 +18,6 @@ export function extractTopicAndDateFromInputText(inputText: string) {
 
   return {
     date: targetDate,
-    topic: extractedTopicTokens.join(" "),
+    topic: removeWhiteSpacesFromQuotedWords(extractedTopicTokens.join(" ")),
   };
 }

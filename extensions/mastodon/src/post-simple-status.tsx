@@ -19,9 +19,10 @@ export interface CommandProps extends LaunchProps {
   children?: React.ReactNode;
   draftValues: Partial<StatusRequest>;
   launchContext: LaunchContext;
+  onAddFileFromClipboard?: () => void;
 }
 
-export default function SimpleCommand({ children, draftValues, launchContext }: CommandProps) {
+export default function SimpleCommand({ children, draftValues, launchContext, onAddFileFromClipboard }: CommandProps) {
   const { handleSubmit, latestStatus, openActionText, itemProps, focus } = useSubmitStatus(draftValues, launchContext);
 
   const { username, getUsername, isLoading } = useMe();
@@ -39,6 +40,9 @@ export default function SimpleCommand({ children, draftValues, launchContext }: 
           <Action.SubmitForm onSubmit={handleSubmit} title={"Toot"} icon={Icon.Upload} />
           {latestStatus && <Action.OpenInBrowser url={latestStatus.url} title={openActionText} />}
           {instance && <Action.OpenInBrowser url={`https://${instance}/home`} title="Open Mastodon in Browser" />}
+          {onAddFileFromClipboard && (
+            <Action title="Add File From Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
+          )}
         </ActionPanel>
       }
     >

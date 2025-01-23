@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tny",
+  "title": "Tny",
+  "description": "Shorten links with Tny by Chief Tools.",
+  "icon": "tny-icon.png",
+  "author": "stayallive",
+  "contributors": [
+    "SebastiaanKloos"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-links",
+      "title": "Manage Short Links",
+      "subtitle": "Tny",
+      "description": "Manage your Tny links",
+      "mode": "view"
+    },
+    {
+      "name": "shorten-selected-url-and-copy",
+      "title": "Shorten Selected URL and Copy to Clipboard",
+      "subtitle": "Tny",
+      "description": "This command shortens the selected URL and copies it to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "shorten-selected-url-and-replace",
+      "title": "Shorten and Replace Selected URL",
+      "subtitle": "Tny",
+      "description": "This command shortens and replaces the selected URL with the shortened URL",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.9.3",
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.5",
+    "cross-fetch": "^4.0.0",
+    "graphql": "^16.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -3,14 +3,14 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2024-01-12 <br />
-Pins Version: 1.7.0
+Last Updated: 2024-07-07 <br />
+Pins Version: 1.8.2
 
 ------------------------
 
 ## Overview
 
-Pins supports various placeholders that are evaluated at runtime whenever you open/execute a pin. These placeholders are useful for pinning items that rely on the current context such as selected text. The placeholders system is provided as a way to supply additional functionality for users that need or want it without complicating the core functionality of Pins.
+Pins supports various placeholders that are evaluated at runtime whenever you open/execute a pin or (optionally) when a pin expires. These placeholders are useful for pinning items that rely on the current context such as selected text. The placeholders system is provided as a way to supply additional functionality for users that need or want it without complicating the core functionality of Pins.
 
 Placeholders in Pins fall into three categories: **information placeholders**, which are replaced with information about the current context, **script placeholders**, which are replaced with the return value of some script, and **directives**, which are commands for Pins to execute that are generally replaced with an empty string (with some exceptions). You can think of information placeholders as a way to get an instantaneous snapshot of the current context, without performing any additional actions, while script placeholders can be used to perform actions and process data before resolving to a string value.
 
@@ -18,7 +18,7 @@ All placeholders are evaluated at runtime — when you open/execute a pin — an
 
 ### Why would I use placeholders?
 
-Placeholders allow pins to be more dynamic and context-aware. You can use placeholders to pin common _workflows_ rather than static items. For example, you can create a pin that saves the current webpage to a specific folder in Finder, or a pin that uploads selected text to GitHub Gist.
+Placeholders allow pins to be more dynamic and context-aware. You can use placeholders to pin common _workflows_ rather than static items. For example, you can create a pin that saves the current webpage to a specific folder in Finder, or a pin that uploads selected text to GitHub Gist. You can also use placeholders to run workflows when a pin expires, for example to save the pin to a Note or to send an email.
 
 ------------------------
 
@@ -26,7 +26,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 
 | Placeholder | Replaced With |
 | ----- | ----- |
-| `{{AI:...}}` or <br /> `{{AI:...}}` or <br /> `{{askAI:...}}` | The response to a Raycast AI query. Requires Raycast Pro. You can specify the model and creativity using `{{AI model="..." creativity=[decimal]}}`. The default model is `gpt-3.5-turbo` and the default creativity is `1.0`. The model must be either `gpt-3.5-turbo` or `text-davinci-003`. Creativity must be between `0.0` and `1.0`. |
+| `{{AI:...}}` or <br /> `{{AI:...}}` or <br /> `{{askAI:...}}` | The response to a Raycast AI query. Requires Raycast Pro. You can specify the model and creativity using `{{AI model="..." creativity=[decimal]}}`. The default model is `OpenAI_GPT3.5-turbo` and the default creativity is `1.0`. The model must be one listed [here](https://developers.raycast.com/api-reference/ai). Creativity must be between `0.0` and `1.0`. |
 | `{{alert:...}}` | Displays an alert with the specified text. Specify an optional message and timeout using `{{alert timeout=[number] title="...":...}}`. The default timeout is 10 seconds. |
 | `{{as:...}}` or <br /> `{{AS:..}}` | The return value of an AppleScript script. |
 | `{{chooseApplication}}` | A quoted POSIX path of an application selected by the user in a file dialog. Use `{{chooseApplication multiple=true}}` to allow the user to select multiple applications. |
@@ -34,6 +34,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{chooseFolder}}` | A quoted POSIX path of a folder selected by the user in a file dialog. Use `{{chooseFolder multiple=true}}` to allow the user to select multiple folders. |
 | `{{clipboardText}}` or <br /> `{{clipboard}}` | The current text content of the clipboard. Use `{{clipboardText offsets=[1, 2, 3, n]}}` or `{{clipboardText offsets=[1..n]}}` to get previous clipboard entries. |
 | `{{copy:...}}` | Copies the specified text to the clipboard. |
+| `{{createPin:[name]:[target]:[group]}}` | Creates a new pin with the specified name, target, and group. |
 | `{{currentAppBundleID}}` or <br /> `{{currentAppID}}` or <br /> `{{currentApplicationBundleID}}` or <br /> `{{currentApplicationID}}` | The bundle ID of the frontmost application. |
 | `{{currentAppName}}` or <br /> `{{currentApp}}` or <br /> `{{currentApplicationName}}` or <br /> `{{currentApplication}}` | The name of the frontmost application. |
 | `{{currentAppPath}}` or <br /> `{{currentApplicationPath}}` | The POSIX path to the bundle of the frontmost application. |
@@ -43,6 +44,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{date}}` or <br /> `{{currentDate}}` | The current date. Use `{{date format="..."}}` to specify a custom date format. Defaults to `MMMM d, yyyy`. |
 | `{{day}}` or <br /> `{{dayName}}` or <br /> `{{currentDay}}` or <br /> `{{currentDayName}}` | The current weekday, e.g. "Monday". Defaults to en-US locale. Use format `{{day locale="xx-XX"}}` to specify a different locale. |
 | `{{delete [name]}}` | Deletes the persistent variable with the specified name. |
+| `{{deletePin:[pinName or ID]}}` | Deletes the specified pin. |
 | `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{file:...}}` | The text content of a path at the specified path. The path can be absolute or relative to the user's home directory using `~/`. |
 | `{{get [name]}}` | Gets the value of the persistent variable with the specified name. |
@@ -54,9 +56,13 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{input}}` | The text entered by the user in an input dialog. You can specify a prompt using `{{input prompt="..."}}`. |
 | `{{js:...}}` or <br /> `{{JS:...}}` | The return value of sandboxed JavaScript code. See [JavaScript Placeholder Reference](#javascript-placeholder-reference) for more information. |
 | `{{jxa:...}}` or <br /> `{{JXA:...}}` | The return value of a JXA script. |
+| `{{launchGroup:[groupName]}}` | Launches all pins in the specified group. |
+| `{{launchPin:[pinName]}}` | Launches the specified pin. |
 | `{{paste:...}}` | Pastes the specified text into the frontmost application. |
+| `{{pinName}}` | The name of the current pin. |
 | `{{pinNames}}` | The comma-separated list of names of all pins, sorted by date last used. Specify an amount of pins to randomly select using `{{pinNames amount=[number]}}`. |
 | `{{pins}}` | The JSON representation of all pins. Specify an amount of pins to randomly select using `{{pins amount=[number]}}`. |
+| `{{pinTarget}}` | The target of the current pin. |
 | `{{pinTargets}}` | The newline-separated list of targets of all pins, sorted by date last used. Specify an amount of pins to randomly select using `{{pinTargets amount=[number]}}`. |
 | `{{previousApp}}` or <br /> `{{previousAppName}}` or <br /> `{{lastApp}}` or <br /> `{{lastAppName}}` or <br /> `{{previousApplication}}` or <br /> `{{previousApplicationName}}` or <br /> `{{lastApplication}}` or <br /> `{{lastApplicationName}}` | The name of the last application that was active before the current one. |
 | `{{previousPinName}}` or <br /> `{{lastPinName}}` | The URL-encoded name of the last pin that was opened. |
@@ -163,6 +169,25 @@ tell application cApp to activate'
 ```
 
 This code, which can be set as a Pin target, interweaves several placeholders to look up the artist of the currently playing song in Music, search Google for songs by that artist, and create a new note in Notes with the search results as the body. This particular example is a bit contrived, but it demonstrates the power of the `{{js:...}}` placeholder.
+
+## Placeholders as Expiration Actions
+
+When creating or editing a pin and setting an expiration date, you can select an _expiration action_ to be performed when the pin expires. A few common actions are provided by default, such as deleting the pin or moving it to a specific group, but you can also provide a custom action using placeholders. For example, to display an alert when a pin expires, you can set the expiration action to `{{alert:The pin '{{pinName}}' has expired!}}`.
+
+The final text of a placeholder action after placeholder substitution is discarded. Thus, `{{alert:This is an alert!}}` is effectively equivalent to `Display an alert: {{alert:This is an alert!}}`. You can use this to provide inline comments or additional information about the action being performed.
+
+Expiration actions are evaluated in the same way as placeholders in a prompt, with the same precedence rules. This means that you can use any placeholder in an expiration action, including script placeholders. For example, the following expiration action will write the Pin's JSON data to a file in the Downloads directory, then delete the pin:
+
+```javascript
+{{js:
+  (async () => {
+    const jsonData = await pinJSON();
+    const filePath = "{{homedir}}/Downloads/{{pinName}}.json";
+    await fs.promises.writeFile(filePath, jsonData);
+    await deletePin("{{pinName}}", );
+  })();
+}}
+```
 
 ------------------------
 

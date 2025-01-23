@@ -1,13 +1,24 @@
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
-import { Project, getProjects } from "../libs/api";
+import { validateProjects, getProjects } from "../libs/api";
 import { Cache } from "@raycast/api";
 
 const CACHE_KEY = "projects";
 const cache = new Cache();
 
+const readFromCache = () => {
+  const cachedString = cache.get(CACHE_KEY);
+  if (!cachedString) return [];
+
+  try {
+    const cachedData = JSON.parse(cachedString);
+    return validateProjects(cachedData);
+  } catch {
+    return [];
+  }
+};
+
 export const useProjects = () => {
-  const cached = cache.get(CACHE_KEY);
-  const cachedProjects: Project[] = cached ? JSON.parse(cached) : [];
+  const cachedProjects = readFromCache();
   const { isLoading, data } = useCachedPromise(
     async () => {
       const projects = await getProjects();
@@ -16,11 +27,10 @@ export const useProjects = () => {
     },
     [],
     {
-      keepPreviousData: true,
       initialData: cachedProjects,
     },
   );
-  const cleanData = (data || []).map((d) => ({ ...d, id: String(d.id) }));
+  const cleanData = validateProjects(data).map((d) => ({ ...d, id: String(d.id) }));
   const { data: sortedData, visitItem } = useFrecencySorting(cleanData);
 
   return { isLoading, projects: sortedData, visitItem };

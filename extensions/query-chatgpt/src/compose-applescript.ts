@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { getTabJavascript } from "./get-tab-javascript";
 import { ComposeAppleScriptArguments, TabOpenerArguments } from "./types";
 
@@ -11,33 +9,50 @@ function runJS(browserName: TabOpenerArguments["browserName"], code: string): st
   }
 }
 
-function composeUrlWithRandomId(gptUrl: TabOpenerArguments["gptUrl"]): string {
-  const id = randomUUID();
-
-  const url = new URL(gptUrl);
-  url.searchParams.set("_qchat-id", id);
-
-  return url.toString();
-}
-
-export function composeApplescript({ browserName, prompt, gptUrl }: ComposeAppleScriptArguments): string {
-  const completeUrl = composeUrlWithRandomId(gptUrl);
+export function composeApplescript({
+  browserName,
+  prompt,
+  urlToSearch,
+  urlToOpen,
+}: ComposeAppleScriptArguments): string {
   const tabJavascript = getTabJavascript(prompt);
   return `
-tell application "${browserName}"
-    open location "${completeUrl}"
-end tell
+on run
+    set urlExists to false
+    set urlToSearch to "${urlToSearch}"
+    set urlToUse to "${urlToOpen}"
+    tell application "${browserName}"
+        repeat with w in (every window)
+            repeat with t in (every tab of w)
+                if URL of t starts with urlToSearch then
+                    set urlExists to true
+                    exit repeat
+                end if
+            end repeat
+            if urlExists then
+                set urlToUse to "${urlToSearch}"
+                exit repeat
+            end if
+        end repeat
+        if not urlExists then
+            open location urlToUse
+            delay 2
+        end if
+    end tell
 
-delay 2
-
-tell application "${browserName}"
-    repeat with w in (every window)		
-        repeat with t in (every tab whose URL equal "${completeUrl}") of w
-          tell t
-            return ${runJS(browserName, tabJavascript)}
-          end tell
-        end repeat	
-    end repeat
-end tell
+    tell application "${browserName}"
+      repeat with w in (every window)
+          repeat with t in (every tab of w)
+            if URL of t starts with urlToUse then
+                tell t
+                  ${runJS(browserName, tabJavascript)}
+                  return urlToUse
+                end tell
+                exit repeat
+            end if
+          end repeat
+      end repeat
+    end tell
+end run
     `;
 }

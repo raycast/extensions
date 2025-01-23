@@ -1,5 +1,20 @@
 # OpenVPN Changelog
 
+## [Handle multiple profiles] - 2024-08-01
+
+### ✨ New
+
+- The extension can now handle multiple profiles!
+- A couple of new command make it easy to conenct/disconnect from one of you profile, or connect/disconnect from the last used profile
+
+### 💎 Improvements
+
+- The apple scripts have been revamped, to avoir explicit clicking and navigation slowing down the process, and instead target directly the correct entry and click it (which then happen in the background without visible action)
+
+### 🐞 Fixes
+
+- `isRunning` function has been updated to rely on the existance of the menu bar (which we leverage later to connect/disconnect anyway) instead of command line checks which are less reliable
+
 ## [Bug Fixes] - 2024-01-27
 
 Fixed a bug where OpenVPN would not start because of minimize flag. UI now shows up and a short delay was added to wait for the UI to be ready for AppleScript.

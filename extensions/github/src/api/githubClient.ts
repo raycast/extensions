@@ -1,7 +1,8 @@
+import { Octokit } from "@octokit/rest";
 import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { GraphQLClient } from "graphql-request";
-import { Octokit } from "octokit";
+import fetch from "node-fetch";
 
 import { getSdk } from "../generated/graphql";
 
@@ -10,15 +11,17 @@ let octokit: Octokit | null = null;
 
 const preferences = getPreferenceValues<Preferences>();
 
+function onAuthorize({ token, type }: { token: string; type: string }) {
+  const authorization = type === "personal" ? `token ${token}` : `bearer ${token}`;
+
+  github = getSdk(new GraphQLClient("https://api.github.com/graphql", { headers: { authorization } }));
+  octokit = new Octokit({ auth: token, request: { fetch } });
+}
+
 export const githubOAuthService = OAuthService.github({
   personalAccessToken: preferences.personalAccessToken,
-  scope: "notifications repo read:org read:user read:project",
-  onAuthorize({ token, type }) {
-    const authorization = type === "personal" ? `token ${token}` : `bearer ${token}`;
-
-    github = getSdk(new GraphQLClient("https://api.github.com/graphql", { headers: { authorization } }));
-    octokit = new Octokit({ auth: token });
-  },
+  scope: "notifications repo project read:org read:user",
+  onAuthorize,
 });
 
 export function getGitHubClient() {

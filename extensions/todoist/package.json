@@ -15,7 +15,9 @@
     "AnishDe12020",
     "kud",
     "gerardcs",
-    "prince_yadav"
+    "prince_yadav",
+    "stelo",
+    "ridemountainpig"
   ],
   "commands": [
     {
@@ -235,31 +237,39 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "focusLabelName",
+      "type": "textfield",
+      "required": false,
+      "title": "Focus Label",
+      "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
+      "placeholder": "raycast-focus"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.11.1",
-    "axios": "^1.6.6",
-    "date-fns": "^3.3.1",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.1",
+    "axios": "^1.7.2",
+    "date-fns": "^3.6.0",
     "form-data": "^4.0.0",
     "lodash": "^4.17.21",
-    "mime": "^4.0.1",
+    "mime": "^4.0.4",
     "node-fetch": "^3.3.2",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.202",
-    "@types/mime": "^3.0.4",
-    "@types/node": "^20.11.6",
-    "@types/react": "^18.2.48",
+    "@types/lodash": "^4.17.6",
+    "@types/mime": "^4.0.0",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
     "@types/remove-markdown": "^0.3.4",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

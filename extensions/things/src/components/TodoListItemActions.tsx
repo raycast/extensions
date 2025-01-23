@@ -1,4 +1,15 @@
-import { Icon, ActionPanel, showToast, Action, Toast, Color, confirmAlert, Keyboard, AI } from '@raycast/api';
+import {
+  Icon,
+  ActionPanel,
+  showToast,
+  Action,
+  Toast,
+  Color,
+  confirmAlert,
+  Keyboard,
+  AI,
+  environment,
+} from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
 import {
@@ -64,13 +75,13 @@ export default function TodoListItemActions({
     if (
       await confirmAlert({
         title: 'Add these items to the checklist?',
-        message: items,
+        message: items.trim(),
         icon: { source: Icon.Stars, tintColor: Color.Yellow },
       })
     ) {
-      await updateAction({ 'append-checklist-items': items }, { title: 'Added checklist items' });
+      await updateAction({ 'append-checklist-items': items.trim() }, { title: 'Added checklist items' });
     } else {
-      toast.hide();
+      await toast.hide();
     }
   }
 
@@ -238,12 +249,14 @@ New title:
           type={Action.PickDate.Type.Date}
         />
 
-        <Action
-          title="Generate Checklist with AI"
-          icon={Icon.BulletPoints}
-          shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
-          onAction={generateChecklistWithAI}
-        />
+        {environment.canAccess(AI) && (
+          <Action
+            title="Generate Checklist with AI"
+            icon={Icon.BulletPoints}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            onAction={generateChecklistWithAI}
+          />
+        )}
 
         <Action
           title="Make To-Do Actionable with AI"

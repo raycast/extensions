@@ -3,6 +3,7 @@ import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { containsMySavedTracks } from "./api/containsMySavedTrack";
+import { safeLaunchCommandInBackground } from "./helpers/safeCommandLauncher";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -35,6 +36,7 @@ export default async function Command() {
       trackIds: [trackId],
     });
     await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
+    await safeLaunchCommandInBackground("current-track");
   } catch (error) {
     await showHUD("Nothing is currently playing");
   }

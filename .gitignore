@@ -160,3 +160,16 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+
+# VSCode
+.vscode
+
+# Root lockfiles
+/package-lock.json
+
+# Non-npm lockfiles
+pnpm-lock.yaml
+yarn.lock
+deno.lock
+bun.lockb
+bun.lock

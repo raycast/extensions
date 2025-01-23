@@ -1,6 +1,6 @@
 import useDetail from "./hooks/useDetail";
 import { Item, Podcast, Movie, Performance, Album, Game, Book, ItemType, TV, Category } from "./types";
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Detail, showToast, Toast } from "@raycast/api";
 import BookMeta from "./components/BookMeta";
 import MovieMeta from "./components/MovieMeta";
 import TVMeta from "./components/TVMeta";
@@ -9,6 +9,8 @@ import GameMeta from "./components/GameMeta";
 import MusicMeta from "./components/MusicMeta";
 import PerformanceMeta from "./components/PerformanceMeta";
 import { useEffect } from "react";
+import getItemTitle from "./utils/getItemTitle";
+import ItemActions from "./components/ItemActions";
 
 export function renderGenre(genre: string[]) {
   return (
@@ -44,11 +46,13 @@ const renderMetaData = (data: ItemType, category: Category, rating: number) => {
 };
 
 const ItemDetail: React.FC<{ item: Item }> = ({ item }) => {
-  const { category, uuid, cover_image_url, display_title, brief, rating } = item;
+  const { category, uuid, cover_image_url, brief, rating } = item;
   const { isLoading, data } = useDetail(category, uuid);
 
+  const title = getItemTitle(item);
+
   const content = `
-  ## ${display_title}
+  ## ${title}
   
   ![](${cover_image_url})
 
@@ -65,18 +69,9 @@ const ItemDetail: React.FC<{ item: Item }> = ({ item }) => {
     <Detail
       isLoading={isLoading}
       markdown={content + ((data as Album)?.track_list || "")}
-      navigationTitle={display_title}
+      navigationTitle={title}
       metadata={data && renderMetaData(data, category, rating)}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={`https://neodb.social${item.url}`} title="Open in Browser" />
-          <Action.CopyToClipboard
-            content={`https://neodb.social${item.url}`}
-            title="Copy the URL"
-            shortcut={{ modifiers: ["opt"], key: "c" }}
-          />
-        </ActionPanel>
-      }
+      actions={<ItemActions route={item.url} />}
     />
   );
 };

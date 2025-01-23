@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
 import { List, Image, ActionPanel, Action, Icon } from "@raycast/api";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useOrganizations, useWorkspaces } from "./hooks";
-import { Workspace } from "./api";
+import { useState, useMemo } from "react";
+
+import { Workspace } from "@/api";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { useOrganizations, useWorkspaces } from "@/hooks";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();

@@ -8,7 +8,9 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await fetch("http://localhost:10769/addToLibrary");
+    await fetch("http://localhost:10767/api/v1/playback/add-to-library", {
+      method: "POST",
+    });
     if (exitOnSuccess) await showHUD("➕ Added to Library");
     else
       await showToast({

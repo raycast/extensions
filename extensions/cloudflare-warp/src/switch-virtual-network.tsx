@@ -22,7 +22,7 @@ const ListItem = ({
       key={virtualNetwork.id}
       id={virtualNetwork.id}
       title={virtualNetwork.name}
-      subtitle={virtualNetwork.comment}
+      subtitle={virtualNetwork.description}
       actions={
         <ActionPanel title="Actions">
           <Action onAction={() => onSwitchVirtualNetwork(virtualNetwork.id)} title="Switch" />

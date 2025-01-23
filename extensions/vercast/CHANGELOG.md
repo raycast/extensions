@@ -1,5 +1,18 @@
 # Vercast Changelog
 
+## [2.7] - 2025-01-14
+
+- Fixed deployment state fetching for team deployments
+- Fixed screenshot fetching for team deployments
+
+## [2.6] - 2024-08-12
+
+- Add `Search Domains` command for quickly viewing your Domains
+
+## [2.5] - 2023-05-03
+
+- Add "Copy URL" Action to Deployments
+
 ## [2.4] - 2023-04-12
 
 - Fixed persistency of the selected team

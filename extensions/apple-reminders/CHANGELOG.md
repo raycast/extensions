@@ -1,5 +1,47 @@
 # Apple Reminders Changelog
 
+## [Add weekdays and weekends options for recurring reminders] - 2024-12-04
+
+- Add weekdays and weekends options for recurring reminders in the `Create Reminder` command.
+
+## [Group today's reminders by time of day] - 2024-10-28
+
+- Group today's reminders by time of day (morning, afternoon, tonight) just like in the native Reminders app.
+
+## [Sort menu bar reminders by due date] - 2024-10-01
+
+- Sort menu bar reminders by due date instead of the order they were created.
+
+## [Add pre-fill for the Create Reminder command with text from My Reminders search] - 2024-09-18
+
+The Create Reminder command will automatically pre-fill the title with the initial query when there are no search results in My Reminders.
+
+## [Change AI model for Quick Add Reminder] - 2024-05-23
+
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
+
+## [Add Saved Locations] - 2024-04-16
+
+- Save your frequently used locations with the new "Add Saved Location" action when creating a reminder. This makes it easy to quickly add new location-based reminders later.
+- In "Quick Add Reminder," you can add reminders for locations or any of your saved locations - simply specify the one you want to use.
+
+## [Separate menu bar count from the view] - 2024-04-15
+
+- It's now possible to set reminders count type separately from the view type in menu bar.
+
+## [Quick Add Reminder Improvements] - 2024-04-11
+
+- It's now possible to specify a due date and a list (with an `#` prefix) in `Quick Add Reminder` when not using the AI.
+- Fixed a bug where notes wouldn't be saved when adding a reminder without using the AI in `Quick Add Reminder`
+
+## [Fix interval error validation] - 2024-03-20
+
+- `interval` error validation now checks for `0` and `negative` values.
+
+## [Quick Add Reminder Fix] - 2024-03-12
+
+- Fixed an issue where reminder notes were not being saved properly when using the Quick Add feature.
+
 ## [Performance improvements & bug fixes] - 2024-03-01
 
 - Completed reminders are now loaded on demand and not upfront, which should fix heap memory errors

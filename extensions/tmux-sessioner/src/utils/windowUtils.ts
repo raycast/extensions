@@ -10,7 +10,7 @@ export interface TmuxWindow {
 }
 
 export function getAllWindow(
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
 ): ChildProcess {
   return exec('tmux list-windows -aF "#{session_name}:#{window_name}:#{window_index}"', { env }, callback);
 }
@@ -46,6 +46,15 @@ export async function switchToWindow(window: TmuxWindow, setLoading: (value: boo
     }
     return;
   });
+}
+
+export function renameWindow(
+  sessionName: string,
+  oldWindowName: string,
+  newWindowName: string,
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
+): ChildProcess {
+  return exec(`tmux rename-window -t ${sessionName}:${oldWindowName} ${newWindowName}`, { env }, callback);
 }
 
 export async function deleteWindow(window: TmuxWindow, setLoading: (value: boolean) => void, callback: () => void) {

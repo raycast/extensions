@@ -1,5 +1,9 @@
 # One Thing Changelog
 
+## [Enhancement] - 2024-03-21
+
+- Added keywords to enhance searchability
+
 ## [Improvements] - 2024-02-23
 
 - Add support for launchContext in One Thing. This can be useful if launching the extension from the Shortcuts app for example.

@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 import Style = Toast.Style;
 
 interface AdbUrlArguments {
@@ -10,7 +10,7 @@ interface AdbUrlArguments {
 export default async function openUrl(props: LaunchProps<{ arguments: AdbUrlArguments }>) {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;

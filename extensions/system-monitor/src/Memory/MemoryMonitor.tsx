@@ -1,8 +1,9 @@
 import { Icon, List } from "@raycast/api";
-import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
+
+import { Actions } from "../components/Actions";
+import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 
 export default function MemoryMonitor() {
   const { data, revalidate } = usePromise(async () => {
@@ -21,22 +22,20 @@ export default function MemoryMonitor() {
   useInterval(revalidate, 1000);
 
   return (
-    <>
-      <List.Item
-        id="memory"
-        title="Memory"
-        icon={Icon.MemoryChip}
-        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
-        detail={
-          <MemoryMonitorDetail
-            freeMem={data?.freeMem || ""}
-            freeMemPercentage={data?.freeMemPercentage || ""}
-            totalMem={data?.totalMem || ""}
-          />
-        }
-        actions={<Actions />}
-      />
-    </>
+    <List.Item
+      id="memory"
+      title="Memory"
+      icon={Icon.MemoryChip}
+      accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
+      detail={
+        <MemoryMonitorDetail
+          freeMem={data?.freeMem || ""}
+          freeMemPercentage={data?.freeMemPercentage || ""}
+          totalMem={data?.totalMem || ""}
+        />
+      }
+      actions={<Actions />}
+    />
   );
 }
 
@@ -68,7 +67,7 @@ function MemoryMonitorDetail({
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
           {topProcess &&
-            topProcess.length > 0 &&
+            topProcess.length &&
             topProcess.map((element, index) => {
               return (
                 <List.Item.Detail.Metadata.Label

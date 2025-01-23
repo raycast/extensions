@@ -23,7 +23,11 @@ const FormParentDropdown = forwardRef(
           query,
         });
 
-        if (result && result.sections.length > 0) {
+        if (result && result.sections.length > 1) {
+          // Retrieve from Current Search
+          return result.sections[1].issues;
+        } else if (result && result.sections.length > 0) {
+          // Retrieve from History Search
           return result.sections[0].issues;
         }
       },

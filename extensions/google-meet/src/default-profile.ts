@@ -5,7 +5,7 @@ import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 export default async function main() {
   try {
     await openMeetTabDefaultProfile();
-
+    await new Promise((r) => setTimeout(r, 500));
     const meetTab = await getMeetTab();
 
     await Clipboard.copy(meetTab);

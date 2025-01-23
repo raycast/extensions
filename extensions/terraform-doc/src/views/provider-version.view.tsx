@@ -25,7 +25,7 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
       }
     }
     updateProviderVersions();
-  }, []);
+  }, [state]);
   return (
     <List isLoading={!(state && state.length > 0)}>
       {state?.map((p) => (
@@ -46,6 +46,11 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
                 icon={Icon.Hourglass}
                 title={`Navigate to ${p.attributes.tag}`}
                 target={<ResourceView provider={props.provider} version={p} />}
+              />
+              <Action
+                icon={Icon.Download}
+                title="Refresh Cached Releases"
+                onAction={() => setState(undefined)}
               />
             </ActionPanel>
           }

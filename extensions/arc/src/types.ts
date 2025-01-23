@@ -3,6 +3,7 @@ export type HistoryEntry = {
   url: string;
   title: string;
   lastVisitedAt: string;
+  profileName: string | undefined;
 };
 
 export type Tab = {
@@ -17,6 +18,14 @@ export type TabLocation = "topApp" | "pinned" | "unpinned";
 export type Space = {
   id: string;
   title?: string;
+};
+
+export type Download = {
+  id: number;
+  current_path: string;
+  target_path: string;
+  tab_url: string;
+  download_time: string;
 };
 
 export type NewTabSearchConfigs = {
@@ -52,6 +61,11 @@ export type Suggestion = {
 
 export type URLArguments = {
   url?: string;
+  space?: string;
+};
+
+export type WindowArguments = {
+  space?: string;
 };
 
 /** Suggestion Parsers */
@@ -68,3 +82,4 @@ interface GoogleSuggestItem {
 
 export type GoogleSuggestionParser = [string, string[], string[], string[], GoogleSuggestItem];
 export type EcosiaSuggestionParser = [string, string[]];
+export type KagiSuggestionParser = [string, string[]];

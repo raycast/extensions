@@ -26,7 +26,7 @@ export default function Config({ project }: ConfigProps) {
                 clearCache()
 
                 // append '.raycast' to the end of .gitignore file inside project directory
-                const gitIgnoreLines = '\n\n# Raycast Project Manager config file\n.raycast\n'
+                const gitIgnoreLines = '\n\n# Raycast Repository Manager config file\n.raycast\n'
 
                 fs.appendFile(`${project.fullPath}/.gitignore`, gitIgnoreLines, (err) => {
                     if (err) {

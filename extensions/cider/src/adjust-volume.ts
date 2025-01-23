@@ -7,12 +7,16 @@ import {
   Toast,
 } from "@raycast/api";
 
+interface AdjustVolumeArguments {
+  volume: string;
+}
+
 interface Preferences {
   exitOnSuccess: boolean;
 }
 
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.AdjustVolume }>,
+  props: LaunchProps<{ arguments: AdjustVolumeArguments }>,
 ) {
   const volume = parseInt(props.arguments.volume);
 
@@ -28,9 +32,13 @@ export default async function Command(
   const { exitOnSuccess } = getPreferenceValues() as Preferences;
 
   try {
-    await fetch("http://localhost:10769/active");
+    await fetch("http://localhost:10767/api/v1/playback/active");
     try {
-      await fetch("http://localhost:10769/volume/" + volume / 100);
+      await fetch("http://localhost:10767/api/v1/playback/volume", {
+        method: "POST",
+        body: JSON.stringify({ volume: volume / 100 }),
+        headers: { "Content-Type": "application/json" },
+      });
       if (exitOnSuccess) await showHUD("🔊 Adjusted Volume");
       else
         await showToast({

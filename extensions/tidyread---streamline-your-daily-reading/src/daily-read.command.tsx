@@ -23,6 +23,7 @@ import CustomActionPanel from "./components/CustomActionPanel";
 import GenTodaysDigestPanel from "./components/GenTodaysDigestPanel";
 import RedirectRoute from "./components/RedirectRoute";
 import GenDigestInBGAction from "./components/GenDigestInBGAction";
+import ShowRSSDetailAction from "./components/ShowRSSDetailAction";
 
 export default function DailyReadCommand(props: LaunchProps<{ launchContext: { autoGenDigest: boolean } }>) {
   const autoGenDigest = props?.launchContext?.autoGenDigest ?? false;
@@ -169,6 +170,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                       {manageSourceListActionNode}
                       {generateDigestActionNode}
                       <GenDigestInBGAction onSuccess={revalidate} />
+                      {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
                       {item.rssLink && (
                         <Action.OpenInBrowser
                           shortcut={{ modifiers: ["cmd"], key: "l" }}
@@ -218,6 +220,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                         onAction={() => openMultipleUrls(otherItems!)}
                       />
                       {manageSourceListActionNode}
+                      {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
                       {item.rssLink && (
                         <Action.OpenInBrowser
                           shortcut={{ modifiers: ["cmd"], key: "l" }}

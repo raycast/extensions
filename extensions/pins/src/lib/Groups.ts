@@ -5,15 +5,16 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:35:11
- * Last modified  : 2023-11-01 00:44:06
+ * Last modified  : 2024-07-05 01:57:13
  */
 
 import { useEffect, useState } from "react";
 import { getStorage, setStorage } from "./storage";
 import { useCachedState } from "@raycast/utils";
-import { SORT_FN, SORT_STRATEGY, StorageKey } from "./constants";
-import { showToast } from "@raycast/api";
-import { Pin, sortPins } from "./Pins";
+import { SORT_FN, SORT_STRATEGY, StorageKey, Visibility } from "./constants";
+import { environment, showToast } from "@raycast/api";
+import { Pin, getPins, sortPins } from "./Pins";
+import { GroupDisplaySetting } from "./preferences";
 
 /**
  * A group of pins.
@@ -53,12 +54,22 @@ export type Group = {
    * The date the group was created.
    */
   dateCreated?: string;
+
+  /**
+   * Where the group is visible, if at all.
+   */
+  visibility?: Visibility;
+
+  /**
+   * How the group should be displayed in the menubar.
+   */
+  menubarDisplay?: GroupDisplaySetting;
 };
 
 /**
  * The keys of an {@link Group} object.
  */
-export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated"];
+export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated", "visibility"];
 
 /**
  * Checks if an object is a group.
@@ -71,6 +82,93 @@ export const isGroup = (obj: object): obj is Group => {
 
 /**
  * Gets the stored groups.
+ * @returns The list of groups.
+ */
+export const getGroups = async () => {
+  return (await getStorage(StorageKey.LOCAL_GROUPS)) as Group[];
+};
+
+/**
+ * Gets the next available group ID.
+ */
+export const getNextGroupID = async () => {
+  // Get the stored groups
+  const storedGroups = await getGroups();
+
+  // Get the next available group ID
+  let newID = (await getStorage(StorageKey.NEXT_GROUP_ID))[0] || 1;
+  while (storedGroups.some((group: Group) => group.id == newID)) {
+    newID++;
+  }
+  setStorage(StorageKey.NEXT_GROUP_ID, [newID + 1]);
+  return newID;
+};
+
+/**
+ * Gets the ancestors of a group.
+ * @param group The group to get the ancestors of.
+ * @param allGroups The list of all groups.
+ * @returns An array of ancestor groups of the group.
+ */
+export const getAncestorsOfGroup = (group: Group, allGroups: Group[], options?: { excluding: Group[] }): Group[] => {
+  const ancestors: Group[] = [];
+  let currentGroup = group;
+  while (currentGroup.parent != undefined) {
+    const parent = allGroups.find(
+      (g) => g.id == currentGroup.parent && !options?.excluding.some((eg) => eg.id == g.id),
+    );
+    if (parent) {
+      ancestors.push(parent);
+      currentGroup = parent;
+    } else {
+      break;
+    }
+  }
+  return ancestors;
+};
+
+/**
+ * Checks if a group should be displayed in the current context.
+ * @param group The group to check.
+ * @param allGroups The list of all groups.
+ * @returns True if the group should be displayed, false otherwise.
+ */
+export const shouldDisplayGroup = (group: Group, allGroups: Group[]): boolean => {
+  if (group.visibility == Visibility.USE_PARENT) {
+    const parent = allGroups.find((g) => g.id == group.parent);
+    return parent ? shouldDisplayGroup(parent, allGroups) : true;
+  }
+  if (group.visibility == Visibility.VISIBLE) return true;
+  if (group.visibility == Visibility.HIDDEN) return false;
+  if (group.visibility == Visibility.DISABLED) return false;
+  if (group.visibility == Visibility.VIEW_PINS_ONLY) return environment.commandName == "view-pins";
+  if (group.visibility == Visibility.MENUBAR_ONLY) return environment.commandName == "index";
+  return true;
+};
+
+/**
+ * Validates a list of groups, ensuring that they all have valid IDs.
+ * @param groups The list of groups to validate.
+ * @returns The list of validated groups.
+ */
+export const validateGroups = async (groups: Group[]) => {
+  const checkedGroups: Group[] = [];
+  for (const [index, group] of groups.entries()) {
+    for (const [index2, group2] of groups.entries()) {
+      if (index != index2 && group.id == group2.id) {
+        group.id = await getNextGroupID();
+      }
+    }
+    checkedGroups.push({
+      ...group,
+      id: group.id == undefined ? await getNextGroupID() : group.id,
+    });
+  }
+  return checkedGroups;
+};
+
+/**
+ * Gets the stored groups.
  * @returns The list of groups alongside an update function.
  */
 export const useGroups = () => {
@@ -79,15 +177,9 @@ export const useGroups = () => {
 
   const revalidateGroups = async () => {
     setLoading(true);
-    const storedGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
-    const checkedGroups: Group[] = [];
-    for (const group of storedGroups) {
-      checkedGroups.push({
-        ...group,
-        id: group.id == undefined ? await getNextGroupID() : group.id,
-      });
-    }
-    setGroups(checkedGroups);
+    const storedGroups = await getGroups();
+    const validatedGroups = await validateGroups(storedGroups);
+    setGroups(validatedGroups);
     setLoading(false);
   };
 
@@ -100,122 +192,95 @@ export const useGroups = () => {
     setGroups: setGroups,
     loadingGroups: loading,
     revalidateGroups: revalidateGroups,
+
+    /**
+     * Gets the ancestors of a group.
+     * @param group The group to get the ancestors of.
+     * @param options Options for which ancestors to include/exclude.
+     * @returns An array of ancestor groups of the group.
+     */
+    getAncestorsOfGroup: (group: Group, options?: { excluding: Group[] }) =>
+      getAncestorsOfGroup(group, groups, options),
+
+    /**
+     * Checks if a group should be displayed in the current context.
+     * @param group The group to check.
+     * @returns True if the group should be displayed, false otherwise.
+     */
+    shouldDisplayGroup: (group: Group) => shouldDisplayGroup(group, groups),
   };
 };
 
 /**
- * Gets the next available group ID.
- */
-export const getNextGroupID = async () => {
-  // Get the stored groups
-  const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
-
-  // Get the next available group ID
-  let newID = (await getStorage(StorageKey.NEXT_GROUP_ID))[0] || 1;
-  while (storedGroups.some((group: Group) => group.id == newID)) {
-    newID++;
-  }
-  setStorage(StorageKey.NEXT_GROUP_ID, [newID + 1]);
-  return newID;
-};
-
-/**
  * Creates a new group; updates local storage.
- * @param name The name of the group.
- * @param icon The icon for the group.
+ * @param attributes The attributes of the new group.
+ * @returns The new group object.
  */
-export const createNewGroup = async (
-  name: string,
-  icon: string,
-  parent?: number,
-  sortStrategy?: keyof typeof SORT_STRATEGY,
-  iconColor?: string,
-) => {
-  const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
+export const createNewGroup = async (attributes: Partial<Group>) => {
+  const storedGroups = await getGroups();
   const newID = await getNextGroupID();
 
   // Add the new group to the stored groups
   const newData = [...storedGroups];
-  newData.push({
-    name: name,
-    icon: icon,
+  const newGroup = {
+    ...attributes,
     id: newID,
-    parent: parent,
-    sortStrategy: sortStrategy,
-    iconColor: iconColor,
     dateCreated: new Date().toUTCString(),
-  });
+    visibility: attributes.visibility || Visibility.USE_PARENT,
+    menubarDisplay: attributes.menubarDisplay || GroupDisplaySetting.SUBMENUS,
+  } as Group;
+  newData.push(newGroup);
 
   // Update the stored groups
   await setStorage(StorageKey.LOCAL_GROUPS, newData);
+  return newGroup;
 };
 
 /**
  * Modifies the properties of a group.
  * @param group The group to modify (used to source the group's ID)
- * @param name The (new) name of the group.
- * @param icon The (new) icon for the group.
- * @param pop Function to pop the current view off the navigation stack.
+ * @param attributes The new attributes for the group.
  * @param setGroups Function to update the list of groups.
- * @param parent The (new) parent group ID for the group.
- * @param sortStrategy The (new) sort strategy for the group.
- * @param iconColor The (new) icon color for the group.
+ * @param pop Function to pop the current view off the navigation stack.
  */
 export const modifyGroup = async (
   group: Group,
-  name: string,
-  icon: string,
-  pop: () => void,
+  attributes: Partial<Group>,
   setGroups: (groups: Group[]) => void,
-  parent?: number,
-  sortStrategy?: keyof typeof SORT_STRATEGY,
-  iconColor?: string,
+  pop: () => void,
 ) => {
-  const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
+  const storedGroups = await getGroups();
   const newGroups: Group[] = storedGroups.map((oldGroup: Group) => {
     // Update group if it exists
     if (group.id != -1 && oldGroup.id == group.id) {
       return {
-        name: name,
-        icon: icon,
-        id: group.id,
-        parent: parent,
-        sortStrategy: sortStrategy,
-        iconColor: iconColor,
+        ...oldGroup,
+        ...attributes,
         dateCreated: group.dateCreated || new Date().toUTCString(),
+        visibility: attributes.visibility || Visibility.USE_PARENT,
+        menubarDisplay: attributes.menubarDisplay || GroupDisplaySetting.SUBMENUS,
       };
     } else {
       return oldGroup;
     }
   });
 
+  // Create a new group if it doesn't exist
   if (group.id == -1) {
-    group.id = (await getStorage(StorageKey.NEXT_GROUP_ID))[0] || 1;
-    while (storedGroups.some((storedGroup: Group) => storedGroup.id == group.id)) {
-      group.id = group.id + 1;
-    }
-    setStorage(StorageKey.NEXT_GROUP_ID, [group.id + 1]);
-
-    // Add new group if it doesn't exist
-    newGroups.push({
-      name: name,
-      icon: icon,
-      id: group.id,
-      parent: parent,
-      sortStrategy: sortStrategy,
-      iconColor: iconColor,
-      dateCreated: new Date().toUTCString(),
-    });
+    const newGroup = await createNewGroup(attributes);
+    newGroups.push(newGroup);
   }
 
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  // Propagate changes to pins
+  const storedPins = await getPins();
   const newPins = storedPins.map((pin: Pin) => {
     if (pin.group == group.name) {
       return {
+        ...pin,
         name: pin.name,
         url: pin.url,
         icon: pin.icon,
-        group: name,
+        group: attributes.name || group.name,
         id: pin.id,
       };
     } else {
@@ -236,7 +301,7 @@ export const modifyGroup = async (
  * @param setGroups The function to update the active list of groups.
  */
 export const deleteGroup = async (group: Group, setGroups: (groups: Group[]) => void, displayToast = true) => {
-  const storedGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
+  const storedGroups = await getGroups();
 
   const filteredGroups = storedGroups
     .filter((oldGroup: Group) => {
@@ -258,7 +323,7 @@ export const deleteGroup = async (group: Group, setGroups: (groups: Group[]) => 
       return oldGroup.name == group.name;
     }).length != 0;
 
-  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  const storedPins = await getPins();
   const updatedPins = storedPins.map((pin: Pin) => {
     if (pin.group == group.name && !isDuplicate) {
       if (group.parent != undefined && storedGroups.some((g) => g.id == group.parent)) {
@@ -306,16 +371,20 @@ export const checkGroupParentField = async (
   suggestedID: string,
   setParentError: React.Dispatch<React.SetStateAction<string | undefined>>,
   groups: Group[],
-) => {
+): Promise<boolean> => {
   const nextID = await getStorage(StorageKey.NEXT_GROUP_ID);
   if (suggestedID.trim().length == 0) {
     setParentError(undefined);
+    return true;
   } else if (!groups.map((g) => g.id).includes(parseInt(suggestedID))) {
     setParentError("No group with this ID exists!");
+    return false;
   } else if (parseInt(suggestedID) == nextID) {
     setParentError("Group cannot be its own parent!");
+    return false;
   } else {
     setParentError(undefined);
+    return true;
   }
 };
 

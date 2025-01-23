@@ -22,10 +22,27 @@
     "erics118",
     "hjoelh",
     "hobhouse",
-    "bkeys818",
     "jatindotdev",
-    "devbear"
+    "devbear",
+    "rfaccio",
+    "badta5te",
+    "andyburris",
+    "thomaslombart",
+    "rhesamu",
+    "themitpatel"
   ],
+  "pastContributors": [
+    "bkeys818"
+  ],
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "license": "MIT",
   "preferences": [
     {
@@ -44,7 +61,53 @@
       "title": "Search",
       "subtitle": "Spotify",
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Filters",
+          "label": "Music Only",
+          "default": false,
+          "description": "Only show results for music. Podcasts and episodes are excluded.",
+          "name": "musicOnly",
+          "required": true,
+          "type": "checkbox"
+        },
+        {
+          "title": "Top View",
+          "data": [
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "artists",
+          "description": "Show a specific view at the top of the results list by default",
+          "name": "topView",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Top View"
+        }
+      ]
     },
     {
       "name": "yourLibrary",
@@ -159,6 +222,14 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "removeSongFromPlaylist",
+      "title": "Remove Playing Song from Playlist",
+      "subtitle": "Spotify",
+      "description": "Remove the current song from a playlist of your choice.",
+      "mode": "no-view",
       "disabledByDefault": true
     },
     {
@@ -341,21 +412,44 @@
       "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
+    },
+    {
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using Raycast AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "startDJ",
+      "title": "Start DJ",
+      "subtitle": "Spotify",
+      "description": "Start the DJ.",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.82.3",
+    "@raycast/utils": "^1.16.2",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.9.1",
-    "@types/react": "18.2.37",
+    "@types/node": "20.14.10",
+    "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

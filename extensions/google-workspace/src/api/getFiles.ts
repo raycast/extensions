@@ -1,3 +1,7 @@
+import { getOAuthToken } from "./googleAuth";
+import { getPreferenceValues } from "@raycast/api";
+import fetch from "node-fetch";
+
 export enum QueryTypes {
   fileName = "fileName",
   fullText = "fullText",
@@ -19,9 +23,16 @@ export type File = {
   modifiedTime: string;
   starred: boolean;
   parents?: string[];
+  filePath?: string;
   capabilities?: {
     canTrash: boolean;
   };
+};
+
+type FileData = {
+  id: string;
+  name: string;
+  parents: string[];
 };
 
 function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
@@ -57,10 +68,57 @@ function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
   return params.toString();
 }
 
-export function getFilesURL(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
-  return `https://www.googleapis.com/drive/v3/files?${getParams(queryType, scope, queryText)}`;
+export async function getFiles(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
+  const url = `https://www.googleapis.com/drive/v3/files?${getParams(queryType, scope, queryText)}`;
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
+  });
+  const data = (await response.json()) as { files: File[] };
+
+  const { displayFilePath } = getPreferenceValues<Preferences>();
+  if (displayFilePath) {
+    await Promise.all(
+      data.files.map(async (file) => {
+        file.filePath = await getFilePath(file.id);
+      }),
+    );
+  }
+
+  return data;
 }
 
-export function getStarredFilesURL() {
-  return getFilesURL(QueryTypes.starred, ScopeTypes.allDrives);
+async function getFilePath(fileId: string): Promise<string> {
+  const getFileParents = async (fileId: string) => {
+    const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name,parents`;
+    const response = await fetch(getFileUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getOAuthToken()}`,
+      },
+    });
+
+    return await response.json();
+  };
+
+  const getParentPath = async (fileId: string): Promise<string> => {
+    const fileData = (await getFileParents(fileId)) as FileData;
+
+    if (!fileData.parents || fileData.parents.length === 0) {
+      return fileData.name;
+    }
+
+    const parentId = fileData.parents[0];
+    const parentPath = await getParentPath(parentId);
+
+    return `${parentPath}/${fileData.name}`;
+  };
+
+  return await getParentPath(fileId);
+}
+
+export function getStarredFiles() {
+  return getFiles(QueryTypes.starred, ScopeTypes.allDrives);
 }

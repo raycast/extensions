@@ -2,7 +2,7 @@ import useTimers from "./hooks/useTimers";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect } from "react";
 import useDefaultPresetVisibles from "./hooks/useDefaultPresetVisibles";
-import { formatTime } from "./formatUtils";
+import { formatTime } from "./backend/formatUtils";
 
 export default function Command() {
   const { customTimers, isLoading, refreshTimers, handleToggleCTVisibility } = useTimers();

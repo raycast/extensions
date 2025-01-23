@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "xmok"
   ],
   "categories": [
     "Applications",
@@ -23,15 +24,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.16.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

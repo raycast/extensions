@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Improve] - 2024-11-21
+
+- `Add Task` command support selecting task priority.
+
+## [Improve] - 2024-04-18
+
+- `Add Task` command support create all-day task
+
 ## [Fixed] - 2024-01-22
 
 - Resolve the issue of the 'Auto Fill with AI' executing too frequently.

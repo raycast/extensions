@@ -58,7 +58,9 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         const curl = curlString(url, curlOptions);
 
         await LocalStorage.setItem(
-          `${method}-${url}`,
+          method != "GET" && method != "DELETE"
+            ? `${method}-${url}-${body.replace("```\n\b\b", "")}`
+            : `${method}-${url}`,
           JSON.stringify({ ...payload, meta: { title: "", description: "" } }),
         );
         push(<ResultView result={result as never} curl={curl} />);

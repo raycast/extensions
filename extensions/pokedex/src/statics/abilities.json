@@ -744,9 +744,63 @@
     "generation": "Generation V"
   },
   {
+    "name": "Aqua Boost",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Big Pecks",
     "short_effect": "Protects against Defense drops.",
     "effect": "This Pokémon's Defense cannot be lowered by other Pokémon.\n\nThis Pokémon can still be passed negative Defense modifiers through heart swap or guard swap.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Black Hole",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Bodyguard",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Bonanza",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Calming",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Celebrate",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Climber",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Confidence",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Conqueror",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -762,6 +816,24 @@
     "generation": "Generation V"
   },
   {
+    "name": "Daze",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Decoy",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Deep Sleep",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Defeatist",
     "short_effect": "Halves Attack and Special Attack at 50% max HP or less.",
     "effect": "This Pokémon's Attack and Special Attack are halved when it has half its HP or less.",
@@ -774,15 +846,69 @@
     "generation": "Generation V"
   },
   {
+    "name": "Disgust",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Dodge",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Explode",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Flame Boost",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Flare Boost",
     "short_effect": "Increases Special Attack to 1.5× when burned.",
     "effect": "This Pokémon has 1.5× its Special Attack when burned.",
     "generation": "Generation V"
   },
   {
+    "name": "Fortune",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Friend Guard",
     "short_effect": "Decreases all direct damage taken by friendly Pokémon to 0.75×.",
     "effect": "All friendly Pokémon take 0.75× as much direct damage from moves while this Pokémon is in battle.\n\nThis effect stacks if multiple allied Pokémon have it.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Frighten",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Frostbite",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Grass Cloak",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Gulp",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -804,6 +930,30 @@
     "generation": "Generation V"
   },
   {
+    "name": "Herbivore",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Hero",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "High-rise",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Hot Blooded",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Illusion",
     "short_effect": "Takes the appearance of the last conscious party Pokémon upon being sent out until hit by a damaging move.",
     "effect": "This Pokémon, upon being sent out, appears to have the species, nickname, and Poké Ball of the last Pokémon in the party that is able to battle.  This illusion breaks upon being hit by a damaging move.\n\nOther damage, e.g. from weather or spikes, does not break the illusion, nor does damage done to a substitute.\n\nIf the party order becomes temporarily shuffled around as Pokémon are switched out in battle, this ability chooses the last Pokémon according to that shuffled order.",
@@ -822,9 +972,27 @@
     "generation": "Generation V"
   },
   {
+    "name": "Instinct",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Interference",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Iron Barbs",
     "short_effect": "Damages attacking Pokémon for 1/8 their max HP on contact.",
     "effect": "Whenever a move makes contact with this Pokémon, the move's user takes 1/8 of its maximum HP in damage.\n\nThis ability functions identically to rough skin.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Jagged Edge",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -834,9 +1002,33 @@
     "generation": "Generation V"
   },
   {
+    "name": "Last Bastion",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Life Force",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Light Metal",
     "short_effect": "Halves the Pokémon's weight.",
     "effect": "This Pokémon has half the usual weight for its species.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Lullaby",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Lunchbox",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -846,9 +1038,33 @@
     "generation": "Generation V"
   },
   {
+    "name": "Medic",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Melee",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Mood Maker",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Moody",
     "short_effect": "Raises a random stat two stages and lowers another one stage after each turn.",
     "effect": "After each turn, one of this Pokémon's stats at random rises two stages, and another falls one stage.\n\nIf a stat is already at 6 or -6 stages, it will not be chosen to be increased or decreased, respectively.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Mountaineer",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -870,9 +1086,39 @@
     "generation": "Generation V"
   },
   {
+    "name": "Nomad",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Nurse",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Omnipotent",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Overcoat",
     "short_effect": "Protects against damage from weather.",
     "effect": "This Pokémon does not take damage from weather.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Parry",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Perception",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -888,9 +1134,21 @@
     "generation": "Generation V"
   },
   {
+    "name": "Power Nap",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Prankster",
     "short_effect": "Raises non-damaging moves' priority by one stage.",
     "effect": "This Pokémon's non-damaging moves have their priority increased by one stage.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Pride",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -906,9 +1164,21 @@
     "generation": "Generation V"
   },
   {
+    "name": "Run Up",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Sand Force",
     "short_effect": "Strengthens rock, ground, and steel moves to 1.3× their power during a sandstorm.  Protects against sandstorm damage.",
     "effect": "During a sandstorm, this Pokémon's rock-, ground-, and steel-type moves have 1.3× their base power.  This Pokémon does not take sandstorm damage, regardless of type.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Sandpit",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -924,9 +1194,69 @@
     "generation": "Generation V"
   },
   {
+    "name": "Sequence",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Shackle",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Shadow Dash",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Share",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Sheer Force",
     "short_effect": "Strengthens moves with extra effects to 1.3× their power, but prevents their extra effects.",
     "effect": "This Pokémon's moves with extra effects have 1.3× their power, but lose their extra effects.\n\nAn effect chance is a move's chance to inflict a status ailment, cause a stat change, or make the target flinch in addition to the move's main effect. For example, thunder shock's paralysis is an extra effect, but thunder wave's is not, nor are knock off's item removal and air cutter's increased critical hit rate.\n\nMoves that lower the user's stats are unaffected.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Shield",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Skater",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Spirit",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Sponge",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Sprint",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Stealth",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -936,9 +1266,21 @@
     "generation": "Generation V"
   },
   {
+    "name": "Tenacity",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Teravolt",
     "short_effect": "Bypasses targets' abilities if they could hinder or prevent moves.",
     "effect": "This Pokémon's moves completely ignore abilities that could hinder or prevent their effect on the target.\n\nFor example, this Pokémon's moves ignore abilities that would fully negate them, such as water absorb; abilities that would prevent any of their effects, such as clear body, shell armor, or sticky hold; and abilities that grant any general protective benefit, such as simple, snow cloak, or thick fat.  If an ability could either hinder or help this Pokémon's moves, e.g. dry skin or unaware, the ability is ignored either way.\n\nAbilities that do not fit this description, even if they could hinder moves in some other way, are not affected.  For example, cursed body only affects potential future uses of the move, while liquid ooze and shadow tag can only hinder a move's effect on the user.  This ablity cannot ignore type or form changes granted by abilities, for example color change or forecast; nor effects that were caused by abilities but are no longer tied to an ability, such as the rain from drizzle.  This ability cannot ignore multitype at all.\n\nAn ability ignored by this ability is only nullified while the move is being used.  For example, this Pokémon's moves can paralyze a Pokémon with limber, but Limber will activate and heal the paralysis immediately thereafter, and this Pokémon's spikes are not affected by this ability after they have been placed.\n\nWhen this Pokémon enters battle, all participating trainers are notified that it has this ability.\n\nThis ability functions identically to mold breaker and turboblaze.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Thrust",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -960,9 +1302,27 @@
     "generation": "Generation V"
   },
   {
+    "name": "Vanguard",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
     "name": "Victory Star",
     "short_effect": "Increases moves' accuracy to 1.1× for friendly Pokémon.",
     "effect": "All friendly Pokémon's moves, including this Pokémon's own moves, have 1.1× their usual accuracy while this Pokémon is in battle.",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Warm Blanket",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation V"
+  },
+  {
+    "name": "Wave Rider",
+    "short_effect": "",
+    "effect": "",
     "generation": "Generation V"
   },
   {
@@ -1594,5 +1954,245 @@
     "short_effect": "",
     "effect": "",
     "generation": "Generation VIII"
+  },
+  {
+    "name": "Anger Shell",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Armor Tail",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Beads of Ruin",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Commander",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Costar",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Cud Chew",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Earth Eater",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Electromorphosis",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Embody Aspect",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Good as Gold",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Guard Dog",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Hadron Engine",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Hospitality",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Lingering Aroma",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Mind’s Eye",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Mycelium Might",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Opportunist",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Orichalcum Pulse",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Poison Puppeteer",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Protosynthesis",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Purifying Salt",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Quark Drive",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Rocky Payload",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Seed Sower",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Sharpness",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Supersweet Syrup",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Supreme Overlord",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Sword of Ruin",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Tablets of Ruin",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Teraform Zero",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Tera Shell",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Tera Shift",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Thermal Exchange",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Toxic Chain",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Toxic Debris",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Vessel of Ruin",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Well-Baked Body",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Wind Power",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Wind Rider",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
+  },
+  {
+    "name": "Zero to Hero",
+    "short_effect": "",
+    "effect": "",
+    "generation": "Generation IX"
   }
 ]

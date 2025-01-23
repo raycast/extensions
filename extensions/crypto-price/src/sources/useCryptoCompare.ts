@@ -1,7 +1,8 @@
+import { mapValues } from "lodash";
 import { Coin, UseSource } from "#/types";
 import { useFetch } from "@raycast/utils";
 import { formatLargeNumber, formatCurrency } from "#/utils";
-import { mapValues } from "lodash-es";
+import { COINS } from "#/constants";
 
 export const useCryptoCompare: UseSource = (currency, coinSymbols) => {
   const fsyms = coinSymbols.join(",");
@@ -13,6 +14,7 @@ export const useCryptoCompare: UseSource = (currency, coinSymbols) => {
   const coins = mapValues(data.RAW, (currencies: any, symbol: string) => {
     const d = currencies[currency];
     const coin: Coin = {
+      ...COINS[symbol],
       symbol,
       price: d.PRICE,
       high24h: d.HIGH24HOUR,

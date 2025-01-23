@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { UploadFile } from "@linear/sdk";
-import { getLinearClient } from "../api/linearClient";
+import { getLinearClient } from "./linearClient";
 import { fileTypeFromFile } from "file-type";
 
 export async function uploadFile(filePath: string) {
@@ -88,4 +88,28 @@ export async function createAttachment(payload: CreateAttachmentPayload) {
   );
 
   return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };
+}
+
+export async function attachLinkUrl(payload: CreateAttachmentPayload) {
+  const { graphQLClient } = getLinearClient();
+
+  const attachmentInput = `issueId: "${payload.issueId}", url: "${payload.url}"`;
+
+  const { data } = await graphQLClient.rawRequest<
+    { attachmentLinkURL: { success: boolean; attachment: { id: string } } },
+    Record<string, unknown>
+  >(
+    `
+      mutation {
+        attachmentLinkURL(${attachmentInput}) {
+          success
+          attachment {
+            id
+          }
+        }
+      }
+    `,
+  );
+
+  return { success: data?.attachmentLinkURL.success, id: data?.attachmentLinkURL.attachment.id };
 }

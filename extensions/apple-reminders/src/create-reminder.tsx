@@ -16,10 +16,12 @@ import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 import { createReminder } from "swift:../swift/AppleReminders";
 
-import { getPriorityIcon } from "./helpers";
+import LocationForm from "./components/LocationForm";
+import { getIntervalValidationError, getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
+import useLocations, { Location } from "./hooks/useLocations";
 
-type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
   title: string;
   listId?: string;
@@ -45,6 +47,7 @@ type CreateReminderValues = {
   isRecurring: boolean;
   frequency: string;
   interval: string;
+  location: string;
   address: string;
   proximity: string;
   radius: string;
@@ -60,19 +63,31 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   const { pop } = useNavigation();
   const { data, isLoading } = useData();
 
+  const { locations, addLocation } = useLocations();
+
   const defaultList = data?.lists.find((list) => list.isDefault);
 
   const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
+  let initialListId;
+  if (listId !== "all") {
+    initialListId = listId;
+  } else if (draftValues?.listId) {
+    initialListId = draftValues.listId;
+  } else if (selectDefaultList && defaultList) {
+    initialListId = defaultList.id;
+  }
+
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
       title: draftValues?.title ?? "",
       notes: draftValues?.notes ?? "",
       dueDate: draftValues?.dueDate,
       priority: draftValues?.priority,
-      listId: listId ?? draftValues?.listId ?? (selectDefaultList ? defaultList?.id : ""),
+      listId: initialListId,
       isRecurring: draftValues?.isRecurring ?? false,
       frequency: draftValues?.frequency,
       interval: draftValues?.interval,
+      location: draftValues?.location ?? "",
       address: draftValues?.address,
       proximity: draftValues?.proximity,
       radius: draftValues?.radius,
@@ -81,12 +96,11 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       title: FormValidation.Required,
       interval: (value) => {
         if (!values.isRecurring) return;
-        if (!value) return "Interval is required";
-        if (isNaN(Number(value))) return "Interval must be a number";
+        return getIntervalValidationError(value);
       },
       radius: (value) => {
         if (!values.address) return;
-        if (isNaN(Number(value))) return "Interval must be a number";
+        if (isNaN(Number(value))) return "Radius must be a number";
       },
     },
     async onSubmit(values) {
@@ -117,7 +131,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           payload.priority = values.priority;
         }
 
-        if (values.address) {
+        if (values.location === "custom" || values.address) {
           payload.address = values.address;
 
           if (values.proximity) {
@@ -127,6 +141,13 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           if (values.radius) {
             payload.radius = parseInt(values.radius);
           }
+        }
+
+        const savedLocation = locations.find((location) => location.id === values.location);
+        if (savedLocation) {
+          payload.address = savedLocation.address;
+          payload.proximity = savedLocation.proximity;
+          payload.radius = parseInt(savedLocation.radius);
         }
 
         const reminder = await createReminder(payload);
@@ -152,6 +173,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
         setValue("title", "");
         setValue("notes", "");
+        setValue("location", "");
         setValue("address", "");
         setValue("radius", "");
 
@@ -170,13 +192,19 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   });
 
   let recurrenceDescription = "";
-  if (values.frequency && values.interval) {
+  if (values.frequency && !getIntervalValidationError(values.interval)) {
     const intervalNum = Number(values.interval);
 
     let repetitionPeriod = "";
     switch (values.frequency) {
       case "daily":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} days` : "day";
+        break;
+      case "weekdays":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks on weekdays` : "week on weekdays";
+        break;
+      case "weekends":
+        repetitionPeriod = intervalNum > 1 ? `${intervalNum} weekends` : "weekend";
         break;
       case "weekly":
         repetitionPeriod = intervalNum > 1 ? `${intervalNum} weeks` : "week";
@@ -194,18 +222,32 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     recurrenceDescription = repetitionPeriod ? `This reminder will repeat every ${repetitionPeriod}.` : "";
   }
 
+  async function addLocationsAndSetValue(value: Location) {
+    await addLocation(value);
+    setValue("location", value.id);
+  }
+
+  const hasLocations = locations.length > 0;
+
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
+          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Reminder" />
           <Action.SubmitForm
+            icon={Icon.Window}
             onSubmit={async (values) => {
               await closeMainWindow({ popToRootType: PopToRootType.Immediate });
               await handleSubmit(values as CreateReminderValues);
             }}
             title="Create Reminder and Close Window"
+          />
+          <Action.Push
+            icon={Icon.Pin}
+            title="Add Saved Location"
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={<LocationForm onSubmit={addLocationsAndSetValue} />}
           />
         </ActionPanel>
       }
@@ -215,7 +257,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due Date" />
+      <Form.DatePicker {...itemProps.dueDate} title="Date" />
       {values.dueDate ? (
         <>
           <Form.Checkbox {...itemProps.isRecurring} label="Is Recurring" />
@@ -223,6 +265,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             <>
               <Form.Dropdown {...itemProps.frequency} title="Frequency">
                 <Form.Dropdown.Item title="Daily" value="daily" />
+                <Form.Dropdown.Item title="Weekdays" value="weekdays" />
+                <Form.Dropdown.Item title="Weekends" value="weekends" />
                 <Form.Dropdown.Item title="Weekly" value="weekly" />
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />
@@ -235,10 +279,45 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         </>
       ) : null}
 
-      <Form.TextField {...itemProps.address} title="Location" placeholder="Address" />
+      <Form.Dropdown {...itemProps.listId} title="List" storeValue>
+        {data?.lists.map((list) => {
+          return (
+            <Form.Dropdown.Item
+              key={list.id}
+              title={list.title}
+              value={list.id}
+              icon={{ source: Icon.Circle, tintColor: list.color }}
+            />
+          );
+        })}
+      </Form.Dropdown>
 
-      {values.address ? (
+      <Form.Dropdown {...itemProps.priority} title="Priority" storeValue>
+        <Form.Dropdown.Item title="None" value="" />
+        <Form.Dropdown.Item title="High" value="high" icon={getPriorityIcon("high")} />
+        <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
+        <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
+      </Form.Dropdown>
+
+      <Form.Separator />
+
+      {hasLocations ? (
+        <Form.Dropdown {...itemProps.location} title="Location">
+          <Form.Dropdown.Item title="None" value="" />
+
+          {locations.map((location) => {
+            return (
+              <Form.Dropdown.Item icon={location.icon} key={location.id} title={location.name} value={location.id} />
+            );
+          })}
+
+          <Form.Dropdown.Item icon={Icon.Pencil} title="Custom Location" value="custom" />
+        </Form.Dropdown>
+      ) : null}
+
+      {values.location === "custom" || !hasLocations ? (
         <>
+          <Form.TextField {...itemProps.address} title="Address" placeholder="Enter an address" />
           <Form.Dropdown
             {...itemProps.proximity}
             title="Proximity"
@@ -255,26 +334,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           />
         </>
       ) : null}
-
-      <Form.Dropdown {...itemProps.priority} title="Priority" storeValue>
-        <Form.Dropdown.Item title="None" value="" />
-        <Form.Dropdown.Item title="High" value="high" icon={getPriorityIcon("high")} />
-        <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
-        <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
-      </Form.Dropdown>
-
-      <Form.Dropdown {...itemProps.listId} title="List" storeValue>
-        {data?.lists.map((list) => {
-          return (
-            <Form.Dropdown.Item
-              key={list.id}
-              title={list.title}
-              value={list.id}
-              icon={{ source: Icon.Circle, tintColor: list.color }}
-            />
-          );
-        })}
-      </Form.Dropdown>
     </Form>
   );
 }

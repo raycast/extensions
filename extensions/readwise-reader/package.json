@@ -5,6 +5,9 @@
   "description": "Interact with Readwise Reader",
   "icon": "reader-logo.png",
   "author": "zach",
+  "contributors": [
+    "neil_brown"
+  ],
   "categories": [
     "Productivity",
     "Media",
@@ -52,8 +55,21 @@
           "placeholder": "URL",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "author",
+          "placeholder": "Author",
+          "type": "text",
+          "required": false
         }
       ]
+    },
+    {
+      "name": "save-links",
+      "title": "Save Links",
+      "description": "Save URLs to Reader",
+      "mode": "view",
+      "icon": "reader-logo.png"
     },
     {
       "name": "save-selection",

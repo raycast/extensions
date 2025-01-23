@@ -1,12 +1,11 @@
 import { List } from "@raycast/api";
-import groupBy from "lodash.groupby";
 import json2md from "json2md";
-
+import groupBy from "lodash.groupby";
 import abilities from "./statics/abilities.json";
 
 const generations = groupBy(abilities, "generation");
 
-export default function Ability() {
+export default function PokeAbilities() {
   return (
     <List throttle isShowingDetail={true}>
       {Object.entries(generations).map(([generation, abilities]) => {

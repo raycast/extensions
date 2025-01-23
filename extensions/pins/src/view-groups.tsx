@@ -13,14 +13,20 @@ import {
 import { setStorage, getStorage } from "./lib/storage";
 import { Direction, StorageKey } from "./lib/constants";
 import { Group, deleteGroup, useGroups } from "./lib/Groups";
-import { Pin, usePins } from "./lib/Pins";
-import { addIDAccessory, addParentGroupAccessory, addSortingStrategyAccessory } from "./lib/accessories";
+import { Pin, openPin, usePins } from "./lib/Pins";
+import {
+  addIDAccessory,
+  addParentGroupAccessory,
+  addSortingStrategyAccessory,
+  addVisibilityAccessory,
+} from "./lib/accessories";
 import { getGroupIcon } from "./lib/icons";
 import GroupForm from "./components/GroupForm";
 import { InstallExamplesAction } from "./components/actions/InstallExamplesAction";
 import { useEffect, useState } from "react";
 import CopyGroupActionsSubmenu from "./components/actions/CopyGroupActionsSubmenu";
-import { ViewGroupsPreferences } from "./lib/preferences";
+import { ExtensionPreferences, ViewGroupsPreferences } from "./lib/preferences";
+import { pluralize } from "./lib/utils";
 
 /**
  * Action to create a new group. Opens a form view with blank/default fields.
@@ -61,12 +67,12 @@ const moveGroup = async (index: number, dir: Direction, setGroups: React.Dispatc
 export default function ViewGroupsCommand() {
   const { groups, setGroups, revalidateGroups } = useGroups();
   const { pins } = usePins();
-  const [examplesInstalled, setExamplesInstalled] = useState<LocalStorage.Value | undefined>(true);
-  const preferences = getPreferenceValues<ViewGroupsPreferences>();
+  const [examplesInstalled, setExamplesInstalled] = useState<boolean>(true);
+  const preferences = getPreferenceValues<ExtensionPreferences & ViewGroupsPreferences>();
 
   useEffect(() => {
     Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLE_GROUPS_INSTALLED)).then((examplesInstalled) => {
-      setExamplesInstalled(examplesInstalled);
+      setExamplesInstalled(examplesInstalled === 1);
     });
   }, []);
 
@@ -92,6 +98,7 @@ export default function ViewGroupsCommand() {
         const groupPins = pins.filter((pin: Pin) => pin.group == group.name);
         const maxID = Math.max(...groups.map((group) => group.id));
         const accessories: List.Item.Accessory[] = [];
+        if (preferences.showVisibility) addVisibilityAccessory(group, accessories, true);
         if (preferences.showSortStrategy) addSortingStrategyAccessory(group, accessories);
         if (preferences.showIDs) addIDAccessory(group, accessories, maxID);
         if (preferences.showParentGroup) addParentGroupAccessory(group, accessories, groups);
@@ -99,13 +106,24 @@ export default function ViewGroupsCommand() {
         return (
           <List.Item
             title={group.name}
-            subtitle={`${groupPins.length} pin${groupPins.length == 1 ? "" : "s"}`}
+            subtitle={`${groupPins.length} ${pluralize("Pin", groupPins.length)}`}
             accessories={accessories}
             key={group.id}
             icon={getGroupIcon(group)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Group Actions">
+                  <Action
+                    title={`Open ${groupPins.length} ${pluralize("Pin", groupPins.length)}`}
+                    icon={Icon.ChevronRight}
+                    onAction={async () => {
+                      await Promise.all(
+                        groupPins.map(async (pin) => {
+                          await openPin(pin, preferences);
+                        }),
+                      );
+                    }}
+                  />
                   <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}

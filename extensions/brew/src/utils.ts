@@ -101,7 +101,7 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
 
   async function fetchURL(): Promise<void> {
     const response = await fetch(remote.url);
-    if (!response.ok) {
+    if (!response.ok || !response.body) {
       throw new Error(`Invalid response ${response.statusText}`);
     }
     await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
@@ -137,7 +137,9 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
         streamArray(),
       ]);
       pipeline.on("data", (data) => {
-        value?.push(data.value);
+        if (data && typeof data === "object" && "value" in data) {
+          value.push(data.value);
+        }
       });
       pipeline.on("end", () => {
         resolve(value);

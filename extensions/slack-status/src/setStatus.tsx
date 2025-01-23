@@ -1,8 +1,10 @@
-import { ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { OAuthService, withAccessToken } from "@raycast/utils";
-import { useState } from "react";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
+  CopyDeeplinkPresetAction,
+  CreateQuicklinkPresetAction,
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
@@ -14,20 +16,51 @@ import {
 import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
+import { CommandLinkParams } from "./types";
+import { useSlack, useSlackProfileAndDndInfo } from "./slack";
+import {
+  getStatusIcon,
+  getStatusSubtitle,
+  getStatusTitle,
+  getStatusPausedNotifications,
+  setStatusToPreset,
+} from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
-const slack = OAuthService.slack({
-  scope: "emoji:read users.profile:write users.profile:read",
+const slackAuth = OAuthService.slack({
+  scope: "emoji:read users.profile:write users.profile:read dnd:write dnd:read",
   personalAccessToken: preferences.accessToken,
 });
 
-function StatusList() {
+function accessories(isPaused: boolean) {
+  return isPaused ? [{ icon: Icon.BellDisabled, tooltip: "Notifications Paused" }] : [];
+}
+
+function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, data, mutate } = useSlackProfile();
+  const { isLoading, data, mutate } = useSlackProfileAndDndInfo(slackAuth);
+  const { profile, dnd } = data || {};
   const [presets, setPresets] = usePresets();
+  const slack = useSlack();
+
+  useEffect(() => {
+    (async () => {
+      if (props.launchContext?.presetId) {
+        const presetId = props.launchContext.presetId;
+        const presetToLaunch = presets.find((p) => p.id === presetId);
+
+        if (!presetToLaunch) {
+          console.error("No preset found with id: ", presetId);
+          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+        } else {
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+          popToRoot();
+          closeMainWindow();
+        }
+      }
+    })();
+  }, [slack]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
@@ -42,12 +75,13 @@ function StatusList() {
       <List.Section title="Current Status">
         <List.Item
           key="current-status"
-          icon={getStatusIcon(data)}
-          title={getStatusTitle(data)}
-          subtitle={getStatusSubtitle(data)}
+          icon={getStatusIcon(profile)}
+          title={getStatusTitle(profile)}
+          subtitle={getStatusSubtitle(profile)}
+          accessories={accessories(!!getStatusPausedNotifications(dnd))}
           actions={
             <ActionPanel>
-              {data?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
+              {profile?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
               <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
             </ActionPanel>
           }
@@ -60,6 +94,7 @@ function StatusList() {
             icon={getEmojiForCode(preset.emojiCode)}
             title={preset.title}
             subtitle={getTitleForDuration(preset.defaultDuration)}
+            accessories={accessories(preset.pauseNotifications)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -73,6 +108,8 @@ function StatusList() {
                       setPresets(presets.map((p) => (p === preset ? editedPreset : p)));
                     }}
                   />
+                  <CreateQuicklinkPresetAction preset={preset} />
+                  <CopyDeeplinkPresetAction preset={preset} />
                   <DeleteStatusPresetAction onDelete={() => setPresets(presets.filter((p) => p !== preset))} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
@@ -89,4 +126,4 @@ function StatusList() {
   );
 }
 
-export default withAccessToken(slack)(StatusList);
+export default withAccessToken(slackAuth)(StatusList);

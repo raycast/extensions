@@ -1,8 +1,14 @@
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
-import { formatTime } from "../formatUtils";
-import { getStopwatches, pauseStopwatch, startStopwatch, stopStopwatch, unpauseStopwatch } from "../stopwatchUtils";
-import { Stopwatch } from "../types";
+import { formatTime } from "../backend/formatUtils";
+import {
+  getStopwatches,
+  pauseStopwatch,
+  startStopwatch,
+  stopStopwatch,
+  unpauseStopwatch,
+} from "../backend/stopwatchBackend";
+import { Stopwatch, StopwatchLaunchConfig } from "../backend/types";
 
 export default function useStopwatches() {
   const [stopwatches, setStopwatches] = useState<Stopwatch[] | undefined>(undefined);
@@ -14,8 +20,8 @@ export default function useStopwatches() {
     setIsLoading(false);
   };
 
-  const handleStartSW = (swName = "Untitled") => {
-    startStopwatch(swName);
+  const handleStartSW = (launchConf: StopwatchLaunchConfig) => {
+    startStopwatch(launchConf);
     refreshSWes();
   };
 
@@ -40,7 +46,7 @@ export default function useStopwatches() {
 
   const handleRestartSW = (stopwatch: Stopwatch) => {
     handleStopSW(stopwatch);
-    handleStartSW(stopwatch.name);
+    handleStartSW({ swName: stopwatch.name, launchedFromMenuBar: false });
     refreshSWes();
   };
 

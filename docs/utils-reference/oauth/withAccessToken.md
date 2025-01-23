@@ -15,6 +15,7 @@ function withAccessToken<T = any>(
 ### Arguments
 
 `options` is an object containing:
+
 - `options.authorize`: a function that initiates the OAuth token retrieval process. It returns a promise that resolves to an access token.
 - `options.personalAccessToken`: an optional string that represents an already obtained personal access token. When `options.personalAccessToken` is provided, it uses that token. Otherwise, it calls `options.authorize` to fetch an OAuth token asynchronously.
 - `options.client`: an optional instance of a PKCE Client that you can create using Raycast API. This client is used to return the `idToken` as part of the `onAuthorize` callback below.
@@ -36,10 +37,10 @@ Note that the access token isn't injected into the wrapped component props. Inst
 ```tsx
 import { List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
-import { authorize } from "./oauth"
+import { authorize } from "./oauth";
 
 function AuthorizedComponent(props) {
-  return // ...
+  return; // ...
 }
 
 export default withAccessToken({ authorize })(AuthorizedComponent);
@@ -52,7 +53,7 @@ export default withAccessToken({ authorize })(AuthorizedComponent);
 ```tsx
 import { showHUD } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
-import { authorize } from "./oauth"
+import { authorize } from "./oauth";
 
 async function AuthorizedCommand() {
   await showHUD("Authorized");
@@ -79,7 +80,7 @@ const linear = OAuthService.linear({
 });
 
 function MyIssues() {
-  return // ...
+  return; // ...
 }
 
 export default withAccessToken(linear)(View);

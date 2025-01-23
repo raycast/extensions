@@ -54,33 +54,35 @@
   ],
   "contributors": [
     "immint023",
-    "mheidinger"
+    "mheidinger",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.1",
-    "@raycast/utils": "^1.11.1",
-    "javascript-time-ago": "^2.5.9",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "javascript-time-ago": "^2.5.10",
     "octokit": "^3.1.2",
     "use-debounce": "^9.0.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
-    "@typescript-eslint/parser": "^6.19.1",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "react-devtools": "4.28.4",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.14.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

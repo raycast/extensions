@@ -5,12 +5,13 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:35:48
- * Last modified  : 2023-07-06 14:51:59
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   getDestinationPaths,
@@ -26,7 +27,7 @@ import {
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function pad(sourcePaths: string[], padding: number, color: string) {
-  const newPaths = getDestinationPaths(sourcePaths);
+  const newPaths = await getDestinationPaths(sourcePaths);
   const resultPaths: string[] = [];
 
   for (const imagePath of sourcePaths) {
@@ -41,16 +42,24 @@ export default async function pad(sourcePaths: string[], padding: number, color:
       resultPaths.push(
         await execSIPSCommandOnWebP(
           `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
-          imagePath
-        )
+          imagePath,
+        ),
       );
     } else if (imagePath.toLowerCase().endsWith(".svg")) {
       // Convert to PNG, apply padding, then restore to SVG
       resultPaths.push(
         await execSIPSCommandOnSVG(
           `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
-          imagePath
-        )
+          imagePath,
+        ),
+      );
+    } else if (imagePath.toLowerCase().endsWith(".avif")) {
+      // Convert to PNG, apply padding, then restore to AVIF
+      resultPaths.push(
+        await execSIPSCommandOnAVIF(
+          `sips --padToHeightWidth ${oldHeight + padding} ${oldWidth + padding} --padColor ${color}`,
+          imagePath,
+        ),
       );
     } else {
       // Image is not a special format, so pad using SIPS
@@ -60,7 +69,7 @@ export default async function pad(sourcePaths: string[], padding: number, color:
       execSync(
         `sips --padToHeightWidth ${oldHeight + padding} ${
           oldWidth + padding
-        } --padColor ${color} -o "${newPath}" "${imagePath}"`
+        } --padColor ${color} -o "${newPath}" "${imagePath}"`,
       );
     }
   }

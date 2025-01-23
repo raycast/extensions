@@ -32,6 +32,7 @@ export function IssueListItem(props: {
     <List.Item
       icon={state.icon}
       title={props.item.summary}
+      keywords={[props.item.id]}
       subtitle={props.item.date}
       accessories={state.accessories}
       actions={
@@ -74,6 +75,15 @@ function IssueDetails(props: {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={issue.created} />
+          <Detail.Metadata.Label
+            title="Assignee"
+            text={issue.assignee?.fullName}
+            icon={
+              isURL(issue.assignee?.avatarUrl ?? "")
+                ? issue.assignee?.avatarUrl
+                : `${props.instance}${issue.assignee?.avatarUrl}`
+            }
+          />
           <Detail.Metadata.Label
             title="Author"
             text={issue.reporter?.fullName}

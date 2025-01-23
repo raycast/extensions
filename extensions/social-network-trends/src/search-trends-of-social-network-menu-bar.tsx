@@ -1,85 +1,72 @@
 import { Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { getAllTrends } from "./hooks/hooks";
 import { TrendMenubarItem } from "./components/trend-menubar-item";
-import { timeStampToDate } from "./utils/common-utils";
+import { useBaidu } from "./hooks/useBaidu";
+import { useBili } from "./hooks/useBili";
+import { useDouyin } from "./hooks/useDouyin";
+import { useToutiao } from "./hooks/useToutiao";
+import { useWeibo } from "./hooks/useWeibo";
+import { useZhihu } from "./hooks/useZhihu";
+import { useMemo } from "react";
+import { TrendsTags } from "./utils/constants";
+import { showBaiDu, showBiliBili, showDouYin, showTouTiao, showWeibo, showZhiHu } from "./types/preferences";
+import { getMenubarTitle, spliceTrends } from "./utils/common-utils";
+import { SocialTrend } from "./types/types";
 
 export default function SearchTrendsOfSocialNetworkMenuBar() {
-  const {
-    weiBoTrends,
-    zhiHuTrends,
-    douYinTrends,
-    baiduTrend,
-    toutiaoTrend,
-    toutiaoNewsTrend,
-    biliTrend,
-    loading,
-    lastRefreshTime,
-  } = getAllTrends(10);
+  const { data: baiduData, isLoading: baiduLoading } = useBaidu();
+  const { data: biliData, isLoading: biliLoading } = useBili();
+  const { data: douyinData, isLoading: douyinLoading } = useDouyin();
+  const { data: toutiaoData, isLoading: toutiaoLoading } = useToutiao();
+  const { data: weiboData, isLoading: weiboLoading } = useWeibo();
+  const { data: zhihuData, isLoading: zhihuLoading } = useZhihu();
+
+  const isLoading = useMemo(() => {
+    return baiduLoading || biliLoading || douyinLoading || toutiaoLoading || weiboLoading || zhihuLoading;
+  }, [baiduLoading, biliLoading, douyinLoading, toutiaoLoading, weiboLoading, zhihuLoading]);
+
+  const socialTrends = useMemo(() => {
+    const socialTrends_: SocialTrend[] = [];
+    const num = 10;
+    if (weiboData && showWeibo) {
+      socialTrends_.push({ title: TrendsTags.WEIBO, data: spliceTrends(weiboData, num) });
+    }
+    if (zhihuData && showZhiHu) {
+      socialTrends_.push({ title: TrendsTags.ZHIHU, data: spliceTrends(zhihuData, num) });
+    }
+    if (douyinData && showDouYin) {
+      socialTrends_.push({ title: TrendsTags.DOUYIN, data: spliceTrends(douyinData, num) });
+    }
+    if (baiduData && showBaiDu) {
+      socialTrends_.push({ title: TrendsTags.BAIDU, data: spliceTrends(baiduData, num) });
+    }
+    if (toutiaoData && showTouTiao) {
+      socialTrends_.push({ title: TrendsTags.TOUTIAO, data: spliceTrends(toutiaoData, num) });
+    }
+    if (biliData && showBiliBili) {
+      socialTrends_.push({ title: TrendsTags.BILI, data: spliceTrends(biliData, num) });
+    }
+    return socialTrends_;
+  }, [baiduData, biliData, douyinData, toutiaoData, weiboData, zhihuData]);
 
   return (
-    <MenuBarExtra
-      isLoading={loading}
-      icon={{ source: { light: "menu-bar-icon/trend-menu-bar.png", dark: "menu-bar-icon/trend-menu-bar@dark.png" } }}
-    >
-      <MenuBarExtra.Section title={"WeiBo"}>
-        {weiBoTrends?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"ZhiHu"}>
-        {zhiHuTrends?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"DouYin"}>
-        {douYinTrends?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"BaiDu"}>
-        {baiduTrend?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"TouTiao"}>
-        {toutiaoTrend?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"TouTiao News"}>
-        {toutiaoNewsTrend?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
-      <MenuBarExtra.Section title={"BiliBili"}>
-        {biliTrend?.map((value, index) => {
-          return <TrendMenubarItem key={index + value.name} trend={value} index={index} />;
-        })}
-      </MenuBarExtra.Section>
-
+    <MenuBarExtra isLoading={isLoading} title={getMenubarTitle(socialTrends)} icon={Icon.Hashtag}>
+      {socialTrends.map((value, index) => {
+        return (
+          <MenuBarExtra.Section title={value.title} key={value.title + index}>
+            {value.data?.map((trend, index) => {
+              return <TrendMenubarItem key={index + trend.name} trend={trend} index={index} />;
+            })}
+          </MenuBarExtra.Section>
+        );
+      })}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title={`Last refresh at ${timeStampToDate(lastRefreshTime)}`}
-          icon={Icon.Repeat}
-          onAction={() => {
-            console.log("User Click");
-          }}
-        />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title={"Preferences"}
           icon={Icon.Gear}
-          onAction={() => {
-            openCommandPreferences().then();
-          }}
+          title={"Settings..."}
           shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={async () => {
+            await openCommandPreferences();
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

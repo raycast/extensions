@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [SF Symbols] - 2024-03-04
+
+- Ensure design consistency by using SF Symbols and unicode characters.
+
 ## [Clock Format] - 2024-01-28
 
 - Add Support for the 24h clock format. The clock format can be changed in the settings.

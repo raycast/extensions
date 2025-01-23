@@ -1,5 +1,17 @@
-import { useState, useEffect, ComponentProps } from "react";
-import { Action, ActionPanel, Grid, Icon, LaunchProps, List, LocalStorage } from "@raycast/api";
+import { useState, useEffect, ComponentProps, Fragment } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Grid,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  LocalStorage,
+  confirmAlert,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
@@ -21,9 +33,18 @@ const filters = {
   episodes: "Episodes",
 };
 
+const musicOnlyIgnoredFilters = ["shows", "episodes"];
+
 type FilterValue = keyof typeof filters;
 
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
+  let { topView } = getPreferenceValues<Preferences.Search>();
+  const { musicOnly } = getPreferenceValues<Preferences.Search>();
+
+  if (musicOnly && musicOnlyIgnoredFilters.includes(topView)) {
+    topView = "artists";
+  }
+
   const {
     data: recentSearchesData,
     isLoading: recentSearchIsLoading,
@@ -57,7 +78,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     throttle: true,
   };
 
-  if (Boolean(searchText) === false) {
+  if (!searchText) {
     return (
       <List {...sharedProps}>
         <List.EmptyView title="What do you want to listen to?" />
@@ -71,17 +92,45 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                   actions={
                     <ActionPanel>
                       <Action icon={Icon.MagnifyingGlass} title="Search Again" onAction={() => setSearchText(search)} />
-                      <Action
-                        icon={Icon.Trash}
-                        title="Remove Search"
-                        onAction={async () => {
-                          await LocalStorage.setItem(
-                            "recent-searches",
-                            JSON.stringify(recentSearches.filter((item: string) => item !== search)),
-                          );
-                          recentSearchRevalidate();
-                        }}
-                      />
+                      <ActionPanel.Section>
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove Search"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.Remove}
+                          onAction={async () => {
+                            await LocalStorage.setItem(
+                              "recent-searches",
+                              JSON.stringify(recentSearches.filter((item: string) => item !== search)),
+                            );
+                            recentSearchRevalidate();
+                          }}
+                        />
+                        <Action
+                          icon={Icon.Trash}
+                          title="Remove All Searches"
+                          style={Action.Style.Destructive}
+                          shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                          onAction={async () => {
+                            await confirmAlert({
+                              title: "Are you sure?",
+                              message: "This will remove all recent searches.",
+                              primaryAction: {
+                                title: "Remove",
+                                style: Alert.ActionStyle.Destructive,
+                                onAction: async () => {
+                                  await LocalStorage.setItem("recent-searches", JSON.stringify([]));
+                                  recentSearchRevalidate();
+                                },
+                              },
+                              dismissAction: {
+                                title: "Cancel",
+                              },
+                              rememberUserChoice: true,
+                            });
+                          }}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
@@ -92,35 +141,54 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     );
   }
 
+  const sections: { key: FilterValue; component: JSX.Element }[] = [
+    { key: "artists", component: <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> },
+    { key: "tracks", component: <TracksSection limit={4} tracks={searchData?.tracks?.items} /> },
+    { key: "albums", component: <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> },
+    {
+      key: "playlists",
+      component: <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />,
+    },
+    { key: "shows", component: <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} /> },
+    { key: "episodes", component: <EpisodesSection limit={3} episodes={searchData?.episodes?.items} /> },
+  ];
+
+  const searchBarAccessory = (
+    <List.Dropdown
+      tooltip="Filter search"
+      value={searchFilter}
+      onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
+    >
+      {Object.entries(filters).map(
+        ([value, label]) =>
+          (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(value))) && (
+            <List.Dropdown.Item key={value} title={label} value={value} />
+          ),
+      )}
+    </List.Dropdown>
+  );
+
   if (
     searchText &&
     (searchFilter === "all" || searchFilter === "tracks" || searchFilter === "playlists" || searchFilter === "episodes")
   ) {
+    const orderedSections =
+      searchFilter === "all"
+        ? [
+            ...sections.filter((section) => section.key === topView),
+            ...sections.filter((section) => section.key !== topView),
+          ]
+        : sections.filter((section) => section.key === searchFilter);
+
     return (
-      <List
-        {...sharedProps}
-        searchBarAccessory={
-          <List.Dropdown
-            tooltip="Filter search"
-            value={searchFilter}
-            onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
-          >
-            {Object.entries(filters).map(([value, label]) => (
-              <List.Dropdown.Item key={value} title={label} value={value} />
-            ))}
-          </List.Dropdown>
-        }
-      >
-        {searchFilter === "all" && (
-          <>
-            <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
-            <TracksSection limit={4} tracks={searchData?.tracks?.items} />
-            <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
-            <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
-            <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
-            <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
-          </>
-        )}
+      <List {...sharedProps} searchBarAccessory={searchBarAccessory}>
+        {searchFilter === "all" &&
+          orderedSections.map(
+            ({ key, component }) =>
+              (!musicOnly || (musicOnly && !musicOnlyIgnoredFilters.includes(key))) && (
+                <Fragment key={key}>{component}</Fragment>
+              ),
+          )}
 
         {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
         {searchFilter === "episodes" && <EpisodesSection episodes={searchData?.episodes?.items} />}
@@ -131,20 +199,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   }
 
   return (
-    <Grid
-      {...sharedProps}
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter search"
-          value={searchFilter}
-          onChange={(newValue) => setSearchFilter(newValue as FilterValue)}
-        >
-          {Object.entries(filters).map(([value, label]) => (
-            <Grid.Dropdown.Item key={value} title={label} value={value} />
-          ))}
-        </Grid.Dropdown>
-      }
-    >
+    <Grid {...sharedProps} searchBarAccessory={searchBarAccessory}>
       {searchFilter === "artists" && <ArtistsSection type="grid" columns={5} artists={searchData?.artists?.items} />}
 
       {searchFilter === "albums" && <AlbumsSection type="grid" columns={5} albums={searchData?.albums?.items} />}

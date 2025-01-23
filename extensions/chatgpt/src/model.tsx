@@ -3,9 +3,12 @@ import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
-import { Model } from "./type";
+import { Model as ModelType } from "./type";
 import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
+import { ExportData, ImportData } from "./utils/import-export";
+import { ImportForm } from "./views/import-form";
+import { COMMAND_MODEL_PREFIX } from "./hooks/useCommand";
 
 export default function Model() {
   const models = useModel();
@@ -14,21 +17,42 @@ export default function Model() {
 
   const { push } = useNavigation();
 
-  const getActionPanel = (model: Model) => (
+  const getActionPanel = (model: ModelType) => (
     <ActionPanel>
-      <Action
-        title={"Edit Model"}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
-        icon={Icon.Text}
-        onAction={() => push(<ModelForm model={model} use={{ models }} />)}
-      />
+      {!model.id.startsWith(COMMAND_MODEL_PREFIX) && (
+        <Action
+          title={"Edit Model"}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          icon={Icon.Text}
+          onAction={() => push(<ModelForm model={model} use={{ models }} />)}
+        />
+      )}
       <Action
         title={"Create Model"}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.Text}
         onAction={() => push(<ModelForm name={searchText} use={{ models }} />)}
       />
-      {model.id !== "default" && (
+      <ActionPanel.Section title="Actions">
+        <Action title={"Export Models"} icon={Icon.Upload} onAction={() => ExportData(models.data, "Models")} />
+        <Action
+          title={"Import Models"}
+          icon={Icon.Download}
+          onAction={() =>
+            push(
+              <ImportForm
+                moduleName="Models"
+                onSubmit={async (file) => {
+                  ImportData<ModelType>("models", file).then((data) => {
+                    models.setModels(data.reduce((acc, model) => ({ ...acc, [model.id]: model }), {}));
+                  });
+                }}
+              />,
+            )
+          }
+        />
+      </ActionPanel.Section>
+      {model.id !== "default" && !model.id.startsWith(COMMAND_MODEL_PREFIX) && (
         <>
           <PinAction
             title={model.pinned ? "Unpin Model" : "Pin Model"}
@@ -50,8 +74,8 @@ export default function Model() {
     </ActionPanel>
   );
 
-  const sortedModels = models.data.sort(
-    (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime()
+  const sortedModels = Object.values(models.data).sort(
+    (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
   );
 
   const filteredModels = sortedModels
@@ -69,11 +93,17 @@ export default function Model() {
 
   const defaultModelOnly = filteredModels.find((x) => x.id === DEFAULT_MODEL.id) ?? DEFAULT_MODEL;
 
-  const customModelsOnly = filteredModels.filter((x) => x.id !== DEFAULT_MODEL.id);
+  const commandModelsOnly = filteredModels.filter(
+    (x) => x.id !== DEFAULT_MODEL.id && x.id.startsWith(COMMAND_MODEL_PREFIX),
+  );
+
+  const customModelsOnly = filteredModels.filter(
+    (x) => x.id !== DEFAULT_MODEL.id && !x.id.startsWith(COMMAND_MODEL_PREFIX),
+  );
 
   return (
     <List
-      isShowingDetail={filteredModels.length !== 0}
+      isShowingDetail // always show detail view, since the default model is always selected
       isLoading={models.isLoading || models.isFetching}
       filtering={false}
       throttle={false}
@@ -89,8 +119,6 @@ export default function Model() {
     >
       {models.isFetching ? (
         <List.EmptyView />
-      ) : models.data.length === 0 ? (
-        <List.EmptyView title="No custom models" description="Create new model with ⌘ + T shortcut" icon={Icon.Stars} />
       ) : (
         <>
           <ModelListItem
@@ -110,6 +138,13 @@ export default function Model() {
             key="models"
             title="Models"
             models={customModelsOnly.filter((x) => !x.pinned)}
+            selectedModel={selectedModelId}
+            actionPanel={getActionPanel}
+          />
+          <ModelListView
+            key="ai-commands"
+            title="AI Commands (read-only)"
+            models={commandModelsOnly}
             selectedModel={selectedModelId}
             actionPanel={getActionPanel}
           />

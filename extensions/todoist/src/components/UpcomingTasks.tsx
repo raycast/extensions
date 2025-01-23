@@ -8,7 +8,7 @@ import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
 import useViewTasks from "../hooks/useViewTasks";
 
-import CreateViewAction from "./CreateViewAction";
+import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type UpcomingTasksProps = { quickLinkView: QuickLinkView };
@@ -35,7 +35,11 @@ export default function UpcomingTasks({ quickLinkView }: UpcomingTasksProps) {
           <ActionPanel>
             <Action.Push title="Create Task" icon={Icon.Plus} target={<CreateTask />} />
 
-            <CreateViewAction {...quickLinkView} />
+            {quickLinkView ? (
+              <ActionPanel.Section>
+                <CreateViewActions {...quickLinkView} />
+              </ActionPanel.Section>
+            ) : null}
           </ActionPanel>
         }
       />

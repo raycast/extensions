@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 
 export default function SearchHistory() {
   return (
