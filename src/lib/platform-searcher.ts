@@ -1,8 +1,15 @@
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 
 // 所有支持的平台
 export const PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
 export type Platform = (typeof PLATFORMS)[number];
+
+// 获取用户语言设置
+function getLanguageFilter(): string {
+  const preferences = getPreferenceValues();
+  const userLanguage = preferences.language as string;
+  return userLanguage ? `+lang:${userLanguage}` : "";
+}
 
 /**
  * 获取搜索URL
@@ -15,8 +22,11 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
   const encodedKeyword = encodeURIComponent(keyword);
 
   switch (platform) {
-    case "x":
-      return `https://x.com/search?q=${encodedKeyword}+min_replies:2+min_retweets:1+lang:zh-cn+since:${date}&src=typed_query&f=live`;
+    case "x": {
+      const langFilter = getLanguageFilter();
+      const langParam = langFilter ? `+${langFilter}` : "";
+      return `https://x.com/search?q=${encodedKeyword}+min_replies:1${langParam}+since:${date}&src=typed_query&f=live`;
+    }
     case "v2ex":
       return `https://google.com/search?q=${encodedKeyword}+site:v2ex.com&newwindow=1&tbs=qdr:m`;
     case "reddit":
