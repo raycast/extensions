@@ -5,7 +5,7 @@ import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
 export default async function Command(props: LaunchProps) {
   try {
-    const keywords = readKeywords(KEYWORDS_FILE_PATH);
+    const keywords = await readKeywords(KEYWORDS_FILE_PATH);
     const randomKeyword = getRandomElement(keywords);
 
     // 计算两个月前的日期
@@ -25,7 +25,7 @@ export default async function Command(props: LaunchProps) {
     await showHUD(`Searching for "${randomKeyword}" on multiple platforms`);
 
   } catch (error) {
-    console.error('Error in main:', error);
+    console.error('Error in Command:', error);
     await showHUD('搜索时发生错误，请查看控制台日志');
   }
 }
