@@ -4,7 +4,7 @@ import { open } from "@raycast/api";
 export const PLATFORMS = ['x', 'v2ex', 'hackernews', 'reddit', 'medium', 'zhihu', 'bilibili', 'youtube'] as const;
 export type Platform = typeof PLATFORMS[number];
 
-// 默认平台
+// 默认打开平台
 export const DEFAULT_PLATFORMS = ['x', 'v2ex'] as const as readonly Platform[];
 
 // 可选平台 - 从所有平台中排除默认平台
