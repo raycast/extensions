@@ -1,25 +1,14 @@
 import { open } from "@raycast/api";
 
-// 平台配置对象
-export const PLATFORMS = {
-  x: { code: 'x' as const, name: 'x' as const },
-  v: { code: 'v' as const, name: 'v2ex' as const },
-  h: { code: 'h' as const, name: 'hackernews' as const },
-  r: { code: 'r' as const, name: 'reddit' as const },
-  m: { code: 'm' as const, name: 'medium' as const },
-  z: { code: 'z' as const, name: 'zhihu' as const },
-  b: { code: 'b' as const, name: 'bilibili' as const },
-  y: { code: 'y' as const, name: 'youtube' as const },
-} as const;
+// 所有支持的平台
+export const PLATFORMS = ['x', 'v2ex', 'hackernews', 'reddit', 'medium', 'zhihu', 'bilibili', 'youtube'] as const;
+export type Platform = typeof PLATFORMS[number];
 
-// 从配置对象派生类型
-export type PlatformCode = (typeof PLATFORMS)[keyof typeof PLATFORMS]['code'];
-export type Platform = (typeof PLATFORMS)[keyof typeof PLATFORMS]['name'];
+// 默认平台
+export const DEFAULT_PLATFORMS = ['x', 'v2ex'] as const as readonly Platform[];
 
-// 从配置对象派生映射
-export const platformMap: Record<PlatformCode, Platform> = Object.fromEntries(
-  Object.values(PLATFORMS).map(({ code, name }) => [code, name])
-) as Record<PlatformCode, Platform>;
+// 可选平台 - 从所有平台中排除默认平台
+export const OPTIONAL_PLATFORMS = PLATFORMS.filter(p => !DEFAULT_PLATFORMS.includes(p)) as Platform[];
 
 /**
  * 获取搜索URL

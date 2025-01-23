@@ -1,9 +1,9 @@
-import { showHUD, LaunchProps } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { getRandomElement } from "./lib/utils";
-import { Platform, searchOnPlatform } from "./lib/platform-searcher";
+import { searchOnPlatform, DEFAULT_PLATFORMS, OPTIONAL_PLATFORMS } from "./lib/platform-searcher";
 import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
-export default async function Command(props: LaunchProps) {
+export default async function Command() {
   try {
     const keywords = await readKeywords(KEYWORDS_FILE_PATH);
     const randomKeyword = getRandomElement(keywords);
@@ -13,19 +13,16 @@ export default async function Command(props: LaunchProps) {
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
     const dateString = twoMonthsAgo.toISOString().split('T')[0];
 
-    // 在X和V2EX上搜索
-    await searchOnPlatform('x', randomKeyword, dateString);
-    await searchOnPlatform('v2ex', randomKeyword);
+    // 在默认平台上搜索
+    for (const platform of DEFAULT_PLATFORMS) {
+      await searchOnPlatform(platform, randomKeyword, dateString);
+    }
 
-    // 从其他平台中随机选择一个
-    const otherPlatforms: Platform[] = ['reddit', 'medium', 'hackernews', 'youtube', 'bilibili', 'zhihu'];
-    const randomPlatform = getRandomElement(otherPlatforms);
-    await searchOnPlatform(randomPlatform, randomKeyword);
-
-    await showHUD(`Searching for "${randomKeyword}" on multiple platforms`);
+    // 随机选择一个其他平台搜索
+    const randomPlatform = getRandomElement(OPTIONAL_PLATFORMS);
+    await searchOnPlatform(randomPlatform, randomKeyword, dateString);
 
   } catch (error) {
-    console.error('Error in Command:', error);
-    await showHUD('搜索时发生错误，请查看控制台日志');
+    await showHUD("❌ Cannot open random search!");
   }
 }

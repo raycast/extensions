@@ -52,27 +52,6 @@
       "title": "Edit Keywords",
       "description": "Edit keyword list",
       "mode": "view"
-    },
-    {
-      "name": "search-multi-platform",
-      "title": "Search on Multi Platform",
-      "subtitle": "X, Reddit, Medium and so on.",
-      "description": "Search a keyword on multiple platforms",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "keyword",
-          "placeholder": "Keyword to search",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "platforms",
-          "placeholder": "Platform (xv hr mz by)",
-          "type": "text",
-          "required": false
-        }
-      ]
     }
   ],
   "dependencies": {
