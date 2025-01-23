@@ -10,7 +10,7 @@ interface Preferences {
 }
 
 function getRandomAvailablePlatform(usedPlatforms: Platform[]): Platform {
-  const availablePlatforms = PLATFORMS.filter(p => !usedPlatforms.includes(p)) as Platform[];
+  const availablePlatforms = PLATFORMS.filter((p) => !usedPlatforms.includes(p)) as Platform[];
   return getRandomElement(availablePlatforms);
 }
 

@@ -34,7 +34,7 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
     case "medium":
       return `https://medium.com/search?q=${encodedKeyword}`;
     case "hackernews":
-      return `https://hn.algolia.com/?q=${encodedKeyword}&dateRange=pastMonth&type=story`
+      return `https://hn.algolia.com/?q=${encodedKeyword}&dateRange=pastMonth&type=story`;
     case "youtube":
       return `https://www.youtube.com/results?search_query=${encodedKeyword}`;
     case "bilibili":
