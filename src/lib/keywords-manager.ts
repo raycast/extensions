@@ -1,15 +1,19 @@
 import { environment } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
-import { readFile, writeFile, appendFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { existsSync } from "fs";
 
 export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "prompt", "AI"];
 export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, 'keywords.txt');
 
-export function ensureDirectoryExists(filePath: string) {
+/**
+ * 确保目录存在
+ * @param filePath 文件路径
+ */
+function ensureDirectoryExists(filePath: string): void {
   const dirname = path.dirname(filePath);
-  if (!fs.existsSync(dirname)) {
+  if (!existsSync(dirname)) {
     fs.mkdirSync(dirname, { recursive: true });
   }
 }
@@ -20,35 +24,55 @@ export function ensureDirectoryExists(filePath: string) {
  * @returns 关键词数组
  */
 export async function readKeywords(filePath: string): Promise<string[]> {
-  if (!existsSync(filePath)) {
+  try {
+    if (!existsSync(filePath)) {
+      return [];
+    }
+    const content = await readFile(filePath, 'utf-8');
+    return content.split('\n').filter(line => line.trim());
+  } catch (error) {
+    console.error('Error reading keywords file:', error);
     return [];
   }
-  const content = await readFile(filePath, 'utf-8');
-  return content.toString().trim().split('\n').filter(Boolean);
 }
 
-export function writeKeywords(keywords: string[], filePath: string = KEYWORDS_FILE_PATH): void {
+/**
+ * 写入关键词列表
+ * @param keywords 关键词数组
+ * @param filePath 文件路径
+ */
+export async function writeKeywords(keywords: string[], filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   try {
     ensureDirectoryExists(filePath);
-    fs.writeFileSync(filePath, keywords.join('\n'), 'utf-8');
+    await writeFile(filePath, keywords.join('\n'), 'utf-8');
   } catch (error) {
     console.error('Error writing keywords file:', error);
     throw error;
   }
 }
 
+/**
+ * 添加关键词
+ * @param keyword 要添加的关键词
+ * @param filePath 文件路径
+ */
 export async function addKeyword(keyword: string, filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   const keywords = await readKeywords(filePath);
-  if (!keywords.includes(keyword)) {
-    keywords.push(keyword);
-    writeKeywords(keywords, filePath);
+  if (!keywords.includes(keyword.trim())) {
+    keywords.push(keyword.trim());
+    await writeKeywords(keywords, filePath);
   }
 }
 
+/**
+ * 删除关键词
+ * @param keyword 要删除的关键词
+ * @param filePath 文件路径
+ */
 export async function removeKeyword(keyword: string, filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   const keywords = await readKeywords(filePath);
-  const updatedKeywords = keywords.filter(k => k !== keyword);
-  writeKeywords(updatedKeywords, filePath);
+  const updatedKeywords = keywords.filter(k => k.trim() !== keyword.trim());
+  await writeKeywords(updatedKeywords, filePath);
 }
 
 /**
@@ -59,4 +83,4 @@ export async function removeKeyword(keyword: string, filePath: string = KEYWORDS
 export async function isKeywordExists(keyword: string): Promise<boolean> {
   const keywords = await readKeywords(KEYWORDS_FILE_PATH);
   return keywords.includes(keyword.trim());
-} 
+}
