@@ -4,7 +4,7 @@ import * as path from "path";
 import { readFile, writeFile } from "fs/promises";
 
 export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "prompt", "AI"];
-export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, 'keywords.txt');
+export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, "keywords.txt");
 
 /**
  * 确保目录存在
@@ -27,10 +27,10 @@ export async function readKeywords(filePath: string): Promise<string[]> {
     if (!fs.existsSync(filePath)) {
       return [];
     }
-    const content = await readFile(filePath, 'utf-8');
-    return content.split('\n').filter(line => line.trim());
+    const content = await readFile(filePath, "utf-8");
+    return content.split("\n").filter((line) => line.trim());
   } catch (error) {
-    console.error('Error reading keywords file:', error);
+    console.error("Error reading keywords file:", error);
     return [];
   }
 }
@@ -43,9 +43,9 @@ export async function readKeywords(filePath: string): Promise<string[]> {
 export async function writeKeywords(keywords: string[], filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   try {
     ensureDirectoryExists(filePath);
-    await writeFile(filePath, keywords.join('\n'), 'utf-8');
+    await writeFile(filePath, keywords.join("\n"), "utf-8");
   } catch (error) {
-    console.error('Error writing keywords file:', error);
+    console.error("Error writing keywords file:", error);
     throw error;
   }
 }

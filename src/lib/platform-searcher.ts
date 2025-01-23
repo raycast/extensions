@@ -1,14 +1,14 @@
 import { open } from "@raycast/api";
 
 // 所有支持的平台
-export const PLATFORMS = ['x', 'v2ex', 'hackernews', 'reddit', 'medium', 'zhihu', 'bilibili', 'youtube'] as const;
-export type Platform = typeof PLATFORMS[number];
+export const PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
+export type Platform = (typeof PLATFORMS)[number];
 
 // 默认打开平台
-export const DEFAULT_PLATFORMS = ['x', 'v2ex'] as const as readonly Platform[];
+export const DEFAULT_PLATFORMS = ["x", "v2ex"] as const as readonly Platform[];
 
 // 可选平台 - 从所有平台中排除默认平台
-export const OPTIONAL_PLATFORMS = PLATFORMS.filter(p => !DEFAULT_PLATFORMS.includes(p)) as Platform[];
+export const OPTIONAL_PLATFORMS = PLATFORMS.filter((p) => !DEFAULT_PLATFORMS.includes(p)) as Platform[];
 
 /**
  * 获取搜索URL
@@ -21,21 +21,21 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
   const encodedKeyword = encodeURIComponent(keyword);
 
   switch (platform) {
-    case 'x':
+    case "x":
       return `https://x.com/search?q=${encodedKeyword}+min_replies:2+min_retweets:1+lang:zh-cn+since:${date}&src=typed_query&f=live`;
-    case 'v2ex':
+    case "v2ex":
       return `https://google.com/search?q=${encodedKeyword}+site:v2ex.com&newwindow=1&tbs=qdr:m`;
-    case 'reddit':
+    case "reddit":
       return `https://reddit.com/search?q=${encodedKeyword}&t=month`;
-    case 'medium':
+    case "medium":
       return `https://medium.com/search?q=${encodedKeyword}`;
-    case 'hackernews':
+    case "hackernews":
       return `https://google.com/search?q=${encodedKeyword}+site:news.ycombinator.com&newwindow=1&tbs=qdr:m`;
-    case 'youtube':
+    case "youtube":
       return `https://www.youtube.com/results?search_query=${encodedKeyword}`;
-    case 'bilibili':
+    case "bilibili":
       return `https://search.bilibili.com/all?keyword=${encodedKeyword}&from_source=webtop_search`;
-    case 'zhihu':
+    case "zhihu":
       return `https://www.zhihu.com/search?q=${encodedKeyword}`;
   }
 }
@@ -61,4 +61,4 @@ export async function searchOnPlatform(platform: Platform, keyword: string, date
   } catch (error) {
     console.error(`Error searching on ${platform}:`, error);
   }
-} 
+}

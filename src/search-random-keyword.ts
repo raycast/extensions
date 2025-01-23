@@ -11,7 +11,7 @@ export default async function Command() {
     // 计算两个月前的日期
     const twoMonthsAgo = new Date();
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-    const dateString = twoMonthsAgo.toISOString().split('T')[0];
+    const dateString = twoMonthsAgo.toISOString().split("T")[0];
 
     // 在默认平台上搜索
     for (const platform of DEFAULT_PLATFORMS) {
@@ -21,7 +21,6 @@ export default async function Command() {
     // 随机选择一个其他平台搜索
     const randomPlatform = getRandomElement(OPTIONAL_PLATFORMS);
     await searchOnPlatform(randomPlatform, randomKeyword, dateString);
-
   } catch (error) {
     await showHUD("❌ Cannot open random search!");
   }

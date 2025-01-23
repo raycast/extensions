@@ -24,7 +24,7 @@ export default async function Command(props: LaunchProps<{ arguments: AddKeyword
     await writeKeywords(keywords);
     await showHUD(`✅ 已添加关键词: '${keyword}'`);
   } catch (error) {
-    console.error('Error in add-keyword:', error);
-    await showHUD('❌ 添加关键词时发生错误');
+    console.error("Error in add-keyword:", error);
+    await showHUD("❌ 添加关键词时发生错误");
   }
 }
