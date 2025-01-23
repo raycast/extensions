@@ -155,7 +155,7 @@ export default function DownloadVideo() {
       onError() {
         setValidationError("url", "Invalid YouTube URL");
       },
-    }
+    },
   );
 
   useEffect(() => {
