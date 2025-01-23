@@ -19,6 +19,10 @@ export default async function Command() {
     const preferences = getPreferenceValues<Preferences>();
     const keywords = await readKeywords(KEYWORDS_FILE_PATH);
     const randomKeyword = getRandomElement(keywords);
+    console.log(randomKeyword);
+    console.log(keywords);
+    console.log(preferences);
+    console.log(KEYWORDS_FILE_PATH);
 
     // 计算日期
     const twoMonthsAgo = new Date();
