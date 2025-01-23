@@ -56,7 +56,7 @@ async function searchMultiPlatform(keyword: string, platformCodes?: string): Pro
 export default async function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
   try {
     // 优先使用命令参数中的关键词，如果没有则尝试获取选中文本或剪贴板内容
-    const searchText = props.arguments.keyword ?? await readTextWithFallback(props.fallbackText);
+    const searchText = (props.arguments.keyword?.trim() || await readTextWithFallback(props.fallbackText));
 
     if (isNotEmpty(searchText)) {
       await searchMultiPlatform(searchText, props.arguments.platforms);
