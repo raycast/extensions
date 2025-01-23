@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Send Message Command] - {PR_MERGE_DATE}
+
+- Add a new command to send a message to a channel or user in Slack. In order for this to work, you will need to add `chat:write` scope to the manifest, and re-install the application in your Slack space.
+
 ## [New Action] - 2025-01-13
 
 - Add `Copy Huddle Link` action to copy the huddle link of a chat to the clipboard

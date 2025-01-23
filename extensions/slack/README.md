@@ -52,6 +52,10 @@ If you don't want to log in through OAuth, you can use an access token instead. 
           # Command: Set Snooze
           - dnd:read
           - dnd:write
+
+          # Command: Send Message
+          - chat:write
+          
     settings:
       org_deploy_enabled: false
       socket_mode_enabled: false
