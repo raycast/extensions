@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Improve URL Validator] - {PR_MERGE_DATE}
+## [Improve URL Validator] - 2025-01-23
 
 - Improve `isYouTubeURL` function
 - Bump all dependencies to the latest
