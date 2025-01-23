@@ -1,4 +1,10 @@
-# KeepassXC Extension Changelog
+# KeePassXC Extension Changelog
+
+## [1.5.2] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Display the correct tooltip on the URL icon.
 
 ## [1.5.1] - 2025-01-20
 
