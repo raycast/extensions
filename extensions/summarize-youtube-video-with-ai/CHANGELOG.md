@@ -5,6 +5,8 @@
 - 🔎 Added support for clipboard and browser extension detection
 - 🪓 Split AIs into separate commands
 
+NOTE: This update may requires you to update your preferences for the extension. Consider using one of the new commands from now on.
+
 ## [New Features] - 2024-12-21
 
 - Added preferences to set a custom OpenAI API endpoint

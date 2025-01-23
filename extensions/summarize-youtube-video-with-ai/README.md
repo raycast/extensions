@@ -6,6 +6,10 @@ Summarize any YouTube Video with AI and ask follow up questions to get all the d
 
 ### Commands
 
+## `summarizeVideo`
+
+This command is deprecated. Please use one of the below commands instead. If you have set preferences for this command, please migrate them to the new command.
+
 ## `summarizeVideoWithRaycast`
 
 ### Preferences for Raycast
@@ -64,6 +68,6 @@ The language you want the summary to be in. Your choice will be used in a prompt
 
 It is possible to use the OpenAI compatible API endpoint from Ollama to summarize YouTube videos using a local LLM. To do this use the following preferences:
 
-- Choose AI: `OpenAI ChatGPT`
-- OpenAI Endpoint: `http://localhost:11434/v1/`
-- OpenAI Model: `llama3.2:latest` or any other model from [Ollama's model catalog](https://ollama.com/search).
+- Run the command `summarizeVideoWithOpenAI`
+- Add OpenAI Endpoint to the commands preferences: `http://localhost:11434/v1/`
+- Add OpenAI Model to the commands preferences: `llama3.2:latest` or any other model from [Ollama's model catalog](https://ollama.com/search).
