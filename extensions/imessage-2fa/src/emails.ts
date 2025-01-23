@@ -91,7 +91,9 @@ async function getAppleMailMessages(
       timeout: 10000,
     });
 
-    if (!result) return [];
+    if (!result) {
+      return [];
+    }
 
     return result
       .split("$end")
@@ -107,7 +109,6 @@ async function getAppleMailMessages(
         };
       });
   } catch (error) {
-    console.error("Failed to get emails:", error);
     return [];
   }
 }
@@ -130,182 +131,174 @@ interface UseEmailsOptions {
 export function useEmails(options: UseEmailsOptions) {
   const preferences = getPreferenceValues<Preferences>();
   const emailSource = preferences.emailSource || "applemail";
-  const storage = useRef<MessageStorage>({ hasCode: {} });
-  const messageCache = useRef<Map<string, boolean>>(new Map());
-
-  // UI and loading state management
   const [data, setData] = useState<Message[]>([]);
-  const [permissionView, setPermissionView] = useState<JSX.Element | null>(null);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
-  const [isInitialLoadStarted, setIsInitialLoadStarted] = useState(false);
-  const isLoadingRef = useRef(false);
+  const [permissionView, setPermissionView] = useState<React.ReactElement | null>(null);
 
-  // Process new emails and update state, avoiding duplicates
+  // Simple cache to track processed messages
+  const messageCache = useRef<Set<string>>(new Set());
+  const isLoadingRef = useRef(false);
+  const latestTimestamp = useRef<number>(0);
+
+  // Process new emails and update state
   const processNewEmails = useCallback(
     (newEmails: Message[]) => {
-      setData((prevData) => {
-        const uniqueEmails = newEmails.filter((email) => {
-          // Skip if already processed
-          if (messageCache.current.has(email.guid)) {
-            return false;
-          }
+      const uniqueEmails = newEmails.filter((email) => {
+        // Skip if we've already processed this message
+        if (messageCache.current.has(email.guid)) {
+          return false;
+        }
 
-          // For code-only search, check if message contains a code
-          if (options.searchType === "code") {
-            const code = extractCode(email.text);
-            const hasCode = code !== null;
-            messageCache.current.set(email.guid, hasCode);
-            return hasCode;
-          }
+        // Mark as processed
+        messageCache.current.add(email.guid);
 
-          messageCache.current.set(email.guid, true);
-          return true;
-        });
+        // Check for code
+        const code = extractCode(email.text);
+        const hasCode = code !== null;
 
-        return uniqueEmails.length > 0 ? [...prevData, ...uniqueEmails] : prevData;
+        // For code-only search, only include messages with codes
+        if (options.searchType === "code") {
+          return hasCode;
+        }
+
+        return true;
       });
+
+      if (uniqueEmails.length > 0) {
+        setData((prevData) => {
+          // Create a Set of existing IDs for O(1) lookup
+          const existingIds = new Set(prevData.map((msg) => msg.guid));
+          // Only add messages that aren't already in the list
+          const newMessages = uniqueEmails.filter((msg) => !existingIds.has(msg.guid));
+          return [...newMessages, ...prevData];
+        });
+      }
     },
     [options.searchType]
   );
 
-  // Main email fetching logic with initial load and incremental update support
-  const fetchEmails = useCallback(async () => {
-    if (!options.enabled || isLoadingRef.current) {
-      return;
-    }
-
-    try {
-      isLoadingRef.current = true;
-
-      // Determine time window: full window for initial load, incremental for updates
-      let cutoffTime: Date;
-      if (!isInitialLoadComplete) {
-        const prefs = getPreferenceValues<Preferences>();
-        const lookbackMinutes = calculateLookBackMinutes(prefs.lookBackUnit, parseInt(prefs.lookBackAmount || "1", 10));
-        cutoffTime = new Date(Date.now() - lookbackMinutes * 60 * 1000);
-      } else {
-        // For updates, only look for messages newer than our latest known message
-        cutoffTime = storage.current.latestTimestamp
-          ? new Date(storage.current.latestTimestamp)
-          : new Date(Date.now() - 60 * 1000); // Fallback to 1 minute if no timestamp
+  // Main email fetching logic
+  const fetchEmails = useCallback(
+    async (isInitialFetch = false) => {
+      if (!options.enabled || isLoadingRef.current) {
+        return;
       }
 
-      let emails: Message[] = [];
+      try {
+        isLoadingRef.current = true;
 
-      // Fetch from selected email source (Gmail or Apple Mail)
-      if (emailSource === "gmail") {
-        if (!preferences.gmailClientId) {
-          console.error("Gmail OAuth Client ID not configured");
-          setData([]);
-          setPermissionView(
-            React.createElement(ErrorView, {
-              icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
-              title: "Gmail Configuration Required",
-              description: "Please add your Gmail OAuth Client ID in the extension preferences.",
-            })
+        // Calculate time window
+        let cutoffTime: Date;
+        if (isInitialFetch) {
+          // On initial load, clear the cache
+          messageCache.current.clear();
+          latestTimestamp.current = 0;
+
+          const prefs = getPreferenceValues<Preferences>();
+          const lookbackMinutes = calculateLookBackMinutes(
+            prefs.lookBackUnit,
+            parseInt(prefs.lookBackAmount || "1", 10)
           );
-          return;
+          cutoffTime = new Date(Date.now() - lookbackMinutes * 60 * 1000);
+        } else {
+          // For updates, only look for messages newer than our latest
+          cutoffTime = new Date(latestTimestamp.current || Date.now() - 60 * 1000);
         }
 
-        try {
-          const isAuthed = await checkGmailAuth();
-          if (!isAuthed) {
+        let emails: Message[] = [];
+        if (emailSource === "gmail") {
+          if (!preferences.gmailClientId) {
             setData([]);
             setPermissionView(
               React.createElement(ErrorView, {
-                icon: { source: Icon.Person, tintColor: Color.Blue },
-                title: "Gmail Authorization Required",
-                description: "Please authorize access to your Gmail account.",
+                icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+                title: "Gmail Configuration Required",
+                description: "Please add your Gmail OAuth Client ID in the extension preferences.",
               })
             );
             return;
           }
-          emails = await getGmailMessages(options.searchType, cutoffTime);
-        } catch (error) {
-          console.error("Gmail error:", error);
-          setData([]);
-          setPermissionView(
-            React.createElement(ErrorView, {
-              icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
-              title: "Gmail Error",
-              description: "Failed to fetch messages from Gmail. Please try again.",
-            })
-          );
-          return;
+
+          try {
+            const isAuthed = await checkGmailAuth();
+            if (!isAuthed) {
+              setData([]);
+              setPermissionView(
+                React.createElement(ErrorView, {
+                  icon: { source: Icon.Person, tintColor: Color.Blue },
+                  title: "Gmail Authorization Required",
+                  description: "Please authorize access to your Gmail account.",
+                })
+              );
+              return;
+            }
+            emails = await getGmailMessages(options.searchType, cutoffTime);
+          } catch (error) {
+            setData([]);
+            setPermissionView(
+              React.createElement(ErrorView, {
+                icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+                title: "Gmail Error",
+                description: "Failed to fetch messages from Gmail. Please try again.",
+              })
+            );
+            return;
+          }
+        } else {
+          emails = await getAppleMailMessages(options.searchType, cutoffTime, Array.from(messageCache.current));
         }
-      } else {
-        const knownGuids = Object.keys(storage.current.hasCode);
-        emails = await getAppleMailMessages(options.searchType, cutoffTime, knownGuids);
-      }
 
-      setPermissionView(null);
-
-      if (emails.length > 0) {
         processNewEmails(emails);
 
-        // Track latest message timestamp for future incremental updates
-        const latestEmail = emails.reduce((latest: number, email: Message) => {
-          const emailDate = new Date(email.message_date).getTime();
-          return emailDate > latest ? emailDate : latest;
-        }, storage.current.latestTimestamp || 0);
-
-        if (latestEmail > (storage.current.latestTimestamp || 0)) {
-          storage.current.latestTimestamp = latestEmail;
+        if (emails.length > 0) {
+          // Update latest timestamp
+          const latestEmail = Math.max(...emails.map((email) => new Date(email.message_date).getTime()));
+          if (latestEmail > latestTimestamp.current) {
+            latestTimestamp.current = latestEmail;
+          }
         }
-      }
 
-      if (!isInitialLoadComplete) {
-        setIsInitialLoadComplete(true);
+        if (isInitialFetch) {
+          setIsInitialLoadComplete(true);
+        }
+      } catch (error) {
+        if (!isInitialLoadComplete) {
+          setIsInitialLoadComplete(true);
+        }
+      } finally {
+        isLoadingRef.current = false;
       }
-    } catch (error) {
-      console.error("Failed to get emails:", error);
-      if (!isInitialLoadComplete) {
-        setIsInitialLoadComplete(true);
-      }
-    } finally {
-      isLoadingRef.current = false;
+    },
+    [options.enabled, options.searchType, processNewEmails, emailSource]
+  );
+
+  // Initial load
+  useEffect(() => {
+    if (!isInitialLoadComplete && options.enabled) {
+      fetchEmails(true);
     }
-  }, [
-    emailSource,
-    options.searchType,
-    options.enabled,
-    processNewEmails,
-    isInitialLoadComplete,
-    preferences.gmailClientId,
-  ]);
+  }, [fetchEmails, options.enabled, isInitialLoadComplete]);
 
   // Reset state when search parameters change
   useEffect(() => {
-    messageCache.current.clear();
-    storage.current = { hasCode: {} };
-    setData([]);
     setIsInitialLoadComplete(false);
-    setIsInitialLoadStarted(false);
   }, [options.searchText, options.searchType]);
-
-  // Start initial load when enabled
-  useEffect(() => {
-    if (!isInitialLoadStarted && options.enabled) {
-      setIsInitialLoadStarted(true);
-      fetchEmails();
-    }
-  }, [fetchEmails, options.enabled, isInitialLoadStarted]);
 
   // Set up polling for updates
   useEffect(() => {
-    if (!options.enabled) {
+    if (!options.enabled || !isInitialLoadComplete) {
       return;
     }
 
-    const interval = setInterval(fetchEmails, 1000);
+    const interval = setInterval(() => fetchEmails(false), 1000);
     return () => clearInterval(interval);
-  }, [fetchEmails, options.enabled]);
+  }, [fetchEmails, options.enabled, isInitialLoadComplete]);
 
   return {
     data,
     isLoading: !isInitialLoadComplete,
     permissionView,
     isInitialLoadComplete,
-    revalidate: fetchEmails,
+    revalidate: () => fetchEmails(false),
   };
 }

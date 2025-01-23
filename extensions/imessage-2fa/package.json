@@ -35,7 +35,7 @@
       "required": false,
       "title": "Enabled Sources",
       "description": "Choose which sources to enable for 2FA codes",
-      "default": "both",
+      "default": "imessage",
       "data": [
         {
           "title": "Both iMessage and Email",
