@@ -21,7 +21,6 @@ export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistAct
             <Action
               key={playlist.id}
               title={playlist.name as string}
-              shortcut={{ modifiers: ["opt"], key: "p" }}
               onAction={async () => {
                 try {
                   await addToPlaylist({
