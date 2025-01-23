@@ -6,7 +6,7 @@ async function fetchImageAsDataUrl(assetId: number): Promise<string | null> {
   // Grab the image (returns { fileBuffer, contentType } or fallback)
   const imageData = await grabImage(assetId);
   if (!imageData) {
-    return null; // Means we couldn’t get anything
+    return null; // Means we couldn't get anything
   }
 
   const { contentType, fileBuffer } = imageData;
@@ -44,7 +44,7 @@ export default function ShowImage(props: LaunchProps<{ arguments: { id: string }
 
   // 1) If not a valid number, show that message
   if (!isValidNumber) {
-    return <Detail markdown="# ⚠️ Invalid Input\nPlease enter a valid numeric Image ID." />;
+    return <Detail markdown={`# ⚠️ Invalid Input\nPlease enter a valid numeric Image ID.`} />;
   }
 
   // 2) If our state is still undefined, that means we’re loading
@@ -54,7 +54,7 @@ export default function ShowImage(props: LaunchProps<{ arguments: { id: string }
 
   // 3) If the URL is null, that means we failed to fetch
   if (imageUrl === null) {
-    return <Detail markdown="# ❌ Failed to Fetch Image\nWe couldn’t retrieve the image. Please try another ID." />;
+    return <Detail markdown={`# ❌ Failed to Fetch Image\nWe couldn't retrieve the image. Please try another ID.`} />;
   }
 
   // 4) Otherwise, we have a valid data URL
