@@ -4,12 +4,6 @@ import { open } from "@raycast/api";
 export const PLATFORMS = ["x", "v2ex", "hackernews", "reddit", "medium", "zhihu", "bilibili", "youtube"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
-// 默认打开平台
-export const DEFAULT_PLATFORMS = ["x", "v2ex"] as const as readonly Platform[];
-
-// 可选平台 - 从所有平台中排除默认平台
-export const OPTIONAL_PLATFORMS = PLATFORMS.filter((p) => !DEFAULT_PLATFORMS.includes(p)) as Platform[];
-
 /**
  * 获取搜索URL
  * @param platform 平台名称
@@ -30,7 +24,7 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
     case "medium":
       return `https://medium.com/search?q=${encodedKeyword}`;
     case "hackernews":
-      return `https://google.com/search?q=${encodedKeyword}+site:news.ycombinator.com&newwindow=1&tbs=qdr:m`;
+      return `https://hn.algolia.com/?q=${encodedKeyword}&dateRange=pastMonth&type=story`
     case "youtube":
       return `https://www.youtube.com/results?search_query=${encodedKeyword}`;
     case "bilibili":

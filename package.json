@@ -11,6 +11,104 @@
     "Media"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultPlatform1",
+      "title": "First Default Platform",
+      "description": "First default platform to search",
+      "type": "dropdown",
+      "required": true,
+      "default": "x",
+      "data": [
+        {
+          "title": "X",
+          "value": "x"
+        },
+        {
+          "title": "Reddit",
+          "value": "reddit"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Hacker News",
+          "value": "hackernews"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
+        },
+        {
+          "title": "V2EX",
+          "value": "v2ex"
+        },
+        {
+          "title": "知乎",
+          "value": "zhihu"
+        },
+        {
+          "title": "哔哩哔哩",
+          "value": "bilibili"
+        }
+      ]
+    },
+    {
+      "name": "defaultPlatform2",
+      "title": "Second Default Platform",
+      "description": "Second default platform to search",
+      "type": "dropdown",
+      "required": true,
+      "default": "reddit",
+      "data": [
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "X",
+          "value": "x"
+        },
+        {
+          "title": "Reddit",
+          "value": "reddit"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Hacker News",
+          "value": "hackernews"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
+        },
+        {
+          "title": "V2EX",
+          "value": "v2ex"
+        },
+        {
+          "title": "知乎",
+          "value": "zhihu"
+        },
+        {
+          "title": "哔哩哔哩",
+          "value": "bilibili"
+        }
+      ]
+    },
+    {
+      "name": "randomPlatform",
+      "description": "Random select a platform to search",
+      "type": "checkbox",
+      "required": true,
+      "label": "Random Select a Platform",
+      "default": false
+    }
+  ],
   "commands": [
     {
       "name": "search-random-keyword",
