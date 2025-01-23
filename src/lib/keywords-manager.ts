@@ -2,7 +2,6 @@ import { environment } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
 import { readFile, writeFile } from "fs/promises";
-import { existsSync } from "fs";
 
 export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "prompt", "AI"];
 export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, 'keywords.txt');
@@ -13,7 +12,7 @@ export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, 'keywords.t
  */
 function ensureDirectoryExists(filePath: string): void {
   const dirname = path.dirname(filePath);
-  if (!existsSync(dirname)) {
+  if (!fs.existsSync(dirname)) {
     fs.mkdirSync(dirname, { recursive: true });
   }
 }
@@ -25,7 +24,7 @@ function ensureDirectoryExists(filePath: string): void {
  */
 export async function readKeywords(filePath: string): Promise<string[]> {
   try {
-    if (!existsSync(filePath)) {
+    if (!fs.existsSync(filePath)) {
       return [];
     }
     const content = await readFile(filePath, 'utf-8');
@@ -49,38 +48,4 @@ export async function writeKeywords(keywords: string[], filePath: string = KEYWO
     console.error('Error writing keywords file:', error);
     throw error;
   }
-}
-
-/**
- * 添加关键词
- * @param keyword 要添加的关键词
- * @param filePath 文件路径
- */
-export async function addKeyword(keyword: string, filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
-  const keywords = await readKeywords(filePath);
-  if (!keywords.includes(keyword.trim())) {
-    keywords.push(keyword.trim());
-    await writeKeywords(keywords, filePath);
-  }
-}
-
-/**
- * 删除关键词
- * @param keyword 要删除的关键词
- * @param filePath 文件路径
- */
-export async function removeKeyword(keyword: string, filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
-  const keywords = await readKeywords(filePath);
-  const updatedKeywords = keywords.filter(k => k.trim() !== keyword.trim());
-  await writeKeywords(updatedKeywords, filePath);
-}
-
-/**
- * 检查关键词是否已存在
- * @param keyword 要检查的关键词
- * @returns 如果关键词存在则返回 true
- */
-export async function isKeywordExists(keyword: string): Promise<boolean> {
-  const keywords = await readKeywords(KEYWORDS_FILE_PATH);
-  return keywords.includes(keyword.trim());
 }

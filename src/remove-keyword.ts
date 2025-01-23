@@ -1,5 +1,5 @@
 import { LaunchProps, showHUD } from "@raycast/api";
-import { removeKeyword, isKeywordExists } from "./lib/keywords-manager";
+import { writeKeywords, readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
 // 参数类型定义
 type RemoveKeywordArguments = {
@@ -10,14 +10,18 @@ export default async function Command(props: LaunchProps<{ arguments: RemoveKeyw
   try {
     const { keyword } = props.arguments;
 
+    // 只读取一次文件
+    const keywords = await readKeywords(KEYWORDS_FILE_PATH);
+
     // 检查关键词是否存在
-    if (!(await isKeywordExists(keyword))) {
+    if (!keywords.includes(keyword.trim())) {
       await showHUD(`⚠ 关键词 '${keyword}' 不存在`);
       return;
     }
 
-    // 删除关键词
-    await removeKeyword(keyword);
+    // 删除关键词并写入
+    const updatedKeywords = keywords.filter(k => k.trim() !== keyword.trim());
+    await writeKeywords(updatedKeywords);
     await showHUD(`✅ 已删除关键词: '${keyword}'`);
   } catch (error) {
     console.error('Error in remove-keyword:', error);
