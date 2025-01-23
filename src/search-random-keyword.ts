@@ -21,7 +21,8 @@ export default async function Command() {
     // 随机选择一个其他平台搜索
     const randomPlatform = getRandomElement(OPTIONAL_PLATFORMS);
     await searchOnPlatform(randomPlatform, randomKeyword, dateString);
+    await showHUD(`✅ Search random keyword: '${randomKeyword}'`, { clearRootSearch: true });
   } catch (error) {
-    await showHUD("❌ Cannot open random search!");
+    await showHUD("❌ Open random search failed");
   }
 }

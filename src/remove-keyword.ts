@@ -15,16 +15,16 @@ export default async function Command(props: LaunchProps<{ arguments: RemoveKeyw
 
     // 检查关键词是否存在
     if (!keywords.includes(keyword.trim())) {
-      await showHUD(`⚠ 关键词 '${keyword}' 不存在`);
+      await showHUD(`❎ Keyword '${keyword}' does not exist`);
       return;
     }
 
     // 删除关键词并写入
     const updatedKeywords = keywords.filter((k) => k.trim() !== keyword.trim());
     await writeKeywords(updatedKeywords);
-    await showHUD(`✅ 已删除关键词: '${keyword}'`);
+    await showHUD(`✅ Removed keyword: '${keyword}'`, { clearRootSearch: true });
   } catch (error) {
     console.error("Error in remove-keyword:", error);
-    await showHUD("❌ 删除关键词时发生错误");
+    await showHUD("❌ Remove keyword failed");
   }
 }

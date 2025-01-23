@@ -15,16 +15,16 @@ export default async function Command(props: LaunchProps<{ arguments: AddKeyword
 
     // 检查关键词是否已存在
     if (keywords.includes(keyword.trim())) {
-      await showHUD(`⚠ 关键词 '${keyword}' 已存在`);
+      await showHUD(`❎ Keyword '${keyword}' already exists`);
       return;
     }
 
     // 添加关键词并写入
     keywords.push(keyword.trim());
     await writeKeywords(keywords);
-    await showHUD(`✅ 已添加关键词: '${keyword}'`);
+    await showHUD(`✅ Added keyword: '${keyword}'`, { clearRootSearch: true });
   } catch (error) {
     console.error("Error in add-keyword:", error);
-    await showHUD("❌ 添加关键词时发生错误");
+    await showHUD("❌ Add keyword failed");
   }
 }
