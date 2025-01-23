@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Improvement] - 2025-01-23
+
+- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command.
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
