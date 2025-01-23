@@ -25,6 +25,7 @@ export type AnthropicPreferences = {
 export default function SummarizeVideoWithAnthropic(
   props: LaunchProps<{
     arguments: SummarizeVideoWithAnthropicProps;
+    launchContext?: { video: string };
   }>,
 ) {
   const [summary, setSummary] = useState<string | undefined>();
@@ -33,7 +34,9 @@ export default function SummarizeVideoWithAnthropic(
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
 
-  useGetVideoUrl({ input: props.arguments.video, setVideoURL }).then((url) => setVideoURL(url));
+  useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
+    setVideoURL(url),
+  );
 
   useEffect(() => {
     if (!videoURL) return;
