@@ -1,6 +1,6 @@
 # LeetCode Changelog
 
-## [Code Template Features] - {PR_MERGE_DATE}
+## [Code Template Features] - 2025-01-23
 
 - Add Copy Code Template submenu action to copy problem's code template to clipboard
 - Add preference setting for default programming language
