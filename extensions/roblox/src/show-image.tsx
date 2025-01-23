@@ -60,7 +60,7 @@ export default function ShowImage(props: LaunchProps<{ arguments: { id: string }
   // 4) Otherwise, we have a valid data URL
   return (
     <Detail
-      markdown={`![](${imageUrl}?raycast-height=280)`}
+      markdown={`# Image ID: ${imageId}\n![](${imageUrl}?raycast-height=280)`}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`https://api.toilettowerdefense.com/image/${imageId}`} />
