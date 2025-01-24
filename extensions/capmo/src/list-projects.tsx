@@ -17,13 +17,17 @@ interface Project {
 }
 
 export default function ListProjects() {
-  const { data: projects, isLoading, error } = useCachedPromise(async () => {
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useCachedPromise(async () => {
     const token = getCapmoToken();
     const response = await axios.get<{ data: { items: Project[] } }>(
       "https://api.capmo.de/api/v1/projects",
       {
         headers: { Authorization: token },
-      }
+      },
     );
 
     // Validate and filter projects
