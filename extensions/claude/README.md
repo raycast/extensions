@@ -13,7 +13,6 @@ Interact with Anthropic's Claude right from your command bar
 </a>
 </p>
 
-
 ![All Commands](metadata/all_commands.png)
 
 # Features
@@ -58,7 +57,6 @@ Got the answer that you wanted? Great.
 - `claude-3-sonnet-20240229`
 - `claude-3-opus-20240229`
 
-
 ## Claude 2
 
 - `claude-2.0`
@@ -76,10 +74,12 @@ This package requires a valid API key from [Anthropic](https://docs.anthropic.co
 
 All preferences properties list that can be customize through `Raycast Settings > Extensions > Claude`
 
-| Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
-| ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal Anthropic API key |
-| `useStream`              | Stream Responses        | `boolean`                           | `true`   | `true`  | Stream responses from Claude in real-time |                                                                         
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your front most application to the `question bar` or `full text input form` automatically |
-| `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
+| Properties        | Label               | Value     | Required | Default | Description                                                                                                       |
+| ----------------- | ------------------- | --------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `apiKey`          | API Key             | `string`  | `true`   | `empty` | Your personal Anthropic API key                                                                                   |
+| `useStream`       | Stream Responses    | `boolean` | `true`   | `true`  | Stream responses from Claude in real-time                                                                         |
+| `isHistoryPaused` | Pause History       | `boolean` | `false`  | `false` | Pause the history of the conversation                                                                             |
+| `isAutoLoadText`  | Auto-load           | `boolean` | `false`  | `false` | Load selected text from your front most application to the `question bar` or `full text input form` automatically |
+| `isAutoFullInput` | Use Full Text Input | `boolean` | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question    |
+
 ---
