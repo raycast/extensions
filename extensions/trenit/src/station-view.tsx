@@ -53,7 +53,7 @@ export function StationView(props: { station: Station }) {
       displayToast({
         title: "Trains Loaded",
         style: Toast.Style.Success,
-        primaryAction: { title: "Try Again", onAction: revalidate },
+        primaryAction: { title: "Reload", onAction: revalidate },
       });
       return { data: mapTrains(result) };
     },
@@ -147,7 +147,7 @@ export function StationView(props: { station: Station }) {
                 />
                 <Action
                   autoFocus={false}
-                  title="Refresh"
+                  title="Reload"
                   onAction={revalidate}
                   icon={Icon.RotateClockwise}
                   shortcut={{ modifiers: ["opt"], key: "l" }}
