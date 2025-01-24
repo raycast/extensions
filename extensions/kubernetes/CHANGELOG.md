@@ -1,5 +1,10 @@
 # Kubernetes Changelog
 
+## [Custom Namespaces] - {PR_MERGE_DATE}
+
+- Allow users to specify available namespaces for each Kubernetes context.
+- Fixed a bug that namespace selection is not preserved when switching between commands.
+
 ## [Support more Kubernetes resources] - 2025-01-19
 
 Added the following commands:
