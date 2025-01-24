@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exa-search",
+  "title": "Exa AI Search",
+  "description": "Search the web using Exa's AI-powered search. Get relevant results instantly via the Exa AI API.",
+  "icon": "extension-icon.png",
+  "author": "joshuaoliphant",
+  "categories": [
+    "Web",
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "exa-search",
+      "title": "Search Exa",
+      "description": "Search the web using Exa's AI-powered semantic search",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exaApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Exa API Key",
+      "description": "Your Exa API key (obtain from https://exa.ai)",
+      "link": "https://exa.ai/dashboard"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.10.10",
+    "@types/node-fetch": "^2.6.10",
+    "@types/react": "^18.2.55",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.10.0",
+    "glob": "^10.3.10",
+    "prettier": "^3.4.2",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
