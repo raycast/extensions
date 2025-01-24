@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "0.1.0",
+  "private": true,
+  "name": "lingo-rep-raycast-extension",
+  "title": "Lingorep - Translate, Repeat, Memorize",
+  "description": "Translate, save and repeat translations to increase your vocabulary",
+  "icon": "command-icon.png",
+  "author": "oleksandr_oliynyk",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lingorep Translate",
+      "subtitle": "Translate, Save and Repeat Translations",
+      "description": "Translate, save and repeat text later to remember it with the best spaced repetition system",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "copy:shared-packages": "./copy-shared-packages.sh",
+    "watch:translate": "chokidar '../../packages/translate/dist/**/*' -c 'npm run copy:shared-packages'",
+    "watch:lang-options": "chokidar '../../packages/lang-options/dist/**/*' -c 'npm run copy:shared-packages'",
+    "watch:shared-packages": "npm-run-all --parallel watch:translate watch:lang-options",
+    "npm:install": "npm install --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast-extension",
+    "build": "npm run npm:install && ray build -e dist",
+    "dev:raycast": "ray develop",
+    "dev": "npm run npm:install && npm run copy:shared-packages && npm-run-all --parallel watch:shared-packages dev:raycast",
+    "dev-raycast": "",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.4.8",
+    "axios": "1.7.2",
+    "hono": "^4.4.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "chokidar-cli": "^3.0.0",
+    "eslint": "^8.51.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  }
+}
