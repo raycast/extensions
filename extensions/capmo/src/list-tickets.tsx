@@ -42,23 +42,27 @@ export default function ListTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   useEffect(() => {
     filterTickets();
   }, [searchText, selectedProject, allTickets]);
-  
-  const { data: fetchedProjects, isLoading: isLoadingProjects, error: projectsError } = useCachedPromise(
+
+  const {
+    data: fetchedProjects,
+    isLoading: isLoadingProjects,
+    error: projectsError,
+  } = useCachedPromise(
     async () => {
       const token = getCapmoToken();
       const response = await axios.get<{ data: { items: Project[] } }>(
         "https://api.capmo.de/api/v1/projects",
-        { headers: { Authorization: token } }
+        { headers: { Authorization: token } },
       );
       return response.data.data.items; // Correct access to items
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {
@@ -67,7 +71,7 @@ export default function ListTickets() {
       const excludedProjectIds = preferences.excludedProjects
         ? preferences.excludedProjects.split(",").map((id) => id.trim())
         : [];
-  
+
       const sanitizedProjects = fetchedProjects.filter((project: Project) => {
         return (
           typeof project.id === "string" &&
@@ -76,10 +80,10 @@ export default function ListTickets() {
           !excludedProjectIds.includes(project.id)
         );
       });
-  
+
       setProjects(sanitizedProjects);
     }
-  
+
     if (projectsError) {
       showToast({
         style: Toast.Style.Failure,
@@ -89,46 +93,48 @@ export default function ListTickets() {
     }
   }, [fetchedProjects, projectsError]);
 
-  const { data: fetchedTickets, isLoading: isLoadingTickets } = useCachedPromise(
-    async (projects: Project[]) => {
-      const token = getCapmoToken();
-      const ticketFetchPromises = projects.map(async (project) => {
-        const ticketTypes = await fetchTicketTypes(project.id);
-        const ticketCategories = await fetchTicketCategories(project.id);
-        const companies = await fetchCompanies(project.id);
-  
-        const response = await axios.get<{ data: { items: Ticket[] } }>(
-          `https://api.capmo.de/api/v1/projects/${project.id}/tickets`,
-          { headers: { Authorization: token } }
-        );
-        
-        return response.data.data.items.map((ticket: Ticket) => ({
-          ...ticket,
-          // Remaining ticket mapping logic
-          project_id: project.id,
-          project_key: project.project_key,
-          type_id: ticketTypes[ticket.type_id] || ticket.type_id,
-          category_id: ticketCategories[ticket.category_id] || ticket.category_id,
-          company_id: companies[ticket.company_id] || ticket.company_id,
-          created_at: formatDate(ticket.created_at),
-          updated_at: formatDate(ticket.updated_at),
-          deadline: formatDate(ticket.deadline),
-          status: mapStatus(ticket.status),
-        }));
-      });
-  
-      const results = await Promise.all(ticketFetchPromises);
-      return results.flat();
-    },
-    [projects]
-  );  
-  
+  const { data: fetchedTickets, isLoading: isLoadingTickets } =
+    useCachedPromise(
+      async (projects: Project[]) => {
+        const token = getCapmoToken();
+        const ticketFetchPromises = projects.map(async (project) => {
+          const ticketTypes = await fetchTicketTypes(project.id);
+          const ticketCategories = await fetchTicketCategories(project.id);
+          const companies = await fetchCompanies(project.id);
+
+          const response = await axios.get<{ data: { items: Ticket[] } }>(
+            `https://api.capmo.de/api/v1/projects/${project.id}/tickets`,
+            { headers: { Authorization: token } },
+          );
+
+          return response.data.data.items.map((ticket: Ticket) => ({
+            ...ticket,
+            // Remaining ticket mapping logic
+            project_id: project.id,
+            project_key: project.project_key,
+            type_id: ticketTypes[ticket.type_id] || ticket.type_id,
+            category_id:
+              ticketCategories[ticket.category_id] || ticket.category_id,
+            company_id: companies[ticket.company_id] || ticket.company_id,
+            created_at: formatDate(ticket.created_at),
+            updated_at: formatDate(ticket.updated_at),
+            deadline: formatDate(ticket.deadline),
+            status: mapStatus(ticket.status),
+          }));
+        });
+
+        const results = await Promise.all(ticketFetchPromises);
+        return results.flat();
+      },
+      [projects],
+    );
+
   useEffect(() => {
     if (fetchedTickets) {
       setAllTickets(fetchedTickets);
       setTickets(fetchedTickets);
     }
-  }, [fetchedTickets]);  
+  }, [fetchedTickets]);
 
   const fetchTicketTypes = async (
     projectId: string,
@@ -317,22 +323,25 @@ export default function ListTickets() {
 
   return (
     <List
-    isLoading={isLoading || isLoadingProjects || isLoadingTickets}
+      isLoading={isLoading || isLoadingProjects || isLoadingTickets}
       searchBarPlaceholder="Search tickets..."
       isShowingDetail
       onSearchTextChange={(text) => setSearchText(text)}
       searchBarAccessory={
-<List.Dropdown
-  tooltip="Filter by Project"
-  storeValue
-  onChange={(value) => setSelectedProject(value || "all")}
->
-  <List.Dropdown.Item title="Alle Projekte" value="all" />
-  {projects?.map((project) => (
-    <List.Dropdown.Item key={project.id} title={project.name} value={project.id} />
-  ))}
-</List.Dropdown>
-
+        <List.Dropdown
+          tooltip="Filter by Project"
+          storeValue
+          onChange={(value) => setSelectedProject(value || "all")}
+        >
+          <List.Dropdown.Item title="Alle Projekte" value="all" />
+          {projects?.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              title={project.name}
+              value={project.id}
+            />
+          ))}
+        </List.Dropdown>
       }
     >
       {tickets.map((ticket) => (
@@ -436,5 +445,3 @@ export default function ListTickets() {
     </List>
   );
 }
-
-
