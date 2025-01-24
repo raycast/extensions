@@ -88,6 +88,7 @@ export async function queryDatabase(
   databaseId: string,
   query: string | undefined,
   sort: "last_edited_time" | "created_time" = "last_edited_time",
+  nextCursor?: string,
 ) {
   try {
     const notion = getNotionClient();
@@ -112,11 +113,11 @@ export async function queryDatabase(
             ],
           }
         : undefined,
+      start_cursor: nextCursor,
     });
-
-    return database.results.map(pageMapper);
+    return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
   } catch (err) {
-    return handleError(err, "Failed to query database", []);
+    return handleError(err, "Failed to query database", { pages: [], hasMore: false, nextCursor: undefined });
   }
 }
 

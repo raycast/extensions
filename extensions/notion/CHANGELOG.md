@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Add searching databases to search command] - 2025-10-21
+- Add the ability to search databases in the search command.
+- Defaults to all databases, but can be any database raycast has access to
+- made queryDatabase function more generic to support searching databases
+
 ## [Refactor - No functional changes] - 2024-10-21
 
 - Move code around and derives more types from `@notionhq/client` (2024-07-03)

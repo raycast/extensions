@@ -32,7 +32,7 @@ export function useRelations(properties: DatabaseProperty[]) {
           if (!isType(property, "relation")) return null;
           const relationId = property.config.database_id;
           if (!relationId) return null;
-          const pages = await queryDatabase(relationId, undefined);
+          const { pages } = await queryDatabase(relationId, undefined);
           relationPages[relationId] = pages;
           return pages;
         }),
