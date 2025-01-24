@@ -75,7 +75,7 @@ export default function ImportExport({ data, onComplete, mode }: ImportExportPro
           await showToast({
             style: Toast.Style.Success,
             title: "History Imported",
-            message: `Added ${newItemsCount} new fasting records`,
+            message: newItemsCount > 0 ? `Added ${newItemsCount} new fasting records` : "No fasting history was added",
           });
         }
 
