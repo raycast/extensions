@@ -1,0 +1,67 @@
+PROJECT: MuteDeck Raycast Extension Publication
+STATUS: In Progress
+DEADLINE: TBD
+
+[X] Core Functionality
+  [X] Toggle Microphone command
+  [X] Toggle Video command
+  [X] Leave Meeting command
+  [X] Show Status command
+  [X] API integration
+  [X] Error handling
+  [X] User preferences
+
+[~] Documentation
+  [X] README.md with features and setup
+  [X] CHANGELOG.md with version history
+  [X] Development guidelines (docs/development.md)
+  [X] Architecture documentation (docs/architecture.md)
+  [X] Keyboard shortcuts guide (docs/keyboard-shortcuts.md)
+  [ ] Update GitHub repository links in README and docs
+  [X] Add troubleshooting.md guide referenced in store description
+
+[X] Testing & Quality (as per development.md)
+  [X] Manual testing of all commands
+  [X] Integration testing with MuteDeck app
+  [X] API interaction verification
+  [X] State management testing
+  [X] Error handling verification
+  [X] UI/UX consistency check
+  [X] Performance profiling
+
+[~] Store Assets
+  [X] Store description (assets/store/description.md)
+  [X] Store screenshots (in progress, assets/store/screenshots/)
+  [X] Verify all screenshot descriptions match actual images
+  [X] Final review of store assets
+  [ ] Create demo video (optional, as noted in description)
+
+[X] Security & Compliance
+  [X] Local-only API communication documented
+  [X] Privacy considerations in store description
+  [X] Complete security review of API endpoints
+  [X] Add explicit data handling documentation
+  [X] Verify license file matches MIT license
+
+[X] Release Preparation
+  [X] Package.json configuration
+  [X] Dependencies up to date
+  [X] Project structure documented
+  [X] Version number finalized in package.json
+  [X] Release date set in CHANGELOG
+  [X] Git tags prepared
+  [X] Release notes prepared
+
+[IN PROGRESS] Store Submission
+  [X] Final store listing preview
+  [X] Internal review checklist
+  [IN PROGRESS] Submit for Raycast review
+  [ ] Address reviewer feedback
+  [ ] Prepare launch announcement
+
+NOTES:
+- GitHub repository needs to be made public before updating links
+- Screenshots are in progress but need final review
+- Development guidelines are comprehensive and should be followed for testing
+- Store description is complete but needs link updates
+- Consider adding more error scenarios to troubleshooting guide 
