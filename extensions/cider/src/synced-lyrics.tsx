@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, popToRoot } from "@raycast/api";
 import { io } from "socket.io-client";
 import { useEffect, useMemo, useState } from "react";
 import { CurrentPlayer } from "./now-playing";
-import { fetch } from "cross-fetch";
+import { callCider, seekTo } from "./functions";
 
 interface SocketResponseBase {
   type: string;
@@ -32,11 +32,9 @@ interface PlaybackStatusDidChangeResponse extends SocketResponseBase {
   };
 }
 
-type SocketResponse =
-  | PlaybackTimeDidChangeResponse
-  | PlaybackStatusDidChangeResponse;
+type SocketResponse = PlaybackTimeDidChangeResponse | PlaybackStatusDidChangeResponse;
 
-interface Lyric {
+export interface Lyric {
   start: number;
   text: string;
   empty: boolean;
@@ -51,26 +49,12 @@ export default function Command() {
   const socket = useMemo(() => io("http://localhost:10767"), []);
 
   async function getCurrentId(): Promise<string | number | null> {
-    const res = await fetch(
-      "http://localhost:10767/api/v1/playback/now-playing",
-    );
-    const data: CurrentPlayer = await res.json();
+    const data = (await callCider("/playback/now-playing")) as CurrentPlayer;
     return data.info.playParams?.catalogId || data.info.playParams?.id || null;
   }
 
   async function getLyrics(songId: string | number) {
-    const res = await fetch("http://localhost:10767/api/v1/lyrics/" + songId);
-    return await res.json();
-  }
-
-  async function seekTo(position: number) {
-    await fetch("http://localhost:10767/api/v1/playback/seek", {
-      method: "POST",
-      body: JSON.stringify({ position }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return (await callCider("/lyrics/" + songId)) as Lyric[];
   }
 
   useEffect(() => {
@@ -81,16 +65,18 @@ export default function Command() {
 
     const handlePlayback = async (data: SocketResponse) => {
       setIsLoading(false);
-      if (data.type === "playbackStatus.playbackTimeDidChange")
-        setTime(data.data.currentPlaybackTime + 0.25);
+      if (data.type === "playbackStatus.playbackTimeDidChange") setTime(data.data.currentPlaybackTime + 0.25);
       if (data.type === "playbackStatus.playbackStateDidChange") {
-        const playParams =
-          data.data.playParams || data.data.attributes?.playParams;
+        const playParams = data.data.playParams || data.data.attributes?.playParams;
         const id = playParams?.catalogId || playParams?.id;
         if (!id) return setLyrics(null);
         setLyrics(await getLyrics(id));
       }
     };
+
+    socket.on("connect_error", async () => {
+      await popToRoot();
+    });
 
     socket.on("API:Playback", handlePlayback);
 
@@ -110,9 +96,7 @@ export default function Command() {
     <List isLoading={isLoading} selectedItemId={selectedIndex.toString()}>
       <List.EmptyView
         title={"No Lyrics Found"}
-        description={
-          "This song doesn't have any lyrics or Cider's API isn't currently available."
-        }
+        description={"This song doesn't have any lyrics or Cider's API isn't currently available."}
         icon={Icon.EmojiSad}
       />
       {lyrics?.map((lyric, index) => (
@@ -123,15 +107,8 @@ export default function Command() {
           icon={index <= selectedIndex ? Icon.CircleFilled : Icon.Circle}
           actions={
             <ActionPanel>
-              <Action
-                title={"Jump to Lyric"}
-                onAction={() => seekTo(lyric.start - 0.25)}
-                icon={Icon.ArrowUpCircle}
-              />
-              <Action.CopyToClipboard
-                title={"Copy Lyric"}
-                content={lyric.text}
-              />
+              <Action title={"Jump to Lyric"} onAction={() => seekTo(lyric.start - 0.25)} icon={Icon.ArrowUpCircle} />
+              <Action.CopyToClipboard title={"Copy Lyric"} content={lyric.text} />
             </ActionPanel>
           }
         />

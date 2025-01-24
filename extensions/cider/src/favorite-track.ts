@@ -8,12 +8,13 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await callCider("/playback/previous", "POST");
-    if (exitOnSuccess) await showHUD("⏮️ Returned to the Previous Track");
+    await callCider("/playback/add-to-library", "POST");
+    await callCider("/playback/set-rating", "POST", { rating: 1 });
+    if (exitOnSuccess) await showHUD("⭐️ Added to Favorites");
     else
       await showToast({
         style: Toast.Style.Success,
-        title: "Returned to the Previous Track",
+        title: "Added to Favorites",
       });
   } catch {
     await showToast({

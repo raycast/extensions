@@ -1,6 +1,7 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
-import { fetch } from "cross-fetch";
+import { Icon, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { callCider } from "./functions";
+import { Lyric } from "./synced-lyrics";
 
 declare global {
   interface Number {
@@ -64,23 +65,9 @@ export default function Command() {
   const [isShowingDetail, setISD] = useState<boolean>(false);
   const [id, setId] = useState<string | null>(null);
 
-  const toastShownRef = useRef<boolean>(false);
-
   async function fetchCurrentPlayer() {
     try {
-      const res = (
-        (await fetch("http://localhost:10767/api/v1/playback/now-playing").then(
-          (res) => res.json(),
-        )) as CurrentPlayer
-      ).info;
-      if (toastShownRef.current) {
-        await showToast({
-          title: "Connected to Cider",
-          message: "Successfully connected to Cider.",
-          style: Toast.Style.Success,
-        });
-        toastShownRef.current = false;
-      }
+      const res = ((await callCider("/playback/now-playing", "GET", undefined, true)) as CurrentPlayer).info;
       if (!res.playParams) {
         setIsPlaying(false);
         setIsLoading(false);
@@ -95,26 +82,14 @@ export default function Command() {
       setSongDuration(res.durationInMillis || 0);
       setSongPosition(res.currentPlaybackTime || 0);
       setAlbumArt(
-        res.artwork.url.replace(
-          "{w}x{h}",
-          `${res.artwork.width}x${res.artwork.height}`,
-        ) || "Unknown Artwork",
+        res.artwork.url.replace("{w}x{h}", `${res.artwork.width}x${res.artwork.height}`) || "Unknown Artwork",
       );
-      setReleaseDate(
-        new Date(res.releaseDate).toLocaleDateString("en-GB") || "Unknown Date",
-      );
+      setReleaseDate(new Date(res.releaseDate).toLocaleDateString("en-US") || "Unknown Date");
       setIsPlaying(true);
       setId(res.playParams.catalogId || res.playParams.id || null);
     } catch (e) {
       setIsPlaying(false);
       setIsLoading(false);
-      if (toastShownRef.current) return;
-      await showToast({
-        title: "Couldn't Connect to Cider",
-        message: "Attempting again.",
-        style: Toast.Style.Animated,
-      });
-      toastShownRef.current = true;
     }
   }
 
@@ -138,12 +113,8 @@ export default function Command() {
 
     const fetchLyrics = async () => {
       try {
-        const res = await fetch("http://localhost:10767/api/v1/lyrics/" + id);
-        const data = await res.json();
-        setLyrics(
-          data.map((line: { text: string }) => line.text).join("\n\n") ||
-            "No Lyrics Found",
-        );
+        const data = (await callCider("/lyrics/" + id)) as Lyric[];
+        setLyrics(data.map((line: { text: string }) => line.text).join("\n\n") || "No Lyrics Found");
       } catch {
         setLyrics("No Lyrics Found");
       }
@@ -153,11 +124,7 @@ export default function Command() {
   }, [id]);
 
   return (
-    <List
-      isShowingDetail={isShowingDetail}
-      isLoading={isLoading}
-      onSelectionChange={(id) => changeISD(id)}
-    >
+    <List isShowingDetail={isShowingDetail} isLoading={isLoading} onSelectionChange={(id) => changeISD(id)}>
       {isPlaying ? (
         <>
           <List.Item title={songName} subtitle={`🎵 Title`} />
@@ -179,19 +146,13 @@ export default function Command() {
             />
           )}
           <List.Item
-            title={`${parseFromSeconds(songPosition)} / ${parseFromMillis(
-              songDuration,
-            )}`}
+            title={`${parseFromSeconds(songPosition)} / ${parseFromMillis(songDuration)}`}
             subtitle={`⏱️ Duration`}
           />
           <List.Item title={releaseDate} subtitle={`📅 Release Date`} />
         </>
       ) : (
-        <List.EmptyView
-          title={"Not Playing"}
-          description={"Try Playing Something First"}
-          icon={Icon.Music}
-        />
+        <List.EmptyView title={"Not Playing"} description={"Try Playing Something First"} icon={Icon.Music} />
       )}
     </List>
   );
