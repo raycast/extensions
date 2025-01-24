@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "preserve",
-    "resolveJsonModule": true
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   }
 }
