@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils";
+import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
 import fs from "fs";
 import { execSync, spawn } from "node:child_process";
-import { execa } from "execa";
+import nanoSpawn from "nano-spawn";
 import path from "path";
 
 export default function DownloadVideo() {
@@ -106,7 +106,7 @@ export default function DownloadVideo() {
           return "URL is required";
         }
         if (!isYouTubeURL(value)) {
-          return "Invalid YouTube URL";
+          return "Invalid URL";
         }
       },
       startTime: (value) => {
@@ -132,9 +132,9 @@ export default function DownloadVideo() {
   const { data: video, isLoading } = usePromise(
     async (url) => {
       if (!url) return;
+      if (!isYouTubeURL(url)) return;
 
-      const result = await execa("/opt/homebrew/bin/yt-dlp", ["-j", url]);
-
+      const result = await nanoSpawn("/opt/homebrew/bin/yt-dlp", ["-j", url]);
       return JSON.parse(result.stdout) as {
         title: string;
         duration: number;
@@ -152,8 +152,8 @@ export default function DownloadVideo() {
     },
     [values.url],
     {
-      onError() {
-        setValidationError("url", "Invalid YouTube URL");
+      onError(error) {
+        setValidationError("url", error.message);
       },
     },
   );
