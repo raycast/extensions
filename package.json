@@ -5,6 +5,20 @@
   "description": "Search a random keyword on X, Reddit, Medium and other platforms.",
   "icon": "extension-icon.png",
   "author": "silvonli",
+  "version": "1.0.0",
+  "keywords": [
+    "search",
+    "social-media",
+    "random",
+    "multi-platform",
+    "x",
+    "twitter",
+    "reddit",
+    "medium",
+    "youtube",
+    "zhihu",
+    "bilibili"
+  ],
   "categories": [
     "Web",
     "Fun",
