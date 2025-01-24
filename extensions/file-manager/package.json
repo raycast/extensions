@@ -8,7 +8,8 @@
   "contributors": [
     "BalliAsghar",
     "urwrstkn8mare",
-    "fengtianze"
+    "fengtianze",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -51,6 +52,14 @@
       "description": "Show dotfiles (files and directories that start with a .)",
       "label": "Show Dotfiles",
       "name": "showDots",
+      "required": true,
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show the hidden file.",
+      "label": "Show Hidden Files",
+      "name": "showHiddenFiles",
       "required": true,
       "type": "checkbox"
     },
