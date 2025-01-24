@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, showToast, Toast, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, showHUD } from "@raycast/api";
+import { closeMainWindow, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect } from "react";
 import { readKeywords, writeKeywords } from "./lib/keywords-manager";
@@ -24,12 +25,13 @@ export default function Command() {
           .filter((k) => k.length > 0);
 
         await writeKeywords(keywordsList);
-        await showHUD("Keywords saved successfully");
+        await showHUD("✅ Save keywords successfully");
+        await popToRoot();
         closeMainWindow();
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Save failed",
+          title: "❌ Save keywords failed",
           message: String(error),
         });
       }
@@ -44,7 +46,7 @@ export default function Command() {
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Read keywords failed",
+          title: "❌ Read keywords failed",
           message: String(error),
         });
       }
