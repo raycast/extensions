@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added ability to search containers by their image-name or id.
+
 ## [Feature] - 2023-12-15
 
 - Added support for http, https, and tcp sockets
