@@ -61,7 +61,9 @@ export async function readKeywords(filePath: string = KEYWORDS_FILE_PATH): Promi
  */
 export async function writeKeywords(keywords: string[], filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   try {
-    const content = keywords.filter((k) => k.trim()).join("\n");
+    // 去重并过滤空字符串
+    const uniqueKeywords = [...new Set(keywords.map(k => k.trim()).filter(k => k))];
+    const content = uniqueKeywords.join("\n");
     await ensureAndWrite(filePath, content);
   } catch (error) {
     console.error("Error writing keywords file:", error);
