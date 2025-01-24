@@ -2,12 +2,12 @@ import { List } from "@raycast/api";
 import { useKubernetesNamespace } from "../states/namespace";
 
 export default function NamespaceDropdown() {
-  const { namespaces, setCurrentNamespace } = useKubernetesNamespace();
+  const { namespaces, currentNamespace, setCurrentNamespace } = useKubernetesNamespace();
 
   return (
     <List.Dropdown
       tooltip="Select Namespace"
-      storeValue={true}
+      value={currentNamespace}
       onChange={(ns) => {
         setCurrentNamespace(ns);
       }}
