@@ -4,6 +4,6 @@
 
 # PocketBase
 
-Manage PocketBase Collections and View Records.
+View [PocketBase](https://pocketbase.io/) Collections and View Records.
 
-This extension requires you to log in as an Admin.
+This extension requires you to log in as an **Admin**.
