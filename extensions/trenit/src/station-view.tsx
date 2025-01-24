@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, Icon, Toast, showToast, Color } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { parseTrains } from "./api/rfi-api";
 import { mapTrains, getUrl } from "./api/trains-service";
@@ -7,9 +7,9 @@ import { Train } from "./models/train";
 import { Station } from "./models/station";
 import { DirectionDropdown } from "./components/direction-dropdown";
 
-function getAccessory(train: Train) {
+function getAccessory(train: Train, icon: string) {
   if (train.isBlinking) {
-    return { tag: `${train.delay}`, icon: { source: Icon.Dot, tintColor: Color.Blue }, tooltip: "Departing now" };
+    return { tag: `${train.delay}`, icon: { source: icon, tintColor: Color.Blue }, tooltip: "Departing now" };
   } else if (train.isDelayed) {
     return { tag: { value: `${train.delay}`, color: Color.Red }, tooltip: `Train delayed by ${train.delay} minutes` };
   } else {
@@ -42,6 +42,20 @@ export function StationView(props: { station: Station }) {
     },
   });
 
+  const [currentIcon, setCurrentIcon] = useState<string>("dot_left.svg");
+
+  useEffect(() => {
+    const icons = ["dot_left.svg", "dot_right.svg"];
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index = (index + 1) % icons.length;
+      setCurrentIcon(icons[index]);
+    }, 450);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <List
       navigationTitle={`${props.station.name} station`}
@@ -70,7 +84,7 @@ export function StationView(props: { station: Station }) {
             title={train.time}
             subtitle={`${train.destination} - ${train.number}`}
             keywords={[train.number, train.destination, train.time]}
-            accessories={[getAccessory(train)]}
+            accessories={[getAccessory(train, currentIcon)]}
             icon={train.icon ? `${train.icon}.svg` : Icon.Train}
             detail={
               <List.Item.Detail
@@ -91,6 +105,9 @@ export function StationView(props: { station: Station }) {
                     <List.Item.Detail.Metadata.Label title="Train" text={`${train.carrier} ${train.number}`} />
                     {train.isReplacedByBus && (
                       <List.Item.Detail.Metadata.Label title="This train is replaced by a bus" />
+                    )}
+                    {train.isIncomplete && (
+                      <List.Item.Detail.Metadata.Label title="⚠️ The details on this canceled train are temporarily not available (the train could be replaced by bus)." />
                     )}
                   </List.Item.Detail.Metadata>
                 }
