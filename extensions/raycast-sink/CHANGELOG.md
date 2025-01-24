@@ -1,5 +1,9 @@
 # Raycast Sink Changelog
 
+## [New Command] - {PR_MERGE_DATE}
+
+- Added a new command quick create short link with AI generated slug
+
 ## [Fix and New Features] - 2024-11-15
 
 - Added statistics to the detail view

@@ -78,3 +78,7 @@ export async function editLink(slug: string, url: string, comment?: string) {
 export async function statsCounter(id: string) {
   return fetchWithAuth(`/api/stats/counters?id=${id}`);
 }
+
+export async function queryAISlug(url: string) {
+  return fetchWithAuth(`/api/link/ai?url=${url}`);
+}
