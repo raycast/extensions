@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useCachedPromise } from "@raycast/utils";
-import { getCapmoToken, getCapmoTokenMitarbeiter, getCapmoTokenTicketeigenschaften } from "./auth";
+import { getCapmoToken } from "./auth";
 
 interface Project {
   id: string;
@@ -91,7 +91,7 @@ export default function ListTickets() {
 
   const { data: fetchedTickets, isLoading: isLoadingTickets } = useCachedPromise(
     async (projects: Project[]) => {
-      const token = getCapmoTokenMitarbeiter();
+      const token = getCapmoToken();
       const ticketFetchPromises = projects.map(async (project) => {
         const ticketTypes = await fetchTicketTypes(project.id);
         const ticketCategories = await fetchTicketCategories(project.id);
@@ -133,7 +133,7 @@ export default function ListTickets() {
   const fetchTicketTypes = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoTokenMitarbeiter();
+    const token = getCapmoToken();
 
     try {
       const response = await axios.get<{
@@ -165,7 +165,7 @@ export default function ListTickets() {
   const fetchTicketCategories = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoTokenMitarbeiter();
+    const token = getCapmoToken();
 
     try {
       const response = await axios.get<{
@@ -198,7 +198,7 @@ export default function ListTickets() {
   const fetchCompanies = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoTokenMitarbeiter();
+    const token = getCapmoToken();
 
     try {
       const response = await axios.get<{
@@ -233,7 +233,7 @@ export default function ListTickets() {
     displayStatus: string,
   ) => {
     try {
-      const token = getCapmoTokenMitarbeiter();
+      const token = getCapmoToken();
       await axios.patch(
         `https://api.capmo.de/api/v1/projects/${ticket.project_id}/tickets/${ticket.id}`,
         { status: newStatus },
