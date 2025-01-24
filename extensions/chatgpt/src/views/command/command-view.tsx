@@ -85,7 +85,7 @@ export default function CommandView(props: CommandLaunchProps) {
     frontmostApp,
     userInput,
     aiAnswer,
-    userInputError,
+    userInputError || chat.errorMsg,
   );
 
   return <Detail markdown={viewBuilder.buildContent()} actions={viewBuilder.buildActionPanel()} />;
@@ -93,7 +93,6 @@ export default function CommandView(props: CommandLaunchProps) {
 
 class CommandViewBuilder {
   iconSizePx: number;
-  charWidthPx: number;
   totalViewWidthPx: number;
 
   command: Command;
@@ -113,9 +112,8 @@ class CommandViewBuilder {
     aiAnswer: string | null,
     error: string | null,
   ) {
-    this.totalViewWidthPx = 700;
+    this.totalViewWidthPx = 710;
     this.iconSizePx = 17;
-    this.charWidthPx = 7;
 
     this.command = command;
     this.chat = chat;
@@ -135,13 +133,31 @@ class CommandViewBuilder {
       inputTemplate = `\`\`\`\n${(this.userInput || "...").trim()}\n\`\`\``;
     }
 
+    let footerMessage = "";
+    let chatWidthPx = 7;
+    let footerMessageColor: "gray" | "yellow" | "red" = "gray";
+    if (this.chat.isAborted) {
+      footerMessage = "Canceled";
+      footerMessageColor = "yellow";
+    } else if (this.error) {
+      chatWidthPx = 6;
+      footerMessage = "An unexpected error occurred; the command execution failed.";
+      footerMessageColor = "red";
+    } else if (this.aiAnswer !== null && !this.chat.isLoading) {
+      chatWidthPx = 6.1;
+      footerMessage = "Continue in Chat ⌘ + 🅹";
+    }
+
     return `${this.generateTitleSvg(this.command.name)}
 
 ${inputTemplate}
 
 ${this.aiAnswer || "..."}
 
-${this.generateStatFooterSvg(this.command.model, this.chat.isAborted ? "Canceled" : null, this.error)}`;
+${this.generateStatFooterSvg(this.command.model, footerMessage, chatWidthPx, footerMessageColor)}
+
+${this.error ? "---" : ""}
+${this.error || ""}`;
   }
 
   generateTitleSvg(title: string): string {
@@ -165,39 +181,30 @@ ${this.generateStatFooterSvg(this.command.model, this.chat.isAborted ? "Canceled
     ).toString("base64")})`;
   }
 
-  generateStatFooterSvg(model: string, warning: string | null, error: string | null) {
-    const textWidth = (warning || error || "").length * this.charWidthPx;
+  generateStatFooterSvg(
+    model: string,
+    message: string,
+    charWidthPx: number = 7,
+    color: "gray" | "yellow" | "red" = "gray",
+  ) {
+    // charWidthPx is a workaround to align the message to the right edge.
+    // I couldn't find a better solution, so for each value that will be sent
+    // to the message, you need to calculate charWidthPx manually.
     const width = this.totalViewWidthPx - this.iconSizePx;
+    const messageWidth = message.length * charWidthPx;
 
     const statImage = `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${this.iconSizePx}" style="background: transparent;">
   <style>
-    .model-text { 
+    .text { 
       font-size: 13px; 
       fill: grey; 
       font-family: Arial, sans-serif; 
     }
-    .warning-text { 
-      font-size: 13px; 
-      fill: yellow; 
-      font-family: Arial, sans-serif; 
-    }
-    .error-text { 
-      font-size: 13px; 
-      fill: red; 
-      font-family: Arial, sans-serif; 
-    }
   </style>
   
-  <text x="5" y="14.5" class="model-text">${model}</text>
-
-  ${
-    error
-      ? `<text x="${width - textWidth}" y="14.5" class="error-text">${error}</text>`
-      : warning
-        ? `<text x="${width - textWidth}" y="14.5" class="warning-text">${warning}</text>`
-        : ""
-  }
+  <text x="5" y="14.5" class="text">${model}</text>
+  <text x="${width - messageWidth}" y="14.5" class="text" style="fill: ${color};">${message}</text>
 </svg>`;
 
     const modelIcon = `&#x200b;![ModelIcon](icon.png?raycast-width=${this.iconSizePx}&raycast-height=${this.iconSizePx})`;

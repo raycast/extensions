@@ -1,5 +1,12 @@
 # Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Fix: Fixed the error display issue: errors are now always fully readable and rendered correctly in their respective places.
+- Fix: Fixed the issue when some errors may not be displayed in the UI.
+- Feature: Added a tip to help users understand how to discuss the results of the AI command in chat.
+- Feature: Refactored error messages. Now, they are more informative and user-friendly.
+
 ## [Feature] - 2025-01-22
 
 - Feature: Introduced a method to dynamically create new commands for processing user text input from various sources, including selected text, clipboard text, and open web pages.
