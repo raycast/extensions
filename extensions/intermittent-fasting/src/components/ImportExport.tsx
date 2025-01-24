@@ -43,7 +43,7 @@ export default function ImportExport({ data, onComplete, mode }: ImportExportPro
             primaryAction: {
               title: "Open Folder",
               onAction: () => {
-                open(fullPath);
+                open(filePath);
               },
             },
           });
