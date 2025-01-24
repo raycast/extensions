@@ -1,4 +1,3 @@
-import { autoDistribute, easyGetColorFromId, formatToYnabAmount, getSubtransacionCategoryname } from '@lib/utils';
 import {
   ActionPanel,
   Action,
@@ -11,17 +10,21 @@ import {
   Alert,
   getPreferenceValues,
 } from '@raycast/api';
+import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
+import { useMemo, useState } from 'react';
+
 import { createTransaction } from '@lib/api';
+import { autoDistribute, easyGetColorFromId, formatToYnabAmount, getSubtransacionCategoryname } from '@lib/utils';
 import { useAccounts } from '@hooks/useAccounts';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
-import { useMemo, useState } from 'react';
-import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
+import { Shortcuts } from '@constants';
+import { usePayees } from '@hooks/usePayees';
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -47,6 +50,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
   const { mutate } = useTransactions(activeBudgetId, timeline);
 
   const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
+  const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
@@ -56,6 +60,7 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
 
   const [isTransfer, setisTransfer] = useState(false);
   const [transferFrom, setTransferTo] = useState('');
+  const [selectOwnPayee, setselectOwnPayee] = useState(false);
 
   const possibleAccounts = useMemo(() => {
     return accounts
@@ -148,8 +153,15 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
     validation: {
       date: FormValidation.Required,
       payee_name: (value) => {
-        if (!value && !isTransfer) {
+        if (selectOwnPayee && !value && !isTransfer) {
           return 'Please add a counterparty';
+        }
+      },
+      payee_id: (value) => {
+        const errorMessage = 'Please select or enter a payee';
+
+        if (!selectOwnPayee && !value) {
+          return errorMessage;
         }
       },
       amount: FormValidation.Required,
@@ -207,6 +219,13 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
           {subtransactions.length > 1 ? (
             <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
           ) : null}
+          <Action
+            title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
+            onAction={() => {
+              setselectOwnPayee((v) => !v);
+            }}
+            shortcut={Shortcuts.TogglePayeeFieldType}
+          />
         </ActionPanel>
       }
       navigationTitle="Create transaction"
@@ -234,8 +253,21 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
             />
           ))}
         </Form.Dropdown>
+      ) : !selectOwnPayee ? (
+        <Form.Dropdown
+          {...itemProps.payee_id}
+          title="Payee"
+          isLoading={isLoadingPayees}
+          info="Press Opt+P to add a payee not in the list"
+        >
+          {payees?.map((payee) => <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />)}
+        </Form.Dropdown>
       ) : (
-        <Form.TextField {...itemProps.payee_name} title="Payee Name" placeholder="Enter the counterparty" />
+        <Form.TextField
+          {...itemProps.payee_name}
+          title="Payee"
+          info="Press Opt+P to select from the list of existing payees"
+        />
       )}
       <Form.Dropdown {...itemProps.account_id} title={isTransfer ? 'To' : 'Account'} defaultValue={accountId}>
         {possibleAccounts}
