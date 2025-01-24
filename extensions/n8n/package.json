@@ -5,6 +5,9 @@
   "description": "Control n8n via Raycast.",
   "icon": "n8n.png",
   "author": "koinzhang",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -12,10 +15,43 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search-workflows-api",
+      "title": "Search Workflows (API)",
+      "subtitle": "n8n",
+      "description": "Search and execute workflows via API.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "instanceUrl",
+          "title": "Instance URL",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "<N8N_HOST>:<N8N_PORT>",
+          "description": "Full n8n URL w/ Port"
+        },
+        {
+          "name": "apiKey",
+          "title": "API Key",
+          "type": "password",
+          "required": true,
+          "placeholder": "ey...xX",
+          "description": "API Key from Settings"
+        },
+        {
+          "name": "rememberFilter",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
       "name": "search-workflows",
       "title": "Search Workflows",
       "subtitle": "n8n",
-      "description": "Search and execute workflows.",
+      "description": "Search and execute workflows via Desktop App.",
       "mode": "view",
       "preferences": [
         {
@@ -44,23 +80,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
     "shell-env": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
