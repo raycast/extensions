@@ -30,6 +30,6 @@ export const readTextWithFallback = async (fallbackText?: string) => {
   return isNotEmpty(fallbackText)
     ? fallbackText?.trim()
     : getSelectedText()
-      .then((text) => (isNotEmpty(text) ? text : Clipboard.readText()))
-      .catch(() => undefined);
+        .then((text) => (isNotEmpty(text) ? text : Clipboard.readText()))
+        .catch(() => undefined);
 };

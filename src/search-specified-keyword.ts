@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD, getPreferenceValues } from "@raycast/api";
-import { searchOnPlatform, Platform, getRandomUnusedPlatform } from './lib/platform-searcher';
-import { isNotEmpty, readTextWithFallback } from './lib/utils';
+import { searchOnPlatform, Platform, getRandomUnusedPlatform } from "./lib/platform-searcher";
+import { isNotEmpty, readTextWithFallback } from "./lib/utils";
 
 interface Preferences {
   defaultPlatform1: Platform;
@@ -51,4 +51,3 @@ export default async function Command(props: LaunchProps<{ arguments: SearchArgu
     await showHUD("❌ Open specified search failed");
   }
 }
-
