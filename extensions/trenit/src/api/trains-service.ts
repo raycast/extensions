@@ -22,8 +22,10 @@ export function mapTrains(apiTrains: api.ApiTrain[]): Train[] {
     const icon = categoryToIcon(category);
     const isReplacedByBus = checkIsReplacedByBus(icon, delay, train.notes);
 
+    const isCancelled = delay == "Cancellato";
+
     // Train is cancelled but sometimes notes are missing for a while, so we don't know if it's replaced by bus or what
-    const isIncomplete = delay == "Cancellato" && train.notes == "";
+    const isIncomplete = isCancelled && train.notes == "";
 
     // Hide platform if it's "punto fermata" (bus) or if the train is replaced by bus (platform doesn't matter anymore)
     const platform = train.platform == "PF" || isReplacedByBus ? "" : train.platform;
@@ -38,6 +40,7 @@ export function mapTrains(apiTrains: api.ApiTrain[]): Train[] {
       platform: platform,
       delay: delay,
       isDelayed: isDelayed,
+      isCancelled: isCancelled,
       isBlinking: train.isBlinking,
       isReplacedByBus,
       isIncomplete: isIncomplete,
@@ -87,4 +90,28 @@ function checkIsReplacedByBus(icon: string | null, delay: string, notes: string)
   }
 
   return isReplacedByBus;
+}
+
+export function getContentForCopyToClipboardAction(train: Train, isArrival: boolean) {
+  if (isArrival) {
+    const content = `Train from ${train.destination} (${train.number}), with scheduled arrival at ${train.time} at platform ${train.platform}`;
+    if (train.isCancelled) {
+      return content + ", is cancelled";
+    } else if (train.isReplacedByBus) {
+      return content + ", is replaced by a bus";
+    } else if (train.isDelayed) {
+      return content + `, is delayed by ${train.delay} minutes`;
+    }
+    return content + ", is on time";
+  } else {
+    const content = `Train to ${train.destination} (${train.number}), with scheduled departure at ${train.time} from platform ${train.platform}`;
+    if (train.isCancelled) {
+      return content + ", is cancelled";
+    } else if (train.isReplacedByBus) {
+      return content + ", is replaced by a bus";
+    } else if (train.isDelayed) {
+      return content + `, is delayed by ${train.delay} minutes`;
+    }
+    return content + ", is on time";
+  }
 }

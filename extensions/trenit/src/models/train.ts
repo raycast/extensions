@@ -8,6 +8,7 @@ export interface Train {
   platform: string;
   delay: string;
   isDelayed: boolean;
+  isCancelled: boolean;
   isBlinking: boolean;
   isReplacedByBus: boolean;
   isIncomplete: boolean;

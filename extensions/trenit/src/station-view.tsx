@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, Toast, showToast, Color } from "@rayca
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { parseTrains } from "./api/rfi-api";
-import { mapTrains, getUrl } from "./api/trains-service";
+import { mapTrains, getUrl, getContentForCopyToClipboardAction } from "./api/trains-service";
 import { Train } from "./models/train";
 import { Station } from "./models/station";
 import { DirectionDropdown } from "./components/direction-dropdown";
@@ -141,7 +141,7 @@ export function StationView(props: { station: Station }) {
               <ActionPanel>
                 <Action.CopyToClipboard
                   title="Copy Train Info"
-                  content={`Train to ${train.destination} (${train.number}), with scheduled departure at ${train.time} from platform ${train.platform}, ${train.isDelayed ? `delayed by ${train.delay} minutes` : "on time"}`}
+                  content={getContentForCopyToClipboardAction(train, direction == "true")}
                   icon={Icon.CopyClipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
