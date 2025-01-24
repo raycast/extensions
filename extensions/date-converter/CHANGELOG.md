@@ -1,6 +1,6 @@
 # Date Converter Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-24
 
 - Support configuring the displayed date format and the format of "Human Date"
 - Support configuring the base time zone
