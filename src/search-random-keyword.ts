@@ -1,17 +1,12 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
 import { getRandomElement } from "./lib/utils";
-import { searchOnPlatform, PLATFORMS, Platform } from "./lib/platform-searcher";
+import { searchOnPlatform, Platform, getRandomUnusedPlatform } from "./lib/platform-searcher";
 import { readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
 interface Preferences {
   defaultPlatform1: Platform;
   defaultPlatform2: Platform | "";
   randomPlatform: boolean;
-}
-
-function getRandomAvailablePlatform(usedPlatforms: Platform[]): Platform {
-  const availablePlatforms = PLATFORMS.filter((p) => !usedPlatforms.includes(p)) as Platform[];
-  return getRandomElement(availablePlatforms);
 }
 
 export default async function Command() {
@@ -35,7 +30,7 @@ export default async function Command() {
     }
 
     if (preferences.randomPlatform) {
-      const randomPlatform = getRandomAvailablePlatform(selectedPlatforms);
+      const randomPlatform = getRandomUnusedPlatform(selectedPlatforms);
       await searchOnPlatform(randomPlatform, randomKeyword, dateString);
     }
 

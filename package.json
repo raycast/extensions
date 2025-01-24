@@ -185,6 +185,21 @@
   ],
   "commands": [
     {
+      "name": "search-specified-keyword",
+      "title": "Search a Specified Keyword",
+      "subtitle": "X, Reddit, Medium and so on.",
+      "description": "Search a specified keyword on X, Reddit, Medium and so on.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword to search",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "search-random-keyword",
       "title": "Search a Random Keyword",
       "subtitle": "X, Reddit, Medium and so on.",
