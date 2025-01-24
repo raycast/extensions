@@ -1,24 +1,19 @@
-import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
-import { scrapeMacUpdater, Update } from "./scrape";
+import { scrapeMacUpdater } from "./scrape";
 import { UpdateListItem } from "./UpdateListItem";
 import { subDays, format } from "date-fns";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 export default function Command() {
-  const [updates, setUpdates] = useState<Update[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const date = format(subDays(new Date(), 1), "yyyy-MM-dd");
-    scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`)
-      .then((updates) => {
-        setUpdates(updates);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const [date] = useState(format(subDays(new Date(), 1), "yyyy-MM-dd"));
+  const { isLoading, data: updates } = useCachedPromise(
+    async () => scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`),
+    [],
+    {
+      initialData: [],
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by title...">
