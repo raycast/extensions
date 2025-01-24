@@ -8,10 +8,14 @@ import { getErrorMessage } from "../helpers/getError";
 import { addToMySavedAlbums } from "../api/addToMySavedAlbums";
 import { removeFromMySavedAlbums } from "../api/removeFromMySavedAlbums";
 import { useContainsMySavedAlbum } from "../hooks/useContainsMySavedAlbum";
+import { RefreshAction } from "./RefreshAction";
 
-type AlbumActionPanelProps = { album: SimplifiedAlbumObject };
+type AlbumActionPanelProps = {
+  album: SimplifiedAlbumObject;
+  onRefresh?: () => void;
+};
 
-export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
+export function AlbumActionPanel({ album, onRefresh }: AlbumActionPanelProps) {
   const { data: isAlbumSaved, mutate } = useContainsMySavedAlbum({ albumId: album.id });
 
   return (
@@ -42,6 +46,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
           }
         }}
       />
+      {onRefresh && <RefreshAction onRefresh={onRefresh} />}
       <FooterAction url={album?.external_urls?.spotify} uri={album.uri} title={album.name} />
     </ActionPanel>
   );

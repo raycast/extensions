@@ -22,6 +22,7 @@ import { PlaylistsSection } from "./components/PlaylistsSection";
 import { debounce } from "./helpers/debounce";
 import { ShowsSection } from "./components/ShowsSection";
 import { EpisodesSection } from "./components/EpisodesSection";
+import { transformTrackToMinimal } from "./helpers/transformers";
 
 const filters = {
   all: "All",
@@ -143,7 +144,10 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
 
   const sections: { key: FilterValue; component: JSX.Element }[] = [
     { key: "artists", component: <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> },
-    { key: "tracks", component: <TracksSection limit={4} tracks={searchData?.tracks?.items} /> },
+    {
+      key: "tracks",
+      component: <TracksSection limit={4} tracks={searchData?.tracks?.items?.map(transformTrackToMinimal)} />,
+    },
     { key: "albums", component: <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> },
     {
       key: "playlists",
@@ -190,7 +194,9 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
               ),
           )}
 
-        {searchFilter === "tracks" && <TracksSection tracks={searchData?.tracks?.items} />}
+        {searchFilter === "tracks" && (
+          <TracksSection tracks={searchData?.tracks?.items?.map(transformTrackToMinimal)} />
+        )}
         {searchFilter === "episodes" && <EpisodesSection episodes={searchData?.episodes?.items} />}
 
         {searchFilter === "playlists" && <PlaylistsSection type="list" playlists={searchData?.playlists?.items} />}
