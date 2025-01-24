@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Form, showToast, Toast, open } from "@raycast/api";
-import { useCallback } from "react";
 import { EnhancedItem } from "../types";
 import { useNavigation } from "@raycast/api";
 import fs from "fs";
