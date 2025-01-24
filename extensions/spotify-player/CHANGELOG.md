@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Improvement] - 2025-01-23
+
+- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command.
+
 ## [Generate Playlist Improvement - Artists] - 2024-12-03
 
 - Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
