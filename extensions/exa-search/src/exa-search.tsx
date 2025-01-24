@@ -2,10 +2,6 @@ import { Action, ActionPanel, List, getPreferenceValues, showToast, Toast, Icon 
 import React from "react";
 import fetch from "node-fetch";
 
-interface Preferences {
-  exaApiKey: string;
-}
-
 interface ExaSearchResult {
   id: string;
   title: string;
@@ -102,8 +98,8 @@ export default function Command() {
           !searchText.trim()
             ? "Enter your search terms"
             : searchText.trim().length < minQueryLength
-            ? `Type at least ${minQueryLength} characters`
-            : "Press ↵ to search"
+              ? `Type at least ${minQueryLength} characters`
+              : "Press ↵ to search"
         }
         description="Press ↵ to search"
       />
