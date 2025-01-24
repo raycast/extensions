@@ -34,6 +34,9 @@ If you don't want to log in through OAuth, you can use an access token instead. 
           - im:read
           - mpim:read
 
+          # Command: Search
+          - search:read
+
           # Command: Unread Messages
           - channels:history
           - groups:history

@@ -2,6 +2,7 @@ import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@ray
 import { User, useChannels } from "./shared/client";
 import { withSlackClient } from "./shared/withSlackClient";
 import { getSlackWebClient } from "./shared/client/WebClient";
+import { handleError } from "./shared/utils";
 
 interface FormValues {
   recipient: string;
@@ -9,9 +10,13 @@ interface FormValues {
   message: string;
 }
 
+interface SendMessageProps {
+  recipient?: string;
+}
+
 const selectRecipient = "SELECT_RECIPIENT";
 
-function SendMessage() {
+function SendMessage({ recipient }: SendMessageProps) {
   const { data: channels, isLoading } = useChannels();
   const { pop } = useNavigation();
 
@@ -50,11 +55,8 @@ function SendMessage() {
       
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to send message to ${recipientTitle}`,
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      });
+
+      handleError(error);
     }
   }
 
@@ -75,7 +77,7 @@ function SendMessage() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="recipient" title="Send to" defaultValue="">
+      <Form.Dropdown id="recipient" title="Send to" defaultValue={recipient ? `${recipient}|${channels?.flat().find(item => item.id === recipient)?.name || recipient}` : selectRecipient}>
 				<Form.Dropdown.Item title="Select a channel or user..." value={selectRecipient} />
         {dropdownItems.map((item) => (
           <Form.Dropdown.Item 
