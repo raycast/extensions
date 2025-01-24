@@ -17,6 +17,24 @@ function getAccessory(train: Train, icon: string) {
   }
 }
 
+function displayToast({
+  title,
+  style,
+  primaryAction = undefined,
+}: {
+  title: string;
+  style: Toast.Style;
+  primaryAction?: Toast.ActionOptions;
+}) {
+  (async () => {
+    await showToast({
+      style: style,
+      title: title,
+      primaryAction: primaryAction,
+    });
+  })();
+}
+
 export function StationView(props: { station: Station }) {
   const [direction, setDirection] = useState("false");
 
@@ -25,20 +43,26 @@ export function StationView(props: { station: Station }) {
     data: trains,
     revalidate,
   } = useFetch(getUrl(props.station.id, direction), {
+    onWillExecute() {
+      displayToast({ title: "Loading Data", style: Toast.Style.Animated });
+    },
     parseResponse(response) {
       return response.text().then(parseTrains);
     },
     mapResult(result) {
+      displayToast({
+        title: "Trains Loaded",
+        style: Toast.Style.Success,
+        primaryAction: { title: "Try Again", onAction: revalidate },
+      });
       return { data: mapTrains(result) };
     },
-    onError(error) {
-      (async () => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: `Could not load trains for ${props.station.name}`,
-          message: error.toString(),
-        });
-      })();
+    onError() {
+      displayToast({
+        title: "Could Not Load Information",
+        style: Toast.Style.Failure,
+        primaryAction: { title: "Try Again", onAction: revalidate },
+      });
     },
   });
 
@@ -100,7 +124,7 @@ export function StationView(props: { station: Station }) {
                     </List.Item.Detail.Metadata.TagList>
 
                     <List.Item.Detail.Metadata.Label title="Info" />
-                    <List.Item.Detail.Metadata.Label title="Original time" text={train.time} />
+                    <List.Item.Detail.Metadata.Label title="Scheduled departure" text={train.time} />
                     <List.Item.Detail.Metadata.Label title="Platform" text={train.platform} />
                     <List.Item.Detail.Metadata.Label title="Train" text={`${train.carrier} ${train.number}`} />
                     {train.isReplacedByBus && (
@@ -115,10 +139,17 @@ export function StationView(props: { station: Station }) {
             }
             actions={
               <ActionPanel>
+                <Action.CopyToClipboard
+                  title="Copy Train Info"
+                  content={`Train to ${train.destination} (${train.number}), with scheduled departure at ${train.time} from platform ${train.platform}, ${train.isDelayed ? `delayed by ${train.delay} minutes` : "on time"}`}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
                 <Action
                   autoFocus={false}
                   title="Refresh"
                   onAction={revalidate}
+                  icon={Icon.RotateClockwise}
                   shortcut={{ modifiers: ["opt"], key: "l" }}
                 />
               </ActionPanel>
