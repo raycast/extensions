@@ -19,51 +19,51 @@ If you don't want to log in through OAuth, you can use an access token instead. 
 5. Copy and paste the following manifest (Select `YAML`):  
    _Feel free to exclude permission scope groups - see comments - if you don't want to have the full experience of this extension._
 
-    ```
-    display_information:
-      name: Raycast - Slack
-    oauth_config:
-      scopes:
-        user:
-          # Command: Search & Unread Messages & Set Presence
-          - users:read
+   ```
+   display_information:
+     name: Raycast - Slack
+   oauth_config:
+     scopes:
+       user:
+         # Command: Search & Unread Messages & Set Presence
+         - users:read
 
-          # Command: Search & Unread Messages
-          - channels:read
-          - groups:read
-          - im:read
-          - mpim:read
+         # Command: Search & Unread Messages
+         - channels:read
+         - groups:read
+         - im:read
+         - mpim:read
 
-          # Command: Search
-          - search:read
+         # Command: Search
+         - search:read
 
-          # Command: Unread Messages
-          - channels:history
-          - groups:history
-          - im:history
-          - mpim:history
+         # Command: Unread Messages
+         - channels:history
+         - groups:history
+         - im:history
+         - mpim:history
 
-          # Command: Unread Messages (optional - needed for marking conversations as read)
-          - channels:write
-          - groups:write
-          - im:write
-          - mpim:write
+         # Command: Unread Messages (optional - needed for marking conversations as read)
+         - channels:write
+         - groups:write
+         - im:write
+         - mpim:write
 
-          # Command: Set Presence
-          - users:write
+         # Command: Set Presence
+         - users:write
 
-          # Command: Set Snooze
-          - dnd:read
-          - dnd:write
+         # Command: Set Snooze
+         - dnd:read
+         - dnd:write
 
-          # Command: Send Message
-          - chat:write
-          
-    settings:
-      org_deploy_enabled: false
-      socket_mode_enabled: false
-      token_rotation_enabled: false
-    ```
+         # Command: Send Message
+         - chat:write
+
+   settings:
+     org_deploy_enabled: false
+     socket_mode_enabled: false
+     token_rotation_enabled: false
+   ```
 
 6. Confirm creation of app
 7. Press `Install to Workspace`
