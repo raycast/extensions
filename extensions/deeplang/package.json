@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deeplang",
+  "title": "Shenyan Dayi",
+  "description": "Find the perfect Chinese words and expressions using DeepLang AI's writing assistant (unofficial client)",
+  "icon": "extension-icon.png",
+  "author": "baksili",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wantwords",
+      "title": "Search Words",
+      "subtitle": "尋詞 WantWords",
+      "description": "Find Chinese words and phrases based on descriptions",
+      "mode": "view",
+      "label": "Search Words"
+    },
+    {
+      "name": "wantquotes",
+      "title": "Search Quotes",
+      "subtitle": "覓句 WantQuotes",
+      "description": "Find matching Chinese quotes and expressions",
+      "mode": "view",
+      "label": "Search Quotes"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useSystemOpencc",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Use System OpenCC",
+      "description": "Use brew-installed OpenCC for traditional to simplified conversion",
+      "label": "Use System OpenCC"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^15.14.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.20.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
