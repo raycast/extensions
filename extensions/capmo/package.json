@@ -15,12 +15,14 @@
     {
       "name": "list-tickets",
       "title": "List Tickets",
+      "subtitle": "Capmo",
       "description": "Display tickets from Capmo.",
       "mode": "view"
     },
     {
       "name": "list-projects",
       "title": "List Projects",
+      "subtitle": "Capmo",
       "description": "Display all projects (non-archived) from Capmo.",
       "mode": "view"
     }
