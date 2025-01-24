@@ -116,7 +116,7 @@ export default function command() {
   }
 
   return (
-    <List searchBarPlaceholder="Search for your favorite team">
+    <List searchBarPlaceholder="Search for your favorite team" isLoading={isLoading}>
       <List.Section
         title={`${data.day.date}`}
         subtitle={`${gameItems.length} Game${gameItems.length !== 1 ? "s" : ""}`}

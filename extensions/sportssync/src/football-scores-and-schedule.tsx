@@ -202,6 +202,7 @@ export default function scoresAndSchedule() {
           <List.Dropdown.Item title="NCAA" value="NCAA" />
         </List.Dropdown>
       }
+      isLoading={nflScheduleStats}
     >
       {currentLeague === "NFL" && (
         <>

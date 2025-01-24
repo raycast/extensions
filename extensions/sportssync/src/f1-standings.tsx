@@ -98,6 +98,7 @@ export default function scoresAndSchedule() {
           <List.Dropdown.Item title={constructorTitle} value="Constructor Standings" />
         </List.Dropdown>
       }
+      isLoading={driverStats}
     >
       {currentLeague === "Driver Standings" && (
         <>

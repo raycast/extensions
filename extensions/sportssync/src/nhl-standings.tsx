@@ -83,7 +83,7 @@ export default function command() {
   });
 
   return (
-    <List searchBarPlaceholder="Search for your favorite team">
+    <List searchBarPlaceholder="Search for your favorite team" isLoading={isLoading}>
       <List.Section title={`${data.children[0].name}`}>{easternTeams}</List.Section>
       <List.Section title={`${data.children[1].name}`}>{westernTeams}</List.Section>
     </List>

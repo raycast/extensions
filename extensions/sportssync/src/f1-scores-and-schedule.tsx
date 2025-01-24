@@ -105,7 +105,7 @@ export default function command() {
   });
 
   return (
-    <List searchBarPlaceholder="Search for an upcoming race">
+    <List searchBarPlaceholder="Search for an upcoming race" isLoading={isLoading}>
       <List.Section
         title={`${data.day.date}`}
         subtitle={`${raceItems.length} Race${raceItems.length !== 1 ? "s" : ""}`}

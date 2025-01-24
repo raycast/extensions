@@ -107,7 +107,7 @@ export default function scoresAndSchedule() {
   const nhlGamesDate = nhlScoresAndSchedule.day.date;
 
   return (
-    <List searchBarPlaceholder="Search for your favorite team">
+    <List searchBarPlaceholder="Search for your favorite team" isLoading={nhlScheduleStats}>
       <List.Section title={`${nhlGamesDate}`} subtitle={`${nhlItems.length} Game${nhlItems.length !== 1 ? "s" : ""}`}>
         {nhlItems}
       </List.Section>

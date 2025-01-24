@@ -154,6 +154,7 @@ export default function scoresAndSchedule() {
           <List.Dropdown.Item title="ITA" value="ITA" />
         </List.Dropdown>
       }
+      isLoading={eplStats}
     >
       {currentLeague === "EPL" && (
         <>

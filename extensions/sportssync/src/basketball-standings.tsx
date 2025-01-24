@@ -138,6 +138,7 @@ export default function scoresAndSchedule() {
           <List.Dropdown.Item title="WNBA" value="WNBA" />
         </List.Dropdown>
       }
+      isLoading={nbaStandingsStats}
     >
       {currentLeague === "NBA" && (
         <>

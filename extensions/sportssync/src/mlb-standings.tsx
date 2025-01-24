@@ -82,7 +82,7 @@ export default function scoresAndSchedule() {
   const nlTeamsSectionName = mlbStandingsData?.children[1].name;
 
   return (
-    <List searchBarPlaceholder="Search for your favorite team">
+    <List searchBarPlaceholder="Search for your favorite team" isLoading={mlbStandingsStats}>
       <List.Section title={`${alTeamsSectionName}`}>{mlbALTeams}</List.Section>
       <List.Section title={`${nlTeamsSectionName}`}>{mlbNLTeams}</List.Section>
     </List>

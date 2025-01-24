@@ -92,6 +92,7 @@ export default function scoresAndSchedule() {
           <List.Dropdown.Item title="Women's NCAA" value="WNCAA" />
         </List.Dropdown>
       }
+      isLoading={mncaaArticlesStatus}
     >
       {currentLeague === "MNCAA" && (
         <>

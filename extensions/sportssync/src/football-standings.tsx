@@ -86,7 +86,7 @@ export default function scoresAndSchedule() {
   });
 
   return (
-    <List searchBarPlaceholder="Search for your favorite team">
+    <List searchBarPlaceholder="Search for your favorite team" isLoading={nflStandingsStats}>
       <List.Section title={`${nflStandingsData?.children[0]?.name}`}>{americanFootballConference}</List.Section>
       <List.Section title={`${nflStandingsData?.children[1]?.name}`}>{nationalFootballConference}</List.Section>
     </List>

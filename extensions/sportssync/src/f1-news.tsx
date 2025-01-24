@@ -50,7 +50,7 @@ export default function scoresAndSchedule() {
   }
 
   return (
-    <List searchBarPlaceholder="Search for an article">
+    <List searchBarPlaceholder="Search for an article" isLoading={f1ArticlesStatus}>
       <List.Section title={`${f1Articles.length} Article${f1Articles.length !== 1 ? "s" : ""}`}>{f1Items}</List.Section>
     </List>
   );
