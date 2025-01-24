@@ -19,6 +19,7 @@ type CreateTaskValues = {
   content: string;
   description: string;
   dueDate: Date | null;
+  deadline: Date | null;
   duration: string;
   priority: string;
   projectId: string;
@@ -54,6 +55,14 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       if (values.dueDate) {
         body.due = {
           date: Form.DatePicker.isFullDay(values.dueDate) ? getAPIDate(values.dueDate) : values.dueDate.toISOString(),
+        };
+      }
+
+      if (values.deadline) {
+        body.deadline = {
+          date: Form.DatePicker.isFullDay(values.deadline)
+            ? getAPIDate(values.deadline)
+            : values.deadline.toISOString(),
         };
       }
 
@@ -130,6 +139,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
           content: "",
           description: "",
           dueDate: null,
+          deadline: null,
           priority: String(lowestPriority.value),
           projectId: "",
           sectionId: "",
@@ -148,6 +158,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       content: draftValues?.content,
       description: draftValues?.description,
       dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      deadline: draftValues?.deadline ?? (fromTodayEmptyView ? new Date() : null),
       duration: draftValues?.duration ?? "",
       priority: draftValues?.priority || String(lowestPriority.value),
       projectId: draftValues?.projectId ? draftValues.projectId : "" || fromProjectId ? fromProjectId : "",
@@ -197,6 +208,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       {values.dueDate && !Form.DatePicker.isFullDay(values.dueDate) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
       ) : null}
+
+      <Form.DatePicker {...itemProps.deadline} title="Deadline date" type={Form.DatePicker.Type.Date} />
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

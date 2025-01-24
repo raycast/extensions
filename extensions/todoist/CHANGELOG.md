@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Add Support for Task Deadlines] - {PR_MERGE_DATE}
+
+It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
+
 ## [Quick Add Task Improvement] - 2024-12-02
 
 Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.

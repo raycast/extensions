@@ -68,6 +68,31 @@ export function displayDueDateTime(dateString: string) {
   return `${date} ${format(new Date(dateString), "HH:mm")}`;
 }
 
+export function displayDeadlineDate(dateString: string) {
+  const date = parseISO(dateString);
+  const today = getToday();
+
+  if (isSameDay(date, today)) {
+    return "Today";
+  }
+
+  if (isSameDay(date, addDays(today, 1))) {
+    return "Tomorrow";
+  }
+
+  const nextWeek = addDays(today, 7);
+
+  if (isBefore(date, nextWeek)) {
+    return format(date, "eeee");
+  }
+
+  if (isThisYear(date)) {
+    return format(date, "dd MMMM");
+  }
+
+  return format(date, "dd MMMM yyy");
+}
+
 export function getAPIDate(date: Date): string {
   return formatISO(date, { representation: "date" });
 }

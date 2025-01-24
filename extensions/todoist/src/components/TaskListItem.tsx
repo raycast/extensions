@@ -5,7 +5,14 @@ import removeMarkdown from "remove-markdown";
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { isRecurring, displayDueDate, isExactTimeTask, displayDueDateTime, isOverdue } from "../helpers/dates";
+import {
+  isRecurring,
+  displayDueDate,
+  isExactTimeTask,
+  displayDueDateTime,
+  isOverdue,
+  displayDeadlineDate,
+} from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -77,6 +84,20 @@ export default function TaskListItem({
       icon: Icon.Bubble,
       text: taskComments.length.toString(),
       tooltip: `${taskComments.length} comment${taskComments.length === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (task.deadline?.date) {
+    const text = displayDeadlineDate(task.deadline.date);
+    const overdue = isOverdue(task.deadline.date);
+
+    accessories.unshift({
+      icon: {
+        source: overdue ? Icon.BullsEyeMissed : Icon.BullsEye,
+        tintColor: overdue ? Color.Red : Color.PrimaryText,
+      },
+      tooltip: `Deadline: ${text}`,
+      text,
     });
   }
 
