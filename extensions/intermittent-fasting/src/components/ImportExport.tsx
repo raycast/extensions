@@ -5,6 +5,7 @@ import { useNavigation } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { mergeItems } from "../storage";
+import { FormValidation, useForm } from "@raycast/utils";
 
 interface StoredItem {
   id: string;
@@ -21,11 +22,14 @@ interface ImportExportProps {
   mode: "import" | "export";
 }
 
+interface FormValues {
+  file: string[];
+}
+
 export default function ImportExport({ data, onComplete, mode }: ImportExportProps) {
   const { pop } = useNavigation();
-
-  const handleSubmit = useCallback(
-    async (values: { file: string[] }) => {
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: async (values) => {
       try {
         const filePath = values.file[0];
 
@@ -86,8 +90,10 @@ export default function ImportExport({ data, onComplete, mode }: ImportExportPro
         });
       }
     },
-    [onComplete, mode, data],
-  );
+    validation: {
+      file: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -105,7 +111,7 @@ export default function ImportExport({ data, onComplete, mode }: ImportExportPro
       />
 
       <Form.FilePicker
-        id="file"
+        {...itemProps.file}
         title="Choose Location"
         allowMultipleSelection={false}
         canChooseDirectories={mode === "export"}

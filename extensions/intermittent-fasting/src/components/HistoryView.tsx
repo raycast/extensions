@@ -19,8 +19,24 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ fastingHistory, revali
     return updatedItems;
   }, [revalidate]);
 
+  const emptyStateActions = (
+    <ActionPanel>
+      <ActionPanel.Section title="History">
+        <Action.Push
+          title="Import History"
+          icon={Icon.Upload}
+          target={<ImportExport data={items} onComplete={handleRevalidate} mode="import" />}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      actions={!items || items.length === 0 ? emptyStateActions : undefined}
+      searchBarPlaceholder="Search fasting history..."
+    >
       <List.Section title="History">
         {items?.map((item) => (
           <ListItem
@@ -44,6 +60,14 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ fastingHistory, revali
           />
         ))}
       </List.Section>
+      {!isLoading && (!items || items.length === 0) && (
+        <List.EmptyView
+          icon={Icon.List}
+          title="No Fasting History"
+          description="Import your history or start tracking your fasts"
+          actions={emptyStateActions}
+        />
+      )}
     </List>
   );
 };
