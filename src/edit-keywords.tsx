@@ -62,7 +62,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Keywords List" placeholder="List of keywords (one per line)" {...itemProps.keywords} />
+      <Form.TextArea title="Edit Keywords" placeholder="Enter one keyword per line" {...itemProps.keywords} />
     </Form>
   );
 }
