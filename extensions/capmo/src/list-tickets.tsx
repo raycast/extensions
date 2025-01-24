@@ -9,7 +9,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { getCapmoToken } from "./auth";
+import { useCachedPromise } from "@raycast/utils";
+import { getCapmoToken, getCapmoTokenMitarbeiter, getCapmoTokenTicketeigenschaften } from "./auth";
 
 interface Project {
   id: string;
@@ -44,122 +45,95 @@ export default function ListTickets() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    initializeData();
-  }, []);
-
-  useEffect(() => {
     filterTickets();
   }, [searchText, selectedProject, allTickets]);
-
-  const initializeData = async () => {
-    try {
-      setIsLoading(true);
-      const fetchedProjects = await fetchProjects();
-      if (fetchedProjects.length > 0) {
-        await fetchAllTickets(fetchedProjects);
-      }
-    } catch {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Initialization Error",
-        message: "Failed to fetch data. Please check your connection.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchProjects = async (): Promise<Project[]> => {
-    const token = getCapmoToken();
-    const preferences = getPreferenceValues<{ excludedProjects: string }>();
-    const excludedProjectIds = preferences.excludedProjects
-      ? preferences.excludedProjects.split(",").map((id) => id.trim())
-      : [];
-
-    try {
+  
+  const { data: fetchedProjects, isLoading: isLoadingProjects, error: projectsError } = useCachedPromise(
+    async () => {
+      const token = getCapmoToken();
       const response = await axios.get<{ data: { items: Project[] } }>(
         "https://api.capmo.de/api/v1/projects",
-        { headers: { Authorization: token } },
+        { headers: { Authorization: token } }
       );
+      return response.data.data.items; // Correct access to items
+    },
+    [],
+    { keepPreviousData: true }
+  );
 
-      if (response.data?.data?.items) {
-        const sanitizedProjects = response.data.data.items.filter(
-          (project) =>
-            typeof project.id === "string" &&
-            typeof project.project_key === "string" &&
-            !project.is_archived && // Exclude archived projects
-            !excludedProjectIds.includes(project.id),
+  useEffect(() => {
+    if (fetchedProjects) {
+      const preferences = getPreferenceValues<{ excludedProjects: string }>();
+      const excludedProjectIds = preferences.excludedProjects
+        ? preferences.excludedProjects.split(",").map((id) => id.trim())
+        : [];
+  
+      const sanitizedProjects = fetchedProjects.filter((project: Project) => {
+        return (
+          typeof project.id === "string" &&
+          typeof project.project_key === "string" &&
+          !project.is_archived &&
+          !excludedProjectIds.includes(project.id)
         );
-        setProjects(sanitizedProjects);
-        return sanitizedProjects;
-      } else {
-        throw new Error("Unexpected response format for projects.");
-      }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
+      });
+  
+      setProjects(sanitizedProjects);
+    }
+  
+    if (projectsError) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error Fetching Projects",
         message: "Failed to fetch projects. Please check your connection.",
       });
-      throw error;
     }
-  };
+  }, [fetchedProjects, projectsError]);
 
-  const fetchAllTickets = async (projects: Project[]) => {
-    const token = getCapmoToken();
-
-    try {
+  const { data: fetchedTickets, isLoading: isLoadingTickets } = useCachedPromise(
+    async (projects: Project[]) => {
+      const token = getCapmoTokenMitarbeiter();
       const ticketFetchPromises = projects.map(async (project) => {
         const ticketTypes = await fetchTicketTypes(project.id);
         const ticketCategories = await fetchTicketCategories(project.id);
         const companies = await fetchCompanies(project.id);
-
-        try {
-          const response = await axios.get<{ data: { items: Ticket[] } }>(
-            `https://api.capmo.de/api/v1/projects/${project.id}/tickets`,
-            { headers: { Authorization: token } },
-          );
-
-          if (response.data?.data?.items) {
-            return response.data.data.items.map((ticket) => ({
-              ...ticket,
-              project_id: project.id,
-              project_key: project.project_key,
-              type_id: ticketTypes[ticket.type_id] || ticket.type_id,
-              category_id:
-                ticketCategories[ticket.category_id] || ticket.category_id,
-              company_id: companies[ticket.company_id] || ticket.company_id,
-              created_at: formatDate(ticket.created_at),
-              updated_at: formatDate(ticket.updated_at),
-              deadline: formatDate(ticket.deadline),
-              status: mapStatus(ticket.status),
-            }));
-          } else {
-            return [];
-          }
-        } catch (error) {
-          console.error(
-            `Error fetching tickets for project ${project.id}:`,
-            error,
-          );
-          return [];
-        }
+  
+        const response = await axios.get<{ data: { items: Ticket[] } }>(
+          `https://api.capmo.de/api/v1/projects/${project.id}/tickets`,
+          { headers: { Authorization: token } }
+        );
+        
+        return response.data.data.items.map((ticket: Ticket) => ({
+          ...ticket,
+          // Remaining ticket mapping logic
+          project_id: project.id,
+          project_key: project.project_key,
+          type_id: ticketTypes[ticket.type_id] || ticket.type_id,
+          category_id: ticketCategories[ticket.category_id] || ticket.category_id,
+          company_id: companies[ticket.company_id] || ticket.company_id,
+          created_at: formatDate(ticket.created_at),
+          updated_at: formatDate(ticket.updated_at),
+          deadline: formatDate(ticket.deadline),
+          status: mapStatus(ticket.status),
+        }));
       });
-
+  
       const results = await Promise.all(ticketFetchPromises);
-      const combinedTickets = results.flat();
-      setAllTickets(combinedTickets);
-      setTickets(combinedTickets);
-    } catch (error) {
-      console.error(error); // Example usage
+      return results.flat();
+    },
+    [projects]
+  );  
+  
+  useEffect(() => {
+    if (fetchedTickets) {
+      setAllTickets(fetchedTickets);
+      setTickets(fetchedTickets);
     }
-  };
+  }, [fetchedTickets]);  
 
   const fetchTicketTypes = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoToken();
+    const token = getCapmoTokenMitarbeiter();
 
     try {
       const response = await axios.get<{
@@ -191,7 +165,7 @@ export default function ListTickets() {
   const fetchTicketCategories = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoToken();
+    const token = getCapmoTokenMitarbeiter();
 
     try {
       const response = await axios.get<{
@@ -224,7 +198,7 @@ export default function ListTickets() {
   const fetchCompanies = async (
     projectId: string,
   ): Promise<{ [key: string]: string }> => {
-    const token = getCapmoToken();
+    const token = getCapmoTokenMitarbeiter();
 
     try {
       const response = await axios.get<{
@@ -259,7 +233,7 @@ export default function ListTickets() {
     displayStatus: string,
   ) => {
     try {
-      const token = getCapmoToken();
+      const token = getCapmoTokenMitarbeiter();
       await axios.patch(
         `https://api.capmo.de/api/v1/projects/${ticket.project_id}/tickets/${ticket.id}`,
         { status: newStatus },
@@ -343,28 +317,22 @@ export default function ListTickets() {
 
   return (
     <List
-      isLoading={isLoading}
+    isLoading={isLoading || isLoadingProjects || isLoadingTickets}
       searchBarPlaceholder="Search tickets..."
       isShowingDetail
       onSearchTextChange={(text) => setSearchText(text)}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Project"
-          storeValue
-          onChange={(value) => setSelectedProject(value || "all")}
-        >
-          <List.Dropdown.Item title="Alle Projekte" value="all" />
-          {projects
-            .filter((project) => !project.is_archived) // Exclude archived projects
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((project) => (
-              <List.Dropdown.Item
-                key={project.id}
-                title={project.name}
-                value={project.id}
-              />
-            ))}
-        </List.Dropdown>
+<List.Dropdown
+  tooltip="Filter by Project"
+  storeValue
+  onChange={(value) => setSelectedProject(value || "all")}
+>
+  <List.Dropdown.Item title="Alle Projekte" value="all" />
+  {projects?.map((project) => (
+    <List.Dropdown.Item key={project.id} title={project.name} value={project.id} />
+  ))}
+</List.Dropdown>
+
       }
     >
       {tickets.map((ticket) => (
@@ -468,3 +436,5 @@ export default function ListTickets() {
     </List>
   );
 }
+
+
