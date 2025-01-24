@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Use pagination for fetching users list] - {PR_MERGE_DATE}
+## [Use pagination for fetching users list] - 2025-01-24
 
 - User Notion pagination to fetch the list of Notion users. This allows fetching more than 100 users.
 
