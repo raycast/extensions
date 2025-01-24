@@ -1,5 +1,9 @@
 # Rehooks Changelog
 
+## [Package] - 2025-01-24
+
+Updated Rehooks package description
+
 ## [Documentation Command] - 2024-10-29
 
 Add documentation command routes to make it accessible via Raycast
