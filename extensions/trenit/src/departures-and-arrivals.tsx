@@ -43,6 +43,7 @@ function StationItem({
           />
           <Action.CreateQuicklink
             title="Create Quicklink"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
             icon={Icon.Link}
             quicklink={{
               name: `${station.name} train station`,
