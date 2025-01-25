@@ -1,4 +1,16 @@
-import { ActionPanel, Color, List, Action, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  LaunchProps,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { createDeeplink } from "@raycast/utils";
 import { getStations } from "./api/stations-service";
 import { StationView } from "./station-view";
 import { Station } from "./models/station";
@@ -29,13 +41,26 @@ function StationItem({
             icon={Icon.Star}
             onAction={() => toggleFavorite(station.id)}
           />
+          <Action.CreateQuicklink
+            title="Create Quicklink"
+            icon={Icon.Link}
+            quicklink={{
+              name: `${station.name} train station`,
+              link: createDeeplink({
+                command: "departures-and-arrivals",
+                context: {
+                  stationId: station.id,
+                },
+              }),
+            }}
+          />
         </ActionPanel>
       }
     />
   );
 }
 
-export default function Command() {
+export default function Command({ launchContext }: LaunchProps<{ launchContext: { stationId: string } }>) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [sortedStations, setSortedStations] = useState<{ favorites: Station[]; others: Station[] }>({
     favorites: [],
@@ -82,6 +107,19 @@ export default function Command() {
   };
 
   const { favorites: favoriteStations, others: otherStations } = sortedStations;
+
+  const { push } = useNavigation();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (launchContext?.stationId) {
+        const station = stations.find((s) => s.id === launchContext?.stationId);
+        if (station) {
+          push(<StationView station={station} />);
+        }
+      }
+    }
+  }, [launchContext?.stationId, isLoading, push]);
 
   return (
     <List searchBarPlaceholder="Search for a train station" navigationTitle="Select station" isLoading={isLoading}>
