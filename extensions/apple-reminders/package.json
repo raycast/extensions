@@ -46,11 +46,11 @@
           "default": false
         },
         {
-          "name": "showTodoList",
+          "name": "showTodayInOverdueList",
           "type": "checkbox",
           "required": false,
-          "label": "Display Todo List",
-          "description": "When enabled, adds a new list showing only overdue reminders.",
+          "label": "Show Fullday Reminders as Overdue",
+          "description": "When enabled, the list of overdue reminders include reminders without a specific time.",
           "default": false
         }
       ]
@@ -161,7 +161,7 @@
           "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
           "default": false,
           "required": false
-		},
+        },
         {
           "name": "sortMenuBarRemindersByDueDate",
           "type": "checkbox",
