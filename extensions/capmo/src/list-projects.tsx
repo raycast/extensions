@@ -22,20 +22,26 @@ export default function ListProjects() {
     isLoading,
     error,
   } = useCachedPromise(async () => {
-    const token = getCapmoToken();
-    const response = await axios.get<{ data: { items: Project[] } }>(
-      "https://api.capmo.de/api/v1/projects",
-      {
-        headers: { Authorization: token },
-      },
-    );
+    try {
+      const token = getCapmoToken();
+      const response = await axios.get<{ data: { items: Project[] } }>(
+        "https://api.capmo.de/api/v1/projects",
+        {
+          headers: { Authorization: token },
+        }
+      );
 
-    // Validate and filter projects
-    const projectItems = response.data?.data?.items;
-    if (projectItems && Array.isArray(projectItems)) {
-      return projectItems.filter((project) => !project.is_archived);
-    } else {
-      throw new Error("Unexpected response format for projects.");
+      // Validate and filter projects
+      const projectItems = response.data?.data?.items;
+      if (Array.isArray(projectItems)) {
+        return projectItems.filter((project) => !project.is_archived);
+      } else {
+        throw new Error("Unexpected response format for projects.");
+      }
+    } catch (err) {
+      throw new Error(
+        err instanceof Error ? err.message : "Failed to fetch projects."
+      );
     }
   });
 
