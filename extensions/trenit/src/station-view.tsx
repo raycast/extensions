@@ -123,7 +123,7 @@ export function StationView(props: { station: Station }) {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title={`${train.destination} - ${train.number}`}>
-                      {train.isDelayed && (
+                      {(train.isDelayed || train.isCancelled) && (
                         <List.Item.Detail.Metadata.TagList.Item text={train.delay} color={Color.Red} />
                       )}
                       {train.isBlinking && (
