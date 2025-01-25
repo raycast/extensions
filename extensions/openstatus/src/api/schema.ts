@@ -8,6 +8,7 @@ export const monitorPeriodicitySchema = z.enum(monitorPeriodicity);
 
 export const monitorSchema = z.object({
   id: z.number(),
+  description: z.string(),
   url: z.string(),
   periodicity: monitorPeriodicitySchema,
   regions: z.array(z.string()),
