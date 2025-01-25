@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support Island Browser] - {PR_MERGE_DATE}
+
+- Added support for `Island` browser.
+
 ## [Support Whale Browser] - 2024-12-14
 
 - Added support for `Whale` Browser Desktop.
