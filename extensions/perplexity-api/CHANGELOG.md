@@ -1,5 +1,10 @@
 # Perplexity API Changelog
 
+## [Updated Models] - 2025-01-25
+
+- Added `Sonar 128k` and `Sonar Pro 200k`.
+- Removed deprecated models `Sonar Small`, `Sonar Large`, and `Sonar Huge`.
+
 ## [Updated Models] - 2025-01-21
 
 - Added `Llama 3.3 70B`.

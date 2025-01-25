@@ -34,12 +34,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -76,12 +76,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -118,12 +118,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -160,12 +160,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -202,12 +202,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -244,12 +244,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -302,24 +302,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-online",
-              "title": "Sonar Small 8B Online"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-online",
-              "title": "Sonar Large 70B Online"
-            },
-            {
-              "value": "llama-3.1-sonar-huge-128k-online",
-              "title": "Sonar Huge 405B Online"
-            },
-            {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
-            },
-            {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -373,12 +361,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -416,12 +404,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -459,12 +447,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -502,12 +490,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -545,12 +533,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -588,12 +576,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -631,12 +619,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -674,12 +662,12 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 128k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 128k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
               "value": "llama-3.3-70b-instruct",
@@ -705,15 +693,15 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.1-sonar-large-128k-chat",
+      "default": "sonar",
       "data": [
         {
-          "value": "llama-3.1-sonar-small-128k-chat",
-          "title": "Sonar Small 8B 128k"
+          "value": "sonar-pro",
+          "title": "Sonar Pro 200k"
         },
         {
-          "value": "llama-3.1-sonar-large-128k-chat",
-          "title": "Sonar Large 70B 128k"
+          "value": "sonar",
+          "title": "Sonar 128k"
         },
         {
           "value": "llama-3.3-70b-instruct",
