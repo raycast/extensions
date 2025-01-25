@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Standard Shortcuts] - {PR_MERGE_DATE}
+## [Standard Shortcuts] - 2025-01-25
 
 - Standardized the removal shortcut with other extensions
 - Updated the dependencies and fixed security issues
