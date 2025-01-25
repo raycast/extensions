@@ -61,7 +61,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
                 icon: showFlags ? { source: Icon.Flag, tintColor: getFlagColor(transaction.flag_color) } : undefined,
               },
               {
-                text: time(transaction.date).fromNow(),
+                text: time(transaction.date).calendar(),
                 tooltip: transaction.date,
               },
             ]
