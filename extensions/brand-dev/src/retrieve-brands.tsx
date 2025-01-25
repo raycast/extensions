@@ -291,9 +291,22 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
             <Detail.Metadata.Label title="Address" text="N/A" />
           ) : (
             <>
-              {Object.entries(brand.address).map(([key, val]) => (
-                <Detail.Metadata.Label key={key} title={key.split("_").map(t => capitalize(t)).join(" ")} text={val} />
-              ))}
+              {brand.address.street && <Detail.Metadata.Label title="Street" text={brand.address.street} />}
+              {brand.address.city && <Detail.Metadata.Label title="City" text={brand.address.city} />}
+              {brand.address.country && <Detail.Metadata.Label title="Country" text={brand.address.country} />}
+              {brand.address.country_code && (
+                <Detail.Metadata.Label title="Country Code" text={brand.address.country_code} />
+              )}
+              {brand.address.state_province && (
+                <Detail.Metadata.Label title="State / Province" text={brand.address.state_province} />
+              )}
+              {brand.address.state_code && <Detail.Metadata.Label title="State Code" text={brand.address.state_code} />}
+              {brand.address.postal_code && (
+                <Detail.Metadata.Label title="Postal Code" text={brand.address.postal_code} />
+              )}
+              {brand.address.additional_info && (
+                <Detail.Metadata.Label title="Additional Info" text={brand.address.additional_info} />
+              )}
             </>
           )}
         </Detail.Metadata>
@@ -306,9 +319,15 @@ ${brand.backdrops.map(({ url }) => `![${url}](${url})`).join(`\n\n`)}`;
               title="View on brand.dev"
               url={`https://world.brand.dev/brand/${brand.domain}`}
             />
-            {brand.logos.length > 0 && (
-              <Action.OpenInBrowser title="Open Logo in Browser" icon={brand.logos[0].url} url={brand.logos[0].url} />
-            )}
+            {brand.logos.map((logo, index) => (
+              <Action.OpenInBrowser
+                key={index}
+                shortcut={{ modifiers: ["cmd"], key: (index + 1).toString() as Keyboard.KeyEquivalent }}
+                title={`Open Logo # ${index + 1} in Browser`}
+                icon={logo.url}
+                url={logo.url}
+              />
+            ))}
           </ActionPanel.Section>
         </ActionPanel>
       }
