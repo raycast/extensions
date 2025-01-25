@@ -17,7 +17,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
   async function handleSubmit(values: Values) {
     if (!isValidFormSubmission(values)) return;
 
-    const submittedValues = { budgeted: formatToYnabAmount(values.budgeted) };
+    const submittedValues = { budgeted: formatToYnabAmount(values.budgeted, activeBudgetCurrency) };
 
     if (submittedValues.budgeted === category.budgeted) {
       await showToast({

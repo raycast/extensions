@@ -17,6 +17,7 @@ import {
   confirmAlert,
   Alert,
   getPreferenceValues,
+  captureException,
 } from '@raycast/api';
 import { createScheduledTransaction } from '@lib/api';
 import { useAccounts } from '@hooks/useAccounts';
@@ -90,72 +91,79 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
       payee_id: undefined,
     },
     onSubmit: async (values) => {
-      const transactionData = {
-        ...values,
-        date: (values.date ?? tomorrow).toISOString(),
-        amount: formatToYnabAmount(values.amount),
-        approved: true,
-        /* If there's a payee id, that means it's a transfer for which the payee is the transfer from account and the category doesn't matter */
-        category_id: values.payee_id ? null : values.categoryList?.[0] || undefined,
-        payee_name: values.payee_id ? undefined : values.payee_name,
-        flag_color: values.flag_color
-          ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
-          : null,
-        subtransactions: undefined,
-        categoryList: undefined,
-        frequency: values.frequency as ScheduledTransactionFrequency,
-      };
-
-      /**
-       * We need make sure the total of subtransactions is equal to the transaction.
-       * That validation makes sense to keep at this level
-       * */
-      if (subtransactions.length > 0) {
-        transactionData.category_id = undefined;
-
-        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
-
-        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-        const difference = subtransactionsTotal - +values.amount;
-
-        if (difference !== 0) {
-          const options: Alert.Options = {
-            title: `Something Doesn't Add Up`,
-            message: `The total is ${
-              values.amount
-            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2,
-            )}?`,
-            primaryAction: {
-              title: 'Auto-Distribute the amounts',
-              onAction: () => {
-                const distributedAmounts = autoDistribute(+values.amount, subtransactions.length).map((amount) =>
-                  amount.toString(),
-                );
-                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-              },
-            },
-            dismissAction: {
-              title: 'Adjust manually',
-            },
-          };
-          await confirmAlert(options);
-          return;
-        }
-      }
-
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Scheduling Transaction' });
 
-      createScheduledTransaction(activeBudgetId, transactionData)
-        .then(() => {
-          toast.style = Toast.Style.Success;
-          toast.title = 'Transaction scheduled successfully';
-        })
-        .catch(() => {
-          toast.style = Toast.Style.Failure;
-          toast.title = 'Failed to schedule transaction';
-        });
+      try {
+        const transactionData = {
+          ...values,
+          date: (values.date ?? tomorrow).toISOString(),
+          amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
+          approved: true,
+          /* If there's a payee id, that means it's a transfer for which the payee is the transfer from account and the category doesn't matter */
+          category_id: values.payee_id ? null : values.categoryList?.[0] || undefined,
+          payee_name: values.payee_id ? undefined : values.payee_name,
+          flag_color: values.flag_color
+            ? TransactionFlagColor[values.flag_color as keyof typeof TransactionFlagColor]
+            : null,
+          subtransactions: undefined,
+          categoryList: undefined,
+          frequency: values.frequency as ScheduledTransactionFrequency,
+        };
+
+        /**
+         * We need make sure the total of subtransactions is equal to the transaction.
+         * That validation makes sense to keep at this level
+         * */
+        if (subtransactions.length > 0) {
+          transactionData.category_id = undefined;
+
+          /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
+          transactionData.subtransactions = subtransactions.map((s) => ({
+            ...s,
+            amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+          }));
+
+          const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
+          const difference = subtransactionsTotal - +values.amount;
+
+          if (difference !== 0) {
+            const options: Alert.Options = {
+              title: `Something Doesn't Add Up`,
+              message: `The total is ${
+                values.amount
+              }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
+                2,
+              )}?`,
+              primaryAction: {
+                title: 'Auto-Distribute the amounts',
+                onAction: () => {
+                  const distributedAmounts = autoDistribute(+values.amount, subtransactions.length).map((amount) =>
+                    amount.toString(),
+                  );
+                  setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+                },
+              },
+              dismissAction: {
+                title: 'Adjust manually',
+              },
+            };
+            await confirmAlert(options);
+            return;
+          }
+        }
+
+        await createScheduledTransaction(activeBudgetId, transactionData);
+        toast.style = Toast.Style.Success;
+        toast.title = 'Transaction scheduled successfully';
+      } catch (error: unknown) {
+        toast.style = Toast.Style.Failure;
+        captureException(error);
+        toast.title = 'Failed to create transaction';
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
+      }
     },
     validation: {
       date: FormValidation.Required,

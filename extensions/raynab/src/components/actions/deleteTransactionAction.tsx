@@ -37,31 +37,35 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
 
         if (await confirmAlert(options)) {
           const toast = await showToast({ style: Toast.Style.Animated, title: 'Deleting transaction' });
-          mutate(deleteTransaction(activeBudgetId, transaction.id), {
-            optimisticUpdate(currentData) {
-              if (!currentData) return;
+          try {
+            await mutate(deleteTransaction(activeBudgetId, transaction.id), {
+              optimisticUpdate(currentData) {
+                if (!currentData) return;
 
-              const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+                const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
 
-              if (transactionIdx < 0) return currentData;
+                if (transactionIdx < 0) return currentData;
 
-              const newData = [...currentData];
+                const newData = [...currentData];
 
-              newData.splice(transactionIdx, 1);
+                newData.splice(transactionIdx, 1);
 
-              return newData;
-            },
-            shouldRevalidateAfter: !preferences.quickRevalidate,
-          })
-            .then(() => {
-              toast.style = Toast.Style.Success;
-              toast.title = 'Transaction deleted successfully';
-            })
-            .catch(() => {
-              toast.style = Toast.Style.Failure;
-              toast.title = 'Failed to delete transaction';
+                return newData;
+              },
+              shouldRevalidateAfter: !preferences.quickRevalidate,
             });
-          return;
+
+            toast.style = Toast.Style.Success;
+            toast.title = 'Transaction deleted successfully';
+            return;
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = 'Failed to delete transaction';
+
+            if (error instanceof Error) {
+              toast.message = error.message;
+            }
+          }
         }
       }}
       icon={Icon.Trash}

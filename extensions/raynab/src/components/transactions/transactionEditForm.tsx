@@ -5,7 +5,6 @@ import {
   formatToReadablePrice,
   formatToYnabAmount,
   getSubtransacionCategoryname,
-  isNumberLike,
   isSplitTransaction,
 } from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
@@ -21,6 +20,7 @@ import {
   Toast,
   useNavigation,
   getPreferenceValues,
+  captureException,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
@@ -110,106 +110,110 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         categoryList.length > 0 && !!categoryList[0] ? categoryList : subtransactions.map((s) => s.category_id ?? ''),
     },
     onSubmit: async (values) => {
-      const transactionData = {
-        ...transaction,
-        date: (values.date ?? new Date()).toISOString(),
-        flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
-        amount: formatToYnabAmount(values.amount),
-        payee_id: values.payee_id,
-        memo: values.memo || null,
-        category_id: values.categoryList?.[0] || undefined,
-        payee_name: values.payee_name || transaction.payee_name,
-        approved: true,
-      };
-
-      if (isReconciled) {
-        await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
-        return;
-      }
-
-      /**
-       * We need make sure the total of subtransactions is equal to the transaction.
-       * That validation makes sense to keep at this level
-       * */
-      if (subtransactions.length > 0) {
-        transactionData.category_id = undefined;
-
-        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
-
-        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-        const difference = subtransactionsTotal - +values.amount;
-
-        if (difference !== 0) {
-          const options: Alert.Options = {
-            title: `Something Doesn't Add Up`,
-            message: `The total is ${
-              values.amount
-            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2,
-            )}?`,
-            primaryAction: {
-              title: 'Auto-Distribute the amounts',
-              onAction: () => {
-                const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
-                  amount.toString(),
-                );
-                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-              },
-            },
-            dismissAction: {
-              title: 'Adjust manually',
-            },
-          };
-          await confirmAlert(options);
-          return;
-        }
-      }
-
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
 
-      mutate(
-        updateTransaction(activeBudgetId, transaction.id, {
-          ...transactionData,
-          payee_id: selectOwnPayee ? null : values.payee_id,
-        }),
-        {
-          optimisticUpdate(currentData) {
-            if (!currentData) return;
+      try {
+        const transactionData = {
+          ...transaction,
+          date: (values.date ?? new Date()).toISOString(),
+          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
+          amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
+          payee_id: values.payee_id,
+          memo: values.memo || null,
+          category_id: values.categoryList?.[0] || undefined,
+          payee_name: values.payee_name || transaction.payee_name,
+          approved: true,
+        };
 
-            const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+        if (isReconciled) {
+          await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
+          return;
+        }
 
-            if (transactionIdx < 0) return currentData;
+        /**
+         * We need make sure the total of subtransactions is equal to the transaction.
+         * That validation makes sense to keep at this level
+         * */
+        if (subtransactions.length > 0) {
+          transactionData.category_id = undefined;
 
-            const newData = [...currentData];
+          /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
+          transactionData.subtransactions = subtransactions.map((s) => ({
+            ...s,
+            amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+          }));
 
-            newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+          const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
+          const difference = subtransactionsTotal - +values.amount;
 
-            return newData;
-          },
-          shouldRevalidateAfter: !preferences.quickRevalidate,
-        },
-      )
-        .then(() => {
-          toast.style = Toast.Style.Success;
-          toast.title = 'Transaction updated successfully';
-
-          if (forApproval) {
-            pop();
+          if (difference !== 0) {
+            const options: Alert.Options = {
+              title: `Something Doesn't Add Up`,
+              message: `The total is ${
+                values.amount
+              }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
+                2,
+              )}?`,
+              primaryAction: {
+                title: 'Auto-Distribute the amounts',
+                onAction: () => {
+                  const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
+                    amount.toString(),
+                  );
+                  setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+                },
+              },
+              dismissAction: {
+                title: 'Adjust manually',
+              },
+            };
+            await confirmAlert(options);
+            return;
           }
-        })
-        .catch(() => {
-          toast.style = Toast.Style.Failure;
-          toast.title = 'Failed to update transaction';
-        });
+        }
+
+        await mutate(
+          updateTransaction(activeBudgetId, transaction.id, {
+            ...transactionData,
+            payee_id: selectOwnPayee ? null : values.payee_id,
+          }),
+          {
+            optimisticUpdate(currentData) {
+              if (!currentData) return;
+
+              const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+
+              if (transactionIdx < 0) return currentData;
+
+              const newData = [...currentData];
+
+              newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+
+              return newData;
+            },
+            shouldRevalidateAfter: !preferences.quickRevalidate,
+          },
+        );
+
+        toast.style = Toast.Style.Success;
+        toast.title = 'Transaction updated successfully';
+
+        if (forApproval) {
+          pop();
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        captureException(error);
+        toast.title = 'Failed to create transaction';
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
+      }
     },
     validation: {
       date: FormValidation.Required,
-      amount: (value) => {
-        if (!value) return 'Please enter a valid amount';
-
-        if (isNumberLike(value) === false) return `${value} is not a valid number`;
-      },
+      amount: FormValidation.Required,
       payee_id: (value) => {
         const errorMessage = 'Please select or enter a payee';
 
