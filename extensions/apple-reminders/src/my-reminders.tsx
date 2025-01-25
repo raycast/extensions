@@ -7,7 +7,7 @@ import { useData } from "./hooks/useData";
 import useViewReminders from "./hooks/useViewReminders";
 
 export default function Command() {
-  const { displayCompletionDate, showTodoList } = getPreferenceValues<Preferences.MyReminders>();
+  const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
   const [listId, setListId] = useCachedState<string>("today");
   const [newReminderTitle, setNewReminderTitle] = useCachedState<string>("");
 
@@ -44,9 +44,6 @@ export default function Command() {
           {data?.lists && data.lists.length > 0 ? (
             <>
               <List.Dropdown.Section>
-                {!showTodoList ? null : (
-                  <List.Dropdown.Item title="Todo" icon={{ source: Icon.List, tintColor: Color.Green }} value="todo" />
-                )}
                 <List.Dropdown.Item
                   title="Today"
                   icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
@@ -56,6 +53,11 @@ export default function Command() {
                   title="Scheduled"
                   icon={{ source: Icon.Calendar, tintColor: Color.Red }}
                   value="scheduled"
+                />
+                <List.Dropdown.Item
+                  title="Overdue"
+                  icon={{ source: Icon.List, tintColor: Color.Orange }}
+                  value="overdue"
                 />
                 <List.Dropdown.Item title="All" icon={Icon.Tray} value="all" />
               </List.Dropdown.Section>
