@@ -2,15 +2,15 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": ["src/**/*", "raycast-env.d.ts"], // Ensure it covers all your source files and the Raycast environment typings
   "compilerOptions": {
-    "lib": ["ES2023", "DOM"],                // Include DOM for browser-related APIs
-    "module": "commonjs",                    // CommonJS for compatibility with Node.js
-    "target": "ES2022",                      // Modern target
-    "strict": true,                          // Enable strict type checking
-    "isolatedModules": true,                 // Required for React's JSX transformations
-    "esModuleInterop": true,                 // Enable interop between CommonJS and ESModules
-    "skipLibCheck": true,                    // Skip type checking of declaration files
+    "lib": ["ES2023", "DOM"], // Include DOM for browser-related APIs
+    "module": "commonjs", // CommonJS for compatibility with Node.js
+    "target": "ES2022", // Modern target
+    "strict": true, // Enable strict type checking
+    "isolatedModules": true, // Required for React's JSX transformations
+    "esModuleInterop": true, // Enable interop between CommonJS and ESModules
+    "skipLibCheck": true, // Skip type checking of declaration files
     "forceConsistentCasingInFileNames": true, // Enforce consistent casing in imports
-    "jsx": "react-jsx",                      // Enable the new JSX transform
-    "resolveJsonModule": true                // Allow importing JSON files as modules
+    "jsx": "react-jsx", // Enable the new JSX transform
+    "resolveJsonModule": true // Allow importing JSON files as modules
   }
 }

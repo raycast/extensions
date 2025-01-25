@@ -7,7 +7,7 @@
     Capmo
   </h1>
 Easily manage and interact with projects and tickets from Capmo directly in Raycast. List tickets, update their status, filter projects, and more – all with quick keystrokes.
-</br></br>
+
 <p>
     <a href="https://www.raycast.com/sven/microsoft-teams">
       <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
@@ -26,9 +26,11 @@ Easily manage and interact with projects and tickets from Capmo directly in Rayc
   </p>
 </div>
 
-![Screenshot of the "List Projects" command](./metadata/screenshot_3.png)
-![Screenshot of the "List Tickets" command](./metadata/screenshot_1.png)
-![Actions in the "List Tickets" command](./metadata/screenshot_2.png)
+![Screenshot of the "List Projects" command](screenshots/screenshot_3.png)
+![Screenshot of the "List Tickets" command](screenshots/screenshot_1.png)
+![Actions in the "List Tickets" command](screenshots/screenshot_2.png)
+
+This extension offers the following functionalities:
 
  <h2>
 Commands
@@ -59,16 +61,17 @@ Actions
 When starting the extension for the first time it will ask you for two IDs: The **Capmo API TOken** and the **Excluded projects**.
 
 1. Retriving Capmo API Token
+
 - Please open [Accountmanagement](https://app.capmo.de/account/general)
 - Create an API Key in the Api-Key Settings
 - Copy the Secret Value and store it somewhere safe
 
 2. Excluding Projects
+
 - If you want to exclude projects from the Application to make it faster, you can do so by including them in the settings
 - Retrive the project ID by opening a project in Campo and Copy the Project ID from the Url
 - Example: https://app.capmo.de/projects/**cdced67e-1cce-11ef-bc14-fb2698a5c2b6**/tickets
 - Copy the Value in the settings. Example: Project 1,Project 2
 - Copy the Secret Value and store it somewhere safe
-
 
 Happy ticket management! 🎉
