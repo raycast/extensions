@@ -8,13 +8,21 @@ import { Station } from "./models/station";
 import { DirectionDropdown } from "./components/direction-dropdown";
 
 function getAccessory(train: Train, icon: string) {
+  const accessories = [];
   if (train.isBlinking) {
-    return { tag: `${train.delay}`, icon: { source: icon, tintColor: Color.Blue }, tooltip: "Departing now" };
-  } else if (train.isDelayed) {
-    return { tag: { value: `${train.delay}`, color: Color.Red }, tooltip: `Train delayed by ${train.delay} minutes` };
-  } else {
-    return {};
+    accessories.push({
+      tag: `${train.delay}`,
+      icon: { source: icon, tintColor: Color.Blue },
+      tooltip: "Departing now",
+    });
   }
+  if (train.isDelayed || train.isCancelled) {
+    accessories.push({
+      tag: { value: `${train.delay}`, color: Color.Red },
+      tooltip: `Train delayed by ${train.delay} minutes`,
+    });
+  }
+  return accessories;
 }
 
 function displayToast({
@@ -108,7 +116,7 @@ export function StationView(props: { station: Station }) {
             title={train.time}
             subtitle={`${train.destination} - ${train.number}`}
             keywords={[train.number, train.destination, train.time]}
-            accessories={[getAccessory(train, currentIcon)]}
+            accessories={getAccessory(train, currentIcon)}
             icon={train.icon ? `${train.icon}.svg` : Icon.Train}
             detail={
               <List.Item.Detail
