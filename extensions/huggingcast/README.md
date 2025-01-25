@@ -43,10 +43,10 @@ To use the extension, you need to configure your Hugging Face API token:
 
 ## Screenshots
 
-![Ask Question Screenshot](media/1-ask-question.png)
-![Conversations Screenshot](media/2-conversations.png)
-![Custom Models Screenshot](media/3-models.png)
-![Summarize Screenshot](media/4-summarize.png)
+![Ask Question Screenshot](metadata/1-ask-question.png)
+![Conversations Screenshot](metadata/2-conversations.png)
+![Custom Models Screenshot](metadata/3-models.png)
+![Summarize Screenshot](metadata/4-summarize.png)
 
 ## Dependencies
 
