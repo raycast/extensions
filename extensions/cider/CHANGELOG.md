@@ -1,6 +1,6 @@
 # Cider Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2025-01-26
 - Added token support (more details in [Overview](https://raycast.com/feyli/cider#readme))
 - Added handcrafted icons for all commands
 - Changed the command's name from favourite to favorite to fit Raycast's standards
