@@ -1,6 +1,6 @@
 # MacUpdater Changelog
 
-## [Cache Enhancements] - {PR_MERGE_DATE}
+## [Cache Enhancements] - 2025-01-26
 
 - All **Updates** are now cached for a smoother experience
 - Add CHANGELOG
