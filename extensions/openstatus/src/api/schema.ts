@@ -67,3 +67,14 @@ export const pageSchema = z.object({
 });
 
 export type Page = z.infer<typeof pageSchema>;
+
+// Incidents
+export const incidentSchema = z.object({
+  id: z.number(),
+  startedAt: z.string(),
+  monitorId: z.number(),
+  acknowledgedAt: z.string().nullable(),
+  acknowledgedBy: z.number().nullable(),
+  resolvedAt: z.string().nullable(),
+  resolvedBy: z.number().nullable(),
+});
