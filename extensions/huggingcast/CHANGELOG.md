@@ -1,6 +1,6 @@
 # Huggingcast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-26
 
 This change extends the existing Huggingcast extension (and adds a changelog). Seamlessly interact with a variety of Hugging Face models via 5 new commands:
 
