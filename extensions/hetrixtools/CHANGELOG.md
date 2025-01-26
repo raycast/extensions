@@ -1,6 +1,6 @@
 # HetrixTools Changelog
 
-## [View Contact Lists] - {PR_MERGE_DATE}
+## [View Contact Lists] - 2025-01-26
 
 - New "View Contact Lists" command shows you contact lists with basic info
 - Show "Category" in Uptime Monitor details
