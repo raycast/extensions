@@ -16,7 +16,6 @@
     {
       "name": "index",
       "title": "Lingorep Translate",
-      "subtitle": "Translate, Save and Repeat Translations",
       "description": "Translate, save and repeat text later to remember it with the best spaced repetition system",
       "mode": "view"
     }
