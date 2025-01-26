@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import { useForm, usePromise } from "@raycast/utils";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
-import fs from "fs";
 import { execSync, spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
+import { useForm, usePromise } from "@raycast/utils";
 import nanoSpawn from "nano-spawn";
-import path from "path";
+import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -40,7 +40,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn("/opt/homebrew/bin/yt-dlp", [...options, values.url]);
+      const process = spawn(preferences.ytdlPath, [...options, values.url]);
 
       let filePath = "";
 
@@ -134,7 +134,7 @@ export default function DownloadVideo() {
       if (!url) return;
       if (!isYouTubeURL(url)) return;
 
-      const result = await nanoSpawn("/opt/homebrew/bin/yt-dlp", ["-j", url]);
+      const result = await nanoSpawn(preferences.ytdlPath, ["-j", url]);
       return JSON.parse(result.stdout) as {
         title: string;
         duration: number;
@@ -153,7 +153,11 @@ export default function DownloadVideo() {
     [values.url],
     {
       onError(error) {
-        setValidationError("url", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch video",
+          message: error.message,
+        });
       },
     },
   );

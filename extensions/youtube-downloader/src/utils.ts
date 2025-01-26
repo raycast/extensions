@@ -1,12 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 
-export const preferences = getPreferenceValues<{
-  downloadPath: string;
-  ytdlPath: string;
-  ffmpegPath: string;
-  ffprobePath: string;
-}>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
   url: string;
