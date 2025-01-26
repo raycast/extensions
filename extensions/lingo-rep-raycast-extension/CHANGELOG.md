@@ -1,3 +1,3 @@
-# lingo-rep-raycast-extension Changelog
+# LingoRep Changelog
 
 ## [Initial Version] - 2024-05-05
