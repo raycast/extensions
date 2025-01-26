@@ -1,6 +1,6 @@
 # Fancy Text Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-01-26
 
 - Merged the `Fancy Selected Text` command into the `Fancy Text` command
 
