@@ -1,6 +1,7 @@
 # Alby Changelog
 
 ## [Features] - 2025-01-26
+
 - Added Support for creating invoices in fiat.
 - Added Support for sending zaps via lightning address in fiat
 - Added support for cashu tokens with all units
