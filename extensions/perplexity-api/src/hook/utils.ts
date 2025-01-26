@@ -2,8 +2,8 @@ import { encode } from "gpt-tokenizer";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Sonar Pro 200k", id: "sonar-pro" },
   { name: "Sonar 128k", id: "sonar" },
+  { name: "Sonar Pro 200k", id: "sonar-pro" },
   { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-instruct" },
 ];
 
