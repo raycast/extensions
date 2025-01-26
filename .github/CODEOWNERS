@@ -1211,6 +1211,7 @@
 /extensions/ploi                                                    @ploi-deploy @xmok
 /extensions/pm2                                                     @LitoMore @pernielsentikaer
 /extensions/pocket                                                  @vimtor @hrishabhn
+/extensions/pocketbase                                              @xmok
 /extensions/podcasts                                                @ron-myers
 /extensions/podcasts-now                                            @cloudy9101
 /extensions/pokedex                                                 @anhthang @miguel-felix1
