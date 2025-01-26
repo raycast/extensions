@@ -1,4 +1,13 @@
-import { getSelectedText, showToast, Toast, closeMainWindow, popToRoot, open, LocalStorage, Clipboard } from "@raycast/api";
+import {
+  getSelectedText,
+  showToast,
+  Toast,
+  closeMainWindow,
+  popToRoot,
+  open,
+  LocalStorage,
+  Clipboard,
+} from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getSearchHistory } from "./utils/handleResults";
 import { SearchResult, HISTORY_KEY } from "./utils/types";
