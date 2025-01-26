@@ -1,6 +1,6 @@
 # Brand.dev Changelog
 
-## [Open Multiple Logos] - {PR_MERGE_DATE}
+## [Open Multiple Logos] - 2025-01-26
 
 - In `Detail` view the proper Address item title is shown e.g. "Country Code" instead of "country_code"
 - You can now open more than the first logo in browser e.g. if a Brand has multiple logos, you can open the 2nd logo instead of first
