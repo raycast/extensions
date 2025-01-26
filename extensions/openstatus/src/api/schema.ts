@@ -78,3 +78,4 @@ export const incidentSchema = z.object({
   resolvedAt: z.string().nullable(),
   resolvedBy: z.number().nullable(),
 });
+export type Incident = z.infer<typeof incidentSchema>;
