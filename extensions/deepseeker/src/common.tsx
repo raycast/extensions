@@ -103,6 +103,13 @@ export default function ResultView(prompt: string, model_override: string, toast
     getResult();
   }
 
+  async function retryWithDeepSeekReasoner() {
+    setModel("deepseek-reasoner");
+    setLoading(true);
+    setResponse("");
+    getResult();
+  }
+
   useEffect(() => {
     getResult();
   }, []);
@@ -146,11 +153,19 @@ export default function ResultView(prompt: string, model_override: string, toast
                 icon={Icon.ArrowNe}
               />
             )}
-            {model != "deepseek-chat" && (
+            {model !== "deepseek-chat" && (
               <Action
                 title="Retry with DeepSeek Chat"
                 onAction={retryWithDeepSeekChat}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                icon={Icon.ArrowNe}
+              />
+            )}
+            {model !== "deepseek-reasoner" && (
+              <Action
+                title="Retry with DeepSeek Reasoner"
+                onAction={retryWithDeepSeekReasoner}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 icon={Icon.ArrowNe}
               />
             )}

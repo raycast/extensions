@@ -1,5 +1,11 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - 2024-01-26
+
+- 🐳 Add DeepSeek-R1 reasoning model
+- 🔄 Rename the deepseek-chat model to DeepSeek-V3 (official name)
+- 💸 Add token count and cost estimation for DeepSeek-R1
+
 ## [New Features] - 2025-01-19
 
 - 🙋 Add `Ask LLM` command using pure user query input.
