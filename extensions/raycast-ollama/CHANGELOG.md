@@ -2,7 +2,7 @@
 
 ## [Fix] - 2025-02-26
 
-- [@jsynowiec] Command 'Create Custom Command': typos fixes.
+- Corrected typos
 
 ## [Improvement] - 2025-01-02
 
