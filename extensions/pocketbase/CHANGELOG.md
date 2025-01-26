@@ -1,6 +1,6 @@
 # PocketBase Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-26
 
 - Search Collections
     - View Collection Schema
