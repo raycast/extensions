@@ -33,12 +33,6 @@ interface PackageListItemProps {
   isHistoryItem?: boolean
 }
 
-export interface Preferences {
-  defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
-  historyCount: string
-  showLinkToSearchResultsInListView: boolean
-}
-
 export const PackageListItem = ({
   result,
   setHistory,
@@ -47,7 +41,8 @@ export const PackageListItem = ({
   isViewingFavorites,
   isHistoryItem,
 }: PackageListItemProps): JSX.Element => {
-  const { defaultOpenAction }: Preferences = getPreferenceValues()
+  const { defaultOpenAction, historyCount } =
+    getPreferenceValues<ExtensionPreferences>()
   const pkg = result
   const { owner, name, type, repoUrl } = parseRepoUrl(pkg.links?.repository)
   const changelogUrl = getChangeLogUrl(type, owner, name)
@@ -58,6 +53,7 @@ export const PackageListItem = ({
       type: 'package',
       package: result,
     })
+    if (Number(historyCount) <= 0) return
     setHistory?.(history)
     showToast(Toast.Style.Success, `Added ${result.name} to history`)
   }
@@ -289,6 +285,10 @@ export const PackageListItem = ({
             <Action.CopyToClipboard
               title="Copy Package Name"
               content={pkg.name}
+            />
+            <Action.CopyToClipboard
+              title="Copy Version"
+              content={pkg.version}
             />
           </ActionPanel.Section>
         </ActionPanel>

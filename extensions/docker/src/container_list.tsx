@@ -1,5 +1,5 @@
 import { ContainerInfo } from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action, Keyboard } from '@raycast/api';
 import ContainerDetail from './container_detail';
 import { useDocker } from './docker';
 import { containerName, isContainerRunning } from './docker/container';
@@ -30,8 +30,14 @@ export default function ContainerList(props: { projectFilter?: string }) {
           accessories={[{ text: { value: containerInfo.State } }]}
           icon={
             isContainerRunning(containerInfo)
-              ? { source: 'icon-container-running.png', tintColor: Color.Green }
-              : { source: 'icon-container.png', tintColor: Color.SecondaryText }
+              ? {
+                  source: 'icon-container-running.png',
+                  tintColor: Color.Green,
+                }
+              : {
+                  source: 'icon-container.png',
+                  tintColor: Color.SecondaryText,
+                }
           }
           actions={
             <ActionPanel>
@@ -39,7 +45,10 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 <Action
                   title="Stop Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                  icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: 'icon-stop.png',
+                    tintColor: Color.PrimaryText,
+                  }}
                   onAction={withToast({
                     action: () => stopContainer(containerInfo),
                     onSuccess: () => `Container ${containerName(containerInfo)} stopped`,
@@ -61,7 +70,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
               )}
               {isContainerRunning(containerInfo) && (
                 <Action.CopyToClipboard
-                  title="Copy Container ID"
+                  title="Copy Container Id"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
                   content={containerInfo.Id}
                 />
@@ -70,7 +79,10 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 <Action
                   title="Start Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-                  icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
+                  icon={{
+                    source: 'icon-start.png',
+                    tintColor: Color.PrimaryText,
+                  }}
                   onAction={withToast({
                     action: () => startContainer(containerInfo),
                     onSuccess: () => `Container ${containerName(containerInfo)} started`,
@@ -86,8 +98,9 @@ export default function ContainerList(props: { projectFilter?: string }) {
               />
               <Action
                 title="Remove Container"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={withToast({
                   action: () => removeContainer(containerInfo),
                   onSuccess: () => `Container ${containerName(containerInfo)} removed`,

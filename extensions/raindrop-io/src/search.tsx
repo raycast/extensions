@@ -9,7 +9,7 @@ import { useRequest } from "./hooks/useRequest";
 import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function Main(): ReactElement {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues();
   const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
 
   const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } = useLastUsedCollection();

@@ -6,11 +6,14 @@
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "contributors": [
-    "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
     "lokot0k",
-    "mitchwu"
+    "mitchwu",
+    "a-laughlin"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "categories": [
     "Productivity",
@@ -296,6 +299,15 @@
       "description": "Whether or not to close the Raycast window when a timer or stopwatch is started.",
       "label": "Automatically close window on start",
       "default": true
+    },
+    {
+      "name": "customTimerFormBypass",
+      "label": "Skip form if arguments are given",
+      "title": "Custom Timer Form Bypass",
+      "type": "checkbox",
+      "required": false,
+      "description": "For the 'Start Custom Timer' command, skip the timer add form if any hour, minute, or second arguments are given.",
+      "default": false
     },
     {
       "name": "newTimerInputOrder",

@@ -8,7 +8,9 @@ interface Preferences {
 export default async function Command() {
   const { exitOnSuccess } = getPreferenceValues<Preferences>();
   try {
-    await fetch("http://localhost:10769/next");
+    await fetch("http://localhost:10767/api/v1/playback/next", {
+      method: "POST",
+    });
     if (exitOnSuccess) await showHUD("⏭️ Skipped to the Next Track");
     else
       await showToast({

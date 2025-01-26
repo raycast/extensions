@@ -27,25 +27,7 @@
       "title": "Show Masked Emails",
       "subtitle": "Fastmail",
       "description": "Show all of your masked emails",
-      "mode": "view",
-      "preferences": [
-        {
-          "description": "Show deleted masked emails in the list",
-          "name": "show_deleted",
-          "required": false,
-          "default": true,
-          "label": "Show Deleted",
-          "type": "checkbox"
-        },
-        {
-          "description": "Show pending masked emails in the list",
-          "name": "show_pending",
-          "required": false,
-          "default": true,
-          "label": "Show Pending",
-          "type": "checkbox"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "create-quick",
@@ -77,8 +59,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.11.19",
-    "@types/react": "18.2.57",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.57",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

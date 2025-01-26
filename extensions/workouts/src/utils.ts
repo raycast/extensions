@@ -193,3 +193,68 @@ export const saveFileToDesktop = (
     });
   }
 };
+
+export function parseFlexibleTime(timeStr: string): string | null {
+  // Remove any whitespace
+  timeStr = timeStr.trim().toLowerCase();
+
+  // Handle HH:MM:SS format
+  if (isDurationValid(timeStr)) {
+    return timeStr;
+  }
+
+  // Handle HH:MM or MM:SS format
+  const timePartMatch = timeStr.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timePartMatch) {
+    const [, part1, part2] = timePartMatch;
+    const num1 = parseInt(part1, 10);
+    const num2 = parseInt(part2, 10);
+
+    // If second number is >= 60, treat as HH:MM
+    if (num2 >= 60) {
+      return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+    }
+
+    // If first number >= 24, treat as MM:SS
+    if (num1 >= 24) {
+      const hours = Math.floor(num1 / 60);
+      const minutes = num1 % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(num2).padStart(2, "0")}`;
+    }
+
+    // Default to HH:MM
+    return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+  }
+
+  // Initialize time components
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+
+  // Handle formats like "5h4m23s", "25min", "25m", etc.
+  const hourMatch = timeStr.match(/(\d+)\s*h/);
+  const minMatch = timeStr.match(/(\d+)\s*m(?:in)?(?!\s*s)/);
+  const secMatch = timeStr.match(/(\d+)\s*s/);
+
+  if (hourMatch) hours = parseInt(hourMatch[1]);
+  if (minMatch) minutes = parseInt(minMatch[1]);
+  if (secMatch) seconds = parseInt(secMatch[1]);
+
+  // If no matches found, try parsing as pure minutes
+  if (!hourMatch && !minMatch && !secMatch) {
+    const numericValue = parseFloat(timeStr);
+    if (!isNaN(numericValue)) {
+      minutes = numericValue;
+    } else {
+      return null;
+    }
+  }
+
+  // Convert to total seconds and format
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}

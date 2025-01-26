@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createWriteStream } from "node:fs";
 import { access, constants, copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -20,7 +20,7 @@ import { useAI } from "@raycast/utils";
 import { execa } from "execa";
 import { Searcher } from "fast-fuzzy";
 import got, { Progress } from "got";
-import { titleToSlug } from "simple-icons/sdk";
+import { getIconSlug } from "simple-icons/sdk";
 import { JsDelivrNpmResponse, IconData, LaunchContext } from "./types.js";
 
 const cache = new Cache();
@@ -153,7 +153,7 @@ export const copySvg = async ({ version, icon }: { version: string; icon: IconDa
   const { svg } = await loadSvg({
     version,
     icon,
-    slug: icon.slug || titleToSlug(icon.title),
+    slug: getIconSlug(icon),
   });
   toast.style = Toast.Style.Success;
   Clipboard.copy(svg);
@@ -219,20 +219,21 @@ export const aiSearch = async (icons: IconData[], searchString: string) => {
   return AI.ask(searchPrompt).catch(() => []);
 };
 
+export const getKeywords = (icon: IconData) =>
+  [
+    icon.title,
+    icon.slug,
+    icon.aliases?.aka,
+    icon.aliases?.dup?.map((duplicate) => duplicate.title),
+    Object.values(icon.aliases?.loc ?? {}),
+  ]
+    .flat()
+    .filter(Boolean) as string[];
+
 export const useSearch = ({ icons }: { icons: IconData[] }) => {
   const [searchString, setSearchString] = useState("");
   const $searchString = searchString.trim().toLowerCase();
-  const getKeywords = (icon: IconData) =>
-    [
-      icon.title,
-      icon.slug,
-      icon.aliases?.aka,
-      icon.aliases?.dup?.map((duplicate) => duplicate.title),
-      Object.values(icon.aliases?.loc ?? {}),
-    ]
-      .flat()
-      .filter(Boolean) as string[];
-  const searcher = new Searcher(icons, { keySelector: getKeywords });
+  const searcher = useMemo(() => new Searcher(icons, { keySelector: getKeywords }), [icons]);
 
   const filteredIcons = $searchString
     ? enableAiSearch && hasAccessToAi

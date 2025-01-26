@@ -5,6 +5,7 @@ import { getFavicon } from "@raycast/utils";
 export interface Preferences {
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
+  readonly profilePath: string;
 }
 
 export enum SettingsProfileOpenBehaviour {
@@ -53,6 +54,10 @@ export class Tab {
 
   urlWithoutScheme(): string {
     return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
+  }
+
+  realFavicon(): string {
+    return new URL(this.favicon || "/favicon.ico", this.url).href;
   }
 
   googleFavicon(): Image.ImageLike {

@@ -1,5 +1,14 @@
 # GitHub Changelog
 
+## [Fix base clone path] - 2025-01-19
+
+- Move `baseClonePath` to extension root level
+- Fix `Clone and Open` path
+
+## [Mark notification as done] - 2025-01-09
+
+- Add a new action to mark a notification as done.
+
 ## [Change menu bar unread style] - 2024-12-17
 
 - Use a new icon with indicator for unread state

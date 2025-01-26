@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Use pagination for fetching users list] - 2025-01-24
+
+- User Notion pagination to fetch the list of Notion users. This allows fetching more than 100 users.
+
 ## [Refactor - No functional changes] - 2024-10-21
 
 - Move code around and derives more types from `@notionhq/client` (2024-07-03)

@@ -52,8 +52,8 @@ export default function Summarize() {
 
   useEffect(() => {
     if (!modelLoading) {
-      setSeparateDefaultModel(data.filter((x) => x.id !== "default"));
-      setDefaultModel(data.find((x) => x.id === "default") ?? DEFAULT_MODEL);
+      setSeparateDefaultModel(Object.values(data).filter((x) => x.id !== "default"));
+      setDefaultModel(data["default"] ?? DEFAULT_MODEL);
     }
   }, [modelLoading]);
 
@@ -87,7 +87,7 @@ export default function Summarize() {
             title="Submit"
             icon={Icon.Checkmark}
             onAction={() => {
-              const chooseModel = data.find((x) => x.id === selectedModelId) || DEFAULT_MODEL;
+              const chooseModel = data[selectedModelId] || DEFAULT_MODEL;
               // PS: Ask page back to Summarize is purely new conversation
               // we don't want to maintain the old conversation
               const conversation: Conversation = {
