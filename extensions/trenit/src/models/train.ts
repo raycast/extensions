@@ -12,4 +12,5 @@ export interface Train {
   isBlinking: boolean;
   isReplacedByBus: boolean;
   isIncomplete: boolean;
+  stops: string[];
 }

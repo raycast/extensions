@@ -30,6 +30,14 @@ export function mapTrains(apiTrains: api.ApiTrain[]): Train[] {
     // Hide platform if it's "punto fermata" (bus) or if the train is replaced by bus (platform doesn't matter anymore)
     const platform = train.platform == "PF" || isReplacedByBus ? "" : train.platform;
 
+    let stops: string[] = [];
+    const regex = /([A-ZÈÀÌÒÙ' .]+?) \((\d{1,2}[:.]\d{2})\)/g;
+    if (regex.test(train.notes)) {
+      stops = [...train.notes.matchAll(regex)].map(
+        (match) => `${match[1].replace(/'{2,}/g, "'").trim()} (${match[2].replace(".", ":")})`,
+      );
+    }
+
     return {
       carrier: capitalize(train.carrier),
       category: category,
@@ -44,6 +52,7 @@ export function mapTrains(apiTrains: api.ApiTrain[]): Train[] {
       isBlinking: train.isBlinking,
       isReplacedByBus,
       isIncomplete: isIncomplete,
+      stops: stops,
     };
   });
 }

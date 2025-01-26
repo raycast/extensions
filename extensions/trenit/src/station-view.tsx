@@ -45,6 +45,7 @@ function displayToast({
 
 export function StationView(props: { station: Station }) {
   const [direction, setDirection] = useState("false");
+  const [currentIcon, setCurrentIcon] = useState<string>("dot_left.svg");
 
   const {
     isLoading: isLoading,
@@ -73,8 +74,6 @@ export function StationView(props: { station: Station }) {
       });
     },
   });
-
-  const [currentIcon, setCurrentIcon] = useState<string>("dot_left.svg");
 
   useEffect(() => {
     const icons = ["dot_left.svg", "dot_right.svg"];
@@ -140,6 +139,13 @@ export function StationView(props: { station: Station }) {
                     )}
                     {train.isIncomplete && (
                       <List.Item.Detail.Metadata.Label title="⚠️ The details on this canceled train are temporarily not available (the train could be replaced by bus)." />
+                    )}
+                    {train.stops && train.stops.length > 0 && (
+                      <List.Item.Detail.Metadata.TagList title="Stops">
+                        {train.stops.map((stop) => (
+                          <List.Item.Detail.Metadata.TagList.Item key={stop} text={stop} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
                     )}
                   </List.Item.Detail.Metadata>
                 }
