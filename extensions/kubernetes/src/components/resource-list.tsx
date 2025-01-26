@@ -1,27 +1,23 @@
-import { ApiType, KubernetesObject } from "@kubernetes/client-node";
+import { KubernetesObject } from "@kubernetes/client-node";
 import { List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { ApiConstructor, useKubernetesContext } from "../states/context";
-import { useKubernetesNamespace } from "../states/namespace";
+import useKubernetesResources from "../hooks/useKubernetesResources";
+import { useKubernetesContext } from "../states/context";
 import { getDarkColor, getLightColor } from "../utils/color";
 import NamespaceDropdown from "./namespace-dropdown";
 import ResourceAction from "./resource-action";
 import ResourceDetail from "./resource-detail";
 
-export function ResourceList<T extends KubernetesObject, U extends ApiType>(props: {
+export function ResourceList<T extends KubernetesObject>(props: {
   apiVersion: string;
   kind: string;
   namespaced: boolean;
-  apiClientType: ApiConstructor<U>;
-  listResources: (apiType: U, namespace: string) => Promise<T[]>;
   matchResource: (resource: T, searchText: string) => boolean;
   renderFields: (resource: T) => string[];
 }) {
-  const { apiVersion, kind, namespaced, apiClientType, listResources, matchResource, renderFields } = props;
+  const { apiVersion, kind, namespaced, matchResource, renderFields } = props;
 
-  const { currentContext, getApiClient } = useKubernetesContext();
-  const { currentNamespace } = useKubernetesNamespace();
+  const { currentContext } = useKubernetesContext();
 
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [showManagedFields, setShowManagedFields] = useState(false);
@@ -30,13 +26,7 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
   const [searchText, setSearchText] = useState("");
   const [resources, setResources] = useState<T[]>([]);
 
-  const { isLoading, data } = usePromise(
-    async (namespace: string) => {
-      return await listResources(getApiClient(apiClientType), namespace);
-    },
-    [currentNamespace],
-    { onData: setResources },
-  );
+  const { isLoading, data } = useKubernetesResources<T>(apiVersion, kind);
 
   useEffect(() => {
     if (!data) {
