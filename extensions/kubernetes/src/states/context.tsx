@@ -1,13 +1,13 @@
 import { ApiType, Configuration, Context, KubeConfig } from "@kubernetes/client-node";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export type ApiConstructor<T extends ApiType> = new (config: Configuration) => T;
 
 type KubernetesContextContextType = {
   kubeConfig: KubeConfig;
   contexts: Context[];
-  currentContext: string;
   setContexts: React.Dispatch<React.SetStateAction<Context[]>>;
+  currentContext: string;
   setCurrentContext: React.Dispatch<React.SetStateAction<string>>;
   getApiClient: <T extends ApiType>(apiClientType: ApiConstructor<T>) => T;
 };
@@ -23,40 +23,38 @@ export const useKubernetesContext = (): KubernetesContextContextType => {
 };
 
 export const KubernetesContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const kubeConfig = useRef(new KubeConfig());
-  kubeConfig.current.loadFromDefault();
+  const kubeConfig = new KubeConfig();
+  kubeConfig.loadFromDefault();
 
-  const [contexts, setContexts] = useState<Context[]>(kubeConfig.current.getContexts());
-  const [currentContext, setCurrentContext] = useState<string>(kubeConfig.current.getCurrentContext());
+  const [contexts, setContexts] = useState<Context[]>(kubeConfig.getContexts());
+  const [currentContext, setCurrentContext] = useState<string>(kubeConfig.getCurrentContext());
 
   const apiClients = useRef(new Map<string, ApiType>());
+  useEffect(() => {
+    if (currentContext) {
+      apiClients.current.clear();
+    }
+  }, [currentContext]);
 
-  const getApiClient = <T extends ApiType>(apiClientType: ApiConstructor<T>): T => {
+  const getApiClient = useCallback(<T extends ApiType>(apiClientType: ApiConstructor<T>): T => {
     const apiType = apiClientType.name;
 
     if (apiClients.current.has(apiType)) {
       return apiClients.current.get(apiType) as T;
     }
 
-    const client = kubeConfig.current.makeApiClient(apiClientType);
+    const client = kubeConfig.makeApiClient(apiClientType);
     apiClients.current.set(apiType, client);
     return client;
-  };
-
-  useEffect(() => {
-    if (currentContext) {
-      kubeConfig.current.setCurrentContext(currentContext);
-      apiClients.current.clear();
-    }
-  }, [currentContext]);
+  }, []);
 
   return (
     <KubernetesContextContext.Provider
       value={{
-        kubeConfig: kubeConfig.current,
+        kubeConfig,
         contexts,
-        currentContext,
         setContexts,
+        currentContext,
         setCurrentContext,
         getApiClient,
       }}
