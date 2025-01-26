@@ -1,6 +1,6 @@
 # Mercado Libre Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-01-26
 
 - Added support for Ecuadorian marketplace.
 - Renamed `Show Details` action to `Show Listing Details` and `Open in Browser` action to `Open Listing in Browser`.
