@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Fix] - 2025-02-26
+
+- [@jsynowiec] Command 'Create Custom Command': typos fixes.
+
 ## [Improvement] - 2025-01-02
 
 - New Command 'Loaded Models': lists currently models loaded on memory. Data are auto updated every 3 seconds.
