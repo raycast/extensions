@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
 import { Fragment } from "react";
 
 import {
@@ -39,6 +49,12 @@ import SubTasks from "./SubTasks";
 import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
 import TaskEdit from "./TaskEdit";
+
+interface Preferences {
+  completeTaskShortcut: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
 
 type TaskActionsProps = {
   task: Task;
@@ -200,6 +216,15 @@ export default function TaskActions({
 
   return (
     <>
+      <Action
+        title="Complete Task"
+        icon={Icon.Checkmark}
+        shortcut={
+          preferences.completeTaskShortcut === "shiftCmdE" ? { modifiers: ["cmd", "shift"], key: "e" } : undefined
+        }
+        onAction={() => completeTask(task)}
+      />
+
       {isTodoistInstalled ? (
         <Action.Open
           title="Open Task in Todoist"
@@ -243,13 +268,6 @@ export default function TaskActions({
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           target={<TaskEdit task={task} />}
-        />
-
-        <Action
-          title="Complete Task"
-          icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-          onAction={() => completeTask(task)}
         />
 
         <Action.PickDate
