@@ -1,4 +1,4 @@
-import { KubernetesObject } from "@kubernetes/client-node";
+import { KubernetesObject, KubernetesObjectApi } from "@kubernetes/client-node";
 import { showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useKubernetesContext } from "../states/context";
@@ -9,7 +9,7 @@ export default function useKubernetesResources<T extends KubernetesObject>(apiVe
   const { currentNamespace } = useKubernetesNamespace();
 
   const { isLoading, data } = usePromise(
-    async (namespace: string) => {
+    async (apiClient: KubernetesObjectApi, namespace: string) => {
       try {
         const resp = await apiClient.list<T>(apiVersion, kind, namespace);
         return resp.items;
@@ -23,7 +23,7 @@ export default function useKubernetesResources<T extends KubernetesObject>(apiVe
         return [];
       }
     },
-    [currentNamespace],
+    [apiClient, currentNamespace],
   );
 
   return { isLoading, data };

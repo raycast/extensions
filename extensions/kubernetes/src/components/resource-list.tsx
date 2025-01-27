@@ -2,11 +2,10 @@ import { KubernetesObject } from "@kubernetes/client-node";
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useKubernetesResources from "../hooks/useKubernetesResources";
+import { useToggle } from "../hooks/useToggle";
 import { useKubernetesContext } from "../states/context";
-import { getDarkColor, getLightColor } from "../utils/color";
 import NamespaceDropdown from "./namespace-dropdown";
-import ResourceAction from "./resource-action";
-import ResourceDetail from "./resource-detail";
+import ResourceItem from "./resource-item";
 
 export function ResourceList<T extends KubernetesObject>(props: {
   apiVersion: string;
@@ -19,10 +18,7 @@ export function ResourceList<T extends KubernetesObject>(props: {
 
   const { currentContext } = useKubernetesContext();
 
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [showManagedFields, setShowManagedFields] = useState(false);
-  const [showLastAppliedConfiguration, setShowLastAppliedConfiguration] = useState(false);
-
+  const detailView = useToggle("Detail View", false);
   const [searchText, setSearchText] = useState("");
   const [resources, setResources] = useState<T[]>([]);
 
@@ -37,8 +33,8 @@ export function ResourceList<T extends KubernetesObject>(props: {
 
   return (
     <List
-      navigationTitle={`${kind} (${resources.length ?? 0}) 🐳 Context: ${currentContext}`}
-      isShowingDetail={isShowingDetail}
+      navigationTitle={`${kind} (${resources.length}) 🐳 Context: ${currentContext}`}
+      isShowingDetail={detailView.show}
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -47,42 +43,13 @@ export function ResourceList<T extends KubernetesObject>(props: {
       <List.EmptyView title={isLoading ? "Loading ..." : "No results found"} />
 
       {resources.map((resource) => (
-        <List.Item
+        <ResourceItem
           key={resource.metadata?.uid}
-          title={resource.metadata?.name ?? ""}
-          detail={
-            <ResourceDetail
-              apiVersion={apiVersion}
-              kind={kind}
-              resource={resource}
-              showManagedFields={showManagedFields}
-              showLastAppliedConfiguration={showLastAppliedConfiguration}
-            />
-          }
-          actions={
-            <ResourceAction
-              resource={resource}
-              isShowingDetail={isShowingDetail}
-              setIsShowingDetail={setIsShowingDetail}
-              showManagedFields={showManagedFields}
-              setShowManagedFields={setShowManagedFields}
-              showLastAppliedConfiguration={showLastAppliedConfiguration}
-              setShowLastAppliedConfiguration={setShowLastAppliedConfiguration}
-            />
-          }
-          accessories={
-            isShowingDetail
-              ? []
-              : renderFields(resource).map((value, index) => ({
-                  tag: {
-                    value,
-                    color: {
-                      light: getLightColor(index),
-                      dark: getDarkColor(index),
-                    },
-                  },
-                }))
-          }
+          apiVersion={apiVersion}
+          kind={kind}
+          resource={resource}
+          detailView={detailView}
+          renderFields={renderFields}
         />
       ))}
     </List>
