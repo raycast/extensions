@@ -85,6 +85,7 @@ const EXCLUDE_APPS = [
   'app/depfu',
   'app/dev-mend-for-github-com',
   'app/developer-platform-dev',
+  'app/devin-ai-integration',
   'app/devpool-directory-superintendent',
   'app/forking-renovate',
   'app/github-actions',
