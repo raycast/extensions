@@ -40,10 +40,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -82,10 +78,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -124,10 +116,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -166,10 +154,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -208,10 +192,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -250,10 +230,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -308,10 +284,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -367,10 +339,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -410,10 +378,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -453,10 +417,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -496,10 +456,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -539,10 +495,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -582,10 +534,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -625,10 +573,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -668,10 +612,6 @@
             {
               "value": "sonar",
               "title": "Sonar 128k"
-            },
-            {
-              "value": "llama-3.3-70b-instruct",
-              "title": "Llama 3.3 70B 128k"
             }
           ]
         }
@@ -702,10 +642,6 @@
         {
           "value": "sonar",
           "title": "Sonar 128k"
-        },
-        {
-          "value": "llama-3.3-70b-instruct",
-          "title": "Llama 3.3 70B 128k"
         }
       ]
     },

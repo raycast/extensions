@@ -4,7 +4,6 @@ export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Sonar 128k", id: "sonar" },
   { name: "Sonar Pro 200k", id: "sonar-pro" },
-  { name: "Llama 3.3 70B 128k", id: "llama-3.3-70b-instruct" },
 ];
 
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
@@ -25,9 +24,6 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   let price = 0;
   switch (model) {
-    case "llama-3.3-70b-instruct":
-      price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
-      break;
     case "sonar":
       price = (5 / 1000 + (prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
       break;
