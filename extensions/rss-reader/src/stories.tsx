@@ -21,8 +21,12 @@ interface Story {
   isNew: boolean;
   date: number;
   fromFeed: string;
+  lastRead?: number;
 }
 
+type StoryLastRead = {
+  [key: string]: number;
+};
 type FeedLastViewed = {
   [key: string]: number;
 };
@@ -49,6 +53,7 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
         </ActionPanel>
       }
       accessories={[
+        props.item.lastRead ? { icon: Icon.Eye, tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}` } : { icon: Icon.EyeDisabled, tooltip: "Last Read: never" },
         {
           text: timeAgo.format(props.item.date) as string,
           icon: props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined,
@@ -58,13 +63,23 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
   );
 }
 
+async function updateLastRead(props: { item: Story }) {
+  const lastRead = new Date().valueOf();
+  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: StoryLastRead = storyLastViewedString ? JSON.parse(storyLastViewedString) : {};
+  storyLastRead[props.item.guid] = lastRead;
+  await LocalStorage.setItem("storyLastRead", JSON.stringify(storyLastRead));
+}
+
 function ReadStory(props: { item: Story }) {
+  updateLastRead(props);
   return props.item.content ? (
     <Action.Push icon={Icon.Book} title="Read Story" target={<StoryDetail item={props.item} />} />
   ) : null;
 }
 
 function OpenStory(props: { item: Story }) {
+  updateLastRead(props);
   return props.item.link ? <Action.OpenInBrowser url={props.item.link} /> : null;
 }
 
@@ -92,10 +107,12 @@ function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
 async function getStories(feeds: Feed[]) {
   const feedLastViewedString = (await LocalStorage.getItem("feedLastViewed")) as string;
   const feedLastViewed = feedLastViewedString
-    ? (JSON.parse(feedLastViewedString) as FeedLastViewed)
-    : ({} as FeedLastViewed);
-
+  ? (JSON.parse(feedLastViewedString) as FeedLastViewed)
+  : ({} as FeedLastViewed);
+  
   const storyItems: Story[] = [];
+  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: StoryLastRead = storyLastViewedString ? JSON.parse(storyLastViewedString) : {};
 
   for (const feedItem of feeds) {
     const lastViewed = feedLastViewed[feedItem.url] || 0;
@@ -103,7 +120,9 @@ async function getStories(feeds: Feed[]) {
       const feed = await parser.parseURL(feedItem.url);
       const stories: Story[] = [];
       feed.items.forEach((item) => {
-        stories.push(ItemToStory(item, feedItem, lastViewed));
+        const story = ItemToStory(item, feedItem, lastViewed);
+        const lastRead = storyLastRead[story.guid] || 0;
+        stories.push({...story, lastRead});
       });
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
@@ -135,18 +154,20 @@ export function StoriesList(props: { feeds?: Feed[] }) {
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        data?.feeds.length && data.feeds.length > 1 ? (
           <List.Dropdown onChange={setFilter} tooltip="Subscription">
             <List.Dropdown.Section>
               <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
             </List.Dropdown.Section>
-            <List.Dropdown.Section>
-              {data?.feeds.map((feed) => (
+            {data?.feeds && data.feeds.length > 1 && <List.Dropdown.Section>
+              {data.feeds.map((feed) => (
                 <List.Dropdown.Item key={feed.url} icon={feed.icon} title={feed.title} value={feed.url} />
               ))}
+            </List.Dropdown.Section>}
+            <List.Dropdown.Section>
+              <List.Dropdown.Item icon={Icon.Eye} title="Read" value="read" />
+              <List.Dropdown.Item icon={Icon.EyeDisabled} title="Unread" value="unread" />
             </List.Dropdown.Section>
           </List.Dropdown>
-        ) : null
       }
       actions={
         !props?.feeds && (
@@ -162,7 +183,11 @@ export function StoriesList(props: { feeds?: Feed[] }) {
       }
     >
       {data?.stories
-        .filter((story) => filter === "all" || story.fromFeed === filter)
+        .filter((story) => {
+          if (filter==="read") return story.lastRead;
+          if (filter==="unread") return !story.lastRead;
+          return filter === "all" || story.fromFeed === filter
+        })
         .map((story) => <StoryListItem key={story.guid} item={story} refresh={revalidate} />)}
     </List>
   );
