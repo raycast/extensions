@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  List,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import axios from "axios";
 import { getCapmoToken } from "./auth";
@@ -24,12 +17,9 @@ export default function ListProjects() {
   } = useCachedPromise(async () => {
     try {
       const token = getCapmoToken();
-      const response = await axios.get<{ data: { items: Project[] } }>(
-        "https://api.capmo.de/api/v1/projects",
-        {
-          headers: { Authorization: token },
-        }
-      );
+      const response = await axios.get<{ data: { items: Project[] } }>("https://api.capmo.de/api/v1/projects", {
+        headers: { Authorization: token },
+      });
 
       // Validate and filter projects
       const projectItems = response.data?.data?.items;
@@ -39,9 +29,7 @@ export default function ListProjects() {
         throw new Error("Unexpected response format for projects.");
       }
     } catch (err) {
-      throw new Error(
-        err instanceof Error ? err.message : "Failed to fetch projects."
-      );
+      throw new Error(err instanceof Error ? err.message : "Failed to fetch projects.");
     }
   });
 
