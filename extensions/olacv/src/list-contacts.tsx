@@ -1,9 +1,8 @@
 import { FormValidation, showFailureToast, useCachedState, useFetch, useForm } from "@raycast/utils";
-import { API_HEADERS, API_URL, parseResponse } from "./config";
-import { Contact, Result } from "./types";
+import { API_HEADERS, API_URL } from "./config";
+import { Contact, ErrorResult, Result } from "./types";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import useOla from "./use-ola";
 
 export default function ListContacts() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-contact-details", false);
@@ -52,17 +51,18 @@ function CreateContact({ onCreate }: {onCreate: () => void}) {
     }
   })
 
-  // const { isLoading } = useOla("contacts", {
-  //   method: "POST",
-  //   body: JSON.stringify(values),
-
-  // });
-
   const { isLoading } = useFetch(API_URL + "contacts", {
     method: "POST",
     headers: API_HEADERS,
     body: JSON.stringify(values),
-    parseResponse,
+    async parseResponse(response) {
+        if (!response.ok) {
+            const result: ErrorResult  = await response.json();
+            throw new Error(result.message);
+        }
+        const result = await response.json();
+        return result;
+    },
     onError(error) {
       showFailureToast(error);
       setExecute(false);

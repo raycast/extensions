@@ -25,6 +25,16 @@ export type Domain = {
     updated_at: string;
 }
 
+export type DomainZone = {
+    id: string;
+    name: string;
+    status: string;
+    name_servers: string[];
+    activated_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export type  ErrorResult = {
     message: string;
     errors?: {

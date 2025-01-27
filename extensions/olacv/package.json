@@ -3,7 +3,7 @@
   "name": "olacv",
   "title": "OlaCV",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "ola.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
@@ -23,13 +23,13 @@
     {
       "name": "list-contacts",
       "title": "List Contacts",
-      "description": "",
+      "description": "List and Create Contacts",
       "mode": "view"
     },
     {
       "name": "list-domains",
       "title": "List Domains",
-      "description": "",
+      "description": "List Domains and View Domain Zone",
       "mode": "view"
     }
   ],
