@@ -50,10 +50,6 @@ import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
 import TaskEdit from "./TaskEdit";
 
-interface Preferences {
-  completeTaskShortcut: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 type TaskActionsProps = {
