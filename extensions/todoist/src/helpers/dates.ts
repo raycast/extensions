@@ -34,8 +34,8 @@ export function isOverdue(date: string) {
   return isBefore(day, today) && !isSameDay(day, today);
 }
 
-export function displayDueDate(dateString: string) {
-  const date = new Date(dateString);
+export function displayDate(dateString: string) {
+  const date = parseISO(dateString);
   if (isOverdue(dateString)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
@@ -63,34 +63,9 @@ export function displayDueDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
-export function displayDueDateTime(dateString: string) {
-  const date = displayDueDate(dateString);
+export function displayDateTime(dateString: string) {
+  const date = displayDate(dateString);
   return `${date} ${format(new Date(dateString), "HH:mm")}`;
-}
-
-export function displayDeadlineDate(dateString: string) {
-  const date = parseISO(dateString);
-  const today = getToday();
-
-  if (isSameDay(date, today)) {
-    return "Today";
-  }
-
-  if (isSameDay(date, addDays(today, 1))) {
-    return "Tomorrow";
-  }
-
-  const nextWeek = addDays(today, 7);
-
-  if (isBefore(date, nextWeek)) {
-    return format(date, "eeee");
-  }
-
-  if (isThisYear(date)) {
-    return format(date, "dd MMMM");
-  }
-
-  return format(date, "dd MMMM yyy");
 }
 
 export function getAPIDate(date: Date): string {

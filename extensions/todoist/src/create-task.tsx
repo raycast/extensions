@@ -18,7 +18,7 @@ import useSyncData from "./hooks/useSyncData";
 type CreateTaskValues = {
   content: string;
   description: string;
-  dueDate: Date | null;
+  date: Date | null;
   deadline: Date | null;
   duration: string;
   priority: string;
@@ -52,17 +52,15 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     async onSubmit(values) {
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
-      if (values.dueDate) {
+      if (values.date) {
         body.due = {
-          date: Form.DatePicker.isFullDay(values.dueDate) ? getAPIDate(values.dueDate) : values.dueDate.toISOString(),
+          date: Form.DatePicker.isFullDay(values.date) ? getAPIDate(values.date) : values.date.toISOString(),
         };
       }
 
       if (values.deadline) {
         body.deadline = {
-          date: Form.DatePicker.isFullDay(values.deadline)
-            ? getAPIDate(values.deadline)
-            : values.deadline.toISOString(),
+          date: getAPIDate(values.deadline),
         };
       }
 
@@ -138,7 +136,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         reset({
           content: "",
           description: "",
-          dueDate: null,
+          date: null,
           deadline: null,
           priority: String(lowestPriority.value),
           projectId: "",
@@ -157,7 +155,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     initialValues: {
       content: draftValues?.content,
       description: draftValues?.description,
-      dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      date: draftValues?.date ?? (fromTodayEmptyView ? new Date() : null),
       deadline: draftValues?.deadline ?? (fromTodayEmptyView ? new Date() : null),
       duration: draftValues?.duration ?? "",
       priority: draftValues?.priority || String(lowestPriority.value),
@@ -203,13 +201,13 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" />
+      <Form.DatePicker {...itemProps.date} title="Date" />
 
-      {values.dueDate && !Form.DatePicker.isFullDay(values.dueDate) ? (
+      {values.date && !Form.DatePicker.isFullDay(values.date) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
       ) : null}
 
-      <Form.DatePicker {...itemProps.deadline} title="Deadline date" type={Form.DatePicker.Type.Date} />
+      <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} />
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

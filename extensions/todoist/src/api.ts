@@ -208,7 +208,7 @@ export async function deleteProject(id: string, { data, setData }: CachedDataPar
   }
 }
 
-export type DueDate = {
+export type Date = {
   date: string;
   timezone: string | null;
   string: string;
@@ -216,7 +216,7 @@ export type DueDate = {
   is_recurring: boolean;
 };
 
-export type DeadlineDate = {
+export type Deadline = {
   date: string;
   timezone: string | null;
   lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
@@ -228,8 +228,8 @@ export type Task = {
   project_id: string;
   content: string;
   description: string;
-  due: DueDate | null;
-  deadline: DeadlineDate | null;
+  due: Date | null;
+  deadline: Deadline | null;
   priority: number;
   parent_id: string | null;
   child_order: number;
@@ -447,7 +447,7 @@ export type Reminder = {
   notify_uid: string;
   item_id: string;
   type: "relative" | "absolute" | "location";
-  due?: DueDate;
+  due?: Date;
   mm_offset?: number;
   name?: string;
   loc_lat?: string;
