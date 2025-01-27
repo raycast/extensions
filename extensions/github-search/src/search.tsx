@@ -131,7 +131,7 @@ const toQualifier = (input: string, qualifier: string) =>
 
 const toQualifierQuoted = (input: string, qualifier: string) =>
   input
-    .split(/[,\s]+/)
+    .split(/,\s*/)
     .map(value => `${qualifier}:"${value.trim()}"`)
     .join(' ');
 
