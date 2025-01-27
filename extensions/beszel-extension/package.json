@@ -15,21 +15,24 @@
       "name": "url",
       "type": "textfield",
       "required": true,
-      "description": "The URL of the Beszel service"
+      "description": "The URL of the Beszel service",
+      "placeholder": "https://beszel.example.com"
     },
     {
       "title": "Username",
       "name": "username",
       "type": "textfield",
       "required": true,
-      "description": "The username to use for authentication"
+      "description": "The username to use for authentication",
+      "placeholder": "admin"
     },
     {
       "title": "Password",
       "name": "password",
       "type": "password",
       "required": true,
-      "description": "The password to use for authentication"
+      "description": "The password to use for authentication",
+      "placeholder": "password"
     }
   ],
   "commands": [

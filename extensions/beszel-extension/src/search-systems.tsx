@@ -1,16 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useCallback, useEffect, useMemo } from "react";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
+import { useMemo } from "react";
 
 import { useSystems } from "./hooks/use-systems";
 import { secondsToUptime } from "./helpers/seconds-to-uptime";
@@ -31,43 +20,21 @@ function getSystemIconTintColor(system: BeszelSystem): Color {
 }
 
 export default function Command() {
-  const { url } = getPreferenceValues<Preferences.SearchSystems>();
   const client = useClient();
-  const { systems, isLoading, error } = useSystems(client);
+  const { systems, isLoading } = useSystems(client);
+  const { url } = getPreferenceValues<Preferences.SearchSystems>();
 
-  useEffect(() => {
-    if (!error) return;
+  const onPause = async (system: BeszelSystem) => {
+    if (!client) return;
 
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Something went wrong",
-      message: error,
-      primaryAction: {
-        title: "Open Extension Preferences",
-        onAction: () => {
-          openExtensionPreferences();
-        },
-      },
-    });
-  }, [error]);
+    await client.collection("systems").update(system.id, { status: "paused" });
+  };
 
-  const onPause = useCallback(
-    async (system: BeszelSystem) => {
-      if (!client) return;
+  const onResume = async (system: BeszelSystem) => {
+    if (!client) return;
 
-      await client.collection("systems").update(system.id, { status: "paused" });
-    },
-    [client],
-  );
-
-  const onResume = useCallback(
-    async (system: BeszelSystem) => {
-      if (!client) return;
-
-      await client.collection("systems").update(system.id, { status: "pending" });
-    },
-    [client],
-  );
+    await client.collection("systems").update(system.id, { status: "pending" });
+  };
 
   const grouped = useMemo(() => {
     if (!systems) return {};
