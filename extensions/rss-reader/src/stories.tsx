@@ -78,7 +78,7 @@ function ReadStory(props: { item: Story }) {
     <Action.Push
       icon={Icon.Book}
       title="Read Story"
-      target={<StoryDetail item={props.item} z />}
+      target={<StoryDetail item={props.item} />}
       onPush={() => updateLastRead(props)}
     />
   ) : null;
