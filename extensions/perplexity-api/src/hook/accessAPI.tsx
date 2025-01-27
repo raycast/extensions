@@ -4,7 +4,7 @@ import { global_model, enable_streaming, openai } from "./configAPI";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
-import { OpenAIError } from "openai";
+import OpenAI from "openai";
 
 const formatUserMessage = (message: string): string =>
   message
@@ -16,6 +16,7 @@ export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
+  const [returnedCitations, setReturnedCitations] = useState<string[]>([]);
   const [metrics, setMetrics] = useState({
     promptTokens: 0,
     responseTokens: 0,
@@ -82,11 +83,23 @@ export default function ResultView(props: ResultViewProps) {
       };
 
       if (response instanceof Stream) {
+        let hasSetCitations = false;
+
         for await (const part of response) {
           updateResponse(part.choices[0]?.delta?.content ?? "");
+
+          if (!hasSetCitations && part.model.includes("sonar")) {
+            const citations = (part as OpenAI.ChatCompletionChunk).citations;
+            if (citations?.length) {
+              setReturnedCitations(citations);
+              hasSetCitations = true; // to prevent further updates
+            }
+          }
         }
       } else {
         updateResponse(response.choices[0]?.message?.content ?? "");
+        const citations = (response as OpenAI.ChatCompletion).citations;
+        setReturnedCitations(response.model.includes("sonar") ? citations || [] : []);
       }
 
       const duration = (Date.now() - startTime) / 1000;
@@ -99,7 +112,7 @@ export default function ResultView(props: ResultViewProps) {
         cumulativeCost: m.cumulativeCost + estimatePrice(m.promptTokens, m.responseTokens, model),
       }));
     } catch (error) {
-      if (error instanceof OpenAIError) {
+      if (error instanceof OpenAI.OpenAIError) {
         setResponse(`## ⚠️ API Error\n\`\`\`${error.message}\`\`\``);
       } else {
         setResponse("⚠️ Unexpected error. Please check your input and connection.");
@@ -111,6 +124,7 @@ export default function ResultView(props: ResultViewProps) {
 
   function handleRetry(options: { newModel?: string; newTemp?: number }) {
     setResponse("");
+    setReturnedCitations([]);
     setLoading(true);
     getResult(options.newModel, options.newTemp);
   }
@@ -119,10 +133,26 @@ export default function ResultView(props: ResultViewProps) {
     getResult();
   }, []);
 
+  const markdownSegments = [];
+  if (user_extra_msg) {
+    markdownSegments.push(formatUserMessage(user_extra_msg) + "\n\n");
+  }
+
+  markdownSegments.push(response);
+
+  const shouldShowCitations = returnedCitations.length > 0 && /\[\d+\]/.test(response); // check if citations are returned and referenced
+  if (shouldShowCitations) {
+    const citationsSection = [
+      "\n\n---\n\n**Sources**\n",
+      returnedCitations.map((citation, index) => `${index + 1}. ${citation}`).join("\n"),
+    ].join("");
+    markdownSegments.push(citationsSection);
+  }
+
   return (
     <Detail
       isLoading={loading}
-      markdown={`${user_extra_msg ? formatUserMessage(user_extra_msg) + "\n\n" : ""}${response}`}
+      markdown={markdownSegments.join("")}
       actions={
         !loading && (
           <ActionPanel title="Actions">
