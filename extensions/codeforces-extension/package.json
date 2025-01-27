@@ -5,6 +5,9 @@
   "description": "Gives details about latest contests and details about any handle",
   "icon": "command-icon.png",
   "author": "harsh_varshney",
+  "contributors": [
+    "Mehul"
+  ],
   "categories": [
     "Web"
   ],
@@ -39,11 +42,19 @@
       "description": "Lists upcoming contests in Menu Bar",
       "mode": "menu-bar",
       "interval": "1d"
+    },
+    {
+      "name": "search-problem",
+      "title": "Search Problem",
+      "description": "Search Codeforces problems",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.5",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/utils": "^1.10.1",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
