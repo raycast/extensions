@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
-import { ActionPanel, Action, Icon, List, Detail, Color, Image } from "@raycast/api";
+import { Icon, List, Detail, Color, Image } from "@raycast/api";
 import type { Server, PingResult, Row } from "./types";
 import { regions, flags } from "./servers";
 
@@ -115,18 +115,13 @@ export default function Command() {
             <List.Item
               key={index}
               icon={generateIcon(result)}
-              title={result.region.name}
+              title={`${flags[result.region.country] || ""}  ${result.region.name}`}
               subtitle={`${result.region.country} (${result.region.code.toUpperCase()})`}
               accessories={[
                 {
-                  text: `${flags[result.region.country] || ""} ${result.unreachable ? "(?)" : result.latency.toFixed()}ms`,
+                  text: `${result.unreachable ? "(?)" : result.latency.toFixed()}ms`,
                 },
               ]}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard content={JSON.stringify(pingResults)} />
-                </ActionPanel>
-              }
             />
           ))}
         </List>

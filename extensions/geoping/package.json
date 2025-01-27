@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geoping",
-  "title": "GeoPing",
+  "title": "Geoping",
   "description": "Pings servers around the globe",
   "icon": "extension_icon.png",
-  "author": "chiroyce1",
+  "author": "chiroyce",
   "categories": [
     "Developer Tools",
     "System"
