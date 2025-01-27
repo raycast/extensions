@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smart-text-to-plain-text-converter",
+  "title": "Smart Text to Plain Text Converter",
+  "description": "Easily convert smart quotes, em dashes, and en dashes into plain text characters directly in Raycast.",
+  "icon": "extension-icon.png",
+  "author": "karbassi",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-command",
+      "title": "Convert Smart Text to Plain Text",
+      "description": "Converts smart quotes and dashes into plain text characters and copies the result.",
+      "mode": "view"
+    },
+    {
+      "name": "replace-highlighted-text",
+      "title": "Replace Highlighted Text with Plain Text",
+      "description": "Replaces the currently highlighted text with a plain text version.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
