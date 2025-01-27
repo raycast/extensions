@@ -1,0 +1,24 @@
+## Project Overview
+
+- A raycast extension. 
+- **Super simple** timer application which only does:
+    - Start a timer: A command accepts a duration in minutes only and starts a timer for the given duration 
+    - Stop the newest timer: A command sotps the most newly created timer
+    - List timers: list the running timers. For each timer, the command should display the remaining time in minutes and seconds. 
+        - In the list view, the timers should be sorted by the time they were started.
+        - In the list view, each timer accepts actions to remove/pause the timer.
+
+## Tecnoogies used
+
+- TypeScript
+- React
+- Raycast
+
+## Development flow
+
+- On each implementation step, create a new branch from the main branch and push the changes to the remote repository.
+
+## Planning
+
+- Before proceed with the implementation, create a thourough plan for the implementation. 
+- Consider erorr cases, edge cases, and the user experience.
