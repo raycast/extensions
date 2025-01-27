@@ -13,6 +13,7 @@ export function useConfig() {
         host: preferences.host,
         token: preferences.token,
         language: preferences.language || "en",
+        slugLength: preferences.slugLength || 6,
         showWebsitePreview: preferences.showWebsitePreview || "true",
       };
       setConfig(newConfig);

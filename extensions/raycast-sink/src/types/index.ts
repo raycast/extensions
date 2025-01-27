@@ -11,6 +11,7 @@ export interface Preferences {
   host: string;
   token: string;
   showWebsitePreview: string;
+  slugLength: number;
   language: string;
 }
 
@@ -18,6 +19,7 @@ export interface Config {
   host: string;
   token: string;
   showWebsitePreview: string;
+  slugLength: number;
   language: string;
 }
 
