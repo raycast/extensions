@@ -17,6 +17,12 @@
       "title": "GitHub Search",
       "description": "Open the GitHub Search web UI with pre-defined filters",
       "mode": "view"
+    },
+    {
+      "name": "run-saved-search",
+      "title": "Run Saved GitHub Search",
+      "description": "Quick access to your saved GitHub searches",
+      "mode": "view"
     }
   ],
   "dependencies": {

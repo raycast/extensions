@@ -135,7 +135,7 @@ const toQualifierQuoted = (input: string, qualifier: string) =>
     .map(value => `${qualifier}:"${value.trim()}"`)
     .join(' ');
 
-const buildUrl = (values: FormFields, reusableFilters: ReusableFilter[]) => {
+export const buildUrl = (values: FormFields, reusableFilters: ReusableFilter[]) => {
   const url = new URL('search', 'https://github.com');
 
   const assigneeFilter = values.assignee ? toQualifier(values.assignee, 'assignee') : '';
