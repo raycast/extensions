@@ -53,7 +53,9 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
         </ActionPanel>
       }
       accessories={[
-        props.item.lastRead ? { icon: Icon.Eye, tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}` } : { icon: Icon.EyeDisabled, tooltip: "Last Read: never" },
+        props.item.lastRead
+          ? { icon: Icon.Eye, tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}` }
+          : { icon: Icon.EyeDisabled, tooltip: "Last Read: never" },
         {
           text: timeAgo.format(props.item.date) as string,
           icon: props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined,
@@ -106,13 +108,11 @@ function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
 
 async function getStories(feeds: Feed[]) {
   const feedLastViewedString = (await LocalStorage.getItem("feedLastViewed")) as string;
-  const feedLastViewed = feedLastViewedString
-  ? (JSON.parse(feedLastViewedString) as FeedLastViewed)
-  : ({} as FeedLastViewed);
-  
+  const feedLastViewed: FeedLastViewed = JSON.parse(feedLastViewedString ?? "{}");
+
   const storyItems: Story[] = [];
   const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
-  const storyLastRead: StoryLastRead = storyLastViewedString ? JSON.parse(storyLastViewedString) : {};
+  const storyLastRead: StoryLastRead = JSON.parse(storyLastViewedString ?? "{}");
 
   for (const feedItem of feeds) {
     const lastViewed = feedLastViewed[feedItem.url] || 0;
@@ -122,7 +122,7 @@ async function getStories(feeds: Feed[]) {
       feed.items.forEach((item) => {
         const story = ItemToStory(item, feedItem, lastViewed);
         const lastRead = storyLastRead[story.guid] || 0;
-        stories.push({...story, lastRead});
+        stories.push({ ...story, lastRead });
       });
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
@@ -154,20 +154,22 @@ export function StoriesList(props: { feeds?: Feed[] }) {
     <List
       isLoading={isLoading}
       searchBarAccessory={
-          <List.Dropdown onChange={setFilter} tooltip="Subscription">
+        <List.Dropdown onChange={setFilter} tooltip="Subscription">
+          <List.Dropdown.Section>
+            <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
+          </List.Dropdown.Section>
+          {data?.feeds && data.feeds.length > 1 && (
             <List.Dropdown.Section>
-              <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
-            </List.Dropdown.Section>
-            {data?.feeds && data.feeds.length > 1 && <List.Dropdown.Section>
               {data.feeds.map((feed) => (
                 <List.Dropdown.Item key={feed.url} icon={feed.icon} title={feed.title} value={feed.url} />
               ))}
-            </List.Dropdown.Section>}
-            <List.Dropdown.Section>
-              <List.Dropdown.Item icon={Icon.Eye} title="Read" value="read" />
-              <List.Dropdown.Item icon={Icon.EyeDisabled} title="Unread" value="unread" />
             </List.Dropdown.Section>
-          </List.Dropdown>
+          )}
+          <List.Dropdown.Section>
+            <List.Dropdown.Item icon={Icon.Eye} title="Read" value="read" />
+            <List.Dropdown.Item icon={Icon.EyeDisabled} title="Unread" value="unread" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
       }
       actions={
         !props?.feeds && (
@@ -184,9 +186,9 @@ export function StoriesList(props: { feeds?: Feed[] }) {
     >
       {data?.stories
         .filter((story) => {
-          if (filter==="read") return story.lastRead;
-          if (filter==="unread") return !story.lastRead;
-          return filter === "all" || story.fromFeed === filter
+          if (filter === "read") return story.lastRead;
+          if (filter === "unread") return !story.lastRead;
+          return filter === "all" || story.fromFeed === filter;
         })
         .map((story) => <StoryListItem key={story.guid} item={story} refresh={revalidate} />)}
     </List>
