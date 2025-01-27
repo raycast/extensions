@@ -68,21 +68,24 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
 async function updateLastRead(props: { item: Story }) {
   const lastRead = new Date().valueOf();
   const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
-  const storyLastRead: StoryLastRead = storyLastViewedString ? JSON.parse(storyLastViewedString) : {};
+  const storyLastRead: StoryLastRead = await JSON.parse(storyLastViewedString ?? "{}");
   storyLastRead[props.item.guid] = lastRead;
   await LocalStorage.setItem("storyLastRead", JSON.stringify(storyLastRead));
 }
 
 function ReadStory(props: { item: Story }) {
-  updateLastRead(props);
   return props.item.content ? (
-    <Action.Push icon={Icon.Book} title="Read Story" target={<StoryDetail item={props.item} />} />
+    <Action.Push
+      icon={Icon.Book}
+      title="Read Story"
+      target={<StoryDetail item={props.item} z />}
+      onPush={() => updateLastRead(props)}
+    />
   ) : null;
 }
 
 function OpenStory(props: { item: Story }) {
-  updateLastRead(props);
-  return props.item.link ? <Action.OpenInBrowser url={props.item.link} /> : null;
+  return props.item.link ? <Action.OpenInBrowser url={props.item.link} onOpen={() => updateLastRead(props)} /> : null;
 }
 
 function CopyStory(props: { item: Story }) {
@@ -107,7 +110,7 @@ function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
 }
 
 async function getStories(feeds: Feed[]) {
-  const feedLastViewedString = (await LocalStorage.getItem("feedLastViewed")) as string;
+  const feedLastViewedString = await LocalStorage.getItem<string>("feedLastViewed");
   const feedLastViewed: FeedLastViewed = JSON.parse(feedLastViewedString ?? "{}");
 
   const storyItems: Story[] = [];
