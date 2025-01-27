@@ -983,7 +983,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "deepseek-r1-distill-llama-70b",
+      "default": "llama-3.3-70b-versatile",
       "data": [
         {
           "value": "deepseek-r1-distill-llama-70b",
