@@ -1,5 +1,17 @@
 # Kubernetes Changelog
 
+## [Refactor Code Structure, Add More Commands] - {PR_MERGE_DATE}
+
+- Refactor code structure to make it more maintainable.
+- Split resources into sections when showing "All Namespaces".
+
+Added the following commands:
+- Get Events
+- Get LimitRanges
+- Get PodTemplates
+- Get ReplicationControllers
+- Get ResourceQuotas
+
 ## [Custom Namespaces] - 2025-01-26
 
 - Allow users to specify available namespaces for each Kubernetes context.
