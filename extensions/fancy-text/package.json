@@ -27,20 +27,6 @@
         "generate",
         "decorate"
       ]
-    },
-    {
-      "name": "fancy-selected-text",
-      "title": "Fancy Selected Text",
-      "description": "Convert selected text to fancy text",
-      "mode": "view",
-      "keywords": [
-        "fancy",
-        "text",
-        "convert",
-        "fancy text",
-        "generate",
-        "decorate"
-      ]
     }
   ],
   "preferences": [

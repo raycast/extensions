@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elevenlabs-tts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "ElevenLabs TTS",
   "description": "Convert selected text to lifelike speech using ElevenLabs' premium AI voices",
   "icon": "extension-icon.png",
@@ -130,6 +130,44 @@
           "type": "textfield",
           "required": false,
           "default": "0.75"
+        },
+        {
+          "name": "playbackSpeed",
+          "title": "Playback Speed",
+          "description": "Speed of speech playback",
+          "type": "dropdown",
+          "required": false,
+          "default": "1.00",
+          "data": [
+            {
+              "title": "0.5x (Slow)",
+              "value": "0.50"
+            },
+            {
+              "title": "0.75x (Slower)",
+              "value": "0.75"
+            },
+            {
+              "title": "1.0x (Normal)",
+              "value": "1.00"
+            },
+            {
+              "title": "1.25x (Faster)",
+              "value": "1.25"
+            },
+            {
+              "title": "1.5x (Fast)",
+              "value": "1.50"
+            },
+            {
+              "title": "1.75x (Very Fast)",
+              "value": "1.75"
+            },
+            {
+              "title": "2.0x (Fastest)",
+              "value": "2.00"
+            }
+          ]
         }
       ]
     }

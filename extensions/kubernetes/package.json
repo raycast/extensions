@@ -51,6 +51,51 @@
       "subtitle": "Kubernetes",
       "description": "List Services in Kubernetes Cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-configmaps",
+      "title": "Get ConfigMaps",
+      "subtitle": "Kubernetes",
+      "description": "List ConfigMaps in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-endpoints",
+      "title": "Get Endpoints",
+      "subtitle": "Kubernetes",
+      "description": "List Endpoints in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-namespaces",
+      "title": "Get Namespaces",
+      "subtitle": "Kubernetes",
+      "description": "List Namespaces in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumes",
+      "title": "Get PersistentVolumes",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumes in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-persistentvolumeclaims",
+      "title": "Get PersistentVolumeClaims",
+      "subtitle": "Kubernetes",
+      "description": "List PersistentVolumeClaims in a Kubernetes Cluster.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "availableNamespaces",
+      "type": "textfield",
+      "required": false,
+      "title": "Available Namespaces",
+      "description": "List of available namespaces for each Kubernetes context. It is useful when there is no permission to list all namespaces in the cluster, or you don't want to have all namespaces displayed in the dropdown menu. It should be a JSON object with the context name as the key and the list of namespaces as the value.",
+      "placeholder": "{\"ctx1\": [\"ns1\", \"ns2\"], \"ctx2\": [\"ns3\"]}"
     }
   ],
   "dependencies": {

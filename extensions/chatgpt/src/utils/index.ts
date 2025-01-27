@@ -2,7 +2,8 @@ import { Chat, Message } from "../type";
 import path from "node:path";
 import * as fs from "node:fs";
 import OpenAI from "openai/index";
-import ChatCompletionContentPart = OpenAI.ChatCompletionContentPart;
+
+type ChatCompletionContentPart = OpenAI.ChatCompletionContentPart;
 
 function countOpenAITokens(text: string): number {
   // 100 tokens ~= 75 words

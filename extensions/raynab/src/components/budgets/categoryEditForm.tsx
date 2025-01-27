@@ -1,23 +1,23 @@
 import { Category, CurrencyFormat } from '@srcTypes';
-import { formatToReadablePrice, formatToYnabPrice, isNumber } from '@lib/utils';
+import { formatToReadablePrice, formatToYnabAmount, isNumberLike } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, confirmAlert } from '@raycast/api';
 import { updateCategory } from '@lib/api';
-import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useLocalStorage } from '@raycast/utils';
 
 interface Values {
   budgeted: string;
 }
 
 export function CategoryEditForm({ category }: { category: Category }) {
-  const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
   async function handleSubmit(values: Values) {
     if (!isValidFormSubmission(values)) return;
 
-    const submittedValues = { budgeted: formatToYnabPrice(values.budgeted) };
+    const submittedValues = { budgeted: formatToYnabAmount(values.budgeted) };
 
     if (submittedValues.budgeted === category.budgeted) {
       await showToast({
@@ -69,7 +69,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
 function isValidFormSubmission(values: Values) {
   let isValid = true;
 
-  if (!isNumber(values.budgeted)) {
+  if (!isNumberLike(values.budgeted)) {
     isValid = false;
     showToast({
       style: Toast.Style.Failure,

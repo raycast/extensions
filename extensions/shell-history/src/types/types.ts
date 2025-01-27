@@ -34,4 +34,5 @@ export const allShellTags = [
 export interface Terminal {
   application: Application;
   supportInput: boolean;
+  key: string;
 }

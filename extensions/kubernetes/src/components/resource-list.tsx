@@ -1,12 +1,13 @@
 import { ApiType, KubernetesObject } from "@kubernetes/client-node";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import * as yaml from "js-yaml";
 import { useEffect, useState } from "react";
 import { ApiConstructor, useKubernetesContext } from "../states/context";
 import { useKubernetesNamespace } from "../states/namespace";
 import { getDarkColor, getLightColor } from "../utils/color";
 import NamespaceDropdown from "./namespace-dropdown";
+import ResourceAction from "./resource-action";
+import ResourceDetail from "./resource-detail";
 
 export function ResourceList<T extends KubernetesObject, U extends ApiType>(props: {
   apiVersion: string;
@@ -69,28 +70,15 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
             />
           }
           actions={
-            <ActionPanel>
-              <Action title="Toggle Detail View" onAction={() => setIsShowingDetail(!isShowingDetail)} />
-              <Action.CopyToClipboard
-                title="Copy Name to Clipboard"
-                content={resource.metadata?.name ?? ""}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-              {isShowingDetail && (
-                <Action
-                  title="Toggle Show Managed Fields"
-                  onAction={() => setShowManagedFields(!showManagedFields)}
-                  shortcut={{ modifiers: ["cmd"], key: "m" }}
-                />
-              )}
-              {isShowingDetail && (
-                <Action
-                  title="Toggle Show Last Applied Configuration"
-                  onAction={() => setShowLastAppliedConfiguration(!showLastAppliedConfiguration)}
-                  shortcut={{ modifiers: ["cmd"], key: "l" }}
-                />
-              )}
-            </ActionPanel>
+            <ResourceAction
+              resource={resource}
+              isShowingDetail={isShowingDetail}
+              setIsShowingDetail={setIsShowingDetail}
+              showManagedFields={showManagedFields}
+              setShowManagedFields={setShowManagedFields}
+              showLastAppliedConfiguration={showLastAppliedConfiguration}
+              setShowLastAppliedConfiguration={setShowLastAppliedConfiguration}
+            />
           }
           accessories={
             isShowingDetail
@@ -108,61 +96,5 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
         />
       ))}
     </List>
-  );
-}
-
-function ResourceDetail<T extends KubernetesObject>(props: {
-  apiVersion: string;
-  kind: string;
-  resource: T;
-  showManagedFields: boolean;
-  showLastAppliedConfiguration: boolean;
-}) {
-  const { apiVersion, kind, resource, showManagedFields, showLastAppliedConfiguration } = props;
-
-  const hideManagedFields = (resource: T) => {
-    if (showManagedFields) {
-      return resource;
-    }
-    return {
-      ...resource,
-      metadata: {
-        ...resource.metadata,
-        managedFields: undefined,
-      },
-    };
-  };
-
-  const hideLastAppliedConfiguration = (resource: T) => {
-    if (showLastAppliedConfiguration) {
-      return resource;
-    }
-
-    return {
-      ...resource,
-      metadata: {
-        ...resource.metadata,
-        annotations: {
-          ...resource.metadata?.annotations,
-          "kubectl.kubernetes.io/last-applied-configuration": undefined,
-        },
-      },
-    };
-  };
-
-  const wrapCodeBlock = (content: string) => {
-    return "```yaml\n" + content + "\n```";
-  };
-
-  return (
-    <List.Item.Detail
-      markdown={wrapCodeBlock(
-        yaml.dump({
-          apiVersion,
-          kind,
-          ...hideManagedFields(hideLastAppliedConfiguration(resource)),
-        }),
-      )}
-    />
   );
 }
