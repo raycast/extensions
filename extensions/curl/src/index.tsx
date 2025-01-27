@@ -1,8 +1,13 @@
-import { useNavigation } from "@raycast/api";
-import FormView from "./views/Form";
+import { useStorage } from "./hooks/storage";
+import { Requests } from "./types/request";
+import { StorageKey } from "./types/storage";
+import { CreateRequest } from "./views/CreateRequest";
 
 export default function Command() {
-  const { push } = useNavigation();
+  const { value: requests, setValue: setRequests } = useStorage<Requests>({
+    key: StorageKey.REQUESTS,
+    initialValue: {},
+  });
 
-  return <FormView push={push} />;
+  return <CreateRequest requests={requests} setRequests={setRequests} autoSend />;
 }

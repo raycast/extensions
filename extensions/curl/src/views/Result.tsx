@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
 import { methodColors } from "../../utils";
 
@@ -17,7 +17,7 @@ type Result = {
 };
 
 export default function ResultView({ result, curl }: { result: Result; curl: string }) {
-  const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
+  const markdown = `### Response\n\n\`\`\`json\n${JSON.stringify(result.response.data, null, 2)}\n\n`;
 
   return (
     <Detail
@@ -33,8 +33,8 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
           </Detail.Metadata.TagList>
 
           <Detail.Metadata.TagList title="Status code">
-            <Detail.Metadata.TagList.Item text={`${result.response.status}`} color={"#00b969"} />
-            <Detail.Metadata.TagList.Item text={`${result.response.statusText}`} color={"#00b969"} />
+            <Detail.Metadata.TagList.Item text={`${result.response.status}`} color="#00b969" />
+            <Detail.Metadata.TagList.Item text={`${result.response.statusText}`} color="#00b969" />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           {/* HEADERS */}
