@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   Toast,
   confirmAlert,
   showToast,
@@ -227,12 +228,13 @@ export default function TaskActions({
           target={getTaskAppUrl(task.id)}
           icon="todoist.png"
           application="Todoist"
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       ) : (
         <Action.OpenInBrowser
           title="Open Task in Browser"
           url={getTaskUrl(task.id)}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       )}
 
