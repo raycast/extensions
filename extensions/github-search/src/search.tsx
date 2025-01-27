@@ -158,7 +158,6 @@ const buildUrl = (values: FormFields, reusableFilters: ReusableFilter[]) => {
     assigneeFilter,
     authorFilter,
     commentsFilter,
-    excludeFilters,
     extensionFilter,
     filenameFilter,
     forkFilter,
@@ -168,9 +167,10 @@ const buildUrl = (values: FormFields, reusableFilters: ReusableFilter[]) => {
     ownerFilter,
     packageTypeFilter,
     pathFilter,
-    reusableFilter,
     starFilter,
-    updatedFilter
+    updatedFilter,
+    reusableFilter,
+    excludeFilters
   ]
     .filter(qualifier => qualifier.trim())
     .join(' ');
