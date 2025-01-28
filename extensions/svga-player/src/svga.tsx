@@ -1,6 +1,6 @@
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { playSvga } from "swift:../swift/svga-player";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { runAppleScript } from "@raycast/utils";
 
 export default async function Main() {
   await runPipeline();
