@@ -1,5 +1,11 @@
 # RSS Reader Changelog
 
+## [Stories Remember 'Last Read'] - {PR_MERGE_DATE}
+
+- Filter Stories by their read status (read or unread) (ref: [Issue #16546](https://github.com/raycast/extensions/issues/16546))
+- Stories show an `Icon` to represent their read status
+- Add README.md
+
 ## [Rename Subscriptions] - 2025-01-12
 
 - Rename Feeds (you can restore the Original Title using the same `Form`) [ref: [#16290](https://github.com/raycast/extensions/issues/16290)]
