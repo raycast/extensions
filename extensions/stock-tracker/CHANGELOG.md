@@ -1,5 +1,9 @@
 # Stock Tracker Changelog
 
+## [Fix] - 2025-01-27
+
+- Fix the integration with the Yahoo Finance API by adding a browser header
+
 ## [Fix] - 2023-06-03
 
 - Fix the integration with the Yahoo Finance API by providing a cookie

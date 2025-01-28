@@ -1,6 +1,11 @@
 import { LocalStorage } from "@raycast/api";
 import fetch from "cross-fetch";
 
+const HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+} as const;
+
 export async function get<T>(path: string, params: { [key: string]: string }, signal: AbortSignal): Promise<T> {
   // Requests to Yahoo Finance require a cookie (header) and a crumb (query param).
   const { cookie, crumb } = await cookieCrumb();
@@ -30,7 +35,7 @@ async function request<T>(
   }
 
   const response = await fetch(url.toString(), {
-    headers: { cookie },
+    headers: { cookie, ...HEADERS },
     signal,
   });
   if (response.status !== 200) {
@@ -69,7 +74,7 @@ export async function cookieCrumb(): Promise<CookieCrumb> {
 }
 
 async function getCookie(): Promise<string> {
-  const response = await fetch("https://fc.yahoo.com");
+  const response = await fetch("https://fc.yahoo.com", { headers: HEADERS });
   const cookie = response.headers.get("set-cookie");
   if (!cookie) {
     throw new Error("Failed to fetch cookie");
@@ -79,7 +84,7 @@ async function getCookie(): Promise<string> {
 
 async function getCrumb(cookie: string): Promise<string> {
   const response = await fetch("https://query1.finance.yahoo.com/v1/test/getcrumb", {
-    headers: { cookie },
+    headers: { cookie, ...HEADERS },
   });
   const crumb = await response.text();
   if (!crumb) {
