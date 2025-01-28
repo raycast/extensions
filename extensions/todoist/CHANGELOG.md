@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Add Complete Task Shortcut Preferences] - {PR_MERGE_DATE}
+
+- Adding in a preference to set a shortcut for completing a task.
+
 ## [Quick Add Task Improvement] - 2024-12-02
 
 Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.
