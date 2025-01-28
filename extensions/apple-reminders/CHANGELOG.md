@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Add overdue view and option to set default date of new reminders to today] - 2025-01-25
+
+- Add a new view called "Overdue", which only shows overdue reminders.
+  - An option determines if fullday reminders are counted as overdue.
+- Add an option to set the default date of new reminders to today.
+
 ## [Add weekdays and weekends options for recurring reminders] - 2024-12-04
 
 - Add weekdays and weekends options for recurring reminders in the `Create Reminder` command.
@@ -18,7 +24,7 @@ The Create Reminder command will automatically pre-fill the title with the initi
 
 ## [Change AI model for Quick Add Reminder] - 2024-05-23
 
-Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo.
+Now, Quick Add Reminder will use GPT-4o instead of GPT-4 Turbo. 
 
 ## [Add Saved Locations] - 2024-04-16
 

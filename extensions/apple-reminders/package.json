@@ -11,7 +11,8 @@
     "jondelgado",
     "phil_s",
     "michalzuch",
-    "ridemountainpig"
+    "ridemountainpig",
+    "maxnyby"
   ],
   "owner": "raycast",
   "access": "public",
@@ -43,6 +44,14 @@
           "label": "Use Time of Day Grouping",
           "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
           "default": false
+        },
+        {
+          "name": "showTodayInOverdueList",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Fullday Reminders as Overdue",
+          "description": "When enabled, the list of overdue reminders include reminders without a specific time.",
+          "default": false
         }
       ]
     },
@@ -58,6 +67,14 @@
           "type": "checkbox",
           "label": "Initially select the default list",
           "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "selectTodayAsDefault",
+          "type": "checkbox",
+          "label": "Initially select today for new reminders",
+          "description": "When enabled, \"Today\" will be initially selected for new reminders.",
           "default": false,
           "required": false
         }

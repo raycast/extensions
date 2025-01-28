@@ -54,6 +54,11 @@ export default function Command() {
                   icon={{ source: Icon.Calendar, tintColor: Color.Red }}
                   value="scheduled"
                 />
+                <List.Dropdown.Item
+                  title="Overdue"
+                  icon={{ source: Icon.List, tintColor: Color.Orange }}
+                  value="overdue"
+                />
                 <List.Dropdown.Item title="All" icon={Icon.Tray} value="all" />
               </List.Dropdown.Section>
 

@@ -5,7 +5,7 @@ import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
-const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
+const { useTimeOfDayGrouping, showTodayInOverdueList } = getPreferenceValues<Preferences.MyReminders>();
 
 import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
@@ -101,7 +101,10 @@ export function groupByDueDates(reminders: Reminder[]) {
   const today = format(startOfDay(new Date()), "yyyy-MM-dd");
 
   const overdueReminders = useTimeOfDayGrouping
-    ? overdue.filter((reminder) => reminder.dueDate && isBefore(reminder.dueDate, today))
+    ? overdue.filter(
+        (reminder) =>
+          reminder.dueDate && isBefore(reminder.dueDate, today) && getDateString(reminder.dueDate as string) !== today,
+      )
     : overdue;
 
   if (overdueReminders.length > 0) {
@@ -136,7 +139,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   }
 
   const remindersOnDate = useTimeOfDayGrouping
-    ? allDueDates.filter((date) => isBefore(date, today))
+    ? allDueDates.filter((date) => !isBefore(date, today) && date !== today)
     : allDueDates.filter((date) => date);
 
   remindersOnDate.forEach((date) => {
@@ -210,7 +213,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     { execute: showCompletedReminders },
   );
 
-  const viewDefault = listId === "today" || listId === "scheduled" ? "dueDate" : "default";
+  const viewDefault = listId === "today" || listId === "scheduled" || listId === "overdue" ? "dueDate" : "default";
 
   const [sortBy, setSortBy] = useCachedState<SortByOption>(`sort-by-${listId}`, viewDefault);
   const [groupBy, setGroupBy] = useCachedState<GroupByOption>(`group-by-${listId}`, viewDefault);
@@ -221,6 +224,11 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
       if (listId === "all") return true;
       if (listId === "today")
         return reminder.dueDate ? isOverdue(reminder.dueDate) || isToday(reminder.dueDate) : false;
+      if (listId === "overdue")
+        return reminder.dueDate
+          ? isOverdue(reminder.dueDate) ||
+              (showTodayInOverdueList && isFullDay(reminder.dueDate as string) && isToday(reminder.dueDate))
+          : false;
       if (listId === "scheduled") return !!reminder.dueDate;
       return reminder.list?.id === listId;
     };
@@ -298,6 +306,8 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
           title = "All";
         } else if (listId === "today") {
           title = "Today";
+        } else if (listId === "overdue") {
+          title = "Overdue";
         } else if (listId === "scheduled") {
           title = "Scheduled";
         } else {
