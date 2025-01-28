@@ -1,6 +1,6 @@
 # Kubernetes Changelog
 
-## [Refactor Code Structure, Add More Commands] - {PR_MERGE_DATE}
+## [Refactor Code Structure, Add More Commands] - 2025-01-28
 
 - Refactor code structure to make it more maintainable.
 - Split resources into sections when showing "All Namespaces".
