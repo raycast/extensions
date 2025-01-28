@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "macrumors",
-      "title": "MacRumors",
+      "title": "Show Latest MacRumors",
       "description": "Retrieve the latest posts on MacRumors.",
       "mode": "view"
     }
