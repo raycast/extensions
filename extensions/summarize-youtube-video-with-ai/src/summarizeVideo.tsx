@@ -36,7 +36,7 @@ export default function DeprecationNote(
       showToast({
         style: Toast.Style.Failure,
         title: "Command has changed",
-        message: "Please run `summarizeVideoWithAnthropic` or enter your anthropic API key above",
+        message: "Please run `Summarize YouTube Video with Anthropic` and enter your anthropic API key in preferences",
         primaryAction: {
           title: "Open Exetension Settings",
           onAction: () => openExtensionPreferences(),
@@ -48,7 +48,7 @@ export default function DeprecationNote(
       showToast({
         style: Toast.Style.Failure,
         title: "Command has changed",
-        message: "Please run `summarizeVideoWithOpenAI` and enter your OpenAI API in preferences",
+        message: "Please run `Summarize YouTube Video with OpenAI` and enter your OpenAI API in preferences",
         primaryAction: {
           title: "Open Exetension Settings",
           onAction: () => openExtensionPreferences(),
@@ -58,7 +58,7 @@ export default function DeprecationNote(
       break;
     case "raycastai":
       launchCommand({
-        name: "summarizeVideoWithRaycast",
+        name: "Please run `Summarize YouTube Video with Raycast`.",
         type: LaunchType.UserInitiated,
         context: { video: props.arguments.video },
       });
