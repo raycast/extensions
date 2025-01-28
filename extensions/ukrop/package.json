@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ukrop",
+  "title": "Ukrop Switcher",
+  "description": "Changes the layout of selected text. Requires Accessibility access",
+  "icon": "punto-icon.png",
+  "author": "red.avtovo",
+  "contributors": [
+    "yaroslav_perederii"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+    "title": "UA Layout",
+      "description": "The script changes layout of selected text. EN-UA supported only.\nFor eg:\n- руддщ -> hello\n- ghbdtn -> привiт",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layoutSwitchModifier",
+      "title": "Layout Switch Shortcut",
+      "description": "The shortcut to switch the layout of the selected text",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "⌘Space",
+          "value": "command"
+        },
+        {
+          "title": "⌃Space",
+          "value": "control"
+        },
+        {
+          "title": "⌥Space",
+          "value": "option"
+        }
+      ],
+      "default": "control"
+    },
+    {
+      "name": "uaLayoutName",
+      "title": "Ukrainian Layout",
+      "description": "The name of the Ukrainian layout",
+      "type": "textfield",
+      "required": true,
+      "default": "Ukrainian-PC"
+    },
+    {
+      "name": "enLayoutName",
+
+      "title": "English Layout",
+      "description": "The name of the English layout",
+      "type": "textfield",
+      "required": true,
+      "default": "ABC"
+    },
+    {
+      "name": "showSuccessHUD",
+      "title": "Show Success HUD",
+      "description": "Show a HUD when the layout is switched",
+      "type": "checkbox",
+      "label": "Show Success HUD",
+      "default": false,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
