@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Bug fixes] - 2024-12-03
+- Fixes locale bug on Append Task command
+- Fixes issue where tags were being converted to lowercase
+
 ## [Task Creation Date] - 2024-12-03
 - Tasks added now log the creation date.
 
