@@ -88,6 +88,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "availableNamespaces",
+      "type": "textfield",
+      "required": false,
+      "title": "Available Namespaces",
+      "description": "List of available namespaces for each Kubernetes context. It is useful when there is no permission to list all namespaces in the cluster, or you don't want to have all namespaces displayed in the dropdown menu. It should be a JSON object with the context name as the key and the list of namespaces as the value.",
+      "placeholder": "{\"ctx1\": [\"ns1\", \"ns2\"], \"ctx2\": [\"ns3\"]}"
+    }
+  ],
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
     "@raycast/api": "^1.88.0",
