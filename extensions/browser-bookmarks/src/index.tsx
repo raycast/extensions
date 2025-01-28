@@ -27,6 +27,7 @@ import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import useIslandBookmarks from "./hooks/useIslandBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
@@ -114,6 +115,7 @@ export default function Command() {
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
@@ -132,6 +134,7 @@ export default function Command() {
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const island = useIslandBookmarks(hasIsland);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
@@ -155,6 +158,7 @@ export default function Command() {
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...island.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
@@ -206,6 +210,7 @@ export default function Command() {
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    island.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
@@ -229,6 +234,7 @@ export default function Command() {
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...island.folders,
       ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
@@ -250,6 +256,8 @@ export default function Command() {
     edgeCanary.folders,
     edgeDev.folders,
     firefox.folders,
+    island.folders,
+    prismaAccess.folders,
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
@@ -363,6 +371,9 @@ export default function Command() {
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
+    if (hasIsland) {
+      island.mutate();
+    }
     if (hasPrismaAccess) {
       prismaAccess.mutate();
     }
@@ -433,6 +444,7 @@ export default function Command() {
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        island.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
@@ -594,10 +606,19 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.island}
+                    name="Island"
+                    icon="island.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    profiles={island.profiles}
+                    currentProfile={island.currentProfile}
+                    setCurrentProfile={island.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
