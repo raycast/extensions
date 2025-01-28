@@ -17,7 +17,7 @@ import { SyncData, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
-import { groupByDueDates } from "./helpers/groupBy";
+import { groupByDates } from "./helpers/groupBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -185,7 +185,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -218,7 +218,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -245,7 +245,7 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   return tasks.length > 0 ? (

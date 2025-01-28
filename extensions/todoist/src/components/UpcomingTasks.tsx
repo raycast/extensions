@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 
 import CreateTask from "../create-task";
-import { groupByDueDates } from "../helpers/groupBy";
+import { groupByDates } from "../helpers/groupBy";
 import { getTasksForTodayOrUpcomingView } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import useCachedData from "../hooks/useCachedData";
@@ -46,7 +46,7 @@ export default function UpcomingTasks({ quickLinkView }: UpcomingTasksProps) {
     );
   }
 
-  const sections = groupByDueDates(sortBy?.value === "default" ? tasks : sortedTasks);
+  const sections = groupByDates(sortBy?.value === "default" ? tasks : sortedTasks);
 
   return <TaskListSections sections={sections} viewProps={{ orderBy, sortBy }} quickLinkView={quickLinkView} />;
 }

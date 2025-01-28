@@ -55,13 +55,13 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     }
   }
 
-  async function changeDueDate(task: Task, dueString: string) {
+  async function changeDate(task: Task, dueString: string) {
     try {
       await updateTask({ id: task.id, due: { string: dueString } }, { data, setData });
-      await showHUD("Updated task due date");
+      await showHUD("Updated task date");
     } catch (error) {
       console.log(error);
-      showHUD("Unable to update task due date ❌");
+      showHUD("Unable to update task date ❌");
     }
   }
 
@@ -150,20 +150,16 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
 
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
 
-        <MenuBarExtra.Submenu title="Change Due Date" icon={Icon.Clock}>
-          <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDueDate(task, "today")} />
-          <MenuBarExtra.Item title="Tomorrow" icon={Icon.Sunrise} onAction={() => changeDueDate(task, "tomorrow")} />
+        <MenuBarExtra.Submenu title="Change Date" icon={Icon.Clock}>
+          <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDate(task, "today")} />
+          <MenuBarExtra.Item title="Tomorrow" icon={Icon.Sunrise} onAction={() => changeDate(task, "tomorrow")} />
           <MenuBarExtra.Item
             title="Next Week"
             icon={Icon.ArrowClockwise}
-            onAction={() => changeDueDate(task, "next week")}
+            onAction={() => changeDate(task, "next week")}
           />
-          <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDueDate(task, "next weekend")} />
-          <MenuBarExtra.Item
-            title="No Due Date"
-            icon={Icon.XMarkCircle}
-            onAction={() => changeDueDate(task, "no due date")}
-          />
+          <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDate(task, "next weekend")} />
+          <MenuBarExtra.Item title="No Date" icon={Icon.XMarkCircle} onAction={() => changeDate(task, "no date")} />
         </MenuBarExtra.Submenu>
         <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
           {priorities.map((priority, index) => (

@@ -34,8 +34,8 @@ export function isOverdue(date: string) {
   return isBefore(day, today) && !isSameDay(day, today);
 }
 
-export function displayDueDate(dateString: string) {
-  const date = new Date(dateString);
+export function displayDate(dateString: string) {
+  const date = parseISO(dateString);
   if (isOverdue(dateString)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
@@ -63,8 +63,8 @@ export function displayDueDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
-export function displayDueDateTime(dateString: string) {
-  const date = displayDueDate(dateString);
+export function displayDateTime(dateString: string) {
+  const date = displayDate(dateString);
   return `${date} ${format(new Date(dateString), "HH:mm")}`;
 }
 

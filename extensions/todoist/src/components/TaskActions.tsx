@@ -261,7 +261,7 @@ export default function TaskActions({
               id: task.id,
               due: date
                 ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no due date" },
+                : { string: "no date" },
             })
           }
         />

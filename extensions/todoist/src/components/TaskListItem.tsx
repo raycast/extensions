@@ -5,7 +5,7 @@ import removeMarkdown from "remove-markdown";
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { isRecurring, displayDueDate, isExactTimeTask, displayDueDateTime, isOverdue } from "../helpers/dates";
+import { isRecurring, displayDate, isExactTimeTask, displayDateTime, isOverdue } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -80,12 +80,26 @@ export default function TaskListItem({
     });
   }
 
+  if (task.deadline?.date) {
+    const text = displayDate(task.deadline.date);
+    const overdue = isOverdue(task.deadline.date);
+
+    accessories.unshift({
+      icon: {
+        source: overdue ? Icon.BullsEyeMissed : Icon.BullsEye,
+        tintColor: overdue ? Color.Red : Color.PrimaryText,
+      },
+      tooltip: `Deadline: ${text}`,
+      text,
+    });
+  }
+
   if (task.due?.date) {
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
     const overdue = isOverdue(task.due.date);
 
-    const text = exactTime ? displayDueDateTime(task.due.date) : displayDueDate(task.due.date);
+    const text = exactTime ? displayDateTime(task.due.date) : displayDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });
@@ -104,7 +118,7 @@ export default function TaskListItem({
           source: recurring ? Icon.ArrowClockwise : Icon.Calendar,
           tintColor: overdue ? Color.Red : Color.PrimaryText,
         },
-        tooltip: `${recurring ? "Next due" : "Due"} date: ${text}`,
+        tooltip: `${recurring ? "Next date" : "Date"}: ${text}`,
         text,
       });
     }
