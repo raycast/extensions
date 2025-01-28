@@ -56,7 +56,8 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
         console.error(e);
       }
     }
-    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(LN_ADDRESS_REGEX))) {
+    //invoice doesn't always start with "lnbc1" as 1 is only bech32 separator and invoice can contain amount.
+    if (text && (text.toLowerCase().startsWith("lnbc") || text.match(LN_ADDRESS_REGEX))) {
       setInput(text);
     }
   };
@@ -65,7 +66,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
     if (!input) {
       return;
     }
-    if (input?.toLowerCase().startsWith("lnbc1")) {
+    if (input?.toLowerCase().startsWith("lnbc")) {
       const invoice = new Invoice({ pr: input });
       setInvoice(invoice.paymentRequest);
       return;

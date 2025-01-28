@@ -1,8 +1,8 @@
 import "cross-fetch/polyfill";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
-import { LightningAddress } from "@getalby/lightning-tools";
+import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
+import { fiat, LightningAddress } from "@getalby/lightning-tools";
 import { connectWallet } from "../utils/wallet";
 
 export default function PayToLightingAddress(props: { lightningAddress: string }) {
@@ -12,7 +12,11 @@ export default function PayToLightingAddress(props: { lightningAddress: string }
   const [comment, setComment] = useState("");
   const [commentAllowed, setCommentAllowed] = useState(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isSatDenomination, setSatDenomination] = useState(true);
+
   const amountFieldRef = useRef<Form.TextField>(null);
+
+  const fiatCurrency = getPreferenceValues<{ currency: string }>().currency;
 
   useEffect(() => {
     lookupLightningAddress();
@@ -27,7 +31,13 @@ export default function PayToLightingAddress(props: { lightningAddress: string }
   };
 
   const requestInvoice = async () => {
-    const satoshis = parseInt(amount.trim(), 10);
+    let satoshis;
+
+    if (isSatDenomination) {
+      satoshis = parseInt(amount.trim(), 10);
+    } else {
+      satoshis = await fiat.getSatoshiValue({ amount: amount.trim(), currency: fiatCurrency });
+    }
     if (isNaN(satoshis) || satoshis <= 0) {
       await showToast(Toast.Style.Failure, "Invalid amount");
       return;
@@ -115,6 +125,11 @@ export default function PayToLightingAddress(props: { lightningAddress: string }
         <ActionPanel>
           <Action title={`Send Payment to ${lightningAddress} `} onAction={handleSendPayment} />
           <Action title={`Copy Invoice`} onAction={handleCopyInvoice} />
+          <Action
+            title={`Swap Currency to ${isSatDenomination ? fiatCurrency : "satoshi"}`}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onAction={() => setSatDenomination(!isSatDenomination)}
+          />
         </ActionPanel>
       }
     >
@@ -122,8 +137,8 @@ export default function PayToLightingAddress(props: { lightningAddress: string }
       {lightningAddressInfo && <Form.Description title="Description" text={lightningAddressInfo} />}
       <Form.TextField
         id="amount"
-        title="Amount (Satoshis)"
-        placeholder="Enter the amount in satoshis"
+        title={`Amount (${isSatDenomination ? "Satoshis" : fiatCurrency})`}
+        placeholder={`Enter the amount in ${isSatDenomination ? "satoshi" : fiatCurrency}`}
         ref={amountFieldRef}
         autoFocus={true}
         value={amount}
