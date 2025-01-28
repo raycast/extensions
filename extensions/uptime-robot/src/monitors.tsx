@@ -1,11 +1,12 @@
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
+import { FormValidation, useFetch, useForm, useLocalStorage } from "@raycast/utils";
 import { API_BODY, API_HEADERS, API_URL, DEFAULT_PAGE_LIMIT, MONITOR, MONITOR_INTERVALS, MONITOR_TYPES } from "./config";
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { ErrorResponse, Monitor, NewMonitor } from "./types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useUptimeRobot from "./lib/hooks/use-uptime-robot";
 import getMonitorIcon from "./lib/utils/get-monitor-icon";
 import unixToDate from "./lib/utils/unix-to-date";
+import { hasDayPassed } from "./lib/utils/has-day-passed";
 
 type Pagination = {
     offset: number;
@@ -19,7 +20,8 @@ type MonitorsResult = {
 }
 
 export default function Monitors() {
-    const { isLoading, data: monitors, pagination, revalidate } = useFetch(
+    const { isLoading: isUsingLocal, value, setValue: setMonitors } = useLocalStorage<{monitors: Monitor[]; updated_at: Date}>("monitors");
+    const { isLoading, pagination, revalidate } = useFetch(
         (options) =>
           API_URL + "getMonitors?" +
           new URLSearchParams({ limit: DEFAULT_PAGE_LIMIT.toString(), offset: String(options.page*DEFAULT_PAGE_LIMIT) }).toString(),
@@ -41,13 +43,23 @@ export default function Monitors() {
           },
           keepPreviousData: true,
           initialData: [],
-          execute: false
+          async onData(data) {
+            await setMonitors({
+                monitors: data,
+                updated_at: new Date()
+            })
+        },
+          execute: !isUsingLocal && !value?.monitors.length
         },
       );
 
+      useEffect(() => {
+              value && hasDayPassed(value.updated_at) && revalidate();
+          }, [value])
+
       return <List isLoading={isLoading} pagination={pagination}>
-        {!isLoading && !monitors ? <List.EmptyView /> :
-        monitors.map(monitor => <List.Item key={monitor.id} title={monitor.friendly_name} icon={getMonitorIcon(monitor.status)} accessories={[
+        {
+        value?.monitors.map(monitor => <List.Item key={monitor.id} title={monitor.friendly_name} icon={getMonitorIcon(monitor.status)} accessories={[
             { icon: Icon.Redo },
             {text: `${monitor.interval/60} min`},
             { date: unixToDate(monitor.create_datetime) }
