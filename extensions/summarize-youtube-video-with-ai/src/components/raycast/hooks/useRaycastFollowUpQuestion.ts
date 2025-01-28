@@ -1,21 +1,14 @@
-import { AI, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
-import { Preferences } from "../../summarizeVideo";
-import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
+import { AI, showToast, Toast } from "@raycast/api";
+import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
+import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-export const useRaycastAIFollowUpQuestion = async (
+export const useRaycastFollowUpQuestion = async (
   question: string,
   transcript: string,
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,
   pop: () => void,
 ) => {
-  const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi } = preferences;
   setSummary(undefined);
-
-  if (chosenAi !== "raycastai") {
-    return;
-  }
 
   const toast = showToast({
     style: Toast.Style.Animated,
@@ -24,8 +17,6 @@ export const useRaycastAIFollowUpQuestion = async (
   });
 
   const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
-
-  pop();
 
   answer.on("data", (data) => {
     setSummary((result) => {
@@ -45,4 +36,5 @@ export const useRaycastAIFollowUpQuestion = async (
       t.message = error.message;
     });
   });
+  pop();
 };
