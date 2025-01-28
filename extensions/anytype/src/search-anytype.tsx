@@ -178,7 +178,14 @@ function Search() {
     >
       {processedObjects.length > 0 ? (
         <List.Section
-          title={searchText ? "Search Results" : "Modified Recently"}
+          title={
+            searchText
+              ? "Search Results"
+              : `${getPreferenceValues()
+                  .sort.split("_")
+                  .slice(-2, -1)[0]
+                  .replace(/^./, (char: string) => char.toUpperCase())} Recently`
+          }
           subtitle={`${pluralize(processedObjects.length, viewType, { withNumber: true })}`}
         >
           {processedObjects.map((object) => (
