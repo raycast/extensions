@@ -1,15 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { search } from "../api/search";
+import { globalSearch } from "../api/globalSearch";
 import { useMemo } from "react";
 import { apiLimit } from "../helpers/constants";
 
-export function useSearch(spaceId: string, query: string, types: string[]) {
+export function useGlobalSearch(query: string, types: string[]) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
     (query: string, types: string[]) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await search(
-        spaceId,
+      const response = await globalSearch(
         { query, types, sort: { direction: "desc", timestamp: getPreferenceValues().sort } },
         { offset, limit: apiLimit },
       );
