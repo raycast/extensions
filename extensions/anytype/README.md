@@ -66,9 +66,9 @@ Make the most of the Anytype extension with the following tips:
 
 ### Error: API Not Reachable
 
-- Verify the app version is **v0.45.0** or later.
 - Ensure the Anytype Desktop app is running.
 - Confirm you are logged into your vault.
+- Verify both the extension and Anytype desktop app are up-to-date, with the app version being **v0.45.0** or later.
 
 ### Objects, Types or Spaces Not Displaying Completely
 
