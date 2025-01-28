@@ -1,6 +1,11 @@
 # File Manager Changelog
 
+## [Features] - 2025-01-28
+
+- Added the preference to show hidden files.
+
 ## [Gitignore and Rayignore] - 2024-07-24
+
 - Added support respecting `.gitignore` and `.rayignore` files.
 
 ## [Features] - 2023-02-22
