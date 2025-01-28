@@ -1,5 +1,9 @@
 # Codeforces Changelog
 
+## [Update] - 2025-01-28
+
+- Fixed the flickering issue
+
 ## [Update] - 2025-01-27
 
 - Added problem search feature

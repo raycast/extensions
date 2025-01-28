@@ -1,8 +1,9 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import fetch from "node-fetch";
 import { ProblemDetail } from "./components/ProblemDetail";
 import { CODEFORCES_API_BASE } from "./constants";
+import debounce from "lodash/debounce";
 
 interface Problem {
   id: string;
@@ -104,7 +105,42 @@ async function searchProblems(query: string): Promise<Problem[]> {
   }
 }
 
-async function getRandomProblems(count: number = 15): Promise<Problem[]> {
+// kar sako toh karlo fix
+
+// async function getRandomProblems(count: number = 15): Promise<Problem[]> {
+//   try {
+//     const response = await fetch(`${CODEFORCES_API_BASE}problemset.problems`, {
+//       headers: {
+//         "User-Agent":
+//           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+//         Accept: "application/json",
+//         "Accept-Language": "en-US,en;q=0.9",
+//       },
+//     });
+
+//     const data = (await response.json()) as CodeforcesResponse;
+
+//     if (data.status === "OK") {
+//       const allProblems = data.result.problems.map((problem: CodeforcesAPIProblem) => ({
+//         id: `${problem.contestId}${problem.index}`,
+//         name: problem.name,
+//         contestId: problem.contestId,
+//         index: problem.index,
+//         rating: problem.rating,
+//         tags: problem.tags,
+//       }));
+
+//       return allProblems.sort(() => Math.random() - 0.5).slice(0, count);
+//     }
+
+//     return [];
+//   } catch (error) {
+//     console.error("Error fetching random problems:", error);
+//     return [];
+//   }
+// }
+
+async function getInitialProblems(count: number = 15): Promise<Problem[]> {
   try {
     const response = await fetch(`${CODEFORCES_API_BASE}problemset.problems`, {
       headers: {
@@ -127,47 +163,61 @@ async function getRandomProblems(count: number = 15): Promise<Problem[]> {
         tags: problem.tags,
       }));
 
-      return allProblems.sort(() => Math.random() - 0.5).slice(0, count);
+      return allProblems.slice(0, count); // bhai na ho ra fix, ill just get the first 15
     }
 
     return [];
   } catch (error) {
-    console.error("Error fetching random problems:", error);
+    console.error("Error fetching initial problems:", error);
     return [];
   }
 }
 
 export default function Command() {
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // tryna fix the flickering issue
+  const [searchText, setSearchText] = useState("");
+
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
+      if (query.length === 0) {
+        const initialProblems = await getInitialProblems(15);
+        setProblems(initialProblems);
+      } else if (query.length >= 2) {
+        const results = await searchProblems(query);
+        setProblems(results);
+      }
+      setIsLoading(false);
+    }, 500),
+    [],
+  );
 
   useEffect(() => {
     async function loadInitialProblems() {
-      const randomProblems = await getRandomProblems(15);
-      setProblems(randomProblems);
+      setIsLoading(true);
+      const initialProblems = await getInitialProblems(15);
+      setProblems(initialProblems);
       setIsLoading(false);
     }
 
     loadInitialProblems();
+
+    return () => {
+      debouncedSearch.cancel();
+    };
   }, []);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = (query: string) => {
+    setSearchText(query);
     setIsLoading(true);
-    if (query.length === 0) {
-      // sirf jab search bar khali ho
-      const randomProblems = await getRandomProblems(15);
-      setProblems(randomProblems);
-    } else {
-      const results = await searchProblems(query);
-      setProblems(results);
-    }
-    setIsLoading(false);
+    debouncedSearch(query);
   };
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={handleSearch}
+      searchText={searchText}
       searchBarPlaceholder="Search problems (e.g., 4A, Watermelon)"
     >
       {problems.map((problem) => (
