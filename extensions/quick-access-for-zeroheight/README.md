@@ -12,4 +12,4 @@ You'll nedd to [create an auth token](https://zeroheight.com/help/article/authen
 - `page:read`
 - `page_status:read`
 
-**Note:** This is not an official extension is not maintained by [zeroheight](https://zeroheight.com/).
+**Note:** This is not an official extension and is not maintained by [zeroheight](https://zeroheight.com/).

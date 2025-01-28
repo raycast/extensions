@@ -89,7 +89,6 @@ export function getContentOrDefault(page: Pick<StyleguidePageData, "tabs" | "con
 }
 
 export function statusIdToColor(id?: string) {
-  console.log(id);
   if (!id) return "#F2F1F2";
 
   return (
