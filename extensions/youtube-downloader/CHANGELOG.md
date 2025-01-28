@@ -1,5 +1,12 @@
 # YouTube Downloader Changelog
 
+## [Improve Error Message] - {PR_MERGE_DATE}
+
+- Improve error message
+- Replace `execa` with `nano-spawn`
+- Adjust import orders
+- Fix `yt-dlp` from preferences
+
 ## [Improve URL Validator] - 2025-01-23
 
 - Improve `isYouTubeURL` function

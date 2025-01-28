@@ -1,11 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 16",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["es2021"],
-    "module": "commonjs",
+    "module": "NodeNext",
     "target": "es2021",
+    "moduleResolution": "nodenext",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
