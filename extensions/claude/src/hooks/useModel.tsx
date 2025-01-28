@@ -1,5 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
 
 export const DEFAULT_MODEL: Model = {

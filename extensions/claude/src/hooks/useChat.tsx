@@ -17,6 +17,12 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
 
+  const [isHistoryPaused] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      isHistoryPaused: boolean;
+    }>().isHistoryPaused;
+  });
+  
   const history = useHistory();
   const chatAnthropic = useAnthropic();
 
@@ -102,11 +108,12 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     });
 
     setLoading(false);
-
     toast.title = "Got your answer!";
     toast.style = Toast.Style.Success;
 
-    history.add(chat);
+    if (!isHistoryPaused) {
+      history.add(chat);
+    }
   }
 
   const clear = useCallback(async () => {
