@@ -3,12 +3,11 @@ import { apiEndpoints } from "../helpers/constants";
 import { SpaceObject, PaginatedResponse, SearchRequest } from "../helpers/schemas";
 import { mapObjects } from "../mappers/objects";
 
-export async function search(
-  spaceId: string,
+export async function globalSearch(
   SearchRequest: SearchRequest,
   options: { offset: number; limit: number },
 ): Promise<PaginatedResponse<SpaceObject>> {
-  const { url, method } = apiEndpoints.search(spaceId, options);
+  const { url, method } = apiEndpoints.globalSearch(options);
   const response = await apiFetch<PaginatedResponse<SpaceObject>>(url, {
     method: method,
     body: JSON.stringify(SearchRequest),

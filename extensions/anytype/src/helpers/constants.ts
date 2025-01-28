@@ -1,11 +1,13 @@
+import { getPreferenceValues } from "@raycast/api";
 import { encodeQueryParams } from "./query";
 
 // Strings
-export const appName = "raycast_v1_0125";
+export const apiAppName = "raycast_v1_0125";
 export const apiUrl = "http://localhost:31009/v1";
 export const anytypeNetwork = "N83gJpVd9MuNRZAuJLZ7LiMntTThhPc6DtzWWVjb1M3PouVU";
-export const apiLimit = 50;
-export const iconWidth = 32;
+export const downloadUrl = "https://download.anytype.io/";
+export const apiLimit = getPreferenceValues().limit;
+export const iconWidth = 64;
 export const errorConnectionMessage = "Can't connect to API. Please ensure Anytype is running and reachable.";
 
 // API Endponts
@@ -58,8 +60,12 @@ export const apiEndpoints = {
     url: `${apiUrl}/spaces/${spaceId}/types${encodeQueryParams(options)}`,
     method: "GET",
   }),
-  search: (query: string, types: string[], options: { offset: number; limit: number }) => ({
-    url: `${apiUrl}/search${encodeQueryParams({ query, types, ...options })}`,
-    method: "GET",
+  globalSearch: (options: { offset: number; limit: number }) => ({
+    url: `${apiUrl}/search${encodeQueryParams(options)}`,
+    method: "POST",
+  }),
+  search: (spaceId: string, options: { offset: number; limit: number }) => ({
+    url: `${apiUrl}/spaces/${spaceId}/search${encodeQueryParams(options)}`,
+    method: "POST",
   }),
 };

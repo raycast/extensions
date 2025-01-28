@@ -1,7 +1,7 @@
 import { apiFetch } from "../helpers/api";
 import { apiEndpoints } from "../helpers/constants";
 import { Type, PaginatedResponse } from "../helpers/schemas";
-import { mapTypes } from "../helpers/mappers/types";
+import { mapTypes } from "../mappers/types";
 import { Pagination } from "../helpers/schemas";
 
 export async function getTypes(
