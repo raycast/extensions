@@ -3,10 +3,14 @@ import { SimplifiedShowObject } from "../helpers/spotify.api";
 import { EpisodesList } from "./EpisodesList";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
+import { RefreshAction } from "./RefreshAction";
 
-type ShowActionPanelProps = { show: SimplifiedShowObject };
+type ShowActionPanelProps = {
+  show: SimplifiedShowObject;
+  onRefresh?: () => void;
+};
 
-export function ShowActionPanel({ show }: ShowActionPanelProps) {
+export function ShowActionPanel({ show, onRefresh }: ShowActionPanelProps) {
   const title = show.name;
 
   return (
@@ -18,6 +22,7 @@ export function ShowActionPanel({ show }: ShowActionPanelProps) {
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
         target={<EpisodesList show={show} />}
       />
+      {onRefresh && <RefreshAction onRefresh={onRefresh} />}
       <FooterAction url={show?.external_urls?.spotify} uri={show.uri} title={title} />
     </ActionPanel>
   );

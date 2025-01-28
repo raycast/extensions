@@ -1,6 +1,5 @@
 import { List } from "@raycast/api";
 import { SimplifiedShowObject } from "../helpers/spotify.api";
-
 import { useShowEpisodes } from "../hooks/useShowEpisodes";
 import EpisodeListItem from "./EpisodeListItem";
 
@@ -21,9 +20,7 @@ export function EpisodesList({ show }: EpisodesListProps) {
   return (
     <List searchBarPlaceholder="Search episodes" isLoading={showEpisodesIsLoading}>
       {episodes &&
-        episodes.map((episode, index) => (
-          <EpisodeListItem key={`${episode.id}${index}`} episode={episode} show={show} />
-        ))}
+        episodes.map((episode, index) => <EpisodeListItem key={`${episode.id}${index}`} episode={episode} />)}
     </List>
   );
 }

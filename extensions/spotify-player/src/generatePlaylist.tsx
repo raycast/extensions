@@ -8,6 +8,7 @@ import { addToPlaylist } from "./api/addToPlaylist";
 import { play } from "./api/play";
 import { addToQueue } from "./api/addTrackToQueue";
 import { skipToNext } from "./api/skipToNext";
+import { transformTrackToMinimal } from "./helpers/transformers";
 
 type Playlist = {
   name: string;
@@ -153,7 +154,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
         <List.Section title={playlist?.name}>
           {tracks?.map((track) => {
             if (!track) return null;
-            return <TrackListItem key={track.id} track={track} album={track.album} showGoToAlbum />;
+            return <TrackListItem key={track.id} track={transformTrackToMinimal(track)} showGoToAlbum />;
           })}
         </List.Section>
       </List>

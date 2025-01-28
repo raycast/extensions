@@ -1,17 +1,22 @@
-import { Icon, Image } from "@raycast/api";
+import { Image, Icon } from "@raycast/api";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
-import { AlbumActionPanel } from "./AlbumActionPanel";
 import { ListOrGridItem } from "./ListOrGridItem";
+import { AlbumActionPanel } from "./AlbumActionPanel";
 
-type AlbumItemProps = { type: "grid" | "list"; album: SimplifiedAlbumObject };
+type AlbumItemProps = {
+  type: "grid" | "list";
+  album: SimplifiedAlbumObject;
+  onRefresh?: () => void;
+};
 
-export function AlbumItem({ type, album }: AlbumItemProps) {
-  const icon: Image.ImageLike = {
-    source: album.images[0]?.url ?? Icon.Dot,
-  };
-
-  const title = album.name;
-  const subtitle = `${album.artists.map((a) => a.name).join(", ")} · ${album.release_date.substring(0, 4)}`;
+export function AlbumItem({ type, album, onRefresh }: AlbumItemProps) {
+  const title = album.name || "Untitled Album";
+  const subtitle = album.artists?.map((a) => a.name).join(", ");
+  const icon: Image.ImageLike = album.images?.[0]?.url
+    ? {
+        source: album.images[0].url,
+      }
+    : { source: Icon.Music };
 
   return (
     <ListOrGridItem
@@ -19,9 +24,9 @@ export function AlbumItem({ type, album }: AlbumItemProps) {
       icon={icon}
       title={title}
       subtitle={subtitle}
-      accessories={[{ text: `${album.total_tracks} songs` }]}
       content={icon}
-      actions={<AlbumActionPanel album={album} />}
+      accessories={[{ text: `${album.total_tracks} tracks` }]}
+      actions={<AlbumActionPanel album={album} onRefresh={onRefresh} />}
     />
   );
 }
