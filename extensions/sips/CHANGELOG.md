@@ -1,9 +1,8 @@
 # Image Modification Changelog
 
-## [Fix WebP optimization] - 2025-01-26
+## [Fix WebP optimization] - {PR_MERGE_DATE}
 
 - Fixed the cwebp path being incorrectly set when Optimizing WebP images
-
 
 ## [Fix avifenc Installation] - 2024-09-11
 
