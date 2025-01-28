@@ -1,5 +1,11 @@
 # Messages 2FA Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add support for Email 2FA codes alongside iMessage
+- Add ability to switch between iMessage, Email, or both sources
+- Add source filtering dropdown in the UI
+
 ## [Update] - 2024-09-25
 
 - Add support for Portuguese auth/code references 
