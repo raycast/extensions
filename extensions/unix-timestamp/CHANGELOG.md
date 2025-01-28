@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-01-28
 
 - Fixed incorrect date calculations for millisecond timestamps
 
