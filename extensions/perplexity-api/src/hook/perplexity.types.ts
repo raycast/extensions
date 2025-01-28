@@ -1,12 +1,10 @@
 import "openai";
 
 declare module "openai" {
-  namespace OpenAI {
-    interface ChatCompletion {
-      citations?: string[];
-    }
-    interface ChatCompletionChunk {
-      citations?: string[];
-    }
+  export interface ChatCompletion {
+    citations?: string[];
+  }
+  export interface ChatCompletionChunk {
+    citations?: string[];
   }
 }
