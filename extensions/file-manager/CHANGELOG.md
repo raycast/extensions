@@ -1,6 +1,6 @@
 # File Manager Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2025-01-28
 
 - Added the preference to show hidden files.
 
