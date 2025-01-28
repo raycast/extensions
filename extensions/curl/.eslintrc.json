@@ -1,4 +1,118 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+
+  "extends": [
+    "@raycast",
+    "plugin:react/recommended",
+    "airbnb",
+    "airbnb-typescript",
+    "prettier"
+  ],
+  "plugins": ["react", "prettier"],
+
+  "rules": {
+    "no-console": ["off", { "allow": ["warn", "error", "info"] }],
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["_id", "_client"]
+      }
+    ],
+
+    // Disallow common abbreviations as they go against our naming conventions
+    "id-blacklist": [
+      // Show error for disallowed abbreviations
+      "error",
+      // List of disallowed abbreviations
+      "e",
+      "err",
+      "el",
+      "ev",
+      "evt",
+      "idx",
+      "v",
+      "val",
+      "prev",
+      "prevValue",
+      "res",
+      "req"
+    ],
+
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never",
+        "": "never"
+      }
+    ],
+    "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": "off",
+
+    "@typescript-eslint/no-throw-literal": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_*$",
+        "varsIgnorePattern": "^_*$",
+        "caughtErrorsIgnorePattern": "^_*$"
+      }
+    ],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      // Allow camelCase variables (23.2), PascalCase variables (23.8), and UPPER_CASE variables (23.10)
+      {
+        "selector": "variable",
+        "format": ["camelCase", "PascalCase", "UPPER_CASE"],
+        "filter": {
+          "regex": "^_*$",
+          "match": false
+        }
+      },
+      // Allow camelCase functions (23.2), and PascalCase functions (23.8)
+      {
+        "selector": "function",
+        "format": ["camelCase", "PascalCase"]
+      },
+      // Airbnb recommends PascalCase for classes (23.3), and although Airbnb does not make TypeScript recommendations, we are assuming this rule would similarly apply to anything "type like", including interfaces, type aliases, and enums
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase"]
+      }
+    ],
+
+    "prettier/prettier": "error",
+
+    "react/no-unescaped-entities": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/forbid-prop-types": "off",
+    // defaultProps rule to be deprecated on function components
+    // https://github.com/reactjs/rfcs/pull/107
+    "react/require-default-props": [
+      "error",
+      {
+        "ignoreFunctionalComponents": true
+      }
+    ]
+  }
 }

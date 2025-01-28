@@ -8,7 +8,8 @@
   "contributors": [
     "pernielsentikaer",
     "bkeys818",
-    "ridemountainpig"
+    "ridemountainpig",
+    "gohadar"
   ],
   "categories": [
     "Productivity",
@@ -24,24 +25,37 @@
       "mode": "view"
     },
     {
-      "name": "requests",
+      "name": "history",
       "title": "Requests History",
       "subtitle": "cURL",
       "description": "HTTP requests history",
       "mode": "view"
+    },
+    {
+      "name": "manage",
+      "title": "Manage Requests",
+      "subtitle": "cURL",
+      "description": "Manage HTTP requests",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.9.0",
-    "axios": "^0.27.2",
-    "curl-string": "^1.1.1"
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.18.1",
+    "axios": "^1.7.9",
+    "curl-string": "^3.1.0",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.9",
-    "eslint": "^8.45.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.37.2",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6"
   },
