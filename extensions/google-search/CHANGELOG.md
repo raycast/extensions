@@ -1,5 +1,9 @@
 # Google Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add a fall back to clipboard if no text is selected
+
 ## [Update] - 2024-11-21
 
 - Add a command to search Google with the selected text
