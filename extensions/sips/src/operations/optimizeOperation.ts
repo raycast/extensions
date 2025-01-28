@@ -61,7 +61,7 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
   const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))} (Optimized).webp`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
-  const [cwebpPath] = await getWebPBinaryPath();
+  const [, cwebpPath] = await getWebPBinaryPath();
   execSync(
     `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
   );
