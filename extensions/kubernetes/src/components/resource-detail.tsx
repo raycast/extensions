@@ -1,18 +1,19 @@
 import { KubernetesObject } from "@kubernetes/client-node";
 import { List } from "@raycast/api";
 import * as yaml from "js-yaml";
+import { Toggle } from "../hooks/useToggle";
 
 export default function ResourceDetail<T extends KubernetesObject>(props: {
   apiVersion: string;
   kind: string;
   resource: T;
-  showManagedFields: boolean;
-  showLastAppliedConfiguration: boolean;
+  managedFields: Toggle;
+  lastAppliedConfiguration: Toggle;
 }) {
-  const { apiVersion, kind, resource, showManagedFields, showLastAppliedConfiguration } = props;
+  const { apiVersion, kind, resource, managedFields, lastAppliedConfiguration } = props;
 
   const hideManagedFields = (resource: T) => {
-    if (showManagedFields) {
+    if (managedFields.show) {
       return resource;
     }
     return {
@@ -25,7 +26,7 @@ export default function ResourceDetail<T extends KubernetesObject>(props: {
   };
 
   const hideLastAppliedConfiguration = (resource: T) => {
-    if (showLastAppliedConfiguration) {
+    if (lastAppliedConfiguration.show) {
       return resource;
     }
 

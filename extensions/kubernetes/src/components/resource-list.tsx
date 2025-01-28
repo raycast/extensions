@@ -1,42 +1,30 @@
-import { ApiType, KubernetesObject } from "@kubernetes/client-node";
+import { KubernetesObject } from "@kubernetes/client-node";
 import { List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { ApiConstructor, useKubernetesContext } from "../states/context";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useKubernetesResources from "../hooks/useKubernetesResources";
+import { useToggle } from "../hooks/useToggle";
+import { useKubernetesContext } from "../states/context";
 import { useKubernetesNamespace } from "../states/namespace";
-import { getDarkColor, getLightColor } from "../utils/color";
 import NamespaceDropdown from "./namespace-dropdown";
-import ResourceAction from "./resource-action";
-import ResourceDetail from "./resource-detail";
+import ResourceItem from "./resource-item";
 
-export function ResourceList<T extends KubernetesObject, U extends ApiType>(props: {
+export function ResourceList<T extends KubernetesObject>(props: {
   apiVersion: string;
   kind: string;
   namespaced: boolean;
-  apiClientType: ApiConstructor<U>;
-  listResources: (apiType: U, namespace: string) => Promise<T[]>;
   matchResource: (resource: T, searchText: string) => boolean;
   renderFields: (resource: T) => string[];
 }) {
-  const { apiVersion, kind, namespaced, apiClientType, listResources, matchResource, renderFields } = props;
+  const { apiVersion, kind, namespaced, matchResource, renderFields } = props;
 
-  const { currentContext, getApiClient } = useKubernetesContext();
+  const { currentContext } = useKubernetesContext();
   const { currentNamespace } = useKubernetesNamespace();
 
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [showManagedFields, setShowManagedFields] = useState(false);
-  const [showLastAppliedConfiguration, setShowLastAppliedConfiguration] = useState(false);
-
+  const detailView = useToggle("Detail View", false);
   const [searchText, setSearchText] = useState("");
   const [resources, setResources] = useState<T[]>([]);
 
-  const { isLoading, data } = usePromise(
-    async (namespace: string) => {
-      return await listResources(getApiClient(apiClientType), namespace);
-    },
-    [currentNamespace],
-    { onData: setResources },
-  );
+  const { isLoading, data } = useKubernetesResources<T>(apiVersion, kind);
 
   useEffect(() => {
     if (!data) {
@@ -45,10 +33,37 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
     setResources(data.filter((resource) => !searchText || matchResource(resource, searchText.toLowerCase())));
   }, [data, searchText]);
 
+  const groupedResources = useMemo(() => {
+    return resources.reduce((map, resource) => {
+      const namespace = resource.metadata?.namespace ?? "default";
+      if (!map.has(namespace)) {
+        map.set(namespace, []);
+      }
+      map.get(namespace)!.push(resource);
+      return map;
+    }, new Map<string, T[]>());
+  }, [resources]);
+
+  const renderResourceItems = useCallback(
+    (resources: T[]) => {
+      return resources.map((resource) => (
+        <ResourceItem
+          key={resource.metadata?.uid}
+          apiVersion={apiVersion}
+          kind={kind}
+          resource={resource}
+          detailView={detailView}
+          renderFields={renderFields}
+        />
+      ));
+    },
+    [apiVersion, kind, detailView, renderFields],
+  );
+
   return (
     <List
-      navigationTitle={`${kind} (${resources.length ?? 0}) 🐳 Context: ${currentContext}`}
-      isShowingDetail={isShowingDetail}
+      navigationTitle={`${kind} (${resources.length}) 🐳 Context: ${currentContext}`}
+      isShowingDetail={detailView.show}
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -56,45 +71,13 @@ export function ResourceList<T extends KubernetesObject, U extends ApiType>(prop
     >
       <List.EmptyView title={isLoading ? "Loading ..." : "No results found"} />
 
-      {resources.map((resource) => (
-        <List.Item
-          key={resource.metadata?.uid}
-          title={resource.metadata?.name ?? ""}
-          detail={
-            <ResourceDetail
-              apiVersion={apiVersion}
-              kind={kind}
-              resource={resource}
-              showManagedFields={showManagedFields}
-              showLastAppliedConfiguration={showLastAppliedConfiguration}
-            />
-          }
-          actions={
-            <ResourceAction
-              resource={resource}
-              isShowingDetail={isShowingDetail}
-              setIsShowingDetail={setIsShowingDetail}
-              showManagedFields={showManagedFields}
-              setShowManagedFields={setShowManagedFields}
-              showLastAppliedConfiguration={showLastAppliedConfiguration}
-              setShowLastAppliedConfiguration={setShowLastAppliedConfiguration}
-            />
-          }
-          accessories={
-            isShowingDetail
-              ? []
-              : renderFields(resource).map((value, index) => ({
-                  tag: {
-                    value,
-                    color: {
-                      light: getLightColor(index),
-                      dark: getDarkColor(index),
-                    },
-                  },
-                }))
-          }
-        />
-      ))}
+      {currentNamespace === ""
+        ? [...groupedResources.entries()].map(([namespace, resources]) => (
+            <List.Section key={namespace} title={namespace}>
+              {renderResourceItems(resources)}
+            </List.Section>
+          ))
+        : renderResourceItems(resources)}
     </List>
   );
 }

@@ -1,5 +1,4 @@
-import { CoreV1Api, V1Endpoints } from "@kubernetes/client-node";
-import { listEndpoints } from "./api/coreV1";
+import { V1Endpoints } from "@kubernetes/client-node";
 import { ResourceList } from "./components/resource-list";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
@@ -12,8 +11,6 @@ export default function Command() {
           apiVersion="v1"
           kind="Endpoints"
           namespaced={true}
-          apiClientType={CoreV1Api}
-          listResources={listEndpoints}
           matchResource={matchEndpoint}
           renderFields={renderEndpointFields}
         />

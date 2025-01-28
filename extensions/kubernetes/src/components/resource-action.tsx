@@ -1,45 +1,44 @@
 import { KubernetesObject } from "@kubernetes/client-node";
 import { Action, ActionPanel } from "@raycast/api";
+import { Toggle } from "../hooks/useToggle";
 
 export default function ResourceAction<T extends KubernetesObject>(props: {
   resource: T;
-  isShowingDetail: boolean;
-  setIsShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  showManagedFields: boolean;
-  setShowManagedFields: React.Dispatch<React.SetStateAction<boolean>>;
-  showLastAppliedConfiguration: boolean;
-  setShowLastAppliedConfiguration: React.Dispatch<React.SetStateAction<boolean>>;
+  detailView: Toggle;
+  managedFields: Toggle;
+  lastAppliedConfiguration: Toggle;
 }) {
-  const {
-    resource,
-    isShowingDetail,
-    setIsShowingDetail,
-    showManagedFields,
-    setShowManagedFields,
-    showLastAppliedConfiguration,
-    setShowLastAppliedConfiguration,
-  } = props;
+  const { resource, detailView, managedFields, lastAppliedConfiguration } = props;
 
   return (
     <ActionPanel>
-      <Action title="Toggle Detail View" onAction={() => setIsShowingDetail(!isShowingDetail)} />
+      <Action
+        title={detailView.title}
+        onAction={() => detailView.toggle()}
+        icon={detailView.icon}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
+      />
       <Action.CopyToClipboard
         title="Copy Name to Clipboard"
         content={resource.metadata?.name ?? ""}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
-      {isShowingDetail && [
+      {detailView.show && (
         <Action
-          title="Toggle Show Managed Fields"
-          onAction={() => setShowManagedFields(!showManagedFields)}
+          title={managedFields.title}
+          onAction={() => managedFields.toggle()}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
-        />,
+          icon={managedFields.icon}
+        />
+      )}
+      {detailView.show && (
         <Action
-          title="Toggle Show Last Applied Configuration"
-          onAction={() => setShowLastAppliedConfiguration(!showLastAppliedConfiguration)}
+          title={lastAppliedConfiguration.title}
+          onAction={() => lastAppliedConfiguration.toggle()}
           shortcut={{ modifiers: ["cmd"], key: "l" }}
-        />,
-      ]}
+          icon={lastAppliedConfiguration.icon}
+        />
+      )}
     </ActionPanel>
   );
 }
