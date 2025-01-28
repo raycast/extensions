@@ -2,9 +2,9 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- Added play-by-play view for completed games.
+- Added play-by-play view for completed and in-progress games.
 - Added details view for games list.
-- Added scoreboard for completed games.
+- Added scoreboard for completed and in-progress games.
 
 ## [Fixes] - 2024-10-28
 
