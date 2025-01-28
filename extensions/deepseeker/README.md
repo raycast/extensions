@@ -13,7 +13,7 @@ While [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-ac
     - ChatGPT: `https://api.openai.com/v1`
     - Gemini: `https://generativelanguage.googleapis.com/v1beta/openai/`
 
-3. Choose `deepseek-chat` as the global preferred model. You can also customize the preferred model for each command.(For now, DeepSeeker only has one model)
+3. Choose `DeepSeek-V3` or `DeepSeek-R1` (new reasoning model) as the global preferred model. You can also customize the preferred model for each command.
 
 Enjoy using DeepSeeker! 🚀
 
