@@ -57,10 +57,10 @@
     },
     {
       "default": false,
-      "description": "Show the hidden file.",
+      "description": "Show hidden files",
       "label": "Show Hidden Files",
       "name": "showHiddenFiles",
-      "required": true,
+      "required": false,
       "type": "checkbox"
     },
     {
