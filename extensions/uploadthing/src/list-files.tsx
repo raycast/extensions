@@ -11,39 +11,28 @@ import { useFiles } from "./lib/hooks";
 import { filesize } from "filesize";
 import { useState } from "react";
 import { UTApi } from "uploadthing/server";
-import { getStatusIcon, getToken } from "./lib/utils";
+import { StatusIconMap, getToken } from "./lib/utils";
 
 export default () => {
-  const { isLoading, files } = useFiles();
+  const { isLoading, files, pagination } = useFiles();
   const [filter, setFilter] = useState("");
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item icon={Icon.Document} title="All" value="" />
           <List.Dropdown.Section title="Status">
-            <List.Dropdown.Item
-              icon={getStatusIcon("Deletion Pending")}
-              title="Deletion Pending"
-              value="status_Deletion Pending"
-            />
-            <List.Dropdown.Item
-              icon={getStatusIcon("Failed")}
-              title="Failed"
-              value="status_Failed"
-            />
-            <List.Dropdown.Item
-              icon={getStatusIcon("Uploaded")}
-              title="Uploaded"
-              value="status_Uploaded"
-            />
-            <List.Dropdown.Item
-              icon={getStatusIcon("Uploading")}
-              title="Uploading"
-              value="status_Uploading"
-            />
+            {Object.entries(StatusIconMap).map(([status, icon]) => (
+              <List.Dropdown.Item
+                key={status}
+                icon={icon}
+                title={status}
+                value={`status_${status}`}
+              />
+            ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -63,7 +52,7 @@ export default () => {
         .map((file) => (
           <List.Item
             key={file.key}
-            icon={getStatusIcon(file.status)}
+            icon={StatusIconMap[file.status]}
             title={file.name}
             subtitle={file.status}
             accessories={[

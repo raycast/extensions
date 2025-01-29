@@ -97,13 +97,21 @@ export const useAppInfo = () => {
 
 export const useFiles = () => {
   const utapi = new UTApi({ token: getToken() });
-  const { isLoading, data } = useCachedPromise(
-    async () => {
-      const res = await utapi.listFiles();
-      return res.files;
+  const LIMIT = 20;
+  const { isLoading, data, pagination } = useCachedPromise(
+    () => async (options: { page: number }) => {
+      const res = await utapi.listFiles({
+        offset: options.page * LIMIT,
+        limit: LIMIT,
+      });
+
+      return {
+        data: [...res.files],
+        hasMore: res.hasMore,
+      };
     },
     [],
     { initialData: [] },
   );
-  return { isLoading, files: data };
+  return { isLoading, files: data, pagination };
 };
