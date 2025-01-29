@@ -3,6 +3,7 @@
 ## [2.0.1 - Add "List Files"] - {PR_MERGE_DATE}
 
 - Add "List Files" command
+- Add `Icon` to "Upload Files" `Action`
 
 ## [2.0.0] - 2024-09-17
 

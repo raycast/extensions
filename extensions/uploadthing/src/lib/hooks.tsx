@@ -97,9 +97,13 @@ export const useAppInfo = () => {
 
 export const useFiles = () => {
   const utapi = new UTApi({ token: getToken() });
-  const { isLoading, data} = useCachedPromise(async () => {
-    const res = await utapi.listFiles();
-    return res.files;
-  }, [], { initialData: [] });
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      const res = await utapi.listFiles();
+      return res.files;
+    },
+    [],
+    { initialData: [] },
+  );
   return { isLoading, files: data };
 };

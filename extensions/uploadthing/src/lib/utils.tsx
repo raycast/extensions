@@ -124,21 +124,23 @@ export const getSignedUrls = async (files: { key: string }[]) => {
   );
 };
 
-export const getStatusIcon = (status: "Deletion Pending" | "Failed" | "Uploaded" | "Uploading") => {
-    let color: Color;
-    switch (status) {
-      case "Deletion Pending":
-        color = Color.Orange;
-        break;
-      case "Failed":
-        color = Color.Red;
-        break;
-      case "Uploaded":
-        color = Color.Green;
-        break;
-      case "Uploading":
-        color = Color.Blue;
-        break;
-    }
-    return { source: Icon.Document, tintColor: color };
+export const getStatusIcon = (
+  status: "Deletion Pending" | "Failed" | "Uploaded" | "Uploading",
+) => {
+  let color: Color;
+  switch (status) {
+    case "Deletion Pending":
+      color = Color.Orange;
+      break;
+    case "Failed":
+      color = Color.Red;
+      break;
+    case "Uploaded":
+      color = Color.Green;
+      break;
+    case "Uploading":
+      color = Color.Blue;
+      break;
   }
+  return { source: Icon.Document, tintColor: color };
+};
