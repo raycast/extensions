@@ -47,7 +47,7 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
         }
       }
       if (!preferences.showHiddenFiles) {
-        const statOutput = execSync(`stat -f%f "${props.path}/${f.name}"`, {
+        const statOutput = execSync(`stat -f%f '${props.path}/${f.name}'`, {
           encoding: "utf8",
         }).trim();
         const fileFlags = parseInt(statOutput, 10);
