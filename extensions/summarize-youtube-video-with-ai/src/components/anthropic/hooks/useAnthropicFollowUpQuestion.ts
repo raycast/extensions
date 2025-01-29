@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { ANTHROPIC_MODEL } from "../../const/defaults";
-import { ALERT, FINDING_ANSWER } from "../../const/toast_messages";
-import { Preferences } from "../../summarizeVideo";
-import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
+import { ANTHROPIC_MODEL } from "../../../const/defaults";
+import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
+
+import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 export const useAnthropicFollowUpQuestion = async (
   question: string,
@@ -11,13 +12,9 @@ export const useAnthropicFollowUpQuestion = async (
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,
   pop: () => void,
 ) => {
-  const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi, anthropicApiToken, anthropicModel } = preferences;
+  const preferences = getPreferenceValues() as AnthropicPreferences;
+  const { anthropicApiToken, anthropicModel } = preferences;
   setSummary(undefined);
-
-  if (chosenAi !== "anthropic") {
-    return;
-  }
 
   const anthropic = new Anthropic({
     apiKey: anthropicApiToken,
