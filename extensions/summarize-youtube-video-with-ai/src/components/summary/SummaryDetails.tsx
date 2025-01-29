@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
-import { VideoDataTypes } from "../utils/getVideoData";
+import { VideoDataTypes } from "../../utils/getVideoData";
 import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
 

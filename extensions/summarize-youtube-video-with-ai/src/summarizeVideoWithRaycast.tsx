@@ -5,7 +5,7 @@ import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
 import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
-import SummaryDetails from "./components/SummaryDetails";
+import SummaryDetails from "./components/summary/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
 import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
