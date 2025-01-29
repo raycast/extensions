@@ -7,8 +7,7 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
-  getPreferenceValues,
+  useNavigation
 } from "@raycast/api";
 import { Fragment } from "react";
 
@@ -50,8 +49,6 @@ import SubTasks from "./SubTasks";
 import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
 import TaskEdit from "./TaskEdit";
-
-const preferences = getPreferenceValues<Preferences>();
 
 type TaskActionsProps = {
   task: Task;
@@ -216,9 +213,6 @@ export default function TaskActions({
       <Action
         title="Complete Task"
         icon={Icon.Checkmark}
-        shortcut={
-          preferences.completeTaskShortcut === "shiftCmdE" ? { modifiers: ["cmd", "shift"], key: "e" } : undefined
-        }
         onAction={() => completeTask(task)}
       />
 

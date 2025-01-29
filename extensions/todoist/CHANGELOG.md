@@ -2,7 +2,9 @@
 
 ## [Add Complete Task Shortcut Preferences] - {PR_MERGE_DATE}
 
-- Adding in a preference to set a shortcut for completing a task.
+- Adjusting shortcuts for the following task actions:
+  - Complete Task - Now `⌘` + `Enter` (previously `shift` + `⌘` + `E`)
+  - Open Task in Todoist - Now `⌘` + `O` (previously `⌘` + `Enter`)
 
 ## [Quick Add Task Improvement] - 2024-12-02
 

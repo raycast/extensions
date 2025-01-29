@@ -246,24 +246,6 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
-    },
-    {
-      "name": "completeTaskShortcut",
-      "title": "Complete Task Shortcut",
-      "description": "Shortcut to complete the current task",
-      "type": "dropdown",
-      "required": false,
-      "default": "shiftCmdE",
-      "data": [
-        {
-          "title": "cmd + enter",
-          "value": "cmdE"
-        },
-        {
-          "title": "shift + cmd + e",
-          "value": "shiftCmdE"
-        }
-      ]
     }
   ],
   "dependencies": {
