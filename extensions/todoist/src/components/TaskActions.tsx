@@ -7,7 +7,7 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation
+  useNavigation,
 } from "@raycast/api";
 import { Fragment } from "react";
 
@@ -210,11 +210,7 @@ export default function TaskActions({
 
   return (
     <>
-      <Action
-        title="Complete Task"
-        icon={Icon.Checkmark}
-        onAction={() => completeTask(task)}
-      />
+      <Action title="Complete Task" icon={Icon.Checkmark} onAction={() => completeTask(task)} />
 
       {isTodoistInstalled ? (
         <Action.Open
