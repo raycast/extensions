@@ -1,79 +1,19 @@
-import {
-  getPreferenceValues,
-  launchCommand,
-  LaunchProps,
-  LaunchType,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Detail } from "@raycast/api";
 
-interface SummarizeVideoWithProps {
-  video: string;
-}
+const markdown = `
+# The Extension has changed
 
-export type Preferences = {
-  chosenAi: "anthropic" | "openai" | "raycastai";
-  creativity: "0" | "0.5" | "1" | "1.5" | "2";
-  openaiApiToken: string;
-  anthropicApiToken: string;
-  language: string;
-  openaiEndpoint: string;
-  openaiModel: string;
-  anthropicModel: string;
-};
+We introduced new commands to summarize YouTube videos with AI. The one you used to use is now deprecated and split into three. You can choose one of the following commands:
 
-export default function DeprecationNote(
-  props: LaunchProps<{
-    arguments: SummarizeVideoWithProps;
-  }>,
-) {
-  const preferences = getPreferenceValues() as Preferences;
-  const { chosenAi } = preferences;
+- Summarize with Raycast: \`summarizeVideoWithRaycastAI\`
+- Summarize with OpenAI: \`summarizeVideoWithOpenAI\`
+- Summarize with Anthropic: \`summarizeVideoWithAnthropic\`
 
-  switch (chosenAi) {
-    case "anthropic":
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Command has changed",
-        message: "Please run `Summarize YouTube Video with Anthropic` and enter your anthropic API key in preferences",
-        primaryAction: {
-          title: "Open Exetension Settings",
-          onAction: () => openExtensionPreferences(),
-        },
-      });
-      launchCommand({ name: "summarizeVideoWithAnthropic", type: LaunchType.UserInitiated, context: { props } });
-      break;
-    case "openai":
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Command has changed",
-        message: "Please run `Summarize YouTube Video with OpenAI` and enter your OpenAI API in preferences",
-        primaryAction: {
-          title: "Open Exetension Settings",
-          onAction: () => openExtensionPreferences(),
-        },
-      });
-      launchCommand({ name: "summarizeVideoWithOpenAI", type: LaunchType.UserInitiated, context: { props } });
-      break;
-    case "raycastai":
-      launchCommand({
-        name: "Please run `Summarize YouTube Video with Raycast`.",
-        type: LaunchType.UserInitiated,
-        context: { video: props.arguments.video },
-      });
-      break;
-    default:
-      showToast({
-        style: Toast.Style.Failure,
-        title: "⚠️",
-        message: "Please choose another command",
-        primaryAction: {
-          title: "Open Exetension Settings",
-          onAction: () => openExtensionPreferences(),
-        },
-      });
-      return;
-  }
-  return null;
+You have to migrate your settings to the new commands. Open the extensions preferences and update the command accordingly. You can find your old settings in the deprecated command.
+
+If you only use one command you can also disbale the others in the preferences.
+`;
+
+export default function DeprecationNote() {
+  return <Detail markdown={markdown} navigationTitle="The Extension has changed" />;
 }
