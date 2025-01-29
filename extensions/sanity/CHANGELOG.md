@@ -1,5 +1,10 @@
 # Sanity Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- Simplify "search-projects" by replacing `Cache` with `useCachedPromise`
+- Add "Search Datasets" to "Search Projects"
+
 ## [Fix "Open Studio" Link] - 2024-09-24
 
 - Fix "Open Studio" link not working

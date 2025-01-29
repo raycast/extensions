@@ -1,34 +1,16 @@
-import { ActionPanel, Cache, Icon, List, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { client } from "./util/client";
+import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
+import { client, projectClient } from "./util/client";
+import { useCachedPromise } from "@raycast/utils";
 import { SanityProject } from "@sanity/client";
 
-const cache = new Cache();
-
 export default function SearchProjects() {
-  const [projects, setProjects] = useState<SanityProject[] | null>(null);
+  const { isLoading, data: projects } = useCachedPromise(async () => await client.projects.list(), [], {
+    initialData: []
+  })
 
-  useEffect(() => {
-    async function fetchProjects() {
-      const cachedProjects = cache.get("projects");
-      /*
-       * If we have a cached version of the projects, use that
-       * while we fetch the fresh version in the background
-       * */
-      if (cachedProjects) {
-        setProjects(JSON.parse(cachedProjects));
-      }
-      const freshProjects: SanityProject[] = await client.projects.list();
-      cache.set("projects", JSON.stringify(freshProjects));
-      setProjects(freshProjects);
-    }
-    fetchProjects();
-  }, []);
-  const isLoading = !projects;
   return (
     <List searchBarPlaceholder="Search Projects..." isLoading={isLoading}>
-      {projects &&
-        projects
+      {projects
           .filter((project) => !project.isDisabled && !project.isDisabledByUser)
           .map((project) => (
             <List.Item
@@ -63,6 +45,9 @@ export default function SearchProjects() {
                         : `https://www.sanity.io/manage/personal/project/${project.id}`
                     }
                   />
+                  <ActionPanel.Section>
+                    <Action.Push icon={Icon.TwoPeople} title="Search Datasets" target={<SearchDatasets project={project} />} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
               accessories={[
@@ -75,4 +60,12 @@ export default function SearchProjects() {
           ))}
     </List>
   );
+}
+
+function SearchDatasets({project}: {project: SanityProject}) {
+  const { isLoading, data: datasets } = useCachedPromise(async() => await projectClient(project.id).datasets.list(), [], {initialData: []});
+
+  return <List isLoading={isLoading}l>
+    {datasets.map((dataset, datasetIndex) => <List.Item key={datasetIndex} icon={Icon.Coin} title={dataset.name} accessories={[{tag: { value: dataset.aclMode, color: dataset.aclMode==="public" ? Color.Green : undefined }}]} />)}
+  </List>
 }
