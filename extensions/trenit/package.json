@@ -14,8 +14,7 @@
       "name": "departures-and-arrivals",
       "title": "Check Trains Status",
       "description": "Lets you browse the trains status throughout Italian stations.",
-      "mode": "view",
-      "handle": "stations"
+      "mode": "view"
     }
   ],
   "dependencies": {

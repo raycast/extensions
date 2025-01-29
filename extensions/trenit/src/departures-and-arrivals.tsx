@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   LaunchProps,
   List,
   LocalStorage,
@@ -37,7 +38,7 @@ function StationItem({
           <Action.Push title="Show Trains" target={<StationView station={station} />} icon={Icon.Train} />
           <Action
             title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-            shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            shortcut={Keyboard.Shortcut.Common.Pin}
             icon={Icon.Star}
             onAction={() => toggleFavorite(station.id)}
           />

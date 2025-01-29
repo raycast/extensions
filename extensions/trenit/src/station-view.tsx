@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon, Toast, showToast, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Keyboard, Toast, showToast, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { parseTrains } from "./api/rfi-api";
@@ -103,7 +103,7 @@ export function StationView(props: { station: Station }) {
                 autoFocus={false}
                 title="Refresh"
                 onAction={revalidate}
-                shortcut={{ modifiers: ["opt"], key: "l" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
             </ActionPanel>
           }
@@ -164,7 +164,7 @@ export function StationView(props: { station: Station }) {
                   title="Reload"
                   onAction={revalidate}
                   icon={Icon.RotateClockwise}
-                  shortcut={{ modifiers: ["opt"], key: "l" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
               </ActionPanel>
             }
