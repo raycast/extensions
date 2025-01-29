@@ -5,7 +5,7 @@ import { ProblemDetail } from "./components/ProblemDetail";
 import { CODEFORCES_API_BASE } from "./constants";
 import { Problem } from "./interface/Problem";
 import { CodeforcesResponse } from "./interface/CodeforcesResponse";
-import { getRatingColors } from "./func/RatingColors";
+import { getColorHexCode } from "./func/HexCode";
 
 async function searchProblems(query: string): Promise<Problem[]> {
   try {
@@ -104,7 +104,7 @@ export default function Command() {
             {
               tag: {
                 value: problem.rating ? `${problem.rating}` : "Unrated",
-                color: getRatingColors(problem.rating).text,
+                color: problem.rating ? getColorHexCode(problem.rating) : "#CCCCCC",
               },
               tooltip: `Difficulty: ${problem.rating || "Unrated"}`,
             },
