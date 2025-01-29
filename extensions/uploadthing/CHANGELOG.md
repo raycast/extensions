@@ -1,5 +1,9 @@
 # UploadThing Changelog
 
+## [2.0.1 - Add "List Files"] - {PR_MERGE_DATE}
+
+- Add "List Files" command
+
 ## [2.0.0] - 2024-09-17
 
 - Update to use UploadThing v7 for faster uploads
