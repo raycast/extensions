@@ -10,15 +10,20 @@ import {
   Icon,
   showHUD,
   getFrontmostApplication,
+  Cache,
 } from '@raycast/api'
 import { runAppleScript } from '@raycast/utils'
 import { useAtom } from 'jotai'
-import { trpc } from './utils/trpc.util'
+import { RouterOutputs, trpc } from './utils/trpc.util'
 import { CachedQueryClientProvider } from './components/CachedQueryClientProvider'
 import MyAccount from './views/MyAccount'
 import { sessionTokenAtom } from './states/session-token.state'
 import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from './states/recent-selected.state'
 import { LoginView } from './views/LoginView'
+import { useTags } from './hooks/use-tags'
+import { Bookmark } from './types'
+import { NewTagForm } from './views/NewTagForm'
+import { useMe } from './hooks/use-me.hook'
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>
@@ -29,6 +34,10 @@ interface ScriptsPerBrowser {
 }
 
 type Browser = 'chrome' | 'safari' | 'arc'
+
+const cache = new Cache()
+const cachedMe = cache.get('me')
+const cachedBookmarks = cache.get('bookmarks')
 
 const actions: Record<Browser, ScriptsPerBrowser> = {
   chrome: {
@@ -153,47 +162,28 @@ function Body(props: { onlyPop?: boolean }) {
     })
   }, [])
 
-  const me = trpc.user.me.useQuery(undefined, {
-    queryHash: sessionToken,
-    enabled: !!sessionToken,
-  })
+  const me = useMe(sessionToken)
 
-  const { data: allTags } = trpc.tag.list.useQuery(
-    {
-      spaceIds: me?.data?.associatedSpaces.map((space) => space.id) ?? [],
-    },
-    {
-      enabled: !!me.data,
-    }
-  )
+  const spaceIds = useMemo(() => {
+    return me?.data?.associatedSpaces.map((s) => s.id) || []
+  }, [me.data])
 
-  const tags = useMemo(() => {
-    if (!allTags) {
-      return undefined
-    }
+  const tags = trpc.tag.list.useQuery({ spaceIds })
+  const spaceTags = useMemo(() => {
+    if (!tags.data) return undefined
 
-    if (selectedSpace === 'email') {
-      return []
-    }
-
-    return allTags?.filter((tag) => tag.spaceId === selectedSpace)
-  }, [allTags, selectedSpace])
-
-  const tagValues = useMemo(
-    () => selectedTags.map((tag) => tag.id).filter((id) => tags?.find((p) => p.id === id)),
-    [selectedTags, tags]
-  )
+    return tags.data.filter((tag) => tag.spaceId === selectedSpace)
+  }, [tags.data, selectedSpace])
 
   const bookmarkCreate = trpc.bookmark.create.useMutation()
 
-  // const handleSubmit = async (form: { title: string; url: string; description: string; owner: string }) => {
   const handleSubmit = async () => {
     await bookmarkCreate.mutateAsync({
       name: title,
       description: description,
       url: url,
       spaceId: selectedSpace,
-      tags: selectedTags.map((tag) => tag.id),
+      tags: selectedTags.map((tag) => tag.name),
     })
 
     if (onlyPop) {
@@ -245,6 +235,15 @@ function Body(props: { onlyPop?: boolean }) {
               setTimeout(() => setAfter1Sec(true), 100)
             }}
           />
+          <Action.Push
+            title="Create New Tag"
+            icon="🏷️"
+            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            target={<NewTagForm spaceId={selectedSpace} />}
+            onPop={() => {
+              tags.refetch()
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -268,20 +267,18 @@ function Body(props: { onlyPop?: boolean }) {
       <Form.TagPicker
         id="tag"
         title="Tags"
-        value={tagValues}
+        value={selectedTags.map((tag) => tag.name)}
         onChange={(values) => {
+          console.log('change')
           if (!tags) return
 
-          const selected = values
-            .map((v) => ({ id: v, title: tags.find((p) => p.id === v)!.name }))
-            .filter((tag) => tag.title)
-
+          const selected = values.map((v) => ({ name: v, spaceId: selectedSpace }))
           setSelectedTags(selected)
         }}
       >
-        {!tags && selectedTags.map((tag) => <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.title} />)}
-        {tags?.map((tag) => <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} />)}
+        {spaceTags?.map((tag) => <Form.TagPicker.Item key={tag.name} value={tag.name} title={tag.name} />)}
       </Form.TagPicker>
+      <Form.Description text={`➕ You can create a new tag by '⌘ + n'`} />
 
       <Form.TextArea id="description" title="Description" value={description} onChange={setDescription} />
     </Form>

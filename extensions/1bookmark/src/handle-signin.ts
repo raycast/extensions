@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { hostname } from 'node:os'
 import { getPreferenceValues, showToast, Toast } from '@raycast/api'
 import axios from 'axios'
 
@@ -13,7 +14,8 @@ const API_URL_SIGNIN = join(API_URL, '/api/raycast-login')
 export const handleSignIn = async (form: { email: string; token: string; onSuccess: (token: string) => void }) => {
   const { email, token, onSuccess } = form
   try {
-    const res = await axios.post(API_URL_SIGNIN, { email, token })
+    const deviceName = hostname()
+    const res = await axios.post(API_URL_SIGNIN, { email, token, deviceName })
     const setCookieHeaders = res?.headers?.['set-cookie']
     const sessionTokenLine = setCookieHeaders?.find((header: string) => header.includes('authjs.session-token='))
 
@@ -32,7 +34,7 @@ export const handleSignIn = async (form: { email: string; token: string; onSucce
     showToast({
       style: Toast.Style.Failure,
       title: 'Signin Failed',
-      message: 'Failed to sign in',
+      message: err instanceof Error ? err.message : 'Unknown error',
     })
   }
 }

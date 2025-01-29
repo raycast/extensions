@@ -6,5 +6,5 @@ We support Raycast extension as our top priority client and are developing a web
 
 ## Commands
 
-- ➕ Add Bookmark: Create a new Bookmark.
-- 🔍 Bookmarks: Search Bookmarks and Open it.
+- Search Bookmarks: Search bookmarks and open it. You can also manage all 1bookmark features in this command.
+- Add Bookmark: Create a new bookmark.

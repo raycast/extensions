@@ -1,6 +1,6 @@
-import { Icon, List } from '@raycast/api'
+import { Color, Icon, List } from '@raycast/api'
 import { BookmarkItemActionPanel } from './BookmarkItemActionPanel'
-import { RouterOutputs } from '../utils/trpc.util'
+import { RouterOutputs, trpc } from '../utils/trpc.util'
 import { getFavicon } from '@raycast/utils'
 import { useMemo } from 'react'
 
@@ -10,7 +10,7 @@ export const BookmarkItem = (props: {
   refetch: () => void
 }) => {
   const { bookmark, me, refetch } = props
-  const { name, url, spaceId } = bookmark
+  const { name, url, spaceId, tags } = bookmark
   const space = me?.associatedSpaces.find((s) => s.id === spaceId)
 
   const icon = useMemo(() => {
@@ -21,12 +21,23 @@ export const BookmarkItem = (props: {
     }
   }, [url])
 
+  const tagItems = useMemo(() => {
+    if (tags.length < 3) {
+      return tags
+    }
+
+    return [...tags.slice(0, 2), `+${tags.length - 2}`]
+  }, [tags])
+
   return (
     <List.Item
       icon={icon}
       title={name}
       subtitle={url.replace(/^https?:\/\//, '')}
-      accessories={space ? [{ icon: space.image || (space.type === 'PERSONAL' ? Icon.Person : Icon.TwoPeople) }] : []}
+      accessories={[
+        ...tagItems.map((tag) => ({ tag })),
+        { icon: space?.image || (space?.type === 'PERSONAL' ? Icon.Person : Icon.TwoPeople) },
+      ]}
       actions={
         <BookmarkItemActionPanel bookmark={bookmark} toggleBookmarkDetail={() => {}} me={me} refetch={refetch} />
       }

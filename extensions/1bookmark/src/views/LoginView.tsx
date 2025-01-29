@@ -66,7 +66,7 @@ function Body() {
     >
       {!sentToken && (
         <>
-          <Form.Description text="Input Email to have a login code sent to your email." />
+          <Form.Description text="👋🏼 Input Email to Login" />
           <Form.TextField id="email" title="Email" placeholder="Email" onChange={(e) => setEmail(e)} />
           <Form.Description text='Press "Command(⌘) + Enter"' />
         </>

@@ -6,8 +6,9 @@ import SuperJSON from 'superjson'
 import fetch from 'node-fetch'
 import { httpBatchLink } from '@trpc/client'
 import { trpc } from '../utils/trpc.util.js'
-import { getSessionToken } from '@/states/session-token.state.js'
+import { getSessionToken, sessionTokenAtom } from '@/states/session-token.state.js'
 import axios from 'axios'
+import { useAtom } from 'jotai'
 
 interface Preferences {
   apiUrl: string
@@ -65,7 +66,20 @@ if (!globalThis.fetch) {
 // }
 
 export function CachedQueryClientProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            // staleTime: ms('1m'),
+            // gcTime: ms('30d'),
+          },
+        },
+      })
+  )
+
+  const [, setSessionToken] = useAtom(sessionTokenAtom)
 
   // sessionToken이 바뀔 때마다 trpcClient를 새로 만들오주고 싶은데,
   // 잘 안되서 일단은 매번 getSessionToken() 하는 구조로 변경.
@@ -97,12 +111,25 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
                 // signal: options?.signal!,
                 headers: headers as any,
               })
+
+              const setCookieHeaders = res?.headers?.['set-cookie']
+              const sessionTokenLine = setCookieHeaders?.find((header: string) =>
+                header.includes('authjs.session-token=')
+              )
+              if (sessionTokenLine) {
+                // 토큰 업데이트. 토큰 만료전에 사용하면 만료가 늘리기위해.
+                setSessionToken(sessionTokenLine)
+              }
+
               return {
                 json: () => res.data,
               }
             } catch (err) {
               const msg = (err as any)?.response?.data?.[0]?.error?.json?.message
+              console.log('rTRPC Error: ')
+              console.log(err)
               console.log((err as any)?.response?.data?.[0]?.error?.json)
+              // console.log((err as any)?.response.data)
               showToast({
                 style: Toast.Style.Failure,
                 title: msg || 'Unknown API Error',

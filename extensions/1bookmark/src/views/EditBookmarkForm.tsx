@@ -1,21 +1,25 @@
 import { CachedQueryClientProvider } from '@/components/CachedQueryClientProvider'
 import { Bookmark } from '@/types'
 import { trpc } from '@/utils/trpc.util'
-import { Form, ActionPanel, Action, popToRoot, showHUD, Toast, showToast } from '@raycast/api'
+import { Form, ActionPanel, Action, showToast, useNavigation, Toast } from '@raycast/api'
 import { useRef, useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
+import { NewTagForm } from './NewTagForm'
 
 interface FormValues {
   titleField: string
   urlField: string
   descriptionField: string
+  tags: string[]
 }
 
 interface Props {
   bookmark: Bookmark
+  refetch: () => void
 }
 
-function Body({ bookmark }: Props) {
+function Body(props: Props) {
+  const { bookmark, refetch } = props
   const nameTextFieldRef = useRef<Form.TextField>(null)
   const [titleError, setTitleError] = useState<string | undefined>(undefined)
 
@@ -26,6 +30,10 @@ function Body({ bookmark }: Props) {
 
   const bookmarkUpdate = trpc.bookmark.update.useMutation()
   const bookmarkExists = trpc.bookmark.exists.useMutation()
+
+  const { data: spaceTags, refetch: spaceTagsRefetch } = trpc.tag.list.useQuery({ spaceIds: [bookmark.spaceId] })
+
+  const { pop } = useNavigation()
 
   const debouncedUrlCheck = useDebounce(async (value: string) => {
     if (bookmark.url === value) {
@@ -79,10 +87,16 @@ function Body({ bookmark }: Props) {
       name: values.titleField,
       url: values.urlField,
       description: values.descriptionField,
+      tags: values.tags,
     })
 
-    showHUD('Bookmark updated')
-    popToRoot({ clearSearchBar: true })
+    showToast({
+      style: Toast.Style.Success,
+      title: 'Bookmark updated',
+    })
+
+    refetch()
+    pop()
   }
 
   return (
@@ -90,6 +104,15 @@ function Body({ bookmark }: Props) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.Push
+            title="Create New Tag"
+            icon="🏷️"
+            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            target={<NewTagForm spaceId={bookmark.spaceId} />}
+            onPop={() => {
+              spaceTagsRefetch()
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -121,14 +144,24 @@ function Body({ bookmark }: Props) {
         ref={descriptionTextFieldRef}
         defaultValue={bookmark.description ?? ''}
       />
+
+      <Form.TagPicker id="tags" title="Tags" defaultValue={bookmark.tags}>
+        {spaceTags
+          ? spaceTags.map((tag) => (
+              <Form.TagPicker.Item key={tag.name} value={tag.name} icon={tag.icon || ''} title={tag.name} />
+            ))
+          : bookmark.tags.map((tag) => <Form.TagPicker.Item key={tag} value={tag} title={tag} />)}
+      </Form.TagPicker>
+      <Form.Description text={`➕ You can create a new tag by '⌘ + n'`} />
     </Form>
   )
 }
 
-export const EditBookmark = ({ bookmark }: Props) => {
+export const EditBookmark = (props: Props) => {
+  const { bookmark, refetch } = props
   return (
     <CachedQueryClientProvider>
-      <Body bookmark={bookmark} />
+      <Body bookmark={bookmark} refetch={refetch} />
     </CachedQueryClientProvider>
   )
 }

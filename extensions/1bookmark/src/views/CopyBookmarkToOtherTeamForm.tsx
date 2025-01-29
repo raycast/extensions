@@ -1,8 +1,7 @@
 import { CachedQueryClientProvider } from '@/components/CachedQueryClientProvider'
 import { Bookmark } from '@/types'
 import { trpc } from '@/utils/trpc.util'
-import { Action, ActionPanel, Detail, Form, Icon, Image } from '@raycast/api'
-import { getFavicon } from '@raycast/utils'
+import { Form, Icon } from '@raycast/api'
 import { useRef } from 'react'
 
 type Props = {
@@ -42,7 +41,7 @@ const Body = ({ bookmark }: Props) => {
         title="TagPicker"
         ref={tagPickerRef}
         onChange={(t) => {
-          console.log(t)
+          console.log('🔍 t', t)
         }}
       >
         <Form.TagPicker.Item

@@ -27,6 +27,7 @@ ${JSON.stringify(data, null, 2)}
             icon="📴"
             onAction={() => {
               utils.user.me.reset()
+              utils.user.me.invalidate()
               setSessionToken('')
               pop()
             }}

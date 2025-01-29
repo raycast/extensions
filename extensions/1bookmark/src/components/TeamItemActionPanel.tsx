@@ -2,6 +2,7 @@ import { RouterOutputs, trpc } from '@/utils/trpc.util'
 import { Action, ActionPanel, Alert, confirmAlert } from '@raycast/api'
 import { TeamMembersView } from '../views/TeamMembersView'
 import { NewTeamForm } from '../views/NewTeamForm'
+import { SpaceTagsView } from '../views/SpaceTagsView'
 
 export const TeamItemActionPanel = (props: {
   me: RouterOutputs['user']['me'] | undefined
@@ -25,7 +26,11 @@ export const TeamItemActionPanel = (props: {
         shortcut={{ modifiers: ['cmd'], key: 'm' }}
         target={<TeamMembersView spaceId={spaceId} />}
       />
-      <Action title={'Parts'} onAction={() => console.log('Parts')} />
+      <Action.Push
+        title={'Tags'}
+        shortcut={{ modifiers: ['cmd'], key: 't' }}
+        target={<SpaceTagsView spaceId={spaceId} />}
+      />
       <Action title={'Copy Invitation Link'} onAction={() => console.log('Copy invitation link')} />
       <Action title={'Leave Team'} onAction={() => console.log('Leave Team')} />
       <Action title={'Delete Team'} onAction={() => console.log('Delete team')} />

@@ -84,7 +84,7 @@ export const BookmarkItemActionPanel = (props: {
         title="Edit Bookmark"
         icon="📝"
         shortcut={{ modifiers: ['cmd'], key: 'e' }}
-        target={<EditBookmark bookmark={bookmark} />}
+        target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
 
       {/* 기능 완성되면 다시 추가할 예정 */}
@@ -114,8 +114,14 @@ export const BookmarkItemActionPanel = (props: {
       /> */}
 
       <ActionPanel.Section>
-        <Action.Push title="Add New Bookmark" icon="➕" target={<AddBookmark onlyPop />} onPop={refetch} />
-        <Action.Push title="My Account" icon="👤" target={<MyAccount />} />
+        <Action.Push
+          title="Add New Bookmark"
+          icon="➕"
+          target={<AddBookmark onlyPop />}
+          onPop={refetch}
+          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+        />
+        <Action.Push title="My Account" icon="👤" target={<MyAccount />} shortcut={{ modifiers: ['cmd'], key: 'm' }} />
         <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ['cmd'], key: 't' }} target={<Teams />} />
         {/* 기능 완성되면 다시 추가할 예정 */}
         {/* <Action

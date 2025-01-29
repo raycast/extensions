@@ -19,3 +19,4 @@ export interface RegisterBookmarkForm {
 }
 
 export type Bookmark = RouterOutputs['bookmark']['listAll'][number]
+export type Tag = RouterOutputs['tag']['list'][number]

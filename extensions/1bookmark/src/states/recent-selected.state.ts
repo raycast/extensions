@@ -10,8 +10,8 @@ export const recentSelectedSpaceAtom = atomWithStorage<string>(
 )
 
 interface SelectedTag {
-  id: string
-  title: string
+  name: string
+  spaceId: string
 }
 
 const tagsStorage = new JotaiCacheStorage<SelectedTag[]>()
