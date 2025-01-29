@@ -3,7 +3,6 @@ import { FuelAgent } from "fuel-agent-kit";
 import fetch from "node-fetch";
 import { useState } from "react";
 
-// Polyfill fetch
 if (!globalThis.fetch) {
   Object.defineProperty(globalThis, "fetch", {
     value: fetch,
