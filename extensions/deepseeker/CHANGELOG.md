@@ -1,6 +1,6 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [New Features] - 2024-01-26
+## [New Features] - {PR_MERGE_DATE}
 
 - 🐳 Add DeepSeek-R1 reasoning model
 - 🔄 Rename the deepseek-chat model to DeepSeek-V3 (official name)
