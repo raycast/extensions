@@ -3,49 +3,9 @@ import { useState, useCallback } from "react";
 import fetch from "node-fetch";
 import { ProblemDetail } from "./components/ProblemDetail";
 import { CODEFORCES_API_BASE } from "./constants";
-
-interface Problem {
-  id: string;
-  name: string;
-  contestId: number;
-  index: string;
-  rating?: number;
-  tags: string[];
-}
-
-interface CodeforcesResponse {
-  status: string;
-  result: {
-    problems: CodeforcesAPIProblem[];
-  };
-}
-
-interface CodeforcesAPIProblem {
-  contestId: number;
-  index: string;
-  name: string;
-  rating?: number;
-  tags: string[];
-}
-
-interface ColorScheme {
-  background: string;
-  text: string;
-}
-
-function getRatingColors(rating: number | undefined): ColorScheme {
-  if (!rating) return { background: "#F0F0F0", text: "#808080" };
-  if (rating >= 2900) return { background: "#FFE5E5", text: "#FF0000" };
-  if (rating >= 2600) return { background: "#FFE5E5", text: "#FF0000" };
-  if (rating >= 2400) return { background: "#FFE5E5", text: "#FF0000" };
-  if (rating >= 2300) return { background: "#FFE8D7", text: "#FF8C00" };
-  if (rating >= 2200) return { background: "#FFE8D7", text: "#FF8C00" };
-  if (rating >= 1900) return { background: "#F8E6F8", text: "#AA01AA" };
-  if (rating >= 1600) return { background: "#E6E6FF", text: "#0000FF" };
-  if (rating >= 1400) return { background: "#E6FAF9", text: "#05A89F" };
-  if (rating >= 1200) return { background: "#E6FFE6", text: "#008001" };
-  return { background: "#F0F0F0", text: "#808080" };
-}
+import { Problem } from "./interface/Problem";
+import { CodeforcesResponse } from "./interface/CodeforcesResponse";
+import { getRatingColors } from "./func/RatingColors";
 
 async function searchProblems(query: string): Promise<Problem[]> {
   try {
@@ -66,7 +26,7 @@ async function searchProblems(query: string): Promise<Problem[]> {
     const data = (await response.json()) as CodeforcesResponse;
 
     if (data.status === "OK") {
-      const problems = data.result.problems.map((problem: CodeforcesAPIProblem) => ({
+      const problems = data.result.problems.map((problem) => ({
         id: `${problem.contestId}${problem.index}`,
         name: problem.name,
         contestId: problem.contestId,
@@ -80,7 +40,7 @@ async function searchProblems(query: string): Promise<Problem[]> {
       }
 
       return problems
-        .filter((problem: Problem) => {
+        .filter((problem) => {
           const searchLower = query.toLowerCase();
           const problemId = problem.id.toLowerCase();
           const problemName = problem.name.toLowerCase();
