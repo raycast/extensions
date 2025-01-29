@@ -1,6 +1,11 @@
 # File Manager Changelog
 
+## [Fixes] - 2025-02-29
+
+- Fixed shell command errors caused by filenames containing single quotes.
+
 ## [Fixes] - 2025-01-29
+
 - Fixed issue with show hidden files preference.
 
 ## [Features] - 2025-01-28
