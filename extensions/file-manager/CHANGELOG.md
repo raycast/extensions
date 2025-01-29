@@ -1,5 +1,8 @@
 # File Manager Changelog
 
+## [Fixes] - 2025-01-29
+- Fixed issue with show hidden files preference.
+
 ## [Features] - 2025-01-28
 
 - Added the preference to show hidden files.
