@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Fix WebP optimization] - {PR_MERGE_DATE}
+## [Fix WebP optimization] - 2025-01-29
 
 - Fixed the cwebp path being incorrectly set when Optimizing WebP images
 
