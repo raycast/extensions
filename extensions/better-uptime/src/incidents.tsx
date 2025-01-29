@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { ActionCopyScreenshotUrl, ActionDeleteIncident } from "./actions";
 import { IncidentsState, Preferences } from "./interface";
 import { useFetch } from "@raycast/utils";
@@ -8,20 +8,11 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const {
     isLoading,
-    error,
     data: incidents,
     revalidate,
   } = useFetch<IncidentsState>(`${baseUrl}/incidents`, {
     headers: { Authorization: `Bearer ${preferences.apiKey}` },
   });
-
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading incidents",
-      message: error.message,
-    });
-  }
 
   if (!incidents?.data?.length) {
     return (

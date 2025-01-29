@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { ActionCopyHeartbeatUrl, ActionDeleteHeartbeat } from "./actions";
 import { baseUrl, statusMap } from "./constants";
 import { HeartbeatsState, Preferences } from "./interface";
@@ -8,20 +8,11 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const {
     isLoading,
-    error,
     data: heartbeats,
     revalidate,
   } = useFetch<HeartbeatsState>(`${baseUrl}/heartbeats`, {
     headers: { Authorization: `Bearer ${preferences.apiKey}` },
   });
-
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading heartbeats",
-      message: error.message,
-    });
-  }
 
   if (!heartbeats?.data?.length) {
     return (

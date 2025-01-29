@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { baseUrl, statusMap } from "./constants";
 import { MonitorsState, Preferences } from "./interface";
 import { ucfirst } from "./utils";
@@ -9,20 +9,11 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const {
     isLoading,
-    error,
     data: monitors,
     revalidate,
   } = useFetch<MonitorsState>(`${baseUrl}/monitors`, {
     headers: { Authorization: `Bearer ${preferences.apiKey}` },
   });
-
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading monitors",
-      message: error.message,
-    });
-  }
 
   if (!monitors?.data?.length) {
     return (
