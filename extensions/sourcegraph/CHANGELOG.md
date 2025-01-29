@@ -1,6 +1,6 @@
 # Changelog
 
-## [New logo] - 2025-01-29
+## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
 
 - **all**: Sourcegraph got a new logo! All extension and command icons have been updated.
 - **doc**: Updated documentation to indicate [Sourcegraph workspaces](https://workspaces.sourcegraph.com) compatibility.
