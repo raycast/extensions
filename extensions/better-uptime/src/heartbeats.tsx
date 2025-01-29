@@ -26,14 +26,7 @@ export default function Command() {
 
   if (!heartbeats?.data?.length) {
     return (
-      <List
-        isLoading={isLoading}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Add Heartbeat" target="add-heartbeat" />
-          </ActionPanel>
-        }
-      >
+      <List isLoading={isLoading}>
         <List.EmptyView
           title="No Heartbeats"
           description="You can add a heartbeat using the 'Add Heartbeat' command."
