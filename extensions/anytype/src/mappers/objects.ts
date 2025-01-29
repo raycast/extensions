@@ -1,5 +1,6 @@
-import { SpaceObject, Detail, Member } from "../schemas";
-import { getIconWithFallback } from "../icon";
+import { SpaceObject, Detail, Member } from "../helpers/schemas";
+import { getIconWithFallback } from "../helpers/icon";
+import { getPreferenceValues } from "@raycast/api";
 
 /**
  * Map raw `SpaceObject` item into display-ready data, including details, icons, etc.
@@ -35,8 +36,8 @@ export async function mapObject(object: SpaceObject): Promise<SpaceObject> {
     ...object,
     icon,
     blocks: undefined, // remove blocks to improve performance, as they're not used in the UI
-    name: object.name || "Untitled",
-    object_type: object.object_type || "Unknown Type",
+    name: object.name || object.snippet || "Untitled",
+    type: object.type || "Unknown Type",
     details: object.details.map((detail) => {
       const { id, details } = detail;
 
@@ -64,9 +65,9 @@ export async function mapObjects(objects: SpaceObject[]): Promise<SpaceObject[]>
       return {
         ...object,
         icon: await getIconWithFallback(object.icon, object.layout),
-        name: object.name || "Untitled",
-        object_type: object.object_type || "Unknown Type",
-        details: object.details?.filter((detail) => detail.id === "last_modified_date"),
+        name: object.name || object.snippet || "Untitled",
+        type: object.type || "Unknown Type",
+        details: object.details?.filter((detail) => detail.id === getPreferenceValues().sort) || [],
       };
     }),
   );

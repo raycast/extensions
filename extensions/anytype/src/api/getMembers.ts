@@ -1,7 +1,7 @@
 import { apiFetch } from "../helpers/api";
 import { apiEndpoints } from "../helpers/constants";
 import { PaginatedResponse } from "../helpers/schemas";
-import { mapMembers } from "../helpers/mappers/members";
+import { mapMembers } from "../mappers/members";
 import { Member, Pagination } from "../helpers/schemas";
 
 export async function getMembers(

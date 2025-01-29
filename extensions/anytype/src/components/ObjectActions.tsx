@@ -43,7 +43,7 @@ export default function ObjectActions({
       template: "Template",
 
       // search
-      all: "Item",
+      all: "Object",
       page: "Page",
       task: "Task",
       list: "List",
@@ -56,8 +56,8 @@ export default function ObjectActions({
   async function handleCopyLink() {
     await Clipboard.copy(objectUrl);
     await showToast({
-      title: "Link Copied",
-      message: `The ${getContextLabel()} link has been copied to your clipboard.`,
+      title: "Link copied",
+      message: `The ${getContextLabel().toLowerCase()} link has been copied to your clipboard.`,
       style: Toast.Style.Success,
     });
   }
@@ -135,7 +135,7 @@ export default function ObjectActions({
   return (
     <ActionPanel title={title}>
       <ActionPanel.Section>
-        {!isType && (
+        {!isType && !isDetailView && (
           <Action.Push
             icon={{ source: Icon.Sidebar }}
             title="Show Details"
