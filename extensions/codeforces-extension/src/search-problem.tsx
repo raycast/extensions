@@ -1,9 +1,8 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import fetch from "node-fetch";
 import { ProblemDetail } from "./components/ProblemDetail";
 import { CODEFORCES_API_BASE } from "./constants";
-import debounce from "lodash/debounce";
 
 interface Problem {
   id: string;
@@ -49,8 +48,6 @@ function getRatingColors(rating: number | undefined): ColorScheme {
 }
 
 async function searchProblems(query: string): Promise<Problem[]> {
-  if (query.length < 2) return [];
-
   try {
     const response = await fetch(`${CODEFORCES_API_BASE}problemset.problems`, {
       headers: {
@@ -77,6 +74,10 @@ async function searchProblems(query: string): Promise<Problem[]> {
         rating: problem.rating,
         tags: problem.tags,
       }));
+
+      if (query.length < 2) {
+        return problems.sort(() => Math.random() - 0.5).slice(0, 15);
+      }
 
       return problems
         .filter((problem: Problem) => {
@@ -105,120 +106,33 @@ async function searchProblems(query: string): Promise<Problem[]> {
   }
 }
 
-// kar sako toh karlo fix
-
-// async function getRandomProblems(count: number = 15): Promise<Problem[]> {
-//   try {
-//     const response = await fetch(`${CODEFORCES_API_BASE}problemset.problems`, {
-//       headers: {
-//         "User-Agent":
-//           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-//         Accept: "application/json",
-//         "Accept-Language": "en-US,en;q=0.9",
-//       },
-//     });
-
-//     const data = (await response.json()) as CodeforcesResponse;
-
-//     if (data.status === "OK") {
-//       const allProblems = data.result.problems.map((problem: CodeforcesAPIProblem) => ({
-//         id: `${problem.contestId}${problem.index}`,
-//         name: problem.name,
-//         contestId: problem.contestId,
-//         index: problem.index,
-//         rating: problem.rating,
-//         tags: problem.tags,
-//       }));
-
-//       return allProblems.sort(() => Math.random() - 0.5).slice(0, count);
-//     }
-
-//     return [];
-//   } catch (error) {
-//     console.error("Error fetching random problems:", error);
-//     return [];
-//   }
-// }
-
-async function getInitialProblems(count: number = 15): Promise<Problem[]> {
-  try {
-    const response = await fetch(`${CODEFORCES_API_BASE}problemset.problems`, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        Accept: "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-    });
-
-    const data = (await response.json()) as CodeforcesResponse;
-
-    if (data.status === "OK") {
-      const allProblems = data.result.problems.map((problem: CodeforcesAPIProblem) => ({
-        id: `${problem.contestId}${problem.index}`,
-        name: problem.name,
-        contestId: problem.contestId,
-        index: problem.index,
-        rating: problem.rating,
-        tags: problem.tags,
-      }));
-
-      return allProblems.slice(0, count); // bhai na ho ra fix, ill just get the first 15
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error fetching initial problems:", error);
-    return [];
-  }
-}
-
 export default function Command() {
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // tryna fix the flickering issue
-  const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const debouncedSearch = useCallback(
-    debounce(async (query: string) => {
-      if (query.length === 0) {
-        const initialProblems = await getInitialProblems(15);
-        setProblems(initialProblems);
-      } else if (query.length >= 2) {
-        const results = await searchProblems(query);
-        setProblems(results);
-      }
-      setIsLoading(false);
-    }, 500),
-    [],
-  );
-
-  useEffect(() => {
-    async function loadInitialProblems() {
-      setIsLoading(true);
-      const initialProblems = await getInitialProblems(15);
-      setProblems(initialProblems);
+  const handleSearch = useCallback(async (query: string) => {
+    setIsLoading(true);
+    try {
+      const results = await searchProblems(query);
+      setProblems(results);
+    } catch (error) {
+      console.error("Error during search:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error during search",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    } finally {
       setIsLoading(false);
     }
-
-    loadInitialProblems();
-
-    return () => {
-      debouncedSearch.cancel();
-    };
   }, []);
-
-  const handleSearch = (query: string) => {
-    setSearchText(query);
-    setIsLoading(true);
-    debouncedSearch(query);
-  };
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={handleSearch}
-      searchText={searchText}
       searchBarPlaceholder="Search problems (e.g., 4A, Watermelon)"
+      throttle
     >
       {problems.map((problem) => (
         <List.Item
