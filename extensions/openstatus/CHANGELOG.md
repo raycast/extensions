@@ -1,6 +1,6 @@
 # OpenStatus Changelog
 
-## [Add "Show Incidents" command] - {PR_MERGE_DATE}
+## [Add "Show Incidents" command] - 2025-01-29
 
 - New "Show Incidents" command: _View_ and Acknowledge, Resolve
 - "Toggle Details" of a Monitor to see more information
