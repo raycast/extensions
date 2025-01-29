@@ -24,7 +24,6 @@ export default function Command() {
     fetchStories();
   }, []);
 
-
   if (state.error) {
     showToast({
       style: Toast.Style.Failure,
