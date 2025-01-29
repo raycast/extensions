@@ -1,8 +1,9 @@
-import { Form, ActionPanel, Action, getPreferenceValues, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
+import fetch from "node-fetch";
 
 interface AddMonitorFormValues {
   url: string;
@@ -19,15 +20,12 @@ interface AddMonitorFormValues {
 export default function Command(): JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
   const [monitorType, setMonitorType] = useState("status");
-  const { handleSubmit, itemProps } = useForm<AddMonitorFormValues>({
+  const { handleSubmit } = useForm<AddMonitorFormValues>({
     async onSubmit(values) {
-      console.log(values);
-
-      // const toast = showToast({
-      //   style: Toast.Style.Success,
-      //   title: "Submitting...",
-      //   message: "Monitor is being created",
-      // });
+      await showToast({
+        title: "Creating monitor...",
+        style: Toast.Style.Animated,
+      });
 
       await fetch(`${baseUrl}/monitors`, {
         method: "POST",
@@ -35,7 +33,7 @@ export default function Command(): JSX.Element {
           Authorization: `Bearer ${preferences.apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(itemProps),
+        body: JSON.stringify(values),
       })
         .then(async (response) => {
           if (!response.ok) {
@@ -43,16 +41,19 @@ export default function Command(): JSX.Element {
             throw { response: { data: errorData } };
           }
 
-          // toast.style = Toast.Style.Success;
-          // toast.title = "Monitor created successfully";
+          await showToast({
+            title: "Monitor created",
+            style: Toast.Style.Success,
+          });
 
           popToRoot();
         })
-        .catch((error) => {
-          // toast.style = Toast.Style.Failure;
-          // toast.title = "Unable to create monitor";
-          // toast.message = error.response.data.errors;
-          console.log(error);
+        .catch(async (error) => {
+          await showToast({
+            title: "Monitor not created",
+            style: Toast.Style.Failure,
+            message: error.response.data.errors,
+          });
         });
     },
     validation: {
@@ -77,7 +78,7 @@ export default function Command(): JSX.Element {
       <Form.TextField
         id="url"
         title={monitorType === "status" ? "URL" : "Host"}
-        placeholder={itemProps.monitor_type.value === "status" ? "https://raycast.com" : "76.76.21.21"}
+        placeholder={monitorType === "status" ? "https://raycast.com" : "76.76.21.21"}
       />
       {monitorType === "status" && (
         <Form.TextField id="check_frequency" title="Check Frequency (seconds)" defaultValue="180" />

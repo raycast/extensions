@@ -1,7 +1,8 @@
-import { Form, ActionPanel, Action, getPreferenceValues, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
 import { FormValidation, useForm } from "@raycast/utils";
+import fetch from "node-fetch";
 
 interface AddIncidentFormValues {
   summary: string;
@@ -11,15 +12,12 @@ interface AddIncidentFormValues {
 
 export default function Command(): JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
-  const { handleSubmit, itemProps } = useForm<AddIncidentFormValues>({
+  const { handleSubmit } = useForm<AddIncidentFormValues>({
     async onSubmit(values) {
-      console.log(values);
-
-      // const toast = showToast({
-      //   style: Toast.Style.Success,
-      //   title: "Submitting...",
-      //   message: "Incident is being created",
-      // });
+      await showToast({
+        title: "Creating incident...",
+        style: Toast.Style.Animated,
+      });
 
       await fetch(`${baseUrl}/incidents`, {
         method: "POST",
@@ -27,7 +25,7 @@ export default function Command(): JSX.Element {
           Authorization: `Bearer ${preferences.apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(itemProps),
+        body: JSON.stringify(values),
       })
         .then(async (response) => {
           if (!response.ok) {
@@ -35,16 +33,19 @@ export default function Command(): JSX.Element {
             throw { response: { data: errorData } };
           }
 
-          // toast.style = Toast.Style.Success;
-          // toast.title = "Incident created successfully";
+          await showToast({
+            title: "Incident created",
+            style: Toast.Style.Success,
+          });
 
           popToRoot();
         })
-        .catch((error) => {
-          // toast.style = Toast.Style.Failure;
-          // toast.title = "Unable to create incident";
-          // toast.message = error.response.data.errors;
-          console.log(error);
+        .catch(async (error) => {
+          await showToast({
+            title: "Incident not created",
+            style: Toast.Style.Failure,
+            message: error.response.data.errors,
+          });
         });
     },
     validation: {

@@ -14,7 +14,6 @@ export default function Command() {
   } = useFetch<HeartbeatsState>(`${baseUrl}/heartbeats`, {
     headers: { Authorization: `Bearer ${preferences.apiKey}` },
   });
-  console.log("data", heartbeats);
 
   if (error) {
     showToast({

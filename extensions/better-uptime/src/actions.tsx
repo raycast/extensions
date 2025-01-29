@@ -1,6 +1,7 @@
 import { Action, Clipboard, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { HeartbeatItem, IncidentItem, MonitorItem, Preferences } from "./interface";
 import { baseUrl } from "./constants";
+import fetch from "node-fetch";
 
 export function ActionCopyUrl({ url }: { url: string }) {
   return (
