@@ -1,4 +1,13 @@
-import { List, Icon, ActionPanel, Action, closeMainWindow, popToRoot, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  closeMainWindow,
+  popToRoot,
+  getPreferenceValues,
+  environment,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
@@ -34,6 +43,9 @@ interface ShortcutListItemProps {
   shortcuts: ShortcutData[]; // All shortcuts for navigation
   creationTime?: Date; // When shortcuts were last updated
 }
+
+// Path where processed shortcut configs are stored
+const configPath = path.join(environment.supportPath, "processed_configs");
 
 // Component that renders a single shortcut in the list view
 export const ShortcutListItem = ({
@@ -173,16 +185,12 @@ export const ShortcutListItem = ({
             />
             <Action.ShowInFinder
               title="Open Configs Directory"
-              path={process.env.HOME ? path.join(process.env.HOME, ".memorkeys", "processed_configs") : ""}
+              path={configPath}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
             <Action.Push
               title="View Setup Instructions"
-              target={
-                <HelpDetailView
-                  configPath={process.env.HOME ? path.join(process.env.HOME, ".memorkeys", "processed_configs") : ""}
-                />
-              }
+              target={<HelpDetailView configPath={configPath} />}
               icon={Icon.QuestionMark}
               shortcut={{ modifiers: ["cmd"], key: "h" }}
             />

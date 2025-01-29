@@ -5,6 +5,7 @@ import { gunzip } from "zlib";
 import path from "path";
 import { formatShortcutData, FormattedShortcut } from "../util/configFormat";
 import { exec } from "child_process";
+import { environment } from "@raycast/api";
 
 const gunzipAsync = promisify(gunzip);
 
@@ -13,6 +14,10 @@ interface RaycastShortcut {
   key: string; // Unique identifier for the shortcut
   hotkey: string; // Raw hotkey string (e.g., "Command-Shift-A")
   type?: string; // Optional type information
+}
+
+interface UploadConfigFormProps {
+  onUploadComplete?: () => void;
 }
 
 // Structure of the Raycast config file
@@ -78,9 +83,9 @@ async function processRaycastConfig(filePath: string): Promise<FormattedShortcut
 }
 
 // Component that handles uploading and processing Raycast config files
-export default function UploadConfigForm() {
+export default function UploadConfigForm({ onUploadComplete }: UploadConfigFormProps) {
   const { pop } = useNavigation();
-  const outputPath = path.join(process.env.HOME || "", ".memorkeys", "processed_configs");
+  const outputPath = path.join(environment.supportPath, "processed_configs");
 
   // Handle form submission with selected config file
   const handleSubmit = async (values: { files: string[] }) => {
@@ -127,6 +132,11 @@ export default function UploadConfigForm() {
       const outputFile = path.join(outputPath, fileName);
 
       await fs.promises.writeFile(outputFile, JSON.stringify(processedData, null, 2));
+
+      // Call the onUploadComplete callback if provided
+      if (onUploadComplete) {
+        await onUploadComplete();
+      }
 
       // Show success toast with action to open folder
       await showToast({

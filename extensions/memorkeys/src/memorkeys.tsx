@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
-import UploadConfig from "./components/upload-config";
+import UploadConfigForm from "./components/upload-config";
 
 const execAsync = promisify(exec);
 
@@ -45,7 +45,21 @@ export default function Command() {
   const [focusedApp, setFocusedApp] = useState("");
 
   // Path where processed shortcut configs are stored
-  const configPath = path.join(process.env.HOME || "", ".memorkeys", "processed_configs");
+  const configPath = path.join(environment.supportPath, "processed_configs");
+
+  // Ensure config directory exists
+  useEffect(() => {
+    fs.promises.mkdir(configPath, { recursive: true }).catch((error) => {
+      console.error("Error creating config directory:", error);
+      setLoadResult({
+        shortcuts: [],
+        error: {
+          type: "NO_DIRECTORY",
+          message: "Failed to create config directory: " + error.message,
+        },
+      });
+    });
+  }, [configPath]);
 
   // Gets the currently focused application using AppleScript
   const getFocusedApp = async () => {
@@ -223,7 +237,7 @@ export default function Command() {
               />
               <Action.Push
                 title="Open Upload Config"
-                target={<UploadConfig />}
+                target={<UploadConfigForm onUploadComplete={loadShortcuts} />}
                 icon={Icon.Upload}
                 shortcut={{ modifiers: ["cmd"], key: "u" }}
               />
@@ -261,7 +275,7 @@ export default function Command() {
                 />
                 <Action.Push
                   title="Open Upload Config"
-                  target={<UploadConfig />}
+                  target={<UploadConfigForm onUploadComplete={loadShortcuts} />}
                   icon={Icon.Upload}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
