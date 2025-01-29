@@ -1,6 +1,6 @@
 # File Manager Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-01-29
 - Fixed issue with show hidden files preference.
 
 ## [Features] - 2025-01-28
