@@ -1,76 +1,66 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
-import axios from "axios";
-import { useRef, useState } from "react";
-import { requiredErrorText } from "./constants";
+import { Form, ActionPanel, Action, getPreferenceValues, popToRoot } from "@raycast/api";
+import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
+import { FormValidation, useForm } from "@raycast/utils";
+import { useState } from "react";
+
+interface AddMonitorFormValues {
+  url: string;
+  checkFrequency: string;
+  tcpTimeout: string;
+  call: boolean;
+  sms: boolean;
+  email: boolean;
+  push: boolean;
+  pronounceable_name: string;
+  monitor_type: string;
+}
 
 export default function Command(): JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
+  const [monitorType, setMonitorType] = useState("status");
+  const { handleSubmit, itemProps } = useForm<AddMonitorFormValues>({
+    async onSubmit(values) {
+      console.log(values);
 
-  const urlRef = useRef<Form.TextField>(null);
-  const checkFrequencyRef = useRef<Form.TextField>(null);
-  const tcpTimeoutRef = useRef<Form.TextField>(null);
+      // const toast = showToast({
+      //   style: Toast.Style.Success,
+      //   title: "Submitting...",
+      //   message: "Monitor is being created",
+      // });
 
-  const [urlError, setUrlError] = useState<string | undefined>();
-  const [checkFrequencyError, setCheckFrequencyError] = useState<string | undefined>();
-  const [tcpTimeoutError, setTcpTimeoutError] = useState<string | undefined>();
-  const [monitorType, setMonitorType] = useState<string>("status");
-
-  async function handleSubmit(item: any) {
-    if (item.url === "") {
-      setUrlError(requiredErrorText);
-      return false;
-    }
-
-    if (item.checkFrequency === "") {
-      setCheckFrequencyError(requiredErrorText);
-      return false;
-    }
-
-    if (item.tcpTimeout === "") {
-      setTcpTimeoutError(requiredErrorText);
-      return false;
-    }
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating monitor...",
-    });
-
-    await axios
-      .post("https://betteruptime.com/api/v2/monitors", item, {
-        headers: { Authorization: `Bearer ${preferences.apiKey}` },
+      await fetch(`${baseUrl}/monitors`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(itemProps),
       })
-      .then(() => {
-        toast.style = Toast.Style.Success;
-        toast.title = "Monitor created successfully";
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw { response: { data: errorData } };
+          }
 
-        popToRoot();
-      })
-      .catch((error) => {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to create monitor";
-        toast.message = error.response.data.errors;
-      });
-  }
+          // toast.style = Toast.Style.Success;
+          // toast.title = "Monitor created successfully";
 
-  function dropUrlErrorIfNeeded() {
-    if (urlError && urlError.length > 0) {
-      setUrlError(undefined);
-    }
-  }
-
-  function dropCheckFrequencyErrorIfNeeded() {
-    if (checkFrequencyError && checkFrequencyError.length > 0) {
-      setCheckFrequencyError(undefined);
-    }
-  }
-
-  function dropTcpTimeoutErrorIfNeeded() {
-    if (tcpTimeoutError && tcpTimeoutError.length > 0) {
-      setTcpTimeoutError(undefined);
-    }
-  }
+          popToRoot();
+        })
+        .catch((error) => {
+          // toast.style = Toast.Style.Failure;
+          // toast.title = "Unable to create monitor";
+          // toast.message = error.response.data.errors;
+          console.log(error);
+        });
+    },
+    validation: {
+      url: FormValidation.Required,
+      checkFrequency: FormValidation.Required,
+      tcpTimeout: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -87,52 +77,12 @@ export default function Command(): JSX.Element {
       <Form.TextField
         id="url"
         title={monitorType === "status" ? "URL" : "Host"}
-        placeholder={monitorType === "status" ? "https://raycast.com" : "76.76.21.21"}
-        ref={urlRef}
-        error={urlError}
-        onChange={dropUrlErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setUrlError(requiredErrorText);
-          } else {
-            dropUrlErrorIfNeeded();
-          }
-        }}
+        placeholder={itemProps.monitor_type.value === "status" ? "https://raycast.com" : "76.76.21.21"}
       />
       {monitorType === "status" && (
-        <Form.TextField
-          id="check_frequency"
-          title="Check Frequency (seconds)"
-          defaultValue="180"
-          ref={checkFrequencyRef}
-          error={checkFrequencyError}
-          onChange={dropCheckFrequencyErrorIfNeeded}
-          onBlur={(event) => {
-            if (event.target.value?.length == 0) {
-              setCheckFrequencyError(requiredErrorText);
-            } else {
-              dropCheckFrequencyErrorIfNeeded();
-            }
-          }}
-        />
+        <Form.TextField id="check_frequency" title="Check Frequency (seconds)" defaultValue="180" />
       )}
-      {monitorType === "ping" && (
-        <Form.TextField
-          id="tcp_timeout"
-          title="Ping Timeout"
-          defaultValue="5"
-          ref={tcpTimeoutRef}
-          error={tcpTimeoutError}
-          onChange={dropTcpTimeoutErrorIfNeeded}
-          onBlur={(event) => {
-            if (event.target.value?.length == 0) {
-              setTcpTimeoutError(requiredErrorText);
-            } else {
-              dropTcpTimeoutErrorIfNeeded();
-            }
-          }}
-        />
-      )}
+      {monitorType === "ping" && <Form.TextField id="tcp_timeout" title="Ping Timeout" defaultValue="5" />}
       <Form.Checkbox id="call" label="Call" defaultValue={false} />
       <Form.Checkbox id="sms" label="Send SMS" defaultValue={false} />
       <Form.Checkbox id="email" label="Send Email" defaultValue={true} />

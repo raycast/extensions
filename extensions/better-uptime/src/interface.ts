@@ -22,9 +22,7 @@ export interface MonitorItemAttributes {
 }
 
 export interface MonitorsState {
-  isLoading: boolean;
-  items: MonitorItem[];
-  error?: any;
+  data: MonitorItem[];
 }
 
 export interface IncidentItem {
@@ -47,9 +45,7 @@ export interface IncidentItemAttributes {
 }
 
 export interface IncidentsState {
-  isLoading: boolean;
-  items: IncidentItem[];
-  error?: any;
+  data: IncidentItem[];
 }
 
 export interface HeartbeatItem {
@@ -71,7 +67,5 @@ export interface HeartbeatItemAttributes {
 }
 
 export interface HeartbeatsState {
-  isLoading: boolean;
-  items: HeartbeatItem[];
-  error?: any;
+  data: HeartbeatItem[];
 }
