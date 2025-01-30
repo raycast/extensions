@@ -195,7 +195,7 @@
       "name": "startWithLorem",
       "type": "checkbox",
       "title": "Other Options",
-      "description": "Select to start the first paragraph with the totally fucking ridiculous phrase “I’m baby”",
+      "description": "Select to start the first paragraph with the phrase “I’m baby”.",
       "label": "Start with Lorem",
       "default": false,
       "required": false
