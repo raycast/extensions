@@ -30,12 +30,14 @@
     {
       "name": "explore-content",
       "title": "Explore Content",
+      "subtitle": "Strapi",
       "description": "List all entries by content-types in your Strapi instance.",
       "mode": "view"
     },
     {
       "name": "search-media-library",
       "title": "Search Media Library",
+      "subtitle": "Strapi",
       "description": "Explore the media library of your Strapi instance.",
       "mode": "view"
     }
