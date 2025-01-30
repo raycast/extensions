@@ -28,12 +28,12 @@ export default async function Main() {
       tell application "Finder"
         set these_items to the selection as alias list
         if (count of these_items) > 0 then
-            set this_item to (item 1 of these_items) as alias
-            return POSIX path of this_item
+          set this_item to (item 1 of these_items) as alias
+          return POSIX path of this_item
         end if
       end tell
       return ""
-      `;
+    `;
 
     try {
       const isFinderActive = await runAppleScript(checkFinderActive);
@@ -55,7 +55,10 @@ export default async function Main() {
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: error instanceof Error ? error.message : "Failed to read current focus",
+        title:
+          error instanceof Error
+            ? error.message
+            : "Failed to read current focus",
       });
       return true;
     }
