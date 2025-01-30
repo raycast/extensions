@@ -112,7 +112,7 @@ export default function Command(props: LaunchProps) {
                   }}
                 />
                 <Action.CreateQuicklink
-                  title="Create QuickLink"
+                  title="Create Quicklink"
                   quicklink={{
                     name: `Convert to ${format}`,
                     link: `raycast://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,
