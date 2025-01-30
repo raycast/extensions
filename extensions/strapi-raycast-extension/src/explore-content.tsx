@@ -1,6 +1,6 @@
 import { getPreferenceValues, ActionPanel, Action, List, Icon } from "@raycast/api";
 import { getContentTypes, getEntries } from "./lib/services";
-import { Preferences, ContentType } from "./types";
+import { ContentType } from "./types";
 import { kindName, entryTtile, entrySubtitle, capitalize } from "./lib/utils";
 
 export default function ExploreContent() {
