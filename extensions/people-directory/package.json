@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "people-directory",
+  "title": "R Brands",
+  "description": "Search for R brands and their quicklinks",
+  "icon": "icon.png",
+  "author": "mmrtsv",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-people",
+      "title": "R Brands",
+      "description": "Search employees of your company",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "API Token for Notion's API",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "databaseId",
+      "title": "Database ID",
+      "description": "Database ID of your People Directory",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.1",
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.4.8",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "eslint": "^9.19.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

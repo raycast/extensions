@@ -1,0 +1,16 @@
+[
+  {
+    "id": "hoff",
+    "name": "HOFF",
+    "shopify": "https://admin.shopify.com/store/thehoffbrand",
+    "admin": "https://appsmith.byrever.com/app/backoffice/ecommerce-6503022166f89a738ccd8848?branch=main&ecommerce=hoff",
+    "portal": "https://returns.itsrever.com/thehoffbrand"
+  },
+  {
+    "id": "thebradery",
+    "name": "TheBradery",
+    "shopify": "https://admin.shopify.com/store/my-moon-store",
+    "admin": "https://appsmith.byrever.com/app/backoffice/ecommerce-6503022166f89a738ccd8848?branch=main&ecommerce=thebradery",
+    "portal": "https://returns.itsrever.com/thebradery"
+  }
+]
