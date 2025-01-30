@@ -1,7 +1,7 @@
 import React from "react";
 import { List, Icon, ActionPanel, Action, Color, Toast, showToast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getStatus, toggleProtection, Status, getAdGuardHomeUrl, disableProtection } from "./api";
+import { getStatus, disableProtection, Status } from "./api";
 
 export default function Command() {
   const [status, setStatus] = useState<Status | null>(null);
@@ -9,13 +9,13 @@ export default function Command() {
   const [snoozeEndTime, setSnoozeEndTime] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState<string>("");
 
+  // Initial load of status and disabled state
   useEffect(() => {
     async function init() {
       const data = await getStatus();
       setStatus(data);
       if (!data.protection_enabled && data.protection_disabled_duration) {
-        const endTime = new Date(Date.now() + data.protection_disabled_duration);
-        setSnoozeEndTime(endTime);
+        setSnoozeEndTime(new Date(Date.now() + data.protection_disabled_duration));
       }
       setIsLoading(false);
     }
@@ -45,13 +45,13 @@ export default function Command() {
       const minutes = Math.floor((seconds % 3600) / 60);
       const remainingSeconds = seconds % 60;
 
-      setRemainingTime(
+      const newRemainingTime =
         hours > 0
           ? `${hours}h ${minutes}m ${remainingSeconds}s`
           : minutes > 0
           ? `${minutes}m ${remainingSeconds}s`
-          : `${remainingSeconds}s`
-      );
+          : `${remainingSeconds}s`;
+      setRemainingTime(newRemainingTime);
     }, 500);
 
     return () => clearInterval(interval);
@@ -79,31 +79,12 @@ export default function Command() {
     }
   }
 
-  async function handleToggleProtection() {
-    if (!status) return;
-    try {
-      const newState = !status.protection_enabled;
-      await toggleProtection(newState);
-      setStatus((prev) => (prev ? { ...prev, protection_enabled: newState } : null));
-      setStatus((prev) => (prev ? { ...prev, protection_enabled: newState } : null));
-      showToast({
-        style: Toast.Style.Success,
-        title: `Protection ${newState ? "enabled" : "disabled"}`,
-      });
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to toggle protection",
-        message: String(error),
-      });
-    }
-  }
-
   async function handleDisable(duration: number) {
     try {
       await disableProtection(duration);
       const endTime = new Date(Date.now() + duration);
       setSnoozeEndTime(endTime);
+      await fetchStatus();
       setStatus((prev) => (prev ? { ...prev, protection_enabled: false } : null));
       showToast({
         style: Toast.Style.Success,
@@ -128,14 +109,10 @@ export default function Command() {
     await handleDisable(duration);
   }
 
-  useEffect(() => {
-    fetchStatus();
-  }, []);
-
   return (
     <List isLoading={isLoading}>
       <List.Item
-        title="Protection Status"
+        title="Current Status"
         icon={{
           source: status?.protection_enabled ? Icon.CheckCircle : Icon.Clock,
           tintColor: status?.protection_enabled ? Color.Green : Color.Orange,
@@ -153,51 +130,58 @@ export default function Command() {
             },
           },
         ]}
-        actions={
-          <ActionPanel>
-            <ActionPanel.Section>
-              <Action
-                title={status?.protection_enabled ? "Disable Protection" : "Enable Protection"}
-                onAction={handleToggleProtection}
-                icon={{
-                  source: status?.protection_enabled ? Icon.XMarkCircle : Icon.CheckCircle,
-                  tintColor: status?.protection_enabled ? Color.Red : Color.Green,
-                }}
-              />
-              {status?.protection_enabled && (
-                <ActionPanel.Submenu title="Disable Protection" icon={Icon.Clock}>
-                  <Action title="Disable for 1 Minute" onAction={() => handleDisable(60 * 1000)} icon={Icon.Clock} />
-                  <Action
-                    title="Disable for 10 Minutes"
-                    onAction={() => handleDisable(10 * 60 * 1000)}
-                    icon={Icon.Clock}
-                  />
-                  <Action title="Disable for 1 Hour" onAction={() => handleDisable(60 * 60 * 1000)} icon={Icon.Clock} />
-                  <Action
-                    title="Disable for 8 Hours"
-                    onAction={() => handleDisable(8 * 60 * 60 * 1000)}
-                    icon={Icon.Clock}
-                  />
-                  <Action
-                    title="Disable Until Tomorrow"
-                    onAction={() => handleDisableUntilTomorrow()}
-                    icon={Icon.Clock}
-                  />
-                </ActionPanel.Submenu>
-              )}
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-              <Action.OpenInBrowser title="Open in Adguard Home" url={`${getAdGuardHomeUrl()}/#`} />
-              <Action
-                title="Refresh Status"
-                icon={Icon.ArrowClockwise}
-                onAction={fetchStatus}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            </ActionPanel.Section>
-          </ActionPanel>
-        }
       />
+      <List.Section title="Disable Protection">
+        <List.Item
+          title="Disable for 1 Minute"
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action title="Disable for 1 Minute" onAction={() => handleDisable(60 * 1000)} icon={Icon.Clock} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Disable for 10 Minutes"
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action title="Disable for 10 Minutes" onAction={() => handleDisable(10 * 60 * 1000)} icon={Icon.Clock} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Disable for 1 Hour"
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action title="Disable for 1 Hour" onAction={() => handleDisable(60 * 60 * 1000)} icon={Icon.Clock} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Disable for 8 Hours"
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Disable for 8 Hours"
+                onAction={() => handleDisable(8 * 60 * 60 * 1000)}
+                icon={Icon.Clock}
+              />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Disable Until Tomorrow"
+          icon={Icon.Clock}
+          actions={
+            <ActionPanel>
+              <Action title="Disable Until Tomorrow" onAction={handleDisableUntilTomorrow} icon={Icon.Clock} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
     </List>
   );
 }
