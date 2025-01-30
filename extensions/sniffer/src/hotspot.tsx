@@ -75,7 +75,7 @@ export default function Command() {
               ...d,
               performance,
             }
-          : d,
+          : d
       );
       setDevices(updatedDevices);
       await LocalStorage.setItem("devices", JSON.stringify(updatedDevices));
