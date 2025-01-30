@@ -31,6 +31,9 @@ rules:
   no-unused-vars: off
   '@typescript-eslint/no-unused-vars': warn
 
+  # https://stackoverflow.com/a/67018836
+  no-undef: off
+
   no-redeclare: off
   '@typescript-eslint/no-redeclare': error
 

@@ -2,7 +2,7 @@ import { RouterOutputs, trpc } from '@/utils/trpc.util'
 import { EditBookmark } from '@/views/EditBookmarkForm'
 // import { CopyBookmarkToOtherTeam } from '@/views/CopyBookmarkToOtherTeamForm'
 import MyAccount from '@/views/MyAccount'
-import { Teams } from '@/views/TeamsView'
+import { Spaces } from '@/views/SpacesView'
 import { Action, ActionPanel, Alert, confirmAlert } from '@raycast/api'
 import AddBookmark from '../add-bookmark'
 
@@ -122,7 +122,7 @@ export const BookmarkItemActionPanel = (props: {
           shortcut={{ modifiers: ['cmd'], key: 'n' }}
         />
         <Action.Push title="My Account" icon="👤" target={<MyAccount />} shortcut={{ modifiers: ['cmd'], key: 'm' }} />
-        <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ['cmd'], key: 't' }} target={<Teams />} />
+        <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ['cmd'], key: 't' }} target={<Spaces />} />
         {/* 기능 완성되면 다시 추가할 예정 */}
         {/* <Action
           title={'Tags'}

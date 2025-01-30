@@ -23,7 +23,7 @@ ${JSON.stringify(data, null, 2)}
         <ActionPanel>
           <Action title={'Back'} icon="↩️" onAction={pop} />
           <Action
-            title={'Logout'}
+            title={'Sign Out'}
             icon="📴"
             onAction={() => {
               utils.user.me.reset()

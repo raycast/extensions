@@ -39,7 +39,7 @@ function Body() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Send Login Code to Email"
+            title={sentToken && email ? 'Login' : 'Send Login Code to Email'}
             onSubmit={async () => {
               if (!sentToken && email) {
                 requestToToken(email)

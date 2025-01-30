@@ -1,5 +1,11 @@
 # 1bookmark Changelog
 
+## [Fix Preferences Issue and Improve README Guide] - {PR_MERGE_DATE}
+
+- 0.3.1
+- 🐛 Fix about raycast preferences bug in production build.
+- 📚 Add Sign-Up, Sign-In and Sign-Out guide in README.
+
 ## [Support Tag and URL Search] - 2025-01-29
 
 - 0.3.0

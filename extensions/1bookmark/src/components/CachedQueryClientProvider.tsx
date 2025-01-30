@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
-import { join } from 'node:path'
+import { showToast, Toast } from '@raycast/api'
 import { useState } from 'react'
 import SuperJSON from 'superjson'
 import fetch from 'node-fetch'
@@ -9,10 +8,7 @@ import { trpc } from '../utils/trpc.util.js'
 import { getSessionToken, sessionTokenAtom } from '@/states/session-token.state.js'
 import axios from 'axios'
 import { useAtom } from 'jotai'
-
-interface Preferences {
-  apiUrl: string
-}
+import { API_URL_TRPC } from '../utils/constants.util.js'
 
 if (!globalThis.fetch) {
   // @ts-expect-error 잘 동작하는 듯
@@ -89,7 +85,7 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: join(getPreferenceValues<Preferences>().apiUrl, '/api/trpc'),
+          url: API_URL_TRPC,
           transformer: SuperJSON,
           // headers: headers,
           async fetch(url, options) {

@@ -5,7 +5,7 @@ import { useAtom } from 'jotai'
 import { showBookmarkDetailAtom } from '@/states/bookmark-view'
 import { useEffect, useMemo, useState } from 'react'
 import { sessionTokenAtom } from '@/states/session-token.state'
-import { Teams } from './views/TeamsView'
+import { Spaces } from './views/SpacesView'
 import AddBookmark from './add-bookmark'
 import { BookmarkItem } from './components/BookmarkItem'
 import { BookmarkFilter } from './components/BookmarkFilter'
@@ -145,11 +145,11 @@ export function Body() {
           }
         />
         <List.Item
-          title="Teams"
+          title="Spaces"
           icon={'👥'}
           actions={
             <ActionPanel>
-              <Action.Push title="Teams" target={<Teams />} />
+              <Action.Push title="Spaces" target={<Spaces />} />
             </ActionPanel>
           }
         />
