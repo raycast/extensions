@@ -12,6 +12,8 @@ export interface Status {
   filtering_enabled: boolean;
   dns_queries: number;
   blocked_today: number;
+  protection_disabled_duration?: number; // Duration in milliseconds until protection is re-enabled
+  protection_disabled_until?: string; // ISO string of when protection will be re-enabled
 }
 
 export interface Stats {
@@ -71,7 +73,8 @@ export async function getStatus(): Promise<Status> {
     throw new Error(`Failed to fetch status: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 }
 
 export async function toggleProtection(enabled: boolean): Promise<void> {
@@ -90,9 +93,32 @@ export async function toggleProtection(enabled: boolean): Promise<void> {
   }
 }
 
+export async function disableProtection(duration: number): Promise<void> {
+  const preferences = getPreferenceValues<Preferences>();
+
+  const response = await fetch(`${preferences.serverUrl}/control/protection`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      enabled: false,
+      duration: duration, // Duration in milliseconds until re-enable
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to disable protection: ${response.statusText}`);
+  }
+}
+
 export async function getQueryLog(limit = 20): Promise<QueryLogEntry[]> {
   const preferences = getPreferenceValues<Preferences>();
   const url = new URL(`${preferences.serverUrl}/control/querylog`);
+
+  url.searchParams.append("limit", limit.toString());
+  url.searchParams.append("offset", "0");
 
   url.searchParams.append("limit", limit.toString());
   url.searchParams.append("offset", "0");
@@ -144,6 +170,13 @@ export async function getCustomRules(): Promise<CustomRule[]> {
   }
 
   const data = await response.json();
+
+  return (
+    data.user_rules?.map((rule: string) => ({
+      enabled: true,
+      text: rule,
+    })) || []
+  );
 
   return (
     data.user_rules?.map((rule: string) => ({
