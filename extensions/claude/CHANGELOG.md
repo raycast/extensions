@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-30
 
 - Fix: History now saves as expected
 - Fix: "Got your answer!" now only displays after the full answer has been streamed
