@@ -1,54 +1,55 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import Parser from "rss-parser";
-import { State } from "./types";
+import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { getIcon, getPubDate } from "./utils";
+import Parser from "rss-parser";
 
 const parser = new Parser();
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const {
+    data: state,
+    isLoading,
+    error,
+    revalidate: fetchStories,
+  } = useCachedPromise(
+    async () => {
+      const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
+      return { items: feed.items };
+    },
+    [],
+    { execute: false },
+  );
 
   useEffect(() => {
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
-        setState({ items: feed.items });
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong."),
-        });
-      }
-    }
-
     fetchStories();
   }, []);
 
-  if (state.error) {
+  if (error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed loading stories.",
-      message: state.error.message,
+      message: error.message,
     });
   }
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
+    <List isLoading={isLoading}>
+      {state?.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
     </List>
   );
 }
 
 function StoryListItem(props: { item: Parser.Item; index: number }) {
   const icon = getIcon(props.index + 1);
-  const pubDate = getPubDate(props.item);
+  const pubDate = new Date(getPubDate(props.item) ?? "");
 
   return (
     <List.Item
       icon={icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator ?? "No author"}
-      accessories={[{ text: pubDate ?? "No date" }]}
+      accessories={[{ date: pubDate }]}
       actions={<Actions item={props.item} />}
     />
   );
