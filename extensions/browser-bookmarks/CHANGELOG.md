@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support Island Browser] - {PR_MERGE_DATE}
+## [Support Island Browser] - 2025-01-30
 
 - Added support for `Island` browser.
 
