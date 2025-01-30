@@ -1,8 +1,3 @@
-export interface Preferences {
-  host: string;
-  apiKey: string;
-}
-
 type FieldType =
   | "string"
   | "component"
