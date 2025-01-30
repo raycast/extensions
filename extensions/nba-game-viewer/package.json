@@ -120,10 +120,11 @@
     "@raycast/api": "^1.81.0",
     "@raycast/utils": "^1.16.4",
     "axios": "^1.7.4",
-    "svg64": "^2.0.0"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.15",
     "@types/node": "^22.3.0",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",

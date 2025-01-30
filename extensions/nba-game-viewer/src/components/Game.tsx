@@ -5,6 +5,7 @@ import { useShowDetails } from "../contexts/showDetailsContext";
 import { Game } from "../types/schedule.types";
 import generateGameAccessories from "../utils/generateGameAccessories";
 import { PlayByPlay } from "../views/playByPlay";
+import { startCase } from "lodash";
 
 type PropTypes = {
   game: Game;
@@ -13,7 +14,7 @@ type PropTypes = {
 const RecordIcon = {
   total: Icon.Leaderboard,
   home: Icon.House,
-  road: Icon.Map,
+  road: Icon.AirplaneTakeoff,
 };
 
 const GameComponent = ({ game }: PropTypes) => {
@@ -93,7 +94,9 @@ const GameComponent = ({ game }: PropTypes) => {
                   <Fragment key={team.id}>
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title={team.displayName} icon={team.logo} />
-                    <List.Item.Detail.Metadata.TagList title={"Records"}>
+                    <List.Item.Detail.Metadata.TagList
+                      title={`Records (${team.records.map((record) => startCase(record.name.toLowerCase())).join(" / ")})`}
+                    >
                       {team.records.map((record) => (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={record.name}
