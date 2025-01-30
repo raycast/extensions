@@ -121,6 +121,13 @@
       "subtitle": "Kubernetes",
       "description": "List ResourceQuotas in a Kubernetes cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-replicasets",
+      "title": "Get ReplicaSets",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicaSets in a Kubernetes Cluster.",
+      "mode": "view"
     }
   ],
   "preferences": [
