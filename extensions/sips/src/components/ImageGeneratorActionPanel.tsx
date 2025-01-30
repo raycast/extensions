@@ -89,7 +89,7 @@ export default function ImageGeneratorActionPanel(props: {
 
       <ActionPanel.Section title="Clipboard Actions">
         <Action.Paste
-          title="Paste Preview In Active App"
+          title="Paste Preview in Active App"
           shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           content={{ html: `<img src="${preview}" />` }}
         />

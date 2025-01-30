@@ -23,7 +23,7 @@ export const FilterCategory = {
   interlaced: "Interlaced",
   highDynamicRange: "High Dynamic Range",
 } as const;
-export type FilterCategory = typeof FilterCategory[keyof typeof FilterCategory];
+export type FilterCategory = (typeof FilterCategory)[keyof typeof FilterCategory];
 
 /**
  * A wrapper around a CIFilter that can be applied to images.
@@ -59,7 +59,7 @@ export type Filter = {
    */
   presets?: {
     [key: string]: unknown;
-  }
+  };
 };
 
 /**
