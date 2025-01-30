@@ -1,6 +1,6 @@
 # SVGA Player Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-01-30
 
 - Fix: Play SVGA from clipboard even when non-SVGA is selected.
 - Feature: Support to display SVGA metadata.
