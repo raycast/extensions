@@ -1,3 +1,3 @@
 # Gift Stardew Valley Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-01-30
