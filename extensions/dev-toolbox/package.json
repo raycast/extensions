@@ -187,6 +187,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/color-convert": "^2.0.4",
     "@types/crypto-js": "^4.2.2",
+    "@types/diff": "^7.0.0",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/jwt-decode": "^2.2.1",
     "@types/lodash": "^4.17.15",
