@@ -3,7 +3,7 @@ import type { Application } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
 
-const APP_CLEANER = "/Applications/AppCleaner1.app";
+const APP_CLEANER = "/Applications/AppCleaner.app";
 const PEAR_CLEANER = "/Applications/PearCleaner.app";
 
 export function checkDependencies(): Promise<void> {
