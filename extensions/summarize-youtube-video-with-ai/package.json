@@ -336,6 +336,7 @@
     "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2",
     "openai": "^4.77.0",
+    "uuid": "^11.0.5",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
