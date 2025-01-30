@@ -75,7 +75,7 @@ export default function SummarizeVideoWithOpenAI(
   return (
     <SummaryDetails
       AskFollowUpQuestion={ActionOpenAIFollowUp}
-      markdown={markdown}
+      summary={markdown}
       setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}

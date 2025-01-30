@@ -6,7 +6,7 @@ type SummaryActionsProps = {
     setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
     pop: () => void;
   }>;
-  markdown?: string;
+  summary?: string;
   ownerProfileUrl: string;
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
   transcript: string;
@@ -15,7 +15,7 @@ type SummaryActionsProps = {
 
 export default function SummaryActions({
   AskFollowUpQuestion,
-  markdown,
+  summary,
   ownerProfileUrl,
   setSummary,
   transcript,
@@ -26,7 +26,7 @@ export default function SummaryActions({
   return (
     <ActionPanel title="Video Actions">
       <AskFollowUpQuestion transcript={transcript} setSummary={setSummary} pop={pop} />
-      <Action.CopyToClipboard title="Copy Result" content={markdown ?? ""} />
+      <Action.CopyToClipboard title="Copy Result" content={summary ?? ""} />
       <Action.OpenInBrowser title="Go to Video" url={video_url} />
       <Action.OpenInBrowser title="Go to Channel" url={ownerProfileUrl} />
     </ActionPanel>

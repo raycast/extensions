@@ -72,7 +72,7 @@ export default function SummarizeVideoWithRaycast(
   return (
     <SummaryDetails
       AskFollowUpQuestion={ActionRaycastFollowUp}
-      markdown={markdown}
+      summary={markdown}
       setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}

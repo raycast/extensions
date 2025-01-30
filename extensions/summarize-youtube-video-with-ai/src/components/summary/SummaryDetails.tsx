@@ -9,7 +9,7 @@ type SummaryDetailsProps = {
     setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
     pop: () => void;
   }>;
-  markdown?: string;
+  summary?: string;
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
   summaryIsLoading: boolean;
   transcript: string;
@@ -18,13 +18,13 @@ type SummaryDetailsProps = {
 
 export default function SummaryDetails({
   AskFollowUpQuestion,
-  markdown,
+  summary,
   setSummary,
   summaryIsLoading,
   transcript,
   videoData,
 }: SummaryDetailsProps) {
-  if (!markdown) return null;
+  if (!summary) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, title, video_url, viewCount } = videoData;
 
   return (
@@ -33,14 +33,14 @@ export default function SummaryDetails({
         <SummaryActions
           transcript={transcript}
           setSummary={setSummary}
-          markdown={markdown}
+          summary={summary}
           video_url={video_url}
           ownerProfileUrl={ownerProfileUrl}
           AskFollowUpQuestion={AskFollowUpQuestion}
         />
       }
       isLoading={summaryIsLoading}
-      markdown={markdown}
+      markdown={summary}
       metadata={
         <SummaryMetadata
           title={title}

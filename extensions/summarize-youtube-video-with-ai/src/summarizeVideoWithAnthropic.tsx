@@ -75,7 +75,7 @@ export default function SummarizeVideoWithAnthropic(
   return (
     <SummaryDetails
       AskFollowUpQuestion={ActionAnthropicFollowUp}
-      markdown={markdown}
+      summary={markdown}
       setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
