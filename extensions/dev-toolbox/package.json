@@ -1,0 +1,208 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-toolbox",
+  "title": "Dev Toolbox",
+  "description": "A comprehensive developer and engineer toolkit with time conversion, encoding, networking, and more.",
+  "icon": "extension-icon.png",
+  "author": "brians_tjipto",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-time-formats",
+      "title": "Convert Time Formats",
+      "subtitle": "Easily convert between various time formats.",
+      "description": "Convert between time formats (natural language, ISO, unix)",
+      "mode": "view",
+      "icon": "/time-icon.png"
+    },
+    {
+      "name": "show-network-information",
+      "title": "Show Network Information",
+      "subtitle": "View IP, MAC addresses, and network details.",
+      "description": "Display IP addresses (v4/v6), MAC, and interface details",
+      "mode": "view",
+      "icon": "/wifi-icon.png"
+    },
+    {
+      "name": "spell-check-thesaurus",
+      "title": "Spell Check & Thesaurus",
+      "subtitle": "Check spelling, definitions, and find synonyms.",
+      "description": "Get definitions, spell check, and synonyms for words",
+      "mode": "view",
+      "icon": "/word-icon.png"
+    },
+    {
+      "name": "json-formatter",
+      "title": "JSON Formatter & Validator",
+      "subtitle": "Format and validate JSON data instantly.",
+      "description": "Pretty-print and validate JSON data",
+      "mode": "view",
+      "icon": "/code-icon.png"
+    },
+    {
+      "name": "base64-encoder-decoder",
+      "title": "Base64 Encoder/Decoder",
+      "subtitle": "Quickly encode or decode Base64 strings.",
+      "description": "Quickly encode or decode strings",
+      "mode": "view",
+      "icon": "/code-icon.png"
+    },
+    {
+      "name": "uuid-generator",
+      "title": "UUID Generator",
+      "subtitle": "Generate random or sequential UUIDs.",
+      "description": "Create random or sequential UUIDs",
+      "mode": "view",
+      "icon": "/add-icon.png"
+    },
+    {
+      "name": "hash-generator",
+      "title": "Hash Generator",
+      "subtitle": "Create cryptographic hashes like MD5, SHA-256.",
+      "description": "Generate MD5, SHA-256, etc.",
+      "mode": "view",
+      "icon": "/add-icon.png"
+    },
+    {
+      "name": "jwt-decoder",
+      "title": "JWT Decoder",
+      "subtitle": "Decode and analyze JWT tokens.",
+      "description": "Decode JWT tokens",
+      "mode": "view",
+      "icon": "/code-icon.png"
+    },
+    {
+      "name": "url-parser",
+      "title": "URL Parser",
+      "subtitle": "Extract and analyze URL components.",
+      "description": "Parse URL components",
+      "mode": "view",
+      "icon": "/network-icon.png"
+    },
+    {
+      "name": "regex-tester",
+      "title": "Regex Tester",
+      "subtitle": "Test and generate regular expressions.",
+      "description": "Test and generate regular expressions",
+      "mode": "view",
+      "icon": "/code-icon.png"
+    },
+    {
+      "name": "http-request-tester",
+      "title": "HTTP Request Tester",
+      "subtitle": "Send simple HTTP requests and view responses.",
+      "description": "Send simple HTTP requests and view responses",
+      "mode": "view",
+      "icon": "/network-icon.png"
+    },
+    {
+      "name": "color-converter",
+      "title": "Color Converter",
+      "subtitle": "Convert between color formats easily.",
+      "description": "Convert between color formats",
+      "mode": "view",
+      "icon": "/color-icon.png"
+    },
+    {
+      "name": "port-scanner",
+      "title": "Port Scanner",
+      "subtitle": "Scan open ports on a specified host.",
+      "description": "Scan open ports on a host",
+      "mode": "view",
+      "icon": "/network-icon.png"
+    },
+    {
+      "name": "text-diff",
+      "title": "Text Diff",
+      "subtitle": "Compare two text snippets for differences.",
+      "description": "Compare two texts",
+      "mode": "view",
+      "icon": "/word-icon.png"
+    },
+    {
+      "name": "fake-data-generator",
+      "title": "Fake Data Generator",
+      "subtitle": "Generate realistic fake data instantly.",
+      "description": "Generate fake data",
+      "mode": "view",
+      "icon": "/add-icon.png"
+    },
+    {
+      "name": "electrical-calculator",
+      "title": "Electrical Calculator",
+      "subtitle": "Perform electrical calculations.",
+      "description": "Calculate electrical parameters including Ohm's Law, Power Factor, Voltage Drop, and Time Constants.",
+      "mode": "view",
+      "icon": "/electrical-icon.png"
+    },
+    {
+      "name": "resistance-calculator",
+      "title": "Resistance Calculator",
+      "subtitle": "Calculate resistance values and color codes.",
+      "description": "Calculate resistance values and color codes.",
+      "mode": "view",
+      "icon": "/electrical-icon.png"
+    },
+    {
+      "name": "dec-hex-bin-converter",
+      "title": "Decimal-Hex-Binary Converter",
+      "subtitle": "Convert between number bases.",
+      "description": "Convert between decimal, hexadecimal, and binary numbers.",
+      "mode": "view",
+      "icon": "/computer-icon.png"
+    },
+    {
+      "name": "computer-toolkit",
+      "title": "Computer Engineering Toolkit",
+      "subtitle": "Compute computer engineering parameters.",
+      "description": "Compute cycle time, transfer rate, memory bandwidth, and power consumption.",
+      "mode": "view",
+      "icon": "/computer-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@faker-js/faker": "^9.4.0",
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.9",
+    "chrono-node": "^2.7.8",
+    "color-convert": "^2.0.1",
+    "crypto-js": "^4.2.0",
+    "debounce": "^2.2.0",
+    "diff": "^7.0.0",
+    "generate-password-ts": "^1.6.5",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
+    "lorem-ipsum": "^2.0.8",
+    "luxon": "^3.5.0",
+    "randexp": "^0.5.3",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/color-convert": "^2.0.4",
+    "@types/crypto-js": "^4.2.2",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/lodash": "^4.17.15",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
