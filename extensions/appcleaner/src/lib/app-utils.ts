@@ -21,21 +21,6 @@ export function getIcon(app: Application): string {
 
 export function isSystem(appPath: string): boolean {
   const normalizedPath = path.normalize(appPath);
-
   if (normalizedPath.startsWith("/System/")) return true;
-
-  try {
-    const stats = fs.statSync(normalizedPath);
-
-    // System apps are typically owned by root:wheel and aren't writable by users
-    if (stats.uid === 0 && !stats.mode.toString(8).endsWith("66")) return true;
-
-    // Check SIP protection by attempting to write to the app's Contents folder
-    const contentsPath = path.join(normalizedPath, "Contents");
-    fs.accessSync(contentsPath, fs.constants.W_OK);
-    return false;
-  } catch (error) {
-    console.error("Error checking app:", error);
-    return true;
-  }
+  return false;
 }
