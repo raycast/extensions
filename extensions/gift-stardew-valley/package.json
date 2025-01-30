@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "stardewgift",
-      "title": "StardewGift",
+      "title": "Search Stardew Valley",
       "description": "Discover the perfect gifts for every character in Stardew Valley with ease",
       "mode": "view"
     }
