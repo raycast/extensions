@@ -4,26 +4,13 @@ import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
 
 type SummaryDetailsProps = {
-  AskFollowUpQuestion: React.ComponentType<{
-    transcript: string;
-    setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
-    pop: () => void;
-  }>;
   summary?: string;
-  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
 };
 
-export default function SummaryDetails({
-  AskFollowUpQuestion,
-  summary,
-  setSummary,
-  summaryIsLoading,
-  transcript,
-  videoData,
-}: SummaryDetailsProps) {
+export default function SummaryDetails({ summary, summaryIsLoading, transcript, videoData }: SummaryDetailsProps) {
   if (!summary) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, title, video_url, viewCount } = videoData;
 
@@ -32,11 +19,9 @@ export default function SummaryDetails({
       actions={
         <SummaryActions
           transcript={transcript}
-          setSummary={setSummary}
           summary={summary}
           video_url={video_url}
           ownerProfileUrl={ownerProfileUrl}
-          AskFollowUpQuestion={AskFollowUpQuestion}
         />
       }
       isLoading={summaryIsLoading}

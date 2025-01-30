@@ -5,10 +5,10 @@ import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnipp
 export const useRaycastFollowUpQuestion = async (
   question: string,
   transcript: string,
-  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,
+  setQuestions: React.Dispatch<React.SetStateAction<string | undefined>>,
   pop: () => void,
 ) => {
-  setSummary(undefined);
+  setQuestions(undefined);
 
   const toast = showToast({
     style: Toast.Style.Animated,
@@ -19,7 +19,7 @@ export const useRaycastFollowUpQuestion = async (
   const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
 
   answer.on("data", (data) => {
-    setSummary((result) => {
+    setQuestions((result) => {
       if (result === undefined) return data;
       return result + data;
     });

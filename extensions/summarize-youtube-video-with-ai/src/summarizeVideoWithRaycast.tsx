@@ -3,7 +3,6 @@ import nodeFetch from "node-fetch";
 
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import ActionRaycastFollowUp from "./components/raycast/ActionRaycastFollowUp";
 import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
@@ -71,9 +70,7 @@ export default function SummarizeVideoWithRaycast(
 
   return (
     <SummaryDetails
-      AskFollowUpQuestion={ActionRaycastFollowUp}
       summary={markdown}
-      setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
       videoData={videoData}
