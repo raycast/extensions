@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Bug Fixes & New Filters] - {PR_MERGE_DATE}
+## [Bug Fixes & New Filters] - 2025-01-30
 
 - Improved memory management when previewing filters, reducing the likelihood of out-of-memory errors
 - Added setting to disable live filter previews
