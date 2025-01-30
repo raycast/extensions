@@ -52,10 +52,10 @@ export default async function Main() {
           throw new Error("Not a valid SVGA file");
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: error.message || "Failed to read current focus",
+        title: error instanceof Error ? error.message : "Failed to read current focus",
       });
       return true;
     }
