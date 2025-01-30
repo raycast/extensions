@@ -11,7 +11,6 @@ function getAccessory(train: Train, icon: string) {
   const accessories = [];
   if (train.isBlinking) {
     accessories.push({
-      tag: `${train.delay}`,
       icon: { source: icon, tintColor: Color.Blue },
       tooltip: "Departing now",
     });
