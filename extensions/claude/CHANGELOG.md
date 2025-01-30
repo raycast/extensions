@@ -1,13 +1,18 @@
 # Claude Changelog
 
-## [Update] -  2024-12-20
+## [Update] - 2025-01-30
+
+- Fix: History now saves as expected
+- Fix: "Got your answer!" now only displays after the full answer has been streamed
+
+## [Update] - 2024-12-20
 
 - Fix: Models dropdown not displaying all models correctly
 
 ## [Update] - 2024-12-12
 
 - Fix: Remove duplicated "Copy Question" action, use existing with tweaked conditions
-- Fix: Use Claude 3.5 Haiku as default fallback modal
+- Fix: Use Claude 3.5 Haiku as default fallback model
 
 ## [Update] - 2024-12-09
 
