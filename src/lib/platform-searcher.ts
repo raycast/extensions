@@ -36,7 +36,7 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
     case "x": {
       const langFilter = getLanguageFilter();
       const langParam = langFilter ? `+${langFilter}` : "";
-      return `https://x.com/search?q=${encodedKeyword}+min_replies:1${langParam}+since:${date}&src=typed_query&f=live`;
+      return `https://x.com/search?q=${encodedKeyword}+min_replies:1+min_retweets:1${langParam}+since:${date}&src=typed_query&f=live`;
     }
     case "v2ex":
       return `https://google.com/search?q=${encodedKeyword}+site:v2ex.com&newwindow=1&tbs=qdr:m`;

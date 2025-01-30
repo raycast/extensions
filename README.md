@@ -5,9 +5,7 @@ Roamio is a powerful multi-platform search tool that helps you discover content 
 ## Features
 
 - 🔍 Multi-platform search: X(Twitter), Reddit, Medium, YouTube, Bilibili, V2EX, and more
-- 🎲 Random keyword search functionality
-- 💾 Keyword management to track your favorite topics
-- 🌍 Multi-language support
+- 🎲 Random keyword search from your favorite topics collection
 
 ## Supported Platforms
 
@@ -27,20 +25,33 @@ Roamio is a powerful multi-platform search tool that helps you discover content 
 
 1. Open Raycast with your shortcut
 2. Type "Search a Specified Keyword"
-3. Enter your search keyword
-4. Choose the platform to search on
+3. You can:
+   - Enter a keyword directly
+   - Use selected text as the keyword
+   - Use clipboard content as the keyword
+4. The search will be performed on your configured platforms
 
 ### Search with a Random Keyword
 
 1. Open Raycast with your shortcut
 2. Type "Search a Random Keyword"
-3. The system will automatically select a random keyword from your list and perform the search
+3. Roamio will automatically:
+   - Select a random keyword from your curated list
+   - Perform searches on your configured platforms
+4. Use cases for random search:
+   - Technology trend tracking (e.g., AI, Web3, Cloud Native)
+   - Discovering interesting discussions about your favorite topics
+   - Staying updated with industry news and developments
 
 ### Keyword Management
 
-- Add keywords: Use the "Add Keyword" command
-- Remove keywords: Use the "Remove Keyword" command
-- Edit keywords: Use the "Edit Keywords" command
+Keyword management helps you maintain a curated list of topics and tech trends that interest you:
+
+- Add keywords: Use the "Add Keyword" command to include new topics you want to track
+- Remove keywords: Use the "Remove Keyword" command to clean up outdated or irrelevant topics
+- Edit keywords: Use the "Edit Keywords" command to refine your interest collection
+
+
 
 ## Configuration
 
@@ -77,11 +88,3 @@ Supported languages include:
 - And many more
 
 These settings can be configured at any time through the Raycast extension preferences.
-
-## Screenshots
-
-[Screenshots to be added]
-
-## Support & Feedback
-
-If you encounter any issues or have suggestions for improvements, please feel free to submit an issue or contact the author.
