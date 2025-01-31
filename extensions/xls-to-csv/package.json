@@ -12,7 +12,7 @@
   "license": "MIT",
   "screenshots": [
     {
-      "file": "screenshot-1.png",
+      "file": "assets/screenshot-1.png",
       "title": "Excel to CSV Converter Screenshot"
     }
   ],
