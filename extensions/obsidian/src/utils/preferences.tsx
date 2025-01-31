@@ -40,6 +40,7 @@ export interface DailyNoteAppendPreferences {
   appendTemplate?: string;
   vaultName?: string;
   heading?: string;
+  prepend?: boolean;
   silent?: boolean;
 }
 
