@@ -13,7 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import Gemini from "gemini-ai";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getSelectedText } from "@raycast/api";
 
 export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -221,6 +221,20 @@ export default function Chat({ launchContext }) {
               }
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+          />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setSearchText((oldText) => oldText + selectedText);
+              } catch (error) {
+                console.error(error);
+                toast(Toast.Style.Failure, "Could not get the selected text");
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section title="Danger zone">

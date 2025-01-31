@@ -34,6 +34,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   const [selectedState, setSelected] = useState("");
   const [lastQuery, setLastQuery] = useState("");
   const [lastResponse, setLastResponse] = useState("");
+  const [textarea, setTextarea] = useState("");
 
   const getResponse = async (query, data) => {
     setLastQuery(query);
@@ -102,11 +103,11 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           getResponse(`${context}\n${selected}`);
         } catch (e) {
           console.error(e);
-          await popToRoot();
           await showToast({
             style: Toast.Style.Failure,
-            title: "Could not get the selected text",
+            title: "Could not get the selected text. Continue without it.",
           });
+          getResponse(argQuery);
         }
       } else {
         if (argQuery === "") {
@@ -167,10 +168,33 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
               getResponse(`${context ? `${context}\n\n` : ""}${values.query}`, files);
             }}
           />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setTextarea((text) => text + selectedText);
+              } catch (error) {
+                console.error(error);
+                await showToast({
+                  title: "Could not get the selected text",
+                  style: Toast.Style.Failure,
+                });
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Prompt" id="query" />
+      <Form.TextArea
+        title="Prompt"
+        id="query"
+        value={textarea}
+        onChange={(value) => setTextarea(value)}
+        placeholder="Ask Gemini a question..."
+      />
       {!buffer.length && (
         <>
           <Form.Description title="Image" text="Image that you want Gemini to analyze along with your prompt." />
