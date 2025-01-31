@@ -3,7 +3,7 @@ import { FunctionComponent } from "react";
 import { KubernetesContextProvider } from "../../states/context";
 import { KubernetesNamespaceProvider } from "../../states/namespace";
 import { kubernetesObjectAge } from "../../utils/duration";
-import { ResourceList } from "../resource-list";
+import { ResourceList } from "../ResourceList";
 
 const PodList: FunctionComponent<{ namespace?: string; labelSelector?: string }> = ({ namespace, labelSelector }) => {
   return (

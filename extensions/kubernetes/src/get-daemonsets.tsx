@@ -1,5 +1,5 @@
 import { V1DaemonSet } from "@kubernetes/client-node";
-import { ResourceList } from "./components/resource-list";
+import { ResourceList } from "./components/ResourceList";
 import PodList from "./components/resources/PodList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";

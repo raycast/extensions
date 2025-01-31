@@ -3,8 +3,8 @@ import { List } from "@raycast/api";
 import { Toggle, useToggle } from "../hooks/useToggle";
 import { getDarkColor, getLightColor } from "../utils/color";
 import { RelatedResource } from "./RelatedResourceAction";
-import ResourceAction from "./resource-action";
-import ResourceDetail from "./resource-detail";
+import ResourceAction from "./ResourceAction";
+import ResourceDetail from "./ResourceDetail";
 
 export default function ResourceItem<T extends KubernetesObject>(props: {
   apiVersion: string;

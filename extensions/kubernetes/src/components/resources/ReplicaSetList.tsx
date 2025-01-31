@@ -4,7 +4,7 @@ import { KubernetesContextProvider } from "../../states/context";
 import { KubernetesNamespaceProvider } from "../../states/namespace";
 import { kubernetesObjectAge } from "../../utils/duration";
 import { labelSelectorToString } from "../../utils/selector";
-import { ResourceList } from "../resource-list";
+import { ResourceList } from "../ResourceList";
 import PodList from "./PodList";
 
 const ReplicaSetList: FunctionComponent<{ namespace?: string; labelSelector?: string }> = ({

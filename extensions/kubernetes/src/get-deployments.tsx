@@ -1,5 +1,5 @@
 import { V1Deployment } from "@kubernetes/client-node";
-import { ResourceList } from "./components/resource-list";
+import { ResourceList } from "./components/ResourceList";
 import ReplicaSetList from "./components/resources/ReplicaSetList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";

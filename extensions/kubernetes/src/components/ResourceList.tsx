@@ -5,9 +5,9 @@ import useKubernetesResources from "../hooks/useKubernetesResources";
 import { useToggle } from "../hooks/useToggle";
 import { useKubernetesContext } from "../states/context";
 import { useKubernetesNamespace } from "../states/namespace";
-import NamespaceDropdown from "./namespace-dropdown";
+import NamespaceDropdown from "./NamespaceDropdown";
 import { RelatedResource } from "./RelatedResourceAction";
-import ResourceItem from "./resource-item";
+import ResourceItem from "./ResourceItem";
 
 export function ResourceList<T extends KubernetesObject>(props: {
   apiVersion: string;
