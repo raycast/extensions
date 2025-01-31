@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { FuelAgent } from "fuel-agent-kit";
 import fetch from "node-fetch";
 import { useState } from "react";
@@ -12,9 +12,10 @@ if (!globalThis.fetch) {
 }
 
 export default function Command() {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const preferences = getPreferenceValues();
+
+  const [command, setCommand] = useState(""); // Track command input
+  const [isExecuting, setIsExecuting] = useState(false);
 
   const agent = new FuelAgent({
     openAiApiKey: preferences.openaiApiKey,
@@ -22,59 +23,54 @@ export default function Command() {
     model: "gpt-4o",
   });
 
-  const executeCommandForm = (
+  async function handleSubmit(values: { command: string }) {
+    setIsExecuting(true);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Executing your command...",
+    });
+
+    try {
+      const response = await agent.execute(values.command);
+      // If the output text has a URL, show it in the success message
+      const linkMatch = response.output.match(/https?:\/\/[^\s]+/);
+      const link = linkMatch ? linkMatch[0] : null;
+      console.log(link);
+
+      // Update toast to success
+      toast.style = Toast.Style.Success;
+      toast.title = "Command executed successfully!";
+      // toast.message = link ? `Transaction link: ${link}` : undefined;
+
+      open("raycast://confetti");
+
+      // Clear the form
+      setCommand("");
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Command execution failed";
+      toast.message = String(error);
+    } finally {
+      setIsExecuting(false);
+    }
+  }
+
+  return (
     <Form
+      isLoading={isExecuting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Execute Command"
-            onSubmit={async (values) => {
-              setLoading(true);
-              const toast = await showToast(Toast.Style.Animated, "Executing your command, please wait...");
-              try {
-                const response = await agent.execute(values.command);
-                console.log("Command response:", response);
-
-                // Extract the transaction link from the response
-                const link = response.output.match(/https?:\/\/[^\s]+/)[0];
-                setTransactionLink(link);
-
-                toast.style = Toast.Style.Success;
-                toast.title = "Command executed successfully!";
-                toast.message = `Transaction link: ${link}`;
-              } catch (error) {
-                console.error("Command error:", error);
-                toast.style = Toast.Style.Failure;
-                toast.title = "Command execution failed";
-                toast.message = String(error);
-              } finally {
-                setLoading(false);
-              }
-            }}
-          />
+          <Action.SubmitForm title="Execute Command" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="command" title="Command" placeholder="Send 0.1 USDC to 0x..." />
+      <Form.TextArea
+        id="command"
+        title="Command"
+        placeholder="Send 1 USDC to 0x..."
+        value={command}
+        onChange={setCommand}
+      />
     </Form>
   );
-
-  if (loading) {
-    return <Detail markdown="# Executing your command, please wait..." />;
-  }
-
-  if (transactionLink) {
-    const markdown = `
-# Transaction Executed Successfully!
-`;
-
-    open("raycast://confetti");
-    return (
-      <>
-        <Detail markdown={markdown} navigationTitle="Transaction Details" />
-      </>
-    );
-  }
-
-  return executeCommandForm;
 }
