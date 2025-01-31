@@ -1,5 +1,9 @@
 # Rehooks Changelog
 
+## [Documentation Command] - 2025-01-30
+
+Fixed links in documentation command
+
 ## [Package] - 2025-01-24
 
 Updated Rehooks package description
