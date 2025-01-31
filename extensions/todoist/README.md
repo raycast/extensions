@@ -1,4 +1,4 @@
-My understanding is that scheduled means planned for today or tomorrow or even further into the future ?# Todoist
+# Todoist
 
 **This extension is not created by, affiliated with, or supported by Doist.**
 
