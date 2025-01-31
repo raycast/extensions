@@ -1,6 +1,6 @@
 # UploadThing Changelog
 
-## [2.0.1 - Add "List Files"] - {PR_MERGE_DATE}
+## [2.0.1 - Add "List Files"] - 2025-01-31
 
 - Add "List Files" command
 - Add `Icon` to "Upload Files" `Action`
