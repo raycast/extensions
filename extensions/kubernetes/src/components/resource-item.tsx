@@ -10,11 +10,11 @@ export default function ResourceItem<T extends KubernetesObject>(props: {
   apiVersion: string;
   kind: string;
   resource: T;
-  detailView: Toggle;
+  yamlView: Toggle;
   renderFields: (resource: T) => string[];
   relatedResource?: RelatedResource<T>;
 }) {
-  const { apiVersion, kind, resource, detailView, renderFields, relatedResource } = props;
+  const { apiVersion, kind, resource, yamlView, renderFields, relatedResource } = props;
 
   const managedFields = useToggle("Managed Fields", false);
   const lastAppliedConfiguration = useToggle("Last Applied Configuration", false);
@@ -35,14 +35,14 @@ export default function ResourceItem<T extends KubernetesObject>(props: {
       actions={
         <ResourceAction
           resource={resource}
-          detailView={detailView}
+          yamlView={yamlView}
           managedFields={managedFields}
           lastAppliedConfiguration={lastAppliedConfiguration}
           relatedResource={relatedResource}
         />
       }
       accessories={
-        detailView.show
+        yamlView.show
           ? []
           : renderFields(resource).map((value, index) => ({
               tag: {

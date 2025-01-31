@@ -25,7 +25,7 @@ export function ResourceList<T extends KubernetesObject>(props: {
   const { currentContext } = useKubernetesContext();
   const { currentNamespace } = useKubernetesNamespace();
 
-  const detailView = useToggle("Detail View", false);
+  const yamlView = useToggle("YAML", false);
   const [searchText, setSearchText] = useState("");
   const [resources, setResources] = useState<T[]>([]);
 
@@ -56,7 +56,7 @@ export function ResourceList<T extends KubernetesObject>(props: {
         apiVersion={apiVersion}
         kind={kind}
         resource={resource}
-        detailView={detailView}
+        yamlView={yamlView}
         renderFields={renderFields}
         relatedResource={relatedResource}
       />
@@ -70,7 +70,7 @@ export function ResourceList<T extends KubernetesObject>(props: {
   return (
     <List
       navigationTitle={navigationTitle}
-      isShowingDetail={detailView.show}
+      isShowingDetail={yamlView.show}
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
