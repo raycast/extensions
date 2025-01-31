@@ -1,4 +1,4 @@
-# Todoist
+My understanding is that scheduled means planned for today or tomorrow or even further into the future ?# Todoist
 
 **This extension is not created by, affiliated with, or supported by Doist.**
 
@@ -8,10 +8,10 @@ Check your Todoist tasks from within Raycast and quickly create new ones.
 
 You can quickly access your `Home` command favorites views using deep-links and quick-links. Here's how:
 
-1.  Open the `Home` command and select your view in the dropdown (e.g `All Tasks` or a specific project)
-2.  Search for `Create View Quicklink` in the actions (`⌘` + `K`).
-3.  Give the quicklink a custom name (optional) and create it (`⌘` + `⏎`).
-4.  Use Raycast root search to find your new quicklink and quickly access your tasks view.
+1. Open the `Home` command and select your view in the dropdown (e.g `All Tasks` or a specific project)
+2. Search for `Create View Quicklink` in the actions (`⌘` + `K`).
+3. Give the quicklink a custom name (optional) and create it (`⌘` + `⏎`).
+4. Use Raycast root search to find your new quicklink and quickly access your tasks view.
 
 This makes it easy to access any of your views, including projects and labels!
 
