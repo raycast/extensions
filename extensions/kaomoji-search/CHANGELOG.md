@@ -1,5 +1,9 @@
 # Kaomoji Search Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- Modernize: remove `Preferences` type + update deps
+
 ## [Grid layout] - 2023-02-07
 
 - Add Grid layout support

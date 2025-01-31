@@ -15,11 +15,11 @@ import { AbortError } from "node-fetch";
 import { lib } from "asciilib";
 import { nanoid } from "nanoid";
 import { useRecentKaomoji } from "./useRecentKaomoji";
-import { Preference, SearchResult, SearchState } from "./types";
+import { SearchResult, SearchState } from "./types";
 
 export default function Command() {
   const { state, search } = useSearch();
-  const { displayMode, primaryAction } = getPreferenceValues<Preference>();
+  const { displayMode, primaryAction } = getPreferenceValues<Preferences>();
 
   const displayGroupedResults = state.searchText.length === 0;
   const groupedResultsByCategory = useMemo(() => {
@@ -95,7 +95,7 @@ function ItemActions({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   const { addKaomoji } = useRecentKaomoji();
 
@@ -142,7 +142,7 @@ function SearchListItem({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   return (
     <List.Item
@@ -182,7 +182,7 @@ function SearchGridItem({
   primaryAction,
 }: {
   searchResult: SearchResult;
-  primaryAction: Preference["primaryAction"];
+  primaryAction: Preferences["primaryAction"];
 }) {
   return (
     <Grid.Item
