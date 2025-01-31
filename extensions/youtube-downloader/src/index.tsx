@@ -5,6 +5,7 @@ import {
   Clipboard,
   Detail,
   Form,
+  getSelectedText,
   Icon,
   open,
   showHUD,
@@ -179,17 +180,16 @@ export default function DownloadVideo() {
   }, [video]);
 
   useEffect(() => {
-    // why nested promise? because we prioritize clipboard over active tab url
-    Clipboard.readText().then((text) => {
-      if (text && isYouTubeURL(text)) {
-        setValue("url", text);
-      } else {
-        BrowserExtension.getTabs().then((tabs) => {
-          const url = tabs.find((tab) => tab.active)?.url;
-          if (url && isYouTubeURL(url)) setValue("url", url);
-        });
-      }
-    });
+    (async () => {
+      const clipboardText = await Clipboard.readText();
+      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+
+      const selectedText = await getSelectedText();
+      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+
+      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+    })();
   }, []);
 
   const missingExecutable = useMemo(() => {

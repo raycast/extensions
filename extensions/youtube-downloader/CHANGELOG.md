@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Insert active tab URL] - 2025-01-31
+## [Insert active tab URL] - {PR_MERGE_DATE}
 
 - If the raycast browser extension is installed, the extension will automatically insert the active tab URL into the input field
 
