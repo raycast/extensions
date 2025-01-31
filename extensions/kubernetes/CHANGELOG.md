@@ -1,6 +1,6 @@
 # Kubernetes Changelog
 
-## [Support Jump To Related Resources] - {PR_MERGE_DATE}
+## [Support Jump To Related Resources] - 2025-01-31
 
 - Support jumping to related resources from the resource view.
 
