@@ -22,7 +22,7 @@ export const getBaseUrl = () => {
 };
 
 export async function request<T>(path: string, options: RequestOptions = { method: "GET" }) {
-  const { authorizationHeader } = getJiraCredentials();
+  const { authorizationHeader, apiVersion } = getJiraCredentials();
 
   const { params, headers, useAgileApi, ...rest } = options;
   const queryParams = params ? `?${new URLSearchParams(params).toString()}` : "";
@@ -30,7 +30,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
   const additionalHeaders = headers || { "Content-Type": "application/json" };
 
   const response = await fetch(
-    `${getBaseUrl()}/${useAgileApi ? "rest/agile/1.0" : "rest/api/3"}${path}${queryParams}`,
+    `${getBaseUrl()}/${useAgileApi ? "rest/agile/1.0" : "rest/api/" + apiVersion}${path}${queryParams}`,
     {
       headers: {
         Authorization: authorizationHeader,
