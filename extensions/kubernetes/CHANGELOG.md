@@ -1,5 +1,12 @@
 # Kubernetes Changelog
 
+## [Support Jump To Related Resources] - {PR_MERGE_DATE}
+
+- Support jumping to related resources from the resource view.
+
+Add the following commands:
+- Get ReplicaSets
+
 ## [Refactor Code Structure, Add More Commands] - 2025-01-28
 
 - Refactor code structure to make it more maintainable.
