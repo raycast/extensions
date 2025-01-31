@@ -1,29 +1,32 @@
 import { KubernetesObject } from "@kubernetes/client-node";
 import { Action, ActionPanel } from "@raycast/api";
 import { Toggle } from "../hooks/useToggle";
+import { RelatedResource, RelatedResourceAction } from "./RelatedResourceAction";
 
 export default function ResourceAction<T extends KubernetesObject>(props: {
   resource: T;
-  detailView: Toggle;
+  yamlView: Toggle;
   managedFields: Toggle;
   lastAppliedConfiguration: Toggle;
+  relatedResource?: RelatedResource<T>;
 }) {
-  const { resource, detailView, managedFields, lastAppliedConfiguration } = props;
+  const { resource, yamlView, managedFields, lastAppliedConfiguration, relatedResource } = props;
 
   return (
     <ActionPanel>
+      <RelatedResourceAction resource={resource} relatedResource={relatedResource} />
       <Action
-        title={detailView.title}
-        onAction={() => detailView.toggle()}
-        icon={detailView.icon}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        title={yamlView.title}
+        onAction={() => yamlView.toggle()}
+        icon={yamlView.icon}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
       />
       <Action.CopyToClipboard
         title="Copy Name to Clipboard"
         content={resource.metadata?.name ?? ""}
         shortcut={{ modifiers: ["cmd"], key: "c" }}
       />
-      {detailView.show && (
+      {yamlView.show && (
         <Action
           title={managedFields.title}
           onAction={() => managedFields.toggle()}
@@ -31,7 +34,7 @@ export default function ResourceAction<T extends KubernetesObject>(props: {
           icon={managedFields.icon}
         />
       )}
-      {detailView.show && (
+      {yamlView.show && (
         <Action
           title={lastAppliedConfiguration.title}
           onAction={() => lastAppliedConfiguration.toggle()}

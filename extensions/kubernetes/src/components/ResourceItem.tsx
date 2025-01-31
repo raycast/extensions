@@ -2,17 +2,19 @@ import { KubernetesObject } from "@kubernetes/client-node";
 import { List } from "@raycast/api";
 import { Toggle, useToggle } from "../hooks/useToggle";
 import { getDarkColor, getLightColor } from "../utils/color";
-import ResourceAction from "./resource-action";
-import ResourceDetail from "./resource-detail";
+import { RelatedResource } from "./RelatedResourceAction";
+import ResourceAction from "./ResourceAction";
+import ResourceDetail from "./ResourceDetail";
 
 export default function ResourceItem<T extends KubernetesObject>(props: {
   apiVersion: string;
   kind: string;
   resource: T;
-  detailView: Toggle;
+  yamlView: Toggle;
   renderFields: (resource: T) => string[];
+  relatedResource?: RelatedResource<T>;
 }) {
-  const { apiVersion, kind, resource, detailView, renderFields } = props;
+  const { apiVersion, kind, resource, yamlView, renderFields, relatedResource } = props;
 
   const managedFields = useToggle("Managed Fields", false);
   const lastAppliedConfiguration = useToggle("Last Applied Configuration", false);
@@ -33,13 +35,14 @@ export default function ResourceItem<T extends KubernetesObject>(props: {
       actions={
         <ResourceAction
           resource={resource}
-          detailView={detailView}
+          yamlView={yamlView}
           managedFields={managedFields}
           lastAppliedConfiguration={lastAppliedConfiguration}
+          relatedResource={relatedResource}
         />
       }
       accessories={
-        detailView.show
+        yamlView.show
           ? []
           : renderFields(resource).map((value, index) => ({
               tag: {
