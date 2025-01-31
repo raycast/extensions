@@ -1,39 +1,29 @@
-import { List, Icon, Color } from "@raycast/api";
-import { PortConnectorsPretty, type Device, type ListDevice } from "../lib/unifi/types/device";
-import type { UnifiClient } from "../lib/unifi/unifi";
-import { useDevice } from "../hooks/useDevice";
-import { useEffect } from "react";
+import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { FrequencyColors } from "../lib/colors";
+import { PortConnectorsPretty, type Device } from "../lib/unifi/types/device";
+import { format } from "date-fns";
 
 interface DeviceDetailProps {
-  deviceData: ListDevice;
-  client: UnifiClient;
-  devices: ListDevice[];
+  device: Device | undefined;
   isLoading?: boolean;
-  onDeviceLoaded?: (device: Device) => void;
 }
 
-export default function DeviceDetail({ deviceData, client, devices, onDeviceLoaded }: DeviceDetailProps) {
-  const { device, isLoading } = useDevice({
-    deviceId: deviceData.id,
-    unifi: client,
-    devices: devices,
-  });
+const { dateFormat } = getPreferenceValues<Preferences>();
 
-  useEffect(() => {
-    if (device) {
-      onDeviceLoaded?.(device);
-    }
-  }, [device]);
-
-  return <List.Item.Detail isLoading={isLoading} metadata={device ? <DeviceMetadata device={device} /> : undefined} />;
+function DeviceDetail({ device, isLoading }: DeviceDetailProps) {
+  return (
+    <List.Item.Detail
+      isLoading={isLoading || !device}
+      metadata={device ? <DeviceMetadata device={device} /> : undefined}
+    />
+  );
 }
 
 interface MetadataProps {
   device: Device;
 }
 
-export function DeviceMetadata({ device }: MetadataProps) {
+function DeviceMetadata({ device }: MetadataProps) {
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="IP Address" text={device.ipAddress} />
@@ -42,8 +32,11 @@ export function DeviceMetadata({ device }: MetadataProps) {
 
       <List.Item.Detail.Metadata.Label
         title="State"
-        text={device.state}
-        icon={device.state === "ONLINE" ? Icon.CircleProgress100 : Icon.Circle}
+        icon={{
+          source: device.state === "ONLINE" ? Icon.CircleProgress100 : Icon.Circle,
+          tintColor: device.state === "ONLINE" ? Color.Green : Color.Red,
+        }}
+        text={device.state === "ONLINE" ? "Online" : device.state === "OFFLINE" ? "Offline" : "Adopting"}
       />
 
       {device && (
@@ -56,6 +49,14 @@ export function DeviceMetadata({ device }: MetadataProps) {
 
           {device.uplink?.deviceId && (
             <List.Item.Detail.Metadata.Label title="Uplink" text={device.uplink.deviceName} />
+            // <List.Item.Detail.Metadata.Link title="Uplink" target={`unifi://devices/${device.uplink.deviceId}`} text={device.uplink.deviceName || ""} />
+          )}
+
+          {device.provisionedAt && (
+            <List.Item.Detail.Metadata.Label
+              title="Provisioned At"
+              text={format(new Date(device.provisionedAt), dateFormat)}
+            />
           )}
 
           {device.interfaces?.ports?.length && device.state !== "OFFLINE" && (
@@ -63,7 +64,7 @@ export function DeviceMetadata({ device }: MetadataProps) {
               {device.interfaces.ports.map((port, i) => (
                 <List.Item.Detail.Metadata.TagList.Item
                   key={i}
-                  text={`Port ${port.idx}: ${PortConnectorsPretty[port.connector]}`}
+                  text={`${port.idx}: ${PortConnectorsPretty[port.connector]}`}
                   color={port.speedMbps ? Color.Green : Color.Red}
                 />
               ))}
@@ -86,3 +87,5 @@ export function DeviceMetadata({ device }: MetadataProps) {
     </List.Item.Detail.Metadata>
   );
 }
+
+export { DeviceDetail, DeviceMetadata };

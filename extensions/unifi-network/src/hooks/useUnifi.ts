@@ -27,5 +27,5 @@ export function useUnifi() {
     client.SetSite(site.id);
   }, [siteIsLoading, client, site]);
 
-  return { client };
+  return { client, siteIsLoading, site };
 }

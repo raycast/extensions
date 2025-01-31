@@ -1,31 +1,45 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
-import DeviceDetail from "./components/DeviceDetail";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  openCommandPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+  type LaunchProps,
+} from "@raycast/api";
+import { memo, useCallback, useEffect, useState } from "react";
+import { DeviceDetail } from "./components/DeviceDetail";
+import { DeviceLiveStats } from "./components/DeviceLiveStats";
 import { useDevices } from "./hooks/useDevices";
-import { useInterval } from "./hooks/useInterval";
 import { useUnifi } from "./hooks/useUnifi";
-import { connectionTypeIcon } from "./lib/utils";
+import type { Device } from "./lib/unifi/types/device";
+import { connectionTypeIcon, getDeviceTypeIcon } from "./lib/utils";
 import ViewDevicePorts from "./view-device-ports";
 import ViewDeviceRadios from "./view-device-radios";
-import type { Device } from "./lib/unifi/types/device";
 
-export default function ViewDevices() {
+function ViewDevices(props: LaunchProps) {
   const { client } = useUnifi();
   const {
     devices,
     isLoading,
     error: deviceErrors,
+    searchText,
     setSearchText,
-    revalidate,
-    lookupDevice,
+    startPolling,
+    stopPolling,
+    pollingDeviceId,
   } = useDevices({
     unifi: client,
+    search: props.arguments.search,
   });
+
   const { push } = useNavigation();
-  const [pollingForDevice, setPollingForDevice] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [device, setDevice] = useState<Device>();
+  const [pollingToast, setPollingToast] = useState<Toast | null>(null);
 
   useEffect(() => {
     if (error || deviceErrors) {
@@ -37,97 +51,110 @@ export default function ViewDevices() {
     }
   }, [error, deviceErrors]);
 
-  useInterval(
-    () => {
-      console.log("Poll for restarted device state: ", pollingForDevice);
-      revalidate();
-      if (pollingForDevice) {
-        isDeviceReady(pollingForDevice).then((ready) => {
-          if (ready) {
-            console.log("Device is ready");
-            setPollingForDevice(null);
-          }
-        });
+  const restartDevice = useCallback(
+    async (deviceId: string) => {
+      if (!client) return;
+
+      try {
+        const status = await client.DeviceAction(deviceId, "RESTART");
+        if (status) {
+          startPolling(deviceId);
+        }
+      } catch (err) {
+        setError(new Error("Failed to restart device"));
+        stopPolling();
       }
     },
-    pollingForDevice ? 5000 : null,
+    [client],
   );
 
-  const isDeviceReady = async (id: string): Promise<boolean> => {
-    const device = lookupDevice(id);
-    if (!device) {
-      console.log("Device not found");
-      return true;
+  const startPollingToast = useCallback(async () => {
+    setPollingToast(
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Polling device status",
+        message: "Waiting for device to come back online...",
+      }),
+    );
+  }, [pollingToast]);
+
+  const stopPollingToast = useCallback(async () => {
+    await pollingToast?.hide();
+    setPollingToast(null);
+  }, [pollingToast]);
+
+  useEffect(() => {
+    if (pollingDeviceId && !pollingToast) {
+      startPollingToast();
+    } else if (!pollingDeviceId && pollingToast) {
+      stopPollingToast();
     }
+  }, [pollingDeviceId]);
 
-    return device?.state === "ONLINE";
-  };
+  const DeviceActions = ({ device }: { device: Device }) => (
+    <ActionPanel title={device.name}>
+      <Action title="View live stats" onAction={() => push(<DeviceLiveStats device={device} />)} />
+      <Action.CopyToClipboard title="Copy IP Address" content={device.ipAddress} />
+      <Action.OpenInBrowser title="Open in Browser" url={client?.GetDeviceUrl(device.macAddress) ?? ""} />
+      <Action.CopyToClipboard title="Copy MAC Address" content={device.macAddress} />
+      {device.interfaces?.ports?.length && (
+        <Action
+          title="View Ports"
+          icon={connectionTypeIcon("WIRED")}
+          onAction={() => push(<ViewDevicePorts deviceDetails={device} />)}
+        />
+      )}
+      {device.interfaces?.radios?.length && (
+        <Action
+          title="View Radios"
+          icon={connectionTypeIcon("WIRELESS")}
+          onAction={() => push(<ViewDeviceRadios deviceDetails={device} />)}
+        />
+      )}
+      {device.state === "ONLINE" && (
+        <Action title="Restart Device" icon={Icon.ArrowClockwise} onAction={() => restartDevice(device.id)} />
+      )}
+      <Action icon={Icon.Cog} title="Open Command Preferences" onAction={openCommandPreferences} />
+    </ActionPanel>
+  );
 
-  const restartDevice = async (deviceId: string) => {
-    if (!client) {
-      return;
-    }
-
-    console.log("Restarting device", deviceId);
-
-    const status = await client.DeviceAction(deviceId, "RESTART");
-    if (status) {
-      console.log("Device restarted");
-      revalidate();
-      setPollingForDevice(deviceId);
-    } else {
-      console.error("Failed to restart device");
-      setError(new Error("Failed to restart device"));
-    }
-  };
+  const renderDeviceItem = useCallback(
+    (dev: Device) => (
+      <List.Item
+        key={dev.id}
+        title={dev.name}
+        id={dev.id}
+        icon={getDeviceTypeIcon(dev)}
+        accessories={[
+          {
+            icon: {
+              source: dev.state === "ONLINE" ? Icon.CircleProgress100 : Icon.Circle,
+              tintColor: dev.state === "ONLINE" ? Color.Green : Color.Red,
+            },
+            tooltip: dev.state,
+          },
+        ]}
+        detail={<DeviceDetail device={dev} />}
+        actions={<DeviceActions device={dev} />}
+      />
+    ),
+    [client, devices],
+  );
 
   return (
     <List
       filtering={false}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Devices"
       searchBarPlaceholder="Search devices by name, IP address, or MAC address"
       isShowingDetail
       isLoading={isLoading}
     >
-      {!devices?.length && <List.Section title="None found..." />}
-      {devices?.map((dev) => (
-        <List.Item
-          key={dev.id}
-          title={dev.name}
-          accessories={[{ icon: dev.state === "ONLINE" ? Icon.CircleProgress100 : Icon.Circle, tooltip: dev.state }]}
-          detail={
-            <DeviceDetail deviceData={dev} client={client} devices={devices} onDeviceLoaded={(dev) => setDevice(dev)} />
-          }
-          actions={
-            device && (
-              <ActionPanel title={device.name}>
-                <Action.CopyToClipboard title="Copy IP Address" content={device.ipAddress} />
-                {device.interfaces?.ports?.length && (
-                  <Action
-                    title="View Ports"
-                    icon={connectionTypeIcon("WIRED")}
-                    onAction={() => push(<ViewDevicePorts deviceDetails={device} />)}
-                  />
-                )}
-                {device.interfaces?.radios?.length && (
-                  <Action
-                    title="View Ports"
-                    icon={connectionTypeIcon("WIRELESS")}
-                    onAction={() => push(<ViewDeviceRadios deviceDetails={device} />)}
-                  />
-                )}
-                <Action.CopyToClipboard title="Copy MAC Address" content={device.macAddress} />
-                {device.state === "ONLINE" && (
-                  <Action title="Restart Device" icon={Icon.ArrowClockwise} onAction={() => restartDevice(device.id)} />
-                )}
-                <Action title="Revalidate" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
-              </ActionPanel>
-            )
-          }
-        />
-      ))}
+      {devices?.map(renderDeviceItem)}
       {devices.length === 0 && !isLoading && <List.EmptyView title="No devices found" />}
     </List>
   );
 }
+
+export default memo(ViewDevices);

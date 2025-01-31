@@ -1,9 +1,10 @@
 import https from "https";
 import fetch, { HeadersInit, RequestInit } from "node-fetch";
 import type { Client, Clients } from "./types/client";
-import type { Device, DeviceActions, ListDevice, ListDevices } from "./types/device";
+import type { Device, DeviceActions, Devices, DeviceStats, ListDevice, ListDevices } from "./types/device";
 import type { ApiResponse } from "./types/response";
 import type { Site, Sites } from "./types/site";
+import { assignUplinkDevice } from "../utils";
 
 class UnifiError extends Error {
   constructor(
@@ -30,8 +31,11 @@ interface UnifiConfig {
 const PUBLIC_API_URL = "https://unifi.ui.com";
 const LOCAL_API_SUFFIX = "/proxy/network";
 const URL_SUFFIX = "/integration/v1/";
+const DEVICE_WEB_SUFFIX = "/network/default/devices/properties/{macAddress}";
+const DASHBOARD_SUFFIX = "/network/default/dashboard";
 
 export class UnifiClient {
+  private readonly host: string;
   private readonly baseURL: string;
   private readonly headers: HeadersInit;
   private readonly agent: https.Agent;
@@ -43,6 +47,7 @@ export class UnifiClient {
   constructor({ host = "https://192.168.1.1", apiKey, remote = false, site }: UnifiConfig) {
     if (!apiKey) throw new Error("API key is required");
 
+    this.host = host;
     this.remote = remote;
     this.baseURL = remote ? `${PUBLIC_API_URL}${URL_SUFFIX}` : `${host}${LOCAL_API_SUFFIX}${URL_SUFFIX}`;
     this.site = site;
@@ -107,10 +112,6 @@ export class UnifiClient {
     }
   }
 
-  IsSiteSet() {
-    return !!this.site;
-  }
-
   SetSite(site: string) {
     this.site = site;
   }
@@ -119,24 +120,28 @@ export class UnifiClient {
     this.remote = remote;
   }
 
-  async GetSites(): Promise<Sites> {
+  async GetSites(abortable?: AbortController): Promise<Sites> {
     const sites = await this.request<ApiResponse<Site>>("sites", {
       retries: this.maxRetries,
+      signal: abortable?.signal,
     });
     return sites.data;
   }
 
-  async GetClients(): Promise<Clients> {
+  async GetClients(abortable?: AbortController): Promise<Clients> {
     this.ensureSite();
     const clients = await this.request<ApiResponse<Client>>(`sites/${this.site}/clients?limit=1000`, {
       retries: this.maxRetries,
+      signal: abortable?.signal,
     });
     return clients.data;
   }
 
-  async GetDevices(): Promise<ListDevices> {
+  async GetDevices(abortable?: AbortController): Promise<ListDevices> {
     this.ensureSite();
-    const devices = await this.request<ApiResponse<ListDevice>>(`sites/${this.site}/devices?limit=1000`);
+    const devices = await this.request<ApiResponse<ListDevice>>(`sites/${this.site}/devices?limit=1000`, {
+      signal: abortable?.signal,
+    });
 
     return devices.data;
   }
@@ -153,6 +158,23 @@ export class UnifiClient {
     }
 
     return device;
+  }
+
+  async GetDevicesFull(abortable: AbortController): Promise<Devices> {
+    this.ensureSite();
+    const fullDevices: Devices = [];
+    try {
+      const devices = await this.GetDevices(abortable);
+
+      for (const device of devices) {
+        const fullDevice = await this.GetDevice(device.id, abortable?.signal);
+        fullDevices.push(assignUplinkDevice(fullDevice, devices));
+      }
+    } catch (error) {
+      return fullDevices;
+    }
+
+    return fullDevices;
   }
 
   async DeviceAction(deviceId: string, action: DeviceActions): Promise<boolean> {
@@ -173,4 +195,26 @@ export class UnifiClient {
       throw new UnifiError(500, "Failed to restart device");
     }
   }
+
+  async GetDeviceStats(deviceId: string, signal?: AbortSignal): Promise<DeviceStats> {
+    this.ensureSite();
+    const stats = await this.request<DeviceStats>(`sites/${this.site}/devices/${deviceId}/statistics/latest`, {
+      signal,
+    });
+    return stats;
+  }
+
+  GetDeviceUrl(macAddress: string): string {
+    if (!macAddress) return "";
+
+    return `${this.host}${DEVICE_WEB_SUFFIX.replace("{macAddress}", macAddress)}`;
+  }
+
+  GetDashboardUrl(): string {
+    return `${this.host}${DASHBOARD_SUFFIX}`;
+  }
 }
+
+export const GetDashboardUrl = (host: string): string => {
+  return `${host}${DASHBOARD_SUFFIX}`;
+};

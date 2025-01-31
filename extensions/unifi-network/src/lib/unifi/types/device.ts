@@ -96,3 +96,30 @@ export interface Device {
 }
 
 export type Devices = Device[];
+
+export interface RadioStats {
+  frequencyGHz: FrequencyGHz;
+  txRetriesPct: number;
+}
+
+export interface UplinkStats {
+  txRateBps: number;
+  rxRateBps: number;
+}
+
+export interface InterfaceStats {
+  radios: RadioStats[];
+}
+
+export interface DeviceStats {
+  uptimeSec: number;
+  lastHeartbeatAt: string;
+  nextHeartbeatAt: string;
+  loadAverage1Min: number;
+  loadAverage5Min: number;
+  loadAverage15Min: number;
+  cpuUtilizationPct: number;
+  memoryUtilizationPct: number;
+  uplink: UplinkStats;
+  interfaces: InterfaceStats;
+}

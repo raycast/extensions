@@ -1,8 +1,28 @@
-import { formatDuration, intervalToDuration } from "date-fns";
+import { format, formatDuration, intervalToDuration } from "date-fns";
 import type { ClientType } from "./unifi/types/client";
+import type { Device, ListDevice, ListDevices } from "./unifi/types/device";
+import { Color, getPreferenceValues, type Image } from "@raycast/api";
 
-export const dateToHumanReadable = (date: Date | string): string => {
-  return formatDuration(intervalToDuration({ start: new Date(date), end: new Date() }));
+interface dateToHumanReadableProps {
+  start?: Date | string;
+  end?: Date | string;
+}
+
+const DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+export const dateToHumanReadable = ({ start = new Date(), end = new Date() }: dateToHumanReadableProps): string => {
+  return formatDuration(intervalToDuration({ start: new Date(start), end: new Date(end) }));
+};
+
+export const secondsToHumanReadable = (seconds: number): string => {
+  return formatDuration(intervalToDuration({ start: 0, end: seconds * 1000 }), {
+    format: ["days", "hours", "minutes"],
+  });
+};
+
+export const formatDate = (date: string): string => {
+  const preferences = getPreferenceValues<Preferences>();
+  return format(new Date(date), preferences.dateFormat || DEFAULT_DATE_FORMAT);
 };
 
 export const connectionTypeIcon = (type: ClientType) => {
@@ -40,4 +60,50 @@ export const formatSpeed = (speedMbps: number): string => {
   }
 
   return `${speedMbps} Mbps`;
+};
+
+export const bpsToHumanReadable = (bps: number): string => {
+  if (bps < 1000) return `${bps} bps`;
+
+  const kbps = bps / 1000;
+  if (kbps < 1000) return `${kbps.toFixed(1)} Kbps`;
+
+  const mbps = kbps / 1000;
+  if (mbps < 1000) return `${mbps.toFixed(1)} Mbps`;
+
+  const gbps = mbps / 1000;
+  return `${gbps.toFixed(1)} Gbps`;
+};
+
+export const assignUplinkDevice = (device: Device, devices: ListDevices): Device => {
+  if (!device.uplink) return device;
+
+  const uplinkDevice = devices.find((dev: ListDevice) => dev.id === device.uplink.deviceId);
+  if (uplinkDevice) {
+    return { ...device, uplink: { ...device.uplink, deviceName: uplinkDevice.name } };
+  }
+
+  return device;
+};
+
+export const getDeviceTypeIcon = (device: Device): Image.ImageLike => {
+  if (device.features.switching && !device.uplink?.deviceId) {
+    return {
+      source: "console-icon.svg",
+      tintColor: Color.Blue,
+    };
+  }
+  if (device.features.switching) {
+    return {
+      source: "switch.svg",
+      tintColor: Color.Blue,
+    };
+  }
+  if (device.features.accessPoint) {
+    return {
+      source: "ap-icon.svg",
+      tintColor: Color.Blue,
+    };
+  }
+  return "Unknown";
 };

@@ -1,73 +1,71 @@
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { useLocalStorage } from "@raycast/utils";
 import Fuse from "fuse.js";
-import { useEffect, useState } from "react";
-import type { ListDevices } from "../lib/unifi/types/device";
+import { useCallback, useMemo, useState } from "react";
+import type { Devices } from "../lib/unifi/types/device";
 import type { Site } from "../lib/unifi/types/site";
 import { UnifiClient } from "../lib/unifi/unifi";
-import { useSiteCheck } from "./useSiteCheck";
+import { useUnifiResource } from "./useUnifiResource";
+import { useDevicePolling } from "./useDevicePolling";
 
 interface DevicesHookProps {
   unifi: UnifiClient | undefined;
+  search?: string;
 }
 
-export function useDevices({ unifi }: DevicesHookProps) {
-  const { value: site, isLoading: siteIsLoading } = useLocalStorage<Site>("selected-site", undefined);
-  const [searchText, setSearchText] = useState("");
+export function useDevices({ unifi, search }: DevicesHookProps) {
+  const { isLoading: siteIsLoading } = useLocalStorage<Site>("selected-site", undefined);
+  const [searchText, setSearchText] = useState(search || "");
+
+  const handleError = useCallback((err: unknown) => {
+    console.error("Devices Error:", err);
+  }, []);
 
   const {
-    isLoading,
-    data: devices,
-    revalidate,
+    data,
+    isLoading: resourceLoading,
     error,
-  } = useCachedPromise(
-    async () => {
-      if (!unifi || siteIsLoading) {
-        return [];
-      }
-
-      return await unifi.GetDevices();
+    fetchData,
+  } = useUnifiResource<Devices>({
+    unifi,
+    siteIsLoading,
+    async fetchResource(client, abortable) {
+      return client.GetDevicesFull(abortable);
     },
-    [],
-    {
-      initialData: [] as ListDevices,
-      keepPreviousData: true,
-    },
-  );
+  });
 
-  const [filteredList, filterList] = useState<ListDevices>(devices);
+  const { pollingDeviceId, startPolling, stopPolling, pollDevices } = useDevicePolling(async (abortable) => {
+    if (!unifi) return [];
+    return unifi.GetDevicesFull(abortable);
+  }, handleError);
 
-  useSiteCheck({ unifi, site, siteIsLoading, onRevalidate: revalidate });
+  const devices = useMemo(() => data || [], [data]);
 
-  useEffect(() => {
-    // used because it allows partial filtering of ips and mac addresses
-    const fuseOptions = {
+  const fuseOptions = useMemo(
+    () => ({
       keys: ["ipAddress", "name", "macAddress"],
       threshold: 0.3,
       includeScore: true,
-    };
+    }),
+    [],
+  );
 
-    const fuse = new Fuse(devices, fuseOptions);
+  const fuse = useMemo(() => new Fuse(devices, fuseOptions), [devices, fuseOptions]);
 
-    if (searchText) {
-      const results = fuse.search(searchText);
-      filterList(results.map((result) => result.item));
-    } else {
-      filterList(devices);
-    }
-  }, [searchText, devices]);
-
-  const lookupDevice = (deviceId: string) => {
-    return devices.find((device) => device.id === deviceId);
-  };
-
-  const isLoadingFull = siteIsLoading || isLoading;
+  const filteredList = useMemo(() => {
+    if (!searchText) return devices;
+    return fuse.search(searchText).map((res) => res.item);
+  }, [searchText, devices, fuse]);
 
   return {
     devices: filteredList,
-    isLoading: isLoadingFull,
+    isLoading: siteIsLoading || resourceLoading,
     error,
+    pollingDeviceId,
+    searchText,
+    pollDevices,
+    startPolling,
+    stopPolling,
     setSearchText,
-    revalidate,
-    lookupDevice,
+    fetchData,
   };
 }

@@ -14,20 +14,87 @@
     {
       "name": "select-site",
       "title": "Select Site",
+      "keywords": [
+        "site",
+        "unifi",
+        "network"
+      ],
       "description": "Select site to view devices/clients for",
       "mode": "view"
     },
     {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "keywords": [
+        "site",
+        "unifi",
+        "network",
+        "dashboard"
+      ],
+      "description": "Open the dashboard",
+      "mode": "no-view"
+    },
+    {
       "name": "view-devices",
       "title": "View Devices",
+      "keywords": [
+        "devices",
+        "unifi",
+        "network",
+        "ip",
+        "mac"
+      ],
       "description": "View general info, radios, ports and quickly restart devices connected to your UniFi network",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "placeholder": "Name, IP or MAC address",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "statsPollingInterval",
+          "title": "Live Stats Interval",
+          "description": "The interval in seconds to poll live stats",
+          "type": "textfield",
+          "default": "2",
+          "required": false
+        }
+      ]
     },
     {
       "name": "view-clients",
       "title": "View Clients",
+      "keywords": [
+        "clients",
+        "unifi",
+        "network",
+        "ip",
+        "mac"
+      ],
       "description": "View info and quickly copy key info of clients connected to your UniFi network",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "placeholder": "Name, IP or MAC address",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "groupClientsByOctet",
+          "title": "Group clients by octet",
+          "description": "Group clients by the first X octets of their IP address. 0 = Disabled",
+          "type": "textfield",
+          "required": false,
+          "default": "0"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -45,6 +112,14 @@
       "description": "The API key for your UniFi controller",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "The format to display dates in",
+      "type": "textfield",
+      "default": "yyyy-MM-dd HH:mm:ss",
+      "required": false
     }
   ],
   "dependencies": {

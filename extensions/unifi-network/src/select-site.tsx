@@ -1,14 +1,11 @@
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
 import { useEffect } from "react";
-import { useSites } from "./hooks/useSites";
+import useSites from "./hooks/useSites";
 import { useUnifi } from "./hooks/useUnifi";
-import type { Site } from "./lib/unifi/types/site";
 
 export default function Command() {
-  const { value: selected, setValue: setSite } = useLocalStorage<Site>("selected-site", undefined);
   const { client: unifiClient } = useUnifi();
-  const { sites, isLoading, error } = useSites({ unifi: unifiClient });
+  const { sites, isLoading, error, selected, setSite } = useSites({ unifi: unifiClient });
 
   useEffect(() => {
     if (error) {

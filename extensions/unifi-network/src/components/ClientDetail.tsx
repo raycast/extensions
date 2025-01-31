@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { Client } from "../lib/unifi/types/client";
 import { format } from "date-fns";
 import { connectionTypeIcon, dateToHumanReadable } from "../lib/utils";
+import { memo } from "react";
 
 interface ClientDetailProps {
   client: Client;
@@ -21,9 +22,11 @@ export function ClientDetail({ client, isLoading }: ClientDetailProps) {
             title="Connected At"
             text={format(new Date(client.connectedAt), "yyyy-MM-dd HH:mm:ss")}
           />
-          <List.Item.Detail.Metadata.Label title="" text={dateToHumanReadable(client.connectedAt)} />
+          <List.Item.Detail.Metadata.Label title="" text={dateToHumanReadable({ start: client.connectedAt })} />
         </List.Item.Detail.Metadata>
       }
     />
   );
 }
+
+export default memo(ClientDetail);
