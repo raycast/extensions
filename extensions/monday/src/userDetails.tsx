@@ -64,7 +64,8 @@ export default function UserDetails({ user }: { user: User }) {
         actions={
           <ActionPanel>
             <Action.CopyToClipboard content={phone} />
-            <Action.Open title="Call on Facetime" target={`tel:${phone}`} />
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
+            <Action.Open title="Call on FaceTime" target={`tel:${phone}`} />
           </ActionPanel>
         }
       />
