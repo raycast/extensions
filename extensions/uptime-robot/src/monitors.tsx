@@ -74,10 +74,11 @@ export default function Monitors() {
     },
   );
   useEffect(() => {
-    if (!isLoadingLocal && !value?.monitors.length) setExecute(true);
+    if (isLoadingLocal) return;
+    if (!value?.monitors.length) setExecute(true);
     else if (value && hasDayPassed(value.updated_at)) setExecute(true);
     else setExecute(false);
-  }, [value]);
+  }, [isLoadingLocal]);
 
   return (
     <List isLoading={isLoading} pagination={pagination}>

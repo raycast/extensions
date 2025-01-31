@@ -28,10 +28,11 @@ export default function AccountDetails() {
   );
 
   useEffect(() => {
-    if (!isLoadingLocal && !account) setExecute(true);
+    if (isLoadingLocal) return;
+    if (!account) setExecute(true);
     else if (account && hasDayPassed(account.updated_at)) setExecute(true);
     else setExecute(false);
-  }, [account]);
+  }, [isLoadingLocal]);
 
   const isLoading = isLoadingLocal || isFetching;
 
@@ -75,7 +76,7 @@ export default function AccountDetails() {
       }
       actions={
         <ActionPanel>
-          <Action icon={Icon.Redo} title="Refresh Acccount Details" onAction={() => setExecute((prev) => !prev)} />
+          <Action icon={Icon.Redo} title="Refresh Account Details" onAction={() => setExecute((prev) => !prev)} />
         </ActionPanel>
       }
     />
