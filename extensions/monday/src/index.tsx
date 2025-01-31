@@ -7,7 +7,6 @@ import { useCachedPromise } from "@raycast/utils";
 import BoardItems from "./boardItems";
 
 export default function BoardsList() {
-  // const { isLoading, data: { me, boards }, error } = useCachedPromise(getBoardsAndUser, [], {
   const state = useCachedPromise(getBoardsAndUser, [], {
     initialData: {
       me: undefined,

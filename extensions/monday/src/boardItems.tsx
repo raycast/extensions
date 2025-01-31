@@ -4,7 +4,7 @@ import { getBoardItemsPage } from "./lib/api";
 import { ErrorView } from "./lib/helpers";
 
 export default function BoardItems({ boardId }: { boardId: number }) {
-    const { isLoading, data: items, error } = useCachedPromise(async () => getBoardItemsPage(boardId), [], {
+    const { isLoading, data: items, error } = useCachedPromise(async () => await getBoardItemsPage(boardId), [], {
         initialData: []
     })
 

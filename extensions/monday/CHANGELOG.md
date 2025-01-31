@@ -2,15 +2,16 @@
 
 ## [Enhancements] - {PR_MERGE_DATE}
 
+- Add metadata image
 - Add CHANGELOG
 - Add extension category
 - Action to "Open Extension Preferences" in `ErrorView`
 - View items in a board and open in browser
 
-## Dev Changes
+### Dev Changes
 - `useForm` in `Add` for better control and validation
 - `useCachedPromise` and `usePomise` to reduce `useEffect`
-- `useCachedPromise` also removed need for in-house caching through `LocalStorage`
+- `useCachedPromise` also reduces need for in-house caching through `LocalStorage` (some commands are still using `LocalStorage` for now)
 
 ## [New Command] - 2022-05-23
 

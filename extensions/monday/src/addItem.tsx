@@ -25,7 +25,7 @@ export default function AddItem({ board }: { board: Board }) {
   }>({ isLoading: false, board: board, groups: [] });
   const { pop } = useNavigation();
 
-  usePromise(async () => fetchGroups(board.id), [], {
+  usePromise(async () => await fetchGroups(board.id), [], {
     onWillExecute() {
       setState((oldState) => ({
         ...oldState,
