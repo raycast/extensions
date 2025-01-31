@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xls-to-csv",
+  "title": "Excel to Csv Converter",
+  "description": "快速將 Excel 檔案（.xls, .xlsx）轉換為 CSV 格式。支援批次轉換多個檔案，轉換後的 CSV 檔案會保存在原始檔案的相同位置。\n\nQuickly convert Excel files (.xls, .xlsx) to CSV format. Supports batch conversion of multiple files. The converted CSV files will be saved in the same location as the original files.",
+  "icon": "command-icon.png",
+  "author": "KNA",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "screenshots": [
+    {
+      "file": "screenshot-1.png",
+      "title": "Excel to CSV Converter Screenshot"
+    }
+  ],
+  "markdown": "# Excel to CSV Converter\n\n快速將 Excel 檔案轉換為 CSV 格式的工具。\n\n## 功能特點\n\n- 支援 .xls 和 .xlsx 格式\n- 支援批次轉換多個檔案\n- 轉換後的 CSV 檔案會自動保存在原始檔案的相同位置\n- 保持原始數據格式和內容\n- 簡單易用的操作界面\n\n## 使用方法\n\n1. 在 Raycast 中輸入 \"Convert Excel to Csv\"\n2. 選擇要轉換的 Excel 檔案（可多選）\n3. 確認後，檔案會自動轉換並保存\n\n## 注意事項\n\n- 轉換後的 CSV 檔案將使用與原始檔案相同的名稱（副檔名改為 .csv）\n- 如果目標位置已存在同名的 CSV 檔案，將會被覆蓋\n\n---\n\n# Excel to CSV Converter\n\nA tool for quickly converting Excel files to CSV format.\n\n## Features\n\n- Supports .xls and .xlsx formats\n- Supports batch conversion of multiple files\n- Converted CSV files are automatically saved in the same location as the original files\n- Preserves original data format and content\n- Simple and easy-to-use interface\n\n## How to Use\n\n1. Type \"Convert Excel to Csv\" in Raycast\n2. Select the Excel files you want to convert (multiple selection supported)\n3. After confirmation, files will be automatically converted and saved\n\n## Notes\n\n- Converted CSV files will use the same name as the original file (with .csv extension)\n- If a CSV file with the same name exists in the target location, it will be overwritten",
+  "commands": [
+    {
+      "name": "xls-to-csv",
+      "title": "Convert Excel to Csv",
+      "description": "將選中的 Excel 檔案轉換為 CSV 格式 | Convert selected Excel files to CSV format",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/xlsx": "^0.0.35",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
