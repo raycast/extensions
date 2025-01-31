@@ -1,5 +1,10 @@
 # Hacker News Changelog
 
+## [🚀 Add Readwise Reader integration] - (2025-01-31)
+
+- Add ability to save articles to Readwise Reader
+- Show visual indicator for previously saved articles
+
 ## [🐛 Fixes] - (2022-08-16)
 
 - Use custom User Agent + cache responses for each topic for 5 minutes to avoid being rate limited
