@@ -102,7 +102,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     const { artists, id: trackId, album } = item as TrackObject;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
-    title = `${name} · ${artistName}`;
+    title = formatTitle(name, artistName, Number(preferences.maxTextLength), Boolean(preferences.showArtist));
     // Get the image with the lowest resolution
     coverImageUrl = album?.images.slice(-1)[0]?.url || "";
 
@@ -188,7 +188,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   } else {
     const { show } = item as EpisodeObject;
     const showName = show.name;
-    title = `${name} · ${showName}`;
+    title = formatTitle(name, showName, Number(preferences.maxTextLength), Boolean(preferences.showArtist));
     coverImageUrl = show.images.slice(-1)[0]?.url || "";
   }
 
@@ -203,7 +203,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             }
           : { source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }
       }
-      title={formatTitle(title, Number(preferences.maxTextLength))}
+      title={title}
       tooltip={title}
     >
       {isPlaying && (

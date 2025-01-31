@@ -30,7 +30,8 @@
     "thomaslombart",
     "rhesamu",
     "themitpatel",
-    "litomore"
+    "litomore",
+    "enneemme"
   ],
   "pastContributors": [
     "bkeys818"
@@ -179,6 +180,15 @@
           "description": "Maximum number of characters to show. If left empty, it defaults to 30",
           "type": "textfield",
           "default": "20",
+          "required": false
+        },
+        {
+          "name": "showArtist",
+          "title": "Show artists namer",
+          "description": "Show the artist name in the Menu Bar",
+          "type": "checkbox",
+          "label": "Enabled",
+          "default": true,
           "required": false
         },
         {
@@ -449,7 +459,7 @@
     "@types/node": "20.14.10",
     "@types/react": "^18.3.3",
     "eslint": "^8.53.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.2",
     "typescript": "^5.5.3"
   },
   "scripts": {
