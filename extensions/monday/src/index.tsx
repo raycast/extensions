@@ -127,6 +127,7 @@ function getBoardActions(board: Board, account: Account) {
         shortcut={{ modifiers: ["opt"], key: "c" }}
       />
       <Action.Push
+        shortcut={{ modifiers: ["cmd"], key: "v" }}
         icon={Icon.List}
         title="View Board Items"
         target={<BoardItems boardId={board.id} />}

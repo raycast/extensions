@@ -1,16 +1,14 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getBoardItemsPage } from "./lib/api";
 import { ErrorView } from "./lib/helpers";
 
 export default function BoardItems({ boardId }: { boardId: number }) {
   const {
     isLoading,
-    data: items,
+    data: items = [],
     error,
-  } = useCachedPromise(async () => await getBoardItemsPage(boardId), [], {
-    initialData: [],
-  });
+  } = usePromise(async () => await getBoardItemsPage(boardId), []);
 
   return error ? (
     <ErrorView error={error} />
