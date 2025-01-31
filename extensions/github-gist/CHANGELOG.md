@@ -1,5 +1,9 @@
 # GitHub Gist Changelog
 
+## [Update GitHub Gist] - {PR_MERGE_DATE}
+
+- Add a new preference to set the default gist tag.
+
 ## [Reduce GitHub Authentication] - 2024-07-16
 
 - Reduce GitHub authentication permissions to access only GitHub Gist content
