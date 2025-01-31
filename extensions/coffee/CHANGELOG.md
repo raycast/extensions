@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Enhancement] - 2025-01-31
+
+- Added `Caffeinate Until` command.
+
 ## [Enhancement] - 2024-10-18
 
 - Implemented schedule-based caffeination, allowing different schedules for different days
