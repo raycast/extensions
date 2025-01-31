@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Detail, environment, Icon, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  environment,
+  Icon,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { resolve } from "path";
 
 export function ErrorView({ error }: { error: string | Error }) {
@@ -8,7 +15,18 @@ export function ErrorView({ error }: { error: string | Error }) {
     "error.png"
   )})\n`;
   errorMarkdown += "## " + error;
-  return <Detail markdown={errorMarkdown} actions={<ActionPanel>
-    <Action icon={Icon.Gear} title="Open Extension Preference" onAction={openExtensionPreferences} />
-  </ActionPanel>} />;
+  return (
+    <Detail
+      markdown={errorMarkdown}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Gear}
+            title="Open Extension Preference"
+            onAction={openExtensionPreferences}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }

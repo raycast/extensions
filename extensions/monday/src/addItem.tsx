@@ -36,17 +36,17 @@ export default function AddItem({ board }: { board: Board }) {
       setState((oldState) => ({
         ...oldState,
         groups: data,
-        isLoading: false
+        isLoading: false,
       }));
     },
     onError(error) {
       setState((oldState) => ({
         ...oldState,
         error: `${error}`,
-        isLoading: false
+        isLoading: false,
       }));
     },
-  })
+  });
 
   const sortedGroups = state.groups
     .slice()
@@ -54,19 +54,19 @@ export default function AddItem({ board }: { board: Board }) {
       parseFloat(g1.position) < parseFloat(g2.position) ? -1 : 1
     );
 
-    type FormValues = {
-      name: string;
-      group: string;
-    }
-    const { itemProps, handleSubmit } = useForm<FormValues>({
-      onSubmit(values) {
-        storeItem(board.id, values)
-      },
-      validation: {
-        name: FormValidation.Required,
-        group: FormValidation.Required
-      }
-    })
+  type FormValues = {
+    name: string;
+    group: string;
+  };
+  const { itemProps, handleSubmit } = useForm<FormValues>({
+    onSubmit(values) {
+      storeItem(board.id, values);
+    },
+    validation: {
+      name: FormValidation.Required,
+      group: FormValidation.Required,
+    },
+  });
 
   if (state.error) {
     return <ErrorView error={state.error} />;

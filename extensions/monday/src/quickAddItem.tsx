@@ -6,11 +6,12 @@ import { useCachedPromise } from "@raycast/utils";
 
 export default function QuickAddItem() {
   const { data: board, error } = useCachedPromise(async () => {
-    const boardId = getPreferenceValues<Preferences.QuickAddItem>().quickAddBoardId;
+    const boardId =
+      getPreferenceValues<Preferences.QuickAddItem>().quickAddBoardId;
     const response = await getBoardAndUser(+boardId);
-    if (!response.boards.length) throw ("Board not found");
+    if (!response.boards.length) throw "Board not found";
     return response.boards[0];
-  }, [])
+  }, []);
 
   if (error) {
     return (

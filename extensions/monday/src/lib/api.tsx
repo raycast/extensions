@@ -1,6 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { BoardsResponse, Group, Me, User, Board, BoardItemsReeponse } from "./models";
+import {
+  BoardsResponse,
+  Group,
+  Me,
+  User,
+  BoardItemsReeponse,
+} from "./models";
 import { resetAllCaches } from "./persistence";
 
 export async function runGraphQLQuery(query: string): Promise<any> {
@@ -186,9 +192,7 @@ export async function addItem(
   return result.create_item.id;
 }
 
-export async function getBoardItemsPage(
-  boardId: number
-) {
+export async function getBoardItemsPage(boardId: number) {
   const result = (await runGraphQLQuery(`
     {
       boards (ids: ${boardId}, limit: 1){
@@ -211,5 +215,5 @@ export async function getBoardItemsPage(
       }
     }
     `)) as BoardItemsReeponse;
-    return result.boards[0].items_page.items;
+  return result.boards[0].items_page.items;
 }

@@ -6,9 +6,13 @@ import UserDetails from "./userDetails";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function MyTeam() {
-  const { isLoading, data: team, error } = useCachedPromise(getTeam, [], {
-    initialData: []
-  })
+  const {
+    isLoading,
+    data: team,
+    error,
+  } = useCachedPromise(getTeam, [], {
+    initialData: [],
+  });
 
   const sortedTeam = team.sort((u1, u2) =>
     u1.name.toLowerCase() < u2.name.toLowerCase() ? -1 : 1
@@ -47,13 +51,13 @@ export default function MyTeam() {
     return (
       <ActionPanel>
         <Action.Push
-        icon={Icon.Person}
+          icon={Icon.Person}
           title="See Contact Details"
           target={<UserDetails user={user} />}
         />
 
         <Action.OpenInBrowser
-        icon="work-management.svg"
+          icon="work-management.svg"
           title="Go to User Profile on monday.com"
           url={user.url}
         />

@@ -10,8 +10,8 @@ export default function BoardsList() {
   const state = useCachedPromise(getBoardsAndUser, [], {
     initialData: {
       me: undefined,
-      boards: []
-    }
+      boards: [],
+    },
   });
 
   const account = state.data.me?.account;
@@ -111,7 +111,11 @@ function getBoardActions(board: Board, account: Account) {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser icon="work-management.svg" title="Open Board" url={boardUrl} />
+      <Action.OpenInBrowser
+        icon="work-management.svg"
+        title="Open Board"
+        url={boardUrl}
+      />
       <Action.Push
         title="Add an Item"
         target={<AddItem board={board} />}
@@ -122,7 +126,11 @@ function getBoardActions(board: Board, account: Account) {
         content={boardUrl}
         shortcut={{ modifiers: ["opt"], key: "c" }}
       />
-      <Action.Push icon={Icon.List} title="View Board Items" target={<BoardItems boardId={board.id} />} />
+      <Action.Push
+        icon={Icon.List}
+        title="View Board Items"
+        target={<BoardItems boardId={board.id} />}
+      />
     </ActionPanel>
   );
 }

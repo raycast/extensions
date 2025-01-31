@@ -4,15 +4,32 @@ import { getBoardItemsPage } from "./lib/api";
 import { ErrorView } from "./lib/helpers";
 
 export default function BoardItems({ boardId }: { boardId: number }) {
-    const { isLoading, data: items, error } = useCachedPromise(async () => await getBoardItemsPage(boardId), [], {
-        initialData: []
-    })
+  const {
+    isLoading,
+    data: items,
+    error,
+  } = useCachedPromise(async () => await getBoardItemsPage(boardId), [], {
+    initialData: [],
+  });
 
-return error ? <ErrorView error={error} /> : <List isLoading={isLoading}>
-    {items.map(item => <List.Item key={item.id} icon={Icon.Circle} title={item.name} subtitle={item.group.title} accessories={[
-        { tag: item.state }
-    ]} actions={<ActionPanel>
-        <Action.OpenInBrowser url={item.url} />
-    </ActionPanel>} />)}
-</List>
+  return error ? (
+    <ErrorView error={error} />
+  ) : (
+    <List isLoading={isLoading}>
+      {items.map((item) => (
+        <List.Item
+          key={item.id}
+          icon={Icon.Circle}
+          title={item.name}
+          subtitle={item.group.title}
+          accessories={[{ tag: item.state }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={item.url} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
 }
