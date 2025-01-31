@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  BrowserExtension,
+  Clipboard,
+  Detail,
+  Form,
+  Icon,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils";
@@ -167,9 +179,15 @@ export default function DownloadVideo() {
   }, [video]);
 
   useEffect(() => {
+    // why nested promise? because we prioritize clipboard over active tab url
     Clipboard.readText().then((text) => {
       if (text && isYouTubeURL(text)) {
         setValue("url", text);
+      } else {
+        BrowserExtension.getTabs().then((tabs) => {
+          const url = tabs.find((tab) => tab.active)?.url;
+          if (url && isYouTubeURL(url)) setValue("url", url);
+        });
       }
     });
   }, []);
