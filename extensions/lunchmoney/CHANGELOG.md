@@ -1,6 +1,6 @@
 # LunchMoney Changelog
 
-## [Edit page, fixes and light improvements] - {PR_MERGE_DATE}
+## [Edit page, fixes and light improvements] - 2025-01-31
 
 - Add edit transaction pages
 - Add more info and changes some info order to a transaction row
