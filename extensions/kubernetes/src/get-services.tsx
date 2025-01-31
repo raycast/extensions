@@ -1,5 +1,4 @@
-import { CoreV1Api, V1Service } from "@kubernetes/client-node";
-import { listServices } from "./api/coreV1";
+import { V1Service } from "@kubernetes/client-node";
 import { ResourceList } from "./components/resource-list";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
@@ -11,10 +10,8 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="v1"
-          kind="Services"
+          kind="Service"
           namespaced={true}
-          apiClientType={CoreV1Api}
-          listResources={listServices}
           matchResource={matchService}
           renderFields={renderServiceFields}
         />

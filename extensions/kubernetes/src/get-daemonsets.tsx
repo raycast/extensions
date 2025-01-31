@@ -1,5 +1,4 @@
-import { AppsV1Api, V1DaemonSet } from "@kubernetes/client-node";
-import { listDaemonSets } from "./api/appsV1";
+import { V1DaemonSet } from "@kubernetes/client-node";
 import { ResourceList } from "./components/resource-list";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
@@ -11,10 +10,8 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="apps/v1"
-          kind="DaemonSets"
+          kind="DaemonSet"
           namespaced={true}
-          apiClientType={AppsV1Api}
-          listResources={listDaemonSets}
           matchResource={matchDaemonSet}
           renderFields={renderDaemonSetFields}
         />

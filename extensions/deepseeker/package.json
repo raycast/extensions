@@ -5,9 +5,18 @@
   "description": "Performs one-shot actions with DeepSeek and more",
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "degouville"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "keywords": [
+    "DeepSeek",
+    "DeepSeek V3",
+    "DeepSeek R1",
+    "LLM"
   ],
   "license": "MIT",
   "commands": [
@@ -38,8 +47,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -92,8 +105,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -146,8 +163,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -225,8 +246,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -279,8 +304,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -333,8 +362,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -383,7 +416,7 @@
           "default": "Answer the following question concisely: \n\n"
         },
         {
-          "name": "model_ask", 
+          "name": "model_ask",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,
@@ -395,8 +428,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -411,7 +448,7 @@
               "value": "gpt-4"
             },
             {
-              "title": "GPT-4 Turbo", 
+              "title": "GPT-4 Turbo",
               "value": "gpt-4-turbo"
             },
             {
@@ -449,8 +486,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -503,8 +544,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -549,8 +594,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -618,8 +667,12 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "deepseek-chat",
+          "title": "DeepSeek-V3",
           "value": "deepseek-chat"
+        },
+        {
+          "title": "DeepSeek-R1",
+          "value": "deepseek-reasoner"
         },
         {
           "title": "GPT-4o",
