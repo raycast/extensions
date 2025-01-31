@@ -1,6 +1,6 @@
 # MacRumors Changelog
 
-## [Various Improvements] - {PR_MERGE_DATE}
+## [Various Improvements] - 2025-01-31
 
 * Updated date and time formatting
 * Streamlined code base
