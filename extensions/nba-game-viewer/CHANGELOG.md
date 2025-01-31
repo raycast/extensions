@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-01-31
 
 - Added play-by-play view for completed and in-progress games.
 - Added details view for games list.
