@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { startCase } from "lodash";
 import { getStories } from "./hackernews";
 import { Topic } from "./types";
@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
+import { saveToReadwise, hasReadwiseToken } from "./readwise";
 
 export default function Command() {
   const [topic, setTopic] = useState<Topic | null>(null);
@@ -72,6 +73,13 @@ function Actions(props: { item: Parser.Item }) {
             content={props.item.link}
             title="Copy Link"
             shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
+        )}
+        {props.item.link && hasReadwiseToken() && (
+          <Action
+            icon={Icon.SaveDocument}
+            title="Save to Readwise Reader"
+            onAction={() => saveToReadwise(props.item.link || "")}
           />
         )}
       </ActionPanel.Section>
