@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uptime-robot",
-  "title": "Uptime Robot",
-  "description": "",
+  "title": "UptimeRobot",
+  "description": "View Monitors and Account Details",
   "icon": "up.png",
   "author": "xmok",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "main_api_key",
       "title": "Main API Key",
-      "description": "",
+      "description": "Main API Key from Uptime Robot Settings",
       "required": true,
       "type": "password",
       "placeholder": "uxxxxxxx-...xx"
@@ -24,14 +24,16 @@
     {
       "name": "account-details",
       "title": "Account Details",
-      "description": "",
-      "mode": "view"
+      "description": "View Account Details",
+      "mode": "view",
+      "subtitle": "UptimeRobot"
     },
     {
       "name": "monitors",
       "title": "Monitors",
-      "description": "",
-      "mode": "view"
+      "description": "View and Create Monitors",
+      "mode": "view",
+      "subtitle": "UptimeRobot"
     }
   ],
   "dependencies": {
