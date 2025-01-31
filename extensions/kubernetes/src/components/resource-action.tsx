@@ -1,17 +1,20 @@
 import { KubernetesObject } from "@kubernetes/client-node";
 import { Action, ActionPanel } from "@raycast/api";
 import { Toggle } from "../hooks/useToggle";
+import { RelatedResource, RelatedResourceAction } from "./RelatedResourceAction";
 
 export default function ResourceAction<T extends KubernetesObject>(props: {
   resource: T;
   detailView: Toggle;
   managedFields: Toggle;
   lastAppliedConfiguration: Toggle;
+  relatedResource?: RelatedResource<T>;
 }) {
-  const { resource, detailView, managedFields, lastAppliedConfiguration } = props;
+  const { resource, detailView, managedFields, lastAppliedConfiguration, relatedResource } = props;
 
   return (
     <ActionPanel>
+      <RelatedResourceAction resource={resource} relatedResource={relatedResource} />
       <Action
         title={detailView.title}
         onAction={() => detailView.toggle()}

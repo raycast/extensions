@@ -1,8 +1,10 @@
 import { V1Deployment } from "@kubernetes/client-node";
 import { ResourceList } from "./components/resource-list";
+import ReplicaSetList from "./components/resources/ReplicaSetList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
+import { labelSelectorToString } from "./utils/selector";
 
 export default function Command() {
   return (
@@ -14,6 +16,7 @@ export default function Command() {
           namespaced={true}
           matchResource={matchDeployment}
           renderFields={renderDeploymentFields}
+          relatedResource={{ kind: "ReplicaSet", render: renderDeploymentRelatedResource }}
         />
       </KubernetesNamespaceProvider>
     </KubernetesContextProvider>
@@ -52,4 +55,13 @@ function deploymentAvailablePods(deployment: V1Deployment): string {
   const available = deployment.status?.availableReplicas ?? 0;
   const total = deployment.status?.replicas ?? 0;
   return `${available}/${total}`;
+}
+
+function renderDeploymentRelatedResource(deployment: V1Deployment) {
+  return (
+    <ReplicaSetList
+      namespace={deployment.metadata?.namespace}
+      labelSelector={labelSelectorToString(deployment.spec?.selector)}
+    />
+  );
 }
