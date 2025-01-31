@@ -1,3 +1,3 @@
-# Fuel-it Changelog
+# Fuelx Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
