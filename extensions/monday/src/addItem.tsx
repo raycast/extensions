@@ -164,7 +164,7 @@ export default function AddItem({ board }: { board: Board }) {
         ...oldState,
         isLoading: false,
       }));
-      return Promise.reject();
+      return -1;
     }
   }
 

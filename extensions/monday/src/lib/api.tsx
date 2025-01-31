@@ -1,12 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import {
-  BoardsResponse,
-  Group,
-  Me,
-  User,
-  BoardItemsReeponse,
-} from "./models";
+import { BoardsResponse, Group, Me, User, BoardItemsReeponse } from "./models";
 import { resetAllCaches } from "./persistence";
 
 export async function runGraphQLQuery(query: string): Promise<any> {
@@ -188,7 +182,6 @@ export async function addItem(
         }
     }
     `);
-
   return result.create_item.id;
 }
 
