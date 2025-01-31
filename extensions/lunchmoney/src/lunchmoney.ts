@@ -205,7 +205,7 @@ export interface DraftTransaction {
 export interface Tag {
   id: number;
   name: string;
-  description: string;
+  description?: string;
   archived: boolean;
 }
 
