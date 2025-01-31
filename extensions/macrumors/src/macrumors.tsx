@@ -1,41 +1,18 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect } from "react";
 import { getIcon, getPubDate } from "./utils";
 import Parser from "rss-parser";
 
-const parser = new Parser();
-
 export default function Command() {
-  const {
-    data: state,
-    isLoading,
-    error,
-    revalidate: fetchStories,
-  } = useCachedPromise(
-    async () => {
-      const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
-      return { items: feed.items };
-    },
-    [],
-    { execute: false },
-  );
-
-  useEffect(() => {
-    fetchStories();
-  }, []);
-
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading stories.",
-      message: error.message,
-    });
-  }
+  const { data, isLoading } = useCachedPromise(async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
+    return { items: feed.items };
+  });
 
   return (
     <List isLoading={isLoading}>
-      {state?.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
+      {data?.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
     </List>
   );
 }
