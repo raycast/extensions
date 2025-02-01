@@ -1,6 +1,11 @@
 # Apple Reminders Changelog
 
+## [Add new "Upcoming" grouping option] - {PR_MERGE_DATE}
+
+- Add a new mode which allows group reminders by when they are upcoming in the `My Reminders` view.
+
 ## [Add "Overdue" view and default date setting] - 2025-02-10
+
 - A new "Overdue" view has been added, displaying only reminders that are overdue.
 - There's now an option to automatically set the default date of new reminders to the current day.
 
