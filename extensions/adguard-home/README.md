@@ -5,6 +5,7 @@ Control your AdGuard Home instance directly from Raycast. Monitor DNS queries, m
 ## Features
 
 - 🔄 Toggle AdGuard Home protection on/off
+- 🔄 Snooze AdGuard Home protection for a specified duration
 - 📊 View DNS query statistics and metrics
 - 📝 View and manage custom filtering rules
 - 📋 Browse recent DNS query logs
@@ -15,6 +16,7 @@ Control your AdGuard Home instance directly from Raycast. Monitor DNS queries, m
 ## Commands
 
 - **Toggle Protection**: Quickly enable or disable AdGuard Home protection
+- **Snooze Protection**: Snooze AdGuard Home protection for a specified duration
 - **View Statistics**: See current DNS query statistics
 - **Top Clients**: View most active DNS clients
 - **Top Queried Domains**: See most queried domain names

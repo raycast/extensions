@@ -1,22 +1,23 @@
-import useNews from "../hooks/useNews";
+import { List } from "@raycast/api";
 import ArticleComponent from "../components/Article";
-import { useState } from "react";
-import { getPreferenceValues, List } from "@raycast/api";
+import { useLeague } from "../contexts/leagueContext";
+import { useShowDetails } from "../contexts/showDetailsContext";
+import useNews from "../hooks/useNews";
 
 const Articles = () => {
-  const { useLastValue, league } = getPreferenceValues<Preferences>();
-  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
-  const [selectedLeague, setSelectedLeague] = useState<string>(league);
-  const { data, isLoading } = useNews(selectedLeague);
+  const { value: league, setValue: setLeague, useLastValue } = useLeague();
+  const { value: isShowingDetails, setValue: setIsShowingDetails } = useShowDetails();
+
+  const { data, isLoading } = useNews(league);
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={isShowingDetail}
+      isShowingDetail={isShowingDetails}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select League"
-          onChange={setSelectedLeague}
+          onChange={setLeague}
           {...(useLastValue ? { storeValue: true } : { defaultValue: league })}
         >
           <List.Dropdown.Item title="NBA" value="nba" />
@@ -28,8 +29,8 @@ const Articles = () => {
         <ArticleComponent
           key={article.title}
           article={article}
-          isShowingDetail={isShowingDetail}
-          setIsShowingDetail={setIsShowingDetail}
+          isShowingDetail={isShowingDetails}
+          setIsShowingDetail={setIsShowingDetails}
         />
       ))}
     </List>

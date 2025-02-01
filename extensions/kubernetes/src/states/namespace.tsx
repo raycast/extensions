@@ -1,4 +1,4 @@
-import { ApiException, CoreV1Api } from "@kubernetes/client-node";
+import { ApiException, V1Namespace } from "@kubernetes/client-node";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { createContext, useContext, useEffect, useMemo } from "react";
@@ -22,7 +22,7 @@ export const useKubernetesNamespace = (): KubernetesNamespaceContextType => {
 };
 
 export const KubernetesNamespaceProvider = ({ children }: { children: React.ReactNode }) => {
-  const { kubeConfig, currentContext, getApiClient } = useKubernetesContext();
+  const { kubeConfig, currentContext, apiClient } = useKubernetesContext();
 
   const [namespaces, setNamespaces] = useCachedState<string[]>(currentContext, ["default"], {
     cacheNamespace: "kubernetes-namespaces",
@@ -82,7 +82,7 @@ export const KubernetesNamespaceProvider = ({ children }: { children: React.Reac
 
     const fetchNamespaces = async () => {
       try {
-        const result = await getApiClient(CoreV1Api).listNamespace();
+        const result = await apiClient.list<V1Namespace>("v1", "Namespace");
 
         const currentNamespaces = result.items.map((ns) => ns.metadata?.name ?? "");
         setNamespacesIfUnchanged(currentNamespaces);

@@ -18,7 +18,8 @@ import useSyncData from "./hooks/useSyncData";
 type CreateTaskValues = {
   content: string;
   description: string;
-  dueDate: Date | null;
+  date: Date | null;
+  deadline: Date | null;
   duration: string;
   priority: string;
   projectId: string;
@@ -51,9 +52,15 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     async onSubmit(values) {
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
-      if (values.dueDate) {
+      if (values.date) {
         body.due = {
-          date: Form.DatePicker.isFullDay(values.dueDate) ? getAPIDate(values.dueDate) : values.dueDate.toISOString(),
+          date: Form.DatePicker.isFullDay(values.date) ? getAPIDate(values.date) : values.date.toISOString(),
+        };
+      }
+
+      if (values.deadline) {
+        body.deadline = {
+          date: getAPIDate(values.deadline),
         };
       }
 
@@ -129,7 +136,8 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         reset({
           content: "",
           description: "",
-          dueDate: null,
+          date: null,
+          deadline: null,
           priority: String(lowestPriority.value),
           projectId: "",
           sectionId: "",
@@ -147,13 +155,14 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
     initialValues: {
       content: draftValues?.content,
       description: draftValues?.description,
-      dueDate: draftValues?.dueDate ?? (fromTodayEmptyView ? new Date() : null),
+      date: draftValues?.date ?? (fromTodayEmptyView ? new Date() : null),
+      deadline: draftValues?.deadline ?? null,
       duration: draftValues?.duration ?? "",
-      priority: draftValues?.priority || String(lowestPriority.value),
-      projectId: draftValues?.projectId ? draftValues.projectId : "" || fromProjectId ? fromProjectId : "",
-      sectionId: draftValues?.sectionId ? draftValues.sectionId : "",
-      responsibleUid: draftValues?.responsibleUid ? draftValues.responsibleUid : "",
-      labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []) ?? [],
+      priority: draftValues?.priority ?? String(lowestPriority.value),
+      projectId: draftValues?.projectId ?? fromProjectId ?? "",
+      sectionId: draftValues?.sectionId ?? "",
+      responsibleUid: draftValues?.responsibleUid ?? "",
+      labels: draftValues?.labels ?? (fromLabel ? [fromLabel] : []),
     },
     validation: {
       content: FormValidation.Required,
@@ -192,11 +201,13 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" />
+      <Form.DatePicker {...itemProps.date} title="Date" />
 
-      {values.dueDate && !Form.DatePicker.isFullDay(values.dueDate) ? (
+      {values.date && !Form.DatePicker.isFullDay(values.date) ? (
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
       ) : null}
+
+      <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} />
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

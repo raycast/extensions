@@ -1,5 +1,24 @@
 # Kubernetes Changelog
 
+## [Support Jump To Related Resources] - 2025-01-31
+
+- Support jumping to related resources from the resource view.
+
+Add the following commands:
+- Get ReplicaSets
+
+## [Refactor Code Structure, Add More Commands] - 2025-01-28
+
+- Refactor code structure to make it more maintainable.
+- Split resources into sections when showing "All Namespaces".
+
+Added the following commands:
+- Get Events
+- Get LimitRanges
+- Get PodTemplates
+- Get ReplicationControllers
+- Get ResourceQuotas
+
 ## [Custom Namespaces] - 2025-01-26
 
 - Allow users to specify available namespaces for each Kubernetes context.

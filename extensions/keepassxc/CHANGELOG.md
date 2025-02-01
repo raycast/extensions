@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.5.3] - 2025-01-28
+
+### Fixed
+
+- Stop animated toast when unlocking the database if a wrong password is given.
+
 ## [1.5.2] - 2025-01-24
 
 ### Fixed
