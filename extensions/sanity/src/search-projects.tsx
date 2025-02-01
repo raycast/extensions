@@ -68,7 +68,7 @@ function SearchDatasets({ project }: { project: SanityProject }) {
   );
 
   return (
-    <List isLoading={isLoading} l>
+    <List isLoading={isLoading}>
       {datasets.map((dataset, datasetIndex) => (
         <List.Item
           key={datasetIndex}
