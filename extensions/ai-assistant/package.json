@@ -1,0 +1,171 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-assistant",
+  "title": "AI Assistant",
+  "description": "Powerful AI tools for translation, dictation, text improvement, and page summarization. Features smart language detection, offline speech recognition, and seamless browser integration.",
+  "icon": "extension-icon.png",
+  "author": "pezzos",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "translation",
+    "dictation",
+    "speech-to-text",
+    "summarization",
+    "openai",
+    "whisper",
+    "productivity",
+    "prompt"
+  ],
+  "homepage": "https://github.com/pezzos/raycast-ai-assistant",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Selected Text",
+      "description": "Smart translation between your primary languages (auto-detects source language)",
+      "mode": "no-view",
+      "icon": "command-icon-translate.png"
+    },
+    {
+      "name": "dictate",
+      "title": "Dictate Text",
+      "description": "Convert speech to text with optional translation",
+      "mode": "no-view",
+      "icon": "command-icon-dictate.png"
+    },
+    {
+      "name": "dictate-prompt",
+      "title": "Dictate AI Prompt",
+      "description": "Use voice commands to generate or modify text with AI",
+      "mode": "no-view",
+      "icon": "command-icon-prompt.png"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "description": "Configure AI Assistant preferences and features",
+      "mode": "view",
+      "icon": "command-icon-settings.png"
+    },
+    {
+      "name": "summarize-page",
+      "title": "Summarize a Text or the Current Page",
+      "description": "Get a quick AI summary",
+      "mode": "view",
+      "icon": "command-icon-summarize.png"
+    },
+    {
+      "name": "dictate-models",
+      "title": "Manage Whisper Models",
+      "description": "Install Whisper and manage local speech recognition models",
+      "mode": "view",
+      "icon": "command-icon-models.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key (starts with 'sk-')",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "primaryLang",
+      "type": "dropdown",
+      "required": true,
+      "title": "Primary Language",
+      "description": "Your primary language (fallback for unknown languages)",
+      "default": "fr",
+      "data": [
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        }
+      ]
+    },
+    {
+      "name": "secondaryLang",
+      "type": "dropdown",
+      "required": true,
+      "title": "Secondary Language",
+      "description": "Your secondary language (alternates with primary)",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        }
+      ]
+    },
+    {
+      "name": "fixText",
+      "type": "checkbox",
+      "required": false,
+      "title": "Improve Text",
+      "label": "Fix grammar and spelling issues during translation",
+      "description": "Fix grammar and spelling issues during translation",
+      "default": true
+    },
+    {
+      "name": "llmModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "LLM Model",
+      "description": "The OpenAI model to use for AI operations",
+      "default": "gpt-4o-mini",
+      "data": [
+        {
+          "title": "GPT-4o Mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4",
+          "value": "gpt-4"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.17.0",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
