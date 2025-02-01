@@ -1,5 +1,9 @@
 # Hue Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Added the action to copy the new Tailwind CSS version 4.0 configuration code.
+
 ## [Feature] - 2025-01-19
 
 - Added the `Search Hue Palette History` feature to track the history of generated Hue palette.
