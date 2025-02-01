@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { global_model, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
 
-export default function ResultView(prompt: string, model_override: string, toast_title: string) {
+export default function ResultView(prompt: string, model_override: string, toast_title: string, user_input?: string) {
   const pref = getPreferenceValues();
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
@@ -29,7 +29,7 @@ export default function ResultView(prompt: string, model_override: string, toast
     let selectedText = "";
 
     try {
-      selectedText = await getSelectedText();
+      selectedText = user_input || (await getSelectedText()); // TODO: a temporary fix for not using selected text but user input. Need refactoring.
     } catch (error) {
       toast.title = "Error";
       toast.style = Toast.Style.Failure;
@@ -103,6 +103,13 @@ export default function ResultView(prompt: string, model_override: string, toast
     getResult();
   }
 
+  async function retryWithDeepSeekReasoner() {
+    setModel("deepseek-reasoner");
+    setLoading(true);
+    setResponse("");
+    getResult();
+  }
+
   useEffect(() => {
     getResult();
   }, []);
@@ -151,6 +158,14 @@ export default function ResultView(prompt: string, model_override: string, toast
                 title="Retry with DeepSeek Chat"
                 onAction={retryWithDeepSeekChat}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                icon={Icon.ArrowNe}
+              />
+            )}
+            {model != "deepseek-reasoner" && (
+              <Action
+                title="Retry with DeepSeek Reasoner"
+                onAction={retryWithDeepSeekReasoner}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 icon={Icon.ArrowNe}
               />
             )}

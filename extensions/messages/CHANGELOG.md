@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Direct link to System Settings] - 2025-01-19
+
+Added a direct link to System Settings when full disk access is required for the `Paste Latest OTP Code` command.
+
 ## [Add `Paste Latest OTP Code` command] - 2024-10-11
 
 Automatically finds and pastes the most recent one-time password (OTP) from your messages.

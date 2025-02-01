@@ -1,5 +1,9 @@
 # Cursor Directory Changelog
 
+## [Improvements] - 2025-01-25
+
+- Support creating rules under `.cursor/rules` directory for Cursor v0.45
+
 ## [Fix] - 2024-10-17
 
 - Fix cursor rule not applied when open project with using builtin command

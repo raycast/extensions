@@ -89,7 +89,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",

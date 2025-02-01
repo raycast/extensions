@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beszel-extension",
+  "title": "Beszel",
+  "description": "Monitor and configure your systems managed by Beszel.",
+  "icon": "icon.png",
+  "author": "wyattjoh",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "URL",
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "description": "The URL of the Beszel service",
+      "placeholder": "https://beszel.example.com"
+    },
+    {
+      "title": "Username",
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "description": "The username to use for authentication",
+      "placeholder": "admin"
+    },
+    {
+      "title": "Password",
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "description": "The password to use for authentication",
+      "placeholder": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-systems",
+      "title": "Search Beszel Systems",
+      "description": "Search for and display system statuses for each system monitored by Beszel",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.17.0",
+    "eventsource": "^3.0.2",
+    "pocketbase": "^0.25.0",
+    "undici": "^7.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

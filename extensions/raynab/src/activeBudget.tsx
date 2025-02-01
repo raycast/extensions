@@ -1,24 +1,19 @@
-import { Icon, List, ActionPanel, Action, Color, showToast, Toast } from '@raycast/api';
-import { SWRConfig } from 'swr';
+import { Icon, List, ActionPanel, Action, Color, showToast } from '@raycast/api';
 
-import { cacheConfig } from '@lib/cache';
 import { BudgetSummary, CurrencyFormat } from '@srcTypes';
 import { useBudgets } from '@hooks/useBudgets';
-import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useLocalStorage } from '@raycast/utils';
 
 export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <BudgetList />
-    </SWRConfig>
-  );
+  return <BudgetList />;
 }
 
 function BudgetList() {
-  const { data: budgets, isValidating } = useBudgets();
+  const { data: budgets, isLoading } = useBudgets();
 
-  const [activeBudgetId, setActiveBudgetId] = useLocalStorage('activeBudgetId', '');
-  const [, setActiveBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetId, setValue: setActiveBudgetId } = useLocalStorage('activeBudgetId', '');
+
+  const { setValue: setActiveBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   const selectActiveBudget = (budget: BudgetSummary) => () => {
     setActiveBudgetId(budget.id ?? '');
@@ -40,7 +35,7 @@ function BudgetList() {
   };
 
   return (
-    <List isLoading={isValidating}>
+    <List isLoading={isLoading}>
       {budgets?.map((budget) => (
         <BudgetItem
           key={budget.id}
@@ -66,7 +61,9 @@ function BudgetItem({
     <List.Item
       icon={Icon.Document}
       title={budget.name}
-      accessoryIcon={budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+      accessories={[
+        { icon: budget.id === selectedId ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle },
+      ]}
       actions={
         <ActionPanel title="Inspect Budget">
           <Action title="Select Budget" onAction={onToggle} />

@@ -22,7 +22,7 @@ import {
   ZSH_PATH,
   signIn,
   useAccounts,
-  CLI_PATH,
+  getCliPath,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
 
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!ZSH_PATH) {
         throw new ZshMissingError("Zsh Binary Path Missing!");
       }
-      if (!CLI_PATH) {
+      if (!getCliPath()) {
         throw new CommandLineMissingError("1Password CLI is missing! Please install it before use.");
       }
       signIn();

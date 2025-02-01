@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-18 18:45:28
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { showToast, Toast } from "@raycast/api";
@@ -30,7 +29,12 @@ export default async function runOperation(params: {
   failureMessage: string;
 }) {
   if (params.selectedImages.length === 0 || (params.selectedImages.length === 1 && params.selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
+    await showToast({
+      title: "No images selected",
+      message:
+        "No images found in your selection. Make sure the image(s) still exist on the disk. If using a third-party file manager, make sure the app's index is up to date.",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 

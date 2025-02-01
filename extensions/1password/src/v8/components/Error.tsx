@@ -1,13 +1,15 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import resetCache from "../../reset-cache";
-import { CLI_PATH, ZSH_PATH } from "../utils";
+import { getCliPath, ZSH_PATH } from "../utils";
+
+const cliPath = getCliPath();
 
 const ERROR = `
-${CLI_PATH ? "" : `# 1Password CLI Tool Not Configured or Installed Properly`}
-${ZSH_PATH ? "" : `# Zsh Shell Not Configured or Installed Properly`}
+${cliPath ? "" : `# 1Password CLI Tool Not Configured or Installed Properly`}
+${cliPath ? "" : `# Zsh Shell Not Configured or Installed Properly`}
 
 ${
-  CLI_PATH
+  cliPath
     ? ""
     : `
 -  Ensure that the 1Password CLI is installed on your system. You can download it from [official 1Password CLI website](https://developer.1password.com/docs/cli/get-started).

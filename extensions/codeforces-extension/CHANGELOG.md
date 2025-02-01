@@ -1,5 +1,13 @@
 # Codeforces Changelog
 
+## [Update] - 2025-01-28
+
+- Fixed the flickering issue
+
+## [Update] - 2025-01-27
+
+- Added problem search feature
+
 ## [Update] - 2024-02-27
 
 - Menu Bar items length issue fixed

@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Detail,
   Form,
+  Icon,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -84,6 +85,7 @@ const Command = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm<{ files: string[] }>
+            icon={Icon.Upload}
             title={`Upload Files ${appInfo ? `(${ACLTitleMap[appInfo.primary]})` : ""}`}
             onSubmit={(values) => handleSubmit(values, appInfo?.primary)}
           />

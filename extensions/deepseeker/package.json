@@ -5,9 +5,18 @@
   "description": "Performs one-shot actions with DeepSeek and more",
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "degouville"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "keywords": [
+    "DeepSeek",
+    "DeepSeek V3",
+    "DeepSeek R1",
+    "LLM"
   ],
   "license": "MIT",
   "commands": [
@@ -38,8 +47,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -92,8 +105,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -146,8 +163,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -225,8 +246,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -279,8 +304,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -333,8 +362,78 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask LLM",
+      "description": "Ask LLM directly with input argument",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter your question",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt_ask",
+          "title": "Ask Prompt",
+          "description": "The prompt prefix for the ask command",
+          "type": "textfield",
+          "required": false,
+          "default": "Answer the following question concisely: \n\n"
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "DeepSeek-V3",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -387,8 +486,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -441,8 +544,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -487,8 +594,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -556,8 +667,12 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "deepseek-chat",
+          "title": "DeepSeek-V3",
           "value": "deepseek-chat"
+        },
+        {
+          "title": "DeepSeek-R1",
+          "value": "deepseek-reasoner"
         },
         {
           "title": "GPT-4o",
@@ -578,6 +693,22 @@
         {
           "title": "GPT-3.5 Turbo",
           "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "gemini-2.0-flash-exp",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "gemini-exp-1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "learnlm-1.5-pro-experimental",
+          "value": "learnlm-1.5-pro-experimental"
+        },
+        {
+          "title": "gemini-2.0-flash-thinking-exp-1219",
+          "value": "gemini-2.0-flash-thinking-exp-1219"
         }
       ],
       "required": true,
