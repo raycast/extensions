@@ -3,7 +3,7 @@
   "name": "sniffer",
   "title": "Hotspot",
   "description": "FInd who is connected to your network",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "night_coder",
   "license": "MIT",
   "commands": [
