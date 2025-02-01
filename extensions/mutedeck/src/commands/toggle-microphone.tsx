@@ -1,5 +1,11 @@
-import { showToast, Toast, confirmAlert, getPreferenceValues, Alert } from '@raycast/api';
-import { toggleMute, getStatus, isPresenting } from '../utils/api';
+import {
+  showToast,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  Alert,
+} from "@raycast/api";
+import { toggleMute, getStatus, isPresenting } from "../utils/api";
 
 interface Preferences {
   confirmMuteInPresentation: boolean;
@@ -7,7 +13,8 @@ interface Preferences {
 }
 
 export default function Command(): Promise<void> {
-  const { confirmMuteInPresentation, showToasts } = getPreferenceValues<Preferences>();
+  const { confirmMuteInPresentation, showToasts } =
+    getPreferenceValues<Preferences>();
 
   return new Promise<void>((resolve, reject) => {
     const handleToggle = async (): Promise<void> => {
@@ -16,10 +23,11 @@ export default function Command(): Promise<void> {
           const status = await getStatus();
           if (isPresenting(status)) {
             const proceed = await confirmAlert({
-              title: 'Toggle Microphone While Presenting',
-              message: 'Are you sure you want to toggle your microphone while presenting?',
+              title: "Toggle Microphone While Presenting",
+              message:
+                "Are you sure you want to toggle your microphone while presenting?",
               primaryAction: {
-                title: 'Toggle Microphone',
+                title: "Toggle Microphone",
                 style: Alert.ActionStyle.Destructive,
               },
             });
@@ -36,7 +44,7 @@ export default function Command(): Promise<void> {
         if (showToasts) {
           await showToast({
             style: Toast.Style.Success,
-            title: 'Toggled Microphone',
+            title: "Toggled Microphone",
           });
         }
 
@@ -44,7 +52,7 @@ export default function Command(): Promise<void> {
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'Failed to Toggle Microphone',
+          title: "Failed to Toggle Microphone",
           message: error instanceof Error ? error.message : String(error),
         });
         reject(error);

@@ -1,5 +1,12 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import {
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import {
   getStatus,
   isMuteDeckRunning,
@@ -7,7 +14,7 @@ import {
   isMuted,
   isVideoOn,
   type MuteDeckStatus,
-} from '../utils/api';
+} from "../utils/api";
 
 interface State {
   status: MuteDeckStatus | null;
@@ -33,7 +40,8 @@ export default function Command(): JSX.Element {
     } catch (error) {
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error : new Error('Failed to fetch status'),
+        error:
+          error instanceof Error ? error : new Error("Failed to fetch status"),
         isLoading: false,
       }));
     }
@@ -58,7 +66,7 @@ export default function Command(): JSX.Element {
   if (state.error) {
     showToast({
       style: Toast.Style.Failure,
-      title: 'Failed to Get Status',
+      title: "Failed to Get Status",
       message: state.error.message,
     });
   }
@@ -74,11 +82,11 @@ export default function Command(): JSX.Element {
               ? isMuteDeckRunning(state.status)
                 ? isInMeeting(state.status)
                   ? isMuted(state.status)
-                    ? 'Muted'
-                    : 'Unmuted'
-                  : 'Not in Meeting'
-                : 'Not Running'
-              : 'Unknown',
+                    ? "Muted"
+                    : "Unmuted"
+                  : "Not in Meeting"
+                : "Not Running"
+              : "Unknown",
           },
         ]}
         actions={
@@ -87,13 +95,15 @@ export default function Command(): JSX.Element {
           </ActionPanel>
         }
       />
-      {state.status && isMuteDeckRunning(state.status) && isInMeeting(state.status) && (
-        <List.Item
-          icon={isVideoOn(state.status) ? Icon.Video : Icon.VideoDisabled}
-          title="Camera Status"
-          accessories={[{ text: isVideoOn(state.status) ? 'On' : 'Off' }]}
-        />
-      )}
+      {state.status &&
+        isMuteDeckRunning(state.status) &&
+        isInMeeting(state.status) && (
+          <List.Item
+            icon={isVideoOn(state.status) ? Icon.Video : Icon.VideoDisabled}
+            title="Camera Status"
+            accessories={[{ text: isVideoOn(state.status) ? "On" : "Off" }]}
+          />
+        )}
     </List>
   );
 }

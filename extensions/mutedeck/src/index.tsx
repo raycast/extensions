@@ -8,8 +8,8 @@ import {
   confirmAlert,
   getPreferenceValues,
   Alert,
-} from '@raycast/api';
-import { useEffect, useState } from 'react';
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import {
   getStatus,
   toggleMute,
@@ -22,16 +22,20 @@ import {
   isPresenting,
   isRecording,
   type MuteDeckStatus,
-} from './utils/api';
+} from "./utils/api";
 
 export default function Command(): JSX.Element {
-  const { showToasts, confirmMuteInPresentation, confirmVideoInPresentation, confirmLeave } =
-    getPreferenceValues<{
-      showToasts: boolean;
-      confirmMuteInPresentation: boolean;
-      confirmVideoInPresentation: boolean;
-      confirmLeave: boolean;
-    }>();
+  const {
+    showToasts,
+    confirmMuteInPresentation,
+    confirmVideoInPresentation,
+    confirmLeave,
+  } = getPreferenceValues<{
+    showToasts: boolean;
+    confirmMuteInPresentation: boolean;
+    confirmVideoInPresentation: boolean;
+    confirmLeave: boolean;
+  }>();
 
   const [state, setState] = useState<{
     items?: MuteDeckStatus;
@@ -44,7 +48,9 @@ export default function Command(): JSX.Element {
         const status = await getStatus();
         setState({ items: status });
       } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error(String(error)) });
+        setState({
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
       }
     }
 
@@ -54,10 +60,11 @@ export default function Command(): JSX.Element {
   async function handleToggleMute(): Promise<void> {
     if (state.items && isPresenting(state.items) && confirmMuteInPresentation) {
       const proceed = await confirmAlert({
-        title: 'Toggle Microphone While Presenting',
-        message: 'Are you sure you want to toggle your microphone while presenting?',
+        title: "Toggle Microphone While Presenting",
+        message:
+          "Are you sure you want to toggle your microphone while presenting?",
         primaryAction: {
-          title: 'Toggle Microphone',
+          title: "Toggle Microphone",
           style: Alert.ActionStyle.Destructive,
         },
       });
@@ -72,25 +79,30 @@ export default function Command(): JSX.Element {
       if (showToasts) {
         await showToast({
           style: Toast.Style.Success,
-          title: 'Toggled microphone',
+          title: "Toggled microphone",
         });
       }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to toggle microphone',
+        title: "Failed to toggle microphone",
         message: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
   async function handleToggleVideo(): Promise<void> {
-    if (state.items && isPresenting(state.items) && confirmVideoInPresentation) {
+    if (
+      state.items &&
+      isPresenting(state.items) &&
+      confirmVideoInPresentation
+    ) {
       const proceed = await confirmAlert({
-        title: 'Toggle Camera While Presenting',
-        message: 'Are you sure you want to toggle your camera while presenting?',
+        title: "Toggle Camera While Presenting",
+        message:
+          "Are you sure you want to toggle your camera while presenting?",
         primaryAction: {
-          title: 'Toggle Camera',
+          title: "Toggle Camera",
           style: Alert.ActionStyle.Destructive,
         },
       });
@@ -105,13 +117,13 @@ export default function Command(): JSX.Element {
       if (showToasts) {
         await showToast({
           style: Toast.Style.Success,
-          title: 'Toggled camera',
+          title: "Toggled camera",
         });
       }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to toggle camera',
+        title: "Failed to toggle camera",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -120,10 +132,10 @@ export default function Command(): JSX.Element {
   async function handleLeaveMeeting(): Promise<void> {
     if (confirmLeave) {
       const proceed = await confirmAlert({
-        title: 'Leave Meeting',
-        message: 'Are you sure you want to leave the current meeting?',
+        title: "Leave Meeting",
+        message: "Are you sure you want to leave the current meeting?",
         primaryAction: {
-          title: 'Leave Meeting',
+          title: "Leave Meeting",
           style: Alert.ActionStyle.Destructive,
         },
       });
@@ -138,13 +150,13 @@ export default function Command(): JSX.Element {
       if (showToasts) {
         await showToast({
           style: Toast.Style.Success,
-          title: 'Left meeting',
+          title: "Left meeting",
         });
       }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to leave meeting',
+        title: "Failed to leave meeting",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -153,14 +165,14 @@ export default function Command(): JSX.Element {
   if (state.error) {
     void showToast({
       style: Toast.Style.Failure,
-      title: 'Failed to get MuteDeck status',
+      title: "Failed to get MuteDeck status",
       message: state.error.message,
     });
 
     return (
       <List>
         <List.EmptyView
-          icon={{ source: 'exclamationmark.triangle' }}
+          icon={{ source: "exclamationmark.triangle" }}
           title="Failed to get MuteDeck status"
           description={state.error.message}
         />
@@ -185,20 +197,20 @@ export default function Command(): JSX.Element {
       <List.Item
         icon={isRunning ? Icon.CheckCircle : Icon.Circle}
         title="MuteDeck Status"
-        subtitle={isRunning ? 'Running' : 'Not Running'}
-        accessories={[{ text: inMeeting ? 'In Meeting' : 'Not in Meeting' }]}
+        subtitle={isRunning ? "Running" : "Not Running"}
+        accessories={[{ text: inMeeting ? "In Meeting" : "Not in Meeting" }]}
       />
       <List.Item
         icon={muted ? Icon.MicrophoneDisabled : Icon.Microphone}
         title="Microphone"
-        subtitle={muted ? 'Muted' : 'Unmuted'}
+        subtitle={muted ? "Muted" : "Unmuted"}
         actions={
           <ActionPanel>
             <Action
               icon={muted ? Icon.Microphone : Icon.MicrophoneDisabled}
-              title={muted ? 'Unmute' : 'Mute'}
+              title={muted ? "Unmute" : "Mute"}
               onAction={handleToggleMute}
-              shortcut={{ modifiers: ['cmd'], key: 'm' }}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
             />
           </ActionPanel>
         }
@@ -206,14 +218,14 @@ export default function Command(): JSX.Element {
       <List.Item
         icon={videoEnabled ? Icon.Video : Icon.VideoDisabled}
         title="Camera"
-        subtitle={videoEnabled ? 'On' : 'Off'}
+        subtitle={videoEnabled ? "On" : "Off"}
         actions={
           <ActionPanel>
             <Action
               icon={videoEnabled ? Icon.VideoDisabled : Icon.Video}
-              title={videoEnabled ? 'Turn off Camera' : 'Turn on Camera'}
+              title={videoEnabled ? "Turn off Camera" : "Turn on Camera"}
               onAction={handleToggleVideo}
-              shortcut={{ modifiers: ['cmd'], key: 'v' }}
+              shortcut={{ modifiers: ["cmd"], key: "v" }}
             />
           </ActionPanel>
         }
@@ -221,12 +233,12 @@ export default function Command(): JSX.Element {
       <List.Item
         icon={presenting ? Icon.Desktop : Icon.Window}
         title="Screen Sharing"
-        subtitle={presenting ? 'Presenting' : 'Not Presenting'}
+        subtitle={presenting ? "Presenting" : "Not Presenting"}
       />
       <List.Item
         icon={recording ? Icon.Dot : Icon.Circle}
         title="Recording"
-        subtitle={recording ? 'Recording' : 'Not Recording'}
+        subtitle={recording ? "Recording" : "Not Recording"}
       />
       {inMeeting && (
         <List.Item
@@ -239,7 +251,7 @@ export default function Command(): JSX.Element {
                 title="Leave Meeting"
                 style={Action.Style.Destructive}
                 onAction={handleLeaveMeeting}
-                shortcut={{ modifiers: ['cmd'], key: 'l' }}
+                shortcut={{ modifiers: ["cmd"], key: "l" }}
               />
             </ActionPanel>
           }
