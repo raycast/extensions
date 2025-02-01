@@ -1,5 +1,10 @@
 # Tower Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Correctly handle URI encoding of repository paths
+- Correctly escape repository path in shell command
+
 ## [New Features] - 2024-09-18
 
 - Add support for selecting a default editor and teminal app for opening repositories
