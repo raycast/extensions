@@ -2,7 +2,7 @@
 
 ## [New Action] - 2025-01-02
 
-- Add links to launch Pipedrive to [add new person, deal, org or view email or activity] when no results are found
+- Add links to launch Pipedrive to add new person, deal, org or view email or activity when no results are found
 
 ## [New Action] - 2025-20-01
 

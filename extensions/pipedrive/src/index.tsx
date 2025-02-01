@@ -99,31 +99,31 @@ export default function PipedriveSearch() {
                   <Action.OpenInBrowser
                     title="Add New Person"
                     url={addNewPersonURL}
-                    shortcut={addNewPersonShortcut}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
                     icon={emojiMap["person"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Deal"
                     url={addNewDealURL}
-                    shortcut={addNewDealShortcut}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
                     icon={emojiMap["deal"]}
                   />
                   <Action.OpenInBrowser
                     title="Add New Organization"
                     url={addNewOrganizationURL}
-                    shortcut={addNewOrganizationShortcut}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
                     icon={emojiMap["organization"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Email"
                     url={openEmailURL}
-                    shortcut={openEmailShortcut}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
                     icon={emojiMap["email"]}
                   />
                   <Action.OpenInBrowser
                     title="Open Activities"
                     url={openActivitiesURL}
-                    shortcut={openActivitiesShortcut}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
                     icon={emojiMap["activities"]}
                   />
                 </ActionPanel.Section>
@@ -316,7 +316,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     throw new Error(response.statusText);
   }
 
-  const { data } = (await response.json()) as { data: { items: string[] } };
+  const { data } = (await response.json()) as { data: { items: any[] } }; // eslint-disable-line @typescript-eslint/no-explicit-any
   const items = data?.items || [];
 
   return items.map(
