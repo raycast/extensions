@@ -1,27 +1,29 @@
 import {
   ActionPanel,
   List,
-  showToast,
   Action,
-  Toast,
   getPreferenceValues,
   Grid,
   Clipboard,
   Icon,
   showHUD,
+  LocalStorage,
 } from "@raycast/api";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { AbortError } from "node-fetch";
+import { useState, useMemo, useCallback } from "react";
 import { lib } from "asciilib";
 import { nanoid } from "nanoid";
 import { useRecentKaomoji } from "./useRecentKaomoji";
-import { SearchResult, SearchState } from "./types";
+import { SearchResult } from "./types";
+import { useLocalStorage, usePromise } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+  const [filter, setFilter] = useState("");
+  const state = useSearch(searchText);
+  const { isLoading, value: favorites = [] } = useLocalStorage<string[]>("favorites", []);
   const { displayMode, primaryAction } = getPreferenceValues<Preferences>();
 
-  const displayGroupedResults = state.searchText.length === 0;
+  const displayGroupedResults = searchText.length === 0;
   const groupedResultsByCategory = useMemo(() => {
     const groupedResults: Record<string, SearchResult[]> = {};
     state.results.forEach((result) => {
@@ -54,16 +56,20 @@ export default function Command() {
 
   return (
     <ListComponent
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
+      isLoading={state.isLoading || isLoading}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by name..."
       throttle
+      searchBarAccessory={<ListComponent.Dropdown tooltip="Filter" onChange={setFilter}>
+        <ListComponent.Dropdown.Item title="All" value="" />
+        <ListComponent.Dropdown.Item icon={Icon.Star} title="Favorites" value="favorites" />
+      </ListComponent.Dropdown>}
     >
       {displayGroupedResults ? (
         <>
           <ListComponent.Section title="Frequently Used" subtitle={recentKaomojis.length + ""}>
             {recentKaomojis.map((result) => (
-              <ItemComponent key={result.id} searchResult={result} primaryAction={primaryAction} />
+              <ItemComponent key={result.id} searchResult={result} primaryAction={primaryAction} isFavorite={isFavorite(result.name, favorites)} />
             ))}
           </ListComponent.Section>
 
@@ -74,7 +80,7 @@ export default function Command() {
               key={category}
             >
               {groupedResultsByCategory[category].map((searchResult) => (
-                <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
+                <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} isFavorite={isFavorite(searchResult.name, favorites)} />
               ))}
             </ListComponent.Section>
           ))}
@@ -82,7 +88,7 @@ export default function Command() {
       ) : (
         <ListComponent.Section title="Results" subtitle={state.results.length + ""}>
           {state.results.map((searchResult) => (
-            <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
+            <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} isFavorite={isFavorite(searchResult.name, favorites)} />
           ))}
         </ListComponent.Section>
       )}
@@ -93,9 +99,11 @@ export default function Command() {
 function ItemActions({
   searchResult,
   primaryAction,
+  isFavorite
 }: {
   searchResult: SearchResult;
   primaryAction: Preferences["primaryAction"];
+  isFavorite: boolean;
 }) {
   const { addKaomoji } = useRecentKaomoji();
 
@@ -130,9 +138,19 @@ function ItemActions({
     }
   }, [primaryAction, CopyToClipboardAction, PasteInActiveAppAction]);
 
+const addToFav = async () => {
+  const val = await LocalStorage.getItem<string>("favorites");
+  const favs: string[] = await JSON.parse(val ?? "[]");
+  favs.push(searchResult.name);
+  await LocalStorage.setItem("favorites", JSON.stringify(favs));
+}
+
   return (
     <ActionPanel>
       <ActionPanel.Section>{actions}</ActionPanel.Section>
+      <ActionPanel.Section>
+        {!isFavorite ? <Action icon={Icon.Star} title="Add to Favorites" onAction={addToFav} /> : <Action icon={Icon.StarDisabled} title="Remove from Favorites" />}
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
@@ -140,19 +158,22 @@ function ItemActions({
 function SearchListItem({
   searchResult,
   primaryAction,
+  isFavorite
 }: {
   searchResult: SearchResult;
   primaryAction: Preferences["primaryAction"];
+  isFavorite: boolean;
 }) {
   return (
     <List.Item
       title={searchResult.name}
       accessories={[
+        isFavorite ? {icon: Icon.Star} : {},
         {
           text: searchResult.description,
         },
       ]}
-      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} />}
+      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} isFavorite={isFavorite} />}
     />
   );
 }
@@ -180,9 +201,11 @@ function getBase64SvgUrl(kaomoji: string, dark = false) {
 function SearchGridItem({
   searchResult,
   primaryAction,
+  isFavorite
 }: {
   searchResult: SearchResult;
   primaryAction: Preferences["primaryAction"];
+  isFavorite: boolean;
 }) {
   return (
     <Grid.Item
@@ -193,68 +216,32 @@ function SearchGridItem({
         },
       }}
       title={searchResult.description}
-      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} />}
+      accessory={isFavorite ? { icon: Icon.Star } : undefined}
+      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} isFavorite={isFavorite} />}
     />
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true, searchText: "" });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-        searchText,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("search error", error);
-      showToast(Toast.Style.Failure, "Could not perform search", String(error));
-    }
-  }
-
+function useSearch(searchText: string) {
+  const { isLoading, data = [] } = usePromise(async (search) => await performSearch(search), [searchText], {
+    failureToastOptions: {
+      title: "Could not perform search"
+    },
+  });
+  
   return {
-    state: state,
-    search: search,
+    isLoading, results: data
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  console.log("searching for", searchText);
-
+async function performSearch(searchText: string): Promise<SearchResult[]> {
   const results = await searchForResults(searchText);
-
-  if (signal.aborted) {
-    return Promise.reject(new AbortError());
-  }
-
-  console.log("results count", results.length);
 
   return results.map((entry: AsciiLibEntry) => {
     return {
       id: nanoid(),
-      name: entry.entry as string,
-      description: entry.name as string,
+      name: entry.entry,
+      description: entry.name,
       category: entry.category,
     };
   });
@@ -280,4 +267,8 @@ function searchForResults(keyword: string): Promise<AsciiLibEntry[]> {
   });
 
   return Promise.resolve(filteredResults);
+}
+
+function isFavorite(name: string, favorites: string[]) {
+  return favorites.includes(name);
 }

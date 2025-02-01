@@ -2,7 +2,9 @@
 
 ## [] - {PR_MERGE_DATE}
 
+
 - Modernize: remove `Preferences` type + update deps
+- `usePromise` to reduce complexity of useSearch hook
 
 ## [Grid layout] - 2023-02-07
 
