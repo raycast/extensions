@@ -6,7 +6,7 @@ export const DEFAULT_MODEL: Model = {
   id: "default",
   updated_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
-  name: "Haiku",
+  name: "Haiku 3.5",
   prompt: "You are a helpful assistant.",
   option: "claude-3-5-haiku-latest",
   temperature: "1",

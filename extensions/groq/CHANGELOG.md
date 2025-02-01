@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [New Models] - 2025-01-27
+
+- Added `DeepSeek R1 70B`
+
 ## [New Models] - 2024-12-13
 
 - Added `Llama 3.3 70B` and `Llama 3.3 70B SpecDec`

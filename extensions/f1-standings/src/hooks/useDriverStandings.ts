@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 import { DriverStanding } from "../types";
 
@@ -22,7 +22,7 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
       cancelRef.current = new AbortController();
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}/driverStandings.json`, {
+        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/driverStandings.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });
@@ -33,6 +33,9 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
           driverStandings: data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [],
         }));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

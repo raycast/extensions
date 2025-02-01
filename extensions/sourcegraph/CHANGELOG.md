@@ -1,6 +1,13 @@
 # Changelog
 
-## [Bug fixes] - 2024-12-19
+## [New logo](https://github.com/raycast/extensions/pull/16697) - 2025-01-29
+
+- **all**: Sourcegraph got a new logo! All extension and command icons have been updated.
+- **doc**: Updated documentation to indicate [Sourcegraph workspaces](https://workspaces.sourcegraph.com) compatibility.
+- **batch-changes**: The Batch Changes command is now disabled by default.
+- **notebooks**: The Notebook command is now disabled by default.
+
+## [Bug fixes](https://github.com/raycast/extensions/pull/15956) - 2024-12-19
 
 - **search**: Fix some issues where results do not reset when a search returns no results or fails.
 

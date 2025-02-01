@@ -40,6 +40,13 @@
       "subtitle": "OpenStatus",
       "description": "Create a new Status Report Update for your Status Report",
       "mode": "view"
+    },
+    {
+      "name": "show-incidents",
+      "title": "Show Incidents",
+      "subtitle": "OpenStatus",
+      "description": "View all your incidents from your OpenStatus account",
+      "mode": "view"
     }
   ],
   "preferences": [

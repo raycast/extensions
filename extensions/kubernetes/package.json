@@ -86,6 +86,48 @@
       "subtitle": "Kubernetes",
       "description": "List PersistentVolumeClaims in a Kubernetes Cluster.",
       "mode": "view"
+    },
+    {
+      "name": "get-events",
+      "title": "Get Events",
+      "subtitle": "Kubernetes",
+      "description": "List Events in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-limitranges",
+      "title": "Get LimitRanges",
+      "subtitle": "Kubernetes",
+      "description": "List LimitRanges in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-podtemplates",
+      "title": "Get PodTemplates",
+      "subtitle": "Kubernetes",
+      "description": "List PodTemplates in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicationcontrollers",
+      "title": "Get ReplicationControllers",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicationControllers in a Kubernetes Cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-resourcequotas",
+      "title": "Get ResourceQuotas",
+      "subtitle": "Kubernetes",
+      "description": "List ResourceQuotas in a Kubernetes cluster.",
+      "mode": "view"
+    },
+    {
+      "name": "get-replicasets",
+      "title": "Get ReplicaSets",
+      "subtitle": "Kubernetes",
+      "description": "List ReplicaSets in a Kubernetes Cluster.",
+      "mode": "view"
     }
   ],
   "preferences": [
