@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Focus Shortcuts] - 2025-02-01
+## [Focus Shortcuts] - {PR_MERGE_DATE}
 
 - Added input focus sub-commands to the `Create Issue` command for changing the focused form input quicker.
 

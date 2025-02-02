@@ -372,6 +372,18 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
               />
             ) : null}
+            <Action
+              title="Focus Attachments"
+              icon={Icon.NewDocument}
+              onAction={() => focus("attachments")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+            />
+            <Action
+              title="Focus Links"
+              icon={Icon.Link}
+              onAction={() => focus("links")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
