@@ -1,6 +1,6 @@
 # Raycast Port Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-02
 
 - Fix JavaScript example code
 - Bump all dependencies to the latest
