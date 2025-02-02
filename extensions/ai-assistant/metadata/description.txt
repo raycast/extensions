@@ -1,0 +1,60 @@
+# AI Assistant for Raycast
+
+A powerful collection of AI-powered tools to enhance your productivity, featuring smart translation, voice dictation, text improvement, and page summarization capabilities.
+
+## Key Features
+
+🌐 Smart Translation
+• Automatic language detection between primary and secondary languages
+• Preserves formatting, punctuation, and technical terms
+• Optional grammar and spelling correction
+• Caches translations for faster repeated use
+• Supports all major languages
+
+🎙️ Voice Dictation
+• Speech-to-text conversion with high accuracy
+• Support for both online (OpenAI) and local Whisper models
+• Automatic language detection
+• Optional translation to target language
+• Text improvement and cleanup
+
+🤖 Dictate Prompt Everywhere
+• Dictate prompts to generate or improve content
+• Natural language commands for text generation
+• Context-aware text modifications
+• Multi-language support
+• Seamless integration with any text editor
+
+📄 Page Summarizer
+• Extracts main content from web pages
+• Generates concise summaries
+• Highlights key points
+• Optional "Explore More" suggestions
+• Multi-language support
+
+⚙️ Settings & Configuration
+• Language preferences (primary/secondary)
+• AI model selection
+• Speech recognition mode (online/local)
+• Whisper model management
+• Feature toggles
+
+## Requirements
+
+• macOS 12 or later
+• OpenAI API key
+• Sox (for voice recording) - Install with: brew install sox
+
+## Privacy & Security
+
+• Does not store your OpenAI API key or any sensitive data
+• Temporarily stores voice recordings (deleted after 1 hour)
+• Only sends necessary data to OpenAI API
+• Processes text locally when possible
+• Does not track usage or collect analytics
+
+## Support
+
+For issues, feature requests, or questions:
+• GitHub: https://github.com/pezzos/raycast-ai-assistant
+• Author: Alexandre Pezzotta (https://github.com/pezzos)
