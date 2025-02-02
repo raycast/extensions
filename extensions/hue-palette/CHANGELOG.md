@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-02-02
 
 - Added the action to copy the new Tailwind CSS version 4.0 configuration code.
 
