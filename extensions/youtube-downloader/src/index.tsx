@@ -1,4 +1,17 @@
-import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  BrowserExtension,
+  Clipboard,
+  Detail,
+  Form,
+  getSelectedText,
+  Icon,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils";
@@ -167,11 +180,16 @@ export default function DownloadVideo() {
   }, [video]);
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      if (text && isYouTubeURL(text)) {
-        setValue("url", text);
-      }
-    });
+    (async () => {
+      const clipboardText = await Clipboard.readText();
+      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+
+      const selectedText = await getSelectedText();
+      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+
+      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+    })();
   }, []);
 
   const missingExecutable = useMemo(() => {
