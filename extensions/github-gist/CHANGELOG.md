@@ -1,6 +1,6 @@
 # GitHub Gist Changelog
 
-## [Update GitHub Gist] - {PR_MERGE_DATE}
+## [Update GitHub Gist] - 2025-02-02
 
 - Add a new preference to set the default gist tag.
 
