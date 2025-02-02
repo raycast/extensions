@@ -6,7 +6,7 @@
 
 ## [New Action] - 2025-20-01
 
-- Added emojis for deal 💰, person 🅿️ and organization 🅾️ to make result types easier to decipher
+- Added emojis for deal 💰, person 🅿️ and organization 🅾️ to make result types easier to decipher.
 - Updated Pipedrive API from v1 to v2
 - Code cleanup
 

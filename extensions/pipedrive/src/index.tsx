@@ -270,7 +270,6 @@ function useSearch() {
       }));
       return;
     }
-
     cancelRef.current = new AbortController();
     setState((prevState) => ({
       ...prevState,
@@ -293,7 +292,6 @@ function useSearch() {
       showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
-
   return {
     state,
     search,
