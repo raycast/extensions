@@ -1,9 +1,10 @@
-import { CoreV1Api, V1Service } from "@kubernetes/client-node";
-import { listServices } from "./api/coreV1";
-import { ResourceList } from "./components/resource-list";
+import { V1Service } from "@kubernetes/client-node";
+import { ResourceList } from "./components/ResourceList";
+import PodList from "./components/resources/PodList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";
+import { selectorToString } from "./utils/selector";
 
 export default function Command() {
   return (
@@ -11,12 +12,11 @@ export default function Command() {
       <KubernetesNamespaceProvider>
         <ResourceList
           apiVersion="v1"
-          kind="Services"
+          kind="Service"
           namespaced={true}
-          apiClientType={CoreV1Api}
-          listResources={listServices}
           matchResource={matchService}
           renderFields={renderServiceFields}
+          relatedResource={{ kind: "Pod", render: renderServiceRelatedResource }}
         />
       </KubernetesNamespaceProvider>
     </KubernetesContextProvider>
@@ -55,4 +55,12 @@ function servicePort(service: V1Service) {
   return service.spec?.ports
     ?.map((port) => (port.protocol === "TCP" ? port.port : `${port.port}/${port.protocol}`))
     .join(", ");
+}
+
+function renderServiceRelatedResource(service: V1Service) {
+  return (
+    service.spec?.selector && (
+      <PodList namespace={service.metadata?.namespace} labelSelector={selectorToString(service.spec?.selector)} />
+    )
+  );
 }

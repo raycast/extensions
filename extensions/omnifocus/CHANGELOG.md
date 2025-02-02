@@ -1,5 +1,15 @@
 # OmniFocus Changelog
 
+## [1.0.1] - 2025-01-22
+
+### Fixed
+
+- Fail gracefully when no subscription is active
+
+### Documentation
+
+- Update README about requirements
+
 ## [Initial Version] - 2025-01-02
 
 ### Added

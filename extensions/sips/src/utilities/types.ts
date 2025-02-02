@@ -5,8 +5,25 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:47:41
- * Last modified  : 2024-06-26 21:37:46
  */
+
+export const FilterCategory = {
+  blur: "Blur",
+  colorAdjustment: "Color Adjustment",
+  colorEffect: "Color Effect",
+  compositeOperation: "Composite Operation",
+  distortion: "Distortion",
+  generator: "Generator",
+  gradient: "Gradient",
+  halftone: "Halftone",
+  sharpen: "Sharpen",
+  stylize: "Stylize",
+  tile: "Tile",
+  stillImage: "Still Image",
+  interlaced: "Interlaced",
+  highDynamicRange: "High Dynamic Range",
+} as const;
+export type FilterCategory = (typeof FilterCategory)[keyof typeof FilterCategory];
 
 /**
  * A wrapper around a CIFilter that can be applied to images.
@@ -23,16 +40,6 @@ export type Filter = {
   description: string;
 
   /**
-   * The method to apply the filter to an image.
-   *
-   * @param source The path of the image to apply the filter to.
-   * @param destination The path to save the filtered image to.
-   * @param CIFilterName The name of the CIFilter to apply.
-   * @returns A promise that resolves when the operation is complete.
-   */
-  applyMethod: (source: string, destination: string, CIFilterName: string) => Promise<string>;
-
-  /**
    * The CIFilter name to use when applying the filter.
    */
   CIFilterName: string;
@@ -41,6 +48,18 @@ export type Filter = {
    * The location in the extension's assets folder of the thumbnail image for the filter.
    */
   thumbnail: string;
+
+  /**
+   * The category of the filter, used to group filters in the UI. Corresponds to the CIFilter's CICategory.
+   */
+  category: FilterCategory;
+
+  /**
+   * Extension-level default values for the filter's inputs.
+   */
+  presets?: {
+    [key: string]: unknown;
+  };
 };
 
 /**

@@ -277,6 +277,12 @@ function useSearch() {
       searchText,
     }));
 
+    cancelRef.current = new AbortController();
+    setState((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+
     try {
       const results = await performSearch(searchText, cancelRef.current.signal);
       setState((prevState) => ({

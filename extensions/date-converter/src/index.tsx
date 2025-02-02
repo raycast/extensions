@@ -4,6 +4,17 @@ import { useMemo, useState } from "react";
 import "@total-typescript/ts-reset";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
+import dayjs from "dayjs";
+import { listTimeZones } from "timezone-support";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const DEFAULT_DATE_FORMAT = "dddd, MMMM D, YYYY hh:mm:ss";
+const TIMEZONES = listTimeZones();
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -18,45 +29,49 @@ interface DateFormatter {
   id: string;
   title: string;
   human: boolean;
-  format: (date: Date) => string;
+  format: (date: Date, tz: string) => string;
 }
 
 interface Preferences {
   defaultFormat: string;
   copyAction: "copy" | "paste" | "both";
-  hour24: boolean;
+  displayFormat: string;
+  humanFormat: string;
 }
 
-const humanFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "full",
-  timeStyle: "medium",
-  hour12: !getPreferenceValues<Preferences>().hour24,
-});
+const displayFormatter = (date: Date, tz: string): string => {
+  return dayjs(date)
+    .tz(tz)
+    .format(getPreferenceValues<Preferences>().displayFormat.trim() || DEFAULT_DATE_FORMAT);
+};
 
 const DATE_FORMATS: DateFormatter[] = [
   {
     id: "human",
     title: "Human Date",
     human: true,
-    format: (date) => humanFormatter.format(date),
+    format: (date: Date, tz: string) =>
+      dayjs(date)
+        .tz(tz)
+        .format(getPreferenceValues<Preferences>().humanFormat.trim() || DEFAULT_DATE_FORMAT),
   },
   {
     id: "unix-ms",
     title: "Unix Timestamp (ms)",
     human: false,
-    format: (date) => date.getTime().toString(),
+    format: (date: Date, tz: string) => dayjs(date).tz(tz).valueOf().toString(),
   },
   {
     id: "unix-s",
     title: "Unix Timestamp (seconds)",
     human: false,
-    format: (date) => Math.floor(date.getTime() / 1000).toString(),
+    format: (date: Date, tz: string) => dayjs(date).tz(tz).unix().toString(),
   },
   {
     id: "iso",
     title: "ISO Date",
     human: false,
-    format: (date) => date.toISOString(),
+    format: (date: Date, tz: string) => dayjs(date).tz(tz).toISOString(),
   },
 ];
 
@@ -186,8 +201,30 @@ function getSortedFormats({ human }: Pick<LabeledDate, "human">): DateFormatter[
   });
 }
 
+function TimezoneDropdown(props: {
+  localTimezone: string;
+  timezones: string[];
+  onTimezoneChange: (value: string) => void;
+}) {
+  const { localTimezone, timezones, onTimezoneChange } = props;
+  return (
+    <List.Dropdown tooltip="Select Target Timezone" storeValue={true} onChange={onTimezoneChange}>
+      <List.Dropdown.Section title="Timezones">
+        <List.Dropdown.Item key={localTimezone} title={`${localTimezone} - local`} value={localTimezone} />
+        {timezones.map((tz) => {
+          if (tz === localTimezone) {
+            return null;
+          }
+          return <List.Dropdown.Item key={tz} title={tz} value={tz} />;
+        })}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [tz, setTz] = useState(LOCAL_TIMEZONE);
 
   const results = useMemo(() => getResults(searchText), [searchText]);
 
@@ -196,17 +233,20 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Enter a human or machine readable date"
+      searchBarAccessory={
+        <TimezoneDropdown localTimezone={LOCAL_TIMEZONE} timezones={TIMEZONES} onTimezoneChange={setTz} />
+      }
     >
       <List.EmptyView title="Invalid Date" description="Failed to parse your date in a human or machine format." />
       {results.map(({ date, label, human }) => (
         <List.Item
           key={date.toISOString()}
-          title={humanFormatter.format(date)}
+          title={displayFormatter(date, tz)}
           subtitle={`${label} - ${timeAgo.format(date)}`}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (
-                <Action key={id} title={`Copy as ${title}`} onAction={() => copy(format(date))} />
+                <Action key={id} title={`Copy as ${title}`} onAction={() => copy(format(date, tz))} />
               ))}
             </ActionPanel>
           }

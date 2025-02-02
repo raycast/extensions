@@ -99,7 +99,7 @@ export default function Command() {
         throttle
         pagination={pagination}
       >
-        <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+        <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "listing" : "listings"}`}>
           {data?.map((item, index) => (
             <ResultGridItem
               key={`${item.id}-${index}`}
@@ -118,7 +118,7 @@ export default function Command() {
         throttle
         pagination={pagination}
       >
-        <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+        <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "listing" : "listings"}`}>
           {data?.map((item, index) => (
             <ResultListItem
               key={`${item.id}-${index}`}

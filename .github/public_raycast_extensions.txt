@@ -45,4 +45,5 @@ pastefy
 wp-bones
 spike
 github-spark
+anytype
 dub
