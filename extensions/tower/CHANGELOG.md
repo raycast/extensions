@@ -1,6 +1,6 @@
 # Tower Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-02-02
 
 - Correctly handle URI encoding of repository paths
 - Correctly escape repository path in shell command
