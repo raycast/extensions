@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { readFile, writeFile, access } from "fs/promises";
 
-export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "deepseek", "AI"];
+export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "Gemini", "Fine-tuning", "perplexity", "NotebookLM"];
 export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, "keywords.txt");
 
 /**
