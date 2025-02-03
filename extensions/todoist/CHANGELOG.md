@@ -1,5 +1,15 @@
 # Todoist Changelog
 
+## [Add Complete Task Shortcut Preferences] - 2025-01-31
+
+- Adjusting shortcuts for the following task actions:
+  - Complete Task - Now `⌘` + `Enter` (previously `shift` + `⌘` + `E`)
+  - Open Task in Todoist - Now `⌘` + `O` (previously `⌘` + `Enter`)
+
+## [Add Support for Task Deadlines] - 2025-01-31
+
+It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
+
 ## [Quick Add Task Improvement] - 2024-12-02
 
 Added a pop to the root and cleared the search bar after creating a task for the `close window immediately` preference.

@@ -64,11 +64,14 @@ export default function Command() {
       const data = await getCustomRules();
       setCustomRules(data);
     } catch (error) {
+      setCustomRules([]);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch custom rules",
         message: String(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

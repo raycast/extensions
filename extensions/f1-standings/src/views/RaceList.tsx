@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, List, Color, useNavigation, Icon } from "@raycast/api";
 import { useFormula1RaceUrl, useRaces, useSeasons } from "../hooks";
-import { formatDate, getFlag, getRaceDates } from "../utils";
+import { formatDate, formatDateTime, getFlag, getRaceDates } from "../utils";
 import RaceSessionDetails from "../components/RaceSessionDetails";
 import RaceResultList from "../views/RaceResultList";
 import { AddToCalendar } from "./AddToCalendar";
@@ -62,7 +62,9 @@ function RaceList() {
             const raceDates = getRaceDates(race);
             const accessories = [];
             if (!isShowingDetail && race.date && race.time) {
-              accessories.push({ text: formatDate(new Date(`${race.date}T${race.time}`)) });
+              accessories.push({ text: formatDateTime(new Date(`${race.date}T${race.time}`)) });
+            } else if (!isShowingDetail && race.date && !race.time) {
+              accessories.push({ text: formatDate(new Date(`${race.date}`)) });
             }
             accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.PrimaryText } });
             return (
@@ -114,7 +116,9 @@ function RaceList() {
             const raceDates = getRaceDates(race);
             const accessories = [];
             if (!isShowingDetail && race.date && race.time) {
-              accessories.push({ text: formatDate(new Date(race.date + "T" + race.time)) });
+              accessories.push({ text: formatDateTime(new Date(race.date + "T" + race.time)) });
+            } else if (!isShowingDetail && race.date && !race.time) {
+              accessories.push({ text: formatDate(new Date(`${race.date}`)) });
             }
             accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.Green } });
 

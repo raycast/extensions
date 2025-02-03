@@ -31,6 +31,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -91,6 +95,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -155,6 +163,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -215,6 +227,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -279,6 +295,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -339,6 +359,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -417,6 +441,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -498,6 +526,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -559,6 +591,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -624,6 +660,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -685,6 +725,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -750,6 +794,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -811,6 +859,10 @@
             {
               "title": "Follow global model",
               "value": "global"
+            },
+            {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
             },
             {
               "value": "llama-3.3-70b-versatile",
@@ -876,6 +928,10 @@
               "value": "global"
             },
             {
+              "value": "deepseek-r1-distill-llama-70b",
+              "title": "DeepSeek R1 70B 128k"
+            },
+            {
               "value": "llama-3.3-70b-versatile",
               "title": "Llama 3.3 70B 128k"
             },
@@ -929,6 +985,10 @@
       "required": true,
       "default": "llama-3.3-70b-versatile",
       "data": [
+        {
+          "value": "deepseek-r1-distill-llama-70b",
+          "title": "DeepSeek R1 70B 128k"
+        },
         {
           "value": "llama-3.3-70b-versatile",
           "title": "Llama 3.3 70B 128k"

@@ -8,6 +8,14 @@
 - Adjust import orders
 - Fix `yt-dlp` from preferences
 
+## [Fixes] - 2025-02-03
+
+- Fixed error: Unable to get selected text from frontmost application
+
+## [Insert active tab URL] - 2025-02-02
+
+- If the raycast browser extension is installed, the extension will automatically insert the active tab URL into the input field
+
 ## [Improve URL Validator] - 2025-01-23
 
 - Improve `isYouTubeURL` function

@@ -1,6 +1,20 @@
 import { execSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import {
+  Action,
+  ActionPanel,
+  BrowserExtension,
+  Clipboard,
+  Detail,
+  Form,
+  getSelectedText,
+  Icon,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useForm, usePromise } from "@raycast/utils";
@@ -171,11 +185,30 @@ export default function DownloadVideo() {
   }, [video]);
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      if (text && isYouTubeURL(text)) {
-        setValue("url", text);
+    (async () => {
+      const clipboardText = await Clipboard.readText();
+      if (clipboardText && isYouTubeURL(clipboardText)) {
+        setValue("url", clipboardText);
+        return;
       }
-    });
+
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText && isYouTubeURL(selectedText)) {
+          setValue("url", selectedText);
+          return;
+        }
+      } catch {
+        // Suppress the error if Raycast didn't find any selected text
+      }
+
+      try {
+        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      } catch {
+        // Suppress the error if Raycast didn't find browser extension
+      }
+    })();
   }, []);
 
   const missingExecutable = useMemo(() => {

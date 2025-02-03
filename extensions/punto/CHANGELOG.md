@@ -1,5 +1,9 @@
 # Punto Changelog
 
+## [Ru layout mapping] - 2025-02-03
+
+- Replaced ru layout preference with a dropdown to map layout caption with names
+
 ## [Improvements] - 2025-01-22
 
 - Removed keyboardSwitcher app from the project
