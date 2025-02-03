@@ -32,7 +32,6 @@ export default function Chat({ launchContext }) {
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
-    console.log(newChatNumbers);
     let lowestAvailableNumber = 1;
     while (newChatNumbers.includes(lowestAvailableNumber)) {
       lowestAvailableNumber++;
@@ -230,7 +229,6 @@ export default function Chat({ launchContext }) {
                 const selectedText = await getSelectedText();
                 setSearchText((oldText) => oldText + selectedText);
               } catch (error) {
-                console.error(error);
                 toast(Toast.Style.Failure, "Could not get the selected text");
               }
             }}
@@ -306,13 +304,11 @@ export default function Chat({ launchContext }) {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           let currentChat = getChat(newData.currentChat, newData.chats);
-          console.log(currentChat);
           let aiChat = gemini.createChat({
             model: "gemini-1.5-pro-latest",
             messages: currentChat.messages.map((x) => [x.prompt, x.answer]),
           });
           currentChat.messages[0].answer = "";
-          console.log(toast);
           toast(Toast.Style.Animated, "Regenerating Last Message");
           (async () => {
             try {

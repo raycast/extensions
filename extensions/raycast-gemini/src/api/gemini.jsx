@@ -26,7 +26,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
   const { apiKey, defaultModel, model } = getPreferenceValues();
-  console.log(defaultModel, model);
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +80,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
         );
       }
-      console.log(e);
     }
 
     setIsLoading(false);
@@ -101,7 +99,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           }
           getResponse(`${context}\n${selected}`);
         } catch (e) {
-          console.error(e);
           await showToast({
             style: Toast.Style.Failure,
             title: "Could not get the selected text. Continue without it.",
@@ -175,7 +172,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
                 const selectedText = await getSelectedText();
                 setTextarea((text) => text + selectedText);
               } catch (error) {
-                console.error(error);
                 await showToast({
                   title: "Could not get the selected text",
                   style: Toast.Style.Failure,
