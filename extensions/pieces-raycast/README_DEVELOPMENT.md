@@ -23,7 +23,8 @@ It's very important to await any asynchronous operation within a command. Withou
 ### Publishing updates
 
 1. Update the version in `package.json`
-2. run `npm run publish` <-- address any errors
-3. This will automatically cut a PR to raycast/extensions and provide a link
-4. Edit the PR description to explain changes
-5. Wait for approval from Raycast team (can take up to 2 weeks)
+2. Update CHANGELOG
+3. run `npm run publish` <-- address any errors
+4. This will automatically cut a PR to raycast/extensions and provide a link
+5. Edit the PR description to explain changes
+6. Wait for approval from Raycast team (can take up to 2 weeks)
