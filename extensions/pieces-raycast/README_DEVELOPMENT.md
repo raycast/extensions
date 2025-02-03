@@ -15,3 +15,15 @@
 ### Lifecycle of a Command
 
 It's very important to await any asynchronous operation within a command. Without doing this, the command will be disposed without completing.
+
+### Resolving command actions
+
+- command `name` in package.json must match filename in `src`
+
+### Publishing updates
+
+1. Update the version in `package.json`
+2. run `npm run publish` <-- address any errors
+3. This will automatically cut a PR to raycast/extensions and provide a link
+4. Edit the PR description to explain changes
+5. Wait for approval from Raycast team (can take up to 2 weeks)
