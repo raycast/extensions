@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nba-game-viewer",
   "title": "NBA & WNBA Viewer",
-  "description": "View upcoming NBA or WNBA games and team standings",
+  "description": "View upcoming NBA or WNBA games and team standings.",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
   "contributors": [
