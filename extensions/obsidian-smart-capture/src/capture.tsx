@@ -109,19 +109,11 @@ export default function Capture() {
   const [selectedText, setSelectedText] = useState<string>("");
   const [includeHighlight, setIncludeHighlight] = useState<boolean>(true);
   const [includeSummary, setIncludeSummary] = useState<boolean>(false);
-
   const [pageContent, setPageContent] = useState<string>("");
-
   const [pageContentMessage, setPageContentMessage] = useState<string>();
-
-  // I think the summary should be generated when the user checks the include summary toggle
   const [summary, setSummary] = useState<string>("");
-
-  // Selected resource, is the url link
   const [selectedResource, setSelectedResource] = useState<string>("");
   const [includePageContents, setIncludePageContents] = useState<boolean>(false);
-
-  // what is the resource info?
   const [resourceInfo, setResourceInfo] = useState<string>("");
 
   useEffect(() => {
