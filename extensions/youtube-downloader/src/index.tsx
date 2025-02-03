@@ -193,15 +193,15 @@ export default function DownloadVideo() {
           setValue("url", selectedText);
           return;
         }
-      } catch (e) {
-        //
+      } catch {
+        // Suppress the error if Raycast didn't find any selected text
       }
 
       try {
         const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
         if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
-      } catch (e) {
-        //
+      } catch {
+        // Suppress the error if Raycast didn't find browser extension
       }
     })();
   }, []);
