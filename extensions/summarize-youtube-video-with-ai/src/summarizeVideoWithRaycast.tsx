@@ -1,8 +1,9 @@
-import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
-
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
+import nodeFetch from "node-fetch";
 import { useEffect, useState } from "react";
+import { v4 as uuid } from "uuid";
+import { useRaycastFollowUpQuestion } from "./components/raycast/hooks/useRaycastFollowUpQuestion";
 import { useRaycastSummary } from "./components/raycast/hooks/useRaycastSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
@@ -29,6 +30,14 @@ export default function SummarizeVideoWithRaycast(
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
+  const [question, setQuestion] = useState("");
+  const [questions, setQuestions] = useState([
+    {
+      id: uuid(),
+      question: "Initial Summary of the video",
+      answer: summary ?? "",
+    },
+  ]);
 
   useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
     setVideoURL(url),
@@ -57,6 +66,7 @@ export default function SummarizeVideoWithRaycast(
   }, [videoURL]);
 
   useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
+  useRaycastFollowUpQuestion(questions, setQuestions, transcript, question, setQuestion, setSelectedQuestionId);
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;
@@ -70,6 +80,8 @@ export default function SummarizeVideoWithRaycast(
 
   return (
     <SummaryDetails
+      questions={questions}
+      handleQuestion={handleAdditionalQuestion}
       summary={markdown}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}

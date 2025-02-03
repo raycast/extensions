@@ -10,8 +10,8 @@ type FollowUpListProps = {
 };
 
 export default function FollowUpList({ summary, transcript }: FollowUpListProps) {
-  const [searchText, setSearchText] = useState("");
-  const [selectedItemId, setSelectedItemId] = useState("");
+  const [question, setQuestion] = useState("");
+  const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [questions, setQuestions] = useState([
     {
       id: uuid(),
@@ -21,7 +21,7 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
   ]);
 
   const handleAdditionalQuestion = async () => {
-    if (!searchText || !transcript) return;
+    if (!question || !transcript) return;
     const qID = uuid();
 
     const toast = await showToast({
@@ -30,12 +30,12 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
       message: FINDING_ANSWER.message,
     });
 
-    const answer = AI.ask(getFollowUpQuestionSnippet(searchText, transcript));
+    const answer = AI.ask(getFollowUpQuestionSnippet(question, transcript));
 
     setQuestions((prevQuestions) => [
       {
         id: qID,
-        question: searchText,
+        question,
         answer: "",
       },
       ...prevQuestions,
@@ -52,8 +52,8 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
 
     answer.finally(() => {
       toast.hide();
-      setSearchText("");
-      setSelectedItemId(qID);
+      setQuestion("");
+      setSelectedQuestionId(qID);
     });
   };
 
@@ -62,13 +62,21 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
       filtering={false}
       isShowingDetail
       navigationTitle="Additional Questions"
-      onSearchTextChange={setSearchText}
-      searchText={searchText}
+      onSearchTextChange={setQuestion}
+      searchText={question}
       searchBarPlaceholder="Ask another question"
-      selectedItemId={selectedItemId}
+      selectedItemId={selectedQuestionId}
       searchBarAccessory={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleAdditionalQuestion} />
+          {/* <Action.CopyToClipboard
+            title="Copy Answer"
+            content={
+              questions.find((question) => {
+                question.id === selectedQuestionId;
+              })?.answer ?? ""
+            }
+          /> */}
         </ActionPanel>
       }
     >

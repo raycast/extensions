@@ -3,7 +3,14 @@ import { VideoDataTypes } from "../../utils/getVideoData";
 import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
 
+export type Question = {
+  id: string;
+  question: string;
+  answer: string;
+};
+
 type SummaryDetailsProps = {
+  questions: Question[];
   summary?: string;
   summaryIsLoading: boolean;
   transcript: string;
