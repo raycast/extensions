@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-02-03
 
 - Fixed error: Unable to get selected text from frontmost application
 
