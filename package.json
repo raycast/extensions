@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "roamio",
-  "title": "Roamio Search",
-  "description": "Search a random keyword on X, Reddit, Medium and other platforms.",
+  "name": "keyword-roulette",
+  "title": "Keyword Roulette",
+  "description": "Spin the roulette —— search your keywords randomly across platforms.",
   "icon": "extension-icon.png",
   "author": "silvonli",
   "version": "1.0.0",
@@ -215,7 +215,7 @@
     },
     {
       "name": "search-random-keyword",
-      "title": "Search a Random Keyword",
+      "title": "Spin Keyword Roulette",
       "subtitle": "X, Reddit, Medium and so on.",
       "description": "Search a random keyword on X, Reddit, Medium and other platforms.",
       "mode": "no-view"
