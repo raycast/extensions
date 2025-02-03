@@ -182,17 +182,23 @@ export default function DownloadVideo() {
   useEffect(() => {
     (async () => {
       const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+      if (clipboardText && isYouTubeURL(clipboardText)) {
+        setValue("url", clipboardText);
+        return;
+      }
 
       try {
         const selectedText = await getSelectedText();
-        if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
-
-        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+        if (selectedText && isYouTubeURL(selectedText)) {
+          setValue("url", selectedText);
+          return;
+        }
       } catch (e) {
         console.log(e);
       }
+
+      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
     })();
   }, []);
 
