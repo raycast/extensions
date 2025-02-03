@@ -94,8 +94,10 @@ Recent searches are persisted [locally through a native Raycast API](https://dev
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
 Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
-Batch changes are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
+> [!NOTE]
+> Batch Changes are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
 or [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud).
+> To use this command, you must also enable it in the Raycast Sourcegraph extension preferences.
 
 ![batch changes](metadata/3-batch-change-manage.png)
 
@@ -104,10 +106,10 @@ or [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud).
 Browse and preview [search notebooks](https://sourcegraph.com/docs/notebooks) straight from Raycast.
 Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
 
-Notebooks are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
+> [!NOTE]
+> Notebooks are currently only supported when connected to a [self-hosted Sourcegraph instance](https://sourcegraph.com/docs/admin/deploy)
 or [Sourcegraph Cloud instance](https://sourcegraph.com/docs/cloud).
-
-![notebooks](metadata/4-notebook-view.png)
+> To use this command, you must also enable it in the Raycast Sourcegraph extension preferences.
 
 <br />
 
