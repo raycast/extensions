@@ -194,14 +194,14 @@ export default function DownloadVideo() {
           return;
         }
       } catch (e) {
-        console.log(e);
+        //
       }
 
       try {
         const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
         if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
       } catch (e) {
-        console.error(e);
+        //
       }
     })();
   }, []);
