@@ -1,11 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { startCaffeinate } from "./utils";
 
-interface Arguments {
-  time: string;
-}
-
-export default async function Command(props: { arguments: Arguments }) {
+export default async function Command(props: { arguments: Arguments.CaffeinateUntil }) {
   const { time } = props.arguments;
   const pattern = /^(\d{1,2})(?::(\d\d))? *(am|pm)?$/i;
 
