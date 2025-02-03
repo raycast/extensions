@@ -26,17 +26,15 @@ export default function unlockDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
         style: Toast.Style.Animated,
         title: "Unlocking Database...",
       });
-      KeePassLoader.checkCredentials(value.password, value.keyFile[0])
-        .then(() => {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Database Unlocked",
-          });
-          KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
-          KeePassLoader.setCredentials(value.password, value.keyFile[0]);
-          setIsUnlocked(true);
-        })
-        .catch(showToastCliErrors);
+      KeePassLoader.checkCredentials(value.password, value.keyFile[0]).then(() => {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Database Unlocked",
+        });
+        KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
+        KeePassLoader.setCredentials(value.password, value.keyFile[0]);
+        setIsUnlocked(true);
+      }, showToastCliErrors);
     },
     validation: {
       password: (value) => {

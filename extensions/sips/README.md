@@ -13,7 +13,7 @@ Apply filters and transformations to various image formats, and convert between 
 - Real time filter previews
 - Rotate, flip, and apply filters to the pages of PDFs
 - Optimize images using JPEG compression, [svgo](https://github.com/svg/svgo), and other strategies
-  - PNG optimization suppored by [PNGOUT](http://www.jonof.id.au/kenutils.html)
+  - PNG optimization supported by [PNGOUT](http://www.jonof.id.au/kenutils.html)
 - Perform realtime image manipulation on images in the clipboard
 - Strip EXIF data from images using [ExifTool](https://exiftool.org)
 

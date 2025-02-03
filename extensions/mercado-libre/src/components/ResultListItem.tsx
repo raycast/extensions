@@ -17,8 +17,11 @@ export function ResultListItem({ item, handleSearchOpen }: ResultListItemProps) 
       icon={{ value: secureThumbnailURL(item.thumbnail), tooltip: item.title }}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<ItemDetail item={item} handleSearchOpen={handleSearchOpen} />} />
-          <Action.OpenInBrowser url={item.permalink} onOpen={handleSearchOpen} />
+          <Action.Push
+            title="Show Listing Details"
+            target={<ItemDetail item={item} handleSearchOpen={handleSearchOpen} />}
+          />
+          <Action.OpenInBrowser title="Open Listing in Browser" url={item.permalink} onOpen={handleSearchOpen} />
         </ActionPanel>
       }
     />

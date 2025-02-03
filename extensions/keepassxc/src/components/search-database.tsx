@@ -128,7 +128,7 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                 },
                 {
                   icon: { source: Icon.Link, tintColor: entry[4] !== "" ? Color.Green : Color.SecondaryText },
-                  tooltip: entry[3] !== "" ? "URL Set" : "URL Unset",
+                  tooltip: entry[4] !== "" ? "URL Set" : "URL Unset",
                 },
               ]}
               actions={
