@@ -4,6 +4,7 @@ import { useForm } from "@raycast/utils";
 import { useEffect } from "react";
 import { readKeywords, writeKeywords } from "./lib/keywords-manager";
 
+// Type for form values
 interface FormValues {
   keywords: string;
 }

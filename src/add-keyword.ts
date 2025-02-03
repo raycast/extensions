@@ -1,7 +1,7 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { writeKeywords, readKeywords, KEYWORDS_FILE_PATH } from "./lib/keywords-manager";
 
-// 参数类型定义
+// Type for command arguments
 type AddKeywordArguments = {
   keyword: string;
 };
@@ -10,16 +10,15 @@ export default async function Command(props: LaunchProps<{ arguments: AddKeyword
   try {
     const { keyword } = props.arguments;
 
-    // 读取文件
     const keywords = await readKeywords(KEYWORDS_FILE_PATH);
 
-    // 检查关键词是否已存在
+    // Check if keyword already exists
     if (keywords.includes(keyword.trim())) {
       await showHUD(`❎ Keyword '${keyword}' already exists`);
       return;
     }
 
-    // 添加关键词并写入
+    // Add keyword and write to file
     keywords.push(keyword.trim());
     await writeKeywords(keywords);
     await showHUD(`✅ Added keyword: '${keyword}'`, { clearRootSearch: true });

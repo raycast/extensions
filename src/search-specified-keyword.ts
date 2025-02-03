@@ -8,36 +8,36 @@ interface Preferences {
   randomPlatform: boolean;
 }
 
-// 参数类型定义
+// Type for command arguments
 type SearchArguments = {
   keyword?: string;
 };
 
 export default async function Command(props: LaunchProps<{ arguments: SearchArguments }>) {
   try {
-    // 获取搜索关键词
+    // Get search keyword
     const searchText = await readTextWithFallback(props.arguments.keyword);
 
     if (isNotEmpty(searchText)) {
       const preferences = getPreferenceValues<Preferences>();
 
-      // 计算日期：两个月前
+      // Calculate date: two months ago
       const twoMonthsAgo = new Date();
       twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
       const dateString = twoMonthsAgo.toISOString().split("T")[0];
 
-      // 获取要搜索的平台
+      // Get platforms to search
       const selectedPlatforms = [preferences.defaultPlatform1];
       if (preferences.defaultPlatform2) {
         selectedPlatforms.push(preferences.defaultPlatform2);
       }
 
-      // 在选定的平台上搜索
+      // Search on selected platforms
       for (const platform of selectedPlatforms) {
         await searchOnPlatform(platform, searchText, dateString);
       }
 
-      // 如果启用了随机平台选项，在一个额外的随机平台上搜索
+      // If random platform option is enabled, search on an additional random platform
       if (preferences.randomPlatform) {
         const randomPlatform = getRandomUnusedPlatform(selectedPlatforms);
         await searchOnPlatform(randomPlatform, searchText, dateString);

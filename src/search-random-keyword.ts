@@ -15,7 +15,7 @@ export default async function Command() {
     const keywords = await readKeywords(KEYWORDS_FILE_PATH);
     const randomKeyword = getRandomElement(keywords);
 
-    // 计算日期
+    // Calculate date
     const twoMonthsAgo = new Date();
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
     const dateString = twoMonthsAgo.toISOString().split("T")[0];

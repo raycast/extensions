@@ -7,8 +7,8 @@ export const DEFAULT_KEYWORDS = ["Claude", "cursor", "RAG", "prompt", "AI"];
 export const KEYWORDS_FILE_PATH = path.join(environment.supportPath, "keywords.txt");
 
 /**
- * 检查文件是否存在
- * @param filePath 文件路径
+ * Check if file exists
+ * @param filePath File path
  */
 async function fileExists(filePath: string): Promise<boolean> {
   try {
@@ -20,9 +20,9 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 /**
- * 确保目录存在并写入内容
- * @param filePath 文件路径
- * @param content 文件内容
+ * Ensure directory exists and write content to file
+ * @param filePath File path
+ * @param content File content
  */
 async function ensureAndWrite(filePath: string, content: string): Promise<void> {
   const dirname = path.dirname(filePath);
@@ -33,9 +33,9 @@ async function ensureAndWrite(filePath: string, content: string): Promise<void> 
 }
 
 /**
- * 读取关键词列表
- * @param filePath 关键词文件路径
- * @returns 关键词数组
+ * Read keywords list
+ * @param filePath Path to keywords file
+ * @returns Array of keywords
  */
 export async function readKeywords(filePath: string = KEYWORDS_FILE_PATH): Promise<string[]> {
   try {
@@ -55,13 +55,13 @@ export async function readKeywords(filePath: string = KEYWORDS_FILE_PATH): Promi
 }
 
 /**
- * 写入关键词列表
- * @param keywords 关键词数组
- * @param filePath 文件路径
+ * Write keywords list
+ * @param keywords Array of keywords
+ * @param filePath Path to file
  */
 export async function writeKeywords(keywords: string[], filePath: string = KEYWORDS_FILE_PATH): Promise<void> {
   try {
-    // 去重并过滤空字符串
+    // Remove duplicates and filter out empty strings
     const uniqueKeywords = [...new Set(keywords.map((k) => k.trim()).filter((k) => k))];
     const content = uniqueKeywords.join("\n");
     await ensureAndWrite(filePath, content);

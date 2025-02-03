@@ -23,11 +23,11 @@ function getLanguageFilter(): string {
 }
 
 /**
- * 获取搜索URL
- * @param platform 平台名称
- * @param keyword 搜索关键词
- * @param date 日期（仅用于X平台）
- * @returns 搜索URL
+ * Get search URL
+ * @param platform Platform name
+ * @param keyword Search keyword
+ * @param date Date (only used for X platform)
+ * @returns Search URL
  */
 export function getSearchUrl(platform: Platform, keyword: string, date?: string): string {
   const encodedKeyword = encodeURIComponent(keyword);
@@ -56,8 +56,8 @@ export function getSearchUrl(platform: Platform, keyword: string, date?: string)
 }
 
 /**
- * 打开URL
- * @param url 要打开的URL
+ * Open URL
+ * @param url URL to open
  * @returns Promise
  */
 export async function openUrl(url: string): Promise<void> {
@@ -65,10 +65,10 @@ export async function openUrl(url: string): Promise<void> {
 }
 
 /**
- * 在指定平台上搜索关键词
- * @param platform 平台
- * @param keyword 关键词
- * @param date 日期（可选）
+ * Search keyword on specified platform
+ * @param platform Platform name
+ * @param keyword Search keyword
+ * @param date Date (optional)
  */
 export async function searchOnPlatform(platform: Platform, keyword: string, date?: string) {
   try {
