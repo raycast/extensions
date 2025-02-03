@@ -6,40 +6,89 @@ import { apolloClient } from "./lib/apollo";
 import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 import { PUBLICATIONS } from "./lib/fetchPublications";
 import { MediaSet, Post, ProfileData, PublicationMainFocus } from "./types";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
-  return (
-    <ApolloProvider client={apolloClient}>
-      <Main />
-    </ApolloProvider>
-  );
+  return <Main />;
 }
 
 function Main() {
-  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+  const gql =
+`
+query SearchProfiles($request: ProfileSearchRequest!) {
+  searchProfiles(request: $request) {
+    items {
+      profileId: id
+      metadata {
+        bio
+        displayName
+        picture {
+          ... on ImageSet {
+            raw {
+              uri
+            }
+          }
+        }
+      }
+      handle {
+        fullHandle
+        localName
+      }
+      stats {
+        totalFollowers: followers
+        totalFollowing: following
+        totalPosts: posts
+        totalComments: comments
+        totalPublications: publications
+        totalMirrors: mirrors
+      }
+    }
+  }
+}
+`;
 
-  const { data: profileSuggestions, loading: profileSuggestionsLoading } = useQuery(PROFILE_SUGGESTIONS, {
-    variables: { query: searchTerm },
-  });
+const [searchTerm, setSearchTerm] = useState("");
+const { data: profileSuggestions, isLoading: profileSuggestionsLoading } = useFetch("https://api-v2.lens.dev/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      query: gql,
+      variables: {
+        request: {
+          query: searchTerm
+        }
+      }
+    }),
+    mapResult(result: { data: { searchProfiles: { items: ProfileData[] } } }) {
+      return {
+        data: result.data.searchProfiles.items
+      }
+    },
+    initialData: [],
+    execute: !!searchTerm
+  })
 
   let title;
   if (!searchTerm) title = "Search for a Lens Profile";
-  if (profileSuggestions?.search.items.length === 0) title = "No Profiles Found";
+  if (profileSuggestions.length === 0) title = "No Profiles Found";
   if (profileSuggestionsLoading) title = "Searching for Lens Profiles...";
 
   return (
     <List
       isLoading={profileSuggestionsLoading}
       searchText={searchTerm}
+      throttle
       onSearchTextChange={(term) => setSearchTerm(term)}
     >
       <List.EmptyView icon={{ source: "list-icon.png" }} title={title} />
-      {profileSuggestions?.search?.items.map((result: ProfileData) => {
-        const avatar = normalizeUrl(result.picture?.original?.url);
+      {profileSuggestions.map((result: ProfileData) => {
+        const avatar = normalizeUrl(result.metadata?.picture.raw?.uri || "");
         return (
           <List.Item
             key={result.profileId}
-            title={result.handle}
+            title={result.handle.localName}
             icon={avatar ? { source: avatar, mask: Image.Mask.Circle, fallback: "👤" } : "👤"}
             actions={
               <ActionPanel>
@@ -47,9 +96,7 @@ function Main() {
                   title="Show profile"
                   icon={Icon.Sidebar}
                   target={
-                    <ApolloProvider client={apolloClient}>
-                      <Profile {...result} />
-                    </ApolloProvider>
+                    <Profile {...result} />
                   }
                 />
                 <Action.OpenInBrowser url={`https://lenster.xyz/u/${result.handle}`} />
@@ -78,7 +125,7 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
   };
 
   return (
-    <List isShowingDetail enableFiltering={false} searchBarPlaceholder={handle}>
+    (<List isShowingDetail filtering={false} searchBarPlaceholder={handle}>
       <List.Section title="Profile">
         <List.Item
           title={handle}
@@ -161,7 +208,7 @@ Posted on: ${String(new Date(post.createdAt).toDateString())}
           })}
         </List.Section>
       )}
-    </List>
+    </List>)
   );
 }
 

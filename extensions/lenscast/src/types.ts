@@ -21,24 +21,28 @@ export type MediaSet = {
 
 export type ProfileData = {
   profileId: string;
-  bio: string;
-  name: string;
-  handle: string;
-  picture: {
-    original: {
-      url: string;
-    };
-  };
+  handle: {
+    fullHandle: string;
+    localName: string;
+  }
   stats: {
     totalFollowers: string;
     totalFollowing: string;
     totalPosts: string;
     totalComments: string;
-    totalMirrors: string;
     totalPublications: string;
-    totalCollects: string;
+    totalMirrors: string;
+    // totalCollects: string;
   };
-  metadata: string;
+  metadata: {
+    bio: string | null;
+    displayName: string;
+    picture: {
+      raw?: {
+        uri: string;
+      };
+    }
+  } | null
 };
 
 export type MetadataOutput = {
