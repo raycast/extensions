@@ -11,7 +11,8 @@
     "rcruzper",
     "thomas",
     "arthur_fontaine",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "anwarulislam"
   ],
   "keywords": [
     "sound",
@@ -33,6 +34,13 @@
       "subtitle": "Audio Device",
       "description": "Sets the active audio input device.",
       "mode": "view"
+    },
+    {
+      "name": "toggle-last-output-device",
+      "title": "Toggle Last Output Device",
+      "subtitle": "Audio Device",
+      "description": "Toggle the active audio output device between the last two used",
+      "mode": "no-view"
     },
     {
       "name": "favourite",
@@ -88,7 +96,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.12.0",
     "@spotxyz/macos-audio-devices": "1.5.0",
     "execa": "^6.0.0",
@@ -110,6 +118,7 @@
     "build": "npm run copy-binary && ray build -e dist",
     "dev": "npm run copy-binary && ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
   }
 }
