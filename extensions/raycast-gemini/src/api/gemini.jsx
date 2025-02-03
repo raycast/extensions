@@ -7,7 +7,6 @@ import {
   showToast,
   getSelectedText,
   getPreferenceValues,
-  popToRoot,
   Keyboard,
   launchCommand,
   LaunchType,
