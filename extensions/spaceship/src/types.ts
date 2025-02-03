@@ -8,10 +8,23 @@ expirationDate: string;
 privacyProtection: {
 level: "public" | "high";
 contactForm: boolean;
-},
+}
+nameservers: {
+    provider: "basic" | "custom";
+    hosts: string[];
+}
 }
 
-export type PaginatedResult<T> = {
+export type ResourceRecord = {
+    type: string;
+    name: string;
+    ttl?: number;
+    group: {
+        type: "custom" | "product" | "personalNs";
+    }
+}
+
+export type SuccessResult<T> = {
     items: T[];
     total: number;
 }
