@@ -1,8 +1,5 @@
-# Roamio Changelog
+# Keyword Roulette Changelog
 
-## [1.0.0] - 2024-03-20
+## [1.0.0] - {PR_MERGE_DATE}
 
-### Added
-- Multi-platform search support for specific keywords
-- Random keyword search functionality
-- Keyword management system (add/remove/edit keywords)
+Initial version code
