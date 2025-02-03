@@ -182,13 +182,27 @@ export default function DownloadVideo() {
   useEffect(() => {
     (async () => {
       const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+      if (clipboardText && isYouTubeURL(clipboardText)) {
+        setValue("url", clipboardText);
+        return;
+      }
 
-      const selectedText = await getSelectedText();
-      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText && isYouTubeURL(selectedText)) {
+          setValue("url", selectedText);
+          return;
+        }
+      } catch {
+        // Suppress the error if Raycast didn't find any selected text
+      }
 
-      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      try {
+        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      } catch {
+        // Suppress the error if Raycast didn't find browser extension
+      }
     })();
   }, []);
 
