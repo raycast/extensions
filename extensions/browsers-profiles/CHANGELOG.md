@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Add sorting on profile names] - {PR_MERGE_DATE}
+## [Add sorting on profile names] - 2025-02-03
 
 - Adding a simple sort on the profile names
 
