@@ -19,8 +19,7 @@
       "name": "index",
       "title": "Google Search",
       "description": "Google search with autosuggestions",
-      "mode": "view",
-      "permissions": ["clipboard"]
+      "mode": "view"
     },
     {
       "name": "searchSelectText",
