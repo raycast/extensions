@@ -82,6 +82,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "pull": "ray pull-contributions",
     "publish": "ray publish"
   }
 }

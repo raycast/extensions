@@ -184,11 +184,15 @@ export default function DownloadVideo() {
       const clipboardText = await Clipboard.readText();
       if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
 
-      const selectedText = await getSelectedText();
-      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
 
-      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      } catch (e) {
+        console.log(e);
+      }
     })();
   }, []);
 
