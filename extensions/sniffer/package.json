@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "hotspot",
-      "title": "Sniffer",
+      "title": "Show Connected Hotspots",
+      "subtitle": "Sniffer",
       "description": "Find who is connected to your network",
       "mode": "view"
     }
