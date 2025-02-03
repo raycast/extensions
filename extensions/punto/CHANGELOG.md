@@ -1,6 +1,6 @@
 # Punto Changelog
 
-## [Ru layout mapping] - {PR_MERGE_DATE}
+## [Ru layout mapping] - 2025-02-03
 
 - Replaced ru layout preference with a dropdown to map layout caption with names
 
