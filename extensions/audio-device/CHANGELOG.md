@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Toggle Last Output Device] - {PR_MERGE_DATE}
+
+- Added the option to toggle the last output device
+
 ## [Update] - 2024-06-26
 
 - Added keywords for better discovery
