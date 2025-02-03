@@ -1,6 +1,6 @@
 # Remove Background - Powered by Mac Changelog
 
-## [Add clipboard support] - {PR_MERGE_DATE}
+## [Add clipboard support] - 2025-02-03
 
 - Add support for removing the background from clipboard images.
 
