@@ -13,6 +13,7 @@
     "Developer Tools"
   ],
   "keywords": [
+    "AI",
     "DeepSeek",
     "DeepSeek V3",
     "DeepSeek R1",
@@ -212,7 +213,7 @@
           "name": "lookup",
           "label": "Lookup Mode (Beta)",
           "title": "Lookup Mode (Beta)",
-          "description": "Enable lookup mode to get the meaning of the selected single word",
+          "description": "Enable lookup mode to get the meaning of the selected single word like a dictionary",
           "type": "checkbox",
           "required": false,
           "default": false
@@ -713,15 +714,6 @@
       ],
       "required": true,
       "title": "LLM Model"
-    },
-    {
-      "name": "sidenote",
-      "title": "SideNote Integration",
-      "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
-      "label": "Enabled",
-      "type": "checkbox",
-      "default": false,
-      "required": false
     }
   ],
   "devDependencies": {

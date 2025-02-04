@@ -1,5 +1,9 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [Minor improvements] - {PR_MERGE_DATE}
+
+- 💤 Minor improvements
+
 ## [New Features] - 2025-01-30
 
 - 🐳 Add DeepSeek-R1 reasoning model
