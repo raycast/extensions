@@ -61,6 +61,7 @@
     "@raycast/api": "^1.84.3",
     "@raycast/utils": "^1.18.0",
     "execa": "^9.4.1",
+    "p-queue": "^8.1.0",
     "valibot": "~0.42.1"
   },
   "devDependencies": {
