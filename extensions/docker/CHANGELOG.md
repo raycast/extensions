@@ -1,6 +1,6 @@
 # Docker Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-02-04
 
 - Added ability to search containers by their image-name or id.
 
