@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execa, execaCommand } from "execa";
+import { ExecaError, execa, execaCommand } from "execa";
 import PQueue from "p-queue";
 import { safeParse } from "valibot";
 
@@ -32,40 +32,51 @@ async function dcli(...args: string[]) {
     throw new CLIVersionNotSupportedError("Dashlane CLI version 6.2415.0 not supported");
   }
 
-  return cliQueue.add(async () => {
-    try {
-      const { stdout } = await execa(CLI_PATH, args, {
-        timeout: 15_000,
-        ...(preferences.masterPassword && {
-          env: {
-            DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
-          },
-        }),
-      });
+  return cliQueue.add<string>(
+    async () => {
+      try {
+        const { stdout } = await execa(CLI_PATH, args, {
+          timeout: 15_000,
+          ...(preferences.masterPassword && {
+            env: {
+              DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
+            },
+          }),
+        });
 
-      if (preferences.biometrics) {
-        execaCommand("open -a Raycast.app");
-      }
+        if (preferences.biometrics) {
+          execaCommand("open -a Raycast.app");
+        }
 
-      return stdout;
-    } catch (error) {
-      if (error instanceof Error && "timedOut" in error && error.timedOut) {
-        if ("stderr" in error && typeof error.stderr === "string") {
-          if (error.stderr.includes("Please enter your master password")) {
-            throw new MasterPasswordMissingError(error.stack ?? error.message);
+        return stdout;
+      } catch (error) {
+        if (error instanceof ExecaError) {
+          if (error.timedOut) {
+            const stderr = error.stderr as unknown as string;
+            if (stderr.includes("Please enter your master password")) {
+              throw new MasterPasswordMissingError(error.stack ?? error.message);
+            }
+
+            if (stderr.includes("Please enter your email address")) {
+              throw new CLINotLoggedInError(error.stack ?? error.message);
+            }
+
+            throw new TimeoutError(error.stack ?? error.message);
           }
 
-          if (error.stderr.includes("Please enter your email address")) {
-            throw new CLINotLoggedInError(error.stack ?? error.message);
+          if (error.code === "ENOENT") {
+            throw new CLINotFoundError(
+              `CLI not found at path: ${CLI_PATH}. Please verify the path in preferences.`,
+              error.stack,
+            );
           }
         }
 
-        throw new TimeoutError(error.stack ?? error.message);
+        throw error;
       }
-
-      throw error;
-    }
-  });
+    },
+    { throwOnTimeout: true },
+  );
 }
 
 export async function syncVault() {
