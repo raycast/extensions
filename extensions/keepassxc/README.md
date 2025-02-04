@@ -1,6 +1,10 @@
-# KeePassXC for Raycast
+<p align="center">
+ <img width=125 src=https://github.com/user-attachments/assets/6f2b44ad-6a93-4e28-ac41-7fa1c8e9b881>
+</p>
 
-Search your passwords, usernames, TOTP codes, and more using KeePassXC directly from [Raycast](https://www.raycast.com).
+<h1 align="center">KeePassXC for Raycast</h1>
+
+<b align="center">Search your passwords, usernames, TOTP codes, and more using KeePassXC directly from Raycast.</b>
 
 ## Requirements
 
