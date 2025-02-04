@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Your Library] - {PR_MERGE_DATE}
+## [Fix Your Library] - 2025-02-04
 
 - Fix a possibly null issue from `getMeAlbums` API.
 
