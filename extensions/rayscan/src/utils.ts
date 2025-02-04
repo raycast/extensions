@@ -1,7 +1,7 @@
 // import { Cache } from "@raycast/api";
 import { Transaction, TransactionsResponse } from "./types";
 import fetch from "node-fetch";
-import { network_configs } from "./networkConfig";
+import { network_configs, nitro_contracts } from "./networkConfig";
 // import Parser from "rss-parser";
 // import { CacheEntry, Topic } from "./types";
 
@@ -40,6 +40,13 @@ export function openInTenderly(transaction: Transaction) {
   const network = network_configs[transaction.network_id];
   return `https://dashboard.tenderly.co/tx/${network.slug ?? network.networkName.toLowerCase().replace(" ", "-")}/${transaction.hash}`;
 }
+export function openInNitro(transaction: Transaction) {
+  return `https://explorer.routernitro.com/tx/${transaction.hash}`;
+}
+export function isNitro(transaction: Transaction) {
+  return transaction.to === nitro_contracts[transaction.network_id];
+}
+
 // export const gqlFetcher = async (url: string, query: string, variables: any) => {
 //     const response = await fetch(url, {
 //         method: 'POST',

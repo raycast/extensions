@@ -1,14 +1,14 @@
 import { Action, ActionPanel, Detail, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { getTransactions, openInTenderly, validateHash } from "./utils";
+import { getTransactions, isNitro, openInNitro, openInTenderly, validateHash } from "./utils";
 import { Transaction } from "./types";
 import { network_configs } from "./networkConfig";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading, error } = usePromise(getTransactions, [searchText], { execute: validateHash(searchText) });
-
+  const transactions = data?.transactions ?? [];
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoading}>
       {error && (
@@ -19,7 +19,8 @@ export default function Command() {
         />
       )}
       {!error &&
-        data?.transactions.map((transaction) => {
+        transactions.length !== 0 &&
+        transactions.map((transaction) => {
           const network = network_configs[transaction.network_id];
           return (
             <List.Item
@@ -34,6 +35,9 @@ export default function Command() {
                     target={<TransactionDetail transaction={transaction} />}
                     icon={Icon.Eye}
                   />
+                  {isNitro(transaction) && (
+                    <Action.OpenInBrowser icon={Icon.ArrowNe} url={openInNitro(transaction)} title="Open in Nitro" />
+                  )}
                   <Action.OpenInBrowser
                     icon={Icon.ArrowNe}
                     url={openInTenderly(transaction)}
@@ -44,6 +48,9 @@ export default function Command() {
             />
           );
         })}
+      {!error && transactions.length === 0 && searchText === "" && (
+        <List.EmptyView title="Enter a transaction hash to search" />
+      )}
     </List>
   );
 }
@@ -90,7 +97,7 @@ export function TransactionDetail({ transaction }: { transaction: Transaction })
     `- **Block Hash:** \`${transaction.block_hash}\``,
     `- **Block Number:** \`${transaction.block_number.toLocaleString()}\``,
     `- **From:** \`${transaction.from}\``,
-    `- **To:** \`${transaction.to}\``,
+    `- **To:** \`${transaction.to}\` \`${isNitro(transaction) ? "(Nitro)" : ""}\``,
     `- **Nonce:** \`${transaction.nonce.toLocaleString()}\``,
     `- **Timestamp:** \`${readableDate} (${howAgo})\``,
     `## Gas Information`,
@@ -124,6 +131,9 @@ export function TransactionDetail({ transaction }: { transaction: Transaction })
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={openInTenderly(transaction)} title="Open in Tenderly" />
+          {isNitro(transaction) && (
+            <Action.OpenInBrowser icon={Icon.ArrowNe} url={openInNitro(transaction)} title="Open in Nitro" />
+          )}
         </ActionPanel>
       }
     />

@@ -17,7 +17,14 @@
       "title": "Search Transaction",
       "subtitle": "search transaction",
       "description": "Searchs Transaction using hash across evm blockchains",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hash",
+          "type": "text",
+          "placeholder": "Enter transaction hash"
+        }
+      ]
     }
   ],
   "dependencies": {
