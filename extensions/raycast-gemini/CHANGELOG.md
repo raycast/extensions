@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Append Selected Text to Chat] - {PR_MERGE_DATE}
+## [Append Selected Text to Chat] - 2025-02-04
 
 - Ability to append selected text to the chat command with the `Append to Chat` command. Shortcut: `Ctrl + Shift + V`
 
