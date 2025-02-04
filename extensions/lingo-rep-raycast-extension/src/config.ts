@@ -12,7 +12,7 @@ const allConfigs = {
     weURL: "chrome-extension://gfmbkbpbncjopblehgldppphpkcmehnk/settings.html",
   },
   production: {
-    apiURL: "https://lingorep.com/api",
+    apiURL: "https://api.lingorep.com/v1",
     lpURL: "https://lingorep.com",
     weURL: "chrome-extension://gfmbkbpbncjopblehgldppphpkcmehnk/settings.html",
   },
