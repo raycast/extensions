@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { global_model, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
