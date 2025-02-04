@@ -31,7 +31,6 @@ export function PlayerSchedule({ url }: { url: string }) {
         rows.each((_, row) => {
           // Use only the immediate td children.
           const tds = $(row).children("td");
-          console.log(tds.length, "tds length");
           if (tds.length >= 5) {
             const rank = $(tds[0]).text().trim();
             const player = $(tds[2]).text().trim();
@@ -53,7 +52,7 @@ export function PlayerSchedule({ url }: { url: string }) {
               const seedRaw = cell.attr("p") || "";
               const seed = seedRaw.replace(/[()]/g, "").trim();
               if (isQual) {
-                tournament = tournament + " (Q)";
+                tournament = `${tournament} (Q)`;
               }
               if (tournament) {
                 events.push({ tournament, seed });
@@ -62,7 +61,6 @@ export function PlayerSchedule({ url }: { url: string }) {
             items.push({ rank, player, age, country, events });
           }
         });
-        console.log("Parsed items:", items);
         setTableItems(items);
       }
     }
