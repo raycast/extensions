@@ -2,7 +2,9 @@
 
 **Spin the roulette—search your keywords randomly across platforms.**  
 
-Keyword Roulette helps you discover content across various social media and content platforms. This extension lets you maintain a list of your personal "hot topics" and then randomly selects one to search across platforms like Twitter, Reddit, and more.   
+
+Keyword Roulette helps you track technology trends more efficiently. This extension allows you to maintain a list of your personal "hot topics" and randomly selects one to search across platforms like Twitter, Reddit, and more—ensuring you never miss out on any tech trends.
+
 
 ## Features
 
