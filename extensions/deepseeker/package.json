@@ -577,8 +577,8 @@
     },
     {
       "name": "execute",
-      "title": "Execute",
-      "description": "Execute the prompt and replace it with its output",
+      "title": "Execute Selected Prompt",
+      "description": "Execute the selected prompt and replace it with its output",
       "mode": "no-view",
       "preferences": [
         {
