@@ -20,8 +20,7 @@ export default function ResultView(prompt: string, model_override: string, toast
     let selectedText = "";
 
     try {
-      selectedText = user_input || "";
-      // selectedText = user_input || (await getSelectedText()); // TODO: a temporary fix for not using selected text but user input. Need refactoring.
+      selectedText = user_input || (await getSelectedText()); // TODO: a temporary fix for not using selected text but user input. Need refactoring.
     } catch (error) {
       toast.title = "Error";
       toast.style = Toast.Style.Failure;
