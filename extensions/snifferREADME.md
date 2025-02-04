@@ -1,4 +1,4 @@
-# Hotspot
+# Sniffer
 
 Find who is connected to your network.
 
