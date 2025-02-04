@@ -86,5 +86,3 @@ async function deploy(code: Blob) {
 
   return deployResponse.id;
 }
-
-export function deactivate() {}
