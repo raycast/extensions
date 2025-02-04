@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix URL parsing issue
+
 ## [Added a shortcut] - 2025-01-22
 
 - Added a shortcut to copy the package version
