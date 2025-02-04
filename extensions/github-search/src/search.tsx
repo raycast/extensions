@@ -254,7 +254,7 @@ export default function Command() {
               />
 
               <Action
-                title="Rename Saved Search..."
+                title="Rename Saved Search…"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
                 icon={Icon.Pencil}
                 onAction={() => {
@@ -291,7 +291,7 @@ export default function Command() {
             </>
           ) : (
             <Action.SubmitForm
-              title="Save Search As..."
+              title="Save Search As…"
               shortcut={{ modifiers: ['cmd'], key: 's' }}
               icon={Icon.PlusCircle}
               onSubmit={async formValues => {
@@ -316,7 +316,7 @@ export default function Command() {
           )}
 
           <Action
-            title="Reusable Filters..."
+            title="Reusable Filters…"
             shortcut={{ modifiers: ['cmd'], key: 'f' }}
             icon={Icon.List}
             onAction={() => {

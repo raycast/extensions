@@ -18,13 +18,16 @@ export default function SavedSearches() {
           description="Create your first saved search in the main GitHub Search view"
           actions={
             <ActionPanel>
-              <Action title="Open GitHub Search" onAction={async () => {
-                try {
-                  await launchCommand({ name: 'search', type: LaunchType.UserInitiated })
+              <Action
+                title="Open GitHub Search"
+                onAction={async () => {
+                  try {
+                    await launchCommand({ name: 'search', type: LaunchType.UserInitiated });
                   } catch (error) {
                     showToast({ title: 'Failed to open GitHub Search', style: Toast.Style.Failure });
                   }
-               }} />
+                }}
+              />
             </ActionPanel>
           }
         />
