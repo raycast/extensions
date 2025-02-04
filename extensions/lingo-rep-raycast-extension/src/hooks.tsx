@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
+import { OAuth } from "@raycast/api";
 import { get, post } from "./fetch";
 
-import { githubService, googleService } from "./oauth";
+import { githubService, googleService, googleClientId } from "./oauth";
 
 export const useGet = (url: string) => {
   const [response, setResponse] = useState<unknown | null>(null);
@@ -46,6 +47,22 @@ export const usePost = (url: string, body: Record<string, unknown>) => {
   return { response, isLoading };
 };
 
+async function refreshGoogleTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
+  const params = new URLSearchParams();
+  params.append("client_id", googleClientId);
+  params.append("refresh_token", refreshToken);
+  params.append("grant_type", "refresh_token");
+
+  const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", body: params });
+  if (!response.ok) {
+    console.error("refresh tokens error:", await response.text());
+    throw new Error(response.statusText);
+  }
+  const tokenResponse = (await response.json()) as OAuth.TokenResponse;
+  tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
+  return tokenResponse;
+}
+
 export const useIsAuthenticated = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [, setJWT] = useCachedState<string>("jwt", "");
@@ -54,11 +71,17 @@ export const useIsAuthenticated = () => {
   useEffect(() => {
     void (async () => {
       if (authProvider === "github") {
-        const tokensObj = await githubService.client.getTokens();
-        if (tokensObj && !tokensObj.isExpired()) setIsAuthenticated(true);
+        const tokenSet = await githubService.client.getTokens();
+        if (tokenSet && !tokenSet.isExpired()) setIsAuthenticated(true);
       } else if (authProvider === "google") {
-        const tokensObj = await googleService.client.getTokens();
-        if (tokensObj && !tokensObj.isExpired()) setIsAuthenticated(true);
+        let tokenSet = await googleService.client.getTokens();
+        if (tokenSet?.accessToken) {
+          if (tokenSet.refreshToken && tokenSet.isExpired()) {
+            await googleService.client.setTokens(await refreshGoogleTokens(tokenSet.refreshToken));
+          }
+          tokenSet = await googleService.client.getTokens();
+          if (tokenSet?.accessToken && !tokenSet?.isExpired()) setIsAuthenticated(true);
+        }
       } else {
         setIsAuthenticated(false);
         setJWT("");

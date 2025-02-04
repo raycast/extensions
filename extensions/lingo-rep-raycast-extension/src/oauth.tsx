@@ -10,8 +10,9 @@ export const githubService = OAuthService.github({
   scope: "read:user user:email",
 });
 
+export const googleClientId = "797589717240-9353d3f7bnfssqgo6ci8kv4rfai9rfu6.apps.googleusercontent.com";
 export const googleService = OAuthService.google({
-  clientId: "797589717240-9353d3f7bnfssqgo6ci8kv4rfai9rfu6.apps.googleusercontent.com",
+  clientId: googleClientId,
   scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
 });
 
@@ -24,7 +25,7 @@ function UserProfileComponent({ authProvider }: { authProvider: "github" | "goog
   // TODO: decide on the refresh strategy
 
   const { data: responseData } = useFetch<{ message: string; jwt: string }>(
-    `http://localhost:8787/api/auth/${authProvider}/get-jwt`,
+    `${config.apiURL}/auth/${authProvider}/get-jwt`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

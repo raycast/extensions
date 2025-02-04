@@ -21,15 +21,7 @@
     }
   ],
   "scripts": {
-    "copy:shared-packages": "./copy-shared-packages.sh",
-    "watch:translate": "chokidar '../../packages/translate/dist/**/*' -c 'npm run copy:shared-packages'",
-    "watch:lang-options": "chokidar '../../packages/lang-options/dist/**/*' -c 'npm run copy:shared-packages'",
-    "watch:shared-packages": "npm-run-all --parallel watch:translate watch:lang-options",
-    "npm:install": "npm install --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast-extension",
-    "build": "npm run npm:install && ray build -e dist",
-    "dev:raycast": "ray develop",
-    "dev": "npm run npm:install && npm run copy:shared-packages && npm-run-all --parallel watch:shared-packages dev:raycast",
-    "dev-raycast": "",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
