@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { OAuth } from "@raycast/api";
+import fetch from "node-fetch";
 import { get, post } from "./fetch";
 
 import { githubService, googleService, googleClientId } from "./oauth";
@@ -68,6 +69,7 @@ export const useIsAuthenticated = () => {
   const [, setJWT] = useCachedState<string>("jwt", "");
   const [authProvider] = useCachedState<string>("authProvider", "");
   const [, setUserId] = useCachedState<string>("userId", "");
+
   useEffect(() => {
     void (async () => {
       if (authProvider === "github") {

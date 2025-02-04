@@ -1,13 +1,11 @@
-const nodeEnv = process.env.NODE_ENV as unknown as "development" | "production";
+let nodeEnv = process.env.NODE_ENV as unknown as "development" | "production" | undefined;
 
-// todo:
-// - check process.env.NODE_ENV in production
-
-if (!["development", "production"].includes(nodeEnv)) throw new Error(`Invalid NODE_ENV: ${nodeEnv}`);
+if (nodeEnv !== "development") nodeEnv = "production";
+console.log("node env", nodeEnv);
 
 const allConfigs = {
   development: {
-    apiURL: "http://localhost:8787/api",
+    apiURL: "http://localhost:8787/v1",
     lpURL: "http://localhost:3001",
     weURL: "chrome-extension://gfmbkbpbncjopblehgldppphpkcmehnk/settings.html",
   },
@@ -17,5 +15,6 @@ const allConfigs = {
     weURL: "chrome-extension://gfmbkbpbncjopblehgldppphpkcmehnk/settings.html",
   },
 };
+// test
 
 export const config = allConfigs[nodeEnv];

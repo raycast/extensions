@@ -205,9 +205,6 @@ function LanguagesDropdown() {
   );
 }
 
-// todo:
-// - add error when reached max translations for free tier or subscription cancelled
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [translatedText, setTranslatedText] = useState<TranslatedText | null>(null);
@@ -278,7 +275,10 @@ export default function Command() {
       {isAuthenticated ? (
         <Action title="Enter (↵) to Save and Repeat" onAction={saveTranslation} />
       ) : (
-        <Action.Push title={`Connect Google Profile to Save`} target={<UserProfilePageGoogle />} />
+        <>
+          <Action.Push title={`Connect Google Profile to Save`} target={<UserProfilePageGoogle />} />
+          <Action.Push title={`Connect GitHub Profile to Save`} target={<UserProfilePageGithub />} />
+        </>
       )}
     </ActionPanel>
   );

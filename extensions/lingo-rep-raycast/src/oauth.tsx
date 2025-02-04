@@ -19,10 +19,11 @@ export const googleService = OAuthService.google({
 function UserProfileComponent({ authProvider }: { authProvider: "github" | "google" }) {
   const { token } = getAccessToken();
   const [, setJWT] = useCachedState<string>("jwt", "");
-  const [, setAuthProvider] = useCachedState<string>("authProvider", "");
+  const [authProviderInState, setAuthProvider] = useCachedState<string>("authProvider", "");
   const [, setUserId] = useCachedState<string>("userId", "");
 
-  // TODO: decide on the refresh strategy
+  // TODO:
+  // - decide on the refresh strategy for github
 
   const { data: responseData } = useFetch<{ message: string; jwt: string }>(
     `${config.apiURL}/auth/${authProvider}/get-jwt`,
@@ -34,13 +35,15 @@ function UserProfileComponent({ authProvider }: { authProvider: "github" | "goog
   );
 
   useEffect(() => {
+    if (!authProviderInState) setAuthProvider(authProvider);
+  }, [authProviderInState]);
+
+  useEffect(() => {
     if (responseData?.jwt) {
       setJWT(responseData.jwt);
-      setAuthProvider(authProvider);
     } else {
       console.log("No JWT received");
       setJWT("");
-      setAuthProvider("");
     }
   }, [responseData?.jwt]);
 
