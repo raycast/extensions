@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon } from '@raycast/api';
+import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast } from '@raycast/api';
 import { focusOrOpenUrl, isSupportBrowser } from './open-url';
 import { useLocalStorage } from '@raycast/utils';
 import type { FormFields, ReusableFilter, ReusableFilterFormProps, SavedSearch } from './types';
@@ -98,7 +98,7 @@ const EXCLUDE_APPS = [
   'app/ubiquity-os-0x4007'
 ];
 
-const SaveSearchForm = ({ defaultName, onSubmit }: { defaultName: string; onSubmit: (name: string) => void }) => {
+const SaveSearchForm = ({ defaultName, onSubmit }: { defaultName: string; onSubmit: (name: string) => false | void }) => {
   const { pop } = useNavigation();
   const [name, setName] = useState(defaultName);
 
@@ -110,9 +110,10 @@ const SaveSearchForm = ({ defaultName, onSubmit }: { defaultName: string; onSubm
             title="Save"
             shortcut={{ modifiers: ['cmd'], key: 's' }}
             onSubmit={() => {
-              onSubmit(name);
-              showToast({ title: 'Search Saved' });
-              pop();
+              if (onSubmit(name) !== false) {
+                showToast({ title: 'Search Saved' });
+                pop();
+              }
             }}
           />
         </ActionPanel>
@@ -261,8 +262,12 @@ export default function Command() {
                   push(
                     <SaveSearchForm
                       defaultName={currentSearch?.name ?? ''}
-                      onSubmit={newName => {
-                        const updatedSearches = savedSearches?.map(search => (search.id === selectedSearchId ? { ...search, name: newName } : search));
+                      onSubmit={name => {
+                        if (!name?.trim()) {
+                          showToast({ title: 'Please enter a name', style: Toast.Style.Failure });
+                          return;
+                        }
+                        const updatedSearches = savedSearches?.map(search => (search.id === selectedSearchId ? { ...search, name } : search));
                         setSavedSearches(updatedSearches ?? []);
                         showToast({ title: 'Saved search renamed' });
                       }}
@@ -294,6 +299,10 @@ export default function Command() {
                   <SaveSearchForm
                     defaultName={formValues.query}
                     onSubmit={name => {
+                      if (!name?.trim()) {
+                        showToast({ title: 'Please enter a name', style: Toast.Style.Failure });
+                        return false;
+                      }
                       const savedSearch: SavedSearch = { id: Date.now().toString(), name, ...formValues };
                       setSavedSearches([...(savedSearches ?? []), savedSearch]).then(() => {
                         setTimeout(setSelectedSearchId, 100, savedSearch.id);
@@ -524,8 +533,12 @@ const ReusableFilterForm = ({ reusableFilters: f, onSelect, selectedFilter }: Re
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
                 icon={Icon.Replace}
                 onSubmit={() => {
-                  if (!name || !filter) {
-                    showToast({ title: 'Please enter a name and filter' });
+                  if (!name?.trim()) {
+                    showToast({ title: 'Please enter a name', style: Toast.Style.Failure });
+                    return;
+                  }
+                  if (!filter?.trim()) {
+                    showToast({ title: 'Please enter a filter', style: Toast.Style.Failure });
                     return;
                   }
                   const filters = reusableFilters.map(f => (f.id === reusableFilterId ? { ...f, name, filter: filter.split('\n').filter(Boolean).join(' ') } : f));
@@ -553,8 +566,12 @@ const ReusableFilterForm = ({ reusableFilters: f, onSelect, selectedFilter }: Re
               title="Save Filter"
               icon={Icon.PlusCircle}
               onSubmit={() => {
-                if (!name || !filter) {
-                  showToast({ title: 'Please enter a name and filter' });
+                if (!name?.trim()) {
+                  showToast({ title: 'Please enter a name', style: Toast.Style.Failure });
+                  return;
+                }
+                if (!filter?.trim()) {
+                  showToast({ title: 'Please enter a filter', style: Toast.Style.Failure });
                   return;
                 }
                 const reusableFilter: ReusableFilter = { id: Date.now().toString(), name, filter };
