@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-04
 
 - Updated the deploy script for the "Deploy Project" command.
 
