@@ -31,7 +31,7 @@
     {
       "name": "manage-domains",
       "title": "Manage Domains",
-      "description": "",
+      "description": "View Domains and DNS Records",
       "mode": "view"
     }
   ],
