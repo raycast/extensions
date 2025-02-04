@@ -1,20 +1,13 @@
-import {
-  List,
-  Icon,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showToast, Toast } from '@raycast/api';
+import { useEffect, useState } from 'react';
 import {
   getStatus,
-  isMuteDeckRunning,
   isInMeeting,
   isMuted,
+  isMuteDeckRunning,
   isVideoOn,
   type MuteDeckStatus,
-} from "../utils/api";
+} from '../utils/api';
 
 interface State {
   status: MuteDeckStatus | null;
@@ -22,88 +15,57 @@ interface State {
   error: Error | null;
 }
 
-export default function Command(): JSX.Element {
+export default function Command(): void {
   const [state, setState] = useState<State>({
     status: null,
     isLoading: true,
     error: null,
   });
 
-  useEffect(() => {
-    void fetchStatus();
-  }, []);
-
   async function fetchStatus(): Promise<void> {
     try {
       const status = await getStatus();
       setState((prev) => ({ ...prev, status, isLoading: false }));
+
+      // Update command metadata
+      Command.subtitle = getStatusText(status);
     } catch (error) {
       setState((prev) => ({
         ...prev,
-        error:
-          error instanceof Error ? error : new Error("Failed to fetch status"),
+        error: error instanceof Error ? error : new Error('Failed to fetch status'),
         isLoading: false,
       }));
+
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Failed to Get Status',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
-  function getStatusIcon(): Icon {
-    if (!state.status || !isMuteDeckRunning(state.status)) {
-      return Icon.XmarkCircle;
+  function getStatusText(status: MuteDeckStatus): string {
+    if (!isMuteDeckRunning(status)) {
+      return 'Not Running';
     }
 
-    if (!isInMeeting(state.status)) {
-      return Icon.Circle;
+    if (!isInMeeting(status)) {
+      return 'Not in Meeting';
     }
 
-    if (isMuted(state.status)) {
-      return Icon.MicrophoneDisabled;
-    }
-
-    return Icon.Microphone;
+    const muted = isMuted(status) ? 'Muted' : 'Unmuted';
+    const video = isVideoOn(status) ? 'Video On' : 'Video Off';
+    return `${muted}, ${video}`;
   }
 
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Get Status",
-      message: state.error.message,
-    });
-  }
-
-  return (
-    <List isLoading={state.isLoading}>
-      <List.Item
-        icon={getStatusIcon()}
-        title="MuteDeck Status"
-        accessories={[
-          {
-            text: state.status
-              ? isMuteDeckRunning(state.status)
-                ? isInMeeting(state.status)
-                  ? isMuted(state.status)
-                    ? "Muted"
-                    : "Unmuted"
-                  : "Not in Meeting"
-                : "Not Running"
-              : "Unknown",
-          },
-        ]}
-        actions={
-          <ActionPanel>
-            <Action title="Refresh Status" onAction={fetchStatus} />
-          </ActionPanel>
-        }
-      />
-      {state.status &&
-        isMuteDeckRunning(state.status) &&
-        isInMeeting(state.status) && (
-          <List.Item
-            icon={isVideoOn(state.status) ? Icon.Video : Icon.VideoDisabled}
-            title="Camera Status"
-            accessories={[{ text: isVideoOn(state.status) ? "On" : "Off" }]}
-          />
-        )}
-    </List>
-  );
+  useEffect(() => {
+    void fetchStatus();
+    const interval = setInterval(fetchStatus, 120000); // Update every 2 minutes
+    return () => clearInterval(interval);
+  }, []);
 }
+
+// Metadata for the command
+Command.title = "Show Status";
+Command.description = "Display current MuteDeck status";
+Command.subtitle = "Loading...";
