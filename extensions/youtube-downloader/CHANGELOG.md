@@ -1,6 +1,6 @@
 # YouTube Downloader Changelog
 
-## [Improve Error Message] - {PR_MERGE_DATE}
+## [Improve Error Message] - 2025-02-04
 
 - Improve error message
 - Fix URL validator while link has no protocol prefix
