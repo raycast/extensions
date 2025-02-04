@@ -101,8 +101,8 @@ export function PlayerSchedule({ url }: { url: string }) {
           subtitle={`No. ${item.rank}`}
           title={`${item.player}`}
           accessories={[
-            { tag: { value: `${item.age}`, color: Color.Green } },
-            { tag: { value: `${item.country}`, color: Color.Magenta } },
+            { tag: { value: `${item.age}`, color: Color.Green }, tooltip: "Age" },
+            { tag: { value: `${item.country}`, color: Color.Magenta }, tooltip: "Country" },
             ...item.events.map((e, index) => ({
               tag: {
                 value: `${e.tournament}${e.seed ? ` (${e.seed})` : ""}`,
