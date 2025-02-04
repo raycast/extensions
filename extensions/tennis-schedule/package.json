@@ -26,11 +26,7 @@
   "dependencies": {
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.18.1",
-    "cheerio": "^1.0.0",
-    "got": "^14.4.5",
-    "hooman": "^1.2.6",
-    "node-fetch": "^3.3.2",
-    "node-html-parser": "^7.0.1"
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
