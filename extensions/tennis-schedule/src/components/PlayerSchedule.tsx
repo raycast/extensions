@@ -13,14 +13,11 @@ interface TableRow {
 
 const eventColors = [Color.Yellow, Color.Red, Color.Blue, Color.Purple, Color.Green, Color.Magenta, Color.Orange];
 
-export function PlayerSchedule ({ url }: { url: string }) {
+export function PlayerSchedule({ url }: { url: string }) {
   const [tableItems, setTableItems] = useState<TableRow[]>([]);
-  const { data: fetchData, isLoading } = useFetch(
-    `https://12ft.io/api/proxy?q=${encodeURIComponent(url)}`,
-    {
-      parseResponse: async (response: Response) => await response.text(),
-    },
-  );
+  const { data: fetchData, isLoading } = useFetch(`https://12ft.io/api/proxy?q=${encodeURIComponent(url)}`, {
+    parseResponse: async (response: Response) => await response.text(),
+  });
 
   useEffect(() => {
     if (fetchData) {
