@@ -1,5 +1,5 @@
-import { showToast, Toast } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import {
   getStatus,
   isInMeeting,
@@ -7,7 +7,7 @@ import {
   isMuteDeckRunning,
   isVideoOn,
   type MuteDeckStatus,
-} from '../utils/api';
+} from "../utils/api";
 
 interface State {
   status: MuteDeckStatus | null;
@@ -32,29 +32,30 @@ export default function Command(): void {
     } catch (error) {
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error : new Error('Failed to fetch status'),
+        error:
+          error instanceof Error ? error : new Error("Failed to fetch status"),
         isLoading: false,
       }));
 
       showToast({
         style: Toast.Style.Failure,
-        title: 'Failed to Get Status',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        title: "Failed to Get Status",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
 
   function getStatusText(status: MuteDeckStatus): string {
     if (!isMuteDeckRunning(status)) {
-      return 'Not Running';
+      return "Not Running";
     }
 
     if (!isInMeeting(status)) {
-      return 'Not in Meeting';
+      return "Not in Meeting";
     }
 
-    const muted = isMuted(status) ? 'Muted' : 'Unmuted';
-    const video = isVideoOn(status) ? 'Video On' : 'Video Off';
+    const muted = isMuted(status) ? "Muted" : "Unmuted";
+    const video = isVideoOn(status) ? "Video On" : "Video Off";
     return `${muted}, ${video}`;
   }
 
