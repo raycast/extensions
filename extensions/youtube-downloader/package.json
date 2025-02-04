@@ -3,6 +3,7 @@
   "name": "youtube-downloader",
   "title": "YouTube Downloader",
   "description": "Download YouTube video from Raycast",
+  "type": "module",
   "icon": "youtube.png",
   "author": "vimtor",
   "contributors": [
@@ -66,7 +67,7 @@
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",
     "date-fns": "^4.1.0",
-    "execa": "^7.2.0",
+    "nano-spawn": "^0.2.0",
     "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
