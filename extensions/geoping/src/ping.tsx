@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
-import { Icon, List, Detail, Color, Image } from "@raycast/api";
+import { Icon, List, Detail, Color, Image, Action, ActionPanel } from "@raycast/api";
 import type { Server, PingResult, Row } from "./types";
 import { regions, flags } from "./servers";
 
@@ -48,19 +48,19 @@ async function ping(server: Server): Promise<PingResult> {
   });
 }
 
-const pingPromises = regions.map(async (region) => {
-  const randomServer = region.servers[Math.floor(Math.random() * region.servers.length)];
-  const result = await ping(randomServer);
-  return {
-    latency: result.latency,
-    region: region,
-    server: randomServer,
-    unreachable: result.error,
-  };
-});
-
 async function getPingResults(updatePingResults: (result: Row) => void): Promise<void> {
   console.log(`Pinging ${regions.length} servers...`);
+  const pingPromises = regions.map(async (region) => {
+    const randomServer = region.servers[Math.floor(Math.random() * region.servers.length)];
+    const result = await ping(randomServer);
+    return {
+      latency: result.latency,
+      region: region,
+      server: randomServer,
+      unreachable: result.error,
+    };
+  });
+
   for (const promise of pingPromises) {
     const result = await promise;
     updatePingResults(result);
@@ -70,34 +70,46 @@ async function getPingResults(updatePingResults: (result: Row) => void): Promise
 export default function Command() {
   const [pingResults, setPingResults] = useState([] as Row[]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const refresh = async () => {
+    setIsLoading(true);
+    setPingResults([]);
+    setError(null);
+    try {
+      await getPingResults((result: Row) => {
+        setPingResults((prevResults) => {
+          const existingResult = prevResults.find((r) => r.region.name === result.region.name);
+          if (existingResult) {
+            return prevResults.map((r) => (r.region.name === result.region.name ? result : r));
+          }
+
+          const updatedResults = [...prevResults, result];
+          updatedResults.sort((a, b) => a.latency - b.latency);
+          return updatedResults;
+        });
+      });
+    } catch (err) {
+      setError("Failed to fetch ping results");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchPingResults() {
-      try {
-        await getPingResults((result: Row) => {
-          setPingResults((prevResults) => {
-            // check if the result is already in the list
-            const existingResult = prevResults.find((r) => r.region.name === result.region.name);
-            if (existingResult) {
-              return prevResults.map((r) => (r.region.name === result.region.name ? result : r));
-            }
-
-            const updatedResults = [...prevResults, result];
-            updatedResults.sort((a, b) => a.latency - b.latency);
-            return updatedResults;
-          });
-        });
-      } catch (err) {
-        setError("Failed to fetch ping results");
-        console.error(err);
-      }
-    }
-    fetchPingResults();
+    refresh();
   }, []);
 
   if (error) {
     return (
-      <List>
+      <List
+        actions={
+          <ActionPanel>
+            <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
+          </ActionPanel>
+        }
+      >
         <List.Item title="Error" subtitle={error} />
       </List>
     );
@@ -105,12 +117,17 @@ export default function Command() {
 
   return (
     <>
-      {pingResults.length === 0 ? (
-        <Detail markdown={`## Pinging servers...`} />
-      ) : pingResults.every((result) => result.unreachable !== null) ? (
-        <Detail markdown={`**All servers are offline!**`} />
+      {!isLoading && pingResults.every((result) => result.unreachable !== null) ? (
+        <Detail
+          markdown={`**All servers are offline!**`}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
+            </ActionPanel>
+          }
+        />
       ) : (
-        <List>
+        <List isLoading={isLoading}>
           {pingResults.map((result, index) => (
             <List.Item
               key={index}
@@ -122,6 +139,11 @@ export default function Command() {
                   text: `${result.unreachable ? "(?)" : result.latency.toFixed()}ms`,
                 },
               ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Refresh" onAction={refresh} icon={Icon.ArrowClockwise} />
+                </ActionPanel>
+              }
             />
           ))}
         </List>
