@@ -1,3 +1,4 @@
+# Video Downloader
 
 > Download high-quality YouTube videos with Raycast.
 
@@ -5,13 +6,13 @@
 
 ## Installation
 
-To use this extension, you must have `ffmpeg` installed on your machine.
+To use this extension, you must have `yt-dlp` and `ffmpeg` installed on your machine.
 
 The easiest way to install this is using [Homebrew](https://brew.sh/). After you have Homebrew installed, run the
 following command in your terminal:
 
 ```bash
-brew install ffmpeg
+brew install yt-dlp ffmpeg
 ```
 
 Depending on your macOS version, the package might be located in a different path than the one set by the extension. To
@@ -26,15 +27,21 @@ Then, update the path in the extension preferences to match the output of the ab
 You'll also need `ffprobe`, which is usually installed with `ffmpeg`. Just run `which ffprobe` and update the path
 accordingly.
 
+## Supported Sites
+
+See <https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md>.
+
 ## **FAQs**
 
-### **Is there a YouTube downloader that actually works?** 
+### **Is there a YouTube downloader that actually works?**
 
 Yes, Raycast's YouTube Downloader is consistently updated to ensure reliable functionality.
 
-### **Can I download clips from YouTube?** 
+<!--
+### **Can I download clips from YouTube?**
 
 Absolutely\! Our extension supports downloading full videos, clips, and even YouTube Shorts.
+-->
 
 ### **How do I download a YouTube video with a manipulated URL?**
 

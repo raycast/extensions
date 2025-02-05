@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-downloader",
-  "title": "YouTube Downloader",
-  "description": "Download YouTube video from Raycast",
+  "title": "Video Downloader",
+  "description": "Download videos from YouTube, X, etc uses yt-dlp",
   "type": "module",
   "icon": "youtube.png",
   "author": "vimtor",
@@ -19,13 +19,19 @@
     "Data",
     "Productivity"
   ],
+  "keywords": [
+    "video",
+    "downloader",
+    "youtube",
+    "yt-dlp"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Download Video",
-      "subtitle": "YouTube",
-      "description": "Download YouTube video with parameters",
+      "subtitle": "Video Downloader",
+      "description": "Download video with parameters",
       "mode": "view"
     }
   ],
@@ -103,6 +109,7 @@
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",
     "date-fns": "^4.1.0",
+    "is-url-superb": "^6.1.0",
     "nano-spawn": "^0.2.0",
     "pretty-bytes": "^6.1.1"
   },
