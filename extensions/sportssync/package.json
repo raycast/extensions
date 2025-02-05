@@ -54,14 +54,16 @@
       "title": "College Basketball Scores and Schedule",
       "subtitle": "NCAA Men's & Women's",
       "description": "View scores and upcoming games across the NCAA Men's and Women's League",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "college-basketball-news",
       "title": "College Basketball News",
       "subtitle": "NCAA Men's & Women's",
       "description": "View news articles across the NCAA Men's and Women's League",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "football-scores-and-schedule",
