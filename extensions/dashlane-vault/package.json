@@ -25,6 +25,13 @@
       "mode": "view"
     },
     {
+      "name": "devices",
+      "title": "Manage your devices",
+      "subtitle": "Dashlane",
+      "description": "List devices connected to your accunt",
+      "mode": "view"
+    },
+    {
       "name": "sync",
       "title": "Sync Vault",
       "subtitle": "Dashlane",

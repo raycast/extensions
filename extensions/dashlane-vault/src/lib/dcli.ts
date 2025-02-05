@@ -15,7 +15,7 @@ import {
   getErrorAction,
   getErrorString,
 } from "@/helper/error";
-import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
+import { Device, VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 
 const preferences = getPreferenceValues<Preferences>();
 const cliQueue = new PQueue({ concurrency: 1 });
@@ -116,6 +116,32 @@ export async function getPassword(id: string) {
   try {
     const stdout = await dcli("read", `dl://${extractId(id)}/password`);
     return stdout.trim();
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
+}
+
+export async function getDevices() {
+  try {
+    const result = await dcli("devices", "list", "--json");
+    const devices = JSON.parse(result) as Device[];
+    devices.sort((a, b) => {
+      if (b.lastActivityDateUnix > a.lastActivityDateUnix) return 1;
+      if (b.lastActivityDateUnix < a.lastActivityDateUnix) return -1;
+      return 0;
+    });
+
+    return devices;
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
+}
+
+export async function removeDevice(id: string) {
+  try {
+    await dcli("devices", "remove", id);
   } catch (error) {
     captureException(error);
     throw error;
