@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2025-02-05
 
 - Fix URL parsing issue
 
