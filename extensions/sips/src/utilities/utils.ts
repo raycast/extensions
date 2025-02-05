@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:48:00
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -23,12 +22,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-
-import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
-import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
-import { ExtensionPreferences } from "./preferences";
-import { getAVIFEncPaths } from "./avif";
 import { runAppleScript } from "@raycast/utils";
+
+import { getAVIFEncPaths } from "./avif";
+import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
+import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
+import { ExtensionPreferences } from "./preferences";
 
 /**
  * Gets currently selected images in Finder.
@@ -195,7 +194,7 @@ const getSelectedNeoFinderImages = async (): Promise<string> => {
         else if (theSelection count) is equal to 1 then
           repeat with imageType in imageTypes
             if (kind of the first item of theSelection) contains imageType then
-              if (finder path of theSelection) is not missing value then
+              if (finder path of item 1 of theSelection) is not missing value then
                 return the finder path of theSelection
                 exit repeat
               end if
@@ -301,12 +300,6 @@ export const addItemToRemove = async (item: string) => {
  * @param extension The extension of the file
  * @returns A promise resolving to the path of the temporary file.
  */
-// export const scopedTempFile = async (name: string, extension: string) => {
-//   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
-//   await addItemToRemove(tempPath);
-//   return tempPath;
-// };
-
 export const getScopedTempFile = async (name: string, extension: string) => {
   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
   return {
@@ -358,7 +351,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
       }
     } catch (error) {
       // Error getting images from clipboard, fall back to Finder/Path Finder
-      console.error("Couldn't get images from clipboard");
+      console.error(`Couldn't get images from clipboard: ${error}`);
       inputMethodError = true;
     }
   }
@@ -367,8 +360,8 @@ export const getSelectedImages = async (): Promise<string[]> => {
   let activeApp = inputMethod;
   try {
     activeApp = (await getFrontmostApplication()).name;
-  } catch {
-    console.error("Couldn't get frontmost application");
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   // Attempt to get selected images from Path Finder
@@ -386,7 +379,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from Path Finder, fall back to Finder
-    console.error("Couldn't get images from Path Finder");
+    console.error(`Couldn't get images from Path Finder: ${error}`);
     inputMethodError = true;
   }
 
@@ -405,7 +398,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from NeoFinder, fall back to Finder
-    console.error("Couldn't get images from NeoFinder");
+    console.error(`Couldn't get images from NeoFinder: ${error}`);
     inputMethodError = true;
   }
 
@@ -424,7 +417,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
     }
   } catch (error) {
     // Error getting images from HoudahSpot, fall back to Finder
-    console.error("Couldn't get images from HoudahSpot");
+    console.error(`Couldn't get images from HoudahSpot: ${error}`);
     inputMethodError = true;
   }
 
@@ -454,8 +447,8 @@ export const moveImageResultsToFinalDestination = async (imagePaths: string[]) =
   let activeApp = "Finder";
   try {
     activeApp = (await getFrontmostApplication()).name;
-  } catch {
-    console.error("Couldn't get frontmost application");
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -953,13 +946,13 @@ export const getMenubarOwningApplication = async () => {
  *
  * @returns The current directory of the file manager.
  */
-export const getCurrentDirectory = async () => {
+export const getCurrentDirectory = async (itemPath: string) => {
   // Get name of frontmost application
   let activeApp = "Finder";
   try {
     activeApp = await getMenubarOwningApplication();
-  } catch {
-    console.error("Couldn't get frontmost application");
+  } catch (error) {
+    console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   // Attempt to get current directory of Path Finder
@@ -967,7 +960,15 @@ export const getCurrentDirectory = async () => {
     if (activeApp == "Path Finder") {
       return runAppleScript(`tell application "Path Finder"
           if 1 ≤ (count finder windows) then
+            try
             get POSIX path of (target of finder window 1)
+            on error message number -1728
+              -- Folder is nonstandard, use container of selection
+              tell application "System Events"
+                set itemPath to POSIX file "${itemPath}" as alias
+                return POSIX path of container of itemPath
+              end tell
+            end try
           else
             get POSIX path of desktop
           end if
@@ -975,15 +976,21 @@ export const getCurrentDirectory = async () => {
     }
   } catch (error) {
     // Error getting directory of Path Finder, fall back to Finder
-    console.error("Couldn't get current directory of Path Finder");
+    console.error(`Couldn't get current directory of Path Finder: ${error}`);
   }
 
   // Fallback to getting current directory from Finder
   return runAppleScript(`tell application "Finder"
-      if 1 <= (count Finder windows) then
-        get POSIX path of (target of window 1 as alias)
+      if 1 ≤ (count Finder windows) then
+        try
+          return POSIX path of (target of window 1 as alias)
+        on error message number -1700
+          -- Folder is nonstandard, use container of selection
+          set itemPath to POSIX file "${itemPath}" as alias
+          return POSIX path of (container of itemPath as alias)
+        end try
       else
-        get POSIX path of (desktop as alias)
+        return POSIX path of (desktop as alias)
       end if
     end tell`);
 };
@@ -1002,7 +1009,7 @@ export const getDestinationPaths = async (
   newExtension: string | undefined = undefined,
 ): Promise<string[]> => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const currentDirectory = await getCurrentDirectory();
+  const currentDirectory = await getCurrentDirectory(originalPaths[0]);
   return originalPaths.map((imgPath) => {
     let newPath = imgPath;
     if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -1043,17 +1050,17 @@ export const getDestinationPaths = async (
 
 /**
  * Shows or updates a toast to display the given error, and logs the error to the console.
- *
  * @param title The title of the toast.
  * @param error The error to show.
  * @param toast The toast to update.
+ * @param messageText The message to show in the toast. If not provided, the error message will be used.
  */
-export const showErrorToast = async (title: string, error: Error, toast?: Toast) => {
+export const showErrorToast = async (title: string, error: Error, toast?: Toast, messageText?: string) => {
   console.error(error);
   if (!toast) {
     toast = await showToast({
       title: title,
-      message: error.message,
+      message: messageText ?? error.message,
       style: Toast.Style.Failure,
       primaryAction: {
         title: "Copy Error",
@@ -1064,7 +1071,7 @@ export const showErrorToast = async (title: string, error: Error, toast?: Toast)
     });
   } else {
     toast.title = title;
-    toast.message = error.message;
+    toast.message = messageText ?? error.message;
     toast.style = Toast.Style.Failure;
     toast.primaryAction = {
       title: "Copy Error",

@@ -5,7 +5,7 @@ import React from "react";
 import { Collaborator, Label, Project, Task, User } from "../api";
 import { priorities } from "../helpers/priorities";
 
-import { displayDueDate, isOverdue, parseDay } from "./dates";
+import { displayDate, isOverdue, parseDay } from "./dates";
 
 export type GroupByOption = "default" | "assignee" | "date" | "priority" | "label" | "project";
 
@@ -24,7 +24,7 @@ export type GroupByProp = {
 export const groupByOptions: GroupByOptions = [
   { label: "Default", icon: Icon.Document, value: "default" },
   { label: "Assignee", icon: Icon.Person, value: "assignee" },
-  { label: "Due Date", icon: Icon.Calendar, value: "date" },
+  { label: "Date", icon: Icon.Calendar, value: "date" },
   { label: "Priority", icon: Icon.LevelMeter, value: "priority" },
   { label: "Label", icon: Icon.Tag, value: "label" },
   { label: "Project", icon: Icon.List, value: "project" },
@@ -81,15 +81,15 @@ export function groupByAssignees({ tasks, collaborators, user }: GroupByAssignee
   return sections;
 }
 
-export function groupByDueDates(tasks: Task[]) {
+export function groupByDates(tasks: Task[]) {
   const [dated, notdated] = partition(tasks, (task: Task) => task.due?.date);
   const [overdue, upcoming] = partition(dated, (task: Task) => task.due?.date && isOverdue(task.due.date));
 
-  const allDueDates = [...new Set(upcoming.map((task) => parseDay(task.due?.date).toISOString()))] as string[];
-  allDueDates.sort();
+  const allDates = [...new Set(upcoming.map((task) => parseDay(task.due?.date).toISOString()))] as string[];
+  allDates.sort();
 
-  const sections = allDueDates.map((date) => ({
-    name: displayDueDate(date),
+  const sections = allDates.map((date) => ({
+    name: displayDate(date),
     tasks: upcoming?.filter((task) => parseDay(task.due?.date).toISOString() === date) || [],
   }));
 
@@ -101,7 +101,7 @@ export function groupByDueDates(tasks: Task[]) {
   }
   if (notdated.length > 0) {
     sections.push({
-      name: "No due date",
+      name: "No date",
       tasks: notdated,
     });
   }

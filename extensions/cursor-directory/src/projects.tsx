@@ -8,7 +8,9 @@ import { homedir } from "os";
 import { OpenPrefAction } from "./components/actions/OpenPrefAction";
 
 export default function Command(
-  props: LaunchProps<{ launchContext: { cursorDirectory?: { ruleContent: string; replace?: boolean } } }>,
+  props: LaunchProps<{
+    launchContext: { cursorDirectory?: { ruleName: string; ruleContent: string; replace?: boolean } };
+  }>,
 ) {
   const { cursorDirectory } = props.launchContext ?? {};
 
@@ -35,10 +37,18 @@ export default function Command(
     await showHUD("Opening project...");
     await openInCursor(project.path, "Project opened successfully");
 
+    console.debug("path: ", project.path);
+
     if (cursorDirectory && cursorDirectory.ruleContent) {
       console.debug("Applying cursor rule");
       await ensureCursorRulesFile(project.path);
-      await applyCursorRule(project.path, cursorDirectory.ruleContent, cursorDirectory.replace ?? true);
+      console.debug("ruleName: ", cursorDirectory.ruleName);
+      await applyCursorRule(
+        project.path,
+        cursorDirectory.ruleName,
+        cursorDirectory.ruleContent,
+        cursorDirectory.replace ?? true,
+      );
     }
   }
 

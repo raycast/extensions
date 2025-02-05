@@ -1,6 +1,6 @@
 import { Grid } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { TimeInfo, TimezoneId } from "../types/types";
+import { TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";
 import { columns, rememberTag } from "../types/preferences";
@@ -8,7 +8,7 @@ import { StarredTimeZoneGridItem, TimeZoneGridItem } from "./time-zone-grid-item
 import { GridEmptyView } from "./grid-empty-view";
 import { useAllTimezones } from "../hooks/useAllTimezones";
 import { useStarTimezones } from "../hooks/useStarTimezones";
-import { useRegionTimeInfo } from "../hooks/useRegionTimeInfo";
+import { useCurrentTime } from "../hooks/useCurrentTime";
 
 export function QueryWorldGridLayout() {
   const [tag, setTag] = useState<string>("");
@@ -29,10 +29,10 @@ export function QueryWorldGridLayout() {
     return starTimezonesData || [];
   }, [starTimezonesData]);
 
-  const { data: timeInfoData } = useRegionTimeInfo(region);
-  const timeInfo = useMemo(() => {
-    return timeInfoData || ({} as TimeInfo);
-  }, [timeInfoData]);
+  const { data: currentTimeData } = useCurrentTime(region);
+  const currentTime = useMemo(() => {
+    return currentTimeData || undefined;
+  }, [currentTimeData]);
 
   return (
     <Grid
@@ -64,8 +64,8 @@ export function QueryWorldGridLayout() {
               <StarredTimeZoneGridItem
                 key={index}
                 index={index}
-                timezone={value.timezone}
-                timeInfo={timeInfo}
+                timezone={value}
+                currentTime={currentTime}
                 starTimezones={starTimezones}
                 mutate={mutate}
               />
@@ -81,7 +81,7 @@ export function QueryWorldGridLayout() {
                 key={index}
                 index={index}
                 timezone={value}
-                timeInfo={timeInfo}
+                currentTime={currentTime}
                 starTimezones={starTimezones}
                 mutate={mutate}
               />

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "anytype",
+  "title": "Anytype",
+  "description": "Create, browse and search in Anytype - right at your fingertips, anywhere on your Mac.",
+  "icon": "anytype-icon.png",
+  "author": "jmetrikat",
+  "owner": "any",
+  "access": "public",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-object",
+      "title": "Create Object",
+      "subtitle": "Anytype",
+      "description": "Create a new object.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-spaces",
+      "title": "Browse Spaces",
+      "subtitle": "Anytype",
+      "description": "Browse your spaces one by one.",
+      "mode": "view"
+    },
+    {
+      "name": "search-anytype",
+      "title": "Search Anytype",
+      "subtitle": "Anytype",
+      "description": "Search objects globally in all spaces.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "anytypeApp",
+      "title": "Anytype App",
+      "description": "The Anytype app on your Mac.",
+      "type": "appPicker",
+      "default": "com.anytype.anytype",
+      "required": false
+    },
+    {
+      "name": "sort",
+      "title": "Sort Order",
+      "description": "The sort order of objects when displayed as a list.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Created Date",
+          "value": "created_date"
+        },
+        {
+          "title": "Last Modified Date",
+          "value": "last_modified_date"
+        },
+        {
+          "title": "Last Opened Date",
+          "value": "last_opened_date"
+        }
+      ],
+      "default": "last_modified_date",
+      "required": false
+    },
+    {
+      "name": "limit",
+      "title": "API Limit",
+      "description": "The maximum number of objects to fetch from the Anytype API at once. Be careful when changing this, as a large number can cause performance issues.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "25",
+          "value": "25"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ],
+      "default": "50",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.17.0",
+    "date-fns": "^4.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

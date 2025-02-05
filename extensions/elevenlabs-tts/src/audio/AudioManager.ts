@@ -5,6 +5,7 @@ import { tmpdir } from "os";
 import { join } from "path/posix";
 import { WebSocket, Data } from "ws";
 import { StreamConfig, WSMessage, ElevenLabsConfig } from "./types";
+import { validatePlaybackSpeed } from "../voice/settings";
 
 /**
  * Manages the audio streaming and playback process
@@ -254,7 +255,9 @@ export class AudioManager extends EventEmitter {
   private async playAudioFile(): Promise<void> {
     return new Promise((resolve, reject) => {
       // Use macOS native audio player for reliable playback
-      const process = spawn("afplay", [this.tempFile]);
+      // Use -r flag to control playback rate
+      const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
+      const process = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
 
       // Handle process errors (e.g., afplay not found)
       process.on("error", (error) => {

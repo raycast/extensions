@@ -30,6 +30,11 @@ export interface Sourcegraph {
    * Feature flags for the extension.
    */
   featureFlags: ExtensionFeatureFlags;
+
+  /**
+   * Whether a custom Sourcegraph connection has been configured by the user.
+   */
+  hasCustomSourcegraphConnection: boolean;
 }
 
 const dotComURL = "https://sourcegraph.com";
@@ -78,6 +83,7 @@ export async function sourcegraphDotCom(): Promise<Sourcegraph> {
     defaultContext: searchPrefs.cloudDefaultContext,
     client: newApolloClient(connect),
     featureFlags: newFeatureFlags(prefs),
+    hasCustomSourcegraphConnection: !!(prefs.customInstance && prefs.customInstanceToken),
   };
 }
 
@@ -100,6 +106,7 @@ export function sourcegraphInstance(): Sourcegraph | null {
     defaultContext: searchPrefs.customInstanceDefaultContext,
     client: newApolloClient(connect),
     featureFlags: newFeatureFlags(prefs),
+    hasCustomSourcegraphConnection: true,
   };
 }
 

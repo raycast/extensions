@@ -17,14 +17,15 @@
     "rotate",
     "sips"
   ],
-  "version": "1.8.2",
+  "version": "1.9.0",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
     "arronhunt",
     "nakaakist",
     "JUSTIVE",
-    "patomos"
+    "patomos",
+    "prince_gupta"
   ],
   "categories": [
     "Media",
@@ -456,6 +457,25 @@
       "keywords": [
         "effect",
         "style"
+      ],
+      "preferences": [
+        {
+          "name": "showPreviews",
+          "label": "Generate Filter Previews",
+          "description": "Whether to show live previews of filters for selected files. Disabling this option might improve performance.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hiddenFilters",
+          "title": "Hidden Filters",
+          "description": "Filters and filter categories to hide from the filter list. Use this to declutter the filter list as desired. Separate multiple filters with commas. For example: 'Bloom, Distortion, Tonal'",
+          "type": "textfield",
+          "default": "",
+          "required": false,
+          "placeholder": "e.g. Bloom, Distortion, Tonal"
+        }
       ]
     },
     {
@@ -513,14 +533,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.18.1",
     "mathjs": "^11.8.2",
     "svgo": "^3.0.2",
     "tar": "^6.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "@types/tar": "^6.1.11",

@@ -42,13 +42,15 @@ const showToastCliErrors = (e: { message: string }) => {
 class KeePassLoader {
   private static database: string;
   private static databasePassword: string;
-  private static keepassxcCli: string;
+  private static keepassxcCli: string | undefined;
   private static keyFile: string;
   private static spawn = child_process.spawn;
   static {
     const preferences: Preference = getPreferenceValues();
     this.database = preferences.database;
-    this.keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli");
+    this.keepassxcCli = preferences.keepassxcRootPath?.path
+      ? path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli")
+      : undefined;
   }
 
   /**
@@ -187,7 +189,7 @@ class KeePassLoader {
       cli.on("error", reject);
       cli.stderr.on("data", this.cliStderrErrorHandler(reject));
       cli.on("exit", (code) => {
-        code === 0 && resolve();
+        code === 0 ? resolve() : reject(new Error("Invalid Credentials"));
       });
     });
   };
@@ -314,7 +316,6 @@ class KeePassLoader {
    *
    * @returns {Promise<string[][]>} The entries in a CSV format.
    */
-  /******  54dad48e-3dfc-410d-b85e-285d0d945e01  *******/
   static loadEntriesCache = () => {
     return LocalStorage.getItem("entries").then((entries) => {
       if (entries == undefined) {

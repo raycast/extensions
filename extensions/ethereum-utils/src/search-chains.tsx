@@ -11,6 +11,7 @@ export default function Command() {
   useEffect(() => {
     async function fetchChains() {
       const chains = await service.getChains();
+      console.log(chains[0]);
       setChains(chains);
       setLoading(false);
     }
@@ -83,7 +84,11 @@ function ChainView(props: ChainProps) {
   ## Homepage
 
   [${chain.infoURL}](${chain.infoURL})
-  `;
+  
+  ## RPC URLs
+
+  ${chain.rpc.map((url) => `- ${url}`).join('\n')}
+`;
 
   return (
     <Detail

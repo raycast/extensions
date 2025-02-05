@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Your Library] - 2025-02-04
+
+- Fix a possibly null issue from `getMeAlbums` API.
+
 ## [Generate Playlist Improvement - Artists] - 2024-12-03
 
 - Modify the prompt so if the description contains "songs from: artist1, artist2, etc" it will only generate a playlist using those artists
