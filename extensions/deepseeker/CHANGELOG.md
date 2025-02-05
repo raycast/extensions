@@ -3,6 +3,7 @@
 ## [Minor improvements] - {PR_MERGE_DATE}
 
 - 💤 Minor improvements
+- 🐳 Minor title adjustment of DeepSeek series and add a new name `deepseek-r1` for Alicloud.
 
 ## [New Features] - 2025-01-30
 
