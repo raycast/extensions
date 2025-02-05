@@ -668,12 +668,16 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "DeepSeek-V3",
+          "title": "deepseek-chat",
           "value": "deepseek-chat"
         },
         {
-          "title": "DeepSeek-R1",
+          "title": "deepseek-reasoner",
           "value": "deepseek-reasoner"
+        },
+        {
+          "title": "deepseek-r1",
+          "value": "deepseek-r1"
         },
         {
           "title": "GPT-4o",
