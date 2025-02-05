@@ -4,6 +4,8 @@ import { Todo, User, Project } from "../types";
 import * as crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import { fileTypeFromBuffer } from "file-type";
+import mime from "mime-types";
 
 const preferences = getPreferenceValues();
 const environment = preferences.environment;
@@ -13,7 +15,7 @@ let oauthUrl: string;
 let apiUrl: string;
 
 if (environment === "development") {
-  clientId = "nzJzX-pGkEIM2Zjbf-uVkdlCBOZA0dEQAKDtoZGjnLc";
+  clientId = "RUe8R2Q4fS5t0LR16EewRRXpcWHaIWaSfLMT-nQd2Wk";
   oauthUrl = "http://wip.test:3000";
   apiUrl = "http://api.wip.test:3000/v1";
 } else {
@@ -167,9 +169,10 @@ export async function createTodo(todoText: string, filePaths: string[] = []): Pr
       }
       const fileBuffer = fs.readFileSync(filePath);
       const checksum = crypto.createHash("md5").update(fileBuffer).digest("base64");
-      const fileType = "application/octet-stream";
       const fileName = path.basename(filePath);
       const fileSize = fileBuffer.length;
+      const fileTypeResult = await fileTypeFromBuffer(fileBuffer);
+      const fileType = fileTypeResult?.mime || mime.lookup(filePath) || "application/octet-stream";
 
       const { url, signed_id, method, headers } = await createUpload(fileName, fileSize, checksum, fileType);
 

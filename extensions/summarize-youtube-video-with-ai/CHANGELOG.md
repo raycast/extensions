@@ -1,5 +1,30 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2025-01-18
+
+- 🔎 Added support for clipboard and browser extension detection
+- 🪓 Split AIs into separate commands
+
+## [New Features] - 2024-12-21
+
+- Added preferences to set a custom OpenAI API endpoint
+- Added preferences to set a custom OpenAI model
+- Added preferences to set a custom Anthropic model
+
+## [New Features] - 2024-12-20
+
+### Major Version update 🎉
+
+- 🤖 Added Anthropic Claude
+- 🔎 Added Action to ask follow up questions
+- 🧑‍💻 Improved AI instruction snippets
+- 🔧 Added up to date AI models as defaults
+  - Raycast AI: Your selected AI Model
+  - OpenAI: `gpt-4o`
+  - Anthropic: `claude-3-5-sonnet-latest`
+- 🐛 Fixed issues with long loading time
+- 🖼️ Added new Icon
+
 ## [Fixes] - 2024-05-01
 
 - ⬆️ Upgraded dependencies
@@ -9,7 +34,8 @@
 
 - 📝 update readme for clarity
 - 🐛 fix return toast for video transcripts
-- 🩹 fix result not having linebreaks from time to time (It can still happen, but should be fixed for most cases)
+- 🩹 fix result not having linebreaks from time to time (It can still happen, but should be fixed
+  for most cases)
 - 🔧 add new config options for `creativity`
 - 🧑‍💻 improve ai instruction snippets
 - ⬆️ upgrade dependencies

@@ -1,5 +1,21 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2025-01-02
+
+- Fix the issue where users cannot open a new window when using a language pack.
+
+## [Update] - 2024-12-04
+
+- Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).
+
+## [Fix] - 2024-12-05
+
+- Improved error handling for ambiguous git HEAD argument.
+
+## [Update] - 2024-12-02
+
+- Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
+
 ## [Update] - 2024-11-17
 
 - Adds support for Windsurf as an option in the extension settings.

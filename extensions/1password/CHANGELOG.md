@@ -1,5 +1,23 @@
 # 1Password Changelog
 
+## [Maintenance] - 2025-01-19
+
+- Remove unused Bun lockfile
+- Fix types
+- Bump all dependencies to the latest
+
+## [Chore] - 2025-01-09
+
+- Moved contributor to past contributors
+- Bump all dependencies to the latest
+
+## [Chore] - 2024-12-02
+
+- Add readme & FAQ
+- Bump all dependencies to the latest
+- Resolve all linting errors
+- Resolve all vulnerabilities through `npm audit fix`
+
 ## [Enhancements] - 2024-10-16
 
 - Feat: allow filtering by additional information

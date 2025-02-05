@@ -250,7 +250,7 @@ export function getStateValue(state: State): string | undefined {
     return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
   } else if (state.entity_id.startsWith("update")) {
     if (state.attributes.in_progress === true) {
-      return "in progress 🔄";
+      return "in progress";
     }
     const iv = state.attributes.installed_version;
     const lv = state.attributes.latest_version;

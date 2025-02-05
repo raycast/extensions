@@ -1,5 +1,38 @@
 # Pomodoro Changelog
 
+## [Improvement] - 2025-01-07
+
+- Add support for hiding timer when stopped
+
+## [Chore] - 2025-01-03
+
+- Update preferences organization
+
+## [Update] - 2024-12-12
+
+- Move timer to dropdown menu if it's hidden
+
+## [Enhancement] - 2024-12-11
+
+- Add the weekly and daily statistics to the `View Pomodoro Stats` command
+
+## [Fixes] - 2024-12-08
+
+- Fix short break timer
+
+## [Chore & Fixes] - 2024-12-04
+
+- Fix the issue where the prompt does not pop up when the timer is completed
+- Move all `lib` source files to `src/lib` since Raycast dev command cannot watch other file in other places
+- Bump all dependencies to the latest
+
+## [Fixes] - 2024-12-02
+
+- Fix command launch sequence
+- Regenerate `package-lock.json` file
+- Move `crossExtensions` field to upper place
+- Mark Confetti feature as deprecated
+
 ## [Chore & Fixes] - 2024-11-21
 
 - Bump all dependencies to the latest

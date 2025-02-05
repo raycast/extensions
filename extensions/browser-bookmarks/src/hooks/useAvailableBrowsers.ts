@@ -11,6 +11,7 @@ export const BROWSERS_BUNDLE_ID = {
   chromeDev: "com.google.chrome.dev",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
+  island: "io.island.island",
   safari: "com.apple.safari",
   sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
@@ -19,6 +20,7 @@ export const BROWSERS_BUNDLE_ID = {
   prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
   zen: "org.mozilla.com.zen.browser",
+  whale: "com.naver.whale",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

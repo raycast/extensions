@@ -1,5 +1,18 @@
 # Changelog
 
+## [Feature] - 2025-01-22
+
+- Feature: Introduced a method to dynamically create new commands for processing user text input from various sources, including selected text, clipboard text, and open web pages.
+- Feature: Added new commands: "Fix Spelling and Grammar" and "Improve Writing".
+
+## [Feature] - 2025-01-01
+
+- Feature: Added import/export functionality to Conversations.
+
+## [Fix] - 2025-01-01
+
+- Fix: Fixed o1 models not working, and added a prompt warning for o1 models.
+
 ## [Fix] - 2024-11-24
 
 - Fix: Fixed Images not rendering if their paths have spaces in them.

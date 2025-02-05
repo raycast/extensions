@@ -16,7 +16,10 @@
     "kud",
     "gerardcs",
     "prince_yadav",
-    "stelo"
+    "stelo",
+    "ridemountainpig",
+    "kcole93",
+    "Rob"
   ],
   "commands": [
     {
@@ -274,6 +277,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix": "ray lint --fix"
+    "fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

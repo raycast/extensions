@@ -55,23 +55,22 @@ export const WEB_IDES = [
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
-  const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
   const applicationPath = application?.path.replaceAll(" ", "\\ ");
-  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
+  const clonePath = `${baseClonePath}/${repository.name}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
 
   const toast = await showToast({
-    title: `Opening ${repository.nameWithOwner}`,
+    title: `Opening ${repository.name}`,
     message: `at ${clonePath}`,
     style: Toast.Style.Animated,
   });
 
   if (!existsSync(clonePath.replace("~", homedir()))) {
-    const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
-    const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
+    const cloneCommand = buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol);
 
     try {
-      execSync(cloneCommand);
+      execSync(cloneCommand, { cwd: baseClonePath });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error while cloning the repository";
@@ -82,7 +81,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   }
 
   try {
-    execSync(openCommand);
+    execSync(openCommand, { cwd: baseClonePath });
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Error while opening the repository";
@@ -129,3 +128,52 @@ export const MY_REPO_SORT_TYPES_TO_QUERIES = [
 ];
 export const REPO_DEFAULT_SORT_QUERY = REPO_SORT_TYPES_TO_QUERIES[0].value;
 export const MY_REPO_DEFAULT_SORT_QUERY = MY_REPO_SORT_TYPES_TO_QUERIES[0].value;
+
+export const ACCEPTABLE_CLONE_PROTOCOLS = ["https", "ssh"] as const;
+export type AcceptableCloneProtocol = (typeof ACCEPTABLE_CLONE_PROTOCOLS)[number];
+export const CLONE_PROTOCOLS_TO_LABELS = {
+  https: "HTTPS",
+  ssh: "SSH",
+} as const satisfies Record<AcceptableCloneProtocol, string>;
+
+/**
+ * Format the clone command based on specified protocol.
+ * @param repoNameWithOwner {string} Repository name with owner.
+ * @param cloneProtocol {AcceptableCloneProtocol} Clone protocol
+ * @returns {string} Executable clone command
+ */
+export const buildCloneCommand = (
+  repoNameWithOwner: string,
+  cloneProtocol: AcceptableCloneProtocol,
+  options?: Partial<AdditionalCloneFormatOptions>,
+): string => {
+  const gitFlag = options?.gitFlags?.join(" ") ?? "";
+  const targetDir = options?.targetDir ?? "";
+
+  const cloneUrl = formatRepositoryUrl(repoNameWithOwner, cloneProtocol);
+  return `git clone ${gitFlag} ${cloneUrl} ${targetDir}`;
+};
+
+type AdditionalCloneFormatOptions = {
+  /**
+   * Target directory for the cloned repository.
+   */
+  targetDir: string;
+  /**
+   * Additional git flags to be passed to the clone command.
+   *
+   * Elements will join with a space.
+   *
+   * @example ["--depth", "1", "-b", "main"]
+   */
+  gitFlags: string[];
+};
+
+/**
+ * Format the repository URL based on specified protocol.
+ * @param repoNameWithOwner {string} Repository name with owner.
+ * @param protocol {"https" | "ssh"} Git protocol
+ * @returns {string} Formatted repository URL
+ */
+const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh"): string =>
+  protocol === "https" ? `https://github.com/${repoNameWithOwner}.git` : `git@github.com:${repoNameWithOwner}.git`;

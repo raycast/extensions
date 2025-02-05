@@ -1,5 +1,32 @@
 # Safari Changelog
 
+## [Chore: Moved contributor to past contributors list] - 2025-01-15
+
+## [Update] - 2025-01-12
+
+- Adds a preference to "Copy Title as Link to Clipboard" command to clean up titles with AI.
+
+## [Update] - 2025-01-07
+
+- Adds a "Copy Title as Link to Clipboard" command to copy the current Safari tab in Markdown format.
+
+## [Update] - 2025-01-06
+
+- Adds a "Copy to Clipboard" command to copy the current Safari tab url.
+
+## [Chore: Renamed title in Dropdown] - 2024-12-20
+
+## [Improve] - 2024-12-13
+
+- Add a preference for `Search Reading List` to hide items that have already been read.
+
+## [Update] - 2024-12-03
+
+- Added `pinyin` support for searching tab
+- improved:
+  - Added cache for formatted string
+  - Reduced re-render times for `CloudTabs`
+
 ## [Improve] 2024-09-27
 
 - Adds a preference to select between different fallback search types for the `Search Tabs` command.

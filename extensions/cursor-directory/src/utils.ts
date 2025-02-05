@@ -6,6 +6,7 @@ import { parse as parseYaml } from "yaml";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import { getPreferenceValues, showHUD, showToast, Toast, open } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 export function getRelativeTime(timestamp: number) {
   dayjs.extend(relativeTime);
@@ -143,25 +144,82 @@ export function expandPath(path: string) {
   return path.replace(/^~/, homedir());
 }
 
-export async function ensureCursorRulesFile(projectPath: string): Promise<void> {
-  const cursorRulesPath = path.join(projectPath, ".cursorrules");
+async function getCursorVersion(): Promise<number | null> {
   try {
-    await fs.access(cursorRulesPath);
-  } catch {
-    await fs.writeFile(cursorRulesPath, "");
+    const script = `
+      tell application "System Events"
+        try
+          set appVersion to version of application "Cursor"
+          return appVersion
+        on error
+          return "0"
+        end try
+      end tell
+    `;
+
+    const version = await runAppleScript(script);
+    const versionNumber = parseFloat(version);
+    return isNaN(versionNumber) ? null : versionNumber;
+  } catch (error) {
+    console.error("Error getting Cursor version:", error);
+    return null;
   }
 }
 
-export async function applyCursorRule(projectPath: string, ruleContent: string, replace: boolean): Promise<void> {
-  const cursorRulesPath = path.join(projectPath, ".cursorrules");
+export async function ensureCursorRulesFile(projectPath: string): Promise<void> {
+  const cursorVersion = await getCursorVersion();
 
-  if (replace) {
-    await fs.writeFile(cursorRulesPath, ruleContent);
+  if (cursorVersion && cursorVersion >= 0.45) {
+    const cursorRulesDir = path.join(projectPath, ".cursor", "rules");
+    try {
+      await fs.mkdir(cursorRulesDir, { recursive: true });
+    } catch (error) {
+      console.error("Error creating cursor rules directory:", error);
+      throw error;
+    }
   } else {
-    await fs.appendFile(cursorRulesPath, "\n" + ruleContent);
+    const cursorRulesPath = path.join(projectPath, ".cursorrules");
+    try {
+      await fs.access(cursorRulesPath);
+    } catch {
+      await fs.writeFile(cursorRulesPath, "");
+    }
   }
+}
 
-  await showHUD("Cursor rules applied successfully");
+export async function applyCursorRule(
+  projectPath: string,
+  ruleName: string,
+  ruleContent: string,
+  replace: boolean,
+): Promise<void> {
+  const cursorVersion = await getCursorVersion();
+
+  try {
+    if (cursorVersion && cursorVersion >= 0.45) {
+      const cursorRulesDir = path.join(projectPath, ".cursor", "rules");
+      const cursorRulesPath = path.join(cursorRulesDir, ruleName);
+
+      if (replace) {
+        await fs.writeFile(cursorRulesPath, ruleContent);
+      } else {
+        await fs.appendFile(cursorRulesPath, "\n" + ruleContent);
+      }
+    } else {
+      const cursorRulesPath = path.join(projectPath, ".cursorrules");
+
+      if (replace) {
+        await fs.writeFile(cursorRulesPath, ruleContent);
+      } else {
+        await fs.appendFile(cursorRulesPath, "\n" + ruleContent);
+      }
+    }
+
+    await showHUD("Cursor rules applied successfully");
+  } catch (error) {
+    console.error("Error applying cursor rule:", error);
+    throw error;
+  }
 }
 
 export async function openInCursor(path: string, successMessage?: string, callback?: () => void): Promise<void> {

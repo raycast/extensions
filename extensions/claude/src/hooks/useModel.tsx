@@ -1,53 +1,50 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { Model, ModelHook } from "../type";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
   updated_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
-  name: "Haiku",
+  name: "Haiku 3.5",
   prompt: "You are a helpful assistant.",
-  option: "claude-3-haiku-20240307",
+  option: "claude-3-5-haiku-latest",
   temperature: "1",
   max_tokens: "4096",
   pinned: false,
 };
 
+const option: Model["option"][] = [
+  "claude-3-5-haiku-latest",
+  "claude-3-5-haiku-20241022",
+  "claude-3-5-sonnet-latest",
+  "claude-3-5-sonnet-20241022",
+  "claude-3-5-sonnet-20240620",
+  "claude-3-opus-20240229",
+  "claude-3-sonnet-20240229",
+  "claude-3-haiku-20240307",
+  "claude-2.1",
+  "claude-2.0",
+];
+
+async function getStoredModels(): Promise<Model[]> {
+  const storedModels = await LocalStorage.getItem<string>("models");
+  if (!storedModels) {
+    return [DEFAULT_MODEL];
+  }
+  return [...JSON.parse(storedModels), DEFAULT_MODEL] satisfies Model[];
+}
+
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(false);
-
-  const option: Model["option"][] = [
-    "claude-3-5-haiku-latest",
-    "claude-3-5-haiku-20241022",
-    "claude-3-5-sonnet-latest",
-    "claude-3-5-sonnet-20241022",
-    "claude-3-5-sonnet-20240620",
-    "claude-3-opus-20240229",
-    "claude-3-sonnet-20240229",
-    "claude-3-haiku-20240307",
-    "claude-2.1",
-    "claude-2.0",
-  ];
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const storedModels = await LocalStorage.getItem<string>("models");
-
-      if (!storedModels) {
-        setData([DEFAULT_MODEL]);
-      } else {
-        setData((previous) => [...previous, ...JSON.parse(storedModels)]);
-      }
-      setLoading(false);
-    })();
+    setLoading(true);
+    getStoredModels()
+      .then(setData)
+      .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    LocalStorage.setItem("models", JSON.stringify(data));
-  }, [data]);
 
   const add = useCallback(
     async (model: Model) => {
@@ -56,25 +53,31 @@ export function useModel(): ModelHook {
         style: Toast.Style.Animated,
       });
       const newModel: Model = { ...model, created_at: new Date().toISOString() };
-      setData([...data, newModel]);
+      setData((prevData) => {
+        const newData = [...prevData, newModel];
+        LocalStorage.setItem("models", JSON.stringify(newData));
+        return newData;
+      });
       toast.title = "Model saved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData]
   );
 
   const update = useCallback(
     async (model: Model) => {
-      setData((prev) => {
-        return prev.map((x) => {
+      setData((prevData) => {
+        const newModels = prevData.map((x) => {
           if (x.id === model.id) {
             return model;
           }
           return x;
         });
+        LocalStorage.setItem("models", JSON.stringify(newModels));
+        return newModels;
       });
     },
-    [setData, data]
+    [setData]
   );
 
   const remove = useCallback(
@@ -83,12 +86,15 @@ export function useModel(): ModelHook {
         title: "Remove your model...",
         style: Toast.Style.Animated,
       });
-      const newModels: Model[] = data.filter((oldModel) => oldModel.id !== model.id);
-      setData(newModels);
+      setData((prevData) => {
+        const newModels = prevData.filter((oldModel) => oldModel.id !== model.id);
+        LocalStorage.setItem("models", JSON.stringify(newModels));
+        return newModels;
+      });
       toast.title = "Model removed!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData]
   );
 
   const clear = useCallback(async () => {
@@ -96,8 +102,11 @@ export function useModel(): ModelHook {
       title: "Clearing your models ...",
       style: Toast.Style.Animated,
     });
-    const newModels: Model[] = data.filter((oldModel) => oldModel.id === DEFAULT_MODEL.id);
-    setData(newModels);
+    setData((prevData) => {
+      const newModels: Model[] = prevData.filter((oldModel) => oldModel.id === DEFAULT_MODEL.id);
+      LocalStorage.setItem("models", JSON.stringify(newModels));
+      return newModels;
+    });
     toast.title = "Models cleared!";
     toast.style = Toast.Style.Success;
   }, [setData]);

@@ -32,7 +32,8 @@
     "stelo",
     "vlasischar",
     "javalangruntimeexception",
-    "shyaka"
+    "shyaka",
+    "sushichan044"
   ],
   "categories": [
     "Developer Tools",
@@ -181,13 +182,6 @@
           "description": "Will be used to open the cloned repository."
         },
         {
-          "name": "baseClonePath",
-          "type": "directory",
-          "required": false,
-          "title": "Clone Path",
-          "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
-        },
-        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -288,14 +282,6 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "maxitems",
-          "description": "Maximum issues shown per category.",
-          "type": "textfield",
-          "required": false,
-          "title": "Max Issues per category",
-          "placeholder": "10"
-        },
-        {
           "name": "showtext",
           "description": "Show issues count with menu bar icon.",
           "type": "checkbox",
@@ -303,6 +289,22 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
+        {
+          "name": "maxitems",
+          "description": "Maximum issues shown per category.",
+          "type": "textfield",
+          "required": false,
+          "title": "Max Issues per category",
+          "placeholder": "10"
         },
         {
           "name": "showCreated",
@@ -346,6 +348,23 @@
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
+        {
+          "name": "showtext",
+          "description": "Show pull requests count with menu bar icon.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show",
+          "title": "Icon Count",
+          "default": true
+        },
+        {
+          "name": "useUnreadIndicator",
+          "description": "Show unread indicator for pull requests.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Unread Indicator",
+          "default": false
+        },
         {
           "name": "includeAssigned",
           "type": "checkbox",
@@ -394,15 +413,6 @@
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
-        },
-        {
-          "name": "showtext",
-          "description": "Show pull requests count with menu bar icon.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show",
-          "title": "Icon Count",
-          "default": true
         }
       ]
     }
@@ -432,6 +442,32 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "name": "baseClonePath",
+      "type": "directory",
+      "required": false,
+      "title": "Clone Path",
+      "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
+    },
+    {
+      "name": "repositoryCloneProtocol",
+      "title": "Repository Clone Protocol",
+      "label": "Protocol for Cloning Repositories",
+      "description": "The protocol to use when cloning a repository.",
+      "type": "dropdown",
+      "required": false,
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ]
     },
     {
       "type": "checkbox",

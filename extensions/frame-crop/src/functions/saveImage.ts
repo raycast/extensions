@@ -5,7 +5,6 @@ import util from "util";
 import { getSavedDirectory, formatIdForFilename, getFileExtension } from "./utils";
 
 const execAsync = util.promisify(exec);
-
 interface SaveImageProps {
   url: string;
   id: string;

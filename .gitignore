@@ -166,5 +166,10 @@ compiled_raycast_swift
 
 # Root lockfiles
 /package-lock.json
-/pnpm-lock.yaml
-/yarn.lock
+
+# Non-npm lockfiles
+pnpm-lock.yaml
+yarn.lock
+deno.lock
+bun.lockb
+bun.lock

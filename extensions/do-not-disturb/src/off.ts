@@ -1,6 +1,7 @@
-import { LaunchContext, turnOffDND } from "./utils";
+import { LaunchContext, handleCrossLaunch, turnOffDND } from "./utils";
 
 export default async ({ launchContext = {} }: { launchContext: LaunchContext }) => {
-  const { suppressHUD } = launchContext;
+  const { suppressHUD, callbackLaunchOptions } = launchContext;
   await turnOffDND(suppressHUD);
+  await handleCrossLaunch(callbackLaunchOptions);
 };

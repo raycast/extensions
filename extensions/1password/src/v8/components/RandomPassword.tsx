@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, showToast, Toast 
 import { useEffect, useState } from "react";
 import { useForm } from "@raycast/utils";
 import { execFileSync } from "child_process";
-import { CLI_PATH } from "../utils";
+import { getCliPath } from "../utils";
 import { Item } from "../types";
 import Style = Toast.Style;
 import Shortcut = Keyboard.Shortcut;
@@ -27,7 +27,7 @@ export function RandomPassword() {
       if (values.symbols) args.push("symbols");
       try {
         // https://1password.community/discussion/139189/feature-request-generate-random-passwords-with-cli-via-dedicated-command-e-g-op-generate
-        const stdout = execFileSync(CLI_PATH, [
+        const stdout = execFileSync(getCliPath(), [
           "item",
           "create",
           "--dry-run",

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
@@ -13,7 +13,7 @@ export function QuickTranslateListItem(props: {
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
+  const langTo = supportedLanguagesByCode[props.languageSet.langTo[0]];
 
   const { data: result, isLoading: isLoading } = usePromise(simpleTranslate, [props.debouncedText, props.languageSet], {
     onWillExecute() {

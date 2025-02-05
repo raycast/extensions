@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🌐 Switched to new API] - 2025-01-28
+
+- Due to deprecation of the Ergast API now using the replacement: https://api.jolpi.ca/ergast/f1/
+
 ## [📆 Add change date format option] - 2024-05-19
 
 - Add the option to change the date format from `MM:DD:YYYY` to `DD:MM:YYYY`.

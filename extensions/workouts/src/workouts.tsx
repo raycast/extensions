@@ -1,35 +1,10 @@
 import { ActionPanel, List, Action, getPreferenceValues, Toast, showToast, Color, Detail, Icon } from "@raycast/api";
-import { useAI, useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
+import { useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
 import { PAGE_SIZE, getActivities, getActivity, provider } from "./api/client";
 import { useEffect } from "react";
 import { StravaActivitySummary } from "./api/types";
 import { sportIcons, sportNames } from "./constants";
 import { formatDistance, formatElevationGain, formatSpeedForSportType, generateMapboxImage } from "./utils";
-
-const preferences = getPreferenceValues();
-
-function AnalyzeActivity({ activityId }: { activityId: StravaActivitySummary["id"] }) {
-  const { data: activity, isLoading: isLoadingActivity } = usePromise(() => getActivity(activityId), []);
-  const cleanedActivity = { ...activity, map: undefined };
-  const { data, isLoading } = useAI(
-    `Please summarize and analyze my activity data: ${JSON.stringify(cleanedActivity)}.
-
-  Here are some rules:
-  - Act as a professional sports coach (but don't mention that you are in fact a coach)
-  - Always start with analysis and recommendations for improvement
-  - Return data as markdown tables
-  - When talking about mileage respond in ${preferences.distance_unit === "km" ? "kilometers" : "miles"}.
-  - When talking about running speed respond with pace in ${preferences.distance_unit === "km" ? "min/km" : "min/mile"}
-  - When talking about speed for other sports respond in ${preferences.distance_unit === "km" ? "km/h" : "mph"}.
-  `,
-    {
-      model: "openai-gpt-4-turbo",
-      execute: activity && !isLoadingActivity,
-    },
-  );
-
-  return <Detail isLoading={isLoading} markdown={data} navigationTitle="Analyze activity" />;
-}
 
 export function Splits({ activityId }: { activityId: StravaActivitySummary["id"] }) {
   const { data: activity, isLoading } = usePromise(() => getActivity(activityId), []);
@@ -168,12 +143,6 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
           ) : null}
-          <Action.Push
-            icon={Icon.Stars}
-            title="Analyze Activity"
-            target={<AnalyzeActivity activityId={activity.id} />}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
-          />
         </ActionPanel>
       }
       keywords={[activity.name]}

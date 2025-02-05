@@ -19,7 +19,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
   const { data: playlist, isLoading } = usePromise(
     async () => {
       const data = await AI.ask(
-        `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
+        `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". IMPORTANT: If the description contains a list of artist names (e.g., "songs from artist1, artist2, artist3, artist4, artist5"), ONLY include songs from those specific artists. Do not include any songs from artists not mentioned in the description. Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
+            
 
 {
   "name": <Playlist name>,

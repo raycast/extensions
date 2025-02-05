@@ -1,5 +1,13 @@
 # Google Chrome Changelog
 
+## [Allow to configure profile path] - 2025-01-18
+- The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
+
+## [Fix] - 2025-01-09
+
+- Fix Search Tabs command when "Extract the favicon from every open tab" is enabled.
+- Fix bookmark list in the Search All command.
+
 ## [Add Search All Command] - 2024-08-01
 
 - Add Google Chrome tabs and history, bookmarks search.

@@ -15,7 +15,8 @@
   "contributors": [
     "yvysunu",
     "pernielsentikaer",
-    "dianne_mcewan"
+    "dianne_mcewan",
+    "stphstph"
   ],
   "categories": [
     "Data"
@@ -51,28 +52,6 @@
       "description": "See your club's weekly leaderboard",
       "mode": "view",
       "icon": "leaderboard-icon.png",
-      "keywords": [
-        "strava",
-        "activities",
-        "exercise"
-      ]
-    },
-    {
-      "name": "ask",
-      "title": "Ask Workout AI",
-      "description": "Ask AI about your 100 most recent workouts",
-      "mode": "view",
-      "icon": "ask-ai-icon.png",
-      "arguments": [
-        {
-          "name": "question",
-          "title": "Question",
-          "description": "Ask a question to the Workout AI",
-          "type": "text",
-          "placeholder": "Mileage this week?",
-          "required": true
-        }
-      ],
       "keywords": [
         "strava",
         "activities",
@@ -153,6 +132,14 @@
         "activities",
         "exercise"
       ]
+    },
+    {
+      "name": "calculator",
+      "title": "Calculate Time or Pace",
+      "subtitle": "Workouts",
+      "description": "Calculate the time or pace for a workout",
+      "icon": "calculator.png",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -178,7 +165,9 @@
   "dependencies": {
     "@raycast/api": "^1.71.0",
     "@raycast/utils": "^1.15.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

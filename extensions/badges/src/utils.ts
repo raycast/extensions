@@ -10,7 +10,8 @@ export const ellipsis = (text: string = "", maxLength: number = 20) =>
 export const codeBlock = (type: string, text: string) => "```" + type + "\n" + text + "\n```";
 
 export const encodeBadgeContentParameters = (params: string[]) =>
-  params.map((p) => encodeURIComponent(p.replace(/-/g, "--").replace(/_/g, "__")));
+  (params.length === 1 ? "-" : "") +
+  params.map((p) => encodeURIComponent(p.replace(/-/g, "--").replace(/_/g, "__"))).join("-");
 
 export const getTagColor = (active: boolean, activeColor?: Color.ColorLike) =>
   active ? (activeColor ?? Color.Green) : Color.SecondaryText;

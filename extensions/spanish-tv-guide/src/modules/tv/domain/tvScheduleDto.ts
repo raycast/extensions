@@ -1,3 +1,6 @@
+import { findLast, replace } from "../../../utils/collectionUtils";
+import { now } from "../../../utils/dateUtils";
+
 export type ChannelScheduleDto = {
   icon: string;
   name: string;
@@ -24,3 +27,20 @@ export const upToDateChannelSchedule = (schedule: ProgramDto[]) => {
 };
 
 export type TvScheduleDto = ChannelScheduleDto[];
+
+export const toLocalizedTvSchedule = (schedule: TvScheduleDto): TvScheduleDto => {
+  return schedule.map((channelSchedule) => {
+    return { ...channelSchedule, schedule: channelScheduleWithLiveProgram(channelSchedule.schedule) };
+  });
+};
+
+const channelScheduleWithLiveProgram = (programs: ProgramDto[]): ProgramDto[] => {
+  const currentProgram = findLast(programs, (program) => program.startTime < now());
+  return currentProgram ? scheduleWithLiveProgram(programs, currentProgram) : programs;
+};
+
+const scheduleWithLiveProgram = (programs: ProgramDto[], currentProgram: ProgramDto): ProgramDto[] => {
+  return replace(currentProgram)
+    .in(programs)
+    .with({ ...currentProgram, isCurrentlyLive: true });
+};

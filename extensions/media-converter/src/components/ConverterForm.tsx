@@ -1,43 +1,33 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { convertVideo } from "../utils/converter";
-import path from "path";
-import { convertImage } from "../utils/converter";
-import { execPromise } from "../utils/exec";
-import { convertAudio } from "../utils/converter";
 import { useState } from "react";
+import path from "path";
+import { convertImage, convertAudio, convertVideo } from "../utils/converter";
+import { execPromise } from "../utils/exec";
 
-const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp"];
+const ALLOWED_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff"];
 const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
   const [selectedFileType, setSelectedFileType] = useState<"video" | "image" | "audio" | null>(null);
-
   const handleFileSelect = (files: string[]) => {
-    // Reset selectedFileType if no files are selected
-    if (!files || files.length === 0) {
+    if (files.length === 0) {
       setSelectedFileType(null);
-      return true; // Return true to prevent form error state
+      return true;
     }
 
     try {
       const firstFileExtension = path.extname(files[0])?.toLowerCase() || "";
-      const isFirstFileVideo = ALLOWED_EXTENSIONS.includes(firstFileExtension);
+      const isFirstFileVideo = ALLOWED_VIDEO_EXTENSIONS.includes(firstFileExtension);
       const isFirstFileImage = ALLOWED_IMAGE_EXTENSIONS.includes(firstFileExtension);
       const isFirstFileAudio = ALLOWED_AUDIO_EXTENSIONS.includes(firstFileExtension);
 
-      // Check if all files are of the same type
       const hasInvalidSelection = files.some((file) => {
-        try {
-          const extension = path.extname(file)?.toLowerCase() || "";
-          if (isFirstFileVideo) return !ALLOWED_EXTENSIONS.includes(extension);
-          if (isFirstFileImage) return !ALLOWED_IMAGE_EXTENSIONS.includes(extension);
-          if (isFirstFileAudio) return !ALLOWED_AUDIO_EXTENSIONS.includes(extension);
-          return true;
-        } catch (error) {
-          console.error("Error processing file:", file, error);
-          return true; // Consider invalid if there's an error
-        }
+        const extension = path.extname(file)?.toLowerCase() || "";
+        if (isFirstFileVideo) return !ALLOWED_VIDEO_EXTENSIONS.includes(extension);
+        if (isFirstFileImage) return !ALLOWED_IMAGE_EXTENSIONS.includes(extension);
+        if (isFirstFileAudio) return !ALLOWED_AUDIO_EXTENSIONS.includes(extension);
+        return true;
       });
 
       if (hasInvalidSelection) {
@@ -74,11 +64,11 @@ export function ConverterForm() {
     }
 
     const fileExtension = path.extname(values.videoFile[0]).toLowerCase();
-    const isInputVideo = ALLOWED_EXTENSIONS.includes(fileExtension);
+    const isInputVideo = ALLOWED_VIDEO_EXTENSIONS.includes(fileExtension);
     const isInputImage = ALLOWED_IMAGE_EXTENSIONS.includes(fileExtension);
     const isInputAudio = ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension);
-    const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg"].includes(values.format);
-    const isOutputImage = ["jpg", "png", "webp"].includes(values.format);
+    const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg", "webm"].includes(values.format);
+    const isOutputImage = ["jpg", "png", "webp", "heic", "tiff"].includes(values.format);
 
     if (!isInputVideo && !isInputImage && !isInputAudio) {
       await showToast({
@@ -103,15 +93,15 @@ export function ConverterForm() {
       title: "Converting file...",
     });
 
-    values.videoFile.forEach(async (item) => {
+    for (const item of values.videoFile) {
       try {
         let outputPath = "";
         if (isInputImage) {
-          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp");
+          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic" | "tiff");
         } else if (isInputAudio) {
           outputPath = await convertAudio(item, values.format as "mp3" | "aac" | "wav" | "flac");
         } else {
-          outputPath = await convertVideo(item, values.format as "mp4" | "avi" | "mkv" | "mov" | "mpg");
+          outputPath = await convertVideo(item, values.format as "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm");
         }
 
         await toast.hide();
@@ -135,7 +125,7 @@ export function ConverterForm() {
           message: String(error),
         });
       }
-    });
+    }
   };
 
   return (
@@ -158,6 +148,8 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="jpg" title=".jpg" />
               <Form.Dropdown.Item value="png" title=".png" />
               <Form.Dropdown.Item value="webp" title=".webp" />
+              <Form.Dropdown.Item value="heic" title=".heic" />
+              <Form.Dropdown.Item value="tiff" title=".tiff" />
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">
@@ -173,6 +165,7 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="mkv" title=".mkv" />
               <Form.Dropdown.Item value="mov" title=".mov" />
               <Form.Dropdown.Item value="mpg" title=".mpg" />
+              <Form.Dropdown.Item value="webm" title=".webm" />
             </Form.Dropdown.Section>
           )}
         </Form.Dropdown>

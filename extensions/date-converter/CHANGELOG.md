@@ -1,5 +1,14 @@
 # Date Converter Changelog
 
+## [Update] - 2025-01-24
+
+- Support configuring the displayed date format and the format of "Human Date"
+- Support configuring the base time zone
+
+## [Update] - 2025-01-03
+
+- Support hexadecimal numbers for seconds/ms
+
 ## [Update] - 2024-05-19
 
 - 24h time format support.

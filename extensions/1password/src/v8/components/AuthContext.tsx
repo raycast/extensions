@@ -11,9 +11,9 @@ import {
   PopToRootType,
   showToast,
   Toast,
+  environment,
 } from "@raycast/api";
 import {
-  capitalizeWords,
   checkZsh,
   errorRegex,
   getSignInStatus,
@@ -22,7 +22,7 @@ import {
   ZSH_PATH,
   signIn,
   useAccounts,
-  CLI_PATH,
+  getCliPath,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
 
@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [accountSelected, setAccountSelected] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { data, error, isLoading } = useAccounts(!accountSelected);
+  const raycastProtocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
 
   const onSubmit = async (values: Form.Values) => {
     const toast = await showToast({
@@ -82,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!ZSH_PATH) {
         throw new ZshMissingError("Zsh Binary Path Missing!");
       }
-      if (!CLI_PATH) {
+      if (!getCliPath()) {
         throw new CommandLineMissingError("1Password CLI is missing! Please install it before use.");
       }
       signIn();
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       toast.style = Toast.Style.Failure;
       toast.title = "Error Authenticating.";
     } finally {
-      await open("raycast://"); // Password prompt causes Raycast to close, so we reopen it here
+      await open(raycastProtocol); // Password prompt causes Raycast to close, so we reopen it here
     }
   };
 

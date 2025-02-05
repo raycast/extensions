@@ -1,5 +1,10 @@
 # Braid Changelog
 
+## [Improvements & New Features] - 2025-01-03
+
+- Add new icons.
+- Add `Table` component.
+
 ## [Improvements & New Features] - 2024-11-18
 
 - Add IconAttachment and IconLicence.

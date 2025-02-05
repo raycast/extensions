@@ -6,8 +6,8 @@ import { UpdatingStatusEnum } from "@pieces.app/pieces-os-client";
 import { pollForConnection } from "./piecesHealthCheck";
 import sleep from "../../utils/sleep";
 
-const MIN_VERSION = "10.0.0";
-const MAX_VERSION = "11.0.0";
+const MIN_VERSION = "11.0.0";
+const MAX_VERSION = "12.0.0";
 
 /**
  * Checks if the Pieces version is up to date and handles necessary updates.
