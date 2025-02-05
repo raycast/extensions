@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Add a preference option for toggling Browser Extension support
+
 ## [Improve Error Message] - 2025-02-04
 
 - Improve error message
