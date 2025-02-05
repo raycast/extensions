@@ -33,6 +33,8 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
   const [billable, setBillable] = useState(timeEntry.billable);
 
   const [taskSearch, setTaskSearch] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(timeEntry.start ? new Date(timeEntry.start) : null);
+  const [endDate, setEndDate] = useState<Date | null>(timeEntry.stop ? new Date(timeEntry.stop) : null);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     try {
@@ -43,6 +45,8 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
         billable: values.billable,
         project_id: selectedProject?.id,
         task_id: selectedTask?.id,
+        start: startDate?.toISOString(),
+        stop: endDate?.toISOString(),
         tags: selectedTags,
       });
 
@@ -126,6 +130,22 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
       }
     >
       <Form.TextField id="description" title="Description" autoFocus defaultValue={timeEntry.description} />
+
+      <Form.DatePicker
+        id="start_date"
+        title="Start Date"
+        defaultValue={timeEntry.start ? new Date(timeEntry.start) : null}
+        onChange={setStartDate}
+      />
+
+      <Form.DatePicker
+        id="end_date"
+        title="End Date"
+        defaultValue={timeEntry.stop ? new Date(timeEntry.stop) : null}
+        onChange={setEndDate}
+      />
+
+      <Form.Separator />
 
       <Form.Dropdown
         id="client"
