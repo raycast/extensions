@@ -1,5 +1,17 @@
 import { showToast, Toast, open, getSelectedFinderItems } from "@raycast/api";
 
+// 定义支持的图片格式
+const SUPPORTED_IMAGE_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".bmp",
+  ".webp",
+  ".heic",
+  ".heif",
+];
+
 export default async function Command() {
   try {
     const selectedItems = await getSelectedFinderItems();
@@ -8,19 +20,20 @@ export default async function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "No file selected",
-        message: "Please select a JPG file in Finder",
+        message: "Please select an image file in Finder",
       });
       return;
     }
 
     const selectedFile = selectedItems[0];
     const filePath = selectedFile.path;
+    const fileExtension = filePath.toLowerCase().substring(filePath.lastIndexOf("."));
 
-    if (!filePath.toLowerCase().endsWith(".jpg") && !filePath.toLowerCase().endsWith(".jpeg")) {
+    if (!SUPPORTED_IMAGE_EXTENSIONS.includes(fileExtension)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid file type",
-        message: "Please select a JPG file",
+        message: `Supported formats: ${SUPPORTED_IMAGE_EXTENSIONS.join(", ")}`,
       });
       return;
     }
