@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "frame-crop-art",
-  "title": "Frame Crop - Discover Art for your TV",
+  "title": "Frame Crop - Discover Art for Your TV",
   "description": "Discover & download amazing artwork curated by Frame Crop",
   "icon": "frame-crop-raycast-logo.png",
   "author": "jsheffers",
