@@ -62,7 +62,7 @@ export const setWallpaper = async ({ url, id }: SetWallpaperProps) => {
   } catch (error) {
     console.error(error);
     toast.style = Toast.Style.Failure;
-    toast.title = "Error managing wallpaper";
-    toast.message = error.message;
+    toast.title = "Error setting wallpaper";
+    toast.message = "Something went wrong. Please try again.";
   }
 };
