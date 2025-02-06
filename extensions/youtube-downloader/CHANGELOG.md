@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Format selection and Clipping are back] - {PR_MERGE_DATE}
+
+- Added format selection and clipping feature
+
 ## [Improve Error Message] - 2025-02-04
 
 - Improve error message
