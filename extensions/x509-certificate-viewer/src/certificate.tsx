@@ -25,8 +25,8 @@ export default function Command() {
       const details: Certificate = {
         subject: formatDN(cert.subject),
         issuer: formatDN(cert.issuer),
-        validFrom: cert.notBefore.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
-        validTo: cert.notAfter.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
+        validFrom: cert.notBefore.toLocaleString(),
+        validTo: cert.notAfter.toLocaleString(),
         serialNumber: stringToHex(cert.serialNumber),
         publicKeyType: cert.publicKey.algorithm.name.toString().toUpperCase(),
         signatureAlgorithm: cert.signatureAlgorithm.hash.name.toString().toUpperCase(),
@@ -35,36 +35,34 @@ export default function Command() {
       };
       setCertDetails(details);
     } catch (error) {
-      console.error("证书解析错误:", error);
+      console.error("Certificate parsing error:", error);
       showToast({
         style: Toast.Style.Failure,
-        title: "解析失败",
-        message: "证书解析出错，可能是不支持的格式或证书损坏",
+        title: "Parse Failed",
+        message: "Failed to parse certificate. Invalid format or corrupted certificate",
       });
     }
   }
 
-  // 格式化 DN 字符串
   function formatDN(dn: string): string {
     return dn
       .split(", ")
       .map((pair) => {
         const [key, value] = pair.split("=");
         const keyMap: { [key: string]: string } = {
-          CN: "通用名称",
-          O: "组织",
-          OU: "组织单位",
-          L: "地理位置",
-          ST: "省/州",
-          C: "国家",
-          E: "邮箱",
+          CN: "Common Name",
+          O: "Organization",
+          OU: "Organizational Unit",
+          L: "Locality",
+          ST: "State/Province",
+          C: "Country",
+          E: "Email",
         };
         return `${keyMap[key] || key}: ${value}`;
       })
       .join("\n");
   }
 
-  // 格式化十六进制字符串
   function formatHex(hex: ArrayBuffer): string {
     return Array.from(new Uint8Array(hex))
       .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -73,7 +71,6 @@ export default function Command() {
   }
 
   function stringToHex(str: string): string {
-    // 每2 个字符切割，最后使用:合并
     return (
       str
         .match(/.{1,2}/g)
@@ -84,42 +81,39 @@ export default function Command() {
 
   if (certDetails) {
     const markdown = `
-# 📜 证书详情
+# 📜 Certificate Details
 
-## 👤 证书主体
+## 👤 Subject
 \`\`\`
 ${certDetails.subject}
 \`\`\`
 
-## 🏢 证书颁发者
+## 🏢 Issuer
 \`\`\`
 ${certDetails.issuer}
 \`\`\`
 
+## ⏱️ Validity Period
+- **Not Before**: \`${certDetails.validFrom}\`
+- **Not After**: \`${certDetails.validTo}\`
 
-## ⏱️ 有效期
-- **生效时间**: \`${certDetails.validFrom}\`
-- **过期时间**: \`${certDetails.validTo}\`
-
-
-## 🔑 公钥信息
+## 🔑 Public Key Info
 \`\`\`
 ${certDetails.publicKey}
 \`\`\`
-- **算法类型**: \`${certDetails.publicKeyType}\`
-${certDetails.publicKeySize ? `- **密钥长度**: \`${certDetails.publicKeySize} bits\`` : ""}
+- **Algorithm**: \`${certDetails.publicKeyType}\`
+${certDetails.publicKeySize ? `- **Key Size**: \`${certDetails.publicKeySize} bits\`` : ""}
 
-## 📝 签名
-算法：\`${certDetails.signatureAlgorithm}\`
+## 📝 Signature
+Algorithm: \`${certDetails.signatureAlgorithm}\`
 
-签名：
+Signature:
 \`\`\`
 ${certDetails.signature}
 \`\`\`
 
-## 🔢 序列号
+## 🔢 Serial Number
 \`${certDetails.serialNumber}\`
-
 `;
 
     return <Detail markdown={markdown} />;
@@ -129,11 +123,15 @@ ${certDetails.signature}
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="解析证书" onSubmit={(values) => parseCertificate(values.certificate)} />
+          <Action.SubmitForm title="Parse Certificate" onSubmit={(values) => parseCertificate(values.certificate)} />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="certificate" title="PEM 证书" placeholder="请粘贴 PEM 格式的证书内容..." />
+      <Form.TextArea
+        id="certificate"
+        title="PEM Certificate"
+        placeholder="Paste your PEM certificate content here..."
+      />
     </Form>
   );
 }

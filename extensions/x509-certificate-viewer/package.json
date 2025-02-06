@@ -3,7 +3,7 @@
   "name": "x509-certificate-viewer",
   "title": "X509 Certificate Viewer",
   "description": "Parse and view X.509 certificate details from PEM format",
-  "icon": "extension-icon.png",
+  "icon": "cert.png",
   "author": "tinywell",
   "categories": [
     "Developer Tools",
@@ -14,7 +14,6 @@
     {
       "name": "certificate",
       "title": "X509 Certificate Viewer",
-      "subtitle": "cert",
       "description": "Parse and view X.509 certificate details from PEM format",
       "mode": "view"
     }
