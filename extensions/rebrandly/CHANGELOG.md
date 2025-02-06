@@ -1,5 +1,9 @@
 # Rebrandly Changelog
 
+## [Delete Link] - {PR_MERGE_DATE}
+
+- Use `ctrl`+`x` to execute "Delete Link" `Action`
+
 ## [Update Logo + Create Link] - 2024-11-09
 
 - Filter by "Starred"
