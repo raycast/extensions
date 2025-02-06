@@ -11,8 +11,9 @@ import {
 } from "@raycast/api";
 import { ACL } from "@uploadthing/shared";
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
+import { basename, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { fileTypeFromBuffer } from "file-type";
 import { UTApi, UTFile } from "uploadthing/server";
 
 export const ACLTitleMap: Record<ACL, string> = {
@@ -80,8 +81,16 @@ export const filePathsToFile = async (filePaths: string[]) => {
   const files = await Promise.all(
     filePaths.map(async (file) => {
       const filepath = file.startsWith("file://") ? fileURLToPath(file) : file;
-      const filename = basename(filepath);
+      let filename = basename(filepath);
       const buf = await readFile(filepath);
+
+      if (!extname(filename)) {
+        const detectedType = await fileTypeFromBuffer(buf);
+        if (detectedType) {
+          filename += `.${detectedType.ext}`;
+        }
+      }
+
       return new UTFile([buf], filename);
     }),
   );

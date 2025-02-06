@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "juliusmarminge",
   "contributors": [
-    "xmok"
+    "xmok",
+    "ridemountainpig"
   ],
   "owner": "pingdotgg",
   "access": "public",
@@ -50,6 +51,7 @@
     "@tanstack/react-query": "^5.28.4",
     "@uploadthing/mime-types": "0.3.0",
     "@uploadthing/shared": "7.0.2",
+    "file-type": "^20.0.1",
     "filesize": "^10.1.6",
     "undici": "^6.19.8",
     "uploadthing": "^7.4.4"

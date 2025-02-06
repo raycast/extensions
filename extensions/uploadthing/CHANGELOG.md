@@ -1,5 +1,9 @@
 # UploadThing Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Add the script to process the file without its extension
+
 ## [2.0.1 - Add "List Files"] - 2025-01-31
 
 - Add "List Files" command
