@@ -35,7 +35,7 @@ const DisplayArtwork = ({ artwork, onRefresh }: DisplayArtworkProps) => {
         <ActionPanel>
           {onRefresh && <Action title="Fetch a Random Artwork" onAction={onRefresh} icon={Icon.RotateClockwise} />}
           <Action
-            title="Copy Image to Clipboard"
+            title="Copy to Clipboard"
             onAction={() => copyFileToClipboard({ url: artwork.full_url, id: artwork.username })}
             icon={Icon.CopyClipboard}
           />

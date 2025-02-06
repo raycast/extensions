@@ -54,7 +54,7 @@ function GetPopularArt() {
                   icon={Icon.Monitor}
                 />
                 <Action
-                  title="Copy Image to Clipboard"
+                  title="Copy to Clipboard"
                   onAction={() => copyFileToClipboard({ url: artwork.full_url, id: artwork.username })}
                   icon={Icon.CopyClipboard}
                 />
