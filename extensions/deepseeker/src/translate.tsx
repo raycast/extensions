@@ -14,5 +14,5 @@ instruction_lookup = lookup ? instruction_lookup : "";
 const instruction = `${instruction_target}\n\n${instruction_lookup}`;
 
 export default function Translate() {
-  return ResultView(instruction, model_override, toast_title);
+  return ResultView(instruction, model_override, toast_title, true);
 }
