@@ -5,7 +5,6 @@
    "description": "Your cursorrul.es in Raycast",
    "icon": "icon.png",
    "author": "nyxb",
-   "owner": "nyxb",
    "crossExtensions": ["degouville/cursor-recent-projects"],
    "categories": ["Productivity", "Developer Tools"],
    "preferences": [
