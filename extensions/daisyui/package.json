@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "daisyui",
-  "title": "daisyUI",
-  "description": "Access the daisyUI reference material from Raycast.",
+  "title": "daisyUI Colors & Components",
+  "description": "Access the daisyUI reference material from Raycast. All references are from the v5 beta!",
   "icon": "daisyui-icon.png",
   "author": "joeynotjoe_2",
   "categories": [
@@ -13,16 +13,16 @@
   "commands": [
     {
       "name": "daisyui-colors",
-      "title": "DaisyUI Colors",
-      "subtitle": "Look up daisyUI colors",
-      "description": "Show daisyUI colors",
+      "title": "Search Colors",
+      "subtitle": "daisyUI Colors",
+      "description": "Browse comprehensive daisyUI color palette with theme variations",
       "mode": "view"
     },
     {
       "name": "daisyui-components",
-      "title": "daisyUI Components",
-      "subtitle": "Look up daisyUI components",
-      "description": "Show daisyUI components",
+      "title": "Search Components",
+      "subtitle": "daisyUI Components",
+      "description": "View detailed information and code snippets for daisyUI components",
       "mode": "view"
     }
   ],

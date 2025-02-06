@@ -1,4 +1,4 @@
-export interface DaisyUIColor {
+export interface daisyUIColor {
   name: string;
   cssVariable: string;
   description: string;
@@ -15,7 +15,7 @@ export interface DaisyUIColor {
 const baseLightBgHex = "#ffffff"; // base-100 light
 const baseDarkBgHex = "#1d232a"; // base-100 dark
 
-export const Colors: DaisyUIColor[] = [
+export const Colors: daisyUIColor[] = [
   {
     name: "primary",
     cssVariable: "--color-primary",

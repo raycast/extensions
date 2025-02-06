@@ -1,6 +1,6 @@
 import { ActionPanel, Grid, Action, Icon } from "@raycast/api";
 import { useState } from "react";
-import { Components, DaisyUIComponent } from "./utils/components";
+import { Components, daisyUIComponent } from "./utils/components";
 import ComponentDetail from "./detail-component";
 
 function SectionDropdown(props: { sections: string[]; onSectionChange: (section: string) => void }) {
@@ -32,7 +32,7 @@ export default function Command() {
       return acc;
     },
     {
-      groupedComponents: {} as Record<string, DaisyUIComponent[]>,
+      groupedComponents: {} as Record<string, daisyUIComponent[]>,
       sections: new Set<string>(),
     },
   );
