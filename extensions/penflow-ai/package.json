@@ -72,16 +72,16 @@
   ],
   "screenshots": [
     {
-      "path": "metadata/001.png",
-      "title": "001"
+      "path": "meta/data/penflow-ai-1.png",
+      "title": "penflow-ai-1"
     },
     {
-      "path": "metadata/002.png",
-      "title": "002"
+      "path": "meta/data/penflow-ai-2.png", 
+      "title": "penflow-ai-2"
     },
     {
-      "path": "metadata/003.png",
-      "title": "003"
+      "path": "meta/data/penflow-ai-3.png",
+      "title": "penflow-ai-3"
     }
   ],
   "lockfileVersion": 2,
