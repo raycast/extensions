@@ -17,10 +17,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      navigationTitle="Generate Secret"
-      searchBarPlaceholder="Select length to generate a secret"
-    >
+    <List navigationTitle="Generate Secret" searchBarPlaceholder="Select length to generate a secret">
       {SECRET_LENGTHS.map((length) => (
         <SecretGenerator
           key={length}

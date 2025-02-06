@@ -10,4 +10,4 @@ export async function showCopyToast() {
     toast.style = Toast.Style.Success;
     toast.title = "Secret copied to clipboard";
   }, 500);
-} 
+}

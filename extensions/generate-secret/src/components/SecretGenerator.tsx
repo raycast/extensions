@@ -28,11 +28,7 @@ export function SecretGenerator({ length, isSelected, currentSecret, onGenerate 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title="Generate Secret"
-              icon={Icon.Wand}
-              onAction={() => onGenerate(length)}
-            />
+            <Action title="Generate Secret" icon={Icon.Wand} onAction={() => onGenerate(length)} />
             {isSelected && currentSecret && (
               <Action
                 title="Copy to Clipboard"
@@ -46,4 +42,4 @@ export function SecretGenerator({ length, isSelected, currentSecret, onGenerate 
       }
     />
   );
-} 
+}
