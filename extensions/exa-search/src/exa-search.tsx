@@ -101,7 +101,6 @@ export default function Command() {
               ? `Type at least ${minQueryLength} characters`
               : "Press ↵ to search"
         }
-        description="Press ↵ to search"
       />
     );
   }, [error, searchText, minQueryLength]);
