@@ -4,6 +4,10 @@ Your [cursorrul.es](https://cursorrul.es/) in Raycast.
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 
+<p align="center">
+<img src="assets/demo.gif" width="100%" align="center" />
+</p>
+
 ## Overview
 
 Cursorrules is a powerful Raycast extension that seamlessly integrates with [cursorrul.es](https://cursorrul.es/), allowing users to access, search, and utilize cursor rules directly within the Cursor Code Editor. This extension streamlines the process of finding and implementing cursor rules and provides learning resources for Cursor IDE users.

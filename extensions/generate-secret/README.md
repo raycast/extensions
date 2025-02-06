@@ -9,7 +9,7 @@ A Raycast extension that generates secure random secrets of various lengths and 
 </p>
 
 <p align="center">
-<img src="assets/NyxbShot-2025-01-19-at-19.43.04.gif" width="100%" align="center" />
+<img src="assets/demo.gif" width="100%" align="center" />
 </p>
 
 ## Features

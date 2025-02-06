@@ -3,7 +3,7 @@
    "name": "cursorrules",
    "title": "cursorrules",
    "description": "Your cursorrul.es in Raycast",
-   "icon": "extension-icon.png",
+   "icon": "icon.png",
    "author": "nyxb",
    "owner": "nyxb",
    "crossExtensions": ["degouville/cursor-recent-projects"],
