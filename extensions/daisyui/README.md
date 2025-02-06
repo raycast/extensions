@@ -46,13 +46,6 @@ Quickly reference daisyUI colors and components directly from Raycast.
 
 This extension is a community project and is not officially affiliated with daisyUI.
 
-## Screenshots
-
-daisyUI
-![daisyUI Colors Interface](daisyui-1.png)
-![daisyUI Components View](daisyui-2.png)
-![daisyUI Dark Mode](daisyui-3.png)
-
 ## License
 
 MIT License
