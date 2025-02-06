@@ -1,7 +1,9 @@
 # DeepSeeker - Quick Actions Changelog
 
-## [Minor improvements] - {PR_MERGE_DATE}
+## [New Features] - {PR_MERGE_DATE}
 
+- 🖱️ New Command: `Ask on Selected`: ask questions or instruct on the selected text.
+- 🧑‍💻 Minor refactor code
 - 💤 Minor improvements
 - 🐳 Minor title adjustment of DeepSeek series and add a new name `deepseek-r1` for Alicloud.
 

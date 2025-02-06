@@ -25,11 +25,21 @@ Enjoy using DeepSeeker! 🚀
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
 - [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
-- [ ] 🔍 Fix Fallback Feature, e.g., ASK LLM
 - [ ] Interaction with Zoo using deeplinks?
 - [ ] 📦 More flexibility for personal needs
   - [ ] Prompt zoo
   - [ ] Choose proopt when running the command
+
+| Command             | Function                                                     | Use Selected Text? |
+| ------------------- | ------------------------------------------------------------ | ------------------ |
+| **Ask on Selected** | Ask questions or instruct on the selected text               | ✅                  |
+| **Ask LLM**         | Ask questions using pure user query input                    | ❌                  |
+| **Summarize**       | Summarize the selected text                                  | ✅                  |
+| **Fix**             | Fix the selected text typo and grammar-wise                  | ✅                  |
+| **Rephrase**        | Rephrase and improve the writing of the selected text        | ✅                  |
+| **Translate**       | Auto translate selected text into target language as setting | ✅                  |
+| **What**            | Give a brief explanation of the selected text                | ✅                  |
+| **Why**             | Give a brief explanation of the selected declaration         | ✅                  |
 
 > This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).
 

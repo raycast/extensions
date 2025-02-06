@@ -53,10 +53,10 @@ export default function ResultView(
       user_prompt = "USER PROMPT: " + user_input;
     }
     if (selectedText) {
-      user_prompt = user_input + "\n\nUSER PROVIDED TEXT: " + selectedText;
+      user_prompt += "\n\nUSER PROVIDED TEXT: " + selectedText;
     }
 
-    console.log("Prompt: " + user_prompt);
+    console.log("Prompt:\n " + user_prompt);
 
     try {
       const stream = await openai.chat.completions.create({
