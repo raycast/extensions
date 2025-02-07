@@ -49,10 +49,9 @@
   "preferences": [
     {
       "name": "closeWindowOnAction",
-      "title": "Close window on action",
-      "description": "Close the Raycast window after performing an action",
+      "description": "If enabled, the Raycast window will be closed after performing an action",
       "type": "checkbox",
-      "label": "Enabled",
+      "label": "Close window on action",
       "default": false,
       "required": false
     }
@@ -175,28 +174,35 @@
       "interval": "10s",
       "preferences": [
         {
-          "name": "maxTextLength",
-          "title": "Maximum text length",
-          "description": "Maximum number of characters to show. If left empty, it defaults to 30",
-          "type": "textfield",
-          "default": "20",
+          "name": "hideIconWhenIdle",
+          "description": "If enabled, the icon in the Menu Bar will be hidden when Spotify is not running or when nothing is playing",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "default": false,
           "required": false
         },
         {
-          "name": "showArtist",
-          "title": "Show artists namer",
-          "description": "Show the artist name in the Menu Bar",
+          "name": "hideArtistName",
+          "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
-          "label": "Enabled",
-          "default": true,
+          "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maxTextLength",
+          "title": "Now Playing Text Length",
+          "description": "Maximum number of characters to show for the currently playing track in the menu bar. Leave empty to use default (30 characters)",
+          "type": "textfield",
+          "default": "30",
           "required": false
         },
         {
           "name": "iconType",
-          "title": "Icon type",
-          "description": "Choose between the default Spotify icon, or the cover image of the current track or episode",
+          "title": "Menu Bar Icon",
+          "description": "Choose between the default Spotify icon, or the cover image of the current track or episode.",
           "type": "dropdown",
-          "default": "spotify",
+          "default": "spotify-icon",
           "data": [
             {
               "title": "Spotify Icon",
@@ -207,15 +213,6 @@
               "value": "cover-image"
             }
           ],
-          "required": false
-        },
-        {
-          "name": "hideIconWhenIdle",
-          "title": "Hide icon when idle",
-          "description": "Hide the icon in the Menu Bar when Spotify is not running or when nothing is playing",
-          "type": "checkbox",
-          "label": "Enabled",
-          "default": false,
           "required": false
         }
       ]
