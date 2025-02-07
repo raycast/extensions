@@ -784,6 +784,13 @@
       ],
       "required": true,
       "title": "LLM Model"
+    },
+    {
+      "name": "custom_model",
+      "title": "Custom Model Name",
+      "description": "Custom model name for your API endpoint if it's not listed in the dropdown, this will override the global model",
+      "type": "textfield",
+      "required": false
     }
   ],
   "devDependencies": {
