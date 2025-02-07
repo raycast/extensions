@@ -30,6 +30,11 @@ Enjoy using DeepSeeker! 🚀
   - [ ] Prompt zoo
   - [ ] Choose proopt when running the command
 
+## Bugs / TODOs
+
+- [ ] It seems translate will run two times. Need to fix it.
+![Translation bug demonstration](./assets/translate-bug.gif)
+
 | Command             | Function                                                     | Use Selected Text? |
 | ------------------- | ------------------------------------------------------------ | ------------------ |
 | **Ask on Selected** | Ask questions or instruct on the selected text               | ✅                  |

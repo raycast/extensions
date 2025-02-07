@@ -6,6 +6,7 @@
 - 🧑‍💻 Minor refactor code
 - 💤 Minor improvements
 - 🐳 Minor title adjustment of DeepSeek series and add a new name `deepseek-r1` for Alicloud.
+- 🌍 Minor fix on `Translate` command
 
 ## [New Features] - 2025-01-30
 
