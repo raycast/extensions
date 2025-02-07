@@ -19,7 +19,8 @@
     "silv",
     "EyLuismi",
     "pernielsentikaer",
-    "BehnH"
+    "BehnH",
+    "shlikhota"
   ],
   "pastContributors": [
     "igor9silva",
@@ -147,6 +148,32 @@
       "title": "API Token",
       "description": "API Token",
       "type": "password",
+      "required": false
+    },
+    {
+      "name": "personalAccessToken",
+      "label": "Use Personal Access Token (PAT)",
+      "description": "Some self-hosted Jira requires PAT instead of Basic authentication with API Token.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "apiVersion",
+      "type": "dropdown",
+      "title": "API version",
+      "description": "Jira Cloud typically uses v3. Choose v2 in case of problems with self-hosted Jira.",
+      "data": [
+        {
+          "title": "v3 (Cloud)",
+          "value": "3"
+        },
+        {
+          "title": "v2 (Self-hosted)",
+          "value": "2"
+        }
+      ],
+      "default": "3",
       "required": false
     },
     {

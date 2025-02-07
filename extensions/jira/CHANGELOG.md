@@ -1,5 +1,10 @@
 # Jira Changelog
 
+## [Improve self-hosted Jira support] - {PR_MERGE_DATE}
+
+- Added checkbox option "Use Personal Access Token (PAT)", required for some self-hosted configurations
+- Added support for switching to an older API version compatible with self-hosted Jira
+
 ## [Add ability to configuring Git branch name format] - 2025-01-09
 - Implemented the ability to configure the Git branch name format in the extension settings.
 
