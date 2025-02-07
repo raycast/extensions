@@ -1,5 +1,11 @@
 # The Blue Cloud Changelog
 
+## [Download File] - {PR_MERGE_DATE}
+
+- Download a file (need to re-authorize for new scope)
+- Open Directories in Browser
+- Remove unused auth.ts file
+
 ## [A New Look] - 2024-11-04
 
 - Extension is now called "The Blue Cloud" to comply with Dropbox Branding Guidelines

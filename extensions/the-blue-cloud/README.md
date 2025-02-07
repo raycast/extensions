@@ -21,6 +21,7 @@ By default, the Extension uses OAuth. However, if you prefer to use your own acc
 6. `Tick` the following permissions:
     - account_info.read
     - files.metadata.read
+    - files.content.read
 7. `Click` "Submit"
 8. Go back to Settings of the App
 9. Click `Generate` under "Generated access token"

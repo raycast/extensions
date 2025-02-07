@@ -28,8 +28,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.6",
-    "@raycast/utils": "^1.18.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "dropbox": "^10.34.0",
     "dropbox-v2-api": "^2.5.2",
     "node-fetch": "^3.3.0"

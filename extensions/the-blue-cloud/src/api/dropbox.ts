@@ -1,6 +1,7 @@
 import { DropboxResponseError } from "dropbox";
 import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
-import { getDropboxClient } from "./oauth";
+import { getDropboxClient, provider } from "./oauth";
+import { showToast, Toast } from "@raycast/api";
 
 export interface ListFileResp {
   entries: Array<files.FileMetadataReference | files.FolderMetadataReference>;
@@ -91,6 +92,10 @@ function convertSearchResult(res: files.SearchV2Result): ListFileResp {
   };
 }
 
+export function getDirectoryViewURL(path: string) {
+  return `https://www.dropbox.com/home${path}`;
+}
+
 export function getFilePreviewURL(path: string): string {
   return `https://www.dropbox.com/preview${path}`;
 }
@@ -103,4 +108,26 @@ function convertError(err: unknown): string {
   }
   if (e instanceof Error) return e.message;
   return `${e}`;
+}
+
+export async function downloadFile(name: string, path: string) {
+  const toast = await showToast(Toast.Style.Animated, "Downloading", name);
+  const dbx = getDropboxClient();
+  try {
+    await dbx.filesDownload({ path });
+    toast.style = Toast.Style.Success;
+    toast.title = "Downloaded";
+  } catch (error) {
+    const message = convertError(error);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not download";
+    toast.message = message;
+    if (message.includes("scope")) toast.primaryAction= {
+      title: "Re-authorize",
+      async onAction() {
+        await provider.client.removeTokens();
+        await provider.authorize();
+      },
+    }
+  }
 }
