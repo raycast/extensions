@@ -37,7 +37,7 @@ export default function ItemDetail({ item, handleSearchOpen }: ItemDetailProps) 
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={item.permalink} onOpen={handleSearchOpen} />
+          <Action.OpenInBrowser title="Open Listing in Browser" url={item.permalink} onOpen={handleSearchOpen} />
         </ActionPanel>
       }
     />

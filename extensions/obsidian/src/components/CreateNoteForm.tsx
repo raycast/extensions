@@ -83,7 +83,7 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
       />
       <Form.TagPicker id="tags" title="Tags" defaultValue={prefTag ? [prefTag] : []}>
         {parseTags()?.map((tag) => (
-          <Form.TagPicker.Item value={tag.name.toLowerCase()} title={tag.name} key={tag.key} />
+          <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.key} />
         ))}
       </Form.TagPicker>
       <Form.TextArea

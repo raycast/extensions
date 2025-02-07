@@ -32,3 +32,16 @@ Currently the license is priced at $59.
 ## Why Google login is required
 
 This extension uses a Google token to identify the user, this token is used to connect a bought license to the user after the payment with Stripe via webhooks.
+
+## Real world usage
+
+I use Spiceblow every day to update and manage my projects databases, for example for [Spiceblow itself](https://spiceblow.com) Postgres database, for [Unchatgpt](https://antidetection.com) Postgres database and [Notaku](https//notaku.so) Mysql database.
+
+Some of the most common tasks:
+
+- Handling support tickets, find the user projects, settings, etc
+- Updating users emails
+- Manually updating user settings without having to write SQL or use an admin panel
+- Find users that signed up this week
+- Draw a graph of the last month sign-ups
+- Export rows as CSV to then run scripts on them

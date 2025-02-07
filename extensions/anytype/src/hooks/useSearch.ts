@@ -1,20 +1,25 @@
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { search } from "../api/search";
 import { useMemo } from "react";
 import { apiLimit } from "../helpers/constants";
 
-export function useSearch(searchText: string, type: string[]) {
+export function useSearch(spaceId: string, query: string, types: string[]) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (searchText: string, type: string[]) => async (options: { page: number }) => {
+    (query: string, types: string[]) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await search(searchText, type, { offset, limit: apiLimit });
+      const response = await search(
+        spaceId,
+        { query, types, sort: { direction: "desc", timestamp: getPreferenceValues().sort } },
+        { offset, limit: apiLimit },
+      );
 
       return {
         data: response.data,
         hasMore: response.pagination.has_more,
       };
     },
-    [searchText, type],
+    [query, types],
     {
       keepPreviousData: true,
     },

@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
-import { LocalStorage, showToast, Toast, List, ActionPanel, Action, Form, Icon } from "@raycast/api";
+import {
+  LocalStorage,
+  showToast,
+  Toast,
+  List,
+  ActionPanel,
+  Action,
+  Form,
+  Icon,
+  Keyboard,
+  open,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { validateToken } from "../api/validateToken";
 import { displayCode } from "../api/displayCode";
 import { getToken } from "../api/getToken";
-import { appName } from "../helpers/constants";
+import { apiAppName, downloadUrl } from "../helpers/constants";
 
 type EnsureAuthenticatedProps = {
   placeholder?: string;
@@ -23,8 +35,8 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
       if (!challengeId) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Challenge not started",
-          message: "Start the challenge before submitting the code.",
+          title: "Pairing not started",
+          message: "Start the pairing before submitting the code.",
         });
         return;
       }
@@ -33,13 +45,13 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
         setIsLoading(true);
         const { app_key } = await getToken(challengeId, values.userCode);
         await LocalStorage.setItem("app_key", app_key);
-        showToast({ style: Toast.Style.Success, title: "Successfully authenticated" });
+        showToast({ style: Toast.Style.Success, title: "Successfully paired" });
         setHasToken(true);
         setTokenIsValid(true);
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to solve challenge",
+          title: "Failed to pair",
           message: String(error),
         });
       } finally {
@@ -56,6 +68,7 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
       },
     },
   });
+
   useEffect(() => {
     const retrieveAndValidateToken = async () => {
       const token = await LocalStorage.getItem<string>("app_key");
@@ -73,13 +86,34 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
   async function startChallenge() {
     try {
       setIsLoading(true);
-      const { challenge_id } = await displayCode(appName);
+      const { challenge_id } = await displayCode(apiAppName);
       setChallengeId(challenge_id);
+
+      // Prevent window from closing
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Pairing started",
+        message: "Check the app for the 4-digit code.",
+      });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to start challenge",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        title: "Failed to start pairing",
+        message: error instanceof Error ? error.message : "An unknown error occurred.",
+        primaryAction: {
+          title: "Open Anytype",
+          shortcut: Keyboard.Shortcut.Common.Open,
+          onAction: async () => {
+            await open(getPreferenceValues().anytypeApp.path);
+          },
+        },
+        secondaryAction: {
+          title: "Download Anytype",
+          shortcut: Keyboard.Shortcut.Common.OpenWith,
+          onAction: async () => {
+            await open(downloadUrl);
+          },
+        },
       });
     } finally {
       setIsLoading(false);
@@ -101,7 +135,6 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
   return challengeId ? (
     <Form
       isLoading={isLoading}
-      navigationTitle="Enter Code to Authenticate"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit Code" onSubmit={handleSubmit} {...itemProps} />
@@ -112,7 +145,7 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
         {...itemProps.userCode}
         id="userCode"
         title="Verification Code"
-        placeholder="Enter the 4-digit code from the app"
+        placeholder="Enter the 4-digit code from popup"
       />
     </Form>
   ) : (
@@ -123,11 +156,11 @@ export default function EnsureAuthenticated({ placeholder, viewType, children }:
     >
       <List.EmptyView
         icon={Icon.Lock}
-        title="Authentication Required"
-        description="You need to authenticate first. Start the challenge for a 4-digit code to pop up in the Anytype desktop app."
+        title="Authentication required"
+        description="Start pairing for a 4-digit code to pop up in the Anytype app."
         actions={
           <ActionPanel>
-            <Action title="Start Challenge" onAction={startChallenge} />
+            <Action title="Start Pairing" onAction={startChallenge} />
           </ActionPanel>
         }
       />

@@ -69,7 +69,8 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
 
   const tag = noteTag ? noteTag + " " : "";
 
-  const creationDateString = creationDate ? " ➕ " + new Date().toISOString().split("T")[0] : "";
+  // en-CA uses the same format as the iso string without the time ex: 2025-09-25
+  const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
 
   const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
   // If there's a configured vault or only one vault, use that
