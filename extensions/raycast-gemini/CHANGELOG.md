@@ -1,12 +1,13 @@
 # Google Gemini Changelog
 
-## [New models] - {PR_MERGE_DATE}
+## [New Models and Features] - {PR_MERGE_DATE}
 
 - 🤖 Add new model vairants
   - Gemini 2.0 Flash, our production ready model
   - Gemini 2.0 Flash-Lite Preview
   - Gemini 2.0 Pro Experimental
 - ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
+- 🙋 Support custom model names as a supplement for listed common models.
 
 ## [Append Selected Text to Chat] - 2025-02-04
 

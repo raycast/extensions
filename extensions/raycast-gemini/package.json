@@ -1001,6 +1001,13 @@
           "value": "gemini-2.0-pro-exp-02-05"
         }
       ]
+    },
+    {
+      "name": "customModel",
+      "title": "Custom Model",
+      "description": "Custom model in case you use a special model that is not listed in the dropdown. It will override the default model. Keep this empty if you don't have a custom model.",
+      "type": "textfield",
+      "required": false
     }
   ],
   "dependencies": {
