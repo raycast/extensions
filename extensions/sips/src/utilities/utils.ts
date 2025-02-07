@@ -28,6 +28,7 @@ import { getAVIFEncPaths } from "./avif";
 import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
 import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
 import { ExtensionPreferences } from "./preferences";
+import { mkdir } from "fs/promises";
 
 /**
  * Gets currently selected images in Finder.
@@ -302,6 +303,19 @@ export const addItemToRemove = async (item: string) => {
  */
 export const getScopedTempFile = async (name: string, extension: string) => {
   const tempPath = path.join(os.tmpdir(), `${name}.${extension}`);
+  return {
+    path: tempPath,
+    [Symbol.asyncDispose]: async () => {
+      if (fs.existsSync(tempPath)) {
+        await fs.promises.rm(tempPath, { recursive: true });
+      }
+    },
+  };
+};
+
+export const getScopedTempDirectory = async (name: string) => {
+  const tempPath = path.join(os.tmpdir(), name);
+  await mkdir(tempPath, { recursive: true });
   return {
     path: tempPath,
     [Symbol.asyncDispose]: async () => {
@@ -1080,4 +1094,25 @@ export const showErrorToast = async (title: string, error: Error, toast?: Toast,
       },
     };
   }
+};
+
+/**
+ * Extracts the RGB and alpha values from a hex color. The default alpha value is 255 (FF).
+ * @param hex The 6- or 8-digit hex color to extract values from. The hash is optional.
+ * @returns An object.
+ */
+export const hexToRGBA = (hex: string) => {
+  const hexWithoutHash = hex.replace("#", "");
+  const hexWithoutAlpha = hexWithoutHash.slice(0, 6);
+  const alpha = hexWithoutHash.slice(6, 8);
+  const hex16 = parseInt(hexWithoutAlpha, 16);
+  const red = (hex16 >> 16) & 255;
+  const green = (hex16 >> 8) & 255;
+  const blue = hex16 & 255;
+  return {
+    red,
+    green,
+    blue,
+    alpha: alpha ? parseInt(alpha, 16) : 255,
+  };
 };

@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.9.0",
+  "version": "1.9.1",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -529,7 +529,71 @@
         "metadata",
         "remove"
       ],
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Background",
+      "description": "Remove the background from images using on-device processing",
+      "mode": "no-view",
+      "keywords": [
+        "erase",
+        "delete",
+        "cutout",
+        "mask",
+        "isolate"
+      ],
+      "arguments": [
+        {
+          "name": "bgcolor",
+          "placeholder": "Replacement Color",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "crop",
+          "placeholder": "Crop To Subject",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultBgColor",
+          "title": "Default Replacement Color",
+          "description": "The default color to replace backgrounds with. Specify colors in hex format with (optional) alpha (e.g. #FF0000 or FF0000FF) or by HTML name (e.g. red). Leave blank to remove the background entirely (i.e. make it transparent). This color is only used when the 'Replacement Color' argument is not provided.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "cropByDefault",
+          "label": "Crop By Default",
+          "description": "Whether to crop images to the subject by default. If disabled, the dimensions of the original image will be preserved, and the subject will remain at its original position. Otherwise, the image will be cropped to the smallest possible size that contains the subject. This option is only used when the 'Crop To Subject' argument is not provided.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "preserveFormat",
+          "label": "Preserve Image Format",
+          "description": "Whether to preserve the original image format when saving the result. When disabled, the result will be saved as a PNG image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

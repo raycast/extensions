@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Remove Background] - {PR_MERGE_DATE}
+
+- Added 'Remove Background' command to remove the background from selected images
+
 ## [Bug Fixes & New Filters] - 2025-01-30
 
 - Improved memory management when previewing filters, reducing the likelihood of out-of-memory errors
