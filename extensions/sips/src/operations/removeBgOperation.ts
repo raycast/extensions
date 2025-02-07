@@ -25,7 +25,13 @@ import { makePDF } from "../utilities/pdf";
  * @param crop Whether to crop the image to the isolated subject.
  * @returns A promise that resolves when the operation is complete.
  */
-const runRemoveBgScript = async (sourcePath: string, outputPath: string, bgColor?: Color, crop = false, ignoreFailure = false) => {
+const runRemoveBgScript = async (
+  sourcePath: string,
+  outputPath: string,
+  bgColor?: Color,
+  crop = false,
+  ignoreFailure = false,
+) => {
   const result = await runAppleScript(
     `function run() {
       ObjC.import("CoreGraphics");
@@ -183,7 +189,9 @@ export default async function removeBg(sourcePaths: string[], bgColorString?: st
 
       if (preferences.preserveFormat) {
         const modifiedPNGs = (await readdir(tempPNGnoBGDir.path)).map((file) => path.join(tempPNGnoBGDir.path, file));
-        modifiedPNGs.sort((a, b) => parseInt(a?.split("-").at(-1) || "0") > parseInt(b?.split("-").at(-1) || "0") ? 1 : -1);
+        modifiedPNGs.sort((a, b) =>
+          parseInt(a?.split("-").at(-1) || "0") > parseInt(b?.split("-").at(-1) || "0") ? 1 : -1,
+        );
         await makePDF(modifiedPNGs, newPath);
       } else {
         const newDirPath = path.join(path.dirname(newPath), path.basename(newPath, ".pdf") + " PNGs");
