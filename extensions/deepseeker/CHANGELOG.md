@@ -7,6 +7,7 @@
 - 💤 Minor improvements
 - 🐳 Minor title adjustment of DeepSeek series and add a new name `deepseek-r1` for Alicloud.
 - 🌍 Minor fix on `Translate` command
+- 🙋 Add custom model support, now you can manually input customized model names if it's not listed
 
 ## [New Features] - 2025-01-30
 
