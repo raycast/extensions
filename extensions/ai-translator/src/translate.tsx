@@ -32,7 +32,7 @@ export default function Command() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
       }
 
