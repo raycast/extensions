@@ -44,14 +44,6 @@
           "label": "Use Time of Day Grouping",
           "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
           "default": false
-        },
-        {
-          "name": "showTodayInOverdueList",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show Fullday Reminders as Overdue",
-          "description": "When enabled, the list of overdue reminders include reminders without a specific time.",
-          "default": false
         }
       ]
     },

@@ -5,7 +5,7 @@ import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
-const { useTimeOfDayGrouping, showTodayInOverdueList } = getPreferenceValues<Preferences.MyReminders>();
+const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
 import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
@@ -224,11 +224,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
       if (listId === "all") return true;
       if (listId === "today")
         return reminder.dueDate ? isOverdue(reminder.dueDate) || isToday(reminder.dueDate) : false;
-      if (listId === "overdue")
-        return reminder.dueDate
-          ? isOverdue(reminder.dueDate) ||
-              (showTodayInOverdueList && isFullDay(reminder.dueDate as string) && isToday(reminder.dueDate))
-          : false;
+      if (listId === "overdue") return reminder.dueDate ? isOverdue(reminder.dueDate) : false;
       if (listId === "scheduled") return !!reminder.dueDate;
       return reminder.list?.id === listId;
     };
