@@ -1,15 +1,13 @@
-import { captureException, getPreferenceValues, showToast, Toast } from '@raycast/api';
-import * as ynab from 'ynab';
+import { captureException, showToast, Toast } from '@raycast/api';
 import { displayError, isYnabError } from './errors';
 import type { Period, BudgetSummary, SaveTransaction, NewTransaction } from '@srcTypes';
 import { time } from './utils';
 import { SaveScheduledTransaction } from 'ynab';
-
-const { apiToken } = getPreferenceValues<Preferences>();
-const client = new ynab.API(apiToken);
+import { getYNABClient } from './oauth';
 
 export async function fetchBudgets() {
   try {
+    const client = getYNABClient();
     const budgetsResponse = await client.budgets.getBudgets();
     const budgets = budgetsResponse.data.budgets;
 
@@ -35,10 +33,11 @@ export async function fetchBudgets() {
 
 export async function fetchBudget(selectedBudgetId: string) {
   try {
+    const client = getYNABClient();
     const budgetResponse = await client.budgets.getBudgetById(selectedBudgetId);
     const { months, currency_format } = budgetResponse.data.budget;
 
-    return { months, currency_format };
+    return { id: budgetResponse.data.budget.id, months, currency_format };
   } catch (error) {
     captureException(error);
 
@@ -56,6 +55,7 @@ export async function fetchBudget(selectedBudgetId: string) {
 
 export async function fetchCategoryGroups(selectedBudgetId: string) {
   try {
+    const client = getYNABClient();
     const categoriesResponse = await client.categories.getCategories(selectedBudgetId);
     const categoryGroups = categoriesResponse.data.category_groups;
     return categoryGroups;
@@ -76,6 +76,7 @@ export async function fetchCategoryGroups(selectedBudgetId: string) {
 
 export async function fetchPayees(selectedBudgetId: string) {
   try {
+    const client = getYNABClient();
     const payeesResponse = await client.payees.getPayees(selectedBudgetId);
     const payees = payeesResponse.data.payees;
     return payees;
@@ -96,6 +97,7 @@ export async function fetchPayees(selectedBudgetId: string) {
 
 export async function fetchAccounts(selectedBudgetId: string) {
   try {
+    const client = getYNABClient();
     const accountsResponse = await client.accounts.getAccounts(selectedBudgetId || 'last-used');
     const accounts = accountsResponse.data.accounts;
 
@@ -117,6 +119,7 @@ export async function fetchAccounts(selectedBudgetId: string) {
 
 export async function fetchTransactions(selectedBudgetId: string, period: Period) {
   try {
+    const client = getYNABClient();
     const transactionsResponse = await client.transactions.getTransactions(
       selectedBudgetId,
       time()
@@ -146,6 +149,7 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
 
 export async function fetchScheduledTransactions(selectedBudgetId: string) {
   try {
+    const client = getYNABClient();
     const scheduledTransactionsResponse = await client.scheduledTransactions.getScheduledTransactions(selectedBudgetId);
     const transactions = scheduledTransactionsResponse.data.scheduled_transactions;
 
@@ -167,6 +171,7 @@ export async function fetchScheduledTransactions(selectedBudgetId: string) {
 
 export async function updateTransaction(selectedBudgetId: string, transactionId: string, data: SaveTransaction) {
   try {
+    const client = getYNABClient();
     const updateResponse = await client.transactions.updateTransaction(selectedBudgetId || 'last-used', transactionId, {
       transaction: data,
     });
@@ -189,6 +194,7 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
 
 export async function createTransaction(selectedBudgetId: string, transactionData: NewTransaction) {
   try {
+    const client = getYNABClient();
     const transactionCreationResponse = await client.transactions.createTransaction(selectedBudgetId || 'last-used', {
       transaction: transactionData,
     });
@@ -215,6 +221,7 @@ export async function createTransaction(selectedBudgetId: string, transactionDat
 
 export async function deleteTransaction(selectedBudgetId: string, transactionId: string) {
   try {
+    const client = getYNABClient();
     const updateResponse = await client.transactions.deleteTransaction(selectedBudgetId || 'last-used', transactionId);
 
     const { transaction: deletedTransaction } = updateResponse.data;
@@ -236,6 +243,7 @@ export async function deleteTransaction(selectedBudgetId: string, transactionId:
 
 export async function createScheduledTransaction(selectedBudgetId: string, transactionData: SaveScheduledTransaction) {
   try {
+    const client = getYNABClient();
     const transactionCreationResponse = await client.scheduledTransactions.createScheduledTransaction(
       selectedBudgetId || 'last-used',
       {
@@ -263,6 +271,7 @@ export async function createScheduledTransaction(selectedBudgetId: string, trans
 
 export async function updateCategory(selectedBudgetId: string, categoryId: string, data: { budgeted: number }) {
   try {
+    const client = getYNABClient();
     const updateResponse = await client.categories.updateMonthCategory(
       selectedBudgetId || 'last-used',
       'current',

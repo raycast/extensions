@@ -9,7 +9,7 @@ import { ToggleDetailsAction } from '@components/actions/toggleDetailsAction';
 import { TransactionCreateForm } from './transactionCreateForm';
 import { Shortcuts } from '@constants';
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudget } from '@hooks/useLocalValues';
 
 const INFLOW_ICON = { source: Icon.PlusCircle, tintColor: Color.Green };
 const OUTFLOW_ICON = { source: Icon.MinusCircle, tintColor: Color.Red };
@@ -26,7 +26,7 @@ export function ScheduledTransactionItem({ transaction }: { transaction: Schedul
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;
 
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetId } = useActiveBudget();
   const { data: categoryGroups } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);
 

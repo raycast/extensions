@@ -1,8 +1,8 @@
-import { useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat } from '@srcTypes';
 
 import { createContext, useContext, type ReactNode } from 'react';
 import { CategoriesViewAction, CategoriesViewState } from './viewReducer';
+import { useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 type CategoriesContextReturnValues = {
   toggleDetails: () => void;
@@ -24,7 +24,7 @@ export function CategoriesProvider({
   const toggleDetails = () => dispatch({ type: 'toggle', view: 'details' });
   const toggleProgress = () => dispatch({ type: 'toggle', view: 'progress' });
 
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
 
   return (
     <CategoriesContext.Provider

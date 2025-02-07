@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Color, Detail, Icon } from '@raycast/api';
-import { useLocalStorage } from '@raycast/utils';
 
 import { OpenInYnabAction } from '@components/actions';
-import { CurrencyFormat, TransactionDetail } from '@srcTypes';
+import { TransactionDetail } from '@srcTypes';
 import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
+import { useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 export function TransactionDetails({ transaction }: { transaction: TransactionDetail }) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
 
   const hasSubtransactions = transaction.subtransactions.length > 0;
 

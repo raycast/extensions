@@ -1,6 +1,6 @@
 import { Action } from '@raycast/api';
 import { Shortcuts, URLs } from '@constants';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudget } from '@hooks/useLocalValues';
 
 interface OpenInYnabActionProps {
   accounts?: boolean;
@@ -9,7 +9,7 @@ interface OpenInYnabActionProps {
 }
 
 export function OpenInYnabAction(props: OpenInYnabActionProps) {
-  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetId } = useActiveBudget();
 
   const constructUrl = (budgetId: string, { accounts, accountId, yearMonth } = props) => {
     const budgetPath = `${URLs.ynab}/${budgetId}/`;

@@ -24,9 +24,10 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, ScheduledTransactionFrequency } from 'ynab';
-import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
+import { SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { useMemo, useState } from 'react';
-import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
+import { FormValidation, useForm } from '@raycast/utils';
+import { useActiveBudget, useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 const FREQUENCY_OPTIONS = [
   'never',
@@ -52,8 +53,9 @@ interface FormValues {
 }
 
 export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
+  const { activeBudgetId } = useActiveBudget();
+
   const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories);

@@ -1,5 +1,10 @@
 # Raynab Changelog
 
+## [Add OAuth and Improve Onboarding] - {PR_MERGE_DATE}
+
+- Implemented OAuth authentication to simplify the connection with YNAB.
+- Improved the onboarding process by automatically selecting an active budget and its currency.
+
 ## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features

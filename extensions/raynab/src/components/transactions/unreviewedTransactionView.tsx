@@ -5,10 +5,11 @@ import { launchCommand } from '@raycast/api';
 import { useTransactions } from '@hooks/useTransactions';
 import { MenuBarExtra } from '@raycast/api';
 import { Fragment } from 'react';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudget } from '@hooks/useLocalValues';
 
 export function UnreviewedTransactionView() {
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetId } = useActiveBudget();
+
   const { isLoading, data: transactions } = useTransactions(activeBudgetId, 'month');
 
   const unreviewedTransactions = transactions?.filter((tx) => tx.approved !== true) ?? [];

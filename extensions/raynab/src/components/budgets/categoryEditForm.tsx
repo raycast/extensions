@@ -1,16 +1,16 @@
-import { Category, CurrencyFormat } from '@srcTypes';
+import { Category } from '@srcTypes';
 import { formatToReadablePrice, formatToYnabAmount, isNumberLike } from '@lib/utils';
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, confirmAlert } from '@raycast/api';
 import { updateCategory } from '@lib/api';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudget, useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 interface Values {
   budgeted: string;
 }
 
 export function CategoryEditForm({ category }: { category: Category }) {
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetId } = useActiveBudget();
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
 
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
 

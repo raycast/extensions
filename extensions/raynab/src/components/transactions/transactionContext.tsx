@@ -1,4 +1,3 @@
-import { useLocalStorage } from '@raycast/utils';
 import {
   CurrencyFormat,
   Filter,
@@ -11,6 +10,7 @@ import {
   TransactionState,
   TransactionViewAction,
 } from '@srcTypes';
+import { useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
@@ -44,7 +44,7 @@ export function TransactionProvider({
 
   const flags = useState(false);
 
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
 
   return (
     <TransactionContext.Provider

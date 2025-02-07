@@ -14,9 +14,9 @@ import {
 } from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
 import { formatToReadablePrice } from '@lib/utils';
-import { useLocalStorage } from '@raycast/utils';
 import { useScheduledTransactions } from '@hooks/useScheduledTransactions';
 import { ScheduledTransactionItem } from './scheduledTransactionItem';
+import { useActiveBudget, useActiveBudgetCurrency, useTimeline } from '@hooks/useLocalValues';
 
 interface TransactionViewProps {
   search?: string;
@@ -24,16 +24,10 @@ interface TransactionViewProps {
 }
 
 export function TransactionView({ search = '', filter: defaultFilter = null }: TransactionViewProps) {
-  const { value: activeBudgetCurrency, isLoading: isLoadingCurrency } = useLocalStorage<CurrencyFormat | null>(
-    'activeBudgetCurrency',
-    null,
-  );
-  const { value: activeBudgetId, isLoading: isLoadingBudget } = useLocalStorage('activeBudgetId', '');
-  const {
-    value: timeline,
-    setValue: setTimeline,
-    isLoading: isLoadingTimeline,
-  } = useLocalStorage<Period>('timeline', 'month');
+  const { activeBudgetCurrency, isLoadingActiveBudgetCurrency: isLoadingCurrency } = useActiveBudgetCurrency();
+
+  const { activeBudgetId, isLoadingActiveBudgetId: isLoadingBudget } = useActiveBudget();
+  const { timeline, setTimeline, isLoadingTimeline } = useTimeline();
 
   const { data: transactions = [], isLoading: isLoadingTransactions } = useTransactions(activeBudgetId, timeline);
   const { data: scheduledTransactions = [], isLoading: isLoadingScheduled } = useScheduledTransactions(activeBudgetId);

@@ -67,15 +67,11 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.91.1",
     "@raycast/utils": "^1.18.1",
     "dayjs": "^1.11.13",
     "fuse.js": "^6.5.3",
     "nanoid": "^3.2.0",
-    "node-fetch": "^3.0.0",
-    "node-localstorage": "^2.2.1",
-    "random-hex-color-generator": "^1.0.12",
-    "swr": "^2.2.5",
     "ynab": "^2.6.0"
   },
   "devDependencies": {
@@ -93,7 +89,7 @@
     {
       "name": "apiToken",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Token",
       "description": "Your YNAB Personal Access Token",
       "placeholder": "Enter your Personal access token"

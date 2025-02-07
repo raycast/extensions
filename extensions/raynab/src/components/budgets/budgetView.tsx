@@ -3,13 +3,13 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { getCurrentMonth } from '@lib/utils';
 import { List } from '@raycast/api';
 import { CategoryGroupSection } from './categoryGroupSection';
-import { useLocalStorage } from '@raycast/utils';
 import { useReducer } from 'react';
 import { categoryViewReducer, initView } from './viewReducer';
 import { CategoriesProvider } from './budgetContext';
+import { useActiveBudget } from '@hooks/useLocalValues';
 
 export function BudgetView() {
-  const { value: activeBudgetId, isLoading: isLoadingBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetId, isLoadingActiveBudgetId } = useActiveBudget();
   const { data: categoryGroups = [], isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const { data: budget, isLoading: isLoadingBudget } = useBudget(activeBudgetId);
 
@@ -25,7 +25,7 @@ export function BudgetView() {
   return (
     <CategoriesProvider state={state} dispatch={dispatch}>
       <List
-        isLoading={isLoadingBudgetId || isLoadingCategories || isLoadingBudget}
+        isLoading={isLoadingActiveBudgetId || isLoadingCategories || isLoadingBudget}
         searchBarPlaceholder={`Search categories in ${getCurrentMonth()}`}
         isShowingDetail={state.isDetailed}
       >
