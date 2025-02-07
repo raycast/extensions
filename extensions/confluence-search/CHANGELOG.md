@@ -1,5 +1,7 @@
 # Confluence Changelog
 
+## [] - {PR_MERGE_DATE}
+
 ## [Bug fix] - 2023-11-19
 
 - Fixed a bug causing the People panel to not open
