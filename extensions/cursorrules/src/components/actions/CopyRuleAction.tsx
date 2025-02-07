@@ -103,16 +103,13 @@ export const CopyRuleAction = ({ cursorRule }: Props) => {
 
 async function launchCursorRecentProjects(context: { cursorDirectory: { ruleContent: string; replace: boolean } }) {
   try {
-    await crossLaunchCommand(
-      {
-        name: "index",
-        extensionName: "cursor-recent-projects",
-        ownerOrAuthorName: "degouville",
-        type: LaunchType.UserInitiated,
-        context,
-      },
-      // TODO: callbackLaunchOptions
-    );
+    await crossLaunchCommand({
+      name: "index",
+      extensionName: "cursor-recent-projects",
+      ownerOrAuthorName: "degouville",
+      type: LaunchType.UserInitiated,
+      context,
+    });
   } catch (error) {
     console.debug("Failed to launch cursor recent projects:", error);
     const shouldInstall = await confirmAlert({
