@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Artist Name Visibility Option] - {PR_MERGE_DATE}
+## [Artist Name Visibility Option] - 2025-02-07
 
 - Added the option to hide the artist's name in the Menu Bar Player.
 
