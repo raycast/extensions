@@ -4,7 +4,7 @@ import { StrapiFile } from "./types";
 
 export default function SearchMediaLibrary() {
   const files = getFiles();
-  const { host } = getPreferenceValues<Preferences>();
+  const { host } = getPreferenceValues();
 
   return (
     <List isShowingDetail isLoading={files.isLoading}>

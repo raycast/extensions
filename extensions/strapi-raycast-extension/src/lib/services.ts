@@ -15,7 +15,7 @@ import fetch from "node-fetch";
  * @returns An object containing the fetched content types and the state of the fetch request.
  */
 export const getContentTypes = () => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = useFetch<ContentTypesResponse>(`${host}/api/content-type-builder/content-types`, {
     headers: {
@@ -44,7 +44,7 @@ export const getContentTypes = () => {
  * @returns The fetched content type.
  */
 export const getContentType = (uid: string) => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = useFetch<ContentTypeResponse>(`${host}/api/content-type-builder/content-types/${uid}`, {
     headers: {
@@ -74,7 +74,7 @@ export const getContentType = (uid: string) => {
  * @returns An object containing the fetched entries and the state of the fetch request.
  */
 export const getEntries = (route: string) => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = useFetch<EntryResponse>(`${host}/api${route}?status=draft&pagination[limit]=10000`, {
     headers: {
@@ -100,7 +100,7 @@ export const getEntries = (route: string) => {
  * @param data - The data to submit.
  */
 export const createEntry = async (route: string, data: object) => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = await fetch(`${host}/api${route}`, {
     method: "POST",
@@ -121,7 +121,7 @@ export const createEntry = async (route: string, data: object) => {
  * @param uid - The UID of the component to fetch.
  */
 export const getComponent = (uid: string) => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = useFetch<ComponentResponse>(`${host}/api/content-type-builder/components/${uid}`, {
     headers: {
@@ -141,7 +141,7 @@ export const getComponent = (uid: string) => {
  * @returns An array containing the fetched files and the state of the fetch request.
  */
 export const getFiles = () => {
-  const { host, apiKey } = getPreferenceValues<Preferences>();
+  const { host, apiKey } = getPreferenceValues();
 
   const res = useFetch<StrapiFile[]>(`${host}/api/upload/files`, {
     headers: {

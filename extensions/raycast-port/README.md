@@ -88,7 +88,7 @@ const launchContext = {
 };
 
 const context = encodeURIComponent(JSON.stringify(launchContext));
-execSync(`open raycast://extensions/litomore/raycast-port/ai-ask?launchType=background&context=${context}`);
+execSync(`open "raycast://extensions/litomore/raycast-port/ai-ask?launchType=background&context=${context}"`);
 ```
 
 ### Shell Example
