@@ -114,20 +114,19 @@ function convertError(err: unknown): string {
 
 export async function downloadFile(name: string, path: string) {
   const { download_directory } = getPreferenceValues<Preferences>();
+  const toast = await showToast(Toast.Style.Animated, "Downloading", name);
+
   if (!download_directory) {
-    await showToast({
-      title: "Download directory not set",
-      message: "Please set the download directory in the extension preferences",
-      style: Toast.Style.Failure,
-      primaryAction: {
-        title: "Open Extension Preferences",
-        onAction: openExtensionPreferences
-      },
-    });
+    toast.style = Toast.Style.Failure;
+    toast.title = "Download directory not set";
+    toast.message = "Please set the download directory in the extension preferences";
+    toast.primaryAction = {
+      title: "Open Extension Preferences",
+      onAction: openExtensionPreferences,
+    };
     return;
   }
 
-  const toast = await showToast(Toast.Style.Animated, "Downloading", name);
   const dbx = getDropboxClient();
   try {
     const res = await dbx.filesDownload({ path });
@@ -142,18 +141,19 @@ export async function downloadFile(name: string, path: string) {
       async onAction() {
         await showInFinder(file);
       },
-    }
+    };
   } catch (error) {
     const message = convertError(error);
     toast.style = Toast.Style.Failure;
     toast.title = "Could not download";
     toast.message = message;
-    if (message.includes("scope")) toast.primaryAction= {
-      title: "Re-authorize",
-      async onAction() {
-        await provider.client.removeTokens();
-        await provider.authorize();
-      },
-    }
+    if (message.includes("scope"))
+      toast.primaryAction = {
+        title: "Re-authorize",
+        async onAction() {
+          await provider.client.removeTokens();
+          await provider.authorize();
+        },
+      };
   }
 }

@@ -4,7 +4,7 @@
 
 - Download a file (need to re-authorize for new scope)
 - Open Directories in Browser
-- Remove unused auth.ts file
+- Remove unused items (auth.ts + dropbox-v2)
 
 ## [A New Look] - 2024-11-04
 
