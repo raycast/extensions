@@ -1,7 +1,9 @@
 import { DropboxResponseError } from "dropbox";
 import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
 import { getDropboxClient, provider } from "./oauth";
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, openExtensionPreferences, showInFinder, showToast, Toast } from "@raycast/api";
+import { join } from "path";
+import { writeFile } from "fs/promises";
 
 export interface ListFileResp {
   entries: Array<files.FileMetadataReference | files.FolderMetadataReference>;
@@ -111,12 +113,36 @@ function convertError(err: unknown): string {
 }
 
 export async function downloadFile(name: string, path: string) {
+  const { download_directory } = getPreferenceValues<Preferences>();
+  if (!download_directory) {
+    await showToast({
+      title: "Download directory not set",
+      message: "Please set the download directory in the extension preferences",
+      style: Toast.Style.Failure,
+      primaryAction: {
+        title: "Open Extension Preferences",
+        onAction: openExtensionPreferences
+      },
+    });
+    return;
+  }
+
   const toast = await showToast(Toast.Style.Animated, "Downloading", name);
   const dbx = getDropboxClient();
   try {
-    await dbx.filesDownload({ path });
+    const res = await dbx.filesDownload({ path });
+    const result = res.result as files.FileMetadata & { fileBinary: Buffer };
+    const file = join(download_directory, result.name);
+    const binary = result.fileBinary;
+    await writeFile(file, binary, "binary");
     toast.style = Toast.Style.Success;
     toast.title = "Downloaded";
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    }
   } catch (error) {
     const message = convertError(error);
     toast.style = Toast.Style.Failure;

@@ -17,6 +17,13 @@
       "type": "password",
       "placeholder": "xx.xxx...xxx",
       "required": false
+    },
+    {
+      "name": "download_directory",
+      "title": "Download Directory",
+      "type": "directory",
+      "required": false,
+      "description": "Files will be downloaded here"
     }
   ],
   "commands": [
