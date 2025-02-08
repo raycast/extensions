@@ -6,7 +6,6 @@
   "description": "Control your Logitech Harmony Hub devices",
   "icon": "command-icon.png",
   "author": "chad_walters",
-  "owner": "chadrwalters",
   "categories": [
     "Media",
     "System"
