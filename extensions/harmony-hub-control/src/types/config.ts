@@ -8,21 +8,31 @@
  */
 export interface RetryConfig {
   /** Maximum number of retry attempts */
-  maxRetries: number;
-  /** Delay between retries in milliseconds */
-  retryDelay: number;
+  maxAttempts: number;
+  /** Base delay between retries in milliseconds */
+  baseDelay: number;
+  /** Maximum delay between retries in milliseconds */
+  maxDelay: number;
   /** Whether to use exponential backoff */
-  useBackoff: boolean;
+  useExponentialBackoff: boolean;
+  /** Maximum total retry duration in milliseconds */
+  maxRetryDuration?: number;
 }
 
 /**
  * Timeout configuration
  */
 export interface TimeoutConfig {
-  /** Network request timeout in milliseconds */
-  networkTimeout: number;
-  /** Command execution timeout in milliseconds */
-  commandTimeout: number;
+  /** Connection timeout in milliseconds */
+  connection: number;
+  /** Message timeout in milliseconds */
+  message: number;
+  /** Activity timeout in milliseconds */
+  activity: number;
+  /** Command timeout in milliseconds */
+  command: number;
   /** Discovery timeout in milliseconds */
-  discoveryTimeout: number;
+  discovery: number;
+  /** Cache timeout in milliseconds */
+  cache: number;
 }
