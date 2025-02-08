@@ -1,5 +1,6 @@
-import WebSocket from "ws";
 import { Logger } from "../logger";
+import WebSocket from "ws";
+
 import { HarmonyError, ErrorCategory } from "../../types/errors";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../../types/harmony";
 import {
@@ -14,11 +15,11 @@ import {
 } from "../../types/websocket";
 
 // Constants for WebSocket management
-const MAX_RECONNECT_ATTEMPTS = 3;
-const RECONNECT_DELAY = 1000;
-const CONNECTION_TIMEOUT = 5000;
-const PING_INTERVAL = 30000;
-const MESSAGE_TIMEOUT = 5000;
+const MAX_RECONNECT_ATTEMPTS: number = 3;
+const RECONNECT_DELAY: number = 1000;
+const CONNECTION_TIMEOUT: number = 5000;
+const PING_INTERVAL: number = 30000;
+const MESSAGE_TIMEOUT: number = 5000;
 
 /**
  * Interface for queued messages
@@ -50,13 +51,12 @@ export class HarmonyWebSocket {
   private status: WebSocketConnectionStatus = WebSocketConnectionStatus.DISCONNECTED;
   private eventHandler?: WebSocketEventHandler;
   private errorHandler?: WebSocketErrorHandlerType;
-  private reconnectAttempts = 0;
+  private reconnectAttempts: number = 0;
   private pingInterval?: NodeJS.Timeout;
   private messageTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private connectPromise: Promise<void> | null = null;
   private connectResolve: (() => void) | null = null;
   private connectReject: ((error: Error) => void) | null = null;
-
   private currentActivity: string | null = null;
   private currentState: {
     activities: HarmonyActivity[];
@@ -73,7 +73,7 @@ export class HarmonyWebSocket {
   /**
    * Get current connection status
    */
-  getStatus(): WebSocketConnectionStatus {
+  public getStatus(): WebSocketConnectionStatus {
     return this.status;
   }
 
@@ -100,9 +100,9 @@ export class HarmonyWebSocket {
         this.ws = new WebSocket(`ws://${this.hubInfo.ip}:${this.hubInfo.remoteId}`);
 
         // Set up connection timeout
-        const timeout = setTimeout(() => {
+        const timeout: NodeJS.Timeout = setTimeout(() => {
           if (this.status === WebSocketConnectionStatus.CONNECTING) {
-            const error = new HarmonyError("WebSocket connection timeout", ErrorCategory.WEBSOCKET);
+            const error: HarmonyError = new HarmonyError("WebSocket connection timeout", ErrorCategory.WEBSOCKET);
             this.handleError(error);
           }
         }, CONNECTION_TIMEOUT);
@@ -123,7 +123,7 @@ export class HarmonyWebSocket {
           this.handleError(error);
         });
       } catch (err: unknown) {
-        const error = err instanceof Error ? err : new Error(String(err));
+        const error: Error = err instanceof Error ? err : new Error(String(err));
         this.handleError(
           new HarmonyError(
             "Failed to connect to WebSocket",
@@ -179,7 +179,7 @@ export class HarmonyWebSocket {
         RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts),
       );
     } else {
-      const error = new HarmonyError("Maximum reconnection attempts reached", ErrorCategory.WEBSOCKET);
+      const error: HarmonyError = new HarmonyError("Maximum reconnection attempts reached", ErrorCategory.WEBSOCKET);
       this.handleError(error);
     }
   }
@@ -246,7 +246,7 @@ export class HarmonyWebSocket {
    */
   private async handleMessage(data: WebSocket.Data): Promise<void> {
     try {
-      const message = JSON.parse(data.toString()) as WebSocketMessageUnion;
+      const message: WebSocketMessageUnion = JSON.parse(data.toString());
       Logger.debug("Received WebSocket message:", message);
 
       if (this.eventHandler) {
@@ -256,7 +256,7 @@ export class HarmonyWebSocket {
       // Process queued messages
       this.processQueue();
     } catch (err: unknown) {
-      const error = err instanceof Error ? err : new Error(String(err));
+      const error: Error = err instanceof Error ? err : new Error(String(err));
       Logger.error("Failed to handle WebSocket message:", error);
     }
   }
@@ -325,21 +325,21 @@ export class HarmonyWebSocket {
   /**
    * Set event handler for WebSocket messages
    */
-  setEventHandler(handler: WebSocketEventHandler): void {
+  public setEventHandler(handler: WebSocketEventHandler): void {
     this.eventHandler = handler;
   }
 
   /**
    * Set error handler for WebSocket errors
    */
-  setErrorHandler(handler: WebSocketErrorHandlerType): void {
+  public setErrorHandler(handler: WebSocketErrorHandlerType): void {
     this.errorHandler = handler;
   }
 
   /**
    * Get current activities
    */
-  async getActivities(): Promise<HarmonyActivity[]> {
+  public async getActivities(): Promise<HarmonyActivity[]> {
     const response = await this.sendMessage<Record<string, never>>(WebSocketMessageType.GET_ACTIVITIES, {});
     if (response.status === "success" && Array.isArray(response.data)) {
       this.currentState.activities = response.data as HarmonyActivity[];
@@ -351,7 +351,7 @@ export class HarmonyWebSocket {
   /**
    * Get current devices
    */
-  async getDevices(): Promise<HarmonyDevice[]> {
+  public async getDevices(): Promise<HarmonyDevice[]> {
     const response = await this.sendMessage<Record<string, never>>(WebSocketMessageType.GET_DEVICES, {});
     if (response.status === "success" && Array.isArray(response.data)) {
       this.currentState.devices = response.data as HarmonyDevice[];
@@ -363,7 +363,7 @@ export class HarmonyWebSocket {
   /**
    * Start an activity
    */
-  async startActivity(activityId: string): Promise<void> {
+  public async startActivity(activityId: string): Promise<void> {
     Logger.debug(`Starting activity: ${activityId}`);
 
     const payload: ActivityPayload = {
@@ -378,8 +378,8 @@ export class HarmonyWebSocket {
     }
 
     // Wait for activity to start (up to 10 seconds)
-    let attempts = 0;
-    const maxAttempts = 10;
+    let attempts: number = 0;
+    const maxAttempts: number = 10;
     while (attempts < maxAttempts) {
       const activities = await this.getActivities();
       const activity = activities.find((a) => a.id === activityId);
@@ -401,7 +401,7 @@ export class HarmonyWebSocket {
   /**
    * Stop current activity
    */
-  async stopActivity(activityId: string): Promise<void> {
+  public async stopActivity(activityId: string): Promise<void> {
     if (!this.currentActivity) {
       throw new HarmonyError("No activity to stop", ErrorCategory.WEBSOCKET);
     }
@@ -420,8 +420,8 @@ export class HarmonyWebSocket {
     }
 
     // Wait for activity to stop (up to 10 seconds)
-    let attempts = 0;
-    const maxAttempts = 10;
+    let attempts: number = 0;
+    const maxAttempts: number = 10;
     while (attempts < maxAttempts) {
       const activities = await this.getActivities();
       const activity = activities.find((a) => a.id === this.currentActivity);
@@ -443,7 +443,7 @@ export class HarmonyWebSocket {
   /**
    * Execute a command
    */
-  async executeCommand(deviceId: string, command: HarmonyCommand): Promise<void> {
+  public async executeCommand(deviceId: string, command: HarmonyCommand): Promise<void> {
     const payload: CommandPayload = {
       deviceId,
       command,
@@ -458,7 +458,7 @@ export class HarmonyWebSocket {
   /**
    * Disconnect from the Harmony Hub
    */
-  disconnect(): void {
+  public disconnect(): void {
     Logger.debug("Disconnecting from Harmony Hub");
     this.cleanup();
   }
