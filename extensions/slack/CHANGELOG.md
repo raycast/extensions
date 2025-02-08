@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [New Action] - {PR_MERGE_DATE}
+
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the Search Messages command 
+
 ## [New Action] - 2025-01-13
 
 - Add `Copy Huddle Link` action to copy the huddle link of a chat to the clipboard
