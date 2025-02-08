@@ -1,7 +1,7 @@
-import React from "react";
+import { Component, ReactNode } from "react";
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -12,7 +12,7 @@ interface ErrorBoundaryState {
  * Error boundary component to catch and handle errors in the component tree.
  * Displays user-friendly error messages and logs errors for debugging.
  */
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { error: null };
@@ -22,9 +22,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return { error };
   }
 
-  componentDidCatch(): void {}
+  componentDidCatch(error: Error): void {
+    console.error("Error caught by boundary:", error);
+  }
 
-  render(): React.ReactNode {
+  render(): ReactNode {
     if (this.state.error) {
       return <div>An unexpected error occurred: {this.state.error.message}</div>;
     }

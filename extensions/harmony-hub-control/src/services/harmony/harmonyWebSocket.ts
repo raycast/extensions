@@ -1,4 +1,3 @@
-import { Logger } from "../logger";
 import WebSocket from "ws";
 
 import { HarmonyError, ErrorCategory } from "../../types/errors";
@@ -13,6 +12,7 @@ import {
   ActivityPayload,
   CommandPayload,
 } from "../../types/websocket";
+import { Logger } from "../logger";
 
 // Constants for WebSocket management
 const MAX_RECONNECT_ATTEMPTS: number = 3;
@@ -472,5 +472,3 @@ export class HarmonyWebSocket {
     if (this.connectResolve) this.connectResolve();
   }
 }
-
-type WebSocketErrorHandler = (error: Error) => void;

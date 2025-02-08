@@ -1,6 +1,5 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
-import React from "react";
-import { HarmonyError, ErrorSeverity, ErrorRecoveryAction } from "../types/errors";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+
 import { Logger } from "../services/logger";
 
 /**
@@ -181,7 +180,7 @@ function getErrorMessage(error: HarmonyError, description?: string): string {
  * />
  * ```
  */
-export function FeedbackState({
+export const FeedbackState: React.FC<FeedbackStateProps> = ({
   title,
   description,
   icon,
@@ -192,7 +191,7 @@ export function FeedbackState({
   onReconnect,
   onClearCache,
   onResetConfig,
-}: FeedbackStateProps) {
+}): JSX.Element => {
   // Get error display properties
   const errorDisplay = error ? getErrorDisplay(error) : undefined;
 
@@ -221,7 +220,7 @@ export function FeedbackState({
       />
     </List>
   );
-}
+};
 
 /**
  * Predefined loading states for feedback display.

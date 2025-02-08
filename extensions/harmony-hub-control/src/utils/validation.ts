@@ -1,7 +1,7 @@
-import { HarmonyError, ErrorCategory } from "../types/errors";
-import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
-import { RetryConfig, TimeoutConfig } from "../types/config";
 import { Logger } from "../services/logger";
+import { RetryConfig, TimeoutConfig } from "../types/config";
+import { ErrorCategory, HarmonyError } from "../types/errors";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
 
 /**
  * Type guard for checking if a value is a non-empty string

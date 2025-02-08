@@ -1,6 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
-import { Logger } from "../services/logger";
-import { HarmonyError, ErrorCategory } from "../types/errors";
+
+import { ErrorCategory, HarmonyError } from "../types/errors";
+
+import { Logger } from "./logger";
 
 /**
  * ErrorHandler class for consistent error handling across the application.

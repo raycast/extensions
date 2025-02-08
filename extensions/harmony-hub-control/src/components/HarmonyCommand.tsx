@@ -1,11 +1,12 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+
 import { useHarmony } from "../hooks/useHarmony";
-import { HarmonyDevice, HarmonyActivity, HarmonyHub, HarmonyStage } from "../types/harmony";
-import type { HarmonyCommand } from "../types/harmony";
 import { Logger } from "../services/logger";
-import { FeedbackState } from "./FeedbackState";
+import { HarmonyHub, HarmonyCommand, HarmonyDevice } from "../types/harmony";
 import { Preferences } from "../types/preferences";
+
+import { FeedbackState } from "./FeedbackState";
 
 /**
  * HarmonyCommand component provides a unified interface for controlling Harmony devices and activities.
@@ -86,7 +87,7 @@ export function HarmonyCommand(): JSX.Element {
       .sort((a, b) => a.name.localeCompare(b.name)) || [];
 
   // Handle hub selection
-  const handleHubSelect = async (hub: HarmonyHub) => {
+  const handleHubSelect = async (hub: HarmonyHub): Promise<void> => {
     try {
       await connect(hub);
       setView(defaultView);
@@ -108,7 +109,7 @@ export function HarmonyCommand(): JSX.Element {
     id: string;
     group?: string;
     label?: string;
-  }) => {
+  }): Promise<void> => {
     try {
       Logger.debug("Executing command:", {
         command,
@@ -137,7 +138,7 @@ export function HarmonyCommand(): JSX.Element {
     }
   };
 
-  const handleActivity = async (activity: HarmonyActivity) => {
+  const handleActivity = async (activity: HarmonyActivity): Promise<void> => {
     try {
       const isCurrentActivity = currentActivity?.id === activity.id;
 

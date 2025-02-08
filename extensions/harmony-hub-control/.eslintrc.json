@@ -1,8 +1,8 @@
 {
-  "extends": "@raycast/eslint-config",
+  "extends": ["@raycast/eslint-config"],
+  "plugins": ["import"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-unused-vars": "error",
     "import/order": [
       "error",
@@ -13,6 +13,13 @@
           "order": "asc",
           "caseInsensitive": true
         }
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true
       }
     ]
   }

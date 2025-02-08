@@ -1,5 +1,5 @@
-import { HarmonyCommand, CommandRequest, CommandStatus, CommandResult, CommandQueueConfig } from "../../types/harmony";
 import { HarmonyError, ErrorCategory } from "../../types/errors";
+import { HarmonyCommand, CommandRequest, CommandStatus, CommandResult, CommandQueueConfig } from "../../types/harmony";
 import { Logger } from "../logger";
 
 const DEFAULT_CONFIG: Required<CommandQueueConfig> = {

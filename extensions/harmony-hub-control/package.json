@@ -1,18 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "harmony-hub-control",
+  "name": "harmony-control",
   "version": "1.0.0",
-  "title": "Harmony Hub Control",
-  "description": "Control your Logitech Harmony Hub devices and activities directly from Raycast",
+  "title": "Harmony Control",
+  "description": "Control your Logitech Harmony Hub devices",
   "icon": "command-icon.png",
-  "author": {
-    "name": "Chad Walters",
-    "url": "https://github.com/chadrwalters"
-  },
+  "author": "chad_walters",
   "categories": [
     "Media",
-    "System",
-    "Applications"
+    "System"
   ],
   "license": "MIT",
   "commands": [
@@ -57,27 +53,36 @@
       "type": "textfield",
       "required": false,
       "title": "Cache Duration",
-      "description": "Duration to cache hub data in seconds",
+      "description": "Duration to cache hub data in seconds (default: 3600 = 1 hour)",
       "default": "3600",
       "label": "Cache Duration (seconds)"
     },
     {
-      "name": "debugMode",
+      "name": "debugLogging",
       "type": "checkbox",
       "required": false,
-      "title": "Debug Mode",
-      "description": "Enable detailed logging for troubleshooting",
-      "default": false,
-      "label": "Enable Debug Mode"
+      "title": "Debug Logging",
+      "description": "Enable debug level logging",
+      "default": true,
+      "label": "Enable Debug Logging"
     },
     {
       "name": "networkTimeout",
       "type": "textfield",
       "required": false,
       "title": "Network Timeout",
-      "description": "Network request timeout in milliseconds",
+      "description": "Network request timeout (in milliseconds)",
       "default": "5000",
       "label": "Network Timeout (ms)"
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Mode",
+      "description": "Enable debug logging",
+      "default": true,
+      "label": "Enable Debug Mode"
     },
     {
       "name": "autoRetry",
@@ -115,6 +120,7 @@
     "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.14",
     "eslint": "^8.51.0",
+    "eslint-plugin-import": "^2.31.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

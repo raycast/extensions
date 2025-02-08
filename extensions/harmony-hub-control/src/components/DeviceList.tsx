@@ -1,13 +1,14 @@
 // External dependencies
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useMemo, useState, useCallback } from "react";
-import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 
 // Types
-import { HarmonyDevice, HarmonyCommand } from "../types/harmony";
 import { useHarmony } from "../hooks/useHarmony";
 import { Logger } from "../services/logger";
-import { FeedbackState, ErrorStates, LoadingStates } from "./FeedbackState";
+import { HarmonyDevice, HarmonyCommand } from "../types/harmony";
 import { HarmonyStage } from "../types/harmony";
+
+import { FeedbackState, ErrorStates, LoadingStates } from "./FeedbackState";
 
 interface DeviceListProps {
   /** Optional filter for device types */

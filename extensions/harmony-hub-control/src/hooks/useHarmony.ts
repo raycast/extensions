@@ -1,4 +1,10 @@
+import { showToast, Toast } from "@raycast/api";
 import React, { useCallback, useEffect, useState, createContext, useContext, useRef } from "react";
+
+import { HarmonyClient } from "../services/harmony/harmonyClient";
+import { HarmonyManager } from "../services/harmony/harmonyManager";
+import { Logger } from "../services/logger";
+import { HarmonyError, ErrorCategory } from "../types/errors";
 import {
   HarmonyHub,
   HarmonyDevice,
@@ -7,11 +13,6 @@ import {
   LoadingState,
   HarmonyStage,
 } from "../types/harmony";
-import { HarmonyManager } from "../services/harmony/harmonyManager";
-import { HarmonyClient } from "../services/harmony/harmonyClient";
-import { HarmonyError, ErrorCategory } from "../types/errors";
-import { Logger } from "../services/logger";
-import { showToast, Toast } from "@raycast/api";
 
 // Create a single manager instance
 const manager = new HarmonyManager();

@@ -1,12 +1,12 @@
 import { Explorer } from "@harmonyhub/discover";
+import { LocalStorage } from "@raycast/api";
+
+import { HarmonyError, ErrorCategory } from "../../types/errors";
 import { HarmonyHub } from "../../types/harmony";
 import { Logger } from "../logger";
-import { LocalStorage } from "@raycast/api";
-import { HarmonyError, ErrorCategory } from "../../types/errors";
 
 // Constants
-const DISCOVERY_TIMEOUT = 5000; // Reduced from 10s to 5s
-const DISCOVERY_COMPLETE_DELAY = 500; // Wait 500ms after finding a hub before completing
+const DISCOVERY_TIMEOUT = 10000; // 10 seconds
 const CACHE_KEY = "harmony-hubs";
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -35,11 +35,12 @@ export class HarmonyManager {
   private isDiscovering = false;
   private discoveryPromise: Promise<HarmonyHub[]> | null = null;
   private completeTimeout: NodeJS.Timeout | null = null;
+  private discoveredHubs: HarmonyHub[] = [];
 
   /**
    * Create a HarmonyHub instance from discovery data
    */
-  private createHub(data: HubDiscoveryData): HarmonyHub {
+  private createHubFromDiscovery(data: HubDiscoveryData): HarmonyHub {
     // Validate required fields
     if (!data.friendlyName || !data.ip || !data.uuid || !data.fullHubInfo?.hubId) {
       throw new HarmonyError(
@@ -65,7 +66,9 @@ export class HarmonyManager {
   /**
    * Start discovery of Harmony Hubs on the network
    */
-  public async startDiscovery(onProgress?: (progress: number, message: string) => void): Promise<HarmonyHub[]> {
+  public async startDiscovery(
+    onProgress?: (progress: number, message: string) => Promise<void>,
+  ): Promise<HarmonyHub[]> {
     // Check cache first
     try {
       const cached = await this.getCachedHubs();
@@ -102,7 +105,7 @@ export class HarmonyManager {
         const hubs: HarmonyHub[] = [];
 
         // Function to complete discovery
-        const completeDiscovery = async () => {
+        const completeDiscovery = async (): Promise<void> => {
           await this.cleanup();
           if (hubs.length > 0) {
             await this.cacheHubs(hubs);
@@ -116,36 +119,20 @@ export class HarmonyManager {
           await completeDiscovery();
         }, DISCOVERY_TIMEOUT);
 
-        this.explorer.on("online", (data: HubDiscoveryData) => {
-          try {
-            const hub = this.createHub(data);
-
-            // Check for duplicate hubs
-            if (!hubs.some((h) => h.hubId === hub.hubId)) {
-              hubs.push(hub);
-              onProgress?.(0.5, `Found hub: ${hub.name}`);
-
-              // Clear any existing completion timeout
-              if (this.completeTimeout) {
-                clearTimeout(this.completeTimeout);
-              }
-
-              // Set a new completion timeout
-              this.completeTimeout = setTimeout(async () => {
-                clearTimeout(timeout);
-                await completeDiscovery();
-              }, DISCOVERY_COMPLETE_DELAY);
-            } else {
-              Logger.info(`Skipping duplicate hub: ${hub.name}`);
-            }
-          } catch (error) {
-            Logger.error("Failed to process hub data:", error);
-            // Don't reject here, just log and continue discovery
+        const handleHubDiscovered = (hub: HarmonyHub): void => {
+          Logger.debug(`Hub discovered: ${hub.name} (${hub.ip})`);
+          if (!hubs.some((h) => h.uuid === hub.uuid)) {
+            this.discoveredHubs.push(hub);
           }
+        };
+
+        this.explorer.on("online", (data: HubDiscoveryData): void => {
+          Logger.debug(`Hub online: ${data.friendlyName} (${data.ip})`);
+          handleHubDiscovered(this.createHubFromDiscovery(data));
         });
 
-        this.explorer.on("error", async (error: Error) => {
-          Logger.error("Discovery error:", error);
+        this.explorer.on("error", async (error: Error): Promise<void> => {
+          Logger.error("Hub discovery error:", error);
           clearTimeout(timeout);
           if (this.completeTimeout) {
             clearTimeout(this.completeTimeout);
@@ -265,5 +252,13 @@ export class HarmonyManager {
       Logger.error("Failed to clear caches:", error);
       throw new HarmonyError("Failed to clear caches", ErrorCategory.STORAGE, error as Error);
     }
+  }
+
+  /**
+   * Handle hub discovery event
+   */
+  private handleHubDiscovered(hub: HarmonyHub): void {
+    Logger.debug(`Hub discovered: ${hub.name} (${hub.ip})`);
+    this.discoveredHubs.push(hub);
   }
 }

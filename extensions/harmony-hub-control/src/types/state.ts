@@ -1,5 +1,5 @@
-import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "./harmony";
 import { HarmonyError } from "./errors";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "./harmony";
 
 /**
  * State machine states for Harmony Hub control

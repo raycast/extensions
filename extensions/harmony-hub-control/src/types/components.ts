@@ -4,8 +4,10 @@
  */
 
 import { Icon } from "@raycast/api";
-import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "./harmony";
+import { ReactNode, ReactErrorInfo } from "react";
+
 import { HarmonyError } from "./errors";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "./harmony";
 
 /**
  * Props for components that display feedback states (loading, error, empty)
@@ -23,7 +25,7 @@ export interface FeedbackStateProps {
   /**
    * Icon to display with the feedback
    */
-  icon?: Icon;
+  icon?: Icon | { source: string };
   /**
    * Optional color for styling
    */
@@ -31,7 +33,7 @@ export interface FeedbackStateProps {
   /**
    * Optional actions that can be taken from this state
    */
-  actions?: React.ReactNode;
+  actions?: ReactNode;
 }
 
 /**
@@ -50,7 +52,7 @@ export interface HarmonyCommandProps {
   /**
    * Command icon
    */
-  icon?: Icon;
+  icon?: Icon | { source: string };
   /**
    * Action to execute when command is selected
    */
@@ -62,7 +64,7 @@ export interface HarmonyCommandProps {
   /**
    * Error state
    */
-  error?: HarmonyError;
+  error?: Error | null;
 }
 
 /**
@@ -89,7 +91,7 @@ export interface DeviceListProps {
   /**
    * Error state
    */
-  error?: HarmonyError;
+  error?: Error | null;
   /**
    * Optional filter for device types
    */
@@ -101,7 +103,7 @@ export interface DeviceListProps {
   /**
    * Optional custom render function for device items
    */
-  renderItem?: (device: HarmonyDevice) => React.ReactNode;
+  renderItem?: (device: HarmonyDevice) => ReactNode;
 }
 
 /**
@@ -116,7 +118,7 @@ export interface ActivityListProps {
   /**
    * Currently active activity
    */
-  currentActivity?: HarmonyActivity;
+  currentActivity?: HarmonyActivity | null;
   /**
    * Action to execute when an activity is selected
    */
@@ -128,7 +130,7 @@ export interface ActivityListProps {
   /**
    * Error state
    */
-  error?: HarmonyError;
+  error?: Error | null;
   /**
    * Optional filter for activity types
    */
@@ -140,7 +142,7 @@ export interface ActivityListProps {
   /**
    * Optional custom render function for activity items
    */
-  renderItem?: (activity: HarmonyActivity) => React.ReactNode;
+  renderItem?: (activity: HarmonyActivity) => ReactNode;
 }
 
 /**
@@ -171,7 +173,7 @@ export interface HarmonyContextProps {
   /**
    * Error state if any
    */
-  error: Error | null;
+  error: HarmonyError | null;
   /**
    * Function to refresh hub connection
    */
@@ -194,15 +196,15 @@ export interface ErrorBoundaryProps {
   /**
    * Child components to wrap with error boundary
    */
-  children: React.ReactNode;
+  children: ReactNode;
   /**
    * Optional custom error renderer
    */
-  renderError?: (error: Error) => React.ReactNode;
+  renderError?: (error: Error) => ReactNode;
   /**
    * Optional error handler callback
    */
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (error: Error, errorInfo: ReactErrorInfo) => void;
 }
 
 /**
@@ -213,7 +215,7 @@ export interface ErrorDisplayProps {
   /**
    * Error to display
    */
-  error: HarmonyError;
+  error: Error;
   /**
    * Action to execute when retry is clicked
    */
@@ -238,7 +240,7 @@ export interface HubSelectorProps {
   /** Whether the component is in a loading state */
   isLoading?: boolean;
   /** Error state if any */
-  error?: HarmonyError;
+  error?: Error | null;
 }
 
 /**

@@ -1,8 +1,8 @@
-import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../../types/harmony";
-import { HarmonyError, ErrorCategory } from "../../types/errors";
-import { Logger } from "../logger";
 import getHarmonyClient from "@harmonyhub/client-ws";
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+
+import { ErrorCategory, HarmonyError } from "../../types/errors";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../../types/harmony";
+import { Logger } from "../logger";
 
 // Cache constants
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours

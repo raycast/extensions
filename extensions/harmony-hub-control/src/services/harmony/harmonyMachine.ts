@@ -4,6 +4,7 @@
  */
 
 import { createMachine } from "xstate";
+
 import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "../../types/harmony";
 
 /**
@@ -25,26 +26,11 @@ const HUB_DISCOVERED = "HUB_DISCOVERED";
 const ERROR = "ERROR";
 const RESET = "RESET";
 
-type HarmonyStartConnectionEvent = {
-  type: typeof START_CONNECTION;
-  hub: HarmonyHub;
-};
-
-type HarmonyHubDiscoveredEvent = {
-  type: typeof HUB_DISCOVERED;
-  hub: HarmonyHub;
-};
-
-type HarmonyErrorEvent = {
-  type: typeof ERROR;
-  error: Error;
-};
-
-type HarmonyResetEvent = {
-  type: typeof RESET;
-};
-
-type HarmonyEvents = HarmonyStartConnectionEvent | HarmonyHubDiscoveredEvent | HarmonyErrorEvent | HarmonyResetEvent;
+export type HarmonyEvents =
+  | { type: typeof START_CONNECTION; hub: HarmonyHub }
+  | { type: typeof HUB_DISCOVERED; hub: HarmonyHub }
+  | { type: typeof ERROR; error: Error }
+  | { type: typeof RESET };
 
 const initialContext: HarmonyContext = {
   hubs: [],

@@ -1,4 +1,5 @@
 import { LocalStorage as RaycastLocalStorage } from "@raycast/api";
+
 import { Logger } from "./logger";
 
 export class LocalStorage {

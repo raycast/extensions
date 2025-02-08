@@ -1,4 +1,3 @@
-import React from "react";
 import { HarmonyCommand } from "./components/HarmonyCommand";
 import { HarmonyProvider } from "./hooks/useHarmony";
 

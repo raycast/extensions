@@ -1,5 +1,6 @@
-import { LogLevel, LogEntry, ILogger, LoggerOptions } from "../types/logging";
 import { getPreferenceValues } from "@raycast/api";
+
+import { LogLevel, LogEntry, ILogger, LoggerOptions } from "../types/logging";
 
 interface Preferences {
   debugLogging: boolean;
