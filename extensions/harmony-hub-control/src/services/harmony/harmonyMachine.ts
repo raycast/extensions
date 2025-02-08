@@ -3,7 +3,7 @@
  * @module
  */
 
-import { assign, createMachine, type MachineConfig } from "xstate";
+import { assign, createMachine } from "xstate";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "../../types/harmony";
 
 /**
@@ -61,6 +61,10 @@ const initialContext: HarmonyContext = {
 };
 
 export const harmonyMachine = createMachine({
+  types: {} as {
+    context: HarmonyContext;
+    events: HarmonyEvents;
+  },
   id: "harmony",
   initial: "idle",
   context: initialContext,
@@ -70,7 +74,7 @@ export const harmonyMachine = createMachine({
         [HarmonyEvent.START_CONNECTION]: {
           target: "connecting",
           actions: assign({
-            selectedHub: (_, event: HarmonyStartConnectionEvent) => event.hub,
+            selectedHub: (_, event) => event.hub,
           }),
         },
       },
@@ -79,13 +83,13 @@ export const harmonyMachine = createMachine({
       on: {
         [HarmonyEvent.HUB_DISCOVERED]: {
           actions: assign({
-            hubs: (context, event: HarmonyHubDiscoveredEvent) => [...context.hubs, event.hub],
+            hubs: (context, event) => [...context.hubs, event.hub],
           }),
         },
         [HarmonyEvent.ERROR]: {
           target: "error",
           actions: assign({
-            error: (_, event: HarmonyErrorEvent) => event.error,
+            error: (_, event) => event.error,
           }),
         },
       },
@@ -99,4 +103,4 @@ export const harmonyMachine = createMachine({
       },
     },
   },
-} satisfies MachineConfig<HarmonyContext, HarmonyEvents>);
+});
