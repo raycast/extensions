@@ -2,10 +2,7 @@
 
 ## [New Models and Features] - {PR_MERGE_DATE}
 
-- 🤖 Add new model vairants
-  - Gemini 2.0 Flash, our production ready model
-  - Gemini 2.0 Flash-Lite Preview
-  - Gemini 2.0 Pro Experimental
+- 🤖 Update model variants
 - ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
 - 🙋 Support custom model names as a supplement for listed common models.
 
