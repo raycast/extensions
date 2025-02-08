@@ -1,7 +1,7 @@
 import { DropboxResponseError } from "dropbox";
 import { Error as DropboxError, files } from "dropbox/types/dropbox_types";
 import { getDropboxClient, provider } from "./oauth";
-import { getPreferenceValues, openExtensionPreferences, showInFinder, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, openExtensionPreferences, popToRoot, showInFinder, showToast, Toast } from "@raycast/api";
 import { join } from "path";
 import { writeFile } from "fs/promises";
 
@@ -147,13 +147,16 @@ export async function downloadFile(name: string, path: string) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not download";
     toast.message = message;
-    if (message.includes("scope"))
+    if (message.includes("scope")) {
+      toast.message = "Please re-authorize to be able to download";
       toast.primaryAction = {
         title: "Re-authorize",
         async onAction() {
           await provider.client.removeTokens();
           await provider.authorize();
+          await popToRoot();
         },
       };
+    }
   }
 }

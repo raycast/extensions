@@ -28,3 +28,11 @@ By default, the Extension uses OAuth. However, if you prefer to use your own acc
 10. `Copy` token
 11. `Open` Extension Prefernces of the Dropbox Raycast Extension
 12. `Enter` this token in Preferences
+
+## 📥 Downlaoading
+
+In order to download files from the convenience of Raycast, set a "Download Directory" in `Preferences` (if it is not set, you will be asked to set one when downloding for first time)
+
+> TIP: Make sure Raycast has permission to access the directory you choose
+
+When downloading, you may need to re-authorize your Dropbox login in order to have the required permissions (not to worry, you will be prompted to do so)!

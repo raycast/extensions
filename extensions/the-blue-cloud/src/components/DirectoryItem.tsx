@@ -23,7 +23,7 @@ export default function DirectoryItem(props: IDirectoryItemProps) {
             icon={Icon.ArrowRight}
             target={<Directory path={file.id} parent={file.path_display} />}
           />
-          {file.path_lower && <Action.OpenInBrowser url={getDirectoryViewURL(file.path_lower)} />}
+          {file.path_lower && <Action.OpenInBrowser url={encodeURI(getDirectoryViewURL(file.path_lower))} />}
         </ActionPanel>
       }
     />
