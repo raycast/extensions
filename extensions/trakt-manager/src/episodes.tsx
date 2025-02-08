@@ -1,15 +1,14 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
 import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
 import { GenericGrid } from "./components/generic-grid";
-import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
-import { TraktShowListItem, withPagination } from "./lib/schema";
+import { TraktShowHistoryListItem, withPagination } from "./lib/schema";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
@@ -18,17 +17,17 @@ export default function Command() {
   const traktClient = initTraktClient();
   const {
     isLoading,
-    data: shows,
+    data: episodes,
     pagination,
   } = useCachedPromise(
     (searchText: string) => async (options: PaginationOptions) => {
       if (!searchText) return { data: [], hasMore: false };
-      await setTimeout(200);
+      await setTimeout(100);
 
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
 
-      const response = await traktClient.shows.searchShows({
+      const response = await traktClient.shows.searchEpisodes({
         query: {
           query: searchText,
           page: options.page + 1,
@@ -64,31 +63,12 @@ export default function Command() {
     },
   );
 
-  const addShowToWatchlist = useCallback(async (show: TraktShowListItem) => {
-    await traktClient.shows.addShowToWatchlist({
+  const addEpisodeToHistory = useCallback(async (episode: TraktShowHistoryListItem) => {
+    await traktClient.shows.addEpisodeToHistory({
       body: {
-        shows: [
+        episodes: [
           {
-            ids: {
-              trakt: show.show.ids.trakt,
-            },
-          },
-        ],
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-  }, []);
-
-  const addShowToHistory = useCallback(async (show: TraktShowListItem) => {
-    await traktClient.shows.addShowToHistory({
-      body: {
-        shows: [
-          {
-            ids: {
-              trakt: show.show.ids.trakt,
-            },
+            ids: { trakt: episode.episode.ids.trakt },
             watched_at: new Date().toISOString(),
           },
         ],
@@ -99,52 +79,39 @@ export default function Command() {
     });
   }, []);
 
-  const checkInFirstEpisodeToHistory = useCallback(async (show: TraktShowListItem) => {
-    const response = await traktClient.shows.getEpisode({
-      params: {
-        showid: show.show.ids.trakt,
-        seasonNumber: 1,
-        episodeNumber: 1,
-      },
-      query: {
-        extended: "full",
-      },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
-    });
-
-    if (response.status !== 200) throw new Error("Failed to get first episode");
-    const firstEpisode = response.body;
-
+  const checkInEpisode = useCallback(async (episode: TraktShowHistoryListItem) => {
     await traktClient.shows.checkInEpisode({
       body: {
         episodes: [
           {
             ids: {
-              trakt: firstEpisode.ids.trakt,
+              trakt: episode.show.ids.trakt,
             },
             watched_at: new Date().toISOString(),
           },
         ],
       },
-      fetchOptions: {
-        signal: abortable.current?.signal,
-      },
     });
   }, []);
 
-  const handleSearchTextChange = useCallback((text: string): void => {
-    abortable.current?.abort();
-    abortable.current = new AbortController();
-    setSearchText(text);
-  }, []);
+  const handleSearchTextChange = useCallback(
+    (text: string): void => {
+      abortable.current?.abort();
+      abortable.current = new AbortController();
+      setSearchText(text);
+    },
+    [abortable],
+  );
 
   const handleAction = useCallback(
-    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>, message: string) => {
+    async (
+      movie: TraktShowHistoryListItem,
+      action: (movie: TraktShowHistoryListItem) => Promise<void>,
+      message: string,
+    ) => {
       setActionLoading(true);
       try {
-        await action(show);
+        await action(movie);
         showToast({
           title: message,
           style: Toast.Style.Success,
@@ -164,58 +131,43 @@ export default function Command() {
   return (
     <GenericGrid
       isLoading={isLoading || actionLoading}
-      emptyViewTitle="Search for shows"
-      searchBarPlaceholder="Search for shows"
+      emptyViewTitle="Search for episodes"
+      searchBarPlaceholder="Search for episodes"
       onSearchTextChange={handleSearchTextChange}
-      throttle={true}
       pagination={pagination}
-      items={shows}
+      items={episodes}
       aspectRatio="9/16"
       fit={Grid.Fit.Fill}
-      title={(item) => item.show.title}
-      subtitle={(item) => item.show.year?.toString() || ""}
+      title={(item) => `${item.episode.title}`}
+      subtitle={(item) => `${item.show.title}`}
       poster={(item) => getPosterUrl(item.show.images, "poster.png")}
-      keyFn={(item, index) => `${item.show.ids.trakt}-${index}`}
+      keyFn={(item, index) => `${item.show.ids.trakt}-${item.episode.ids.trakt}-${index}`}
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               icon={getFavicon(TRAKT_APP_URL)}
               title="Open in Trakt"
-              url={getTraktUrl("shows", item.show.ids.slug)}
+              url={getTraktUrl("episode", item.show.ids.slug, item.episode.season, item.episode.number)}
             />
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
               title="Open in IMDb"
-              url={getIMDbUrl(item.show.ids.imdb)}
+              url={getIMDbUrl(item.episode.ids.imdb)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.Push
-              icon={Icon.Switch}
-              title="Browse Seasons"
-              shortcut={Keyboard.Shortcut.Common.Open}
-              target={<SeasonGrid showId={item.show.ids.trakt} slug={item.show.ids.slug} imdbId={item.show.ids.imdb} />}
-            />
             <Action
               title="Check-in"
               icon={Icon.Checkmark}
               shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-              onAction={() => handleAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title="Add to Watchlist"
-              icon={Icon.Bookmark}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => handleAction(item, addShowToWatchlist, "Show added to watchlist")}
+              onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
             />
             <Action
               title="Add to History"
               icon={Icon.Clock}
               shortcut={Keyboard.Shortcut.Common.Duplicate}
-              onAction={() => handleAction(item, addShowToHistory, "Show added to history")}
+              onAction={() => handleAction(item, addEpisodeToHistory, "Episode added to history")}
             />
           </ActionPanel.Section>
         </ActionPanel>

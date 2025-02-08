@@ -9,9 +9,7 @@ import { SeasonGrid } from "./components/season-grid";
 import { initTraktClient } from "./lib/client";
 import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
-import { TraktMediaType, TraktMovieHistoryListItem, TraktShowHistoryListItem, withPagination } from "./lib/schema";
-
-const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
+import { TraktMediaType, TraktMovieBaseItem, TraktShowBaseItem, withPagination } from "./lib/schema";
 
 export default function Command() {
   const abortable = useRef<AbortController>();
@@ -25,19 +23,19 @@ export default function Command() {
     revalidate: revalidateMovie,
   } = useCachedPromise(
     (mediaType: TraktMediaType) => async (options: PaginationOptions) => {
-      await setTimeout(100);
       if (mediaType === "show") return { data: [], hasMore: false };
+      await setTimeout(100);
 
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
 
-      const response = await traktClient.movies.getMovieHistory({
+      const response = await traktClient.movies.getRecommendedMovies({
         query: {
           page: options.page + 1,
           limit: 10,
           extended: "full,cloud9",
-          sort_by: "added",
-          sort_how: "desc",
+          ignore_collected: true,
+          ignore_watchlisted: true,
         },
         fetchOptions: {
           signal: abortable.current.signal,
@@ -73,26 +71,26 @@ export default function Command() {
     revalidate: revalidateShow,
   } = useCachedPromise(
     (mediaType: TraktMediaType) => async (options: PaginationOptions) => {
-      await setTimeout(100);
       if (mediaType === "movie") return { data: [], hasMore: false };
+      await setTimeout(100);
 
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
 
-      const response = await traktClient.shows.getShowHistory({
+      const response = await traktClient.shows.getRecommendedShows({
         query: {
           page: options.page + 1,
           limit: 10,
           extended: "full,cloud9",
-          sort_by: "added",
-          sort_how: "desc",
+          ignore_collected: true,
+          ignore_watchlisted: true,
         },
         fetchOptions: {
           signal: abortable.current.signal,
         },
       });
 
-      if (response.status !== 200) return { data: [], hasMore: false };
+      if (response.status !== 200) throw new Error("Failed to fetch recommendations");
       const paginatedResponse = withPagination(response);
 
       return {
@@ -115,13 +113,13 @@ export default function Command() {
     },
   );
 
-  const removeMovieFromHistory = useCallback(async (movie: TraktMovieHistoryListItem) => {
-    await traktClient.movies.removeMovieFromHistory({
+  const addMovieToWatchlist = useCallback(async (movie: TraktMovieBaseItem) => {
+    await traktClient.movies.addMovieToWatchlist({
       body: {
         movies: [
           {
             ids: {
-              trakt: movie.movie.ids.trakt,
+              trakt: movie.ids.trakt,
             },
           },
         ],
@@ -132,14 +130,15 @@ export default function Command() {
     });
   }, []);
 
-  const removeEpisodeFromHistory = useCallback(async (episode: TraktShowHistoryListItem) => {
-    await traktClient.shows.removeEpisodeFromHistory({
+  const addMovieToHistory = useCallback(async (movie: TraktMovieBaseItem) => {
+    await traktClient.movies.addMovieToHistory({
       body: {
-        episodes: [
+        movies: [
           {
             ids: {
-              trakt: episode.episode.ids.trakt,
+              trakt: movie.ids.trakt,
             },
+            watched_at: new Date().toISOString(),
           },
         ],
       },
@@ -155,12 +154,78 @@ export default function Command() {
     setMediaType(newValue as TraktMediaType);
   }, []);
 
+  const addShowToWatchlist = useCallback(async (show: TraktShowBaseItem) => {
+    await traktClient.shows.addShowToWatchlist({
+      body: {
+        shows: [
+          {
+            ids: {
+              trakt: show.ids.trakt,
+            },
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
+  const addShowToHistory = useCallback(async (show: TraktShowBaseItem) => {
+    await traktClient.shows.addShowToHistory({
+      body: {
+        shows: [
+          {
+            ids: {
+              trakt: show.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
+  const checkInFirstEpisodeToHistory = useCallback(async (show: TraktShowBaseItem) => {
+    const response = await traktClient.shows.getEpisode({
+      params: {
+        showid: show.ids.trakt,
+        seasonNumber: 1,
+        episodeNumber: 1,
+      },
+      query: {
+        extended: "full",
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+
+    if (response.status !== 200) throw new Error("Failed to get first episode");
+    const firstEpisode = response.body;
+
+    await traktClient.shows.checkInEpisode({
+      body: {
+        episodes: [
+          {
+            ids: {
+              trakt: firstEpisode.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+      fetchOptions: {
+        signal: abortable.current?.signal,
+      },
+    });
+  }, []);
+
   const handleMovieAction = useCallback(
-    async (
-      movie: TraktMovieHistoryListItem,
-      action: (movie: TraktMovieHistoryListItem) => Promise<void>,
-      message: string,
-    ) => {
+    async (movie: TraktMovieBaseItem, action: (movie: TraktMovieBaseItem) => Promise<void>, message: string) => {
       setActionLoading(true);
       try {
         await action(movie);
@@ -182,14 +247,10 @@ export default function Command() {
   );
 
   const handleShowAction = useCallback(
-    async (
-      episode: TraktShowHistoryListItem,
-      action: (episode: TraktShowHistoryListItem) => Promise<void>,
-      message: string,
-    ) => {
+    async (show: TraktShowBaseItem, action: (show: TraktShowBaseItem) => Promise<void>, message: string) => {
       setActionLoading(true);
       try {
-        await action(episode);
+        await action(show);
         revalidateShow();
         showToast({
           title: message,
@@ -210,8 +271,8 @@ export default function Command() {
   return mediaType === "movie" ? (
     <GenericGrid
       isLoading={isMovieLoading || actionLoading}
-      emptyViewTitle="No history available"
-      searchBarPlaceholder="Search history"
+      emptyViewTitle="No recommendations available"
+      searchBarPlaceholder="Search recommendation"
       searchBarAccessory={
         <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
           <Grid.Dropdown.Item value="movie" title="Movies" />
@@ -222,30 +283,35 @@ export default function Command() {
       items={movies}
       aspectRatio="9/16"
       fit={Grid.Fit.Fill}
-      poster={(item) => getPosterUrl(item.movie.images, "poster.png")}
-      title={(item) => item.movie.title}
-      subtitle={(item) => (item.watched_at ? `${formatter.format(new Date(item.watched_at))}` : "")}
-      keyFn={(item, index) => `${item.movie.ids.trakt}-${index}`}
+      title={(item) => item.title}
+      poster={(item) => getPosterUrl(item.images, "poster.png")}
+      keyFn={(item, index) => `${item.ids.trakt}-${index}`}
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               icon={getFavicon(TRAKT_APP_URL)}
               title="Open in Trakt"
-              url={getTraktUrl("movies", item.movie.ids.slug)}
+              url={getTraktUrl("movies", item.ids.slug)}
             />
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
               title="Open in IMDb"
-              url={getIMDbUrl(item.movie.ids.imdb)}
+              url={getIMDbUrl(item.ids.imdb)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title="Remove from History"
-              icon={Icon.Trash}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={() => handleMovieAction(item, removeMovieFromHistory, "Movie removed from history")}
+              title="Add to Watchlist"
+              icon={Icon.Bookmark}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => handleMovieAction(item, addMovieToWatchlist, "Movie added to watchlist")}
+            />
+            <Action
+              title="Add to History"
+              icon={Icon.Clock}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              onAction={() => handleMovieAction(item, addMovieToHistory, "Movie added to history")}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -254,8 +320,8 @@ export default function Command() {
   ) : (
     <GenericGrid
       isLoading={isShowsLoading || actionLoading}
-      emptyViewTitle="No history available"
-      searchBarPlaceholder="Search history"
+      emptyViewTitle="No recommendations available"
+      searchBarPlaceholder="Search recommendation"
       searchBarAccessory={
         <Grid.Dropdown onChange={onMediaTypeChange} tooltip="Media Type">
           <Grid.Dropdown.Item value="movie" title="Movies" />
@@ -266,26 +332,21 @@ export default function Command() {
       items={shows}
       aspectRatio="9/16"
       fit={Grid.Fit.Fill}
-      poster={(item) => getPosterUrl(item.show.images, "poster.png")}
-      title={(item) => `${item.show.title} - ${item.episode.title}`}
-      subtitle={(item) =>
-        `${item.episode.season}x${item.episode.number.toString().padStart(2, "0")}${
-          item.watched_at ? ` - ${formatter.format(new Date(item.watched_at))}` : ""
-        }`
-      }
-      keyFn={(item, index) => `${item.show.ids.trakt}-${item.episode.ids.trakt}-${index}`}
+      title={(item) => item.title}
+      poster={(item) => getPosterUrl(item.images, "poster.png")}
+      keyFn={(item, index) => `${item.ids.trakt}-${index}`}
       actions={(item) => (
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
               icon={getFavicon(TRAKT_APP_URL)}
               title="Open in Trakt"
-              url={getTraktUrl("episode", item.show.ids.slug, item.episode.season, item.episode.number)}
+              url={getTraktUrl("shows", item.ids.slug)}
             />
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
               title="Open in IMDb"
-              url={getIMDbUrl(item.episode.ids.imdb)}
+              url={getIMDbUrl(item.ids.imdb)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -293,13 +354,27 @@ export default function Command() {
               icon={Icon.Switch}
               title="Browse Seasons"
               shortcut={Keyboard.Shortcut.Common.Open}
-              target={<SeasonGrid showId={item.show.ids.trakt} slug={item.show.ids.slug} imdbId={item.show.ids.imdb} />}
+              target={<SeasonGrid showId={item.ids.trakt} slug={item.ids.slug} imdbId={item.ids.imdb} />}
             />
             <Action
-              title="Remove from History"
-              icon={Icon.Trash}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={() => handleShowAction(item, removeEpisodeFromHistory, "Episode removed from history")}
+              title="Check-in"
+              icon={Icon.Checkmark}
+              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+              onAction={() => handleShowAction(item, checkInFirstEpisodeToHistory, "First episode checked-in")}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Add to Watchlist"
+              icon={Icon.Bookmark}
+              shortcut={Keyboard.Shortcut.Common.Edit}
+              onAction={() => handleShowAction(item, addShowToWatchlist, "Show added to watchlist")}
+            />
+            <Action
+              title="Add to History"
+              icon={Icon.Clock}
+              shortcut={Keyboard.Shortcut.Common.Duplicate}
+              onAction={() => handleShowAction(item, addShowToHistory, "Show added to history")}
             />
           </ActionPanel.Section>
         </ActionPanel>
