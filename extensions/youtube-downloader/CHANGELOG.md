@@ -15,6 +15,7 @@
 - Mention the `yt-dlp` in readme
 - Mention supported sites in readme
 - Comment `Can I download clips from YouTube` out since we don't support it yet
+- Update screenshots since the format selector is not ready yet
 
 ## [Improvement] - 2025-02-15
 
