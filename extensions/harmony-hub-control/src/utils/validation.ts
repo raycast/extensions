@@ -1,7 +1,7 @@
 import { Logger } from "../services/logger";
 import { ErrorCategory, HarmonyError } from "../types/errors";
-import { RetryConfig, TimeoutConfig } from "../types/preferences";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
+import { RetryConfig, TimeoutConfig } from "../types/preferences";
 
 /**
  * Type guard for checking if a value is a non-empty string
@@ -54,7 +54,7 @@ export function validateHubConfig(hub: HarmonyHub): void {
     throw new HarmonyError("Hub IP address is required", ErrorCategory.CONNECTION);
   }
 
-  const port = typeof hub.port === 'number' ? hub.port : parseInt(hub.port as string, 10);
+  const port = typeof hub.port === "number" ? hub.port : parseInt(hub.port as string, 10);
   if (hub.port !== undefined && !isValidPort(port)) {
     throw new HarmonyError(`Invalid port number: ${hub.port}`, ErrorCategory.CONNECTION);
   }

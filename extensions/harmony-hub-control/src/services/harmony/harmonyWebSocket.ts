@@ -14,7 +14,6 @@ import {
   CommandPayload,
   WebSocketMessageEvent,
 } from "../../types/websocket";
-
 import { Logger } from "../logger";
 
 // Constants for WebSocket management
@@ -262,11 +261,7 @@ export class HarmonyWebSocket {
       Logger.error("Failed to handle WebSocket message", { error, data });
       if (this.errorHandler) {
         await this.errorHandler(
-          new HarmonyError(
-            "Failed to handle WebSocket message",
-            ErrorCategory.WEBSOCKET,
-            error as Error,
-          ),
+          new HarmonyError("Failed to handle WebSocket message", ErrorCategory.WEBSOCKET, error as Error),
         );
       }
     }
@@ -352,10 +347,9 @@ export class HarmonyWebSocket {
    */
   public async getActivities(): Promise<HarmonyActivity[]> {
     Logger.debug("Getting activities");
-    const response = await this.sendMessage<WebSocketResponse<HarmonyActivity[]>>(
-      WebSocketMessageType.GET_ACTIVITIES,
-      { success: true }
-    );
+    const response = await this.sendMessage<WebSocketResponse<HarmonyActivity[]>>(WebSocketMessageType.GET_ACTIVITIES, {
+      success: true,
+    });
     return Array.isArray(response?.data) ? response.data : [];
   }
 
@@ -364,10 +358,9 @@ export class HarmonyWebSocket {
    */
   public async getDevices(): Promise<HarmonyDevice[]> {
     Logger.debug("Getting devices");
-    const response = await this.sendMessage<WebSocketResponse<HarmonyDevice[]>>(
-      WebSocketMessageType.GET_DEVICES,
-      { success: true }
-    );
+    const response = await this.sendMessage<WebSocketResponse<HarmonyDevice[]>>(WebSocketMessageType.GET_DEVICES, {
+      success: true,
+    });
     return Array.isArray(response?.data) ? response.data : [];
   }
 
@@ -380,12 +373,9 @@ export class HarmonyWebSocket {
       activityId,
       status: "starting",
       timestamp: Date.now(),
-      success: true
+      success: true,
     };
-    await this.sendMessage<WebSocketResponse<void>>(
-      WebSocketMessageType.START_ACTIVITY,
-      payload
-    );
+    await this.sendMessage<WebSocketResponse<void>>(WebSocketMessageType.START_ACTIVITY, payload);
   }
 
   /**
@@ -397,12 +387,9 @@ export class HarmonyWebSocket {
       activityId,
       status: "stopping",
       timestamp: Date.now(),
-      success: true
+      success: true,
     };
-    await this.sendMessage<WebSocketResponse<void>>(
-      WebSocketMessageType.STOP_ACTIVITY,
-      payload
-    );
+    await this.sendMessage<WebSocketResponse<void>>(WebSocketMessageType.STOP_ACTIVITY, payload);
   }
 
   /**
@@ -413,12 +400,9 @@ export class HarmonyWebSocket {
     const payload: CommandPayload & WebSocketResponse<void> = {
       deviceId,
       command,
-      success: true
+      success: true,
     };
-    await this.sendMessage<WebSocketResponse<void>>(
-      WebSocketMessageType.EXECUTE_COMMAND,
-      payload
-    );
+    await this.sendMessage<WebSocketResponse<void>>(WebSocketMessageType.EXECUTE_COMMAND, payload);
   }
 
   /**

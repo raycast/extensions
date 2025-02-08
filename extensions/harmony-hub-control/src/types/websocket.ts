@@ -81,7 +81,11 @@ export interface CommandPayload {
 /**
  * Union type for all possible WebSocket message payloads
  */
-export type WebSocketMessageUnion = ActivityPayload | CommandPayload | WebSocketResponse<unknown> | Record<string, unknown>;
+export type WebSocketMessageUnion =
+  | ActivityPayload
+  | CommandPayload
+  | WebSocketResponse<unknown>
+  | Record<string, unknown>;
 
 /**
  * WebSocket configuration interface

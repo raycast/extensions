@@ -1,5 +1,5 @@
-import { Detail } from "@raycast/api";
 import { useState } from "react";
+
 import { HarmonyCommand, HarmonyStageType } from "./components/HarmonyCommand";
 import { HarmonyProvider } from "./hooks/useHarmony";
 
@@ -8,10 +8,7 @@ export default function Command(): JSX.Element {
 
   return (
     <HarmonyProvider>
-      <HarmonyCommand
-        stage={stage}
-        onStageChange={setStage}
-      />
+      <HarmonyCommand stage={stage} onStageChange={setStage} />
     </HarmonyProvider>
   );
 }
