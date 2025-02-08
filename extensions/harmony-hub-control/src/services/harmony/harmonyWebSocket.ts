@@ -1,17 +1,20 @@
-import WebSocket from "ws";
+import { WebSocket } from "ws";
+import type { Data } from "ws";
 
 import { HarmonyError, ErrorCategory } from "../../types/errors";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../../types/harmony";
 import {
   WebSocketConnectionStatus,
-  WebSocketMessageType,
   WebSocketResponse,
   WebSocketEventHandler,
-  WebSocketErrorHandler as WebSocketErrorHandlerType,
+  WebSocketErrorHandler,
+  WebSocketMessageType,
   WebSocketMessageUnion,
   ActivityPayload,
   CommandPayload,
+  WebSocketMessageEvent,
 } from "../../types/websocket";
+
 import { Logger } from "../logger";
 
 // Constants for WebSocket management
@@ -50,7 +53,7 @@ export class HarmonyWebSocket {
   private messageQueue: QueuedMessage[] = [];
   private status: WebSocketConnectionStatus = WebSocketConnectionStatus.DISCONNECTED;
   private eventHandler?: WebSocketEventHandler;
-  private errorHandler?: WebSocketErrorHandlerType;
+  private errorHandler?: WebSocketErrorHandler;
   private reconnectAttempts: number = 0;
   private pingInterval?: NodeJS.Timeout;
   private messageTimeouts: Map<string, NodeJS.Timeout> = new Map();
@@ -244,20 +247,28 @@ export class HarmonyWebSocket {
   /**
    * Handle incoming WebSocket message
    */
-  private async handleMessage(data: WebSocket.Data): Promise<void> {
+  private async handleMessage(data: Data): Promise<void> {
     try {
-      const message: WebSocketMessageUnion = JSON.parse(data.toString());
+      const message = JSON.parse(data.toString()) as WebSocketMessageEvent;
       Logger.debug("Received WebSocket message:", message);
 
       if (this.eventHandler) {
-        this.eventHandler(message);
+        await this.eventHandler(message);
       }
 
       // Process queued messages
       this.processQueue();
-    } catch (err: unknown) {
-      const error: Error = err instanceof Error ? err : new Error(String(err));
-      Logger.error("Failed to handle WebSocket message:", error);
+    } catch (error) {
+      Logger.error("Failed to handle WebSocket message", { error, data });
+      if (this.errorHandler) {
+        await this.errorHandler(
+          new HarmonyError(
+            "Failed to handle WebSocket message",
+            ErrorCategory.WEBSOCKET,
+            error as Error,
+          ),
+        );
+      }
     }
   }
 
@@ -332,7 +343,7 @@ export class HarmonyWebSocket {
   /**
    * Set error handler for WebSocket errors
    */
-  public setErrorHandler(handler: WebSocketErrorHandlerType): void {
+  public setErrorHandler(handler: WebSocketErrorHandler): void {
     this.errorHandler = handler;
   }
 
@@ -340,24 +351,24 @@ export class HarmonyWebSocket {
    * Get current activities
    */
   public async getActivities(): Promise<HarmonyActivity[]> {
-    const response = await this.sendMessage<Record<string, never>>(WebSocketMessageType.GET_ACTIVITIES, {});
-    if (response.status === "success" && Array.isArray(response.data)) {
-      this.currentState.activities = response.data as HarmonyActivity[];
-      return response.data as HarmonyActivity[];
-    }
-    throw new HarmonyError("Failed to get activities", ErrorCategory.WEBSOCKET);
+    Logger.debug("Getting activities");
+    const response = await this.sendMessage<WebSocketResponse<HarmonyActivity[]>>(
+      WebSocketMessageType.GET_ACTIVITIES,
+      { success: true }
+    );
+    return Array.isArray(response?.data) ? response.data : [];
   }
 
   /**
    * Get current devices
    */
   public async getDevices(): Promise<HarmonyDevice[]> {
-    const response = await this.sendMessage<Record<string, never>>(WebSocketMessageType.GET_DEVICES, {});
-    if (response.status === "success" && Array.isArray(response.data)) {
-      this.currentState.devices = response.data as HarmonyDevice[];
-      return response.data as HarmonyDevice[];
-    }
-    throw new HarmonyError("Failed to get devices", ErrorCategory.WEBSOCKET);
+    Logger.debug("Getting devices");
+    const response = await this.sendMessage<WebSocketResponse<HarmonyDevice[]>>(
+      WebSocketMessageType.GET_DEVICES,
+      { success: true }
+    );
+    return Array.isArray(response?.data) ? response.data : [];
   }
 
   /**
@@ -365,94 +376,49 @@ export class HarmonyWebSocket {
    */
   public async startActivity(activityId: string): Promise<void> {
     Logger.debug(`Starting activity: ${activityId}`);
-
-    const payload: ActivityPayload = {
+    const payload: ActivityPayload & WebSocketResponse<void> = {
       activityId,
-      timestamp: Date.now(),
       status: "starting",
+      timestamp: Date.now(),
+      success: true
     };
-
-    const response = await this.sendMessage<ActivityPayload>(WebSocketMessageType.START_ACTIVITY, payload);
-    if (response.status !== "success") {
-      throw new HarmonyError("Failed to start activity", ErrorCategory.WEBSOCKET);
-    }
-
-    // Wait for activity to start (up to 10 seconds)
-    let attempts: number = 0;
-    const maxAttempts: number = 10;
-    while (attempts < maxAttempts) {
-      const activities = await this.getActivities();
-      const activity = activities.find((a) => a.id === activityId);
-
-      if (activity?.isCurrent) {
-        Logger.debug(`Activity ${activityId} started successfully`);
-        this.currentActivity = activityId;
-        return;
-      }
-
-      Logger.debug(`Waiting for activity ${activityId} to start (attempt ${attempts + 1}/${maxAttempts})`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      attempts++;
-    }
-
-    throw new HarmonyError("Activity start timeout", ErrorCategory.WEBSOCKET);
+    await this.sendMessage<WebSocketResponse<void>>(
+      WebSocketMessageType.START_ACTIVITY,
+      payload
+    );
   }
 
   /**
    * Stop current activity
    */
   public async stopActivity(activityId: string): Promise<void> {
-    if (!this.currentActivity) {
-      throw new HarmonyError("No activity to stop", ErrorCategory.WEBSOCKET);
-    }
-
-    Logger.debug(`Stopping activity: ${this.currentActivity}`);
-
-    const payload: ActivityPayload = {
+    Logger.debug(`Stopping activity: ${activityId}`);
+    const payload: ActivityPayload & WebSocketResponse<void> = {
       activityId,
-      timestamp: Date.now(),
       status: "stopping",
+      timestamp: Date.now(),
+      success: true
     };
-
-    const response = await this.sendMessage<ActivityPayload>(WebSocketMessageType.STOP_ACTIVITY, payload);
-    if (response.status !== "success") {
-      throw new HarmonyError("Failed to stop activity", ErrorCategory.WEBSOCKET);
-    }
-
-    // Wait for activity to stop (up to 10 seconds)
-    let attempts: number = 0;
-    const maxAttempts: number = 10;
-    while (attempts < maxAttempts) {
-      const activities = await this.getActivities();
-      const activity = activities.find((a) => a.id === this.currentActivity);
-
-      if (!activity?.isCurrent) {
-        Logger.debug(`Activity ${this.currentActivity} stopped successfully`);
-        this.currentActivity = null;
-        return;
-      }
-
-      Logger.debug(`Waiting for activity ${this.currentActivity} to stop (attempt ${attempts + 1}/${maxAttempts})`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      attempts++;
-    }
-
-    throw new HarmonyError("Activity stop timeout", ErrorCategory.WEBSOCKET);
+    await this.sendMessage<WebSocketResponse<void>>(
+      WebSocketMessageType.STOP_ACTIVITY,
+      payload
+    );
   }
 
   /**
    * Execute a command
    */
   public async executeCommand(deviceId: string, command: HarmonyCommand): Promise<void> {
-    const payload: CommandPayload = {
+    Logger.debug(`Executing command: ${command.name} on device: ${deviceId}`);
+    const payload: CommandPayload & WebSocketResponse<void> = {
       deviceId,
       command,
+      success: true
     };
-
-    const response = await this.sendMessage<CommandPayload>(WebSocketMessageType.EXECUTE_COMMAND, payload);
-    if (response.status !== "success") {
-      throw new HarmonyError("Failed to execute command", ErrorCategory.WEBSOCKET);
-    }
+    await this.sendMessage<WebSocketResponse<void>>(
+      WebSocketMessageType.EXECUTE_COMMAND,
+      payload
+    );
   }
 
   /**

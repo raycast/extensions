@@ -1,4 +1,5 @@
 import getHarmonyClient from "@harmonyhub/client-ws";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 import { ErrorCategory, HarmonyError } from "../../types/errors";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../../types/harmony";

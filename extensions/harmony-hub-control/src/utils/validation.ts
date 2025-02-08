@@ -1,6 +1,6 @@
 import { Logger } from "../services/logger";
-import { RetryConfig, TimeoutConfig } from "../types/config";
 import { ErrorCategory, HarmonyError } from "../types/errors";
+import { RetryConfig, TimeoutConfig } from "../types/preferences";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
 
 /**
@@ -11,16 +11,16 @@ export function isNonEmptyString(value: unknown): value is string {
 }
 
 /**
- * Type guard for checking if a value is a positive number
+ * Checks if a value is a positive number
  */
-export function isPositiveNumber(value: unknown): value is number {
+function isPositiveNumber(value: number): boolean {
   return typeof value === "number" && !isNaN(value) && value > 0;
 }
 
 /**
- * Type guard for checking if a value is a valid port number
+ * Checks if a value is a valid port number
  */
-export function isValidPort(value: unknown): value is number {
+function isValidPort(value: number): boolean {
   return isPositiveNumber(value) && value <= 65535;
 }
 
@@ -49,49 +49,14 @@ export function isValidCommandGroup(value: unknown): value is string {
 /**
  * Validate Harmony Hub configuration
  */
-export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is HarmonyHub {
-  if (!isNonEmptyString(hub.id)) {
-    throw new HarmonyError(
-      "Hub ID is required",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_HUB_ID",
-    );
+export function validateHubConfig(hub: HarmonyHub): void {
+  if (!hub.ip) {
+    throw new HarmonyError("Hub IP address is required", ErrorCategory.CONNECTION);
   }
 
-  if (!isNonEmptyString(hub.name)) {
-    throw new HarmonyError(
-      "Hub name is required",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_HUB_NAME",
-    );
-  }
-
-  if (!isValidIpAddress(hub.ip)) {
-    throw new HarmonyError(
-      "Invalid hub IP address",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_HUB_IP",
-    );
-  }
-
-  if (hub.port !== undefined && !isValidPort(hub.port)) {
-    throw new HarmonyError(
-      "Invalid hub port",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_HUB_PORT",
-    );
+  const port = typeof hub.port === 'number' ? hub.port : parseInt(hub.port as string, 10);
+  if (hub.port !== undefined && !isValidPort(port)) {
+    throw new HarmonyError(`Invalid port number: ${hub.port}`, ErrorCategory.CONNECTION);
   }
 
   Logger.debug("Hub config validation passed", { hub });
@@ -263,138 +228,57 @@ export function validateCommandRequest(request: Partial<CommandRequest>): assert
 }
 
 /**
- * Validate retry configuration
+ * Validates a retry configuration object
  */
-export function validateRetryConfig(config: Partial<RetryConfig>): asserts config is RetryConfig {
+export function validateRetryConfig(config: RetryConfig): void {
   if (!isPositiveNumber(config.maxAttempts)) {
-    throw new HarmonyError(
-      "Maximum retry attempts must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_RETRY_MAX_ATTEMPTS",
-    );
+    throw new HarmonyError("maxAttempts must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.baseDelay)) {
-    throw new HarmonyError(
-      "Base retry delay must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_RETRY_BASE_DELAY",
-    );
+    throw new HarmonyError("baseDelay must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.maxDelay)) {
-    throw new HarmonyError(
-      "Maximum retry delay must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_RETRY_MAX_DELAY",
-    );
+    throw new HarmonyError("maxDelay must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (typeof config.useExponentialBackoff !== "boolean") {
-    throw new HarmonyError(
-      "Use exponential backoff must be a boolean",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_RETRY_BACKOFF",
-    );
+    throw new HarmonyError("useExponentialBackoff must be a boolean", ErrorCategory.VALIDATION);
   }
 
   if (config.maxRetryDuration !== undefined && !isPositiveNumber(config.maxRetryDuration)) {
-    throw new HarmonyError(
-      "Maximum retry duration must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_RETRY_DURATION",
-    );
+    throw new HarmonyError("maxRetryDuration must be a positive number", ErrorCategory.VALIDATION);
   }
-
-  Logger.debug("Retry config validation passed", { config });
 }
 
 /**
- * Validate timeout configuration
+ * Validates a timeout configuration object
  */
-export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts config is TimeoutConfig {
+export function validateTimeoutConfig(config: TimeoutConfig): void {
   if (!isPositiveNumber(config.connection)) {
-    throw new HarmonyError(
-      "Connection timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_CONNECTION",
-    );
+    throw new HarmonyError("connection timeout must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.message)) {
-    throw new HarmonyError(
-      "Message timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_MESSAGE",
-    );
+    throw new HarmonyError("message timeout must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.activity)) {
-    throw new HarmonyError(
-      "Activity timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_ACTIVITY",
-    );
+    throw new HarmonyError("activity timeout must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.command)) {
-    throw new HarmonyError(
-      "Command timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_COMMAND",
-    );
+    throw new HarmonyError("command timeout must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.discovery)) {
-    throw new HarmonyError(
-      "Discovery timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_DISCOVERY",
-    );
+    throw new HarmonyError("discovery timeout must be a positive number", ErrorCategory.VALIDATION);
   }
 
   if (!isPositiveNumber(config.cache)) {
-    throw new HarmonyError(
-      "Cache timeout must be a positive number",
-      ErrorCategory.VALIDATION,
-      undefined,
-      undefined,
-      false,
-      "INVALID_TIMEOUT_CACHE",
-    );
+    throw new HarmonyError("cache timeout must be a positive number", ErrorCategory.VALIDATION);
   }
-
-  Logger.debug("Timeout config validation passed", { config });
 }
 
 /**

@@ -121,7 +121,7 @@ export class HarmonyManager {
 
         const handleHubDiscovered = (hub: HarmonyHub): void => {
           Logger.debug(`Hub discovered: ${hub.name} (${hub.ip})`);
-          if (!hubs.some((h) => h.uuid === hub.uuid)) {
+          if (!hubs.some((h) => h.id === hub.id)) {
             this.discoveredHubs.push(hub);
           }
         };

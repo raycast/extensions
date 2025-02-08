@@ -92,7 +92,7 @@ function useHarmonyState(): HarmonyContextState {
         title: "Searching for Harmony Hubs",
       });
 
-      const discoveredHubs = await manager.startDiscovery((progress, message) => {
+      const discoveredHubs = await manager.startDiscovery(async (progress, message) => {
         setLoadingState({
           stage: HarmonyStage.DISCOVERING,
           message,

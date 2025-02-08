@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
 
 import { Logger } from "../services/logger";
+import { HarmonyError, ErrorSeverity, ErrorRecoveryAction } from "../types/errors";
 
 /**
  * Props for the FeedbackState component.

@@ -4,7 +4,7 @@
  */
 
 import { Icon } from "@raycast/api";
-import { ReactNode, ReactErrorInfo } from "react";
+import { ReactNode, ErrorInfo } from "react";
 
 import { HarmonyError } from "./errors";
 import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "./harmony";
@@ -204,7 +204,7 @@ export interface ErrorBoundaryProps {
   /**
    * Optional error handler callback
    */
-  onError?: (error: Error, errorInfo: ReactErrorInfo) => void;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 /**
