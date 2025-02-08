@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/ban-types */
 // This file was automatically generated. Edits will be overwritten
 
 export interface Typegen0 {
