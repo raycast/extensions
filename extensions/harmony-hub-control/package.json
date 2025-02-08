@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "harmony-hub-control",
+  "name": "harmony-control",
   "version": "1.0.0",
-  "title": "Harmony Hub Control",
+  "title": "Harmony Control",
   "description": "Control your Logitech Harmony Hub devices",
   "icon": "command-icon.png",
-  "author": "chadrwalters",
+  "author": "chad_walters",
   "categories": [
     "Media",
     "System"
@@ -27,6 +27,7 @@
       "title": "Default View",
       "description": "Choose whether to show Activities or Devices by default",
       "default": "activities",
+      "label": "Default View",
       "data": [
         {
           "title": "Activities",
@@ -44,7 +45,8 @@
       "required": false,
       "title": "Command Hold Time",
       "description": "Duration to hold a command in milliseconds",
-      "default": "100"
+      "default": "100",
+      "label": "Command Hold Time (ms)"
     },
     {
       "name": "cacheDuration",
@@ -52,7 +54,8 @@
       "required": false,
       "title": "Cache Duration",
       "description": "Duration to cache hub data in seconds (default: 3600 = 1 hour)",
-      "default": "3600"
+      "default": "3600",
+      "label": "Cache Duration (seconds)"
     },
     {
       "name": "debugLogging",
@@ -60,7 +63,8 @@
       "required": false,
       "title": "Debug Logging",
       "description": "Enable debug level logging",
-      "default": true
+      "default": true,
+      "label": "Enable Debug Logging"
     },
     {
       "name": "networkTimeout",
@@ -68,7 +72,8 @@
       "required": false,
       "title": "Network Timeout",
       "description": "Network request timeout (in milliseconds)",
-      "default": "5000"
+      "default": "5000",
+      "label": "Network Timeout (ms)"
     },
     {
       "name": "debugMode",
@@ -94,7 +99,8 @@
       "required": false,
       "title": "Max Retries",
       "description": "Maximum number of retry attempts",
-      "default": "3"
+      "default": "3",
+      "label": "Max Retries"
     }
   ],
   "dependencies": {

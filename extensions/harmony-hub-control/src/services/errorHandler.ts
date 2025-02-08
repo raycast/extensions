@@ -12,7 +12,7 @@ export class ErrorHandler {
    */
   static handle(error: Error | unknown, context?: string): void {
     const harmonyError = ErrorHandler.toHarmonyError(error);
-    
+
     // Log the error
     Logger.logError(harmonyError, context);
 
@@ -25,7 +25,7 @@ export class ErrorHandler {
    */
   static handleWithCategory(error: Error | unknown, category: ErrorCategory, context?: string): void {
     const harmonyError = ErrorHandler.toHarmonyError(error, category);
-    
+
     // Log the error
     Logger.logError(harmonyError, context);
 
@@ -89,10 +89,7 @@ export class ErrorHandler {
   /**
    * Handle an async operation with proper error handling
    */
-  static async handleAsync<T>(
-    operation: () => Promise<T>,
-    context?: string
-  ): Promise<T> {
+  static async handleAsync<T>(operation: () => Promise<T>, context?: string): Promise<T> {
     try {
       return await operation();
     } catch (error) {
@@ -107,7 +104,7 @@ export class ErrorHandler {
   static async handleAsyncWithCategory<T>(
     operation: () => Promise<T>,
     category: ErrorCategory,
-    context?: string
+    context?: string,
   ): Promise<T> {
     try {
       return await operation();

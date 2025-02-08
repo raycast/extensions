@@ -45,7 +45,7 @@ export class HarmonyManager {
       throw new HarmonyError(
         "Invalid hub data received",
         ErrorCategory.VALIDATION,
-        new Error(`Missing required fields: ${JSON.stringify(data)}`)
+        new Error(`Missing required fields: ${JSON.stringify(data)}`),
       );
     }
 
@@ -58,16 +58,14 @@ export class HarmonyManager {
       version: data.fullHubInfo.current_fw_version,
       port: data.fullHubInfo.port,
       productId: data.fullHubInfo.productId,
-      protocolVersion: data.fullHubInfo.protocolVersion
+      protocolVersion: data.fullHubInfo.protocolVersion,
     };
   }
 
   /**
    * Start discovery of Harmony Hubs on the network
    */
-  public async startDiscovery(
-    onProgress?: (progress: number, message: string) => void
-  ): Promise<HarmonyHub[]> {
+  public async startDiscovery(onProgress?: (progress: number, message: string) => void): Promise<HarmonyHub[]> {
     // Check cache first
     try {
       const cached = await this.getCachedHubs();
@@ -121,9 +119,9 @@ export class HarmonyManager {
         this.explorer.on("online", (data: HubDiscoveryData) => {
           try {
             const hub = this.createHub(data);
-            
+
             // Check for duplicate hubs
-            if (!hubs.some(h => h.hubId === hub.hubId)) {
+            if (!hubs.some((h) => h.hubId === hub.hubId)) {
               hubs.push(hub);
               onProgress?.(0.5, `Found hub: ${hub.name}`);
 
@@ -153,11 +151,7 @@ export class HarmonyManager {
             clearTimeout(this.completeTimeout);
           }
           await this.cleanup();
-          reject(new HarmonyError(
-            "Hub discovery failed",
-            ErrorCategory.HUB_COMMUNICATION,
-            error
-          ));
+          reject(new HarmonyError("Hub discovery failed", ErrorCategory.HUB_COMMUNICATION, error));
         });
 
         // Start discovery
@@ -166,14 +160,9 @@ export class HarmonyManager {
 
       // Return the discovery promise
       return await this.discoveryPromise;
-
     } catch (error) {
       Logger.error("Failed to start discovery:", error);
-      throw new HarmonyError(
-        "Failed to start hub discovery",
-        ErrorCategory.HUB_COMMUNICATION,
-        error as Error
-      );
+      throw new HarmonyError("Failed to start hub discovery", ErrorCategory.HUB_COMMUNICATION, error as Error);
     } finally {
       this.isDiscovering = false;
       this.discoveryPromise = null;
@@ -187,17 +176,13 @@ export class HarmonyManager {
     try {
       const cache: CachedHubs = {
         hubs,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       await LocalStorage.setItem(CACHE_KEY, JSON.stringify(cache));
       Logger.info(`Cached ${hubs.length} hubs`);
     } catch (error) {
       Logger.warn("Failed to cache hubs:", error);
-      throw new HarmonyError(
-        "Failed to cache hubs",
-        ErrorCategory.STORAGE,
-        error as Error
-      );
+      throw new HarmonyError("Failed to cache hubs", ErrorCategory.STORAGE, error as Error);
     }
   }
 
@@ -210,7 +195,7 @@ export class HarmonyManager {
       if (!cached) return null;
 
       const { hubs, timestamp } = JSON.parse(cached) as CachedHubs;
-      
+
       // Check if cache is expired
       if (Date.now() - timestamp > CACHE_TTL) {
         Logger.info("Cache expired");
@@ -230,11 +215,7 @@ export class HarmonyManager {
       return hubs;
     } catch (error) {
       Logger.warn("Failed to get cached hubs:", error);
-      throw new HarmonyError(
-        "Failed to read hub cache",
-        ErrorCategory.STORAGE,
-        error as Error
-      );
+      throw new HarmonyError("Failed to read hub cache", ErrorCategory.STORAGE, error as Error);
     }
   }
 
@@ -267,26 +248,22 @@ export class HarmonyManager {
   public async clearCache(): Promise<void> {
     try {
       Logger.info("Clearing all Harmony caches");
-      
+
       // Clear hub cache
       await LocalStorage.removeItem(CACHE_KEY);
-      
+
       // Clear all hub-specific config caches
       const allKeys = await LocalStorage.allItems();
       for (const key of Object.keys(allKeys)) {
-        if (key.startsWith('harmony-config-')) {
+        if (key.startsWith("harmony-config-")) {
           await LocalStorage.removeItem(key);
         }
       }
-      
+
       Logger.info("All caches cleared");
     } catch (error) {
       Logger.error("Failed to clear caches:", error);
-      throw new HarmonyError(
-        "Failed to clear caches",
-        ErrorCategory.STORAGE,
-        error as Error
-      );
+      throw new HarmonyError("Failed to clear caches", ErrorCategory.STORAGE, error as Error);
     }
   }
 }

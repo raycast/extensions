@@ -2,7 +2,7 @@ import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../.
 import { HarmonyError, ErrorCategory } from "../../types/errors";
 import { Logger } from "../logger";
 import getHarmonyClient from "@harmonyhub/client-ws";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 // Cache constants
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
@@ -34,10 +34,6 @@ interface HarmonyHubActivity {
   id: string;
   label: string;
   type: string;
-}
-
-interface HarmonyHubCurrentActivity {
-  id: string;
 }
 
 interface HarmonyCommandBody {
@@ -98,11 +94,11 @@ export class HarmonyClient {
 
     try {
       Logger.info(`Connecting to hub ${this.hub.name} (${this.hub.ip})`);
-      
+
       // Create client with remoteId if available for faster connection
       this.client = await getHarmonyClient(this.hub.ip);
       this.isConnected = true;
-      
+
       Logger.info(`Connected to hub ${this.hub.name}`);
 
       // Setup disconnect handler
@@ -110,13 +106,12 @@ export class HarmonyClient {
         Logger.warn(`Disconnected from hub ${this.hub.name}`);
         this.isConnected = false;
       });
-
     } catch (err) {
       this.isConnected = false;
       throw new HarmonyError(
         `Failed to connect to hub ${this.hub.name}`,
         ErrorCategory.CONNECTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -139,17 +134,17 @@ export class HarmonyClient {
 
       // Get from hub if not cached
       const devices = await this.getDevicesFromHub();
-      const mappedDevices = devices.map(device => ({
+      const mappedDevices = devices.map((device) => ({
         id: device.id,
         name: device.name,
         type: device.type,
-        commands: device.commands.map(func => ({
+        commands: device.commands.map((func) => ({
           id: func.name,
           name: func.name,
           label: func.label,
           deviceId: device.id,
-          group: func.action?.command?.type || "IRCommand"
-        }))
+          group: func.action?.command?.type || "IRCommand",
+        })),
       })) as HarmonyDevice[];
 
       // Cache the new devices along with current activities
@@ -160,41 +155,39 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get devices",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
 
   private async getDevicesFromHub(): Promise<HarmonyHubConfig["device"]> {
     if (!this.client) {
-      throw new HarmonyError(
-        "Client not initialized",
-        ErrorCategory.CONNECTION
-      );
+      throw new HarmonyError("Client not initialized", ErrorCategory.CONNECTION);
     }
 
     try {
-      const rawConfig = await this.client.getAvailableCommands() as RawConfig;
-      const devices = rawConfig.device?.map((d: RawDevice) => ({
-        id: d.id || "",
-        name: d.label || d.name || "",
-        type: d.type || "",
-        commands: (d.controlPort?.commandGroup || []).flatMap((group: CommandGroup) => 
-          (group.function || []).map((fn: CommandFunction) => ({
-            id: fn.name,
-            name: fn.name,
-            label: fn.label || fn.name,
-            action: fn.action
-          }))
-        )
-      })) || [];
+      const rawConfig = (await this.client.getAvailableCommands()) as RawConfig;
+      const devices =
+        rawConfig.device?.map((d: RawDevice) => ({
+          id: d.id || "",
+          name: d.label || d.name || "",
+          type: d.type || "",
+          commands: (d.controlPort?.commandGroup || []).flatMap((group: CommandGroup) =>
+            (group.function || []).map((fn: CommandFunction) => ({
+              id: fn.name,
+              name: fn.name,
+              label: fn.label || fn.name,
+              action: fn.action,
+            })),
+          ),
+        })) || [];
 
       return devices;
     } catch (err) {
       throw new HarmonyError(
         "Failed to get devices from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }
@@ -226,7 +219,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get activities",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -236,17 +229,14 @@ export class HarmonyClient {
    */
   private async getActivitiesFromHub(): Promise<HarmonyActivity[]> {
     if (!this.client) {
-      throw new HarmonyError(
-        "Client not initialized",
-        ErrorCategory.CONNECTION
-      );
+      throw new HarmonyError("Client not initialized", ErrorCategory.CONNECTION);
     }
-    const activities = await this.client.getActivities() as HarmonyHubActivity[];
-    return activities.map(activity => ({
+    const activities = (await this.client.getActivities()) as HarmonyHubActivity[];
+    return activities.map((activity) => ({
       id: activity.id,
       name: activity.label,
       type: activity.type,
-      isCurrent: false // Will be updated by current activity check
+      isCurrent: false, // Will be updated by current activity check
     }));
   }
 
@@ -269,7 +259,7 @@ export class HarmonyClient {
 
       // Get all activities to find the current one
       const activities = await this.getActivities();
-      const activity = activities.find(a => a.id === currentActivityId);
+      const activity = activities.find((a) => a.id === currentActivityId);
 
       if (!activity) {
         return null;
@@ -277,13 +267,13 @@ export class HarmonyClient {
 
       return {
         ...activity,
-        isCurrent: true
+        isCurrent: true,
       };
     } catch (err) {
       throw new HarmonyError(
         "Failed to get current activity",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }
@@ -298,7 +288,7 @@ export class HarmonyClient {
 
     try {
       Logger.debug("Starting activity", { activityId });
-      
+
       await this.client.startActivity(activityId);
 
       // Wait for activity to start and verify
@@ -311,7 +301,7 @@ export class HarmonyClient {
           Logger.debug("Activity started successfully", { activityId });
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       throw new Error("Timeout waiting for activity to start");
@@ -319,7 +309,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         `Failed to start activity ${activityId}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -334,7 +324,7 @@ export class HarmonyClient {
 
     try {
       Logger.debug("Stopping current activity");
-      
+
       const currentActivity = await this.getCurrentActivity();
       if (!currentActivity) {
         Logger.debug("No activity running");
@@ -353,7 +343,7 @@ export class HarmonyClient {
           Logger.debug("Activity stopped successfully");
           return;
         }
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       throw new Error("Timeout waiting for activity to stop");
@@ -361,7 +351,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to stop activity",
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -377,7 +367,7 @@ export class HarmonyClient {
       }
 
       const config = JSON.parse(cached) as CachedConfig;
-      
+
       // Check if cache is expired
       if (Date.now() - config.timestamp > CACHE_EXPIRY) {
         Logger.info("Config cache expired for hub", this.hub.name);
@@ -400,7 +390,7 @@ export class HarmonyClient {
       const cache: CachedConfig = {
         devices,
         activities,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       await LocalStorage.setItem(this.cacheKey, JSON.stringify(cache));
       Logger.info("Cached config for hub", this.hub.name);
@@ -422,11 +412,11 @@ export class HarmonyClient {
       const holdTime = parseInt(preferences.commandHoldTime || "100", 10);
 
       Logger.debug("Sending command to hub", { command });
-      
+
       const commandBody: HarmonyCommandBody = {
         command: command.id,
         deviceId: command.deviceId,
-        type: command.group || "IRCommand"
+        type: command.group || "IRCommand",
       };
 
       Logger.debug("Command body:", commandBody);
@@ -435,16 +425,15 @@ export class HarmonyClient {
       await this.client.send("holdAction", commandBody);
 
       // Wait for hold time
-      await new Promise(resolve => setTimeout(resolve, holdTime));
+      await new Promise((resolve) => setTimeout(resolve, holdTime));
 
       // Send release action
       await this.client.send("releaseAction", commandBody);
-
     } catch (err) {
       throw new HarmonyError(
         `Failed to execute command ${command.name}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined
+        err instanceof Error ? err : undefined,
       );
     }
   }
@@ -463,7 +452,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to disconnect from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err))
+        err instanceof Error ? err : new Error(String(err)),
       );
     }
   }

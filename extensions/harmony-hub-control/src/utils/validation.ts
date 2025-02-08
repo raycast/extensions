@@ -1,5 +1,6 @@
-import { HarmonyError, ErrorCategory, RetryConfig, TimeoutConfig, ErrorSeverity } from "../types/errors";
-import { HarmonyHub, HarmonyDevice, HarmonyActivity, CommandRequest, HarmonyCommand } from "../types/harmony";
+import { HarmonyError, ErrorCategory } from "../types/errors";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
+import { RetryConfig, TimeoutConfig } from "../types/config";
 import { Logger } from "../services/logger";
 
 /**
@@ -30,7 +31,7 @@ export function isValidIpAddress(value: unknown): value is string {
   if (!isNonEmptyString(value)) return false;
   const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
   if (!ipv4Regex.test(value)) return false;
-  return value.split(".").every(num => {
+  return value.split(".").every((num) => {
     const n = parseInt(num, 10);
     return n >= 0 && n <= 255;
   });
@@ -56,7 +57,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_ID"
+      "INVALID_HUB_ID",
     );
   }
 
@@ -67,7 +68,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_NAME"
+      "INVALID_HUB_NAME",
     );
   }
 
@@ -78,7 +79,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_IP"
+      "INVALID_HUB_IP",
     );
   }
 
@@ -89,7 +90,7 @@ export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is Harm
       undefined,
       undefined,
       false,
-      "INVALID_HUB_PORT"
+      "INVALID_HUB_PORT",
     );
   }
 
@@ -107,7 +108,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_ID"
+      "INVALID_DEVICE_ID",
     );
   }
 
@@ -118,7 +119,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_NAME"
+      "INVALID_DEVICE_NAME",
     );
   }
 
@@ -129,7 +130,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_DEVICE_TYPE"
+      "INVALID_DEVICE_TYPE",
     );
   }
 
@@ -140,11 +141,11 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
       undefined,
       undefined,
       false,
-      "INVALID_COMMANDS_ARRAY"
+      "INVALID_COMMANDS_ARRAY",
     );
   }
 
-  device.commands.forEach((command, index) => {
+  device.commands.forEach((command: HarmonyCommand, index: number) => {
     if (!isNonEmptyString(command.id)) {
       throw new HarmonyError(
         `Invalid command ID at index ${index}`,
@@ -152,7 +153,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_ID"
+        "INVALID_COMMAND_ID",
       );
     }
 
@@ -163,7 +164,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_NAME"
+        "INVALID_COMMAND_NAME",
       );
     }
 
@@ -174,7 +175,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_DEVICE_ID"
+        "INVALID_COMMAND_DEVICE_ID",
       );
     }
 
@@ -185,7 +186,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
         undefined,
         undefined,
         false,
-        "INVALID_COMMAND_GROUP"
+        "INVALID_COMMAND_GROUP",
       );
     }
   });
@@ -204,7 +205,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_ID"
+      "INVALID_ACTIVITY_ID",
     );
   }
 
@@ -215,7 +216,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_NAME"
+      "INVALID_ACTIVITY_NAME",
     );
   }
 
@@ -226,7 +227,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_TYPE"
+      "INVALID_ACTIVITY_TYPE",
     );
   }
 
@@ -237,7 +238,7 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
       undefined,
       undefined,
       false,
-      "INVALID_ACTIVITY_STATUS"
+      "INVALID_ACTIVITY_STATUS",
     );
   }
 
@@ -249,24 +250,15 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
  */
 export function validateCommandRequest(request: Partial<CommandRequest>): asserts request is CommandRequest {
   if (!request) {
-    throw new HarmonyError(
-      "Command request is required",
-      ErrorCategory.VALIDATION
-    );
+    throw new HarmonyError("Command request is required", ErrorCategory.VALIDATION);
   }
 
   if (!request.command || !isNonEmptyString(request.command.deviceId)) {
-    throw new HarmonyError(
-      "Command request must include deviceId",
-      ErrorCategory.VALIDATION
-    );
+    throw new HarmonyError("Command request must include deviceId", ErrorCategory.VALIDATION);
   }
 
   if (!isNonEmptyString(request.command.name)) {
-    throw new HarmonyError(
-      "Command request must include command name",
-      ErrorCategory.VALIDATION
-    );
+    throw new HarmonyError("Command request must include command name", ErrorCategory.VALIDATION);
   }
 }
 
@@ -281,7 +273,7 @@ export function validateRetryConfig(config: Partial<RetryConfig>): asserts confi
       undefined,
       undefined,
       false,
-      "INVALID_RETRY_MAX_ATTEMPTS"
+      "INVALID_RETRY_MAX_ATTEMPTS",
     );
   }
 
@@ -292,7 +284,7 @@ export function validateRetryConfig(config: Partial<RetryConfig>): asserts confi
       undefined,
       undefined,
       false,
-      "INVALID_RETRY_BASE_DELAY"
+      "INVALID_RETRY_BASE_DELAY",
     );
   }
 
@@ -303,7 +295,7 @@ export function validateRetryConfig(config: Partial<RetryConfig>): asserts confi
       undefined,
       undefined,
       false,
-      "INVALID_RETRY_MAX_DELAY"
+      "INVALID_RETRY_MAX_DELAY",
     );
   }
 
@@ -314,7 +306,7 @@ export function validateRetryConfig(config: Partial<RetryConfig>): asserts confi
       undefined,
       undefined,
       false,
-      "INVALID_RETRY_BACKOFF"
+      "INVALID_RETRY_BACKOFF",
     );
   }
 
@@ -325,7 +317,7 @@ export function validateRetryConfig(config: Partial<RetryConfig>): asserts confi
       undefined,
       undefined,
       false,
-      "INVALID_RETRY_DURATION"
+      "INVALID_RETRY_DURATION",
     );
   }
 
@@ -343,7 +335,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_CONNECTION"
+      "INVALID_TIMEOUT_CONNECTION",
     );
   }
 
@@ -354,7 +346,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_MESSAGE"
+      "INVALID_TIMEOUT_MESSAGE",
     );
   }
 
@@ -365,7 +357,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_ACTIVITY"
+      "INVALID_TIMEOUT_ACTIVITY",
     );
   }
 
@@ -376,7 +368,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_COMMAND"
+      "INVALID_TIMEOUT_COMMAND",
     );
   }
 
@@ -387,7 +379,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_DISCOVERY"
+      "INVALID_TIMEOUT_DISCOVERY",
     );
   }
 
@@ -398,7 +390,7 @@ export function validateTimeoutConfig(config: Partial<TimeoutConfig>): asserts c
       undefined,
       undefined,
       false,
-      "INVALID_TIMEOUT_CACHE"
+      "INVALID_TIMEOUT_CACHE",
     );
   }
 
@@ -416,7 +408,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_ID"
+      "INVALID_COMMAND_ID",
     );
   }
 
@@ -427,7 +419,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_NAME"
+      "INVALID_COMMAND_NAME",
     );
   }
 
@@ -438,7 +430,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_DEVICE_ID"
+      "INVALID_COMMAND_DEVICE_ID",
     );
   }
 
@@ -449,7 +441,7 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
       undefined,
       undefined,
       false,
-      "INVALID_COMMAND_GROUP"
+      "INVALID_COMMAND_GROUP",
     );
   }
 

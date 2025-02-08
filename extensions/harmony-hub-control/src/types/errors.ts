@@ -49,7 +49,7 @@ export enum ErrorCategory {
   /** Activity stop errors */
   ACTIVITY_STOP = "activity_stop",
   /** Unknown or unclassified errors */
-  UNKNOWN = "unknown"
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -63,7 +63,7 @@ export enum ErrorSeverity {
   /** Serious issues that affect core functionality */
   ERROR = "error",
   /** Critical issues that prevent the extension from working */
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 /**
@@ -81,7 +81,7 @@ export enum ErrorRecoveryAction {
   /** Restart extension */
   RESTART = "restart",
   /** Manual user intervention required */
-  MANUAL = "manual"
+  MANUAL = "manual",
 }
 
 /**
@@ -188,7 +188,7 @@ export class HarmonyError extends Error {
     code?: string,
     details?: Record<string, unknown>,
     severity: ErrorSeverity = ErrorSeverity.ERROR,
-    recoveryStrategies?: ErrorRecoveryStrategy[]
+    recoveryStrategies?: ErrorRecoveryStrategy[],
   ) {
     super(message);
     this.name = "HarmonyError";
@@ -221,7 +221,7 @@ export class HarmonyError extends Error {
       this.code,
       this.details,
       this.severity,
-      this.recoveryStrategies
+      this.recoveryStrategies,
     );
   }
 
@@ -238,7 +238,7 @@ export class HarmonyError extends Error {
       this.code,
       this.details,
       this.severity,
-      strategies
+      strategies,
     );
   }
 
@@ -262,7 +262,7 @@ export class HarmonyError extends Error {
     const nonRetryableCategories = config.nonRetryableCategories || [
       ErrorCategory.VALIDATION,
       ErrorCategory.AUTHENTICATION,
-      ErrorCategory.PERMISSION
+      ErrorCategory.PERMISSION,
     ];
     if (nonRetryableCategories.includes(this.category)) return false;
 
@@ -286,10 +286,7 @@ export class HarmonyError extends Error {
     if (!useExponentialBackoff) return baseDelay;
 
     // Calculate delay with exponential backoff
-    const delay = Math.min(
-      baseDelay * Math.pow(2, attempts),
-      maxDelay
-    );
+    const delay = Math.min(baseDelay * Math.pow(2, attempts), maxDelay);
 
     // Add jitter to prevent thundering herd
     return delay * (0.5 + Math.random());
@@ -304,9 +301,11 @@ export class HarmonyError extends Error {
     }
 
     // Get highest priority strategy that hasn't exceeded max attempts
-    return this.recoveryStrategies
-      .sort((a, b) => a.priority - b.priority)
-      .find(s => !this.retryContext || this.retryContext.attempts < s.maxAttempts) || null;
+    return (
+      this.recoveryStrategies
+        .sort((a, b) => a.priority - b.priority)
+        .find((s) => !this.retryContext || this.retryContext.attempts < s.maxAttempts) || null
+    );
   }
 
   /**
@@ -321,7 +320,7 @@ export class HarmonyError extends Error {
           priority: 1,
           automatic: true,
           maxAttempts: 3,
-          delayBetweenAttempts: 1000
+          delayBetweenAttempts: 1000,
         };
       case ErrorCategory.CACHE:
         return {
@@ -329,7 +328,7 @@ export class HarmonyError extends Error {
           priority: 1,
           automatic: true,
           maxAttempts: 2,
-          delayBetweenAttempts: 500
+          delayBetweenAttempts: 500,
         };
       case ErrorCategory.CONFIG:
         return {
@@ -337,7 +336,7 @@ export class HarmonyError extends Error {
           priority: 2,
           automatic: false,
           maxAttempts: 1,
-          delayBetweenAttempts: 0
+          delayBetweenAttempts: 0,
         };
       case ErrorCategory.ACTIVITY_START:
       case ErrorCategory.ACTIVITY_STOP:
@@ -346,7 +345,7 @@ export class HarmonyError extends Error {
           priority: 1,
           automatic: true,
           maxAttempts: 2,
-          delayBetweenAttempts: 500
+          delayBetweenAttempts: 500,
         };
       default:
         return null;

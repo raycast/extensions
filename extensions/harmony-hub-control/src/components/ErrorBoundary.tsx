@@ -1,8 +1,4 @@
 import React from "react";
-import { List, Icon } from "@raycast/api";
-import { Logger } from "../services/logger";
-import { ErrorCategory } from "../types/errors";
-import { FeedbackState, ErrorStates } from "./FeedbackState";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -26,22 +22,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return { error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    Logger.error("Component error caught by boundary", {
-      error,
-      componentStack: errorInfo.componentStack,
-      category: ErrorCategory.UI,
-    });
-  }
+  componentDidCatch(): void {}
 
   render(): React.ReactNode {
     if (this.state.error) {
-      return (
-        <FeedbackState
-          {...ErrorStates.GENERAL_ERROR}
-          description={`An unexpected error occurred: ${this.state.error.message}`}
-        />
-      );
+      return <div>An unexpected error occurred: {this.state.error.message}</div>;
     }
 
     return this.props.children;

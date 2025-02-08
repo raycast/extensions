@@ -5,7 +5,7 @@ export class LocalStorage {
   public static async getItem(key: string): Promise<string | null> {
     try {
       const value = await RaycastLocalStorage.getItem(key);
-      return typeof value === 'string' ? value : null;
+      return typeof value === "string" ? value : null;
     } catch (error) {
       Logger.error(`Failed to get item from storage: ${key}`, error);
       return null;

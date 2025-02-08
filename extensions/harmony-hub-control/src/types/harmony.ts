@@ -112,7 +112,7 @@ export enum HarmonyStage {
   /** Connected and ready */
   CONNECTED = "connected",
   /** Error state */
-  ERROR = "error"
+  ERROR = "error",
 }
 
 /**
@@ -160,10 +160,8 @@ export enum ErrorCategory {
   /** State management errors */
   STATE = "state",
   /** Data retrieval or parsing errors */
-  DATA = "data"
+  DATA = "data",
 }
-
-import { WebSocket } from "ws";
 
 /**
  * WebSocket message format from Harmony Hub
@@ -209,7 +207,7 @@ export enum CommandStatus {
   /** Command has failed */
   FAILED = "FAILED",
   /** Command was cancelled */
-  CANCELLED = "CANCELLED"
+  CANCELLED = "CANCELLED",
 }
 
 /**

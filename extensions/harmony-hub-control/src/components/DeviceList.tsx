@@ -25,51 +25,55 @@ export function DeviceList({ deviceType }: DeviceListProps): JSX.Element {
   // Memoize filtered devices to prevent unnecessary recalculations
   const filteredDevices = useMemo(() => {
     let result = devices;
-    
+
     if (deviceType) {
-      result = result.filter(device => device.type === deviceType);
+      result = result.filter((device) => device.type === deviceType);
     }
-    
+
     if (searchText) {
       const searchLower = searchText.toLowerCase();
-      result = result.filter(device => 
-        device.name.toLowerCase().includes(searchLower) ||
-        device.commands.some(cmd => cmd.label.toLowerCase().includes(searchLower))
+      result = result.filter(
+        (device) =>
+          device.name.toLowerCase().includes(searchLower) ||
+          device.commands.some((cmd) => cmd.label.toLowerCase().includes(searchLower)),
       );
     }
-    
+
     return result;
   }, [devices, deviceType, searchText]);
 
   // Memoize command handler to prevent recreation on each render
-  const handleCommand = useCallback(async (device: HarmonyDevice, command: HarmonyCommand) => {
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: `Sending command ${command.label} to ${device.name}`,
-      });
+  const handleCommand = useCallback(
+    async (device: HarmonyDevice, command: HarmonyCommand) => {
+      try {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: `Sending command ${command.label} to ${device.name}`,
+        });
 
-      await executeCommand({
-        id: command.id,
-        name: command.name,
-        label: command.label || command.name,
-        deviceId: device.id,
-        group: command.group || "IRCommand"
-      });
+        await executeCommand({
+          id: command.id,
+          name: command.name,
+          label: command.label || command.name,
+          deviceId: device.id,
+          group: command.group || "IRCommand",
+        });
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Command sent successfully",
-      });
-    } catch (error) {
-      Logger.error("Failed to execute command", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to execute command",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }, [executeCommand]);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Command sent successfully",
+        });
+      } catch (error) {
+        Logger.error("Failed to execute command", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to execute command",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    },
+    [executeCommand],
+  );
 
   if (!selectedHub) {
     return <FeedbackState {...ErrorStates.NO_HUB_SELECTED} />;
@@ -100,11 +104,7 @@ export function DeviceList({ deviceType }: DeviceListProps): JSX.Element {
           actions={
             <ActionPanel>
               {device.commands.map((command) => (
-                <Action
-                  key={command.id}
-                  title={command.label}
-                  onAction={() => handleCommand(device, command)}
-                />
+                <Action key={command.id} title={command.label} onAction={() => handleCommand(device, command)} />
               ))}
             </ActionPanel>
           }

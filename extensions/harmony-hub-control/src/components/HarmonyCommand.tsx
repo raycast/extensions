@@ -1,11 +1,10 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useHarmony } from "../hooks/useHarmony";
 import { HarmonyDevice, HarmonyActivity, HarmonyHub, HarmonyStage } from "../types/harmony";
 import type { HarmonyCommand } from "../types/harmony";
 import { Logger } from "../services/logger";
 import { FeedbackState } from "./FeedbackState";
-import { ErrorBoundary } from "./ErrorBoundary";
 import { Preferences } from "../types/preferences";
 
 /**
@@ -22,20 +21,17 @@ export function HarmonyCommand(): JSX.Element {
     error,
     loadingState,
     connect,
-    disconnect,
     refresh,
     executeCommand,
     clearCache,
     startActivity,
-    stopActivity
+    stopActivity,
   } = useHarmony();
 
   const [searchText, setSearchText] = useState("");
   const preferences = getPreferenceValues<Preferences>();
   const defaultView = preferences.defaultView || "devices";
-  const [view, setView] = useState<"hubs" | "activities" | "devices" | "commands">(
-    selectedHub ? defaultView : "hubs"
-  );
+  const [view, setView] = useState<"hubs" | "activities" | "devices" | "commands">(selectedHub ? defaultView : "hubs");
   const [selectedDevice, setSelectedDevice] = useState<HarmonyDevice | null>(null);
 
   // Start discovery on mount
@@ -45,7 +41,7 @@ export function HarmonyCommand(): JSX.Element {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to discover hubs",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     });
   }, [refresh]);
@@ -58,7 +54,7 @@ export function HarmonyCommand(): JSX.Element {
   }, [selectedHub, view]);
 
   // Get icon for command based on its label
-  const getCommandIcon = useCallback((label: string): Icon => {
+  const getCommandIcon = (label: string): Icon => {
     const lowerLabel = label.toLowerCase();
     if (lowerLabel.includes("power")) return Icon.Power;
     if (lowerLabel.includes("volume")) return Icon.SpeakerHigh;
@@ -71,33 +67,26 @@ export function HarmonyCommand(): JSX.Element {
     if (lowerLabel.includes("input")) return Icon.Link;
     if (lowerLabel.includes("menu")) return Icon.List;
     return Icon.Circle;
-  }, []);
+  };
 
   // Filter and sort devices based on search
-  const filteredDevices = useMemo(() => {
-    if (!devices) return [];
-    return devices
-      .filter(device => 
-        device.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        device.commands.some(cmd => 
-          cmd.name.toLowerCase().includes(searchText.toLowerCase())
-        )
+  const filteredDevices =
+    devices
+      ?.filter(
+        (device) =>
+          device.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          device.commands.some((cmd) => cmd.name.toLowerCase().includes(searchText.toLowerCase())),
       )
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [devices, searchText]);
+      .sort((a, b) => a.name.localeCompare(b.name)) || [];
 
   // Filter and sort activities based on search
-  const filteredActivities = useMemo(() => {
-    if (!activities) return [];
-    return activities
-      .filter(activity =>
-        activity.name.toLowerCase().includes(searchText.toLowerCase())
-      )
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [activities, searchText]);
+  const filteredActivities =
+    activities
+      ?.filter((activity) => activity.name.toLowerCase().includes(searchText.toLowerCase()))
+      .sort((a, b) => a.name.localeCompare(b.name)) || [];
 
   // Handle hub selection
-  const handleHubSelect = useCallback(async (hub: HarmonyHub) => {
+  const handleHubSelect = async (hub: HarmonyHub) => {
     try {
       await connect(hub);
       setView(defaultView);
@@ -107,52 +96,58 @@ export function HarmonyCommand(): JSX.Element {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to connect",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [connect, defaultView]);
+  };
 
   // Handle command execution
-  const handleCommand = useCallback(async (command: { name: string; deviceId: string; id: string; group?: string; label?: string }) => {
+  const handleCommand = async (command: {
+    name: string;
+    deviceId: string;
+    id: string;
+    group?: string;
+    label?: string;
+  }) => {
     try {
       Logger.debug("Executing command:", {
         command,
         device: selectedDevice?.name,
-        deviceId: selectedDevice?.id
+        deviceId: selectedDevice?.id,
       });
       await executeCommand({
         name: command.name,
         deviceId: command.deviceId,
         id: command.id,
         label: command.label || command.name,
-        group: command.group || "IRCommand"
+        group: command.group || "IRCommand",
       });
       showToast({
         style: Toast.Style.Success,
         title: "Command sent",
-        message: command.name
+        message: command.name,
       });
     } catch (error) {
       Logger.error("Failed to execute command:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Command failed",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [executeCommand, selectedDevice]);
+  };
 
-  const handleActivity = useCallback(async (activity: HarmonyActivity) => {
+  const handleActivity = async (activity: HarmonyActivity) => {
     try {
       const isCurrentActivity = currentActivity?.id === activity.id;
-      
+
       if (isCurrentActivity) {
         Logger.debug("Stopping activity", { activityId: activity.id });
         await stopActivity();
         showToast({
           style: Toast.Style.Success,
           title: "Activity stopped",
-          message: activity.name
+          message: activity.name,
         });
       } else {
         Logger.debug("Starting activity", { activityId: activity.id });
@@ -160,7 +155,7 @@ export function HarmonyCommand(): JSX.Element {
         showToast({
           style: Toast.Style.Success,
           title: "Activity started",
-          message: activity.name
+          message: activity.name,
         });
       }
 
@@ -171,17 +166,13 @@ export function HarmonyCommand(): JSX.Element {
       showToast({
         style: Toast.Style.Failure,
         title: "Activity failed",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [currentActivity, startActivity, stopActivity, refresh]);
+  };
 
   if (error) {
-    return <FeedbackState 
-      error={error} 
-      onRetry={refresh}
-      title="Failed to load Harmony Hub"
-    />;
+    return <FeedbackState error={error} onRetry={refresh} title="Failed to load Harmony Hub" />;
   }
 
   useEffect(() => {
@@ -189,7 +180,7 @@ export function HarmonyCommand(): JSX.Element {
       view,
       deviceCount: filteredDevices.length,
       activityCount: filteredActivities.length,
-      loadingStage: loadingState.stage
+      loadingStage: loadingState.stage,
     });
   }, [view, filteredDevices.length, filteredActivities.length, loadingState.stage]);
 
@@ -225,10 +216,7 @@ export function HarmonyCommand(): JSX.Element {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Select Hub"
-                      onAction={() => handleHubSelect(hub)}
-                    />
+                    <Action title="Select Hub" onAction={() => handleHubSelect(hub)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
@@ -265,7 +253,7 @@ export function HarmonyCommand(): JSX.Element {
             value={view}
             onChange={(newView) => {
               setView(newView as "devices" | "activities" | "commands");
-              setSelectedDevice(null);  // Reset selected device when changing views
+              setSelectedDevice(null); // Reset selected device when changing views
             }}
           >
             <List.Dropdown.Item key="devices" title="Devices" value="devices" />
@@ -278,11 +266,7 @@ export function HarmonyCommand(): JSX.Element {
           // Show commands for selected device
           <List.Section key={selectedDevice.id} title={`${selectedDevice.name} Commands`}>
             {selectedDevice.commands
-              .filter((command) =>
-                searchText
-                  ? command.name.toLowerCase().includes(searchText.toLowerCase())
-                  : true
-              )
+              .filter((command) => (searchText ? command.name.toLowerCase().includes(searchText.toLowerCase()) : true))
               .map((command) => {
                 const itemKey = `${selectedDevice.id}-${command.id}`;
                 return (
@@ -294,12 +278,14 @@ export function HarmonyCommand(): JSX.Element {
                       <ActionPanel>
                         <Action
                           title="Send Command"
-                          onAction={() => handleCommand({
-                            name: command.name,
-                            deviceId: selectedDevice.id,
-                            id: command.id,
-                            group: command.group || "Default"
-                          })}
+                          onAction={() =>
+                            handleCommand({
+                              name: command.name,
+                              deviceId: selectedDevice.id,
+                              id: command.id,
+                              group: command.group || "Default",
+                            })
+                          }
                         />
                         <Action
                           title="Back to Devices"
@@ -324,10 +310,7 @@ export function HarmonyCommand(): JSX.Element {
                 icon={Icon.Devices}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="View Commands"
-                      onAction={() => setSelectedDevice(device)}
-                    />
+                    <Action title="View Commands" onAction={() => setSelectedDevice(device)} />
                   </ActionPanel>
                 }
               />
@@ -351,7 +334,7 @@ export function HarmonyCommand(): JSX.Element {
           HarmonyStage.STARTING_ACTIVITY,
           HarmonyStage.STOPPING_ACTIVITY,
           HarmonyStage.EXECUTING_COMMAND,
-          HarmonyStage.REFRESHING
+          HarmonyStage.REFRESHING,
         ].includes(loadingState.stage)}
       >
         {devices.map((device) => {
@@ -360,7 +343,7 @@ export function HarmonyCommand(): JSX.Element {
             searchText
               ? command.name.toLowerCase().includes(searchText.toLowerCase()) ||
                 device.name.toLowerCase().includes(searchText.toLowerCase())
-              : true
+              : true,
           );
 
           // Skip devices with no matching commands when searching
@@ -379,12 +362,14 @@ export function HarmonyCommand(): JSX.Element {
                     <ActionPanel>
                       <Action
                         title="Execute Command"
-                        onAction={() => handleCommand({
-                          name: command.name,
-                          deviceId: device.id,
-                          id: command.id,
-                          group: command.group || "Default"
-                        })}
+                        onAction={() =>
+                          handleCommand({
+                            name: command.name,
+                            deviceId: device.id,
+                            id: command.id,
+                            group: command.group || "Default",
+                          })
+                        }
                       />
                     </ActionPanel>
                   }
@@ -398,10 +383,7 @@ export function HarmonyCommand(): JSX.Element {
   }
 
   return (
-    <List
-      searchBarPlaceholder="Search activities..."
-      onSearchTextChange={setSearchText}
-    >
+    <List searchBarPlaceholder="Search activities..." onSearchTextChange={setSearchText}>
       <List.Section key="activities" title="Activities">
         {filteredActivities.map((activity) => (
           <List.Item

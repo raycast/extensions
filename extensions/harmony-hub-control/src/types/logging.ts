@@ -10,7 +10,7 @@ export enum LogLevel {
   /** Warning level for potentially problematic situations */
   WARN = 2,
   /** Error level for error conditions */
-  ERROR = 3
+  ERROR = 3,
 }
 
 /**

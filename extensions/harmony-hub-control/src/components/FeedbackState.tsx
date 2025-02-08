@@ -66,14 +66,14 @@ function getRecoveryActions(
     onReconnect?: () => void;
     onClearCache?: () => void;
     onResetConfig?: () => void;
-  }
+  },
 ): React.ReactNode {
   const strategy = error.getRecoveryStrategy();
   if (!strategy) return null;
 
   const actions: React.ReactNode[] = [];
-  
-  strategy.actions.forEach(action => {
+
+  strategy.actions.forEach((action) => {
     switch (action) {
       case ErrorRecoveryAction.RETRY:
         if (callbacks.onRetry) {
@@ -86,7 +86,7 @@ function getRecoveryActions(
                 Logger.debug("Retrying action");
                 callbacks.onRetry?.();
               }}
-            />
+            />,
           );
         }
         break;
@@ -101,7 +101,7 @@ function getRecoveryActions(
                 Logger.debug("Reconnecting to hub");
                 callbacks.onReconnect?.();
               }}
-            />
+            />,
           );
         }
         break;
@@ -116,7 +116,7 @@ function getRecoveryActions(
                 Logger.debug("Clearing cache");
                 callbacks.onClearCache?.();
               }}
-            />
+            />,
           );
         }
         break;
@@ -131,7 +131,7 @@ function getRecoveryActions(
                 Logger.debug("Resetting configuration");
                 callbacks.onResetConfig?.();
               }}
-            />
+            />,
           );
         }
         break;
@@ -140,11 +140,7 @@ function getRecoveryActions(
 
   if (actions.length === 0) return null;
 
-  return (
-    <ActionPanel>
-      {actions}
-    </ActionPanel>
-  );
+  return <ActionPanel>{actions}</ActionPanel>;
 }
 
 /**
@@ -152,7 +148,7 @@ function getRecoveryActions(
  */
 function getErrorMessage(error: HarmonyError, description?: string): string {
   const messages: string[] = [];
-  
+
   if (description) {
     messages.push(description);
   }
@@ -185,34 +181,36 @@ function getErrorMessage(error: HarmonyError, description?: string): string {
  * />
  * ```
  */
-export function FeedbackState({ 
-  title, 
-  description, 
-  icon, 
-  color = Color.PrimaryText, 
+export function FeedbackState({
+  title,
+  description,
+  icon,
+  color = Color.PrimaryText,
   actions,
   error,
   onRetry,
   onReconnect,
   onClearCache,
-  onResetConfig
+  onResetConfig,
 }: FeedbackStateProps) {
   // Get error display properties
   const errorDisplay = error ? getErrorDisplay(error) : undefined;
-  
+
   // Use provided icon/color or error-based ones
-  const iconSource = isRaycastIcon(icon) ? icon : (icon?.source || errorDisplay?.icon || Icon.Circle);
+  const iconSource = isRaycastIcon(icon) ? icon : icon?.source || errorDisplay?.icon || Icon.Circle;
   const iconColor = error ? errorDisplay?.color : color;
-  
+
   // Get error message and recovery actions
   const finalDescription = error ? getErrorMessage(error, description) : description;
-  const recoveryActions = error ? getRecoveryActions(error, {
-    onRetry,
-    onReconnect,
-    onClearCache,
-    onResetConfig
-  }) : actions;
-  
+  const recoveryActions = error
+    ? getRecoveryActions(error, {
+        onRetry,
+        onReconnect,
+        onClearCache,
+        onResetConfig,
+      })
+    : actions;
+
   return (
     <List>
       <List.EmptyView
@@ -253,7 +251,7 @@ export const LoadingStates = {
     title: "Executing Command...",
     description: "Sending command to your device",
     icon: Icon.Play,
-  }
+  },
 } as const;
 
 /**
@@ -291,7 +289,7 @@ export const ErrorStates = {
     description: "Please select a Harmony Hub to continue",
     icon: Icon.ExclamationMark,
     color: Color.Red,
-  }
+  },
 } as const;
 
 /**
