@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "harmony-control",
+  "version": "1.0.0",
+  "title": "Harmony Control",
+  "description": "Control your Logitech Harmony Hub devices",
+  "icon": "command-icon.png",
+  "author": "chad_walters",
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "control",
+      "title": "Control Harmony Hub",
+      "description": "Control your Harmony Hub devices and activities",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Choose whether to show Activities or Devices by default",
+      "default": "activities",
+      "data": [
+        {
+          "title": "Activities",
+          "value": "activities"
+        },
+        {
+          "title": "Devices",
+          "value": "devices"
+        }
+      ]
+    },
+    {
+      "name": "commandHoldTime",
+      "type": "textfield",
+      "required": false,
+      "title": "Command Hold Time",
+      "description": "Duration to hold a command in milliseconds",
+      "default": "100"
+    },
+    {
+      "name": "cacheDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Cache Duration",
+      "description": "Duration to cache hub data in seconds (default: 3600 = 1 hour)",
+      "default": "3600"
+    },
+    {
+      "name": "debugLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Logging",
+      "description": "Enable debug level logging",
+      "default": true
+    },
+    {
+      "name": "networkTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Network Timeout",
+      "description": "Network request timeout (in milliseconds)",
+      "default": "5000"
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Mode",
+      "description": "Enable debug logging",
+      "default": true,
+      "label": "Enable Debug Mode"
+    },
+    {
+      "name": "autoRetry",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Retry",
+      "description": "Automatically retry failed operations",
+      "default": true,
+      "label": "Enable Auto Retry"
+    },
+    {
+      "name": "maxRetries",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Retries",
+      "description": "Maximum number of retry attempts",
+      "default": "3"
+    }
+  ],
+  "dependencies": {
+    "@harmonyhub/client-ws": "^1.0.9",
+    "@harmonyhub/discover": "^1.0.9",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.10.1",
+    "node-machine-id": "^1.1.12",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0",
+    "xstate": "^5.19.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.5.14",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
