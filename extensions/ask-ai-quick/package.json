@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ask-ai-quick",
+  "title": "Ask AI Quick",
+  "description": "start ask ai agent quickly with deeplinks",
+  "icon": "icon.png",
+  "author": "SmithYe66",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.18.1",
+    "openai": "^4.53.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.25",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Your API Key",
+      "type": "password",
+      "required": true,
+      "title": "API Key"
+    },
+    {
+      "name": "model",
+      "description": "DeepSeek LLM to use for your commands",
+      "type": "textfield",
+      "required": true,
+      "default": "Doubao-1.5-pro-32k",
+      "title": "LLM Model"
+    },
+    {
+      "name": "baseurl",
+      "description": "Custom API endpoint for DeepSeek or ChatGPT, or more",
+      "type": "textfield",
+      "required": false,
+      "default": "https://ark.cn-beijing.volces.com/api/v3",
+      "title": "Custom API Endpoint"
+    },
+    {
+      "name": "priceinput",
+      "description": "Input price per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "0.0030",
+      "title": "Model Input Price"
+    },
+    {
+      "name": "priceoutput",
+      "description": "Output price per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "default": "0.0090",
+      "title": "Model Output Price"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ask AI",
+      "description": "Ask LLM directly with input argument",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate text to another language",
+      "mode": "view"
+    },
+    {
+      "name": "agent_list",
+      "title": "AI Agents",
+      "description": "List all custom AI Agents",
+      "mode": "view"
+    }
+  ]
+}
