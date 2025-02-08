@@ -83,8 +83,8 @@
     "fix-lint": "ray lint --fix",
     "fmt": "prettier '**/*' -wu && syncpack-format",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "pull": "npx @raycast/api@latest pull-contributions"
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
   },
   "title": "Trakt Manager"
 }
