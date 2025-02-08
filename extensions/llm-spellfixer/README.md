@@ -2,14 +2,6 @@
 
 A spell correction extension powered by AI language models. Process selected text through your chosen AI provider with fully customizable prompts and settings.
 
-## Screenshots
-
-![Extension](./metadata/1_extension_command.png)
-![Spell Correction in Progress](./metadata/2_correction_in_progress.png)
-![Spell Correction Result](./metadata/3_correction_result.png)
-![Configuration Options](./metadata/4_configuration_options.png)
-
-
 ## Features
 
 - 🤖 Multiple AI Providers: OpenAI, Claude, and Ollama support
