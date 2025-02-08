@@ -463,11 +463,7 @@ export class iCloudService {
   async logOut() {
     const data = { trustBrowser: true, allBrowsers: false };
     const headers = this.getAuthHeaders();
-    try {
-      await this.session.request("post", `${this.setupEndpoint}/logout`, { headers, data });
-    } catch (error) {
-      console.log("UHOH:", error);
-    }
+    await this.session.request("post", `${this.setupEndpoint}/logout`, { headers, data });
   }
 
   updateSessionData(key: string, value: string) {
