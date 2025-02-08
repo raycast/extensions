@@ -22,9 +22,18 @@
       "description": "Select the AI provider to use",
       "required": true,
       "data": [
-        { "title": "OpenAI", "value": "openai" },
-        { "title": "Claude", "value": "claude" },
-        { "title": "Ollama", "value": "ollama" }
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Claude",
+          "value": "claude"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        }
       ],
       "default": "openai"
     },
@@ -42,14 +51,38 @@
       "description": "Select the model type based on your chosen provider",
       "required": true,
       "data": [
-        { "title": "OpenAI - GPT-4o mini", "value": "gpt-4o-mini" },
-        { "title": "OpenAI - GPT-4o", "value": "gpt-4o" },
-        { "title": "OpenAI - GPT-3.5 Turbo", "value": "gpt-3.5-turbo" },
-        { "title": "Claude - 3 Opus", "value": "claude-3-opus-20240229" },
-        { "title": "Claude - 3 Sonnet", "value": "claude-3-5-sonnet-latest" },
-        { "title": "Claude - 3 Haiku", "value": "claude-3-5-haiku-latest" },
-        { "title": "Phi-4", "value": "phi4:latest" },
-        { "title": "Llama 3.2 3B", "value": "llama3.2:3b" }
+        {
+          "title": "OpenAI - GPT-4o mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "OpenAI - GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "OpenAI - GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "Claude - 3 Opus",
+          "value": "claude-3-opus-20240229"
+        },
+        {
+          "title": "Claude - 3 Sonnet",
+          "value": "claude-3-5-sonnet-latest"
+        },
+        {
+          "title": "Claude - 3 Haiku",
+          "value": "claude-3-5-haiku-latest"
+        },
+        {
+          "title": "Phi-4",
+          "value": "phi4:latest"
+        },
+        {
+          "title": "Llama 3.2 3B",
+          "value": "llama3.2:3b"
+        }
       ],
       "default": "gpt-4o-mini"
     },
@@ -59,14 +92,16 @@
       "title": "Custom Model",
       "description": "Enter a custom model identifier (e.g., 'mistral:latest' for Ollama) or leave as '-' to use the model selected above",
       "required": true,
-      "default": "-"
+      "default": "-",
+      "placeholder": "e.g., mistral:latest"
     },
     {
       "name": "systemPrompt",
       "type": "textfield",
       "title": "System Prompt",
       "description": "Customize the system prompt for spell correction. Leave empty to use the default prompt.",
-      "required": false
+      "required": false,
+      "placeholder": "Enter your custom prompt here"
     },
     {
       "name": "temperature",
@@ -74,7 +109,8 @@
       "title": "Temperature",
       "description": "Set the model's temperature (0-1). Lower values make output more focused and deterministic.",
       "required": false,
-      "default": "0"
+      "default": "0",
+      "placeholder": "0.0-1.0"
     },
     {
       "name": "maxTokens",
@@ -111,5 +147,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Other"
+  ],
+  "contributors": []
 }
