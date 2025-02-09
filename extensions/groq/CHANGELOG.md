@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-02-06
+
+- Removed depreacted `Gemma 7B 8k`
+
 ## [New Models] - 2025-01-27
 
 - Added `DeepSeek R1 70B`
