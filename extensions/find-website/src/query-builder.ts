@@ -78,3 +78,30 @@ export class OrionQueryBuilder extends QueryBuilder {
     return "host";
   }
 }
+
+export class SafariQueryBuilder extends QueryBuilder {
+  queryTopVisited(size: number, text: string) {
+    return `
+      select i.id, v.title as title, i.url as url, i.visit_count as visitCount
+      from history_visits v, history_items i
+      where v.history_item = i.id and (${this.filters(text)})
+      group by i.id, v.title, i.url, i.visit_count
+      order by visit_time desc
+      limit ${size}
+    `;
+  }
+
+  queryRecents(size: number, text: string) {
+    return `
+      select distinct i.id, v.title as title, i.url as url, v.visit_time as visitTime
+      from history_visits v, history_items i
+      where v.history_item = i.id and (${this.filters(text)})
+      order by visit_time desc
+      limit ${size}
+    `;
+  }
+
+  hostColumn() {
+    return "url";
+  }
+}

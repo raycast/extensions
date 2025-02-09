@@ -3,15 +3,21 @@ export interface Record {
   url: string;
   title: string;
   visitCount: number;
-  typedCount: number;
-  lastVisitTime: string;
+}
+
+export interface SafariRecord extends Record {
+  visitTime: number;
 }
 
 export interface OrionRecord extends Record {
+  lastVisitTime: string;
+  typedCount: number;
   host: string;
 }
 
 export interface ChromeRecord extends Record {
+  lastVisitTime: string;
+  typedCount: number;
   hidden: number;
 }
 

@@ -6,15 +6,25 @@ import {
   ChromeAdapterTopVisited,
   OrionAdapterRecents,
   OrionAdapterTopVisited,
+  SafariAdapterRecents,
+  SafariAdapterTopVisited,
 } from "./adapters";
-import { OrionQueryBuilder, QueryBuilder, ChromeQueryBuilder, ArcQueryBuilder } from "./query-builder";
-import { ChromeRecord, OrionRecord, Record, ArcRecord } from "./record";
+import {
+  OrionQueryBuilder,
+  QueryBuilder,
+  ChromeQueryBuilder,
+  ArcQueryBuilder,
+  SafariQueryBuilder,
+} from "./query-builder";
+import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
 
 interface Configurations {
   chrome: Factory<ChromeRecord>;
   orion: Factory<OrionRecord>;
+  arc: Factory<ArcRecord>;
+  safari: Factory<SafariRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -37,6 +47,7 @@ export class Factory<T extends Record> {
       chrome: new ChromeFactory(profile),
       orion: new OrionFactory(),
       arc: new ArcFactory(),
+      safari: new SafariFactory(),
     };
 
     return config[browser];
@@ -58,6 +69,24 @@ class OrionFactory extends Factory<OrionRecord> {
 
   getSrc(): string {
     return resolve(homedir(), "Library/Application Support/Orion/Defaults/history");
+  }
+}
+
+class SafariFactory extends Factory<SafariRecord> {
+  getQueryBuilder() {
+    return new SafariQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<SafariRecord> {
+    return new SafariAdapterRecents();
+  }
+
+  getTopVisitedAdapter(): Adapter<SafariRecord> {
+    return new SafariAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), "Library/Safari/History.db");
   }
 }
 

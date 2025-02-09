@@ -37,6 +37,10 @@
         {
           "title": "Arc",
           "value": "arc"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
         }
       ]
     },
