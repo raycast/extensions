@@ -91,7 +91,7 @@ class AdapterRecents<T extends Record> extends Adapter<T> {
   }
 
   getVisitTime(record: T): string {
-    return "";
+    return record.id.toString();
   }
 }
 
