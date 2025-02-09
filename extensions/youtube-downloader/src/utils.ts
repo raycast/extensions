@@ -1,15 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 
-export const preferences = getPreferenceValues<ExtensionPreferences>();
+export const preferences = getPreferenceValues();
 
-export type DownloadOptions = {
+export interface DownloadOptions {
   url: string;
-  format: string;
   copyToClipboard: boolean;
   startTime?: string;
   endTime?: string;
-};
+  format?: string;
+}
 
 export function formatHHMM(seconds: number) {
   const duration = intervalToDuration({ start: 0, end: seconds * 1000 });

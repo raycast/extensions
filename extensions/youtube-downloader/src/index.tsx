@@ -18,7 +18,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import nanoSpawn from "nano-spawn";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
+import { DownloadOptions, formatHHMM, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -26,23 +26,31 @@ export default function DownloadVideo() {
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
       url: "",
+      format: "best",
     },
     onSubmit: async (values) => {
       const options = ["-P", preferences.downloadPath];
 
       options.push("--ffmpeg-location", preferences.ffmpegPath);
-      options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
 
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
+      // Handle format selection
+      if (values.format === "best") {
+        options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
+      } else {
+        options.push("-f", values.format);
+      }
+
+      // Handle video trimming
+      if (!values.startTime && values.endTime) {
+        options.push("--download-sections");
+        options.push(`*0:00-${values.endTime}`);
+      } else if (values.startTime && !values.endTime) {
+        options.push("--download-sections");
+        options.push(`*${values.startTime}-*`);
+      } else if (values.startTime && values.endTime) {
+        options.push("--download-sections");
+        options.push(`*${values.startTime}-${values.endTime}`);
+      }
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -249,19 +257,29 @@ export default function DownloadVideo() {
         placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
         {...itemProps.url}
       />
-      {/*<Form.Separator />*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="Start Time"*/}
-      {/*  placeholder="00:00"*/}
-      {/*  {...itemProps.startTime}*/}
-      {/*/>*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="End Time"*/}
-      {/*  placeholder={video ? formatHHMM(video.duration) : "00:00"}*/}
-      {/*  {...itemProps.endTime}*/}
-      {/*/>*/}
+      <Form.Dropdown title="Format" {...itemProps.format}>
+        <Form.Dropdown.Item value="best" title="Best Quality" />
+        {video?.formats.map((format) => (
+          <Form.Dropdown.Item
+            key={format.format_id}
+            value={format.format_id}
+            title={`${format.resolution} - ${Math.round(format.filesize_approx / 1024 / 1024)}MB`}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Separator />
+      <Form.TextField
+        info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."
+        title="Start Time"
+        placeholder="00:00"
+        {...itemProps.startTime}
+      />
+      <Form.TextField
+        info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."
+        title="End Time"
+        placeholder={video ? formatHHMM(video.duration) : "00:00"}
+        {...itemProps.endTime}
+      />
     </Form>
   );
 }
