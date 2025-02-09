@@ -98,19 +98,18 @@ export default function ListFeatureFlags() {
               title={displayTitle}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section>
                   <Action.Push icon={Icon.Sidebar} title="Show Details" target={<FlagDetails flag={flag} />} />
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
                     title="Open in Browser"
                     url={getLDUrlWithEnvs(flag, [], undefined)}
                   />
+                  <Action.CopyToClipboard title="Copy Feature Flag Key" content={flag.key} />
                   <Action
                     icon={Icon.Switch}
                     title={`Show ${showName ? "Key" : "Name"}`}
                     onAction={() => toggleShowName()}
                   />
-                  </ActionPanel.Section>
                 </ActionPanel>
               }
               detail={
