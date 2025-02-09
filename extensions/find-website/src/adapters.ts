@@ -43,6 +43,8 @@ export class Adapter<T extends Record> {
   }
 
   getTitle(record: T): string {
+    if (record.title == null || record.title == undefined) return "";
+
     return record.title;
   }
 
