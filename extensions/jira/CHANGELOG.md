@@ -1,5 +1,8 @@
 # Jira Changelog
 
+## [Avatars now display with a circular mask] - 2025-02-08
+- To be consistent with avatars with initials, the profile pictures now show with a circular mask.
+
 ## [Add ability to configuring Git branch name format] - 2025-01-09
 - Implemented the ability to configure the Git branch name format in the extension settings.
 
