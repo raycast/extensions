@@ -1,5 +1,9 @@
 # HideMyEmail Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Made it possible to search items in list-emails command by email address or note
+
 ## [Update] - 2025-01-10
 
 - Improved user experience through caching and optimistic updates
