@@ -1,5 +1,9 @@
 # YAFW Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Remove unused `bun.lockb` file
+
 ## [Fix special characters handling in selected file's name] - 2024-05-20
 
 - Fixes #12439 : fix how `sanitizeFileName` method handles special characters

@@ -1,5 +1,9 @@
 # Twenty Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Cleanup unused `.github` files
+
 ## [Enhancements] - 2025-01-09
 
 - Added support for multi-select field type

@@ -1,5 +1,9 @@
 # IATA Code Decoder Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Cleanup unused `.github` files
+
 ## [v1.2.2] - 2023-03-28
 
 * Point to new API host for source data
