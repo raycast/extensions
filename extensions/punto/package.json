@@ -45,8 +45,22 @@
       "name": "ruLayoutName",
       "title": "Russian Layout",
       "description": "The name of the Russian layout",
-      "type": "textfield",
+      "type": "dropdown",
       "required": true,
+      "data": [
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Russian - PC",
+          "value": "RussianWin"
+        },
+        {
+          "title": "Russian - QWERTY",
+          "value": "Russian - Phonetic"
+        }
+      ],
       "default": "Russian"
     },
     {

@@ -23,7 +23,7 @@ export const sortByOptions: SortByOptions = [
   { label: "Default", icon: Icon.Document, value: "default" },
   { label: "Name", icon: Icon.Lowercase, value: "name" },
   { label: "Assignee", icon: Icon.Person, value: "assignee" },
-  { label: "Due Date", icon: Icon.List, value: "date" },
+  { label: "Date", icon: Icon.List, value: "date" },
   { label: "Priority", icon: Icon.LevelMeter, value: "priority" },
   { label: "Project", icon: Icon.Tag, value: "project" },
 ];

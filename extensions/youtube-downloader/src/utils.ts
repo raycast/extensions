@@ -1,12 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 
-export const preferences = getPreferenceValues<{
-  downloadPath: string;
-  ytdlPath: string;
-  ffmpegPath: string;
-  ffprobePath: string;
-}>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
   url: string;
@@ -55,6 +50,8 @@ export function isValidHHMM(input: string) {
 export function isYouTubeURL(input: string) {
   const validHostnames = new Set(["youtube.com", "www.youtube.com", "youtu.be"]);
   const videoIdPattern = /^[a-zA-Z0-9_-]{11}$/;
+  const linkProtocolPrefix = "https://";
+  if (!input.startsWith(linkProtocolPrefix)) input = linkProtocolPrefix + input;
   try {
     const url = new URL(input);
     if (!validHostnames.has(url.hostname)) return false;

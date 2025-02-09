@@ -5,17 +5,11 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2024-06-04 05:46:15
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { execSync } from "child_process";
-
-const EncoderNotFoundError = {
-  title: "AVIF Encoder not found.",
-  message: "Please install the libavif Homebrew formula and try again.",
-  style: Toast.Style.Failure,
-};
+import { showErrorToast } from "./utils";
 
 /**
  * Attempts to install the AVIF encoder using Homebrew.
@@ -60,11 +54,12 @@ async function installAVIFEnc(): Promise<boolean> {
       toast.style = Toast.Style.Success;
       return true;
     } catch (error) {
-      console.error(error);
-      toast.title = "Failed to install AVIF Encoder.";
-      toast.message =
-        "If you previously attempted to install libavif or avifenc, please run `brew doctor` followed by `brew cleanup` and try again.";
-      toast.style = Toast.Style.Failure;
+      showErrorToast(
+        "Failed to install AVIF Encoder.",
+        error as Error,
+        toast,
+        "If you previously attempted to install libavif or avifenc, please run `brew doctor` followed by `brew cleanup` and try again.",
+      );
     }
   }
   await showToast({
@@ -98,10 +93,21 @@ export async function getAVIFEncPaths() {
           await LocalStorage.setItem("avifDecoderPath", decoderPath);
         } catch (error) {
           console.error(error);
-          await showToast(EncoderNotFoundError);
+          showErrorToast(
+            "AVIF Encoder not found.",
+            error as Error,
+            undefined,
+            "Please install the libavif Homebrew formula and try again.",
+          );
         }
       } else {
-        await showToast(EncoderNotFoundError);
+        console.error(error);
+        showErrorToast(
+          "AVIF Encoder not found.",
+          error as Error,
+          undefined,
+          "Please install the libavif Homebrew formula and try again.",
+        );
       }
     }
   }

@@ -1,5 +1,10 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2025-01-18
+
+- 🔎 Added support for clipboard and browser extension detection
+- 🪓 Split AIs into separate commands
+
 ## [New Features] - 2024-12-21
 
 - Added preferences to set a custom OpenAI API endpoint
