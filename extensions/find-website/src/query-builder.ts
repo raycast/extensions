@@ -93,7 +93,7 @@ export class SafariQueryBuilder extends QueryBuilder {
 
   queryRecents(size: number, text: string) {
     return `
-      select distinct i.id, v.title as title, i.url as url, v.visit_time as visitTime
+      select distinct i.id, v.title as title, i.url as url, datetime(v.visit_time + 978307200, 'unixepoch', 'localtime') as visitTime
       from history_visits v, history_items i
       where v.history_item = i.id and (${this.filters(text)})
       order by visit_time desc
