@@ -1,5 +1,10 @@
 # DeepSeeker - Quick Actions Changelog
 
+## [New Features] - {PR_MERGE_DATE}
+
+- 💸 Fix `deepseek-reasoner` prices
+- 🧮 allow to use `input_price` & `output_price` with `deepseek-reasoner`
+
 ## [New Features] - 2025-01-30
 
 - 🐳 Add DeepSeek-R1 reasoning model

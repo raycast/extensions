@@ -26,8 +26,7 @@ export function countToken(content: string) {
 }
 
 // get priceoutput, priceinput from preference
-const input_price = getPreferenceValues().priceinput || 0.27;
-const output_price = getPreferenceValues().priceoutput || 1.1;
+const { input_price, output_price } = getPreferenceValues();
 
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
@@ -45,13 +44,9 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
   } else if (model == "gpt-4o") {
     price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
   } else if (model == "deepseek-reasoner") {
-    price = (prompt_token * 2.0 + output_token * 2.5) / 10000;
+    price = (prompt_token * (input_price || 0.55) + output_token * (output_price || 2.19)) / 10000;
   } else if (model == "deepseek-chat") {
-    price = (prompt_token * input_price + output_token * output_price) / 10000;
-    // * there is a tmeporary discount for deepseek-chat, we ignore it for now
-    // * there is cache discount for deepseek-chat, we ignore it
-    // so your actual price may be lower than this
-    // https://api-docs.deepseek.com/quick_start/pricing
+    price = (prompt_token * (input_price || 0.27) + output_token * (output_price || 1.1)) / 10000;
   } else {
     return -1;
   }
