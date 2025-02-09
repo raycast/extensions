@@ -17,6 +17,7 @@ export default function ColorNames() {
     setIsSearching(true);
     try {
       const colors = colorNamer(searchString);
+      console.log(colors);
       setColors(colors);
     } catch (error) {
       setColors(undefined);
