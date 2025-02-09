@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - 2025-02-06
+## [Updated Models] - 2025-02-09
 
 - Removed depreacted `Gemma 7B 8k`
 - Added reasoning formatting for thinking models
