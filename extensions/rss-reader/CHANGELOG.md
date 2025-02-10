@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Stories Remember 'Last Read'] - {PR_MERGE_DATE}
+## [Stories Remember 'Last Read'] - 2025-02-10
 
 - Filter Stories by their read status (read or unread) (ref: [Issue #16546](https://github.com/raycast/extensions/issues/16546))
 - Stories show an `Icon` to represent their read status
