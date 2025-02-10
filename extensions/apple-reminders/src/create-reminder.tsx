@@ -54,7 +54,7 @@ type CreateReminderValues = {
 };
 
 type CreateReminderFormProps = {
-  draftValues?: CreateReminderValues;
+  draftValues?: Partial<CreateReminderValues>;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
@@ -82,8 +82,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     initialDueDate = draftValues?.dueDate;
   } else if (selectTodayAsDefault) {
     initialDueDate = addMilliseconds(startOfToday(), 1);
-  } else {
-    initialDueDate = draftValues?.dueDate;
   }
 
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({

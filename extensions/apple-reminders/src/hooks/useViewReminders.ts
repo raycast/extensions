@@ -5,11 +5,12 @@ import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
-const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
 import { displayDueDate, getDateString, isFullDay, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
+
+const { useTimeOfDayGrouping } = getPreferenceValues<Preferences.MyReminders>();
 
 export type SortByOption = "default" | "dueDate" | "priority" | "title";
 
@@ -101,10 +102,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   const today = format(startOfDay(new Date()), "yyyy-MM-dd");
 
   const overdueReminders = useTimeOfDayGrouping
-    ? overdue.filter(
-        (reminder) =>
-          reminder.dueDate && isBefore(reminder.dueDate, today) && getDateString(reminder.dueDate as string) !== today,
-      )
+    ? overdue.filter((reminder) => reminder.dueDate && isBefore(reminder.dueDate, today))
     : overdue;
 
   if (overdueReminders.length > 0) {
@@ -139,7 +137,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   }
 
   const remindersOnDate = useTimeOfDayGrouping
-    ? allDueDates.filter((date) => !isBefore(date, today) && date !== today)
+    ? allDueDates.filter((date) => !isBefore(date, today))
     : allDueDates.filter((date) => date);
 
   remindersOnDate.forEach((date) => {

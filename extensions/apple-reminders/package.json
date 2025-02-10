@@ -65,8 +65,8 @@
         {
           "name": "selectTodayAsDefault",
           "type": "checkbox",
-          "label": "Initially select today for new reminders",
-          "description": "When enabled, \"Today\" will be initially selected for new reminders.",
+          "label": "Initially select \"Today\" for new reminders",
+          "description": "When enabled, \"Today\" will be initially selected for new reminders instead of no due date.",
           "default": false,
           "required": false
         }
@@ -216,7 +216,7 @@
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.75.1",
+    "@raycast/api": "^1.91.1",
     "@raycast/utils": "^1.18.1",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
