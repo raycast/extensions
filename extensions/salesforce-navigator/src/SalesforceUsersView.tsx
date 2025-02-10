@@ -35,6 +35,12 @@ type UserRecord = {
   lastLoginDate: string;
 };
 
+// Add this interface near the top (after your UserRecord type)
+interface RawUserRecord extends Partial<UserRecord> {
+  Profile?: { Name?: string; name?: string };
+  UserRole?: { Name?: string; name?: string };
+}
+
 type QueryResult = {
   result: {
     records: UserRecord[];
@@ -107,17 +113,14 @@ export default function SalesforceUsersView({ org }: { org: Org }) {
       if (data) {
         try {
           const parsed: QueryResult = JSON.parse(data);
-          const recs: UserRecord[] = parsed.result.records.map((record: Partial<UserRecord>) => {
+          const recs: UserRecord[] = parsed.result.records.map((record: RawUserRecord) => {
             return {
-              Id: record.Id || record.id || "",
-              Name: record.Name || record.name || "",
-              username: record.username || record.Username || "",
-              alias: record.alias || record.Alias || "",
-              email: record.email || record.Email || "",
-              profileName:
-                record.Profile && (record.Profile.Name || record.Profile.name)
-                  ? record.Profile.Name || record.Profile.name
-                  : "",
+              Id: record.Id || "",
+              Name: record.Name || "",
+              username: record.Username || "",
+              alias: record.Alias || "",
+              email: record.Email || "",
+              profileName: record.Profile ? (record.Profile.Name ?? record.Profile.name ?? "") : "",
               roleName:
                 record.UserRole && (record.UserRole.Name || record.UserRole.name)
                   ? record.UserRole.Name || record.UserRole.name

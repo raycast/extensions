@@ -244,7 +244,7 @@ export default function SalesforceSearchView({ org, sobject }: { org: Org; sobje
                   }
                 }}
               />
-              <Action.CopyToClipboard title="Copy to Clipboard" content={record.Id} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={String(record.Id)} />
             </ActionPanel>
           }
         />
