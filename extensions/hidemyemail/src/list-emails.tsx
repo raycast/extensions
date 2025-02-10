@@ -329,7 +329,7 @@ export default function Command() {
                 key={email.id}
                 id={email.id}
                 title={`${email.label}`}
-                keywords={[email.address, email.note]}
+                keywords={[email.address, ...email.note.split(/\s+/g)]}
                 icon={{ source: Icon.ChevronRightSmall, tintColor: email.isActive ? Color.Green : Color.Red }}
                 detail={
                   <List.Item.Detail
