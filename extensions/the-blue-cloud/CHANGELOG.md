@@ -1,6 +1,6 @@
 # The Blue Cloud Changelog
 
-## [Download File] - {PR_MERGE_DATE}
+## [Download File] - 2025-02-10
 
 - Download a file (need to re-authorize for new scope)
 - Open Directories in Browser
