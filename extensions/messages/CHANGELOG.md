@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [Fix `Paste Latest OTP Code` Command for Phone #s] - 2025-01-19
+## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-02-10
 
 Added a number filter for OTP Code messages that include phone/cellular numbers that should not be used as OTP Codes for this command.
 
