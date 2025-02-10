@@ -24,8 +24,8 @@
           "name": "showStartDate",
           "type": "checkbox",
           "title": "Show Start Date",
-          "label": "Show the Start Date field in the Create Task command",
-          "description": "When enabled, the Start Date field will be shown in the Create Task command",
+          "label": "Show the Start Date field",
+          "description": "When enabled, the Start Date field will be shown in the Create Task form",
           "required": false,
           "default": true
         }
