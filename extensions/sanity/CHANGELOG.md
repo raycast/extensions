@@ -1,6 +1,6 @@
 # Sanity Changelog
 
-## [Add "Search Datasets" subcommand] - {PR_MERGE_DATE}
+## [Add "Search Datasets" subcommand] - 2025-02-10
 
 - Simplify "search-projects" by replacing `Cache` with `useCachedPromise`
 - Add "Search Datasets" to "Search Projects"
