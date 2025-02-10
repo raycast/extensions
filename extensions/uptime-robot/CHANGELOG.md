@@ -1,4 +1,4 @@
-# Uptime Robot Changelog
+# UptimeRobot Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
