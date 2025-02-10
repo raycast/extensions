@@ -39,6 +39,9 @@ type UserRecord = {
 interface RawUserRecord extends Partial<UserRecord> {
   Profile?: { Name?: string; name?: string };
   UserRole?: { Name?: string; name?: string };
+  Username?: string;
+  Alias?: string;
+  Email?: string;
 }
 
 type QueryResult = {
