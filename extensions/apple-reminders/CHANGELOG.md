@@ -1,7 +1,6 @@
 # Apple Reminders Changelog
 
-## [Add "Overdue" view and default date setting] - {PR_MERGE_DATE}
-
+## [Add "Overdue" view and default date setting] - 2025-02-10
 - A new "Overdue" view has been added, displaying only reminders that are overdue.
 - There's now an option to automatically set the default date of new reminders to the current day.
 
