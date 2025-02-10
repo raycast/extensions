@@ -42,6 +42,7 @@ interface RawUserRecord extends Partial<UserRecord> {
   Username?: string;
   Alias?: string;
   Email?: string;
+  LastLoginDate?: string;
 }
 
 type QueryResult = {
