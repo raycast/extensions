@@ -1,6 +1,6 @@
 # Raycast Port Changelog
 
-## [New Feature & Improvements] - {PR_MERGE_DATE}
+## [New Feature & Improvements] - 2025-02-10
 
 - Add port for Browser Extension API
 - Improve error handling & add port result documentation
