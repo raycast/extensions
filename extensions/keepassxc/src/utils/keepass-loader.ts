@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, showHUD, LocalStorage, Toast, showToast } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, Toast, showToast } from "@raycast/api";
 import { parse } from "csv-parse/sync";
 import path from "path";
 import child_process from "child_process";
@@ -195,22 +195,6 @@ class KeePassLoader {
   };
 
   /**
-   * Copies the TOTP of the given KeePassXC entry to the clipboard.
-   *
-   * The TOTP is copied as a concealed entry, meaning it will not be stored in the clipboard history.
-   * The function returns a Promise that resolves with the copied TOTP.
-   *
-   * @param entry The title of the KeePassXC entry.
-   * @returns A Promise that resolves with the copied TOTP.
-   */
-  static copyTOTP(entry: string) {
-    return this.getTOTP(entry).then((otp) => {
-      showHUD("TOTP has been copied to clipboard");
-      return Clipboard.copy(otp, { concealed: true }).then(() => otp);
-    });
-  }
-
-  /**
    * Removes the stored credentials from LocalStorage.
    *
    * This function deletes the cached database password and key file path
@@ -270,23 +254,6 @@ class KeePassLoader {
   };
 
   /**
-   * Get the TOTP value for a given entry.
-   *
-   * @param {string} entry - The name of the entry to get the TOTP for.
-   * @returns {Promise<string>} The TOTP value.
-   */
-  static getTOTP = (entry: string) => {
-    return this.execKeepassXCCli([
-      "show",
-      ...this.convertIntoKeyFileOption(this.keyFile),
-      "-q",
-      "-t",
-      `${this.database}`,
-      `${entry}`,
-    ]);
-  };
-
-  /**
    * Load credentials from LocalStorage.
    *
    * If the credentials aren't stored in LocalStorage, it will return an empty object.
@@ -323,19 +290,6 @@ class KeePassLoader {
       } else {
         return this.parseCsvEntries(entries as string);
       }
-    });
-  };
-
-  /**
-   * Pastes the TOTP value for the given entry from the KeePass database into
-   * the system clipboard.
-   *
-   * @param {string} entry - The name of the entry in the KeePass database.
-   * @returns {Promise<string>} - A promise that resolves to the TOTP value.
-   */
-  static pasteTOTP = (entry: string) => {
-    return this.getTOTP(entry).then((otp) => {
-      return Clipboard.paste(otp).then(() => otp);
     });
   };
 
