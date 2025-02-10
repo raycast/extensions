@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [New "Copy Message URL" action] - {PR_MERGE_DATE}
+## [New "Copy Message URL" action] - 2025-02-10
 
 - Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command 
 
