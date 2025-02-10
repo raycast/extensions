@@ -121,10 +121,7 @@ export default function SalesforceUsersView({ org }: { org: Org }) {
               alias: record.Alias || "",
               email: record.Email || "",
               profileName: record.Profile ? (record.Profile.Name ?? record.Profile.name ?? "") : "",
-              roleName:
-                record.UserRole && (record.UserRole.Name || record.UserRole.name)
-                  ? record.UserRole.Name || record.UserRole.name
-                  : "",
+              roleName: record.UserRole ? (record.UserRole.Name ?? record.UserRole.name ?? "") : "",
               lastLoginDate: record.LastLoginDate || record.lastLoginDate || "",
             };
           });
