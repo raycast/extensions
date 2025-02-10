@@ -1,5 +1,8 @@
 # Jira Changelog
 
+## [Fix Git branch name format] - 2025-02-10
+- Fixed an issue where the Git branch name format, specifically the issue summary, was not slugified.
+
 ## [Add ability to configuring Git branch name format] - 2025-01-09
 - Implemented the ability to configure the Git branch name format in the extension settings.
 
