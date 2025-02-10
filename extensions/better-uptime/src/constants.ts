@@ -1,3 +1,5 @@
+export const baseUrl = "https://betteruptime.com/api/v2";
+
 export const statusMap = {
   paused: "⏸",
   pending: "🔍",
@@ -6,5 +8,3 @@ export const statusMap = {
   validating: "🤔",
   down: "❌",
 } as { [key: string]: string };
-
-export const requiredErrorText = "This field is required!";

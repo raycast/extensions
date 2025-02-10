@@ -1,10 +1,10 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, open } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Keyboard } from "@raycast/api";
+import useLocalStorage from "./hooks/useLocalStorage";
+import { useEffect, useState } from "react";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import YAML from "yaml";
-import { usePromise } from "@raycast/utils";
 import { launchConfig } from "./uri";
 
 interface SearchResult {
@@ -18,6 +18,12 @@ const fullPath = path.join(os.homedir(), configPath);
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const {
+    data: resultsOrderList,
+    setData: setResultsOrderList,
+    isLoading: isResultsOrderListLoading,
+  } = useLocalStorage<Array<string>>("resultsOrder", []);
+
   const [error, setError] = useState(false);
 
   const showError = async (title: string, message: string) => {
@@ -51,7 +57,6 @@ export default function Command() {
         .filter((file) => file.match(/.y(a)?ml$/g))
         .map(async (file) => {
           const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
-
           const yaml = YAML.parse(contents);
 
           return { name: yaml.name, path: path.join(fullPath, file) };
@@ -65,10 +70,48 @@ export default function Command() {
       );
     }
 
-    setResults(fileList);
+    const allFileNames = fileList.map(({ name }) => name);
+    const resultsOrderListFilteredFromStaleFiles = resultsOrderList.filter(
+      (fileName) => allFileNames.indexOf(fileName) !== -1
+    );
+    const newFileNamesNotPresentOnResultsOrderList = allFileNames.filter(
+      (fileName) => resultsOrderList.indexOf(fileName) === -1
+    );
+
+    const currentOrderList = [...resultsOrderListFilteredFromStaleFiles, ...newFileNamesNotPresentOnResultsOrderList];
+    setResultsOrderList(currentOrderList);
+    setResults(
+      [...fileList].sort((fileA, fileB) => {
+        return currentOrderList.indexOf(fileA.name) - currentOrderList.indexOf(fileB.name);
+      })
+    );
   };
 
-  usePromise(init, []);
+  let initialized = false;
+  useEffect(() => {
+    if (initialized || isResultsOrderListLoading) {
+      return;
+    }
+    initialized = true;
+    init();
+  }, [isResultsOrderListLoading]);
+
+  const swapSearchItems = (currentIndex: number, swapIndex: number) => {
+    if (swapIndex < 0 || swapIndex >= results.length) {
+      return;
+    }
+
+    const resultsOrderCopy = [...resultsOrderList];
+    [resultsOrderCopy[currentIndex], resultsOrderCopy[swapIndex]] = [
+      resultsOrderCopy[swapIndex],
+      resultsOrderCopy[currentIndex],
+    ];
+    setResultsOrderList(resultsOrderCopy);
+
+    const resultsCopy = [...results];
+    [resultsCopy[currentIndex], resultsCopy[swapIndex]] = [resultsCopy[swapIndex], resultsCopy[currentIndex]];
+    setResults(resultsCopy);
+  };
 
   return (
     <List
@@ -84,16 +127,37 @@ export default function Command() {
       <List.Section title="Results" subtitle={results?.length + ""}>
         {results
           ?.filter((f) => f.name.toLowerCase().includes(searchText.toLowerCase()))
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((searchResult) => (
-            <SearchListItem key={searchResult.path} searchResult={searchResult} />
+          .map((searchResult, index) => (
+            <SearchListItem
+              key={searchResult.path}
+              searchResult={searchResult}
+              isSearching={searchText.length > 0}
+              moveSearchResultDown={() => {
+                swapSearchItems(index, index + 1);
+                showToast(Toast.Style.Success, `Moved down`);
+              }}
+              moveSearchResultUp={() => {
+                swapSearchItems(index, index - 1);
+                showToast(Toast.Style.Success, `Moved up`);
+              }}
+            />
           ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({
+  searchResult,
+  isSearching,
+  moveSearchResultUp,
+  moveSearchResultDown,
+}: {
+  searchResult: SearchResult;
+  isSearching: boolean;
+  moveSearchResultUp: () => void;
+  moveSearchResultDown: () => void;
+}) {
   return (
     <List.Item
       title={searchResult.name}
@@ -112,12 +176,28 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action.Open
               title="Edit Launch Configuration"
               target={searchResult.path}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.CreateQuicklink
               title="Save as Quicklink"
               quicklink={{ link: launchConfig(searchResult.name), name: searchResult.name }}
             />
+            {!isSearching && (
+              <>
+                <Action
+                  title="Move up"
+                  shortcut={Keyboard.Shortcut.Common.MoveUp}
+                  onAction={moveSearchResultUp}
+                  icon={Icon.ArrowUp}
+                />
+                <Action
+                  title="Move down"
+                  shortcut={Keyboard.Shortcut.Common.MoveDown}
+                  onAction={moveSearchResultDown}
+                  icon={Icon.ArrowDown}
+                />
+              </>
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }

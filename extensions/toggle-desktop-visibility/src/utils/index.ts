@@ -1,6 +1,7 @@
 import { spawnSync } from "child_process";
 import * as MontereyAndBefore from "./monterey-and-before";
 import * as Sonoma from "./sonoma";
+import * as Sequoia from "./sequoia"; // Assuming you have a module for Sequoia
 
 function getMacosMajorVersion() {
   const { stdout } = spawnSync("sw_vers", ["-productVersion"], { encoding: "utf-8" });
@@ -8,11 +9,17 @@ function getMacosMajorVersion() {
 }
 
 function isSonoma() {
-  return getMacosMajorVersion() == 14;
+  return getMacosMajorVersion() === 14;
+}
+
+function isSequoia() {
+  return getMacosMajorVersion() === 15;
 }
 
 export function areDesktopIconsHidden() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    return Sequoia.areDesktopIconsHidden();
+  } else if (isSonoma()) {
     return Sonoma.areDesktopIconsHidden();
   } else {
     return MontereyAndBefore.areDesktopIconsHidden();
@@ -20,7 +27,9 @@ export function areDesktopIconsHidden() {
 }
 
 export function hideDesktopIcons() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    Sequoia.hideDesktopIcons();
+  } else if (isSonoma()) {
     Sonoma.hideDesktopIcons();
   } else {
     MontereyAndBefore.hideDesktopIcons();
@@ -28,7 +37,9 @@ export function hideDesktopIcons() {
 }
 
 export function showDesktopIcons() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    Sequoia.showDesktopIcons();
+  } else if (isSonoma()) {
     Sonoma.showDesktopIcons();
   } else {
     MontereyAndBefore.showDesktopIcons();
@@ -36,7 +47,9 @@ export function showDesktopIcons() {
 }
 
 export function areDesktopWidgetsHidden() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    return Sequoia.areDesktopWidgetsHidden();
+  } else if (isSonoma()) {
     return Sonoma.areDesktopWidgetsHidden();
   } else {
     throw new Error("Not supported on Monterey and before");
@@ -44,7 +57,9 @@ export function areDesktopWidgetsHidden() {
 }
 
 export function hideDesktopWidgets() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    Sequoia.hideDesktopWidgets();
+  } else if (isSonoma()) {
     Sonoma.hideDesktopWidgets();
   } else {
     throw new Error("Not supported on Monterey and before");
@@ -52,7 +67,9 @@ export function hideDesktopWidgets() {
 }
 
 export function showDesktopWidgets() {
-  if (isSonoma()) {
+  if (isSequoia()) {
+    Sequoia.showDesktopWidgets();
+  } else if (isSonoma()) {
     Sonoma.showDesktopWidgets();
   } else {
     throw new Error("Not supported on Monterey and before");

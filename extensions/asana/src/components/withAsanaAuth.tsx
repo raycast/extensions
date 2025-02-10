@@ -1,40 +1,12 @@
-import { Detail, environment, MenuBarExtra } from "@raycast/api";
-import { useMemo, useState } from "react";
-import { authorize } from "../api/oauth";
+import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
 
-let token: string | null = null;
+const asana = OAuthService.asana({ scope: "default" });
 
-export default function withAsanaAuth(component: JSX.Element) {
-  const [x, forceRerender] = useState(0);
-
-  // we use a `useMemo` instead of `useEffect` to avoid a render
-  useMemo(() => {
-    (async function () {
-      token = await authorize();
-
-      forceRerender(x + 1);
-    })();
-  }, []);
-
-  if (!token) {
-    if (environment.commandMode === "view") {
-      // Using the <List /> component makes the placeholder buggy
-      return <Detail isLoading />;
-    } else if (environment.commandMode === "menu-bar") {
-      return <MenuBarExtra isLoading />;
-    } else {
-      console.error("`withAsanaAuth` is only supported in `view` and `menu-bar` mode");
-      return null;
-    }
-  }
-
-  return component;
+export default function withAsanaAuth(Component: React.ComponentType) {
+  return withAccessToken(asana)(Component);
 }
 
 export function getOAuthToken(): string {
-  if (!token) {
-    throw new Error("getOAuthToken must be used when authenticated");
-  }
-
+  const { token } = getAccessToken();
   return token;
 }

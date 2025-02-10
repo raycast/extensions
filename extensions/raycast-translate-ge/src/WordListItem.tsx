@@ -5,13 +5,13 @@ export function WordListItem({ word }: { word: Word }) {
   return (
     <List.Item
       title={word.word}
-      subtitle={word.desc}
+      subtitle={word.translation}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy to Clipboard"
-              content={word.desc}
+              content={word.translation}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
           </ActionPanel.Section>

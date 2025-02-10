@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { useViewer } from "./useViewer";
 

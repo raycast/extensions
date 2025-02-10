@@ -58,6 +58,7 @@ Depending on the primary action set in preferences, the keyboard shortcuts can b
 - `opt + a` will let you append text to the note (supports templates)
 - `opt + s` will append selected text to the note (supports templates)
 - `opt + c` will copy the notes content to your clipboard
+- `opt + t` will copy the notes title to your clipboard
 - `opt + v` will paste the notes content to the app you used before raycast
 - `opt + l` will copy a markdown link for the note to your clipboard
 - `opt + u` will copy the obsidian URI for the note to your clipboard (see: [Obsidian URI](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI))
@@ -120,6 +121,8 @@ Both the note name and note content support these templates:
 - `{timestamp}`, `{zettelkastenID}`
 - `{clipboard}`, `{clip}`
 - `{\n}`, `{nl}`, `{newline}`
+
+But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).
 
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">
 

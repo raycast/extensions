@@ -1,4 +1,5 @@
 import { Media, Note } from "./interfaces";
+import Fuse from "fuse.js";
 
 /**
  * Filters a list of notes according to the input search string. If the search string is empty, all notes are returned. It will match the notes title, path and content.
@@ -27,6 +28,35 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
   }
 }
 
+export function filterNotesFuzzy(notes: Note[], input: string, byContent: boolean) {
+  if (input.length === 0) {
+    return notes;
+  }
+
+  const options = {
+    keys: ["title", "path"],
+    fieldNormWeight: 2.0,
+    ignoreLocation: true,
+    threshold: 0.3,
+  };
+
+  if (byContent) {
+    options.keys.push("content");
+  }
+
+  // Filter by each word individually, this helps with file path search
+  const words = input.trim().split(/\s+/);
+  let filteredNotes = notes;
+  const fuse = new Fuse(notes, options);
+
+  for (const word of words) {
+    filteredNotes = fuse.search(word).map((result) => result.item);
+    fuse.setCollection(filteredNotes);
+  }
+
+  return filteredNotes;
+}
+
 /**
  * Filters a list of media according to the input search string. If the input is empty, all media is returned. It will match the medias title, path and all notes mentioning the media.
  *
@@ -35,7 +65,7 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
  * @returns - A list of media filtered according to the input search string
  */
 export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
-  if (input.length === 0) {
+  if (input?.length === 0) {
     return mediaList;
   }
 
@@ -55,17 +85,4 @@ export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
 
 function tokenize(input: string) {
   return input.split(" ").filter((s) => s.length > 0);
-}
-
-export function fuzzyFilter(notes: Note[], input: string) {
-  if (input.length === 0) {
-    return notes;
-  }
-  input = input.toLowerCase();
-
-  // TODO: weigh tokens before using them
-
-  return notes.filter((note) => {
-    return note.title.toLowerCase().includes(input) || note.path.toLowerCase().includes(input);
-  });
 }

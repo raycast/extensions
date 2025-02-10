@@ -36,7 +36,7 @@ export function getGroups(): [Group[], boolean, any] {
   const groups = data?.groups.filter((group) => group.id !== 0) || [];
 
   if (error) {
-    console.error(`Error while fetching friends: \n ${error}`);
+    console.error(`Error while fetching groups: \n ${error}`);
   }
 
   return [groups, isLoading, revalidate];

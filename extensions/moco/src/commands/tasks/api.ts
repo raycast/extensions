@@ -12,7 +12,7 @@ const taskSchema = z.array(
     billable: z.boolean(),
     budget: z.number(),
     projectID: z.number(),
-  })
+  }),
 );
 
 const preferences = getPreferenceValues<Preferences>();
@@ -38,6 +38,6 @@ export const fetchProjectTasks = async (projectID: number): Promise<Task[]> => {
         name: task.name as string,
         billable: task.billable as boolean,
         projectID: projectID as number,
-      })
+      }),
     );
 };

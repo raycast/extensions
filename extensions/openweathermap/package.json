@@ -5,6 +5,9 @@
   "description": "Get Weather via https://openweathermap.com",
   "icon": "openweathermap.png",
   "author": "tonka3000",
+  "contributors": [
+    "lari_kovanen"
+  ],
   "license": "MIT",
   "commands": [
     {

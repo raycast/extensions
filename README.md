@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/store-logo.png" height="128">
+  <img src="images/store-logo.webp" height="128">
   <h1 align="center">Raycast Extensions</h1>
 </p>
 
@@ -14,13 +14,13 @@
 
 [Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
 
-![Header](images/header.png)
+![Header](images/header.webp)
 
 ## Getting Started
 
 Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
 
-Be sure to follow our [Community Guidelines](https://manual.raycast.com/community-guidelines) when submitting your extension and interacting with other folks in this repository.
+Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines when submitting your extension and interacting with other folks in this repository.
 
 ## Feedback
 

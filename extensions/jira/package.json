@@ -7,13 +7,24 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "igor9silva",
-    "jesperorb",
     "teziovsky",
     "rifont",
     "gavinroderick",
     "lusit",
-    "literallyjustroy"
+    "literallyjustroy",
+    "mheidinger",
+    "luarmr",
+    "horumy",
+    "santiago_perez",
+    "silv",
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH",
+    "jokeychen"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "mikybars"
   ],
   "owner": "raycast",
   "access": "public",
@@ -27,7 +38,17 @@
       "title": "Create Issue",
       "subtitle": "Jira",
       "description": "Create and assign new issues.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyURLtoClipboard",
+          "description": "If checked, copies the newly created issue URL to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy created issue URL to clipboard"
+        }
+      ]
     },
     {
       "name": "open-issues",
@@ -88,11 +109,67 @@
       "subtitle": "Jira",
       "description": "Search issues globally in all projects.",
       "mode": "view"
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Open Issue from Clipboard",
+      "subtitle": "Jira",
+      "description": "Open an issue by its key from the clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "baseUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Jira Base URL",
+          "description": "Optional Base URL for Self-Hosted Jira (e.g. https://jira.acme-inc.com). Defaults to the public Jira."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site URL",
+      "description": "Your Jira site URL (e.g foo.atlassian.net)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "foo.atlassian.com"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Account Email",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "API Token",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/utils": "^1.16.2",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",

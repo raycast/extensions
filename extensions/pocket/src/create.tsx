@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, open, popToRoot, Toast } from "@raycast/api";
-import { createBookmark } from "./utils/api";
-import { capitalize } from "lodash";
-import { useTags } from "./utils/hooks";
+import { Action, ActionPanel, Clipboard, Form, Icon, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { useForm } from "@raycast/utils";
 import isUrl from "is-url";
+import { usePocketClient, View } from "./lib/oauth/view";
+import { useTags } from "./lib/hooks/use-tags";
+import { titleCase } from "./lib/utils";
 
 interface CreateBookmarkValues {
   url: string;
@@ -12,20 +12,20 @@ interface CreateBookmarkValues {
   tags: string[];
 }
 
-export default function Create() {
-  const tags = useTags();
+function CreateBookmark() {
+  const pocket = usePocketClient();
+  const { tags } = useTags();
 
   const { handleSubmit, setValue, itemProps } = useForm<CreateBookmarkValues>({
     async onSubmit(values) {
-      const toast = new Toast({
+      const toast = await showToast({
         title: "Creating bookmark",
         message: values.url,
         style: Toast.Style.Animated,
       });
 
-      toast.show();
+      const bookmark = await pocket.createBookmark(values);
 
-      const bookmark = await createBookmark(values);
       toast.style = Toast.Style.Success;
       toast.title = "Bookmark created";
       toast.message = bookmark.title ?? bookmark.url;
@@ -43,7 +43,8 @@ export default function Create() {
           Clipboard.copy(bookmark.pocketUrl);
         },
       };
-      popToRoot();
+
+      await popToRoot();
     },
     validation: {
       url: (value) => {
@@ -72,7 +73,6 @@ export default function Create() {
     >
       <Form.TextField title="URL" autoFocus placeholder="https://raycast.com" {...itemProps.url} />
       <Form.TextField
-        id="title"
         title="Title"
         placeholder="Raycast"
         info="If Pocket detects a title from the content of the page, this value will be ignored."
@@ -80,9 +80,17 @@ export default function Create() {
       />
       <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags.map((tag) => (
-          <Form.TagPicker.Item key={tag} icon={Icon.Tag} title={capitalize(tag)} value={tag} />
+          <Form.TagPicker.Item key={tag} icon={Icon.Tag} title={titleCase(tag)} value={tag} />
         ))}
       </Form.TagPicker>
     </Form>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <CreateBookmark />
+    </View>
   );
 }

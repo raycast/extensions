@@ -23,10 +23,10 @@ export type NumberConfigField = ConfigField & {
   max: string;
   value?: string;
 };
+
 /**
  * A PromptLab command setup configuration.
  */
-
 export type CommandConfig = {
   /**
    * The list of configuration fields.

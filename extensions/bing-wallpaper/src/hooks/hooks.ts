@@ -1,10 +1,10 @@
 import fetch, { AbortError } from "node-fetch";
 import { buildBingWallpapersURL } from "../utils/bing-wallpaper-utils";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { BingImage, BingResponseData, DownloadedBingImage } from "../types/types";
 import { autoDownloadPictures, getDownloadedBingWallpapers } from "../utils/common-utils";
-import { Preferences } from "../types/preferences";
+import { autoDownload, downloadSize } from "../types/preferences";
 
 export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
@@ -22,7 +22,7 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
               //Remove duplicate elements
               (second_data as BingResponseData).images.shift();
               const _bingWallpaperHD = (first_data as BingResponseData).images.concat(
-                (second_data as BingResponseData).images
+                (second_data as BingResponseData).images,
               );
 
               setBingWallpaperHD(_bingWallpaperHD);
@@ -30,7 +30,15 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
                 setDownloadedBingWallpapers(getDownloadedBingWallpapers());
               }
               setIsLoading(false);
+            })
+            .catch(async (e) => {
+              await showToast(Toast.Style.Failure, String(e));
+              setIsLoading(false);
             });
+        })
+        .catch(async (e) => {
+          await showToast(Toast.Style.Failure, String(e));
+          setIsLoading(false);
         });
     } catch (e) {
       if (e instanceof AbortError) {
@@ -48,7 +56,6 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
 };
 
 export const autoDownloadWallpapers = (bingWallpapers: BingImage[]) => {
-  const { autoDownload, downloadSize } = getPreferenceValues<Preferences>();
   const fetchData = useCallback(async () => {
     try {
       //auto download wallpaper

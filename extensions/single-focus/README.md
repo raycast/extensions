@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/assets/command_icon.png" height="128">
+  <img src="/assets/command-icon.png" height="128">
   <h1 align="center">Single Focus</h1>
 </p>
 

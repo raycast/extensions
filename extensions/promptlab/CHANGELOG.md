@@ -1,5 +1,11 @@
 # PromptLab Changelog
 
+## [PromptLab 1.2.3] - 2024-01-16
+
+- Added option to record previous runs of a command.
+- Added {{lastRun}} placeholder.
+- Fixed bug where commands that don't show a response view would hang if the prompt evaluated to an empty string.
+
 ## [PromptLab 1.2.2] - 2024-01-09
 
 - Code cleanup. No user-facing changes.

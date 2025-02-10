@@ -1,5 +1,14 @@
 # Hue Changelog
 
+## [Fix support for old Hue bridges] - 2024-10-27
+
+- Fix a self-signed certificate bug when connecting to older Hue Bridges
+
+## [Small improvements] - 2024-01-15
+
+- Improve wording in readme and preferences
+- Add fallback icon
+
 ## [Fix] - 2023-11-21
 
 - Fixed bugs

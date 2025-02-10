@@ -1,16 +1,12 @@
-import { jsonRequest, useQuery } from "../nextcloud";
+import { useNextcloudJsonArray } from "../nextcloud";
 
 export function useNotes() {
-  const { data, isLoading } = useQuery((signal) => getNotes(signal));
+  const { data, isLoading } = useNextcloudJsonArray<Note>("notes/api/v1/notes");
 
   return {
-    notes: data ?? [],
+    notes: data,
     isLoading,
   };
-}
-
-async function getNotes(signal: AbortSignal): Promise<Note[]> {
-  return await jsonRequest({ signal, base: "notes/api/v1/notes" });
 }
 
 export interface Note {

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "yz3440",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "xmok"
   ],
   "categories": [
     "Web"
@@ -66,7 +67,7 @@
       "description": "Force query from the specified mirror.",
       "type": "textfield",
       "default": "",
-      "placeholder": "https://libgen.rs",
+      "placeholder": "https://libgen.is",
       "required": false
     },
     {
@@ -116,6 +117,15 @@
       "required": true
     },
     {
+      "name": "allowIgnoreHTTPSErrors",
+      "title": "Ignore HTTPS Errors (Insecure) on Download",
+      "description": "Allow to ignore HTTPS errors. This is useful when you are encountering SSL errors when downloading.",
+      "type": "checkbox",
+      "default": false,
+      "label": "Ignore HTTPS errors",
+      "required": false
+    },
+    {
       "name": "searchPriority",
       "title": "Priotitize Search By",
       "description": "Prioritizes searching results by the following fields.",
@@ -157,21 +167,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^3.2.8",
-    "swr": "^2.2.4"
+    "node-fetch": "^3.3.2",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3"
+    "@types/node": "20.11.19",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5"
   },
   "scripts": {
     "build": "ray build -e dist",

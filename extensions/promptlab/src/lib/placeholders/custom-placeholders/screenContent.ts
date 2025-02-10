@@ -1,6 +1,6 @@
-import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
-import { filterString, getMenubarOwningApplication } from "../../../lib/context-utils";
+import { filterString, getMenubarOwningApplication } from "../../context-utils";
 import { ScriptRunner } from "../../scripts";
+import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
 
 const ScreenContentPlaceholder: Placeholder = {
   name: "screenContent",

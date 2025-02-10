@@ -1,6 +1,6 @@
 import { ActionPanel, Grid } from "@raycast/api";
 import React from "react";
-import { ActionOpenPreferences } from "./action-open-preferences";
+import { ActionSettings } from "./action-settings";
 
 export function EmptyView() {
   return (
@@ -9,7 +9,7 @@ export function EmptyView() {
       icon={{ source: "empty-icon.png" }}
       actions={
         <ActionPanel>
-          <ActionOpenPreferences />
+          <ActionSettings />
         </ActionPanel>
       }
     />

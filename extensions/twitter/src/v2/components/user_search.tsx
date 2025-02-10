@@ -1,12 +1,13 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { URL } from "url";
+import { XIcon } from "../../icon";
 
 function OpenSearchInBrowserAction(props: { search: string }): ReactElement {
   const url = new URL("https://twitter.com/search");
   url.searchParams.append("q", props.search);
   url.searchParams.append("f", "user");
-  return <Action.OpenInBrowser title="Search on Twitter.com" icon="twitter.png" url={url.href} />;
+  return <Action.OpenInBrowser title="Search on Twitter.com" icon={XIcon()} url={url.href} />;
 }
 
 function ListItemSearch(props: { search: string | undefined }): ReactElement | null {
@@ -17,7 +18,7 @@ function ListItemSearch(props: { search: string | undefined }): ReactElement | n
   return (
     <List.Item
       title={`Search '${s}' on twitter.com`}
-      icon="twitter.png"
+      icon={XIcon()}
       actions={
         <ActionPanel>
           <OpenSearchInBrowserAction search={s} />
@@ -37,6 +38,7 @@ export function SearchUserListV2(): ReactElement {
       searchBarPlaceholder="Search Users by Name or Handle (e.g. @tonka_2000 or Michael Aigner)"
     >
       <ListItemSearch search={search} />
+      <List.EmptyView icon={Icon.Person} title="Search for a User on X.com" />
     </List>
   );
 }

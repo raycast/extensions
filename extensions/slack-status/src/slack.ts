@@ -1,113 +1,57 @@
-import { OAuth } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { getAccessToken, usePromise, OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
-import fetch from "node-fetch";
-import { OAuthSessionConfig, getOAuthSession } from "./oauth";
-
-type SlackOAuthResponse = {
-  ok: boolean;
-  authed_user: {
-    id: string;
-    scope: string;
-    access_token: string;
-  };
-};
+import { confirmAlert } from "@raycast/api";
 
 let webClient: WebClient;
 
 export function useSlack() {
-  const accessToken = getOAuthSession();
-  webClient = webClient ?? new WebClient(accessToken);
+  const { token } = getAccessToken();
+  webClient = webClient ?? new WebClient(token);
   return webClient;
 }
 
-export function useSlackProfile() {
+export function useSlackProfileAndDndInfo(slackAuth: OAuthService) {
   const slack = useSlack();
+
   return usePromise(async () => {
-    const response = await slack.users.profile.get();
-    if (!response.ok) {
+    const profileResponse = await slack.users.profile.get();
+    if (!profileResponse.ok) {
       throw Error("Failed to fetch profile");
     }
-    return response.profile;
-  });
-}
 
-export class SlackOAuthSessionConfig implements OAuthSessionConfig {
-  private baseUrl: string;
-  private clientId: string;
-  private userScopes: string[];
-  private defaultAccessToken?: string;
+    let dndResponse;
+    let dndCalled = false;
 
-  private client = new OAuth.PKCEClient({
-    redirectMethod: OAuth.RedirectMethod.Web,
-    providerName: "Slack",
-    providerIcon: "slack.svg",
-    providerId: "slack",
-    description: "Connect your Slack account to set your status",
-  });
+    while (!dndCalled) {
+      try {
+        dndResponse = await slack.dnd.info();
+        dndCalled = true;
+        if (!dndResponse.ok) {
+          throw Error("Failed to fetch DND info");
+        }
+      } catch (error: unknown) {
+        // We added new scopes for DND. Old installs don't automatically upgrade scopes.
+        // The `instanceof` is a type guard.
+        if (!(error instanceof Error) || !error.message.includes("missing_scope")) {
+          throw error;
+        }
 
-  constructor(options: { baseUrl?: string; clientId: string; userScopes: string[]; defaultAccessToken?: string }) {
-    this.baseUrl = options.baseUrl ?? "https://slack.oauth.raycast.com";
-    this.clientId = options.clientId;
-    this.userScopes = options.userScopes ?? [];
-    this.defaultAccessToken = options.defaultAccessToken;
-  }
+        // We don't care about the response. The user *needs* to reconnect.
+        // There's no option for a cancel-less alert AFAIK.
+        await confirmAlert({
+          title: "Missing permissions after upgrade",
+          message: "Reconnect your Slack account to get the right permissions.",
+        });
 
-  async authorize() {
-    if (this.defaultAccessToken) {
-      await this.client.removeTokens();
-      return this.defaultAccessToken;
-    }
-
-    const existingTokens = await this.client.getTokens();
-
-    if (existingTokens?.accessToken) {
-      return existingTokens.accessToken;
-    }
-
-    const authRequest = await this.client.authorizationRequest({
-      endpoint: `${this.baseUrl}/authorize`,
-      clientId: this.clientId,
-      scope: "",
-      extraParameters: {
-        user_scope: this.userScopes.join(" "),
-      },
-    });
-
-    const { authorizationCode } = await this.client.authorize(authRequest);
-    const tokens = await this.fetchTokens(authRequest, authorizationCode);
-    await this.client.setTokens(tokens);
-
-    return tokens.access_token;
-  }
-
-  private async fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string) {
-    const response = await fetch(`${this.baseUrl}/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: this.clientId,
-        code: authCode,
-        code_verifier: authRequest.codeVerifier,
-        grant_type: "authorization_code",
-        redirect_uri: authRequest.redirectURI,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("fetch tokens error:", await response.text());
-      throw new Error(response.statusText);
-    }
-
-    const parsedResponse = (await response.json()) as SlackOAuthResponse;
-    if (!parsedResponse.ok) {
-      console.error("fetch tokens error:", parsedResponse);
-      throw new Error("Failed to fetch tokens");
+        await slackAuth.client.removeTokens();
+        await slackAuth.authorize();
+        // The loop will re-attempt the DND call.
+      }
     }
 
     return {
-      access_token: parsedResponse.authed_user.access_token,
-      scope: parsedResponse.authed_user.scope,
+      profile: profileResponse.profile,
+      dnd: dndResponse,
     };
-  }
+  });
 }

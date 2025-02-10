@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { generateKey } from "../utils/generateKey";
+import { generateKey } from "@utils/generateKey";
 
 interface Props {
   dateList: string[];

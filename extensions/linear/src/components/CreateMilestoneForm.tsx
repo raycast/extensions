@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
 import useProjects from "../hooks/useProjects";
 import { getProjectIcon } from "../helpers/projects";

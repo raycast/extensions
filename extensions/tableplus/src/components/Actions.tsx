@@ -2,7 +2,7 @@ import { Action, Icon } from "@raycast/api";
 import { preferences } from "../constants";
 import { Connection } from "../interfaces";
 
-export const Actions = (props: { connection: Connection; groupName: string }) => {
+export const OpenActions = (props: { connection: Connection; groupName: string }) => {
   const { connection } = props;
 
   return preferences.defaultAction == "tab" ? (

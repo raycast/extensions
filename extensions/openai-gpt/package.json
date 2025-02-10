@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openai-gpt",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "title": "OpenAI GPT",
   "description": "Interact with OpenAI GPT AI",
   "icon": "openai-logo.png",

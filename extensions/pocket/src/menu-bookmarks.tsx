@@ -1,11 +1,11 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
-import { useBookmarks } from "./utils/hooks";
-import { Bookmark, ReadState } from "./utils/types";
+import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { truncate } from "lodash";
+import { Bookmark, ReadState } from "./lib/api";
+import { View } from "./lib/oauth/view";
+import { preferences } from "./lib/preferences";
+import { useBookmarks } from "./lib/hooks/use-bookmarks";
 
-const preferences = getPreferenceValues();
-
-export default function MenuBookmarks() {
+function MenuBookmarks() {
   const { bookmarks: unreadBookmarks, loading: loadingUnread } = useBookmarks({
     state: ReadState.Unread,
     count: 6,
@@ -46,5 +46,13 @@ export default function MenuBookmarks() {
         />
       ))}
     </MenuBarExtra>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <MenuBookmarks />
+    </View>
   );
 }

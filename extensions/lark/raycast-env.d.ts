@@ -22,11 +22,14 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `search-docs` command */
   export type SearchDocs = ExtensionPreferences & {}
+  /** Preferences accessible in the `search-minutes` command */
+  export type SearchMinutes = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `search-docs` command */
   export type SearchDocs = {}
+  /** Arguments passed to the `search-minutes` command */
+  export type SearchMinutes = {}
 }
-
 

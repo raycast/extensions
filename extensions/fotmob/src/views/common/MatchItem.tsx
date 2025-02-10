@@ -1,8 +1,9 @@
-import { Color, Icon, Image, List } from "@raycast/api";
-import { ComponentProps } from "react";
-import { MatchFixture } from "../../types/team-detail";
-import { prettyDate } from "../../utils/date";
-import { buildLeagueLogoUrl, buildTeamLogoUrl } from "../../utils/url-builder";
+import type { ComponentProps } from "react";
+import type { Image } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
+import type { MatchFixture } from "@/types/team-detail";
+import { prettyDate } from "@/utils/date";
+import { buildLeagueLogoUrl, buildTeamLogoUrl } from "@/utils/url-builder";
 
 // remove title props from List.Item.Props and add match props
 export type MatchItemProps = Omit<ComponentProps<typeof List.Item>, "title"> & {

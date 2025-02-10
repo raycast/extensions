@@ -1,6 +1,7 @@
 import { Action, Clipboard, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { Preferences } from "./interface";
+import { HeartbeatItem, IncidentItem, MonitorItem, Preferences } from "./interface";
+import { baseUrl } from "./constants";
+import fetch from "node-fetch";
 
 export function ActionCopyUrl({ url }: { url: string }) {
   return (
@@ -44,7 +45,7 @@ export function ActionCopyScreenshotUrl({ url }: { url: string }) {
   );
 }
 
-export function ActionDeleteMonitor({ item, onDeleted }: { item: any; onDeleted: () => void }) {
+export function ActionDeleteMonitor({ item, onDeleted }: { item: MonitorItem; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -57,11 +58,18 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: any; onDeleted:
           title: "Deleting monitor...",
         });
 
-        await axios
-          .delete(`https://betteruptime.com/api/v2/monitors/${item.id}`, {
-            headers: { Authorization: `Bearer ${preferences.apiKey}` },
-          })
-          .then(() => {
+        await fetch(`${baseUrl}/monitors/${item.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw { response: { data: errorData } };
+            }
+
             toast.style = Toast.Style.Success;
             toast.title = "Monitor deleted successfully";
 
@@ -76,8 +84,7 @@ export function ActionDeleteMonitor({ item, onDeleted }: { item: any; onDeleted:
     />
   );
 }
-
-export function ActionDeleteIncident({ item, onDeleted }: { item: any; onDeleted: () => void }) {
+export function ActionDeleteIncident({ item, onDeleted }: { item: IncidentItem; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -90,11 +97,18 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: any; onDeleted
           title: "Deleting incident...",
         });
 
-        await axios
-          .delete(`https://betteruptime.com/api/v2/incidents/${item.id}`, {
-            headers: { Authorization: `Bearer ${preferences.apiKey}` },
-          })
-          .then(() => {
+        await fetch(`${baseUrl}/incidents/${item.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw { response: { data: errorData } };
+            }
+
             toast.style = Toast.Style.Success;
             toast.title = "Incident deleted successfully";
 
@@ -110,7 +124,7 @@ export function ActionDeleteIncident({ item, onDeleted }: { item: any; onDeleted
   );
 }
 
-export function ActionDeleteHeartbeat({ item, onDeleted }: { item: any; onDeleted: () => void }) {
+export function ActionDeleteHeartbeat({ item, onDeleted }: { item: HeartbeatItem; onDeleted: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
 
   return (
@@ -123,11 +137,18 @@ export function ActionDeleteHeartbeat({ item, onDeleted }: { item: any; onDelete
           title: "Deleting heartbeat...",
         });
 
-        await axios
-          .delete(`https://betteruptime.com/api/v2/heartbeats/${item.id}`, {
-            headers: { Authorization: `Bearer ${preferences.apiKey}` },
-          })
-          .then(() => {
+        await fetch(`${baseUrl}/heartbeats/${item.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw { response: { data: errorData } };
+            }
+
             toast.style = Toast.Style.Success;
             toast.title = "Heartbeat deleted successfully";
 

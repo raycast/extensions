@@ -10,13 +10,14 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 
 - Pin sites, files, folders, apps, Terminal commands, and scripts to your menu bar
 - Pin any kind of URL, using any kind of URL scheme
-- Pin current browser tab or Finder selection with a single click
+- Pin current browser tab, Finder selection, frontmost document, etc. with a single click
 - Customize pin icons
 - Create groups and subgroups to organize pins into
 - Customize group icons
 - Edit pins and groups as desired
 - Move/rearrange pins and groups as desired
 - View pins and groups in the menu bar or within Raycast
+- Set a target group to quickly add new pins to during a work session
 - Import/Export JSON data in several formats
 - Utilize placeholders to dynamically insert data into your pins
 - Highly configurable

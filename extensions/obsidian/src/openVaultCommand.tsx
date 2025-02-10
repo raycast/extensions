@@ -32,7 +32,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Open
-                  title="Open vault"
+                  title="Open Vault"
                   icon={Icon.ArrowRight}
                   target={getObsidianTarget({ type: ObsidianTargetType.OpenVault, vault: vault })}
                 />

@@ -50,8 +50,8 @@ function PrayerItem(props: { item: PrayerTimeItem; items: PrayerTimeItem[] }) {
           tag: { value: "Current", color: Color.Green },
         }
       : isNext
-      ? { tag: { value: different } }
-      : undefined;
+        ? { tag: { value: different } }
+        : undefined;
   }
 
   useEffect(() => {

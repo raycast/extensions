@@ -1,8 +1,8 @@
-import { List, ActionPanel } from "@raycast/api";
+import { List, ActionPanel, Action, openExtensionPreferences, Icon } from "@raycast/api";
 import { Connection } from "../interfaces";
 import { preferences } from "../constants";
 import { GetAccessories } from "./GetAccessories";
-import { Actions } from "./Actions";
+import { OpenActions } from "./Actions";
 
 export const ConnectionListItem = (props: { connection: Connection; groupName: string }) => {
   const { connection, groupName } = props;
@@ -17,7 +17,13 @@ export const ConnectionListItem = (props: { connection: Connection; groupName: s
       icon={connection.icon}
       actions={
         <ActionPanel>
-          <Actions connection={connection} groupName={groupName} />
+          <OpenActions connection={connection} groupName={groupName} />
+          <Action
+            title="Open Extension Preferences"
+            onAction={openExtensionPreferences}
+            icon={Icon.Gear}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          />
         </ActionPanel>
       }
       keywords={preferences.searchByGroupName ? [groupName] : []}

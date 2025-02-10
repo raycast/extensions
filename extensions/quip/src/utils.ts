@@ -3,15 +3,15 @@ import fs from 'fs';
 import stream from 'stream/promises';
 import fetch from 'node-fetch';
 import mime from 'mime-types';
-import { endpoint } from './api';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
+
+export const preferences = getPreferenceValues<Preferences>();
 
 type Preferences = {
   personalAccessToken: string;
+  endpoint: string;
   onlyMatchTitles?: boolean;
 };
-
-export const preferences = getPreferenceValues<Preferences>();
 
 export async function downloadBlob(src: string) {
   // src should look like /blob/{threadId}/{blobId}
@@ -19,7 +19,7 @@ export async function downloadBlob(src: string) {
 
   fs.mkdirSync(`${environment.supportPath}/${threadId}`, { recursive: true });
 
-  const resp = await fetch(`${endpoint}/1${src}`, {
+  const resp = await fetch(`${preferences.endpoint}/1${src}`, {
     headers: {
       Authorization: `Bearer ${preferences.personalAccessToken}`,
     },

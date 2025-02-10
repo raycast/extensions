@@ -1,5 +1,22 @@
 # Xcode Changelog
 
+## [Added Delete App Data] - 2024-09-30
+
+- Added delete app data command to remove the data of an app installed on a simulator without uninstalling.
+
+## [Search Recent Projects Improvements] - 2024-09-20
+
+- Improved the "Search Recent Projects" command to remember the last filter option
+
+## [Clear SwiftUI Previews Cache] - 2024-04-03
+
+- Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory
+- Improved "Clear Swift Package Manager Cache" command
+
+## [Maintenance Update] - 2024-01-10
+
+- Removed "Search Swift Package Index" command due to the unavailability of the underlying API
+
 ## [Maintenance Update] - 2023-10-28
 
 - Added an option to open the App Group directory from the "Show Recent Builds in Menu Bar"

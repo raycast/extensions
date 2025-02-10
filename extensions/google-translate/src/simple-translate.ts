@@ -1,4 +1,10 @@
 import translate from "@iamtraction/google-translate";
+import * as googleTTS from "google-tts-api";
+import * as os from "os";
+import * as path from "path";
+import * as https from "https";
+import * as child_process from "child_process";
+import { existsSync, writeFileSync, unlinkSync } from "fs";
 import { LanguageCode } from "./languages";
 import { LanguageCodeSet } from "./types";
 
@@ -26,13 +32,13 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
         translatedText: "",
         pronunciationText: "",
         langFrom: options.langFrom,
-        langTo: options.langTo,
+        langTo: options.langTo[0],
       };
     }
 
     const translated = await translate(text, {
       from: options.langFrom,
-      to: options.langTo,
+      to: options.langTo[0],
       raw: true,
     });
 
@@ -41,7 +47,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       translatedText: translated.text,
       pronunciationText: extractPronounceTextFromRaw(translated?.raw),
       langFrom: translated?.from?.language?.iso as LanguageCode,
-      langTo: options.langTo,
+      langTo: options.langTo[0],
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -75,8 +81,8 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
 
     if (translated1?.langFrom) {
       const translated2 = await simpleTranslate(translated1.translatedText, {
-        langFrom: options.langTo,
-        langTo: translated1.langFrom,
+        langFrom: options.langTo[0],
+        langTo: [translated1.langFrom],
       });
 
       return [translated1, translated2];
@@ -90,9 +96,43 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
         langTo: options.langTo,
       }),
       simpleTranslate(text, {
-        langFrom: options.langTo,
-        langTo: options.langFrom,
+        langFrom: options.langTo[0],
+        langTo: [options.langFrom],
       }),
     ]);
   }
+}
+
+export async function playTTS(text: string, langTo: string) {
+  const audioUrl = googleTTS.getAudioUrl(text, {
+    lang: langTo,
+    slow: false,
+    host: "https://translate.google.com",
+  });
+  https.get(audioUrl, (response) => {
+    const chunks: Uint8Array[] = [];
+
+    response.on("data", (chunk) => {
+      chunks.push(chunk);
+    });
+
+    response.on("end", () => {
+      const audioData = Buffer.concat(chunks);
+
+      const tempFilePath = path.join(os.tmpdir(), "translation.mp3");
+      writeFileSync(tempFilePath, audioData);
+
+      // Play the audio file using afplay
+      const afplayProcess = child_process.spawn("afplay", [tempFilePath]);
+
+      afplayProcess.on("exit", (code) => {
+        if (code !== 0) {
+          console.error("Error playing audio");
+        }
+        if (existsSync(tempFilePath)) {
+          unlinkSync(tempFilePath);
+        }
+      });
+    });
+  });
 }

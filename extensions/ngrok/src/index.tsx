@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, List, useNavigation, Icon } from "@raycast/api";
 
 import {
   AddTunnel,
@@ -8,8 +8,8 @@ import {
   StopAgentAction,
   StopTunnelAction,
 } from "./components";
-import { formatDate } from "./utils/date";
 import { useReservedDomains, useTunnelSessions } from "./hooks";
+import { formatDate, getTunnelAccessories, shortenTunnelId } from "./utils";
 
 export default function TunnelsList() {
   const { push } = useNavigation();
@@ -55,18 +55,29 @@ export default function TunnelsList() {
               session.tunnels.map((tunnel) => (
                 <List.Item
                   key={tunnel.id}
-                  title={tunnel.public_url}
-                  subtitle={`Forwards to ➡️ ${tunnel.forwards_to}`}
-                  accessories={tunnel.metadata ? [{ tag: tunnel.metadata }] : []}
+                  title={{
+                    value: tunnel.public_url || shortenTunnelId(tunnel.id),
+                    tooltip: tunnel.id,
+                  }}
+                  subtitle={`➡️ ${tunnel.forwards_to}`}
+                  accessories={getTunnelAccessories(tunnel.metadata, tunnel.labels)}
+                  icon={
+                    tunnel.public_url
+                      ? { value: Icon.Monitor, tooltip: "Local tunnel" }
+                      : { value: Icon.Globe, tooltip: "Cloud Edge tunnel" }
+                  }
                   actions={
-                    <ActionPanel title={tunnel.public_url}>
-                      <Action.CopyToClipboard title="Copy URL" content={tunnel.public_url} />
-                      <Action.OpenInBrowser url={tunnel.public_url} />
+                    <ActionPanel title={tunnel.public_url || tunnel.id}>
+                      <Action.CopyToClipboard
+                        title={tunnel.public_url ? "Copy URL" : "Copy Tunnel ID"}
+                        content={tunnel.public_url || tunnel.id}
+                      />
+                      {tunnel.public_url && <Action.OpenInBrowser url={tunnel.public_url} />}
                       <ActionPanel.Section title="Danger zone">
                         {tunnel.local !== null && (
                           <StopTunnelAction
-                            tunnelName={tunnel.local?.name || ""}
-                            tunnelUrl={tunnel.public_url}
+                            tunnelName={tunnel.local?.name || tunnel.id}
+                            tunnelUrl={tunnel.public_url || tunnel.id}
                             revalidateTunelSessions={revalidateSessions}
                           />
                         )}

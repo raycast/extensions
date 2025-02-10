@@ -1,7 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-import { AxiosProxyConfig } from "axios";
+import { Agent } from "http";
+import { ProxyAgent } from "proxy-agent";
 
-export function useProxy(): AxiosProxyConfig | undefined {
+export function useProxy(): Agent | undefined {
   const prefs = getPreferenceValues<{
     useProxy?: boolean;
     proxyProtocol?: string;
@@ -15,18 +16,13 @@ export function useProxy(): AxiosProxyConfig | undefined {
     return undefined;
   }
 
-  const config: AxiosProxyConfig = {
-    host: prefs.proxyHost,
-    port: prefs.proxyPort,
-    protocol: prefs.proxyProtocol,
-  };
+  let proxyUrl = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
 
   if (prefs.proxyUsername && prefs.proxyPassword) {
-    config.auth = {
-      username: prefs.proxyUsername,
-      password: prefs.proxyPassword,
-    };
+    proxyUrl = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
   }
 
-  return config;
+  return new ProxyAgent({
+    getProxyForUrl: () => proxyUrl,
+  });
 }

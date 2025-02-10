@@ -2,16 +2,17 @@ import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@rayca
 import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
-  let service;
+  let service: string;
   if (props.arguments.service) {
     service = props.arguments.service;
   } else {
-    const preferences = await getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences>();
     service = preferences.service;
   }
 
+  const urlArgument = props.arguments.url;
   try {
-    const url = await getUrl();
+    const url = await getUrl(urlArgument);
 
     if (typeof url !== "string") {
       throw url;

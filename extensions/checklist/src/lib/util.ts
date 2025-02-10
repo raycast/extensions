@@ -12,8 +12,6 @@ export function generateClipboardExport(checklist: Checklist, options: { type: "
     if (options.type === "jira") {
       return `* ✅ ${task.name}`;
     }
-
-    // return `- ✅ ${task.name}`;
   });
 
   return `
@@ -22,18 +20,21 @@ export function generateClipboardExport(checklist: Checklist, options: { type: "
     `;
 }
 
-export async function checkClipboardContent() {
+export async function checkClipboardContent(): Promise<{ checklist: ShareableChecklist | null }> {
   const clipboardContent = await Clipboard.readText();
-  if (clipboardContent) {
-    try {
-      const parsedContent = JSON.parse(clipboardContent);
-      if (ShareableChecklist.safeParse(parsedContent)) {
-        return parsedContent as ShareableChecklist;
-      }
-    } catch {
-      return null;
+  if (!clipboardContent) return { checklist: null };
+
+  try {
+    const parsedChecklist = ShareableChecklist.parse(JSON.parse(clipboardContent));
+
+    if (parsedChecklist.tasks.length > 0) {
+      return { checklist: parsedChecklist };
+    } else {
+      return { checklist: null };
     }
-  } else return null;
+  } catch {
+    return { checklist: null };
+  }
 }
 
 export function shareableChecklist({ title, tasks }: Checklist) {

@@ -1,5 +1,21 @@
 # Google Meet Changelog
 
+## [Improvement] - 2024-10-22
+
+- Add delay before reading meeting URL from browser
+
+## [Improvement] - 2024-07-19
+
+- Change the way to get the URL in some Chromium-based browsers
+
+## [Improvement] - 2024-05-29
+
+- Change the way to get the URL in Arc Browser
+
+## [Bug fix] - 2024-01-05
+
+- Open Arc's location bar before attempting to copy the URL
+
 ## [New Preference] - 2023-07-31
 
 - Now it's possible to select a preferred browser, meaning that if you have multiple browsers and want to customize whether it opens on default application or a custom. By default it will always open with the default browser, but you can now override the value on preferences. Don't forget to only choose valid browsers.

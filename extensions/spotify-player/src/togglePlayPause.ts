@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { getPlaybackState } from "./api/getPlaybackState";
 import { pause } from "./api/pause";
-import { getError } from "./helpers/getError";
+import { getErrorMessage } from "./helpers/getError";
 import { play } from "./api/play";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 
@@ -16,16 +16,16 @@ export default async function Command() {
       await pause();
       await showHUD("Paused");
     } catch (err) {
-      const error = getError(err);
-      await showHUD(error.message);
+      const message = getErrorMessage(err);
+      await showHUD(message);
     }
   } else {
     try {
       await play();
       await showHUD("Playing");
     } catch (err) {
-      const error = getError(err);
-      await showHUD(error.message);
+      const message = getErrorMessage(err);
+      await showHUD(message);
     }
   }
 }

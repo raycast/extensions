@@ -55,6 +55,7 @@ type EntriesParams = {
   starred?: true;
   page?: number;
   feedId?: number;
+  per_page?: number;
 };
 
 export function useEntries({ feedId, ...params }: EntriesParams = {}) {
@@ -264,17 +265,6 @@ export function readLater(url: string) {
       showFailureToast("Failed to Save to Read Later");
       throw err;
     }) as Promise<Entry>;
-}
-
-export interface Icon {
-  host: string;
-  url: string;
-}
-
-export function useIcons() {
-  return useFetchWithEtag<Icon[]>(`${API_ROOT}/v2/icons.json`, {
-    headers: getHeaders(),
-  });
 }
 
 export function updateSubscription(id: number, title: string) {

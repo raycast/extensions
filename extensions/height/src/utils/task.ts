@@ -1,6 +1,7 @@
 import { Icon, Image } from "@raycast/api";
-import type { Label } from "../types/fieldTemplate";
-import { UserObject } from "../types/user";
+
+import type { Label } from "@/types/fieldTemplate";
+import { UserObject } from "@/types/user";
 
 export function getIconByStatusState(statusId: string | undefined, statuses: Label[] | undefined) {
   const status = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";

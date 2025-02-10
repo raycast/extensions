@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ok-json",
   "title": "OK JSON",
-  "description": "Control OK JSON with Raycast.",
+  "description": "Control OK JSON with Raycast",
   "icon": "okjson.png",
   "author": "anybox",
   "categories": [

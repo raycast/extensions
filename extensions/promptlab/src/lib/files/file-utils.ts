@@ -7,7 +7,7 @@ import { CommandOptions } from "../commands/types";
 import { defaultModels } from "../../data/default-models";
 import { randomUUID } from "crypto";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, CUSTOM_PLACEHOLDERS_FILENAME } from "../constants";
+import { ADVANCED_SETTINGS_FILENAME, CUSTOM_PLACEHOLDERS_FILENAME } from "../common/constants";
 import { defaultCustomPlaceholders } from "../../data/default-custom-placeholders";
 import { ScriptRunner } from "../scripts";
 import exifr from "exifr";

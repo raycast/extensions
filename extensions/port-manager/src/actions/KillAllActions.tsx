@@ -5,8 +5,8 @@ import { KillSignal, killProcess } from "../utilities/killProcess";
 const preferences = getPreferenceValues<Preferences>();
 export default function KillAllActions(props: {
   process: ProcessInfo;
-  onKilled?: () => Promise<void>;
-  onError?: (error: unknown) => Promise<void>;
+  onKilled?: () => Promise<void> | void;
+  onError?: (error: unknown) => Promise<void> | void;
 }) {
   if (preferences.killSignal === KillSignal.KILL || preferences.killSignal === KillSignal.TERM) {
     return (
@@ -16,7 +16,6 @@ export default function KillAllActions(props: {
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: preferences.killSignal,
-            useSudo: preferences.sudo,
             killAll: true,
             onKilled: props.onKilled,
             onError: props.onError,
@@ -33,7 +32,6 @@ export default function KillAllActions(props: {
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: KillSignal.TERM,
-            useSudo: preferences.sudo,
             killAll: true,
             onKilled: props.onKilled,
             onError: props.onError,

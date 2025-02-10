@@ -27,7 +27,7 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
   const extensions = getListOfExtensions(allMedia);
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
-  const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
+  const [searchText, setSearchText] = useState(searchArguments?.searchArgument ?? "");
   const list = useMemo(() => filterMedia(mediaList, searchText, notes), [mediaList, searchText]);
 
   return (

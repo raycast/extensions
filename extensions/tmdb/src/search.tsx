@@ -6,6 +6,8 @@ import { MovieResponse, ShowResponse } from "moviedb-promise";
 import { format } from "date-fns";
 import MovieDetail from "./components/MovieDetail";
 import TvShowDetail from "./components/TvShowDetail";
+import Posters from "./components/Posters";
+import Backdrops from "./components/Backdrops";
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -107,6 +109,18 @@ function Movie({ movie }: { movie: MovieResponse }) {
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           ) : null}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={movie.id !== undefined && <Posters id={movie.id} type="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={movie.id !== undefined && <Backdrops id={movie.id} type="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />
@@ -123,7 +137,7 @@ function Show({ show }: { show: ShowResponse }) {
   return (
     <List.Item
       icon={`https://image.tmdb.org/t/p/w200/${show.poster_path}`}
-      title={show.name ?? "Unknwon Show"}
+      title={show.name ?? "Unknown Show"}
       detail={
         <List.Item.Detail
           markdown={`![Movie Banner](https://image.tmdb.org/t/p/w500/${show.backdrop_path})${
@@ -150,6 +164,25 @@ function Show({ show }: { show: ShowResponse }) {
         <ActionPanel>
           <Action.Push title="Show Details" icon={Icon.Sidebar} target={<TvShowDetail show={show} />} />
           <Action.OpenInBrowser url={`https://www.themoviedb.org/tv/${show.id ?? 0}`} />
+          {show.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID`}
+              content={show.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={show.id !== undefined && <Posters id={show.id ?? 0} type="tv" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={show.id !== undefined && <Backdrops id={show.id ?? 0} type="tv" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />

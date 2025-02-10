@@ -1,5 +1,5 @@
-import type { Label } from "./fieldTemplate";
-import type { ListObject } from "./list";
+import type { Label } from "@/types/fieldTemplate";
+import type { ListObject } from "@/types/list";
 
 export interface Field {
   fieldTemplateId: string;

@@ -4,7 +4,7 @@
   "title": "Metronome",
   "description": "Based on an input (integer argument) BPM, you can get a metronome that plays a sound after a certain amount of time.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "categories": [
     "Other",
     "Fun"

@@ -4,7 +4,7 @@ import { XcodeRelease } from "../../models/xcode-release/xcode-release.model";
 /**
  * Xcode Release List Item Detail
  */
-export function XcodeReleaseListItemDetail(props: { release: XcodeRelease }): JSX.Element {
+export function XcodeReleaseListItemDetail(props: { release: XcodeRelease }) {
   return (
     <List.Item.Detail
       metadata={

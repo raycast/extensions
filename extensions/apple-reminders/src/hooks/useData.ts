@@ -1,8 +1,13 @@
 import { useCachedPromise } from "@raycast/utils";
-
-import { getData } from "../api";
+import { getData } from "swift:../../swift/AppleReminders";
 
 export type Priority = "low" | "medium" | "high" | null;
+
+export type Location = {
+  address: string;
+  proximity: string;
+  radius?: number;
+};
 
 export type Reminder = {
   id: string;
@@ -16,6 +21,7 @@ export type Reminder = {
   isRecurring: string;
   recurrenceRule: string;
   list: { id: string; title: string; color: string } | null;
+  location?: Location;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };
@@ -26,5 +32,7 @@ export type Data = {
 };
 
 export function useData() {
-  return useCachedPromise(getData);
+  return useCachedPromise(() => {
+    return getData() as Promise<Data>;
+  });
 }

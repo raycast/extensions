@@ -1,5 +1,33 @@
 # Browser Bookmarks Changelog
 
+## [Support Island Browser] - 2025-01-30
+
+- Added support for `Island` browser.
+
+## [Support Whale Browser] - 2024-12-14
+
+- Added support for `Whale` Browser Desktop.
+
+## [Update Logo] - 2024-12-11
+
+- Updated to latest logo since rebrand.
+
+## [Support Zen Browser] - 2024-11-26
+
+- Added support for Zen Browser Desktop.
+
+## [Support for Prisma Access] - 2024-11-24
+
+- Add support for `Prisma Access` browser.
+
+## [Support for Chrome Beta] - 2024-01-12
+
+- Add support for `Chrome Beta` browser.
+
+## [Bug Fixes] - 2024-02-01
+
+- Fixed sort by score issue
+
 ## [Bug Fixes] - 2023-12-29
 
 - Fixed an issue where the selected item would not be the first one after the search text changed

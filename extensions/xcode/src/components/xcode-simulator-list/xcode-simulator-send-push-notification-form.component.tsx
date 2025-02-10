@@ -12,7 +12,7 @@ import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 export function XcodeSimulatorSendPushNotificationForm(props: {
   simulator: XcodeSimulator;
   preferredBundleIdentifier?: string;
-}): JSX.Element {
+}) {
   const [payloadFilePath, setPayloadFilePath] = useState<string>("");
   const [bundleIdentifier, setBundleIdentifier] = useState<string>(props.preferredBundleIdentifier ?? "");
   const xcodeSimulatorApplications = usePromise(() =>

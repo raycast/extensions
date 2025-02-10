@@ -1,14 +1,22 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
+import {
+  deleteReminder,
+  setPriorityStatus,
+  toggleCompletionStatus,
+  setDueDate as setReminderDueDate,
+  setLocation,
+} from "swift:../../swift/AppleReminders";
 
-import { deleteReminder, setReminderPriority, toggleCompletionStatus, setReminderDueDate } from "../api";
 import { CreateReminderForm } from "../create-reminder";
 import { getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
+import useLocations, { Location } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
 import EditReminder from "./EditReminder";
+import LocationForm from "./LocationForm";
 
 type ReminderActionsProps = {
   reminder: Reminder;
@@ -18,6 +26,8 @@ type ReminderActionsProps = {
 };
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
+  const { locations } = useLocations();
+
   async function toggleReminder() {
     async function toggle() {
       await mutate(toggleCompletionStatus(reminder.id), {
@@ -62,9 +72,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
     }
   }
 
-  async function setPriority(reminderId: string, priority: Priority) {
+  async function setPriority(priority: Priority) {
     try {
-      await mutate(setReminderPriority(reminderId, priority), {
+      await mutate(setPriorityStatus({ reminderId: reminder.id, priority }), {
         optimisticUpdate(data) {
           if (!data) return;
 
@@ -86,6 +96,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         message: priority ? `Changed to ${priority}` : "",
       });
     } catch (error) {
+      console.error(error);
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to set priority`,
@@ -100,7 +111,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         newDate = Action.PickDate.isFullDay(date) ? format(date, "yyyy-MM-dd") : date.toISOString();
       }
 
-      await mutate(setReminderDueDate(reminder.id, newDate), {
+      await mutate(setReminderDueDate({ reminderId: reminder.id, dueDate: newDate }), {
         optimisticUpdate(data) {
           if (!data) return;
 
@@ -125,6 +136,32 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to update due date",
+      });
+    }
+  }
+
+  async function setReminderLocation(location: Location) {
+    try {
+      const radius = parseInt(location.radius);
+
+      await mutate(
+        setLocation({
+          reminderId: reminder.id,
+          address: location.address,
+          proximity: location.proximity,
+          radius,
+        }),
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Set location reminder",
+        message: location.name,
+      });
+    } catch (error) {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to set location reminder",
       });
     }
   }
@@ -192,10 +229,10 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           icon={Icon.Exclamationmark}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         >
-          <Action title="None" onAction={() => setPriority(reminder.id, null)} />
-          <Action title="High" icon={getPriorityIcon("high")} onAction={() => setPriority(reminder.id, "high")} />
-          <Action title="Medium" icon={getPriorityIcon("medium")} onAction={() => setPriority(reminder.id, "medium")} />
-          <Action title="Low" icon={getPriorityIcon("low")} onAction={() => setPriority(reminder.id, "low")} />
+          <Action title="None" onAction={() => setPriority(null)} />
+          <Action title="High" icon={getPriorityIcon("high")} onAction={() => setPriority("high")} />
+          <Action title="Medium" icon={getPriorityIcon("medium")} onAction={() => setPriority("medium")} />
+          <Action title="Low" icon={getPriorityIcon("low")} onAction={() => setPriority("low")} />
         </ActionPanel.Submenu>
 
         <Action.PickDate
@@ -204,6 +241,23 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           onChange={setDueDate}
         />
+
+        <ActionPanel.Submenu title="Set Location" icon={Icon.Pin} shortcut={{ modifiers: ["cmd"], key: "l" }}>
+          {locations.map((location) => (
+            <Action
+              key={location.id}
+              title={location.name}
+              icon={location.icon}
+              onAction={() => setReminderLocation(location)}
+            />
+          ))}
+
+          <Action.Push
+            title="Custom Location"
+            icon={Icon.Pencil}
+            target={<LocationForm onSubmit={setReminderLocation} isCustomLocation />}
+          />
+        </ActionPanel.Submenu>
 
         <Action
           title="Delete Reminder"
@@ -284,7 +338,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           title="Create Reminder"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          target={<CreateReminderForm listId={listId !== "all" ? listId : ""} />}
+          target={<CreateReminderForm listId={listId} />}
         />
       </ActionPanel.Section>
 

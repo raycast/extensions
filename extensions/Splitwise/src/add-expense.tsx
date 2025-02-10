@@ -1,23 +1,22 @@
-import { Action, ActionPanel, Icon, Image, List, Form, Color, useNavigation, Keyboard } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
-
-import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_groups.types";
-import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
-
+import { Action, ActionPanel, Icon, Image, List, Color, Keyboard } from "@raycast/api";
+import { getFriends, getGroups } from "./hooks/useFriends_Groups";
 import { getCurrency_code } from "./utils/utils";
+import { FillForm } from "./components-add/FillForm";
+
+import { Entity } from "./types/friends_groups.types";
 
 export default function Command() {
   const [friends, loadingFriends, revalidateFriends] = getFriends();
   const [groups, loadingGroups, revalidateGroups] = getGroups();
-
   function cmpUpdatedAt(a: Entity, b: Entity) {
     return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   }
 
   function lastInteractionAccessory(entity: Entity) {
+    const date = new Date(entity.updated_at);
     return {
-      date: new Date(entity.updated_at),
-      tooltip: `Last interaction: ${new Date(entity.updated_at).toLocaleString()}`,
+      date,
+      tooltip: `Last interaction: ${date.toLocaleString()}`,
     };
   }
 
@@ -34,9 +33,9 @@ export default function Command() {
               friend.balance.length > 0
                 ? {
                     tag: {
-                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${getCurrency_code(
-                        friend.balance[0].currency_code
-                      )}`,
+                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${
+                        getCurrency_code(friend.balance[0].currency_code).symbol
+                      }`,
                       color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
                     },
                   }
@@ -45,7 +44,11 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm friend={friend} />} />
+                <Action.Push
+                  icon={Icon.Wallet}
+                  title="Add Expense"
+                  target={<FillForm friend={friend} revalidateFriends={revalidateFriends} />}
+                />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
@@ -71,7 +74,11 @@ export default function Command() {
             accessories={[lastInteractionAccessory(Group)]}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm group={Group} />} />
+                <Action.Push
+                  icon={Icon.Wallet}
+                  title="Add Expense"
+                  target={<FillForm group={Group} revalidateGroups={revalidateGroups} />}
+                />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
@@ -89,67 +96,5 @@ export default function Command() {
         ))}
       </List.Section>
     </List>
-  );
-}
-
-function FillForm(props: FriendOrGroupProps) {
-  const { pop } = useNavigation();
-
-  const { handleSubmit, itemProps } = useForm<{
-    description: string;
-    date: Date | null;
-    cost: string;
-    currency_code: string;
-  }>({
-    onSubmit: (values) => {
-      const paramsJson: ExpenseParams = {
-        description: values.description,
-        date: values.date,
-        cost: values.cost,
-        currency_code: values.currency_code,
-        split_equally: true,
-      };
-      props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
-      postExpense(paramsJson).then(() => pop());
-    },
-    validation: {
-      description: FormValidation.Required,
-      cost: (input) => {
-        // check if input is integer or float with 1 or 2 decimal places
-        if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
-          return "Decimal value (2 places)";
-        }
-      },
-    },
-  });
-
-  return (
-    <Form
-      navigationTitle="Add Expense"
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Add Expense" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description
-        title={`${props.friend ? "Friend" : "Group"}`}
-        text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
-      />
-      <Form.TextField title="Description" {...itemProps.description} />
-      <Form.DatePicker title="Date of Expense" {...itemProps.date} />
-      <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
-        <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
-        <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
-        <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
-        <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
-      </Form.Dropdown>
-      <Form.TextField
-        title="Cost"
-        placeholder="0.00"
-        {...itemProps.cost}
-        info="Expense will be split equally; assumes you are the payer."
-      />
-    </Form>
   );
 }

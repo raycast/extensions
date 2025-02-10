@@ -1,12 +1,12 @@
-import { MenuBarExtra, getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
+import { Icon, MenuBarExtra, getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchDatabases, getShortcut } from "./utils";
+import { fetchDatabases, getShortcut, uppercaseText } from "./utils";
 import { Group } from "./interfaces";
 import { preferences } from "./constants";
 
 export default function MenuCommand() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
-  const { showPathInMenubar, showMonochromeIcon } = getPreferenceValues<ExtensionPreferences>();
+  const { showPathInMenubar, showMonochromeIcon, subtitleMenubar } = getPreferenceValues<ExtensionPreferences>();
 
   useEffect(() => {
     (async () => {
@@ -25,7 +25,15 @@ export default function MenuCommand() {
         state.connections?.map((item) => (
           <MenuBarExtra.Section key={item.id} title={item.name}>
             {item.connections.map((connection) => {
-              const subtitle = showPathInMenubar ? connection.subtitle : "";
+              const pathMap = {
+                path: connection.subtitle,
+                environment: uppercaseText(connection.Environment),
+              };
+
+              const subtitle = showPathInMenubar ? pathMap[subtitleMenubar] : "";
+              const optionalSubtitle = showPathInMenubar
+                ? pathMap[subtitleMenubar === "path" ? "environment" : "path"]
+                : "";
 
               const handleClick = (event: MenuBarExtra.ActionEvent) => {
                 const baseUri = `tableplus://?id=${connection.id}`;
@@ -45,6 +53,16 @@ export default function MenuCommand() {
                   onAction={(event: MenuBarExtra.ActionEvent) => {
                     handleClick(event);
                   }}
+                  alternate={
+                    <MenuBarExtra.Item
+                      icon={connection.icon}
+                      title={connection.name}
+                      subtitle={optionalSubtitle}
+                      onAction={(event: MenuBarExtra.ActionEvent) => {
+                        handleClick(event);
+                      }}
+                    />
+                  }
                 />
               );
             })}
@@ -53,6 +71,7 @@ export default function MenuCommand() {
       <MenuBarExtra.Section title="Preferences">
         <MenuBarExtra.Item
           title="Open Preferences"
+          icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openExtensionPreferences}
         />

@@ -4,7 +4,7 @@ import * as path from "node:path";
 import dedent from "ts-dedent";
 
 import { LinkFormState } from "../hooks/use-link-form";
-import { File, FrontMatter } from "../types";
+import { File, FrontMatter, Preferences } from "../types";
 
 import { fileExists } from "./file-utils";
 import getPublisher from "./get-publisher";
@@ -12,7 +12,8 @@ import { addToLocalStorageFiles } from "./localstorage-files";
 import { addToLocalStorageTags } from "./localstorage-tags";
 import slugify from "./slugify";
 import tagify from "./tagify";
-import { getOrCreateBookmarksPath } from "./vault-path";
+import { getSaveSubfolderPath } from "./vault-path";
+import { getPreferenceValues } from "@raycast/api";
 
 function formatDate(date: Date): string {
   const year = String(date.getFullYear()).padStart(4, "0");
@@ -25,12 +26,12 @@ function formatDate(date: Date): string {
 async function getFileName(filename: string): Promise<string> {
   const ext = path.extname(filename);
   const base = path.basename(filename, ext);
-  const bookmarksPath = await getOrCreateBookmarksPath();
-  let file = path.join(bookmarksPath, filename);
+  const savePath = await getSaveSubfolderPath();
+  let file = path.join(savePath, filename);
   let index = 1;
   while (await fileExists(file)) {
     const newFilename = `${base}-${index++}.md`;
-    file = path.join(bookmarksPath, newFilename);
+    file = path.join(savePath, newFilename);
   }
   return file;
 }
@@ -50,7 +51,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
 
   const body = dedent`
   # [${values.title.replace(/[[\]]/g, "")}](${values.url})
-  
+
   ${values.description}
   `;
 
@@ -63,10 +64,13 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   tags: ${JSON.stringify(attributes.tags)}
   `;
 
-  const fileSlug = `${formatDate(midnight)}-${slugify(attributes.title)}`.slice(0, 150);
+  const { datePrefix } = getPreferenceValues<Preferences>();
+  const prefix = datePrefix ? formatDate(midnight) + "-" : "";
+  const fileSlug = `${prefix}${slugify(attributes.title)}`.slice(0, 150);
   const baseName = `${fileSlug}.md`;
   const fullPath = await getFileName(baseName);
   const fileName = path.basename(fullPath);
+  const mtime = 1;
 
   return {
     attributes,
@@ -74,11 +78,16 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
     body,
     fileName,
     fullPath,
+    mtime,
     bodyBegin: 4 + frontmatter.length,
   };
 }
 
 export default async function saveToObsidian(file: File): Promise<string> {
+  // Combine the form tags with the required tags
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+  const combinedTags = file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags);
+
   const template = dedent`
     ---
     title: ${JSON.stringify(file.attributes.title)}
@@ -86,7 +95,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     source: ${JSON.stringify(file.attributes.source)}
     publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
-    tags: ${JSON.stringify(file.attributes.tags.flatMap((t) => tagify(t)))}
+    tags: ${JSON.stringify(combinedTags)}
     ---
 
     ${file.body}

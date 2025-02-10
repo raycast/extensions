@@ -96,6 +96,13 @@ export function CopyNoteAction(props: { note: Note }) {
   );
 }
 
+export function CopyNoteTitleAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+  );
+}
+
 export function PasteNoteAction(props: { note: Note }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -323,6 +330,7 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
       <AppendToNoteAction note={note} vault={vault} />
       <AppendSelectedTextToNoteAction note={note} vault={vault} />
       <CopyNoteAction note={note} />
+      <CopyNoteTitleAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />

@@ -1,6 +1,7 @@
-import React from "react";
+import { useMemo, useState } from "react";
 import { ActionPanel, Detail, Action, Grid, Color } from "@raycast/api";
 import { fetchShots, Shot } from "./data";
+import { useCachedPromise } from "@raycast/utils";
 
 const createShotMarkdown = (item: Shot) => {
   return `## ${item.title}
@@ -9,24 +10,27 @@ const createShotMarkdown = (item: Shot) => {
 };
 
 export default function Command() {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState("recent");
-  const [items, setItems] = React.useState<Shot[]>([]);
+  const [filter, setFilter] = useState("recent");
+  const { data, isLoading, pagination } = useCachedPromise(
+    (filter) =>
+      async ({ page }) => {
+        const shots = await fetchShots(filter, page + 1);
+        return { data: shots, hasMore: page < 50 };
+      },
+    [filter]
+  );
 
-  React.useEffect(() => {
-    setIsLoading(true);
-    setItems([]);
-    fetchShots(filter)
-      .then(setItems)
-      .then(() => setIsLoading(false))
-      .catch(() => setIsLoading(false));
-  }, [filter]);
+  const uniqueItems: Shot[] = useMemo(
+    () => Array.from(new Set((data ?? []).map((obj) => JSON.stringify(obj)))).map((str) => JSON.parse(str)),
+    [data, filter]
+  );
 
   return (
     <Grid
       columns={3}
       aspectRatio="4/3"
       isLoading={isLoading}
+      pagination={pagination}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Filter" value={filter} onChange={setFilter}>
           <Grid.Dropdown.Section title="Recent">
@@ -70,7 +74,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {items.map((item) => (
+      {uniqueItems.map((item) => (
         <Grid.Item
           key={item.icon}
           content={{ tooltip: item.title, value: { source: item.image } }}

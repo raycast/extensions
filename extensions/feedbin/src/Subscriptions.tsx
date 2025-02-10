@@ -17,10 +17,10 @@ import {
   useFeedbinApiContext,
 } from "./utils/FeedbinApiContext";
 import { Subscription, updateSubscription } from "./utils/api";
-import { useIcon } from "./utils/useIcon";
+import { getIcon } from "./utils/getIcon";
 
 export function SubscriptionItem(props: { sub: Subscription }) {
-  const icon = useIcon(props.sub.site_url);
+  const icon = getIcon(props.sub.site_url);
 
   return (
     <List.Item

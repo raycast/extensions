@@ -7,15 +7,20 @@ export const BROWSERS_BUNDLE_ID = {
   braveBeta: "com.brave.browser.beta",
   braveNightly: "com.brave.browser.nightly",
   chrome: "com.google.chrome",
+  chromeBeta: "com.google.chrome.beta",
   chromeDev: "com.google.chrome.dev",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
+  island: "io.island.island",
   safari: "com.apple.safari",
   sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
   edgeCanary: "com.microsoft.edgemac.canary",
+  prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
+  zen: "org.mozilla.com.zen.browser",
+  whale: "com.naver.whale",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

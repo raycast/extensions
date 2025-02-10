@@ -1,13 +1,12 @@
+import { getPreferenceValues } from "@raycast/api";
+import { format, isDate } from "date-fns";
+
 const formatDate = (date: Date) => {
-  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+  if (!isDate(date)) {
     return "";
   }
-  return date.toLocaleString([], {
-    year: "numeric",
-    month: "2-digit",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+
+  const preferences = getPreferenceValues<{ dateFormat: string }>();
+  return format(date, `E, ${preferences.dateFormat}`);
 };
 export default formatDate;

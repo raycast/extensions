@@ -10,7 +10,6 @@ import TaskListItem from "./TaskListItem";
 
 type TaskListProps = {
   sections: SectionWithTasks[];
-  isLoading?: boolean;
   mode?: ViewMode;
   viewProps?: ViewProps;
   quickLinkView?: QuickLinkView;

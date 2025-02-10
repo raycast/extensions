@@ -1,12 +1,18 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { useTask } from "./hooks/useTask";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { useTaskActions } from "./hooks/useTask";
 import { useTimePolicy } from "./hooks/useTimePolicy";
 import { useUser } from "./hooks/useUser";
-import { TimePolicy } from "./types/time-policy";
-import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
 import { TaskPlanDetails } from "./types/plan";
+import { makeOrderedListComparator } from "./utils/arrays";
+import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+
+export const timeSchemeTitleComparator = makeOrderedListComparator<string>(["Working Hours", "Personal Hours"]);
 
 interface FormValues {
   title: string;
@@ -42,15 +48,25 @@ const getDefaultDueDate = (defaultDueDatePreference: number | undefined) => {
   return null;
 };
 
-export default (props: Props) => {
+function Command(props: Props) {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
 
+  /********************/
+  /*   custom hooks   */
+  /********************/
+
   const { currentUser } = useUser();
-  const { createTask } = useTask();
-  const { isLoading: isLoadingTimePolicy, getTimePolicy } = useTimePolicy();
+  const { createTask } = useTaskActions();
+  const { timePolicies, isLoading: isLoadingTimePolicy } = useTimePolicy();
+
+  /********************/
+  /*     useState     */
+  /********************/
 
   const defaults = useMemo(() => {
     // RAI-10338 respect user settings of no default due date and no default snooze date
+    const defaultAlwaysPrivate = currentUser?.features.taskSettings.defaults.alwaysPrivate;
+    const defaultOnDeck = currentUser?.features.taskSettings.defaults.onDeck;
     const defaultDueDatePreference = currentUser?.features.taskSettings.defaults.dueInDays;
     const defaultDueDate = getDefaultDueDate(defaultDueDatePreference);
     const defaultDelayedStartPreference = currentUser?.features.taskSettings.defaults.delayedStartInMinutes;
@@ -60,6 +76,8 @@ export default (props: Props) => {
     return {
       defaultDueDate: defaultDueDate,
       defaultSnoozeDate: defaultSnoozeDate,
+      alwaysPrivate: defaultAlwaysPrivate,
+      onDeck: defaultOnDeck,
       minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
@@ -82,15 +100,30 @@ export default (props: Props) => {
   const [timeNeededError, setTimeNeededError] = useState<string | undefined>();
   const [durationMinError, setDurationMinError] = useState<string | undefined>();
   const [durationMaxError, setDurationMaxError] = useState<string | undefined>();
-  const [timePolicies, setTimePolicies] = useState<TimePolicy[] | undefined>();
-  const [timePolicy, setTimePolicy] = useState<string>("");
+  const [timePolicyId, setTimePolicyId] = useState<string>("");
 
   const [due, setDue] = useState<Date | null>(interpreter?.due ? new Date(interpreter.due) : defaults.defaultDueDate);
   const [snooze, setSnooze] = useState<Date | null>(
     interpreter?.snoozeUntil ? new Date(interpreter.snoozeUntil) : defaults.defaultSnoozeDate
   );
 
-  const handleSubmit = async (formValues: FormValues) => {
+  /********************/
+  /* useMemo & consts */
+  /********************/
+
+  const filteredPolicies = useMemo(
+    () =>
+      timePolicies
+        ?.filter((policy) => !!policy.features.find((f) => f === "TASK_ASSIGNMENT"))
+        .sort((a, b) => timeSchemeTitleComparator(a.title, b.title)),
+    [timePolicies]
+  );
+
+  /********************/
+  /*    useCallback   */
+  /********************/
+
+  const handleSubmit = useCallbackSafeRef(async (formValues: FormValues) => {
     await showToast(Toast.Style.Animated, "Creating Task...");
     const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy, priority, onDeck } =
       formValues;
@@ -99,23 +132,26 @@ export default (props: Props) => {
     const _durationMin = parseDurationToMinutes(durationMin) / TIME_BLOCK_IN_MINUTES;
     const _durationMax = parseDurationToMinutes(durationMax) / TIME_BLOCK_IN_MINUTES;
 
-    const selectedTimePolicy = timePolicies?.find((policy) => policy.id === timePolicy);
+    const selectedTimePolicy = filteredPolicies?.find((policy) => policy.id === timePolicy);
 
     if (!selectedTimePolicy) {
       await showToast(Toast.Style.Failure, "Something went wrong", `Task ${title} not created`);
       return;
     }
 
+    const _alwaysPrivate = defaults.alwaysPrivate === undefined ? false : defaults.alwaysPrivate;
+
     const created = await createTask({
-      category: selectedTimePolicy.taskCategory === "WORK" ? "WORK" : "PERSONAL",
       title,
+      timePolicy: selectedTimePolicy.id,
+      category: selectedTimePolicy.taskCategory === "WORK" ? "WORK" : "PERSONAL",
       timeNeeded: _timeNeeded,
       durationMin: _durationMin,
       durationMax: _durationMax,
       snoozeUntil,
-      timePolicy: selectedTimePolicy.id,
       due,
       notes,
+      alwaysPrivate: _alwaysPrivate,
       priority,
       onDeck,
     });
@@ -128,33 +164,22 @@ export default (props: Props) => {
     } else {
       await showToast(Toast.Style.Failure, "Something went wrong", `Task ${title} not created`);
     }
-  };
+  });
 
-  const loadTimePolicy = async () => {
-    const allPolicies = await getTimePolicy("TASK_ASSIGNMENT");
-    if (allPolicies) {
-      setTimePolicies(allPolicies);
-      if (interpreter?.personal) {
-        const personalPolicy = allPolicies.find((policy) => policy.policyType === "PERSONAL");
-        if (personalPolicy) {
-          setTimePolicy(personalPolicy.id);
-        }
-      }
-    }
-  };
-
-  const timePolicyOptions = useMemo(() => {
-    return timePolicies
-      ? timePolicies.map((policy) => ({
-          title: policy.title,
-          value: policy.id,
-        }))
-      : [];
-  }, [timePolicies]);
+  /********************/
+  /*    useEffects    */
+  /********************/
 
   useEffect(() => {
-    void loadTimePolicy();
-  }, []);
+    if (filteredPolicies && interpreter?.personal) {
+      const personalPolicy = filteredPolicies.find((policy) => policy.policyType === "PERSONAL");
+      if (personalPolicy) setTimePolicyId(personalPolicy.id);
+    }
+  }, [filteredPolicies, interpreter]);
+
+  /********************/
+  /*       JSX        */
+  /********************/
 
   return (
     <Form
@@ -227,9 +252,9 @@ export default (props: Props) => {
         }}
       />
 
-      <Form.Dropdown id="timePolicy" title="Hours" value={timePolicy} onChange={setTimePolicy}>
-        {timePolicyOptions?.map((policy) => (
-          <Form.Dropdown.Item key={policy.value} title={policy.title} value={policy.value} />
+      <Form.Dropdown id="timePolicy" title="Hours" value={timePolicyId} onChange={setTimePolicyId}>
+        {filteredPolicies?.map((policy) => (
+          <Form.Dropdown.Item key={policy.id} title={policy.title} value={policy.id} />
         ))}
       </Form.Dropdown>
       <Form.DatePicker
@@ -242,8 +267,10 @@ export default (props: Props) => {
       <Form.DatePicker value={due} onChange={setDue} type={Form.DatePicker.Type.DateTime} id="due" title="Due" />
       <Form.TextArea id="notes" title="Notes" />
       {defaults.schedulerVersion > 14 && (
-        <Form.Checkbox id="onDeck" title="Send to Up Next" label="" defaultValue={false} />
+        <Form.Checkbox id="onDeck" title="Send to Up Next" label="" defaultValue={defaults.onDeck} />
       )}
     </Form>
   );
-};
+}
+
+export default withRAIErrorBoundary(Command);

@@ -39,18 +39,3 @@ export async function runAppleScriptSilently(appleScript: string) {
   await closeMainWindow();
   await runAppleScript(appleScript);
 }
-
-/**
- * Checks if Spotify is installed.
- * @returns A promise that is resolved with a boolean indicating if Spotify is installed
- * @throws An error when the AppleScript fails to run
- * @example
- * ```
- * const isSpotifyInstalled = await isSpotifyInstalled();
- * ```
- */
-export async function checkIfSpotifyIsInstalled() {
-  return (
-    (await runAppleScript(`tell application "System Events" to (name of processes) contains "Spotify"`)) === "true"
-  );
-}

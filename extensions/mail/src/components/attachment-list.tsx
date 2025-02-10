@@ -59,7 +59,7 @@ export const AttachmentList = (props: AttachmentListProps) => {
               )}
 
               <Action.Push
-                title={"Save Attachment As..."}
+                title={"Save Attachment As…"}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 icon={MailIcon.SaveAs}
                 target={<SaveAttachment {...props} attachment={attachment} />}

@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { IssueResult } from "../api/getIssues";
 
 import { getUserIcon } from "../helpers/users";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
 
 import useIssueComments from "../hooks/useIssueComments";
@@ -109,7 +109,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                       title="Delete Comment"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                       onAction={() => deleteComment(comment.id)}
                     />
                   </ActionPanel.Section>

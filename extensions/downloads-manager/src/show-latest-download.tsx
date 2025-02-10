@@ -1,4 +1,4 @@
-import { popToRoot, showHUD, showInFinder } from "@raycast/api";
+import { popToRoot, showHUD, showInFinder, closeMainWindow } from "@raycast/api";
 import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
 
 export default async function main() {
@@ -14,5 +14,6 @@ export default async function main() {
   }
 
   await showInFinder(latestDownload.path);
+  await closeMainWindow();
   await popToRoot();
 }

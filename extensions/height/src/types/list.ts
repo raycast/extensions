@@ -1,4 +1,4 @@
-import { ListColors, ListIcons, ListTypes, ListVisualizations } from "../utils/list";
+import { ListColors, ListIcons, ListTypes, ListVisualizations } from "@/utils/list";
 
 export type ListIcon = (typeof ListIcons)[number]["value"];
 

@@ -1,5 +1,10 @@
 # Gitfox Changelog
 
+## [Evergreen] - 2024-09-19
+
+- Update all dependencies to their latest versions
+- Fixed a bug that caused "Maximum call stack size exceeded"
+
 ## [Evergreen] - 2023-08-03
 
 - Update all dependencies to their latest versions

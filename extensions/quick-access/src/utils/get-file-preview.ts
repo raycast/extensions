@@ -8,11 +8,14 @@ import * as util from "util";
 import fileUrl from "file-url";
 import { formatBytes, isEmpty } from "./common-utils";
 import { environment } from "@raycast/api";
+import { fileContentInfoInit } from "../types/file-content-info";
+import * as os from "node:os";
 
 const assetPath = environment.assetsPath;
 
 //Detail content: Image
-export const getFileContent = async (fileInfo: FileInfo) => {
+export const getFileContent = async (fileInfo: FileInfo | undefined) => {
+  if (!fileInfo) return fileContentInfoInit;
   let fileContent = "";
   let preview = "";
   let sizeTitle = "Size";
@@ -79,7 +82,7 @@ export const getFileContent = async (fileInfo: FileInfo) => {
   return {
     fileContent: fileContent,
     name: parsePath.base,
-    where: parsePath.dir,
+    where: parsePath.dir.replace(os.homedir(), "~"),
     sizeTitle: sizeTitle,
     size: size,
     created: created,

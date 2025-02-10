@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "octoprint",
+  "title": "OctoPrint",
+  "description": "Control your OctoPrint printer from Raycast",
+  "icon": "octoprint-logo.png",
+  "author": "mSarheed",
+  "categories": [
+    "Fun",
+    "Applications",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "printerStatus",
+      "title": "Show OctoPrint Status",
+      "subtitle": "Get the status of your OctoPrint printer",
+      "description": "Get the status of your OctoPrint printer",
+      "mode": "view"
+    },
+    {
+      "name": "files",
+      "title": "Show OctoPrint Files",
+      "subtitle": "List all files on your OctoPrint server",
+      "description": "List all files on your OctoPrint server",
+      "mode": "view"
+    },
+    {
+      "name": "setTemperature",
+      "title": "Set Printer Temperature",
+      "subtitle": "Set the temperature of your OctoPrint printer",
+      "description": "Set the temperature of your OctoPrint printer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "extruder_temp",
+          "type": "text",
+          "required": true,
+          "title": "Extruder Temp",
+          "description": "The temperature to set for the extruder",
+          "placeholder": "Extruder e.g. 210"
+        },
+        {
+          "name": "bed_temp",
+          "type": "text",
+          "required": true,
+          "title": "Bed Temp",
+          "description": "The temperature to set for the bed",
+          "placeholder": "Bed e.g. 60"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "octoPrintBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "OctoPrint Base URL",
+      "description": "The base URL of your OctoPrint server",
+      "placeholder": "http(s)://yourdomain.com or http(s)://192.168.1.5:5000"
+    },
+    {
+      "name": "applicationKey",
+      "type": "password",
+      "required": true,
+      "title": "Application Key",
+      "description": "The application key for your OctoPrint server",
+      "placeholder": "Your application key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.4.8",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

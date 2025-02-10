@@ -12,6 +12,7 @@ import {
   Icon,
   getSelectedText,
   Clipboard,
+  Color,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useStartApp from "./hooks/useStartApp";
@@ -21,12 +22,14 @@ import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
 import guessProject from "./service/ai/guessProject";
 import { getDefaultDate } from "./service/preference";
+import moment from "moment-timezone";
 
 interface FormValues {
   list: string;
   title: string;
   dueDate: Date | null;
   desc: string;
+  priority: string;
 }
 
 export default function TickTickCreate() {
@@ -39,6 +42,7 @@ export default function TickTickCreate() {
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+  const [priority, setPriority] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -74,6 +78,7 @@ export default function TickTickCreate() {
   const titleRef = useRef<Form.TextField>(null);
   const descRef = useRef<Form.TextArea>(null);
   const dueDatePickerRef = useRef<Form.DatePicker>(null);
+  const priorityRef = useRef<Form.Dropdown>(null);
   const listPickerRef = useRef<Form.Dropdown>(null);
 
   const handleSubmit = useCallback(
@@ -84,7 +89,15 @@ export default function TickTickCreate() {
         title: values.title.replace(/"/g, `\\"`),
         description: values.desc.replace(/"/g, `\\"`),
         dueDate: formatToServerDate(values.dueDate),
-        isAllDay: false,
+        isAllDay: (() => {
+          if (values.dueDate) {
+            return (
+              moment(values.dueDate).toDate().getTime() - moment(values.dueDate).startOf("day").toDate().getTime() === 1
+            );
+          }
+          return false;
+        })(),
+        priority: values.priority,
       });
 
       switch (result) {
@@ -132,7 +145,7 @@ export default function TickTickCreate() {
       // Hiding the toast
       toast.hide();
     },
-    500,
+    1000,
     []
   );
 
@@ -188,6 +201,12 @@ export default function TickTickCreate() {
         title="Due Date"
         type={Form.DatePicker.Type.DateTime}
       />
+      <Form.Dropdown ref={priorityRef} id="priority" title="Priority">
+        <Form.Dropdown.Item value="" title="None" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />
+        <Form.Dropdown.Item value="1" title="Low" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
+        <Form.Dropdown.Item value="3" title="Medium" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />
+        <Form.Dropdown.Item value="5" title="High" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      </Form.Dropdown>
     </Form>
   );
 }

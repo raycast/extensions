@@ -33,14 +33,22 @@
     {
       "name": "apiInstanceUrl",
       "title": "API Instance URL",
-      "description": "Want to use a different Cobalt API instance? Change your instance URL here!",
-      "placeholder": "https://co.wuk.sh",
-      "default": "https://co.wuk.sh",
+      "description": "Want to use a different Cobalt API instance? Set your instance URL here!",
+      "placeholder": "https://cobalt.aelew.dev",
+      "default": "https://cobalt.aelew.dev",
       "type": "textfield",
       "required": false
     },
     {
-      "name": "filenamePattern",
+      "name": "apiInstanceKey",
+      "title": "API Instance Key",
+      "description": "If the instance you are using requires an API key, enter it here.",
+      "placeholder": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "filenameStyle",
       "title": "File Name Style",
       "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
       "type": "dropdown",
@@ -66,24 +74,6 @@
       ]
     },
     {
-      "name": "vimeoDownloadType",
-      "title": "Vimeo Download Type",
-      "description": "Progressive: Direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: Video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
-      "type": "dropdown",
-      "required": false,
-      "default": "progressive",
-      "data": [
-        {
-          "title": "Progressive",
-          "value": "progressive"
-        },
-        {
-          "title": "Dash",
-          "value": "dash"
-        }
-      ]
-    },
-    {
       "name": "notifyOnDownload",
       "label": "Notify on Successful Download",
       "description": "Sends you a notification when your download is complete.",
@@ -92,38 +82,61 @@
       "default": true
     },
     {
-      "name": "removeTikTokWatermark",
-      "label": "Remove TikTok and Douyin Watermarks",
-      "description": "Whether downloaded TikTok & Douyin videos should have watermarks removed.",
+      "name": "alwaysProxy",
+      "label": "Always Proxy",
+      "description": "Tunnels all downloads through the processing server, even when not necessary.",
       "type": "checkbox",
       "required": false
     },
     {
-      "name": "downloadOriginalTikTokSound",
-      "label": "Use Original TikTok Audio",
+      "name": "disableMetadata",
+      "label": "Disable Metadata",
+      "description": "Disables the addition of file metadata.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "youtubeHLS",
+      "label": "YouTube: Use HLS",
+      "description": "Whether to use HLS when downloading video or audio from YouTube.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "twitterGif",
+      "label": "Twitter: Convert GIFs to .gif",
+      "description": "Changes whether Twitter GIFs are converted to .gif or not. May reduce quality and increase file size.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "tiktokFullAudio",
+      "label": "TikTok: Use Original Audio",
       "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
       "type": "checkbox",
       "required": false
     },
     {
-      "name": "muteVideoAudio",
-      "label": "Mute Video Audio",
-      "description": "Disable the audio track in video downloads.",
+      "name": "tiktokH265",
+      "label": "TikTok: Prefer H.265/HEVC Videos",
+      "description": "Downloads 1080p videos from TikTok in H.265/HEVC format when available.",
       "type": "checkbox",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.10.0"
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.18.0",
+    "content-disposition": "^0.5.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/content-disposition": "^0.5.8",
     "@types/node": "20.8.9",
-    "@types/react": "18.2.33",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/react": "^18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "ray build -e dist",

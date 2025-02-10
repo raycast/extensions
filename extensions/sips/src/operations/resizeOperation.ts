@@ -5,13 +5,14 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:31:23
- * Last modified  : 2023-07-06 14:52:02
+ * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
 import path from "path";
 
 import {
+  execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
   execSIPSCommandOnWebP,
   getDestinationPaths,
@@ -28,9 +29,13 @@ import {
  */
 export default async function resize(sourcePaths: string[], width: number, height: number) {
   const pathStrings = '"' + sourcePaths.join('" "') + '"';
-  const newPaths = getDestinationPaths(sourcePaths);
+  const newPaths = await getDestinationPaths(sourcePaths);
 
-  if (pathStrings.toLocaleLowerCase().includes("webp") || pathStrings.toLocaleLowerCase().includes("svg")) {
+  if (
+    pathStrings.toLocaleLowerCase().includes("webp") ||
+    pathStrings.toLocaleLowerCase().includes("svg") ||
+    pathStrings.toLocaleLowerCase().includes("avif")
+  ) {
     // Special formats in selection -- Handle each image individually
     const resultPaths = [];
     for (const imgPath of sourcePaths) {
@@ -51,6 +56,15 @@ export default async function resize(sourcePaths: string[], width: number, heigh
           resultPaths.push(await execSIPSCommandOnSVG(`sips --resampleHeight ${height}`, imgPath));
         } else {
           resultPaths.push(await execSIPSCommandOnSVG(`sips --resampleHeightWidth ${height} ${width}`, imgPath));
+        }
+      } else if (imgPath.toLowerCase().endsWith(".avif")) {
+        // Convert to PNG, resize, and restore to AVIF
+        if (width != -1 && height == -1) {
+          resultPaths.push(await execSIPSCommandOnAVIF(`sips --resampleWidth ${width}`, imgPath));
+        } else if (width == -1 && height != -1) {
+          resultPaths.push(await execSIPSCommandOnAVIF(`sips --resampleHeight ${height}`, imgPath));
+        } else {
+          resultPaths.push(await execSIPSCommandOnAVIF(`sips --resampleHeightWidth ${height} ${width}`, imgPath));
         }
       } else {
         // Image is not a special format, so just rotate it using SIPS

@@ -1,3 +1,5 @@
+import { FavoritableObject, NamedObject } from "../common/types";
+
 /**
  * Wrapper type for the chat manager returned by {@link useChats}.
  */
@@ -31,13 +33,6 @@ export type ChatManager = {
    * @returns A promise that resolves to the newly created chat, or undefined if the chat could not be created.
    */
   createChat: (name: string, basePrompt: string, options: object) => Promise<Chat | undefined>;
-
-  /**
-   * Deletes a chat.
-   * @param name The name of the chat to delete.
-   * @returns A promise that resolves when the chat has been deleted.
-   */
-  deleteChat: (name: string) => Promise<void>;
 
   /**
    * Appends text to a chat conversation & updates the chat's file.
@@ -77,14 +72,6 @@ export type ChatManager = {
   setChatProperty: (chat: Chat, property: string, value: string | boolean) => Promise<void>;
 
   /**
-   * Updates a chat's settings.
-   * @param name The name of the chat to update.
-   * @param chatData The new chat data.
-   * @returns A promise that resolves when the chat has been updated.
-   */
-  updateChat: (name: string, chatData: Chat) => Promise<void>;
-
-  /**
    * Gets the contents of a chat's file.
    * @param chat The chat to get the contents of.
    * @returns The contents of the chat's file.
@@ -102,87 +89,78 @@ export type ChatManager = {
 /**
  * A PromptLab Chat instance.
  */
-export type Chat = {
-  /**
-   * The name of the chat.
-   */
-  name: string;
-
-  /**
-   * The Raycast icon for the chat.
-   */
-  icon: string;
-
-  /**
-   * The Raycast color for the chat.
-   */
-  iconColor: string;
-
-  /**
-   * The base prompt for the chat, to always be kept included in the conversation context window.
-   */
-  basePrompt: string;
-
-  /**
-   * Whether the chat is favorited.
-   */
-  favorited: boolean;
-
-  /**
-   * Data to be used as context for the conversation.
-   */
-  contextData: {
+export type Chat = NamedObject &
+  FavoritableObject & {
     /**
-     * The type of context data.
+     * The Raycast icon for the chat.
      */
-    type: string;
+    icon: string;
 
     /**
-     * The source of the context data.
+     * The Raycast color for the chat.
      */
-    source: string;
+    iconColor: string;
 
     /**
-     * The data itself.
+     * The base prompt for the chat, to always be kept included in the conversation context window.
      */
-    data: string;
-  }[];
+    basePrompt: string;
 
-  /**
-   * How context data should be condensed.
-   */
-  condensingStrategy: string;
+    /**
+     * Data to be used as context for the conversation.
+     */
+    contextData: {
+      /**
+       * The type of context data.
+       */
+      type: string;
 
-  /**
-   * The maximum length of context data summaries.
-   */
-  summaryLength: string;
+      /**
+       * The source of the context data.
+       */
+      source: string;
 
-  /**
-   * Calculated statistics for the chat.
-   */
-  stats?: ChatStatistics;
+      /**
+       * The data itself.
+       */
+      data: string;
+    }[];
 
-  /**
-   * Whether to display the base prompt in the chat view.
-   */
-  showBasePrompt: boolean;
+    /**
+     * How context data should be condensed.
+     */
+    condensingStrategy: string;
 
-  /**
-   * Whether to use the selected files as context data.
-   */
-  useSelectedFilesContext: boolean;
+    /**
+     * The maximum length of context data summaries.
+     */
+    summaryLength: string;
 
-  /**
-   * Whether to use the conversation history as context data.
-   */
-  useConversationContext: boolean;
+    /**
+     * Calculated statistics for the chat.
+     */
+    stats?: ChatStatistics;
 
-  /**
-   * Whether to let the AI run PromptLab commands autonomously.
-   */
-  allowAutonomy: boolean;
-};
+    /**
+     * Whether to display the base prompt in the chat view.
+     */
+    showBasePrompt: boolean;
+
+    /**
+     * Whether to use the selected files as context data.
+     */
+    useSelectedFilesContext: boolean;
+
+    /**
+     * Whether to use the conversation history as context data.
+     */
+    useConversationContext: boolean;
+
+    /**
+     * Whether to let the AI run PromptLab commands autonomously.
+     */
+    allowAutonomy: boolean;
+  };
 
 /**
  * Statistics about a PromptLab chat.
@@ -202,3 +180,7 @@ export type ChatStatistics = {
   mostUsedCommand: string;
   mostUsedEmojis: string[];
 };
+
+export function isChat(obj: object): obj is Chat {
+  return "condensingStrategy" in obj;
+}

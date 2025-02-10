@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-sink",
+  "title": "Sink Short Links Manager",
+  "description": "Create, search, and manage short links using Sink",
+  "icon": "sink.png",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "luolei",
+  "commands": [
+    {
+      "name": "listLink",
+      "title": "Link List",
+      "description": "List all your short links",
+      "mode": "view"
+    },
+    {
+      "name": "createLink",
+      "title": "Create Link",
+      "description": "Create a new short link",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.3",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Select your preferred language",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "label": "Show Website Preview Icon",
+      "name": "showWebsitePreview",
+      "title": "Show Website Preview Icon",
+      "description": "Display website preview icon in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "API Host",
+      "description": "Enter the API host UR",
+      "placeholder": "https://your-sink-instance.com",
+      "default": ""
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Enter your API token",
+      "placeholder": "Enter your Sink API authentication token",
+      "default": ""
+    }
+  ]
+}

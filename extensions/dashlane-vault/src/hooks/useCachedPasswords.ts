@@ -28,8 +28,12 @@ export function useCachedPasswords() {
 }
 
 function getCachedPasswords(): VaultCredential[] | undefined {
-  const cached = cache.get(CACHE_KEYS.PASSWORDS);
-  return cached ? JSON.parse(cached) : undefined;
+  try {
+    const cached = cache.get(CACHE_KEYS.PASSWORDS);
+    return cached ? JSON.parse(cached) : undefined;
+  } catch (_) {
+    cache.remove(CACHE_KEYS.PASSWORDS);
+  }
 }
 
 function setCachedPasswords(passwords: VaultCredential[]) {

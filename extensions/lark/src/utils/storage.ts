@@ -1,10 +1,12 @@
 import { LocalStorage } from '@raycast/api';
-import { RecentListResponse } from '../services/space';
+import { RecentDocsListResponse } from '../services/space';
+import { RecentMinutesListResponse } from '../services/minutes';
 
 export const StorageKey = {
   TenantDomain: 'TENANT_DOMAIN',
   SpaceSession: 'SPACE_SESSION',
   DocsRecentList: 'DOCS_RECENT_LIST',
+  MinutesRecentList: 'MINUTES_RECENT_LIST',
 } as const;
 
 export type StorageKey = ValueOf<typeof StorageKey>;
@@ -12,7 +14,8 @@ export type StorageKey = ValueOf<typeof StorageKey>;
 type StorageTypes = {
   TENANT_DOMAIN: string;
   SPACE_SESSION: string;
-  DOCS_RECENT_LIST: RecentListResponse;
+  DOCS_RECENT_LIST: RecentDocsListResponse;
+  MINUTES_RECENT_LIST: RecentMinutesListResponse;
 };
 
 export async function setStorage<K extends StorageKey>(key: K, value: StorageTypes[K]): Promise<void> {

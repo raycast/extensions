@@ -5,6 +5,9 @@
   "description": "Find package and check its size on Bundlephobia",
   "icon": "icon.png",
   "author": "vette",
+  "contributors": [
+    "rushelex"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,18 +21,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.1",
+    "@raycast/api": "^1.82.5",
     "axios": "^0.26.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^5.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

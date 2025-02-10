@@ -49,8 +49,14 @@ export interface LibgenPreferences {
   preferredLibgenMirror: string;
   downloadGateway: LibgenDownloadGateway;
   downloadPath: string;
+  allowIgnoreHTTPSErrors: boolean;
   alwaysAskWhereToSave: boolean;
   searchPriority: SearchPriority;
   preferredLanguages: string;
   preferredFormats: string;
+}
+
+export enum SearchType {
+  "Fiction" = 0,
+  "NonFiction" = 1,
 }

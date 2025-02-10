@@ -1,7 +1,7 @@
 import { ERRORTYPE } from "../lib/common/types";
 import { Model } from "../lib/models/types";
-import { CommandOptions } from "../lib/commands/types";
 import { ExtensionPreferences } from "../lib/preferences/types";
+import { CommandOptions } from "../lib/commands/types";
 import { useEffect, useState } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import path from "path";

@@ -49,14 +49,12 @@
     {
       "name": "all-feeds",
       "title": "View Feeds",
-      "subtitle": "Feedbin",
       "description": "Shows all feeds in your Feedbin account",
       "mode": "view"
     },
     {
       "name": "unread-menu-bar",
       "title": "Feedbin Menu Bar",
-      "subtitle": "Feedbin",
       "description": "Fetches updates every 15 minutes in the background and displays the number of unread entries in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -68,27 +66,32 @@
           "required": false,
           "default": true,
           "label": "Show Unread Count"
+        },
+        {
+          "name": "openWhileMarkingAsRead",
+          "description": "Toggles whether or not to open an article when marking it as read from the menu bar",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Open While Marking as Read"
         }
       ]
     },
     {
       "name": "starred-entries",
       "title": "View Starred Content",
-      "subtitle": "Feedbin",
       "description": "View a list of your starred entries",
       "mode": "view"
     },
     {
       "name": "subscriptions",
-      "title": "Manage Subscriptions",
-      "subtitle": "Feedbin",
-      "description": "Manage Feedbin Subscriptions",
+      "title": "Subscriptions",
+      "description": "Feedbin Subscriptions",
       "mode": "view"
     },
     {
       "name": "add-subscription",
       "title": "Subscribe to URL",
-      "subtitle": "Feedbin",
       "description": "Looks for RSS feeds on the given URL. If only one is found it will be subscribed to, but if multiple are found you will be presented with the options to choose from. The source of the URL is based on the extension level URL Source preference and defaults to selected text.",
       "mode": "view",
       "arguments": [
@@ -103,7 +106,6 @@
     {
       "name": "read-later",
       "title": "Read Later",
-      "subtitle": "Feedbin",
       "description": "Saves the URL to Feedbin to read later. The source of the URL is based on the extension level URL Source preference and defaults to selected text.",
       "mode": "no-view",
       "arguments": [

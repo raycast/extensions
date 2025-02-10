@@ -1,6 +1,6 @@
 import { Detail, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getCid, getConclsion } from "../utils";
+import { getCid, getConclsion } from "../apis";
 
 type Props = { bvid: string; cid: number; up_mid: number };
 export function ConclusionView(props: Props) {

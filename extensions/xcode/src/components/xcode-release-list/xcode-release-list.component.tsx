@@ -6,7 +6,7 @@ import { XcodeReleaseListItem } from "./xcode-release-list-item.component";
 /**
  * Xcode Release List
  */
-export function XcodeReleaseList(): JSX.Element {
+export function XcodeReleaseList() {
   const xcodeReleases = useCachedPromise(XcodeReleaseService.xcodeReleases);
   return (
     <List isLoading={xcodeReleases.isLoading} isShowingDetail={!!xcodeReleases.data?.length}>

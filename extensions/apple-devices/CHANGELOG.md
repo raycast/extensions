@@ -1,5 +1,9 @@
 # Apple Devices Changelog
 
+## [Added new devices] - 2024-11-25
+
+- Added iPhone, iPad and Watch 2024 Lineup
+
 ## [Added new devices] - 2023-09-23
 
 - Added Apple Watch Series 9 & Ultra 2

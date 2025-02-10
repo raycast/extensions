@@ -2,8 +2,8 @@ import { Cluster } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getClusterUrl } from "../../actions";
-import { getActionOpenInBrowser, getExportResponse } from "../../util";
 import ECSClusterServices from "./ECSClusterServices";
+import { AwsAction } from "../common/action";
 
 function ECSCluster({ cluster }: { cluster: Cluster }) {
   const { data: services, isLoading } = useCachedPromise(fetchServices, [cluster.clusterArn ?? ""], {
@@ -12,7 +12,6 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
 
   return (
     <List.Item
-      id={cluster.clusterArn}
       key={cluster.clusterArn}
       title={cluster.clusterName || ""}
       icon={isLoading ? Icon.CircleProgress : "aws-icons/ecs.png"}
@@ -37,11 +36,11 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
           <Action.Push
             title={"View Services"}
             icon={Icon.Eye}
-            target={<ECSClusterServices clusterArn={cluster.clusterArn || ""}></ECSClusterServices>}
+            target={<ECSClusterServices clusterArn={cluster.clusterArn || ""} />}
           />
-          {getActionOpenInBrowser(getClusterUrl(cluster))}
+          <AwsAction.Console url={getClusterUrl(cluster)} />
           <ActionPanel.Section title="Copy">
-            {getExportResponse(cluster)}
+            <AwsAction.ExportResponse response={cluster} />
             <Action.CopyToClipboard
               title="Copy Cluster ARN"
               content={cluster.clusterArn || ""}

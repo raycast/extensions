@@ -9,15 +9,19 @@ export interface Entry {
   subtitle: string;
 }
 
-export function getEntry(uri: string): Entry {
-  const path = fileURLToPath(uri);
-  const title = decodeURIComponent(basename(uri));
-  const subtitle = tildify(dirname(path));
+export function getEntry(uri: string): Entry | null {
+  try {
+    const path = fileURLToPath(uri);
+    const title = decodeURIComponent(basename(uri));
+    const subtitle = tildify(dirname(path));
 
-  return {
-    uri,
-    path,
-    title,
-    subtitle,
-  };
+    return {
+      uri,
+      path,
+      title,
+      subtitle,
+    };
+  } catch (e) {
+    return null;
+  }
 }

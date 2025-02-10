@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { formatDate } from "date-fns";
 import json2md from "json2md";
 import { Team } from "../types";
-import { format } from "date-fns";
 import ClubSquad from "./squad";
 
-export default function ClubDetails(team: Team) {
+export default function ClubProfile(team: Team) {
   const { club, venue } = team;
 
   return (
@@ -26,7 +26,7 @@ export default function ClubDetails(team: Team) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Year of foundation"
-            text={team.foundation ? format(new Date(team.foundation), "yyyy") : ""}
+            text={team.foundation ? formatDate(team.foundation, "yyyy") : ""}
           />
 
           <Detail.Metadata.TagList title="Club Colors">
@@ -54,7 +54,7 @@ export default function ClubDetails(team: Team) {
       }
       actions={
         <ActionPanel>
-          <Action.Push title="Squad" icon={Icon.Person} target={<ClubSquad {...team} />} />
+          <Action.Push title="Squad" icon={Icon.TwoPeople} target={<ClubSquad {...team} />} />
           <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/clubs/${team.slug}`} />
         </ActionPanel>
       }

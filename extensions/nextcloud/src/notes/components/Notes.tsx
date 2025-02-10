@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { getPreferences } from "../../preferences";
-import { Note, useNotes } from "../hooks";
+import { type Note, useNotes } from "../hooks";
 import { NoteDetails } from "./NoteDetails";
+import { BASE_URL } from "../../config";
 
 export function Notes() {
   const { notes, isLoading } = useNotes();
@@ -17,18 +17,16 @@ export function Notes() {
   );
 }
 function Note({ note }: { note: Note }) {
-  const { hostname } = getPreferences();
-
-  const noteUrl = `https://${hostname}/apps/notes/note/${note.id}`;
+  const noteUrl = `${BASE_URL}/apps/notes/note/${note.id}`;
 
   return (
     <List.Item
       title={note.title}
-      icon={{ source: Icon.TextDocument }}
+      icon={{ source: Icon.BlankDocument }}
       actions={
         <ActionPanel title={note.title}>
           <ActionPanel.Section>
-            <Action.Push icon={Icon.Eye} title="Show Details" target={<NoteDetails note={note} />} />
+            <Action.Push icon={Icon.Eye} title="Show Details" target={<NoteDetails note={note} noteUrl={noteUrl} />} />
             <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
           </ActionPanel.Section>
         </ActionPanel>

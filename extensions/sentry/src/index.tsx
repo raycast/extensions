@@ -9,7 +9,7 @@ import { UnauthorizedError } from "./UnauthorizedError";
 export default function Command() {
   const [project, setProject] = useState<Project>();
   const [projectError, setProjectError] = useState<Error>();
-  const { data, error, isLoading, mutate } = useIssues(project);
+  const { data, error, isLoading, mutate, pagination } = useIssues(project);
 
   if (projectError || (error && error instanceof Error && error.message.includes("Unauthorized"))) {
     return <UnauthorizedError />;
@@ -18,6 +18,7 @@ export default function Command() {
   return (
     <List
       isLoading={project === null || isLoading}
+      pagination={pagination}
       searchBarPlaceholder="Filter issues by title or assignee"
       searchBarAccessory={<ProjectDropdown onProjectChange={setProject} onError={setProjectError} />}
     >

@@ -5,6 +5,9 @@
   "description": "Flush the DNS cache",
   "icon": "extension_icon.png",
   "author": "rasmusbe",
+  "contributors": [
+    "tombonez"
+  ],
   "categories": [
     "Developer Tools",
     "System"

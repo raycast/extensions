@@ -19,13 +19,15 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
       continue;
     }
 
-    if (trimmedLine.startsWith("Host ")) {
+    if (trimmedLine.startsWith("Host ") && trimmedLine !== "Host *") {
       if (currentConnection !== null) {
         connections.push(currentConnection);
       }
       currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
     } else if (currentConnection !== null) {
-      const [key, value] = trimmedLine.split(/\s+/, 2);
+      const firstSpaceIndex = trimmedLine.indexOf(" ");
+      const key = trimmedLine.substring(0, firstSpaceIndex);
+      const value = trimmedLine.substring(firstSpaceIndex + 1);
 
       switch (key) {
         case "HostName":
@@ -65,7 +67,10 @@ function saveSSHConfig(configFilePath: string, connections: ISSHConnection[]): v
   for (const connection of connections) {
     configData += `Host ${connection.name}\n`;
     configData += `  HostName ${connection.address}\n`;
-    configData += `  User ${connection.user}\n`;
+
+    if (connection.user) {
+      configData += `  User ${connection.user}\n`;
+    }
 
     if (connection.port) {
       configData += `  Port ${connection.port}\n`;

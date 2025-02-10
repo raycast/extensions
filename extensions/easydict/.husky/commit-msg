@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx --no -- commitlint --edit "\${1}"
+# npx --no -- commitlint --edit "\${1}" # throw error
+npx --no-install commitlint --edit $1 # it works, https://github.com/conventional-changelog/commitlint/issues/589#issuecomment-1014563579

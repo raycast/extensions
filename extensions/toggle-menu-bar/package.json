@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toggle-menu-bar",
   "title": "Toggle Menu Bar",
-  "description": "Switch between show/hide menu bar modes",
+  "description": "Switch between show/hide menu bar options",
   "icon": "command-icon.png",
   "author": "iamyeizi",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "toggle",
       "title": "Toggle Menu Bar",
-      "description": "Toggle auto hide/show menu bar between \"In Full Screen Only ↔ Always\" or \"On Desktop Only ↔ Never\"",
+      "description": "Toggle auto hide/show menu bar between two options of your choice.",
       "mode": "no-view"
     }
   ],
@@ -27,22 +27,56 @@
       "required": false
     },
     {
-      "name": "toastBehavior",
-      "title": "Select Toggle behavior:",
+      "name": "optionOne",
+      "title": "Select option 1️⃣",
       "data": [
         {
-          "title": "In Full Screen Only ↔ Always",
+          "title": "Always",
           "value": "always"
         },
         {
-          "title": "On Desktop Only ↔ Never",
+          "title": "On Desktop Only",
+          "value": "ondesk"
+        },
+        {
+          "title": "In Full Screen Only",
+          "value": "infull"
+        },
+        {
+          "title": "Never",
           "value": "never"
         }
       ],
       "type": "dropdown",
-      "description": "Select the Auto hide/show menu bar behavior. This is necessary to correctly display the toast when using the command. If you don't know, you can find on \"System Settings > Desktop & Dock > Menu Bar section\"",
+      "description": "Select \"Automatically hide and show the menu bar\" option.",
       "required": true,
       "default": "always"
+    },
+    {
+      "name": "optionTwo",
+      "title": "Select option 2️⃣",
+      "data": [
+        {
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "On Desktop Only",
+          "value": "ondesk"
+        },
+        {
+          "title": "In Full Screen Only",
+          "value": "infull"
+        },
+        {
+          "title": "Never",
+          "value": "never"
+        }
+      ],
+      "type": "dropdown",
+      "description": "Select \"Automatically hide and show the menu bar\" option.",
+      "required": true,
+      "default": "infull"
     }
   ],
   "dependencies": {

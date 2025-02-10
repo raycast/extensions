@@ -1,6 +1,6 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator/xcode-simulator-application.model";
-import { Action, ActionPanel, Form, Toast, getSelectedFinderItems, showToast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Form, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 import fs from "fs";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
@@ -15,13 +15,13 @@ type Values = {
 /**
  * Xcode Simulator Application Push Notifications
  */
-export function XcodeSimulatorApplicationPushNotifications(props: {
-  application: XcodeSimulatorApplication;
-}): JSX.Element {
+export function XcodeSimulatorApplicationPushNotifications(props: { application: XcodeSimulatorApplication }) {
   const [currentFile, setCurrentFile] = useState<string[]>([]);
+
   function isFileValid(file: string) {
     return !(!fs.existsSync(file) || !fs.lstatSync(file).isFile());
   }
+
   //attempt to get the current selected file in Finder if any.
   useEffect(() => {
     (async () => {
@@ -40,6 +40,7 @@ export function XcodeSimulatorApplicationPushNotifications(props: {
       }
     })();
   }, []);
+
   async function submit(values: Values) {
     const file = values.files[0];
     if (!isFileValid(file)) {
@@ -58,6 +59,7 @@ export function XcodeSimulatorApplicationPushNotifications(props: {
         )
     ).then();
   }
+
   return (
     <Form
       actions={

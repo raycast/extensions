@@ -55,16 +55,16 @@ tell application "Music"
 	set theArtist to artist of current track
 	set theAlbum to album of the current track
 	set existingTracks to get tracks of source 1 whose name is theName and artist is theArtist and album is theAlbum
-	
+
 	if (count of existingTracks) = 0 then
 		set theCount to count of tracks of source 1
 		duplicate current track to source 1
-		
+
 		repeat while theCount = (count of tracks of source 1)
 			delay 1
 		end repeat
 	end if
-	
+
 	set theTrack to first track of source 1 whose name is theName and artist is theArtist and album is theAlbum
 	duplicate theTrack to playlist "${playlist}"
 end tell
@@ -78,16 +78,16 @@ tell application "Music"
 	set theArtist to artist of current track
 	set theAlbum to album of the current track
 	set existingTracks to get tracks of source "${library}" whose name is theName and artist is theArtist and album is theAlbum
-	
+
 	if (count of existingTracks) = 0 then
 		set theCount to count of tracks of "${library}"
 		duplicate current track to library playlist "${library}"
-		
+
 		repeat while theCount = (count of tracks of "${library}")
 			delay 1
 		end repeat
 	end if
-	
+
 	set theTrack to first track of library playlist "${library}" whose name is theName and artist is theArtist and album is theAlbum
 	duplicate theTrack to playlist "${playlist}"
 end tell
@@ -128,6 +128,13 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   return pipe(
     runScript(`
       set output to ""
+      tell application "System Events"
+        set isNotRunning to (count of (every process whose name is "Music")) = 0
+      end tell
+
+      if isNotRunning then
+        error
+      else
         tell application "Music"
           set t to (get current track)
           set trackId to id of t
@@ -139,8 +146,45 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
 
           set output to ${querystring}
         end tell
+      end if
+
       return output
     `),
     TE.map(parseQueryString<Track>())
+  );
+};
+
+// Adapted from: https://dougscripts.com/itunes/2018/05/remove-currently-playing-from-current-playlist/
+export const removeCurrentTrackFromCurrentPlaylist = (): TE.TaskEither<
+  Error,
+  Readonly<Pick<Track, "name" | "artist" | "album"> & { playlist: string }>
+> => {
+  const querystring = createQueryString({
+    name: "tName",
+    artist: "tArtist",
+    album: "tAlbum",
+    playlist: "tPlaylist",
+  });
+
+  // prettier-ignore
+  return pipe(
+    runScript(`
+      set output to ""
+        tell application "Music"
+          set t to (get current track)
+          set tName to name of t
+          set tArtist to artist of t
+          set tAlbum to album of t
+
+          set tPlaylist to name of current playlist
+
+          next track
+          delete t
+
+          set output to ${querystring}
+        end tell
+      return output
+    `),
+    TE.map(parseQueryString())
   );
 };

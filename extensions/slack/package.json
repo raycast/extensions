@@ -6,7 +6,10 @@
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
-    "Elliot67"
+    "Elliot67",
+    "stelo",
+    "thomaslombart",
+    "Rob"
   ],
   "categories": [
     "Communication",
@@ -16,9 +19,30 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Open Channel",
       "subtitle": "Slack",
+      "keywords": [
+        "search"
+      ],
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Channel Metadata",
+          "label": "Display extra metadata in results",
+          "description": "Show team member's titles, time zone, and current time in Open Channel results",
+          "name": "displayExtraMetadata",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "subtitle": "Slack",
+      "description": "Search for Slack messages.",
       "mode": "view"
     },
     {
@@ -55,7 +79,7 @@
       "description": "View extension's README for instructions.",
       "name": "accessToken",
       "placeholder": "xoxp-...",
-      "required": true,
+      "required": false,
       "title": "Slack Access Token",
       "type": "password"
     },
@@ -70,24 +94,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.2",
-    "@slack/web-api": "^6.7.0",
-    "date-fns": "^2.28.0",
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "@slack/web-api": "^7.0.4",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3",
     "lodash": "^4.17.21",
-    "run-applescript": "^6.0.0",
-    "swr": "^1.2.2"
+    "node-emoji": "^2.1.3"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.181",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "^20.8.10",
+    "@types/node-emoji": "^2.1.0",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

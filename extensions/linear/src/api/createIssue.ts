@@ -1,5 +1,5 @@
 import { IssueFragment, IssueResult } from "./getIssues";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type CreateIssuePayload = {
   title: string;

@@ -1,8 +1,9 @@
 import fetch from "node-fetch";
-import { getOAuthToken } from "../components/withHeightAuth";
-import { CreateTaskPayload, TaskObject, UpdateBatchTaskPayload, UpdateTaskPayload } from "../types/task";
-import { ApiErrorResponse, ApiResponse } from "../types/utils";
-import { ApiUrls } from "./helpers";
+
+import { ApiUrls } from "@/api/helpers";
+import { getOAuthToken } from "@/components/withHeightAuth";
+import { CreateTaskPayload, TaskObject, UpdateBatchTaskPayload, UpdateTaskPayload } from "@/types/task";
+import { ApiErrorResponse, ApiResponse } from "@/types/utils";
 
 export async function getTask(endpoint: string) {
   const response = await fetch(endpoint, {

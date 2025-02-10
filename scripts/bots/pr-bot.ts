@@ -29,6 +29,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
+  const expectations = "You can expect an initial review within five business days.";
+
   const codeowners = await getCodeOwners({ github, context });
 
   const sender = context.payload.sender.login;
@@ -64,10 +66,11 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+      // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\nThe team is currently on holiday, but we will be back to normal availability on the 2nd of January :christmas_tree:\n\nThank you for your patience.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\n${expectations}\n\nOnce the PR is approved and merged, the extension will be available on our Store.`,
       });
       return;
     }
@@ -79,12 +82,29 @@ export default async ({ github, context }: API) => {
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
+    if (!owners.length) {
+      console.log("no maintainer for this extension");
+      await comment({
+        github,
+        context,
+        comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
+
+This is especially helpful since there were no maintainers for this extension :pray:\n\n${expectations}`,
+      });
+    }
+
     if (owners[0] === sender) {
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
         labels: ["OP is author"],
+      });
+
+      await comment({
+        github,
+        context,
+        comment: `Thank you for the update! :tada:\n\n${expectations}`,
       });
       return;
     }
@@ -101,10 +121,11 @@ export default async ({ github, context }: API) => {
     await comment({
       github,
       context,
-      comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:\n\n🔔 ${owners
-        .filter((x) => x !== sender)
+      comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
+
+🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.\n\nThe team is on holiday, we'll review it once everyone is back. :christmas_tree:`,
+        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
     });
 
     return;
@@ -114,11 +135,14 @@ export default async ({ github, context }: API) => {
 async function getCodeOwners({ github, context }: Pick<API, "github" | "context">) {
   const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
-  const regex = /(\/extensions\/[\w-]+) +(.+)/g;
+  const regex = /(\/extensions\/[\w-]+) +(.*)/g;
   const matches = codeowners.matchAll(regex);
 
   return Array.from(matches).reduce<{ [key: string]: string[] }>((prev, match) => {
-    prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
+    prev[match[1]] = match[2]
+      .split(" ")
+      .map((x) => x.replace(/^@/, ""))
+      .filter((x) => !!x);
     return prev;
   }, {});
 }

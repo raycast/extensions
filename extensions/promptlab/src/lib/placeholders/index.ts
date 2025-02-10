@@ -18,6 +18,7 @@ import ScreenContentPlaceholder from "./custom-placeholders/screenContent";
 import WindowContentPlaceholder from "./custom-placeholders/windowContent";
 import FileContentsPlaceholder from "./custom-placeholders/contents";
 import { DefaultPlaceholders, PlaceholderType } from "placeholders-toolkit";
+import LastRunPLaceholder from "./custom-placeholders/lastRun";
 
 export const PromptLabPlaceholders = [
   FileContentsPlaceholder,
@@ -36,6 +37,7 @@ export const PromptLabPlaceholders = [
   PreviousCommandPlaceholder,
   PreviousPromptPlaceholder,
   PreviousResponsePlaceholder,
+  LastRunPLaceholder,
   ScreenContentPlaceholder,
   WindowContentPlaceholder,
   ...Object.values(DefaultPlaceholders).filter((placeholder) => placeholder.type != PlaceholderType.Script),

@@ -1,13 +1,8 @@
 # Toggle Menu Bar
 
-Switch between show/hide menu bar modes.
+Switch between show/hide menu bar options.
 
 ## Troubleshooting
-
-```diff
-+ Green Toast    → menu bar is shown
-- Red Toast      → menu bar is not shown
-```
 
 ### Error: Command failed with exit code 1: osascript -e
 

@@ -4,25 +4,31 @@ import { exec } from "./utils";
 export const missingCLIError = `### Day One CLI Missing 🚨
 [Download here](https://dayoneapp.com/guides/tips-and-tutorials/command-line-interface-cli/)`;
 
+export const CLISyncError = `### Day One CLI is out of sync ⚠️
+This is fixed by starting the desktop application once.`;
+
 type Entry = {
   body: string;
   date: Date;
   journal?: string;
 };
 
-export async function isDayOneInstalled(): Promise<boolean> {
+export async function isDayOneInstalled(): Promise<CLIState> {
   try {
     await exec("dayone2 --version");
-    return true;
+    return "ready";
   } catch (error) {
-    // This being caught means the CLI is available
-    return false;
+    if (error instanceof Error && error.message.includes(`addPersistentStoreWithType`)) {
+      return "out-of-sync";
+    }
+
+    return "missing";
   }
 }
 
 async function addEntry(entry: Entry) {
-  const date = entry.date.toISOString().split("T")[0];
-  let command = `dayone2 new "${entry.body}" --date "${date}"`;
+  const date = entry.date.toISOString().split(".")[0] + "Z";
+  let command = `dayone2 new "${entry.body}" --isoDate "${date}"`;
 
   if (entry.journal) {
     command = `${command} --journal ${entry.journal}`;
@@ -38,13 +44,15 @@ async function addEntry(entry: Entry) {
 }
 
 type DayOneHook = () => {
-  installed: boolean | "pending";
+  installed: CLIState;
   addEntry: (entry: Entry) => Promise<string>;
   loading: boolean;
 };
 
+type CLIState = "ready" | "out-of-sync" | "missing";
+
 export const useDayOneIntegration: DayOneHook = () => {
-  const [installed, setInstalled] = useState(false);
+  const [installed, setInstalled] = useState<CLIState>("missing");
   const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {

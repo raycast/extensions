@@ -10,7 +10,7 @@ import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
 /**
  * Xcode Simulator Applications Menu Bar Item
  */
-export function XcodeSimulatorApplicationsMenuBarItem(props: { application: XcodeSimulatorApplication }): JSX.Element {
+export function XcodeSimulatorApplicationsMenuBarItem(props: { application: XcodeSimulatorApplication }) {
   return (
     <MenuBarExtra.Submenu
       icon={{ source: props.application.appIconPath ?? "app-icon-placeholder.png", mask: Image.Mask.RoundedRectangle }}

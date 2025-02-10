@@ -1,5 +1,30 @@
 # Obsidian Changelog
 
+## [Prepend to Daily Note] - 2025-02-01
+- Adds prepend option to Append to Daily Note
+
+## [Bug fixes] - 2025-01-28
+- Fixes locale bug on Append Task command
+- Fixes issue where tags were being converted to lowercase
+
+## [Task Creation Date] - 2024-12-03
+- Tasks added now log the creation date.
+
+## [Support for Fuzzy Search] - 2024-09-05
+- Add option to use Fuzzy Search on notes search. Disabled by default in note search config.
+
+## [Bugfix for nested bookmarks] - 2024-02-06
+- Fixes a bug where nested bookmarks would not be displayed correctly in search
+
+## [Support luxon formats in templates] - 2024-01-30
+- Support luxon date and time format (e.g. dd, MM, YYYY,...) in templates
+
+## [Fix Search Media HotKey bug] - 2024-01-26
+- Checks for defined `searchArgument` in MediaGrid value before filtering
+
+## [Copy Note Title action] - 2024-01-17
+- Add `Copy Note Title` action
+
 ## [Bugfixes and cache behavior tweak] - 2023-11-19
 - Will now skip the cache if the value is an empty array
 - Fixes a bug where no default application crashes the extension

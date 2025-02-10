@@ -1,7 +1,7 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityStandardActionSections } from "@components/entity";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 
 export function ButtonPressAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

@@ -17,7 +17,7 @@ import { SyncData, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
-import { groupByDueDates } from "./helpers/groupBy";
+import { groupByDates } from "./helpers/groupBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -58,7 +58,7 @@ function MenuBar(props: MenuBarProps) {
       });
     }
     return data?.items.filter((t) => t.due?.date) ?? [];
-  }, [data, upcomingDays, view, filter]);
+  }, [data, upcomingDays, view]);
 
   useEffect(() => {
     const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
@@ -82,7 +82,7 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask, tasks, hideMenuBarCount, filterTasks]);
+  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
@@ -93,7 +93,14 @@ function MenuBar(props: MenuBarProps) {
 
   return (
     <MenuBarExtra
-      icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
+      icon={{
+        source: { light: "icon.png", dark: "icon@dark.png" },
+        tintColor: {
+          light: "",
+          dark: "#E5E5E5",
+          adjustContrast: false,
+        },
+      }}
       isLoading={isLoading || isLoadingFilter}
       title={menuBarExtraTitle}
     >
@@ -178,7 +185,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -211,7 +218,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -238,7 +245,7 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   return tasks.length > 0 ? (
