@@ -1,5 +1,14 @@
 import { Icon, Color, Image } from "@raycast/api";
-import { Record, OrionRecord, ChromeRecord, ArcRecord, SafariRecord, FirefoxRecord, ZenRecord } from "./record";
+import {
+  Record,
+  OrionRecord,
+  ChromeRecord,
+  ArcRecord,
+  SafariRecord,
+  FirefoxRecord,
+  ZenRecord,
+  BraveRecord,
+} from "./record";
 
 class Result {
   key: string;
@@ -102,6 +111,7 @@ export class ChromeAdapterTopVisited extends AdapterTopVisited<ChromeRecord> {}
 
 export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
 export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
+export class BraveAdapterTopVisited extends AdapterTopVisited<BraveRecord> {}
 
 export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
 export class ZenAdapterTopVisited extends AdapterTopVisited<ZenRecord> {}
@@ -112,17 +122,14 @@ export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {
   }
 }
 
-export class ChromeAdapterRecents extends AdapterRecents<ChromeRecord> {
-  getVisitTime(record: ChromeRecord): string {
+export class ChromeAdapterRecents<T extends ChromeRecord> extends AdapterRecents<T> {
+  getVisitTime(record: T): string {
     return record.lastVisitTime.toString();
   }
 }
 
-export class ArcAdapterRecents extends AdapterRecents<ArcRecord> {
-  getVisitTime(record: ArcRecord): string {
-    return record.lastVisitTime.toString();
-  }
-}
+export class ArcAdapterRecents extends ChromeAdapterRecents<ArcRecord> {}
+export class BraveAdapterRecents extends ChromeAdapterRecents<BraveRecord> {}
 
 export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
   getVisitTime(record: SafariRecord): string {

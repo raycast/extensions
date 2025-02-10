@@ -49,6 +49,10 @@
         {
           "title": "Zen Browser",
           "value": "zen"
+        },
+        {
+          "title": "Brave Browser",
+          "value": "brave"
         }
       ]
     },

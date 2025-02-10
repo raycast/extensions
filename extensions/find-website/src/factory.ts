@@ -10,6 +10,8 @@ import {
   SafariAdapterTopVisited,
   FirefoxAdapterRecents,
   FirefoxAdapterTopVisited,
+  BraveAdapterRecents,
+  BraveAdapterTopVisited,
 } from "./adapters";
 import {
   OrionQueryBuilder,
@@ -19,7 +21,16 @@ import {
   SafariQueryBuilder,
   FirefoxQueryBuilder,
 } from "./query-builder";
-import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord, FirefoxRecord, ZenRecord } from "./record";
+import {
+  ChromeRecord,
+  OrionRecord,
+  Record,
+  ArcRecord,
+  SafariRecord,
+  FirefoxRecord,
+  ZenRecord,
+  BraveRecord,
+} from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
 import ini from "ini";
@@ -32,6 +43,7 @@ interface Configurations {
   safari: Factory<SafariRecord>;
   firefox: Factory<FirefoxRecord>;
   zen: Factory<ZenRecord>;
+  brave: Factory<BraveRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -57,6 +69,7 @@ export class Factory<T extends Record> {
       safari: new SafariFactory(),
       firefox: new FirefoxFactory(),
       zen: new ZenFactory(),
+      brave: new BraveFactory(),
     };
 
     return config[browser];
@@ -116,7 +129,7 @@ class ArcFactory extends Factory<ArcRecord> {
   }
 }
 
-class ChromeFactory extends Factory<ChromeRecord> {
+class ChromeFactory<T extends ChromeRecord> extends Factory<T> {
   profile: string;
 
   getQueryBuilder(): QueryBuilder {
@@ -132,11 +145,28 @@ class ChromeFactory extends Factory<ChromeRecord> {
     this.profile = profile;
   }
 
-  getRecentsAdapter(): Adapter<ChromeRecord> {
-    return new ChromeAdapterRecents();
+  getRecentsAdapter(): Adapter<T> {
+    return new ChromeAdapterRecents<ChromeRecord>();
   }
-  getTopVisitedAdapter(): Adapter<ChromeRecord> {
+  getTopVisitedAdapter(): Adapter<T> {
     return new ChromeAdapterTopVisited();
+  }
+}
+
+class BraveFactory extends ChromeFactory<BraveRecord> {
+  constructor() {
+    super("");
+  }
+
+  getRecentsAdapter(): Adapter<BraveRecord> {
+    return new BraveAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<BraveRecord> {
+    return new BraveAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/BraveSoftware/Brave-Browser/Default/History`);
   }
 }
 
@@ -161,7 +191,7 @@ class FirefoxFactory<T extends FirefoxRecord> extends Factory<T> {
   }
 
   getRecentsAdapter(): Adapter<T> {
-    return new FirefoxAdapterRecents();
+    return new FirefoxAdapterRecents<FirefoxRecord>();
   }
   getTopVisitedAdapter(): Adapter<T> {
     return new FirefoxAdapterTopVisited();
