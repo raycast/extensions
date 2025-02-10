@@ -19,7 +19,7 @@ import {
   SafariQueryBuilder,
   FirefoxQueryBuilder,
 } from "./query-builder";
-import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord, FirefoxRecord } from "./record";
+import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord, FirefoxRecord, ZenRecord } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
 import ini from "ini";
@@ -31,6 +31,7 @@ interface Configurations {
   arc: Factory<ArcRecord>;
   safari: Factory<SafariRecord>;
   firefox: Factory<FirefoxRecord>;
+  zen: Factory<ZenRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -55,6 +56,7 @@ export class Factory<T extends Record> {
       arc: new ArcFactory(),
       safari: new SafariFactory(),
       firefox: new FirefoxFactory(),
+      zen: new ZenFactory(),
     };
 
     return config[browser];
@@ -138,7 +140,7 @@ class ChromeFactory extends Factory<ChromeRecord> {
   }
 }
 
-class FirefoxFactory extends Factory<FirefoxRecord> {
+class FirefoxFactory<T extends FirefoxRecord> extends Factory<T> {
   profile: string;
 
   constructor() {
@@ -150,19 +152,23 @@ class FirefoxFactory extends Factory<FirefoxRecord> {
     return new FirefoxQueryBuilder();
   }
 
-  getSrc(): string {
-    return resolve(homedir(), `Library/Application Support/Firefox/${this.profile}/places.sqlite`);
+  getBaseDir(): string {
+    return "Library/Application Support/Firefox";
   }
 
-  getRecentsAdapter(): Adapter<FirefoxRecord> {
+  getSrc(): string {
+    return resolve(homedir(), `${this.getBaseDir()}/${this.profile}/places.sqlite`);
+  }
+
+  getRecentsAdapter(): Adapter<T> {
     return new FirefoxAdapterRecents();
   }
-  getTopVisitedAdapter(): Adapter<FirefoxRecord> {
+  getTopVisitedAdapter(): Adapter<T> {
     return new FirefoxAdapterTopVisited();
   }
 
   getProfile(): string {
-    const file = fs.readFileSync(resolve(homedir(), `Library/Application Support/Firefox/profiles.ini`), "utf8");
+    const file = fs.readFileSync(resolve(homedir(), `${this.getBaseDir()}/profiles.ini`), "utf8");
     const iniFile = ini.parse(file);
 
     const profiles = Object.keys(iniFile).map((key) => ({ name: iniFile[key].Name, path: iniFile[key].Path }));
@@ -171,5 +177,11 @@ class FirefoxFactory extends Factory<FirefoxRecord> {
 
     const defaultProfile: string = installKey ? iniFile[installKey]?.Default : profiles[0].path;
     return defaultProfile;
+  }
+}
+
+class ZenFactory extends FirefoxFactory<ZenRecord> {
+  getBaseDir(): string {
+    return "Library/Application Support/zen";
   }
 }

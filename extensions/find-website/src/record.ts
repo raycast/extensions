@@ -13,6 +13,8 @@ export interface FirefoxRecord extends Record {
   lastVisitDate: string;
 }
 
+export interface ZenRecord extends FirefoxRecord {}
+
 export interface OrionRecord extends Record {
   lastVisitTime: string;
   typedCount: number;

@@ -125,3 +125,5 @@ export class FirefoxQueryBuilder extends QueryBuilder {
     return "url";
   }
 }
+
+export class ZenQueryBuilder extends FirefoxQueryBuilder {}

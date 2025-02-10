@@ -1,5 +1,5 @@
 import { Icon, Color, Image } from "@raycast/api";
-import { Record, OrionRecord, ChromeRecord, ArcRecord, SafariRecord, FirefoxRecord } from "./record";
+import { Record, OrionRecord, ChromeRecord, ArcRecord, SafariRecord, FirefoxRecord, ZenRecord } from "./record";
 
 class Result {
   key: string;
@@ -104,6 +104,7 @@ export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
 export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
 
 export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
+export class ZenAdapterTopVisited extends AdapterTopVisited<ZenRecord> {}
 
 export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {
   getVisitTime(record: OrionRecord): string {
@@ -129,8 +130,10 @@ export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
   }
 }
 
-export class FirefoxAdapterRecents extends AdapterRecents<FirefoxRecord> {
+export class FirefoxAdapterRecents<T extends FirefoxRecord> extends AdapterRecents<T> {
   getVisitTime(record: FirefoxRecord): string {
     return record.lastVisitDate;
   }
 }
+
+export class ZenAdapterRecents extends FirefoxAdapterRecents<ZenRecord> {}
