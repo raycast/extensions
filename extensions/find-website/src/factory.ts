@@ -8,6 +8,8 @@ import {
   OrionAdapterTopVisited,
   SafariAdapterRecents,
   SafariAdapterTopVisited,
+  FirefoxAdapterRecents,
+  FirefoxAdapterTopVisited,
 } from "./adapters";
 import {
   OrionQueryBuilder,
@@ -15,16 +17,20 @@ import {
   ChromeQueryBuilder,
   ArcQueryBuilder,
   SafariQueryBuilder,
+  FirefoxQueryBuilder,
 } from "./query-builder";
-import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord } from "./record";
+import { ChromeRecord, OrionRecord, Record, ArcRecord, SafariRecord, FirefoxRecord } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
+import ini from "ini";
+import fs from "node:fs";
 
 interface Configurations {
   chrome: Factory<ChromeRecord>;
   orion: Factory<OrionRecord>;
   arc: Factory<ArcRecord>;
   safari: Factory<SafariRecord>;
+  firefox: Factory<FirefoxRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -48,6 +54,7 @@ export class Factory<T extends Record> {
       orion: new OrionFactory(),
       arc: new ArcFactory(),
       safari: new SafariFactory(),
+      firefox: new FirefoxFactory(),
     };
 
     return config[browser];
@@ -128,5 +135,41 @@ class ChromeFactory extends Factory<ChromeRecord> {
   }
   getTopVisitedAdapter(): Adapter<ChromeRecord> {
     return new ChromeAdapterTopVisited();
+  }
+}
+
+class FirefoxFactory extends Factory<FirefoxRecord> {
+  profile: string;
+
+  constructor() {
+    super();
+    this.profile = this.getProfile();
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new FirefoxQueryBuilder();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/Firefox/${this.profile}/places.sqlite`);
+  }
+
+  getRecentsAdapter(): Adapter<FirefoxRecord> {
+    return new FirefoxAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<FirefoxRecord> {
+    return new FirefoxAdapterTopVisited();
+  }
+
+  getProfile(): string {
+    const file = fs.readFileSync(resolve(homedir(), `Library/Application Support/Firefox/profiles.ini`), "utf8");
+    const iniFile = ini.parse(file);
+
+    const profiles = Object.keys(iniFile).map((key) => ({ name: iniFile[key].Name, path: iniFile[key].Path }));
+
+    const installKey = Object.keys(iniFile).find((key) => key.startsWith("Install"));
+
+    const defaultProfile: string = installKey ? iniFile[installKey]?.Default : profiles[0].path;
+    return defaultProfile;
   }
 }

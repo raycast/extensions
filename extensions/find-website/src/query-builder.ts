@@ -105,3 +105,23 @@ export class SafariQueryBuilder extends QueryBuilder {
     return "url";
   }
 }
+
+export class FirefoxQueryBuilder extends QueryBuilder {
+  queryRecents(size: number, text: string) {
+    const order = `order by last_visit_date desc`;
+
+    return this.buildQuery(size, text, order);
+  }
+
+  select(): string {
+    return "select distinct id as id, title as title, url as url, datetime(last_visit_date/1000000, 'unixepoch', 'localtime') as lastVisitDate, visit_count as visitCount";
+  }
+
+  table() {
+    return "moz_places";
+  }
+
+  hostColumn() {
+    return "url";
+  }
+}

@@ -1,5 +1,5 @@
 import { Icon, Color, Image } from "@raycast/api";
-import { Record, OrionRecord, ChromeRecord, ArcRecord, SafariRecord } from "./record";
+import { Record, OrionRecord, ChromeRecord, ArcRecord, SafariRecord, FirefoxRecord } from "./record";
 
 class Result {
   key: string;
@@ -97,13 +97,19 @@ class AdapterRecents<T extends Record> extends Adapter<T> {
   }
 }
 
-export class OrionAdapterTopVisited extends AdapterTopVisited<OrionRecord> {
+export class OrionAdapterTopVisited extends AdapterTopVisited<OrionRecord> {}
+export class ChromeAdapterTopVisited extends AdapterTopVisited<ChromeRecord> {}
+
+export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
+export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
+
+export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
+
+export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {
   getVisitTime(record: OrionRecord): string {
     return record.lastVisitTime.toString();
   }
 }
-
-export class OrionAdapterRecents extends AdapterRecents<OrionRecord> {}
 
 export class ChromeAdapterRecents extends AdapterRecents<ChromeRecord> {
   getVisitTime(record: ChromeRecord): string {
@@ -111,16 +117,20 @@ export class ChromeAdapterRecents extends AdapterRecents<ChromeRecord> {
   }
 }
 
-export class ChromeAdapterTopVisited extends AdapterTopVisited<ChromeRecord> {}
-
-export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
-
-export class ArcAdapterRecents extends AdapterRecents<ArcRecord> {}
-
-export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
+export class ArcAdapterRecents extends AdapterRecents<ArcRecord> {
+  getVisitTime(record: ArcRecord): string {
+    return record.lastVisitTime.toString();
+  }
+}
 
 export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
   getVisitTime(record: SafariRecord): string {
-    return record.visitTime.toString();
+    return record.visitTime;
+  }
+}
+
+export class FirefoxAdapterRecents extends AdapterRecents<FirefoxRecord> {
+  getVisitTime(record: FirefoxRecord): string {
+    return record.lastVisitDate;
   }
 }

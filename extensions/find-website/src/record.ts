@@ -6,7 +6,11 @@ export interface Record {
 }
 
 export interface SafariRecord extends Record {
-  visitTime: number;
+  visitTime: string;
+}
+
+export interface FirefoxRecord extends Record {
+  lastVisitDate: string;
 }
 
 export interface OrionRecord extends Record {
