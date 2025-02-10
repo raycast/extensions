@@ -1,11 +1,10 @@
 /* eslint-disable @raycast/prefer-title-case */
-import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { getFavicon, showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import common = require("oci-common");
 import * as core from "oci-core";
 import { Instance } from "oci-core/lib/model";
 import { mapObjectToMarkdownTable } from "./utils";
-import { containerinstances } from "oci-sdk";
 
 const onError = (error: Error) => {
   const err = error.message as string | common.OciError;
@@ -16,8 +15,9 @@ const onError = (error: Error) => {
 
 export default function CheckProvider() {
   try {
-    new common.ConfigFileAuthenticationDetailsProvider();
-    return <Core />
+    const provider = new common.ConfigFileAuthenticationDetailsProvider();
+    if (!provider) return <Detail isLoading />
+    return <Core provider={provider} />
   } catch (error) {
     return <Detail navigationTitle="Oracle Cloud - Provider Error" markdown={`## Error: \n\n Can't load the default config from \`~/.oci/config\` or \`~/.oraclebmc/config\` because it does not exists or it's not a file. For more info about config file and how to get required information, see https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm for more info on OCI configuration files. \n\n > TIP: Check extension README!`} actions={<ActionPanel>
       <Action.OpenInBrowser icon={getFavicon("https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm", { fallback: Icon.Globe })} url="https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm" />
@@ -25,12 +25,11 @@ export default function CheckProvider() {
   }
 }
 
-function Core() {
+function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsProvider }) {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-instance-details", false);
   
   const { isLoading, data: instances } = useCachedPromise(
     async () => {
-      const provider = new common.ConfigFileAuthenticationDetailsProvider();
       const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       const instances = await computeClient.listInstances({ compartmentId: provider.getTenantId() });
       return instances.items;
@@ -54,23 +53,6 @@ function Core() {
         return Color.Red;
       default:
         return undefined;
-    }
-  }
-
-  async function rebootInstance(instance: Instance) {
-    const toast = await showToast(Toast.Style.Animated, "Rebooting", `${instance.displayName}`);
-    try {
-      const provider = new common.ConfigFileAuthenticationDetailsProvider();
-      const containerinstancesClient = new containerinstances.ContainerInstanceClient({ authenticationDetailsProvider: provider });
-      await containerinstancesClient.restartContainerInstance({
-        containerInstanceId: "instance.id"
-      });
-      toast.style = Toast.Style.Success;
-      toast.title = "Reboooted";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Reboot failed";
-      toast.message = `${error}`;
     }
   }
 
@@ -121,11 +103,8 @@ function Core() {
                 <Action.Push
                   icon={Icon.List}
                   title="View VNIC Attachments"
-                  target={<ListInstanceVnicAttachments instanceId={instance.id} />}
+                  target={<ListInstanceVnicAttachments instanceId={instance.id} provider={provider} />}
                 />
-                <ActionPanel>
-                  <Action icon={Icon.Redo} title="Reboot" onAction={() => rebootInstance(instance)} />
-                </ActionPanel>
               </ActionPanel>
             }
           />
@@ -135,10 +114,9 @@ function Core() {
   );
 }
 
-function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
+function ListInstanceVnicAttachments({ instanceId, provider }: { instanceId: string, provider: common.ConfigFileAuthenticationDetailsProvider }) {
   const { isLoading, data: VNICs } = useCachedPromise(
     async () => {
-      const provider = new common.ConfigFileAuthenticationDetailsProvider();
       const computeClient = new core.ComputeClient({ authenticationDetailsProvider: provider });
       const VNICs = await computeClient.listVnicAttachments({ compartmentId: provider.getTenantId(), instanceId });
       return VNICs.items;
@@ -158,7 +136,7 @@ function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
           actions={
             <ActionPanel>
               {vnic.vnicId && (
-                <Action.Push icon={Icon.Eye} title="View VNIC" target={<ViewVnic vnicId={vnic.vnicId} />} />
+                <Action.Push icon={Icon.Eye} title="View VNIC" target={<ViewVnic vnicId={vnic.vnicId} provider={provider} />} />
               )}
             </ActionPanel>
           }
@@ -168,10 +146,9 @@ function ListInstanceVnicAttachments({ instanceId }: { instanceId: string }) {
   );
 }
 
-function ViewVnic({ vnicId }: { vnicId: string }) {
+function ViewVnic({ vnicId, provider }: { vnicId: string, provider: common.ConfigFileAuthenticationDetailsProvider }) {
   const { isLoading, data: vnic } = useCachedPromise(
     async () => {
-      const provider = new common.ConfigFileAuthenticationDetailsProvider();
       const vnicClient = new core.VirtualNetworkClient({ authenticationDetailsProvider: provider });
       const res = await vnicClient.getVnic({ vnicId });
       return res.vnic;
