@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keepassxc",
   "title": "KeePassXC",
-  "description": "Access a KeePass database through KeePassXC",
+  "description": "Access a KeePass database through KeePassXC.",
   "icon": "keepassxc.png",
   "author": "pabroux",
   "contributors": [
