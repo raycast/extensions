@@ -34,12 +34,7 @@ export function ProjectList() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.Push
-                  title="View Tasks"
-                  icon={Icon.List}
-                  target={<TaskList project={project} />}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
+                <Action.Push title="View Tasks" icon={Icon.List} target={<TaskList project={project} />} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -54,12 +49,7 @@ export function ProjectList() {
         actions={
           <ActionPanel>
             {searchText.trim() && (
-              <Action.Push
-                title="Create Project"
-                icon={Icon.PlusCircle}
-                target={<CreateProject name={searchText} />}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-              />
+              <Action.Push title="Create Project" icon={Icon.PlusCircle} target={<CreateProject name={searchText} />} />
             )}
           </ActionPanel>
         }

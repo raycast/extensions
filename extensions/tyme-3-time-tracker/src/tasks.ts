@@ -14,6 +14,8 @@ export interface Task {
   hasSubtasks?: boolean;
   subtasks?: Task[];
   parentTaskId?: string;
+  parentTaskName?: string;
+  isSubtask?: boolean;
 }
 
 // Get all active projects
@@ -74,48 +76,25 @@ export async function getTasksForProject(projectId: string): Promise<Task[]> {
         const project = tyme.projects.byId("${projectId}");
         if (!project) throw new Error("Project not found");
         
-        const projectInfo = {
-          id: project.id(),
-          name: project.name()
-        };
-
-        const allTasks = project.tasks;
-        const taskList = [];
-        const taskCompleted = allTasks.completed();
-        const taskIds = allTasks.id();
-        const taskNames = allTasks.name();
-        
-        for (let i = 0; i < taskIds.length; i++) {
-          if (!taskCompleted[i]) {
-            const task = allTasks[i];            
-            const allSubtasks = task.subtasks;
-            const subtaskList = [];
-            const subtaskCompleted = allSubtasks.completed();
-            const subtaskIds = allSubtasks.id();
-            const subtaskNames = allSubtasks.name();
-            
-            for (let j = 0; j < subtaskIds.length; j++) {
-              if (!subtaskCompleted[j]) {
-                subtaskList.push({
-                  id: subtaskIds[j],
-                  name: subtaskNames[j],
-                  project: projectInfo,
-                  parentTaskId: taskIds[i]
-                });
-              }
+        const data = {
+          project: {
+            id: project.id(),
+            name: project.name()
+          },
+          tasks: {
+            ids: project.tasks.id().flat(),
+            names: project.tasks.name().flat(),
+            completed: project.tasks.completed().flat(),
+            hasSubtasks: project.tasks.subtasks.id().flat(),
+            subtasks: {
+              ids: project.tasks.subtasks.id().flat(),
+              names: project.tasks.subtasks.name().flat(),
+              completed: project.tasks.subtasks.completed().flat()
             }
-            
-            taskList.push({
-              id: taskIds[i],
-              name: taskNames[i],
-              project: projectInfo,
-              hasSubtasks: subtaskList.length > 0,
-              subtasks: subtaskList
-            });
           }
-        }
+        };
         
-        JSON.stringify(taskList);
+        JSON.stringify(data);
       } catch (err) {
         JSON.stringify({ error: err.message });
       }
@@ -126,11 +105,44 @@ export async function getTasksForProject(projectId: string): Promise<Task[]> {
       }
     );
 
-    const result = JSON.parse(res);
-    if ("error" in result) {
-      throw new Error(result.error);
+    const data = JSON.parse(res);
+    if ("error" in data) {
+      throw new Error(data.error);
     }
-    return result;
+
+    // Process the data in JavaScript for better performance
+    const taskList = [];
+    let subtaskIndex = 0;
+
+    for (let i = 0; i < data.tasks.ids.length; i++) {
+      if (!data.tasks.completed[i]) {
+        // If task has subtasks, add them as separate items
+        if (data.tasks.hasSubtasks[i]) {
+          while (subtaskIndex < data.tasks.subtasks.ids.length && !data.tasks.subtasks.completed[subtaskIndex]) {
+            taskList.push({
+              id: data.tasks.subtasks.ids[subtaskIndex],
+              name: data.tasks.subtasks.names[subtaskIndex],
+              project: data.project,
+              parentTaskId: data.tasks.ids[i],
+              parentTaskName: data.tasks.names[i],
+              isSubtask: true,
+            });
+            subtaskIndex++;
+          }
+        } else {
+          // Add the main task
+          taskList.push({
+            id: data.tasks.ids[i],
+            name: data.tasks.names[i],
+            project: data.project,
+            hasSubtasks: false,
+            subtasks: [],
+          });
+        }
+      }
+    }
+
+    return taskList;
   } catch (error) {
     await showErrorHUD("fetching tasks", error);
     return [];

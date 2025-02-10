@@ -31,35 +31,16 @@ export function TaskList({ project }: TaskListProps) {
     }
   }, []);
 
-  const renderSubtaskItem = (subtask: Task) => (
-    <List.Item
-      key={subtask.id}
-      title={subtask.name}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action
-              title="Start Tracking"
-              icon={Icon.Play}
-              onAction={() => handleStartTracking(subtask)}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  );
-
   const filteredTasks = useMemo(() => {
-    return tasks
-      .map((task) => ({
-        ...task,
-        subtasks: task.subtasks?.filter((subtask) => subtask.name.toLowerCase().includes(searchText.toLowerCase())),
-      }))
-      .filter(
-        (task) =>
-          task.name.toLowerCase().includes(searchText.toLowerCase()) || (task.subtasks && task.subtasks.length > 0)
-      );
+    return tasks.filter((task) => {
+      const searchLower = searchText.toLowerCase();
+      if (task.isSubtask) {
+        return (
+          task.name.toLowerCase().includes(searchLower) || task.parentTaskName?.toLowerCase().includes(searchLower)
+        );
+      }
+      return task.name.toLowerCase().includes(searchLower);
+    });
   }, [tasks, searchText]);
 
   return (
@@ -70,30 +51,20 @@ export function TaskList({ project }: TaskListProps) {
       searchBarPlaceholder={`Search or create a task in ${project.name}...`}
       navigationTitle={project.name}
     >
-      {filteredTasks.map((task) =>
-        task.hasSubtasks ? (
-          <List.Section key={task.id} title={task.name}>
-            {task.subtasks?.map(renderSubtaskItem)}
-          </List.Section>
-        ) : (
-          <List.Item
-            key={task.id}
-            title={task.name}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action
-                    title="Start Tracking"
-                    icon={Icon.Play}
-                    onAction={() => handleStartTracking(task)}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        )
-      )}
+      {filteredTasks.map((task) => (
+        <List.Item
+          key={task.id}
+          title={task.name}
+          subtitle={task.isSubtask ? task.parentTaskName : undefined}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action title="Start Task" icon={Icon.Play} onAction={() => handleStartTracking(task)} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ))}
       <List.EmptyView
         title={searchText.trim() ? `Create task "${searchText}"` : "No Tasks Found"}
         description={searchText.trim() ? "Press Enter to create this task" : "Type to search or create a new task"}
@@ -105,7 +76,6 @@ export function TaskList({ project }: TaskListProps) {
                 title="Create Task"
                 icon={Icon.PlusCircle}
                 target={<CreateTask project={project} name={searchText} />}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
               />
             )}
           </ActionPanel>
