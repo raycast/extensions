@@ -12,6 +12,8 @@ import {
   FirefoxAdapterTopVisited,
   BraveAdapterRecents,
   BraveAdapterTopVisited,
+  VivaldiAdapterRecents,
+  VivaldiAdapterTopVisited,
 } from "./adapters";
 import {
   OrionQueryBuilder,
@@ -30,6 +32,7 @@ import {
   FirefoxRecord,
   ZenRecord,
   BraveRecord,
+  VivaldiRecord,
 } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
@@ -44,6 +47,7 @@ interface Configurations {
   firefox: Factory<FirefoxRecord>;
   zen: Factory<ZenRecord>;
   brave: Factory<BraveRecord>;
+  vivaldi: Factory<VivaldiRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -70,6 +74,7 @@ export class Factory<T extends Record> {
       firefox: new FirefoxFactory(),
       zen: new ZenFactory(),
       brave: new BraveFactory(),
+      vivaldi: new VivaldiFactory(),
     };
 
     return config[browser];
@@ -170,6 +175,22 @@ class BraveFactory extends ChromeFactory<BraveRecord> {
   }
 }
 
+class VivaldiFactory extends ChromeFactory<VivaldiRecord> {
+  constructor() {
+    super("");
+  }
+
+  getRecentsAdapter(): Adapter<VivaldiRecord> {
+    return new VivaldiAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<VivaldiRecord> {
+    return new VivaldiAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/Vivaldi/Default/History`);
+  }
+}
 class FirefoxFactory<T extends FirefoxRecord> extends Factory<T> {
   profile: string;
 

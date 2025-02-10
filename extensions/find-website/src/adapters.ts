@@ -112,6 +112,7 @@ export class ChromeAdapterTopVisited extends AdapterTopVisited<ChromeRecord> {}
 export class SafariAdapterTopVisited extends AdapterTopVisited<SafariRecord> {}
 export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
 export class BraveAdapterTopVisited extends AdapterTopVisited<BraveRecord> {}
+export class VivaldiAdapterTopVisited extends AdapterTopVisited<VivaldiRecord> {}
 
 export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
 export class ZenAdapterTopVisited extends AdapterTopVisited<ZenRecord> {}
@@ -130,6 +131,7 @@ export class ChromeAdapterRecents<T extends ChromeRecord> extends AdapterRecents
 
 export class ArcAdapterRecents extends ChromeAdapterRecents<ArcRecord> {}
 export class BraveAdapterRecents extends ChromeAdapterRecents<BraveRecord> {}
+export class VivaldiAdapterRecents extends ChromeAdapterRecents<VivaldiRecord> {}
 
 export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
   getVisitTime(record: SafariRecord): string {

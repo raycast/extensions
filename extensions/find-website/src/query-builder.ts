@@ -1,3 +1,5 @@
+import exp from "node:constants";
+
 export class QueryBuilder {
   buildQuery(size: number, text: string, order: string) {
     const select = this.select();
@@ -65,6 +67,7 @@ export class ChromeQueryBuilder extends QueryBuilder {
 
 export class ArcQueryBuilder extends ChromeQueryBuilder {}
 export class BraveQueryBuilder extends ChromeQueryBuilder {}
+export class VivaldiQueryBuilder extends ChromeQueryBuilder {}
 
 export class OrionQueryBuilder extends QueryBuilder {
   select(): string {

@@ -29,3 +29,4 @@ export interface ChromeRecord extends Record {
 
 export interface ArcRecord extends ChromeRecord {}
 export interface BraveRecord extends ChromeRecord {}
+export interface VivaldiRecord extends ChromeRecord {}

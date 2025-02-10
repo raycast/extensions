@@ -53,6 +53,10 @@
         {
           "title": "Brave Browser",
           "value": "brave"
+        },
+        {
+          "title": "Vivaldi",
+          "value": "vivaldi"
         }
       ]
     },
