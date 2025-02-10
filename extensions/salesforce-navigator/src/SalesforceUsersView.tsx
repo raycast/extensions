@@ -246,16 +246,8 @@ export default function SalesforceUsersView({ org }: { org: Org }) {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Open User Record"
-                      icon={Icon.OpenInBrowser}
-                      onAction={() => handleOpenUserRecord(user)}
-                    />
-                    <Action
-                      title="Login as User"
-                      icon={Icon.SwitchHorizontal}
-                      onAction={() => handleLoginAsUser(user)}
-                    />
+                    <Action title="Open User Record" icon={Icon.Globe} onAction={() => handleOpenUserRecord(user)} />
+                    <Action title="Login as User" icon={Icon.Switch} onAction={() => handleLoginAsUser(user)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action

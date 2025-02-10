@@ -226,7 +226,7 @@ export default function SalesforceSearchView({ org, sobject }: { org: Org; sobje
             <ActionPanel>
               <Action
                 title="Open Record"
-                icon={Icon.OpenInBrowser}
+                icon={Icon.Globe}
                 onAction={async () => {
                   try {
                     const relativeRecordPath = `/lightning/r/${apiNameValue}/${record.Id}/view`;

@@ -215,7 +215,7 @@ export default function GlobalSearchResultsView({ org }: { org: Org }) {
               <ActionPanel>
                 <Action
                   title={`Open ${record.attributes.type} Record`}
-                  icon={Icon.OpenInBrowser}
+                  icon={Icon.Globe}
                   onAction={() => handleOpenRecord(record)}
                 />
                 <Action title="Search in Browser" icon={Icon.Globe} onAction={handleSearchInBrowser} />

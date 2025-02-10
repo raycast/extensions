@@ -137,7 +137,7 @@ function OrgListView() {
             key={org.username}
             title={org.alias || org.username}
             subtitle={org.instanceUrl}
-            icon={Icon.Database}
+            icon={Icon.Box}
             actions={
               <ActionPanel>
                 <Action.Push title="Select Options" icon={Icon.ArrowRight} target={<SelectOptionsView org={org} />} />
@@ -270,7 +270,7 @@ function renderSobjectRow(org: Org, sobj: SObject, index: number): JSX.Element {
       key={`${sobj.id}_${index}`}
       title={baseLabel}
       subtitle={sobj.QualifiedApiName}
-      icon={Icon.Table}
+      icon={Icon.AppWindowList}
       keywords={keywords}
       actions={
         <ActionPanel>
