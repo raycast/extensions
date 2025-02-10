@@ -1,5 +1,12 @@
 # HideMyEmail Changelog
 
+## [Update] - 2025-02-10
+
+- Added fallback to old iCloud login method since new authentication does not work for all users ([#16368](https://github.com/raycast/extensions/issues/16368), [#16451](https://github.com/raycast/extensions/issues/16451))
+- Increased timeout time
+- Added logout action
+- Changed focus login form to password field to allow easy Passwords access
+
 ## [Update] - 2025-01-10
 
 - Improved user experience through caching and optimistic updates

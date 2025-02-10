@@ -15,15 +15,21 @@ const getProfileName = (userDirectoryPath: string) => {
   const preferences = getPreferenceValues<Preferences>();
 
   const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  const alphaProfile = profiles.filter((profile) => profile.endsWith(".Default (alpha)"))[0];
+  if (customProfile) return customProfile;
 
-  if (customProfile) {
-    return customProfile;
-  } else if (alphaProfile) {
-    return alphaProfile;
-  } else {
-    return "";
-  }
+  const releaseProfile = profiles.filter((profile) => profile.endsWith(".Default (release)"))[0];
+  if (releaseProfile) return releaseProfile;
+
+  const betaProfile = profiles.filter((profile) => profile.endsWith(".Default (beta)"))[0];
+  if (betaProfile) return betaProfile;
+
+  const alphaProfile = profiles.filter((profile) => profile.endsWith(".Default (alpha)"))[0];
+  if (alphaProfile) return alphaProfile;
+
+  const anyDefaultProfile = profiles.filter((profile) => profile.includes(".Default ("))[0];
+  if (anyDefaultProfile) return anyDefaultProfile;
+
+  return "";
 };
 
 export const getHistoryDbPath = (): string => {
