@@ -88,8 +88,8 @@ export type GroupByProp = {
 
 export const groupByOptions: GroupByOptions = [
   { label: "Default", icon: Icon.Document, value: "default" },
-  { label: "Due Date", icon: Icon.Calendar, value: "dueDate" },
-  { label: "Upcoming", icon: Icon.Clock, value: "upcoming" },
+  { label: "Due Date", icon: Icon.Clock, value: "dueDate" },
+  { label: "Upcoming", icon: Icon.Calendar, value: "upcoming" },
   { label: "Priority", icon: Icon.Exclamationmark, value: "priority" },
 ];
 
