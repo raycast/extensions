@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Minor improvements] - 2025-02-10
+
+- Add a preference to allow the user to not show the `Start Date` field in the `Create Task` command
+
 ## [Added Copy Task Formatted URL command] - 2024-03-27
 
 - Added a new task command - "Copy Task Formatted URL"

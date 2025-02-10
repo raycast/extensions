@@ -18,7 +18,18 @@
       "name": "create-task",
       "title": "Create Task",
       "description": "Create and assign new tasks.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStartDate",
+          "type": "checkbox",
+          "title": "Show Start Date",
+          "label": "Show the Start Date field in the Create Task command",
+          "description": "When enabled, the Start Date field will be shown in the Create Task command",
+          "required": false,
+          "default": true
+        }
+      ]      
     },
     {
       "name": "my-tasks",
