@@ -1,6 +1,6 @@
 # Rebrandly Changelog
 
-## [Delete Link] - {PR_MERGE_DATE}
+## [Delete Link] - 2025-02-10
 
 - Use `ctrl`+`x` to execute "Delete Link" `Action`
 
