@@ -1,6 +1,6 @@
 # monday.com Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-02-10
 
 - Add metadata image
 - Add CHANGELOG
