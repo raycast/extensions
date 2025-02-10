@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Add new "Upcoming" grouping option] - {PR_MERGE_DATE}
+## [Add new "Upcoming" grouping option] - 2025-02-10
 
 - Add a new mode which allows group reminders by when they are upcoming in the `My Reminders` view.
 
