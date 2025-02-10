@@ -26,7 +26,7 @@
     },
     {
       "name": "devices",
-      "title": "Manage your devices",
+      "title": "Manage Devices",
       "subtitle": "Dashlane",
       "description": "List devices connected to your accunt",
       "mode": "view"
