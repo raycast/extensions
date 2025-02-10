@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, useNavigation, Toast, showToast, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  useNavigation,
+  Toast,
+  showToast,
+  getPreferenceValues,
+} from "@raycast/api";
 import { format } from "date-fns";
 import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
 import { useMemo, useEffect } from "react";
