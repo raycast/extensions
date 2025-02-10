@@ -197,8 +197,8 @@ export default function SalesforceSearchView({ org, sobject }: { org: Org; sobje
     >
       {records.map((record) => (
         <List.Item
-          key={record.Id}
-          title={record.Name}
+          key={String(record.Id)}
+          title={record.Name as string}
           subtitle={`ID: ${record.Id}`}
           detail={
             <List.Item.Detail
@@ -211,9 +211,9 @@ export default function SalesforceSearchView({ org, sobject }: { org: Org; sobje
                       title={field}
                       text={
                         field.toLowerCase() === "id"
-                          ? record.Id
+                          ? String(record.Id)
                           : record[field]
-                            ? record[field].toString()
+                            ? record[field]?.toString()
                             : "Not available"
                       }
                     />

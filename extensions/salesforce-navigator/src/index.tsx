@@ -89,7 +89,7 @@ function OrgListView() {
             parsed.result.nonScratchOrgs.forEach((item: RawOrg) => {
               fetchedOrgs.push({
                 username: item.username,
-                alias: item.alias,
+                alias: item.alias ?? "",
                 orgId: item.orgId,
                 instanceUrl: item.instanceUrl,
               });
@@ -99,7 +99,7 @@ function OrgListView() {
             parsed.result.scratchOrgs.forEach((item: RawOrg) => {
               fetchedOrgs.push({
                 username: item.username,
-                alias: item.alias,
+                alias: item.alias ?? "",
                 orgId: item.orgId,
                 instanceUrl: item.instanceUrl,
               });
@@ -342,7 +342,6 @@ function SelectOptionsView({ org }: { org: Org }) {
     isLoading: isLoadingSobjects,
     data: sobjectsOutput,
     error: sobjectsError,
-    revalidate: revalidateSobjects,
   } = useExec("sf", [
     "data",
     "query",
@@ -501,12 +500,7 @@ function SelectOptionsView({ org }: { org: Org }) {
         </List.Section>
       )}
       {(filterCategory === "all" || filterCategory === "sobjects") && (
-        <List.Section
-          title="SObjects"
-          accessory={
-            <Action title="Refresh Sobjects" icon={Icon.ArrowClockwise} onAction={() => revalidateSobjects()} />
-          }
-        >
+        <List.Section title="SObjects">
           {isLoadingSobjects ? (
             <List.Item title="Loading SObjects…" icon={Icon.CircleProgress} />
           ) : sobjectsError ? (
