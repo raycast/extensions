@@ -108,7 +108,10 @@ function Core({ provider }: { provider: common.ConfigFileAuthenticationDetailsPr
         return (
           <List.Item
             key={instance.id}
-            icon={{ value: {source: Icon.CircleFilled, tintColor: getInstanceColor(instance.lifecycleState)}, tooltip: instance.lifecycleState}}
+            icon={{
+              value: { source: Icon.CircleFilled, tintColor: getInstanceColor(instance.lifecycleState) },
+              tooltip: instance.lifecycleState,
+            }}
             title={instance.displayName ?? ""}
             subtitle={isShowingDetail ? undefined : instance.shape}
             accessories={isShowingDetail ? undefined : accessories}
