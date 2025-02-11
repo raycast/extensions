@@ -1,5 +1,8 @@
 # Google Chrome Changelog
 
+## [Add Copy Title action for Search Tab] - 2025-02-11
+- Add Copy Title action for Search Tab command.
+
 ## [Allow to configure profile path] - 2025-01-18
 - The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
