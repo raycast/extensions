@@ -146,7 +146,6 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search devices..."
-      navigationTitle="Network Devices"
       actions={
         !isLoading && devices.length > 0 ? (
           <ActionPanel>
