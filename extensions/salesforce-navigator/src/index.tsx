@@ -411,7 +411,7 @@ function SelectOptionsView({ org }: { org: Org }) {
                   onAction={async () => {
                     try {
                       const execPromise = promisify(exec);
-                      await execPromise(`sf org open --target-org "${targetOrg}"`);
+                      await execPromise(`sf org open -p "/" --target-org "${targetOrg}"`);
                       await closeMainWindow();
                     } catch (error: unknown) {
                       const errorMessage = error instanceof Error ? error.message : String(error);
