@@ -57,6 +57,10 @@
         {
           "title": "Vivaldi",
           "value": "vivaldi"
+        },
+        {
+          "title": "Opera",
+          "value": "opera"
         }
       ]
     },

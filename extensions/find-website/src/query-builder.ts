@@ -68,6 +68,7 @@ export class ChromeQueryBuilder extends QueryBuilder {
 export class ArcQueryBuilder extends ChromeQueryBuilder {}
 export class BraveQueryBuilder extends ChromeQueryBuilder {}
 export class VivaldiQueryBuilder extends ChromeQueryBuilder {}
+export class OperaQueryBuilder extends ChromeQueryBuilder {}
 
 export class OrionQueryBuilder extends QueryBuilder {
   select(): string {

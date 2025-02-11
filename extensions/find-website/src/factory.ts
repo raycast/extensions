@@ -14,6 +14,8 @@ import {
   BraveAdapterTopVisited,
   VivaldiAdapterRecents,
   VivaldiAdapterTopVisited,
+  OperaAdapterRecents,
+  OperaAdapterTopVisited,
 } from "./adapters";
 import {
   OrionQueryBuilder,
@@ -22,6 +24,9 @@ import {
   ArcQueryBuilder,
   SafariQueryBuilder,
   FirefoxQueryBuilder,
+  BraveQueryBuilder,
+  VivaldiQueryBuilder,
+  OperaQueryBuilder,
 } from "./query-builder";
 import {
   ChromeRecord,
@@ -33,6 +38,7 @@ import {
   ZenRecord,
   BraveRecord,
   VivaldiRecord,
+  OperaRecord,
 } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
@@ -48,6 +54,7 @@ interface Configurations {
   zen: Factory<ZenRecord>;
   brave: Factory<BraveRecord>;
   vivaldi: Factory<VivaldiRecord>;
+  opera: Factory<OperaRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -75,6 +82,7 @@ export class Factory<T extends Record> {
       zen: new ZenFactory(),
       brave: new BraveFactory(),
       vivaldi: new VivaldiFactory(),
+      opera: new OperaFactory(),
     };
 
     return config[browser];
@@ -163,6 +171,10 @@ class BraveFactory extends ChromeFactory<BraveRecord> {
     super("");
   }
 
+  getQueryBuilder(): QueryBuilder {
+    return new BraveQueryBuilder();
+  }
+
   getRecentsAdapter(): Adapter<BraveRecord> {
     return new BraveAdapterRecents();
   }
@@ -180,6 +192,10 @@ class VivaldiFactory extends ChromeFactory<VivaldiRecord> {
     super("");
   }
 
+  getQueryBuilder(): QueryBuilder {
+    return new VivaldiQueryBuilder();
+  }
+
   getRecentsAdapter(): Adapter<VivaldiRecord> {
     return new VivaldiAdapterRecents();
   }
@@ -191,6 +207,28 @@ class VivaldiFactory extends ChromeFactory<VivaldiRecord> {
     return resolve(homedir(), `Library/Application Support/Vivaldi/Default/History`);
   }
 }
+
+class OperaFactory extends ChromeFactory<OperaRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new OperaQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<OperaRecord> {
+    return new OperaAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<OperaRecord> {
+    return new OperaAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/com.operasoftware.Opera/Default/History`);
+  }
+}
+
 class FirefoxFactory<T extends FirefoxRecord> extends Factory<T> {
   profile: string;
 
