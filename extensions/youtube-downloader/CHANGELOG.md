@@ -1,5 +1,17 @@
 # YouTube Downloader Changelog
 
+## [Improve Error Message] - 2025-02-04
+
+- Improve error message
+- Fix URL validator while link has no protocol prefix
+- Replace `execa` with `nano-spawn`
+- Adjust import orders
+- Fix `yt-dlp` from preferences
+
+## [Fixes] - 2025-02-03
+
+- Fixed error: Unable to get selected text from frontmost application
+
 ## [Insert active tab URL] - 2025-02-02
 
 - If the raycast browser extension is installed, the extension will automatically insert the active tab URL into the input field

@@ -14,6 +14,7 @@ import {
   Alert,
   useNavigation,
   Image,
+  LocalStorage,
 } from "@raycast/api";
 import { iCloudService } from "./api/connect";
 import { getIcon, HideMyEmail, MetaData } from "./api/hide-my-email";
@@ -55,6 +56,7 @@ export default function Command() {
   const [service, setService] = useState<iCloudService | null>(null);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>(EmailStatus.ANY);
   const [showLoginAction, setShowLoginAction] = useState<boolean>(false);
+  const [isLoggedOut, setIsLoggedOut] = useCachedState<boolean>("isLoggedOut", false);
   const [appIcons, setAppIcons] = useCachedState<AppIcons>(
     "app-icons",
     { default: "extension-icon.png" },
@@ -92,6 +94,9 @@ export default function Command() {
         }
       },
       onData: async (data) => {
+        if (isLoggedOut) {
+          setIsLoggedOut(false);
+        }
         const newIcons: AppIcons = {};
         let newData = false;
         for (const hme of data) {
@@ -115,7 +120,7 @@ export default function Command() {
           showToast({ style: Toast.Style.Success, title: "Logged in" });
           setService(iService);
         } catch (error) {
-          if (emails.length > 0) {
+          if (emails.length > 0 && !isLoggedOut) {
             showToast({
               style: Toast.Style.Failure,
               title: "Failed to log in",
@@ -128,8 +133,18 @@ export default function Command() {
     }
   }, []);
 
-  if (!service && !emails.length) {
-    return <Login onLogin={(iService: iCloudService) => setService(iService)} />;
+  if (!service && (!emails.length || isLoggedOut)) {
+    return (
+      <Login
+        onLogin={(iService: iCloudService) => {
+          setService(iService);
+        }}
+      />
+    );
+  }
+
+  if (isLoggedOut) {
+    return <List isLoading={true} />;
   }
 
   async function isServiceAvailable() {
@@ -253,6 +268,21 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Adding failed";
       toast.message = (error as { message: string }).message;
+    }
+  }
+
+  async function logOut() {
+    try {
+      await service?.logOut();
+      LocalStorage.clear();
+      setIsLoggedOut(true);
+      setService(null);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to log out",
+        message: (error as { message: string }).message,
+      });
     }
   }
 
@@ -407,6 +437,17 @@ export default function Command() {
                           }
                           icon={Icon.PlusCircle}
                           shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        />
+                      </ActionPanel.Section>
+                    )}
+                    {service && (
+                      <ActionPanel.Section>
+                        <Action
+                          title="Log Out"
+                          onAction={async () => {
+                            await logOut();
+                          }}
+                          icon={Icon.Logout}
                         />
                       </ActionPanel.Section>
                     )}

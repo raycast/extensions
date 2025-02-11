@@ -1,3 +1,6 @@
+import { execSync, spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import {
   Action,
   ActionPanel,
@@ -14,11 +17,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils";
-import fs from "fs";
-import { execSync, spawn } from "node:child_process";
-import { execa } from "execa";
-import path from "path";
+import nanoSpawn from "nano-spawn";
+import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -53,7 +53,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const process = spawn("/opt/homebrew/bin/yt-dlp", [...options, values.url]);
+      const process = spawn(preferences.ytdlPath, [...options, values.url]);
 
       let filePath = "";
 
@@ -119,7 +119,7 @@ export default function DownloadVideo() {
           return "URL is required";
         }
         if (!isYouTubeURL(value)) {
-          return "Invalid YouTube URL";
+          return "Invalid URL";
         }
       },
       startTime: (value) => {
@@ -145,9 +145,9 @@ export default function DownloadVideo() {
   const { data: video, isLoading } = usePromise(
     async (url) => {
       if (!url) return;
+      if (!isYouTubeURL(url)) return;
 
-      const result = await execa("/opt/homebrew/bin/yt-dlp", ["-j", url]);
-
+      const result = await nanoSpawn(preferences.ytdlPath, ["-j", url]);
       return JSON.parse(result.stdout) as {
         title: string;
         duration: number;
@@ -165,8 +165,12 @@ export default function DownloadVideo() {
     },
     [values.url],
     {
-      onError() {
-        setValidationError("url", "Invalid YouTube URL");
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch video",
+          message: error.message,
+        });
       },
     },
   );
@@ -182,13 +186,27 @@ export default function DownloadVideo() {
   useEffect(() => {
     (async () => {
       const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) setValue("url", clipboardText);
+      if (clipboardText && isYouTubeURL(clipboardText)) {
+        setValue("url", clipboardText);
+        return;
+      }
 
-      const selectedText = await getSelectedText();
-      if (selectedText && isYouTubeURL(selectedText)) setValue("url", selectedText);
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText && isYouTubeURL(selectedText)) {
+          setValue("url", selectedText);
+          return;
+        }
+      } catch {
+        // Suppress the error if Raycast didn't find any selected text
+      }
 
-      const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-      if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      try {
+        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+      } catch {
+        // Suppress the error if Raycast didn't find browser extension
+      }
     })();
   }, []);
 
