@@ -30,6 +30,7 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
+      <Action.CopyToClipboard title="Copy Title" content={tab.title} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
       <CloseTab tab={tab} onTabClosed={onTabClosed} />
       <ActionPanel.Section>
         <Action.CreateQuicklink
