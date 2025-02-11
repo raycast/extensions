@@ -16,6 +16,8 @@ import {
   VivaldiAdapterTopVisited,
   OperaAdapterRecents,
   OperaAdapterTopVisited,
+  EdgeAdapterRecents,
+  EdgeAdapterTopVisited,
 } from "./adapters";
 import {
   OrionQueryBuilder,
@@ -27,6 +29,7 @@ import {
   BraveQueryBuilder,
   VivaldiQueryBuilder,
   OperaQueryBuilder,
+  EdgeQueryBuilder,
 } from "./query-builder";
 import {
   ChromeRecord,
@@ -39,6 +42,7 @@ import {
   BraveRecord,
   VivaldiRecord,
   OperaRecord,
+  EdgeRecord,
 } from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
@@ -55,6 +59,7 @@ interface Configurations {
   brave: Factory<BraveRecord>;
   vivaldi: Factory<VivaldiRecord>;
   opera: Factory<OperaRecord>;
+  edge: Factory<EdgeRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -83,6 +88,7 @@ export class Factory<T extends Record> {
       brave: new BraveFactory(),
       vivaldi: new VivaldiFactory(),
       opera: new OperaFactory(),
+      edge: new EdgeFactory(),
     };
 
     return config[browser];
@@ -226,6 +232,27 @@ class OperaFactory extends ChromeFactory<OperaRecord> {
 
   getSrc(): string {
     return resolve(homedir(), `Library/Application Support/com.operasoftware.Opera/Default/History`);
+  }
+}
+
+class EdgeFactory extends ChromeFactory<EdgeRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new EdgeQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<EdgeRecord> {
+    return new EdgeAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<EdgeRecord> {
+    return new EdgeAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/Microsoft Edge/Default/History`);
   }
 }
 

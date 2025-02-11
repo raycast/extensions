@@ -61,6 +61,10 @@
         {
           "title": "Opera",
           "value": "opera"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
         }
       ]
     },

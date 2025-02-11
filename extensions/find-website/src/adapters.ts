@@ -10,6 +10,7 @@ import {
   BraveRecord,
   VivaldiRecord,
   OperaRecord,
+  EdgeRecord,
 } from "./record";
 
 class Result {
@@ -116,6 +117,7 @@ export class ArcAdapterTopVisited extends AdapterTopVisited<ArcRecord> {}
 export class BraveAdapterTopVisited extends AdapterTopVisited<BraveRecord> {}
 export class VivaldiAdapterTopVisited extends AdapterTopVisited<VivaldiRecord> {}
 export class OperaAdapterTopVisited extends AdapterTopVisited<OperaRecord> {}
+export class EdgeAdapterTopVisited extends AdapterTopVisited<EdgeRecord> {}
 
 export class FirefoxAdapterTopVisited extends AdapterTopVisited<FirefoxRecord> {}
 export class ZenAdapterTopVisited extends AdapterTopVisited<ZenRecord> {}
@@ -136,6 +138,7 @@ export class ArcAdapterRecents extends ChromeAdapterRecents<ArcRecord> {}
 export class BraveAdapterRecents extends ChromeAdapterRecents<BraveRecord> {}
 export class VivaldiAdapterRecents extends ChromeAdapterRecents<VivaldiRecord> {}
 export class OperaAdapterRecents extends ChromeAdapterRecents<OperaRecord> {}
+export class EdgeAdapterRecents extends ChromeAdapterRecents<EdgeRecord> {}
 
 export class SafariAdapterRecents extends AdapterRecents<SafariRecord> {
   getVisitTime(record: SafariRecord): string {

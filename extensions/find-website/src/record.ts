@@ -31,3 +31,4 @@ export interface ArcRecord extends ChromeRecord {}
 export interface BraveRecord extends ChromeRecord {}
 export interface VivaldiRecord extends ChromeRecord {}
 export interface OperaRecord extends ChromeRecord {}
+export interface EdgeRecord extends ChromeRecord {}
