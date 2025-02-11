@@ -219,6 +219,7 @@ export default function GlobalSearchResultsView({ org }: { org: Org }) {
                   onAction={() => handleOpenRecord(record)}
                 />
                 <Action title="Search in Browser" icon={Icon.Globe} onAction={handleSearchInBrowser} />
+                <Action.CopyToClipboard title="Copy Record Id" content={record.Id} />
               </ActionPanel>
             }
           />
