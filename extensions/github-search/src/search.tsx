@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast } from '@raycast/api';
+import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard } from '@raycast/api';
 import { focusOrOpenUrl, isSupportBrowser } from './open-url';
 import { useLocalStorage } from '@raycast/utils';
 import type { FormFields, ReusableFilter, ReusableFilterFormProps, SavedSearch } from './types';
@@ -278,7 +278,7 @@ export default function Command() {
 
               <Action
                 title="Delete Saved Search"
-                shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 icon={Icon.Trash}
                 onAction={() => {
@@ -549,7 +549,7 @@ const ReusableFilterForm = ({ reusableFilters: f, onSelect, selectedFilter }: Re
               />
               <Action
                 title="Remove Filter"
-                shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 icon={Icon.Trash}
                 onAction={() => {
