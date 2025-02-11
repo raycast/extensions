@@ -1,7 +1,9 @@
-import { ActionPanel, List, Action, Image, Icon, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Image, Icon, getPreferenceValues, showHUD, PopToRootType } from "@raycast/api";
 import { useState } from "react";
 import useSearch from "../api/useSearch";
 import AnimeDetails from "./listDetail";
+import { authorize } from "../api/oauth";
+import { addAnime } from "../api/api";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
@@ -47,6 +49,17 @@ export default function SearchAnimeList() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
+                <Action
+                  title="Add to Watchlist"
+                  onAction={async () => {
+                    await authorize();
+                    await showHUD("Added to Watchlist", {
+                      popToRootType: PopToRootType.Immediate,
+                    });
+                    await addAnime(anime);
+                  }}
+                  icon={Icon.Plus}
+                />
                 <Action
                   title="Toggle Detailed View"
                   onAction={() => setShowingDetail(!showingDetail)}

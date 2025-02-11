@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues, Icon } from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, Icon, showHUD, PopToRootType } from "@raycast/api";
 import useSearch from "../api/useSearch";
+import { addAnime } from "../api/api";
+import { authorize } from "../api/oauth";
 
 export default function SearchAnimeGrid() {
   const [page, setPage] = useState("1");
@@ -33,6 +35,16 @@ export default function SearchAnimeGrid() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
+                <Action
+                  title="Add to Watchlist"
+                  onAction={async () => {
+                    await authorize();
+                    await showHUD("Added to Watchlist", {
+                      popToRootType: PopToRootType.Immediate,
+                    });
+                    await addAnime(anime);
+                  }}
+                />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     content={`https://myanimelist.net/anime/${anime.id}`}

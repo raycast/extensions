@@ -1,5 +1,10 @@
 # Myanimelist search Changelog
 
+## [New Commands and API overhaul] - {PR_MERGE_DATE}
+
+- Added 1 new command: Manage Watchlist
+- Added 1 action: Add to Watchlist
+
 ## [Added extra Actions] - 2023-07-23
 
 - Added 3 actions: Copy Link, Copy Original Title, Copy English Title
