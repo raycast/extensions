@@ -1,5 +1,3 @@
-import exp from "node:constants";
-
 export class QueryBuilder {
   buildQuery(size: number, text: string, order: string) {
     const select = this.select();
