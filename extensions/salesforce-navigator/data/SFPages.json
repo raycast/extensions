@@ -2,6 +2,7 @@
   { "title": "Apex Jobs", "value": "/lightning/setup/AsyncApexJobs/home" },
   { "title": "App Manager", "value": "/lightning/setup/NavigationMenus/home" },
   { "title": "Certificate and Keys Management", "value": "/lightning/setup/CertificatesAndKeysManagement/home" },
+  { "title": "Company Information", "value": "/lightning/setup/CompanyProfileInfo/home" },
   { "title": "Custom Metadata", "value": "/lightning/setup/CustomMetadata/home" },
   { "title": "Custom Settings", "value": "/lightning/setup/CustomSettings/home" },
   { "title": "Dashboards", "value": "/lightning/o/Dashboard/home" },
