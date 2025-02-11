@@ -1,6 +1,6 @@
 import { Reminder } from "../api";
 
-import { displayDateTime } from "./dates";
+import { DisplayDateTime } from "./dates";
 
 export function displayReminderName(reminder: Reminder) {
   if (reminder.type === "location" && reminder.name) {
@@ -8,7 +8,7 @@ export function displayReminderName(reminder: Reminder) {
   }
 
   if (reminder.due?.date) {
-    return displayDateTime(reminder.due.date);
+    return DisplayDateTime(reminder.due.date);
   }
 
   return "Unknown reminder";

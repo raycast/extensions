@@ -1,11 +1,10 @@
 import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
-import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { isRecurring, displayDate, isExactTimeTask, displayDateTime, isOverdue } from "../helpers/dates";
+import { DisplayDateTime, DisplayTime, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -81,7 +80,7 @@ export default function TaskListItem({
   }
 
   if (task.deadline?.date) {
-    const text = displayDate(task.deadline.date);
+    const text = DisplayDateTime(task.deadline.date);
     const overdue = isOverdue(task.deadline.date);
 
     accessories.unshift({
@@ -99,17 +98,16 @@ export default function TaskListItem({
     const recurring = isRecurring(task);
     const overdue = isOverdue(task.due.date);
 
-    const text = exactTime ? displayDateTime(task.due.date) : displayDate(task.due.date);
+    const text = DisplayDateTime(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });
     }
 
     if (mode === ViewMode.date && exactTime) {
-      const time = task.due?.date as string;
-      const text = format(new Date(time), "HH:mm");
+      const time = DisplayTime(task.due.date);
 
-      accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
+      accessories.unshift({ icon: Icon.Clock, text: time, tooltip: `Due time: ${time}` });
     }
 
     if (isOverdue(task.due.date) || mode !== ViewMode.date) {
