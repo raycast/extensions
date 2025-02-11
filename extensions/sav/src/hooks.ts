@@ -22,7 +22,7 @@ export const useGetActiveDomains = () =>
     parseResponse,
     mapResult(result: { domain_count: number; domains: ActiveDomain[] }) {
       return {
-        data: result.domains.filter((d) => d.domain_name.includes("khak")),
+        data: result.domains,
       };
     },
     initialData: [],
