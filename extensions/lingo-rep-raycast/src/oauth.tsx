@@ -1,7 +1,14 @@
 import _ from "lodash";
-import { useEffect } from "react";
-import { Detail, ActionPanel, Action } from "@raycast/api";
-import { OAuthService, withAccessToken, getAccessToken, useCachedState, useFetch } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { Detail, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
+import {
+  OAuthService,
+  withAccessToken,
+  getAccessToken,
+  useCachedState,
+  useFetch,
+  showFailureToast,
+} from "@raycast/utils";
 
 import { useGet } from "./hooks";
 import { config } from "./config";
@@ -16,27 +23,23 @@ export const googleService = OAuthService.google({
   scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
 });
 
-function UserProfileComponent({ authProvider }: { authProvider: "github" | "google" }) {
+function UserProfileDetails() {
   const { token } = getAccessToken();
   const [, setJWT] = useCachedState<string>("jwt", "");
-  const [authProviderInState, setAuthProvider] = useCachedState<string>("authProvider", "");
+  const [authProviderInState] = useCachedState<string>("authProvider", "");
   const [, setUserId] = useCachedState<string>("userId", "");
 
   // TODO:
   // - decide on the refresh strategy for github
 
   const { data: responseData } = useFetch<{ message: string; jwt: string }>(
-    `${config.apiURL}/auth/${authProvider}/get-jwt`,
+    `${config.apiURL}/auth/${authProviderInState}/get-jwt`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     },
   );
-
-  useEffect(() => {
-    if (!authProviderInState) setAuthProvider(authProvider);
-  }, [authProviderInState]);
 
   useEffect(() => {
     if (responseData?.jwt) {
@@ -95,9 +98,35 @@ function UserProfileComponent({ authProvider }: { authProvider: "github" | "goog
   );
 }
 
-export const UserProfilePageGithub = withAccessToken(githubService)(() => (
-  <UserProfileComponent authProvider="github" />
-));
-export const UserProfilePageGoogle = withAccessToken(googleService)(() => (
-  <UserProfileComponent authProvider="google" />
-));
+export const UserProfilePageGithub = withAccessToken(githubService)(() => <UserProfileDetails />);
+export const UserProfilePageGoogle = withAccessToken(googleService)(() => <UserProfileDetails />);
+
+export function AuthorizationComponent({ authProvider }: { authProvider: "github" | "google" }) {
+  const [, setAuthProvider] = useCachedState<string>("authProvider", "");
+
+  const service = (() => {
+    if (authProvider === "github") return githubService;
+    else if (authProvider === "google") return googleService;
+    else throw new Error("Invalid auth provider");
+  })();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setAuthProvider(authProvider);
+    (async () => {
+      try {
+        await service.authorize();
+        setIsLoading(false);
+        await showToast({ title: "Authorization Successful" });
+      } catch (error) {
+        console.error("error authorizaing user", error);
+        setIsLoading(false);
+        await showFailureToast({ title: "Authorization Failed" });
+      } finally {
+        popToRoot();
+      }
+    })();
+  }, [service]);
+
+  return <Detail isLoading={isLoading} />;
+}

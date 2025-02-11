@@ -24,7 +24,7 @@ import {
   targetLangOptionsRaycast,
 } from "./shared-packages/lang-options";
 
-import { UserProfilePageGithub, UserProfilePageGoogle } from "./oauth";
+import { AuthorizationComponent, UserProfilePageGithub, UserProfilePageGoogle } from "./oauth";
 import { post } from "./fetch";
 import { useIsAuthenticated } from "./hooks";
 import { config } from "./config";
@@ -276,8 +276,14 @@ export default function Command() {
         <Action title="Enter (↵) to Save and Repeat" onAction={saveTranslation} />
       ) : (
         <>
-          <Action.Push title={`Connect Google Profile to Save`} target={<UserProfilePageGoogle />} />
-          <Action.Push title={`Connect GitHub Profile to Save`} target={<UserProfilePageGithub />} />
+          <Action.Push
+            title={`Connect Google Profile to Save`}
+            target={<AuthorizationComponent authProvider="github" />}
+          />
+          <Action.Push
+            title={`Connect GitHub Profile to Save`}
+            target={<AuthorizationComponent authProvider="google" />}
+          />
         </>
       )}
     </ActionPanel>
@@ -293,8 +299,8 @@ export default function Command() {
         <ActionPanel>
           {!isAuthenticated ? (
             <>
-              <Action.Push title={`Connect Google Profile`} target={<UserProfilePageGoogle />} />
-              <Action.Push title={`Connect GitHub Profile`} target={<UserProfilePageGithub />} />
+              <Action.Push title={`Connect Google Profile`} target={<AuthorizationComponent authProvider="google" />} />
+              <Action.Push title={`Connect GitHub Profile`} target={<AuthorizationComponent authProvider="github" />} />
             </>
           ) : authProvider === "github" ? (
             <Action.Push title={`View GitHub Profile`} target={<UserProfilePageGithub />} />

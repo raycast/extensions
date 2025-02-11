@@ -7,7 +7,7 @@ const allConfigs = {
   development: {
     apiURL: "http://localhost:8787/v1",
     lpURL: "http://localhost:3001",
-    weURL: "chrome-extension://gfmbkbpbncjopblehgldppphpkcmehnk/settings.html",
+    weURL: "chrome-extension://lgcnkaedeeaalllmgmbdlfcfjjdfapid/settings.html",
   },
   production: {
     apiURL: "https://api.lingorep.com/v1",
