@@ -1,7 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Anime, ExtendedAnime, fetchAnimes, fetchSuggestions } from "./api";
+import { type ExtendedAnime, fetchAnimes, fetchSuggestions } from "./api";
 import { isSignedIn } from "./oauth";
 
 type SearchProps = {
@@ -44,7 +44,7 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    let _debounce = searchText == "" ? 0 : debounce;
+    const _debounce = searchText == "" ? 0 : debounce;
 
     setIsLoading(true);
     const timeout = setTimeout(async () => {

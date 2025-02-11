@@ -1,20 +1,12 @@
 import { useState } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues, Icon, showHUD, PopToRootType } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showHUD, PopToRootType } from "@raycast/api";
 import useSearch from "../api/useSearch";
 import { addAnime } from "../api/api";
 import { authorize } from "../api/oauth";
 
 export default function SearchAnimeGrid() {
-  const [page, setPage] = useState("1");
-  const preferences = getPreferenceValues();
   const [searchText, setSearchText] = useState("");
   const { isLoading, items: data } = useSearch({ q: searchText });
-  /*const { isLoading, data } = useFetch<Result>(
-    searchText
-      ? `https://api.jikan.moe/v4/anime?q=${searchText}&page=${page}${shouldHideNSFW}`
-      : `https://api.jikan.moe/v4/seasons/now?page=${page}`,
-    { keepPreviousData: true }
-  );*/
 
   return (
     <Grid

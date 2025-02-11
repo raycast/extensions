@@ -1,12 +1,10 @@
 import {
   Action,
   ActionPanel,
-  closeMainWindow,
   Form,
   getPreferenceValues,
   Icon,
   List,
-  popToRoot,
   PopToRootType,
   showHUD,
   showToast,

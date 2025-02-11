@@ -68,7 +68,10 @@
     "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.0.1",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
     "typescript": "^4.4.3"
