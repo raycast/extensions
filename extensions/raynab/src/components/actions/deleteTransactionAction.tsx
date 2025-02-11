@@ -3,9 +3,8 @@ import { useTransactions } from '@hooks/useTransactions';
 import { deleteTransaction } from '@lib/api';
 import { formatToReadablePrice } from '@lib/utils';
 import { Action, confirmAlert, Icon, showToast, Toast, Alert, getPreferenceValues } from '@raycast/api';
-import { useLocalStorage } from '@raycast/utils';
-import { CurrencyFormat, Period, TransactionDetail } from '@srcTypes';
-
+import { TransactionDetail } from '@srcTypes';
+import { useActiveBudget, useActiveBudgetCurrency, useTimeline } from '@hooks/useLocalValues';
 const preferences = getPreferenceValues<Preferences>();
 
 interface DeleteTransactionActionProps {
@@ -13,9 +12,9 @@ interface DeleteTransactionActionProps {
 }
 
 export function DeleteTransactionAction({ transaction }: DeleteTransactionActionProps) {
-  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
+  const { activeBudgetId } = useActiveBudget();
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
+  const { timeline } = useTimeline();
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
 

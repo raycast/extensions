@@ -1,11 +1,11 @@
 import { ActionPanel, Detail } from '@raycast/api';
 import { OpenInYnabAction } from '@components/actions';
-import { CurrencyFormat, Category } from '@srcTypes';
+import { Category } from '@srcTypes';
 import { formatToReadablePrice } from '@lib/utils';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 export function CategoryDetails({ category }: { category: Category }) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
 
   const markdown = `
   # ${category.name} — ${formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency })} left

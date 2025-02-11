@@ -1,19 +1,23 @@
 import { Icon, List, ActionPanel, Action, Color, showToast } from '@raycast/api';
 
-import { BudgetSummary, CurrencyFormat } from '@srcTypes';
+import { BudgetSummary } from '@srcTypes';
 import { useBudgets } from '@hooks/useBudgets';
-import { useLocalStorage } from '@raycast/utils';
+import { useActiveBudget, useActiveBudgetCurrency } from '@hooks/useLocalValues';
+import View from '@components/View';
 
 export default function Command() {
-  return <BudgetList />;
+  return (
+    <View>
+      <BudgetList />
+    </View>
+  );
 }
 
 function BudgetList() {
   const { data: budgets, isLoading } = useBudgets();
 
-  const { value: activeBudgetId, setValue: setActiveBudgetId } = useLocalStorage('activeBudgetId', '');
-
-  const { setValue: setActiveBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { activeBudgetId, setActiveBudgetId } = useActiveBudget();
+  const { setActiveBudgetCurrency } = useActiveBudgetCurrency();
 
   const selectActiveBudget = (budget: BudgetSummary) => () => {
     setActiveBudgetId(budget.id ?? '');

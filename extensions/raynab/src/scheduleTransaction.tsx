@@ -1,5 +1,10 @@
 import { ScheduleTransactionCreateForm } from '@components/transactions/scheduledTransactionCreateForm';
+import View from '@components/View';
 
 export default function Command() {
-  return <ScheduleTransactionCreateForm />;
+  return (
+    <View>
+      <ScheduleTransactionCreateForm />
+    </View>
+  );
 }

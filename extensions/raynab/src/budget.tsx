@@ -1,5 +1,10 @@
 import { BudgetView } from '@components/budgets/budgetView';
+import View from '@components/View';
 
 export default function Command() {
-  return <BudgetView />;
+  return (
+    <View>
+      <BudgetView />
+    </View>
+  );
 }

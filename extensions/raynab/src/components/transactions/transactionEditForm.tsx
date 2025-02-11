@@ -22,8 +22,8 @@ import {
   useNavigation,
   getPreferenceValues,
 } from '@raycast/api';
-import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
-import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
+import { FormValidation, useForm } from '@raycast/utils';
+import { SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { useEffect, useState } from 'react';
 
 import { useCategoryGroups } from '@hooks/useCategoryGroups';
@@ -31,6 +31,7 @@ import { usePayees } from '@hooks/usePayees';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
 import { Shortcuts } from '@constants';
+import { useActiveBudget, useActiveBudgetCurrency, useTimeline } from '@hooks/useLocalValues';
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -55,9 +56,9 @@ interface TransactionEditFormProps {
 export function TransactionEditForm({ transaction, forApproval = false }: TransactionEditFormProps) {
   const { pop } = useNavigation();
 
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: activeBudgetId = '' } = useLocalStorage<string>('activeBudgetId', '');
-  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
+  const { activeBudgetId } = useActiveBudget();
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
+  const { timeline } = useTimeline();
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
   const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);

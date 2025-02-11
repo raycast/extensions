@@ -17,12 +17,12 @@ import { useCategoryGroups } from '@hooks/useCategoryGroups';
 import { nanoid as random } from 'nanoid';
 
 import { TransactionFlagColor, TransactionClearedStatus } from 'ynab';
-import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
+import { SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { useMemo, useState } from 'react';
-import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
+import { FormValidation, useForm } from '@raycast/utils';
 import { useTransactions } from '@hooks/useTransactions';
 import { AutoDistributeAction } from '@components/actions/autoDistributeAction';
-
+import { useActiveBudget, useActiveBudgetCurrency, useTimeline } from '@hooks/useLocalValues';
 const preferences = getPreferenceValues<Preferences>();
 
 interface FormValues {
@@ -39,10 +39,9 @@ interface FormValues {
 }
 
 export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: string; accountId?: string }) {
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const { value: activeBudgetId = '' } = useLocalStorage('activeBudgetId', '');
-
-  const { value: timeline } = useLocalStorage<Period>('timeline', 'month');
+  const { activeBudgetCurrency } = useActiveBudgetCurrency();
+  const { activeBudgetId } = useActiveBudget();
+  const { timeline } = useTimeline();
 
   const { mutate } = useTransactions(activeBudgetId, timeline);
 

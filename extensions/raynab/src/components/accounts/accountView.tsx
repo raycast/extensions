@@ -5,16 +5,15 @@ import { Shortcuts } from '@constants';
 import { useAccounts } from '@hooks/useAccounts';
 import { formatToReadablePrice } from '@lib/utils';
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
-import { useLocalStorage } from '@raycast/utils';
-import { CurrencyFormat } from '@srcTypes';
+import { useActiveBudget, useActiveBudgetCurrency } from '@hooks/useLocalValues';
 
 export function AccountView() {
-  const { value: activeBudgetId } = useLocalStorage('activeBudgetId', '');
+  const { activeBudgetId, isLoadingActiveBudgetId } = useActiveBudget();
+  const { activeBudgetCurrency, isLoadingActiveBudgetCurrency } = useActiveBudgetCurrency();
   const { data: accounts, isLoading } = useAccounts(activeBudgetId);
-  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading || isLoadingActiveBudgetId || isLoadingActiveBudgetCurrency}>
       {accounts?.map((account) => (
         <List.Item
           key={account.id}
