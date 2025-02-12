@@ -2,7 +2,7 @@
 
 A [Raycast](https://www.raycast.com/) extension to cut files and paste them in Finder window.
 
-![commands-list.png](assets/commands-list.png)
+![commands-list.png](media/commands-list.png)
 
 # Development
 
