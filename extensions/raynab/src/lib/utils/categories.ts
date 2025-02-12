@@ -134,8 +134,7 @@ export function formatGoalCadenceAndFrequency(category: Category, currency: Curr
   if (GOAL_CADENCES_WITH_FREQUENCY.includes(category.goal_cadence)) {
     const frequency = category.goal_cadence_frequency;
 
-    if (!frequency) {
-      console.error(`Encountered goal cadence [0-2, 13] without a frequency`);
+    if (frequency == undefined) {
       return baseString;
     }
 
