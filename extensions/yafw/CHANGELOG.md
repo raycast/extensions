@@ -1,6 +1,6 @@
 # YAFW Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-12
 
 - Remove unused `bun.lockb` file
 

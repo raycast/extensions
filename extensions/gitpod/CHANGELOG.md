@@ -1,6 +1,6 @@
 # Gitpod Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-12
 
 - Remove unused `.github` files
 - Fix changelog format

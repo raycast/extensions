@@ -1,6 +1,6 @@
 # hupu2 Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-12
 
 - Cleanup unused `pnpm-lock.yaml` file
 

@@ -1,6 +1,6 @@
 # IATA Code Decoder Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-12
 
 - Cleanup unused `.github` files
 
