@@ -1,5 +1,13 @@
 # Raynab Changelog
 
+## [Improvements & Bug fixes] - {PR_MERGE_DATE}
+
+- Aligned currency formatting support with budget settings
+- Added support for budget setting decimal separator to create and edit transaction amounts
+- Removed hidden categories in transaction forms
+- Fixed relative time of locally created transactions being set at midnight of the same day
+- Fixed error messages of certain API calls being swallowed without a proper error toast
+
 ## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features
