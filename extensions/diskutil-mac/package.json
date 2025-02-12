@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "diskutil-mac",
-  "title": "View your disks and volumes",
-  "description": "An implementation of the macOS 'diskutil' command with quicker access to features, providing a better overview and a much more userfriendly interface",
+  "title": "Diskutil-Mac",
+  "description": "View your disks and volumes\nAn implementation of the macOS 'diskutil' command with quicker access to features, providing a better overview and a much more userfriendly interface",
   "icon": "extension-icon.png",
   "author": "Globolo",
   "categories": [
@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "diskutil-mac",
-      "description": "View diskutil command in raycast",
+      "title": "Diskutil-Mac",
+      "description": "View your disks and volume like with diskutil. Just better. \n(Note: Due To limitation with the diskutil command implementation the execution takes some time with HDDs)",
       "mode": "view"
     }
   ],

@@ -14,4 +14,3 @@ This extention is basically just a combination between the terminal command "dis
 It's probably not the fastest possibility, but it provides all information provided.
 
 A probably more performant and multiplatform approach the module INSERT_HERE. But it does not provide as much information as the diskutil command. Might be implemented as a fallback version in the future though maybe.
-

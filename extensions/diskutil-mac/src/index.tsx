@@ -9,7 +9,7 @@ export default function ListDisks(): JSX.Element {
 
   useEffect(() => {
     process.env.PATH = `${process.env.PATH}:/usr/sbin:/usr/bin/`;
-    process.env.USER = `$USER`
+    process.env.USER = `$USER`;
     fetchDisks("Init");
   }, []);
 
@@ -20,7 +20,7 @@ export default function ListDisks(): JSX.Element {
   async function initialInitDiskSections() {
     showToast({
       style: Toast.Style.Animated,
-      title: "Initializing..."
+      title: "Initializing...",
     });
 
     const diskSections: DiskSection[] = [];
@@ -28,7 +28,7 @@ export default function ListDisks(): JSX.Element {
     const stream = execDiskCommandStream("diskutil list");
     const outputBuffer = { data: "" };
 
-    updateDiskSections("DiskUpdate")
+    updateDiskSections("DiskUpdate");
 
     //stream.stdout.on("data", (chunk) => handleChunk(chunk, outputBuffer, diskSections));
 
@@ -37,42 +37,39 @@ export default function ListDisks(): JSX.Element {
 
   /**
    * Tried to performance using chunks, but the script command is not built for that
-   * @param chunk 
-   * @param outputBuffer 
-   * @param diskSections 
+   * @param chunk
+   * @param outputBuffer
+   * @param diskSections
    */
   function handleChunk(chunk: string, outputBuffer: { data: string }, diskSections: DiskSection[]) {
     outputBuffer.data += chunk;
 
     //const sectionRegex = /(\/.*?:.*?)(?=(?:\/))/sg;
-    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/sg;
-
+    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/gs;
 
     let match;
-    var counter = 0;
-
-    console.log(outputBuffer.data.split("\n").length)
-
-
+    //console.log(outputBuffer.data.split("\n").length)
 
     while ((match = sectionRegex.exec(outputBuffer.data)) !== null) {
       //console.log(counter++)
-      console.log("Match")
+      console.log("Match");
 
-      console.log(match.join("\n"))
-
+      console.log(match.join("\n"));
 
       const diskSection = DiskSection.createFromString(match[0]);
-      diskSection.initDisks().then(() => {
-        diskSections.push(diskSection);
-        setDisks([...diskSections]);
-      }).catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "ERROR: Failed to initialize disks",
-          message: error.message
+      diskSection
+        .initDisks()
+        .then(() => {
+          diskSections.push(diskSection);
+          setDisks([...diskSections]);
+        })
+        .catch((error) => {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "ERROR: Failed to initialize disks",
+            message: error.message,
+          });
         });
-      });
 
       // Remove processed sections from the buffer
       outputBuffer.data = outputBuffer.data.replace(match[0], "");
@@ -80,47 +77,48 @@ export default function ListDisks(): JSX.Element {
   }
 
   function handleRemainingSection(outputBuffer: { data: string }, diskSections: DiskSection[]) {
-    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/sg;
+    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/gs;
     const remainingSections = outputBuffer.data.match(sectionRegex) ?? [];
-    console.log("Remaining Sections")
-    console.log(remainingSections)
+    console.log("Remaining Sections");
+    console.log(remainingSections);
     for (const sectionString of remainingSections) {
       const diskSection = DiskSection.createFromString(sectionString);
 
-      diskSection.initDisks().then(() => {
-        diskSections.push(diskSection);
-        setDisks([...diskSections]);
-      }).catch((error) => {
-        console.log(error);
-      });
+      diskSection
+        .initDisks()
+        .then(() => {
+          diskSections.push(diskSection);
+          setDisks([...diskSections]);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
 
     showToast({
       style: Toast.Style.Success,
-      title: "Initialized"
+      title: "Initialized",
     });
   }
 
-  // DiskUpdate (Dont show Toast) or Refresh 
-  async function updateDiskSections(update: string | 'DiskUpdate' | 'Refresh') {
+  // DiskUpdate (Dont show Toast) or Refresh
+  async function updateDiskSections(update: string | "DiskUpdate" | "Refresh") {
     // If DiskUpdate, re'initDisks all diskSections without initially fetching them
 
-    const initDisksPromises = disks.map(disk =>
+    const initDisksPromises = disks.map((disk) =>
       disk.initDisks().then(() => {
-        setDisks(prevDisks => [...prevDisks]);
+        setDisks((prevDisks) => [...prevDisks]);
       })
     );
     await Promise.all(initDisksPromises);
 
-
     // Now fetch new disks
     const diskOutput = await execDiskCommand("diskutil list");
-    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/sg;
+    const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/gs;
     const sectionStrings = diskOutput.match(sectionRegex) ?? [];
     const newDiskSections: DiskSection[] = sectionStrings.map(DiskSection.createFromString);
-    
-    console.log(diskOutput.split("\n").length)
 
+    console.log(diskOutput.split("\n").length);
 
     // Check if disks are the same
     // NOTE: This is a simple comparison that checks if the length of disks are the same.
@@ -130,31 +128,29 @@ export default function ListDisks(): JSX.Element {
     if (!areDisksTheSame || update === "Refresh") {
       showToast({
         style: Toast.Style.Animated,
-        title: "Refreshing..."
+        title: "Refreshing...",
       });
 
-      await Promise.all(newDiskSections.map(disk => disk.initDisks()));
+      await Promise.all(newDiskSections.map((disk) => disk.initDisks()));
       setDisks(newDiskSections);
 
       showToast({
         style: Toast.Style.Success,
-        title: "Refreshed"
+        title: "Refreshed",
       });
     }
   }
 
-
   /**
-   * 
+   *
    * @param update "DiskUpdate", "Refresh", "Init"
    */
-  function fetchDisks(update: string | 'Init' | 'DiskUpdate' | 'Refresh') {
-
+  function fetchDisks(update: string | "Init" | "DiskUpdate" | "Refresh") {
     try {
-      if (update === 'Init') {
-        initialInitDiskSections()
+      if (update === "Init") {
+        initialInitDiskSections();
       } else {
-        updateDiskSections(update)
+        updateDiskSections(update);
       }
     } catch (error) {
       showToast({
@@ -166,8 +162,8 @@ export default function ListDisks(): JSX.Element {
 
   /**
    * Helper
-   * @param command 
-   * @returns 
+   * @param command
+   * @returns
    */
   async function execDiskCommand(command: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
@@ -182,11 +178,10 @@ export default function ListDisks(): JSX.Element {
   }
 
   function execDiskCommandStream(command: string) {
-    const [cmd, ...args] = command.split(' ');
+    const [cmd, ...args] = command.split(" ");
     const childProcess = spawn(cmd, args);
     return childProcess;
   }
-
 
   return (
     <List isShowingDetail={showingDetail}>
@@ -233,5 +228,4 @@ export default function ListDisks(): JSX.Element {
       })}
     </List>
   );
-
 }
