@@ -2,6 +2,7 @@
 
 ## [Improvements & Bug fixes] - {PR_MERGE_DATE}
 
+- Add a dropdown to choose the transaction's payee. Optionally allow manual input
 - Aligned currency formatting support with budget settings
 - Added support for budget setting decimal separator to create and edit transaction amounts
 - Removed hidden categories in transaction forms
