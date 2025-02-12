@@ -28,7 +28,7 @@ export default function SearchAnimeGrid() {
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
                 <Action
-                  title="Add to Watchlist"
+                  title={anime.isInWatchlist ? "Remove from Playlist" : "Add to Watchlist"}
                   onAction={async () => {
                     await authorize();
                     await showHUD("Added to Watchlist", {
@@ -36,6 +36,7 @@ export default function SearchAnimeGrid() {
                     });
                     await addAnime(anime);
                   }}
+                  icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
                 />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard

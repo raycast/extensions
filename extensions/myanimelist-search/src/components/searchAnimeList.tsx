@@ -3,7 +3,7 @@ import { useState } from "react";
 import useSearch from "../api/useSearch";
 import AnimeDetails from "./listDetail";
 import { authorize } from "../api/oauth";
-import { addAnime } from "../api/api";
+import { addAnime, removeAnime } from "../api/api";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
@@ -50,15 +50,22 @@ export default function SearchAnimeList() {
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
                 <Action
-                  title="Add to Watchlist"
+                  title={anime.isInWatchlist ? "Remove from Playlist" : "Add to Watchlist"}
                   onAction={async () => {
                     await authorize();
-                    await showHUD("Added to Watchlist", {
-                      popToRootType: PopToRootType.Immediate,
-                    });
-                    await addAnime(anime);
+                    if (anime.isInWatchlist) {
+                      await showHUD("Removed from Watchlist", {
+                        popToRootType: PopToRootType.Immediate,
+                      });
+                      await removeAnime(anime);
+                    } else {
+                      await showHUD("Added to Watchlist", {
+                        popToRootType: PopToRootType.Immediate,
+                      });
+                      await addAnime(anime);
+                    }
                   }}
-                  icon={Icon.Plus}
+                  icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
                 />
                 <Action
                   title="Toggle Detailed View"

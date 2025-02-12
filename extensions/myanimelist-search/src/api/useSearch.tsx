@@ -1,7 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { type ExtendedAnime, fetchAnimes, fetchSuggestions } from "./api";
+import { type ExtendedAnime, fetchAnimes, fetchSuggestions, getAnimeWatchlist } from "./api";
 import { isSignedIn } from "./oauth";
 
 type SearchProps = {
@@ -38,7 +38,7 @@ function getSuggestions(): ExtendedAnime[] | undefined {
 }
 
 export default function useSearch({ q: searchText, debounce = 500 }: SearchProps) {
-  const [items, setItems] = useState<ExtendedAnime[]>([]);
+  const [items, setItems] = useState<(ExtendedAnime & { isInWatchlist: boolean })[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const preferences = getPreferenceValues<Preferences>();
@@ -50,10 +50,17 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
     const timeout = setTimeout(async () => {
       const isAuthed = await isSignedIn();
 
+      const watchlist = isAuthed ? await getAnimeWatchlist() : [];
+
+      const isInWatchlistMap = (anime: ExtendedAnime) => ({
+        ...anime,
+        isInWatchlist: watchlist.some((w) => w.id === anime.id),
+      });
+
       if (!searchText) {
         const cached = getSuggestions();
         if (cached) {
-          setItems(cached);
+          setItems(cached.map(isInWatchlistMap));
           setIsLoading(false);
           return;
         }
@@ -61,11 +68,11 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
         // No search, get some suggestions to fill the void
         const res = (await fetchSuggestions({ nsfw: !preferences.hide_nsfw, anon: !isAuthed })) ?? [];
         storeSuggestions(res);
-        setItems(res);
+        setItems(res.map(isInWatchlistMap));
       } else {
         // If there is a search query, fetch the animes
         const res = (await fetchAnimes(searchText, { nsfw: !preferences.hide_nsfw, anon: !isAuthed })) ?? [];
-        setItems(res);
+        setItems(res.map(isInWatchlistMap));
       }
 
       setIsLoading(false);

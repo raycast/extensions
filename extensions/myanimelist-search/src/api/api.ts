@@ -343,13 +343,14 @@ export async function setEpisodes(anime: ExtendedAnime, episodes: number) {
   await res.text();
 }
 
-async function _getAnimeWatchlist(status: AnimeStatus): Promise<Anime[]> {
-  const cacheKey = "watchlist_" + status;
+export async function getAnimeWatchlist(status?: AnimeStatus): Promise<Anime[]> {
+  const cacheKey = status === undefined ? "watchlist" : "watchlist_" + status;
   const _cache = cacheGet<Anime[]>(cacheKey);
   if (_cache) return _cache;
 
   const params = new URLSearchParams();
   params.append("limit", "1000");
+  if (status) params.append("status", status);
 
   const res = await request("https://api.myanimelist.net/v2/users/@me/animelist?" + params, undefined, "GET");
 
@@ -372,9 +373,9 @@ async function _getAnimeWatchlist(status: AnimeStatus): Promise<Anime[]> {
   return data;
 }
 
-export async function getWatchlist(statuses: AnimeStatus[]): Promise<(ExtendedAnime & { status: string })[]> {
+export async function getDetailedWatchlist(statuses: AnimeStatus[]): Promise<(ExtendedAnime & { status: string })[]> {
   const getStatusCategory = async (status: AnimeStatus) => {
-    const list = await _getAnimeWatchlist(status);
+    const list = await getAnimeWatchlist(status);
 
     const animes = await Promise.all(list.map(async (anime) => ({ ...(await getAnimeDetails(anime)), status })));
 
