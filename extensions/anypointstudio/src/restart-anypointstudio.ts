@@ -4,15 +4,21 @@ export default async function () {
   await runAppleScript(
     `
 tell application "System Events"
-	get name of every process whose name is "Anypoint Studio"
-	if result is not {} then
+	set processList to name of every process
+
+	-- Check if the app is running
+	if processList contains "AnypointStudio" then
 		tell application "AnypointStudio" to quit
 	end if
-  repeat until application "AnypointStudio" is not running    
-    delay 0.5
-  end repeat
-	tell application "AnypointStudio" to activate
 end tell
+
+-- Wait until the application is fully closed
+repeat until not (application "AnypointStudio" is running)
+    delay 0.5
+end repeat
+
+-- Restart the application
+tell application "AnypointStudio" to activate
 `,
   );
 }

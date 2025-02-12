@@ -13,7 +13,6 @@
     {
       "name": "restart-anypointstudio",
       "title": "Restart AnypointStudio",
-      "subtitle": "AnypointStudio",
       "description": "Quit AnypointStudio and start again when ready",
       "mode": "no-view"
     }
