@@ -25,7 +25,7 @@ export function formatToReadablePrice({
   const fmtAmount = utils.convertMilliUnitsToCurrencyAmount(amount, currency?.decimal_digits ?? 2);
 
   // Using locale string helps format larger numbers with commas
-  const localizedAmount = fmtAmount.toLocaleString('en-us');
+  const localizedAmount = localizeToBudgetSettings(fmtAmount, currency);
 
   if (currency) {
     const { currency_symbol: symbol, symbol_first, display_symbol } = currency;
@@ -39,6 +39,40 @@ export function formatToReadablePrice({
   } else {
     return locale ? localizedAmount : fmtAmount.toString();
   }
+}
+
+/**
+ * Formats a number according to the budget's currency settings or defaults to US locale.
+ *
+ * @param fmtAmount - The amount to format (e.g. 1234.56)
+ * @param currency - Optional currency format configuration with separators and decimal settings
+ * @returns A string with the formatted amount using appropriate separators (e.g. "1,234.56" or "1.234,56")
+ *
+ * @example
+ * // With USD currency format
+ * localizeToBudgetSettings(1234.56, {
+ *   group_separator: ',',
+ *   decimal_separator: '.',
+ *   decimal_digits: 2
+ * }) // Returns "1,234.56"
+ *
+ * // Without currency format (defaults to US locale)
+ * localizeToBudgetSettings(1234.56) // Returns "1,234.56"
+ */
+function localizeToBudgetSettings(fmtAmount: number, currency?: CurrencyFormat) {
+  if (!currency) {
+    return fmtAmount.toLocaleString('en-us');
+  }
+
+  const [integerPart, decimalPart] = fmtAmount.toString().split('.');
+
+  // Group integers according to currency format
+  const integerGroups = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, currency.group_separator);
+
+  // Combine with decimal part using currency decimal separator
+  return !decimalPart
+    ? integerGroups
+    : `${integerGroups}${currency.decimal_separator}${decimalPart.padEnd(currency.decimal_digits, '0')}`;
 }
 
 /**
