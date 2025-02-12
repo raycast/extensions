@@ -101,8 +101,8 @@ export function TransactionCreateForm({ categoryId, accountId }: { categoryId?: 
           date: (values.date ?? new Date()).toISOString(),
           amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
           approved: true,
-          /* If there's a payee id, that means it's a transfer for which the payee is the transfer from account and the category doesn't matter */
-          category_id: values.payee_id ? null : values.categoryList?.[0] || undefined,
+          // In transfers, the category id doesn't matter
+          category_id: isTransfer ? null : values.categoryList?.[0] || undefined,
           payee_name: values.payee_id ? undefined : values.payee_name,
           cleared: values.cleared ? TransactionClearedStatus.Cleared : TransactionClearedStatus.Uncleared,
           flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
