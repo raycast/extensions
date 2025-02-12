@@ -26,7 +26,7 @@ export default function ListDisks(): JSX.Element {
     const diskSections: DiskSection[] = [];
 
     const stream = execDiskCommandStream("diskutil list");
-    let outputBuffer = { data: "" };
+    const outputBuffer = { data: "" };
 
     updateDiskSections("DiskUpdate")
 
@@ -35,6 +35,12 @@ export default function ListDisks(): JSX.Element {
     //stream.on("close", () => handleRemainingSection(outputBuffer, diskSections))
   }
 
+  /**
+   * Tried to performance using chunks, but the script command is not built for that
+   * @param chunk 
+   * @param outputBuffer 
+   * @param diskSections 
+   */
   function handleChunk(chunk: string, outputBuffer: { data: string }, diskSections: DiskSection[]) {
     outputBuffer.data += chunk;
 
