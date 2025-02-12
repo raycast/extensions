@@ -5,7 +5,7 @@
   "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
-  "owner": "doist",
+  "owner": "ainslie-digital",
   "access": "public",
   "license": "MIT",
   "categories": [
@@ -18,7 +18,8 @@
     "prince_yadav",
     "stelo",
     "ridemountainpig",
-    "kcole93"
+    "kcole93",
+    "Rob"
   ],
   "commands": [
     {

@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { Fragment } from "react";
 
 import {
@@ -200,18 +210,21 @@ export default function TaskActions({
 
   return (
     <>
+      <Action title="Complete Task" icon={Icon.Checkmark} onAction={() => completeTask(task)} />
+
       {isTodoistInstalled ? (
         <Action.Open
           title="Open Task in Todoist"
           target={getTaskAppUrl(task.id)}
           icon="todoist.png"
           application="Todoist"
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       ) : (
         <Action.OpenInBrowser
           title="Open Task in Browser"
           url={getTaskUrl(task.id)}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       )}
 
@@ -245,13 +258,6 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action
-          title="Complete Task"
-          icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-          onAction={() => completeTask(task)}
-        />
-
         <Action.PickDate
           title="Schedule Task"
           type={Action.PickDate.Type.DateTime}
@@ -262,6 +268,19 @@ export default function TaskActions({
               due: date
                 ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
                 : { string: "no date" },
+            })
+          }
+        />
+
+        <Action.PickDate
+          icon={Icon.BullsEye}
+          title="Schedule Task Deadline"
+          type={Action.PickDate.Type.Date}
+          shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+          onChange={(date) =>
+            updateTask({
+              id: task.id,
+              deadline: date ? { date: date.toISOString() } : { string: "no date" },
             })
           }
         />
