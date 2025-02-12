@@ -202,6 +202,7 @@ export default function DownloadVideo() {
       }
 
       try {
+        if (!preferences.enableBrowserExtensionSupport) return;
         const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
         if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
       } catch {
