@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon, showHUD, PopToRootType } from "@raycast/api";
 import useSearch from "../api/useSearch";
-import { addAnime, removeAnime } from "../api/api";
+import { addAnime, cacheRemove, removeAnime, removeCachedWatchlist } from "../api/api";
 import { authorize } from "../api/oauth";
 
 export default function SearchAnimeGrid() {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, items: data } = useSearch({ q: searchText });
+  const { isLoading, items: data, clearCache: clearSearchCache } = useSearch({ q: searchText });
 
   return (
     <Grid
@@ -28,19 +28,23 @@ export default function SearchAnimeGrid() {
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
                 <Action
-                  title={anime.isInWatchlist ? "Remove from Playlist" : "Add to Watchlist"}
+                  title={anime.isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
                   onAction={async () => {
                     await authorize();
                     if (anime.isInWatchlist) {
+                      await removeAnime(anime);
+                      clearSearchCache();
+                      removeCachedWatchlist();
                       await showHUD("Removed from Watchlist", {
                         popToRootType: PopToRootType.Immediate,
                       });
-                      await removeAnime(anime);
                     } else {
+                      await addAnime(anime);
+                      clearSearchCache();
+                      removeCachedWatchlist();
                       await showHUD("Added to Watchlist", {
                         popToRootType: PopToRootType.Immediate,
                       });
-                      await addAnime(anime);
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}

@@ -134,6 +134,14 @@ export function cacheRemove(key: string) {
   cache.remove(key);
 }
 
+export function removeCachedWatchlist() {
+  // Hardcoding cause now I have to cope with my bad coding decisions ¯\_(ツ)_/¯
+  cacheRemove("watchlist");
+  (["watching", "plan_to_watch", "completed", "dropped", "on_hold"] as AnimeStatus[]).map((status) =>
+    cacheRemove(`watchlist_${status}`)
+  );
+}
+
 export async function request(
   url: string,
   body: string | undefined = undefined,

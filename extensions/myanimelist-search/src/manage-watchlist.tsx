@@ -38,11 +38,12 @@ function SetEpisodesWatched({ anime }: { anime: api.ExtendedAnime }) {
     onSubmit: async (values) => {
       const cacheKey = `episodes_${anime.id}`;
 
+      await api.setEpisodes(anime, parseInt(values.episodes));
+      api.cacheRemove(cacheKey);
+      api.removeCachedWatchlist();
       await showHUD(`${anime.title} now has ${values.episodes} episodes watched.`, {
         popToRootType: PopToRootType.Immediate,
       });
-      await api.setEpisodes(anime, parseInt(values.episodes));
-      api.cacheRemove(cacheKey);
     },
     validation: {
       episodes: (value) => {
@@ -134,6 +135,7 @@ export default function Command() {
 
                     const newEps = await api.incrementEpisodes(item);
                     api.cacheRemove(cacheKey);
+                    api.removeCachedWatchlist();
                     await showHUD(`${item.title} now has ${newEps} episodes watched.`, {
                       popToRootType: PopToRootType.Immediate,
                     });

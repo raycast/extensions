@@ -3,14 +3,14 @@ import { useState } from "react";
 import useSearch from "../api/useSearch";
 import AnimeDetails from "./listDetail";
 import { authorize } from "../api/oauth";
-import { addAnime, removeAnime } from "../api/api";
+import { addAnime, removeAnime, removeCachedWatchlist } from "../api/api";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
   const showDetailDefault = preferences.view;
   const [searchText, setSearchText] = useState("");
   const [showingDetail, setShowingDetail] = useState(showDetailDefault == "list-detailed");
-  const { isLoading, items: data } = useSearch({ q: searchText });
+  const { isLoading, items: data, clearCache: clearSearchCache } = useSearch({ q: searchText });
 
   return (
     <List
@@ -50,19 +50,23 @@ export default function SearchAnimeList() {
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
                 <Action
-                  title={anime.isInWatchlist ? "Remove from Playlist" : "Add to Watchlist"}
+                  title={anime.isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
                   onAction={async () => {
                     await authorize();
                     if (anime.isInWatchlist) {
+                      await removeAnime(anime);
+                      clearSearchCache();
+                      removeCachedWatchlist();
                       await showHUD("Removed from Watchlist", {
                         popToRootType: PopToRootType.Immediate,
                       });
-                      await removeAnime(anime);
                     } else {
+                      await addAnime(anime);
+                      clearSearchCache();
+                      removeCachedWatchlist();
                       await showHUD("Added to Watchlist", {
                         popToRootType: PopToRootType.Immediate,
                       });
-                      await addAnime(anime);
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}

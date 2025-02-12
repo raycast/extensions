@@ -1,5 +1,5 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { type ExtendedAnime, fetchAnimes, fetchSuggestions, getAnimeWatchlist } from "./api";
 import { isSignedIn } from "./oauth";
@@ -43,6 +43,11 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
 
   const preferences = getPreferenceValues<Preferences>();
 
+  const clearCache = useCallback(() => {
+    cache.remove("suggestions");
+    cache.remove("watchlist");
+  }, []);
+
   useEffect(() => {
     const _debounce = searchText == "" ? 0 : debounce;
 
@@ -80,5 +85,5 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
     return () => clearTimeout(timeout);
   }, [searchText, preferences.hide_nsfw]);
 
-  return { items, isLoading };
+  return { items, isLoading, clearCache };
 }
