@@ -43,7 +43,7 @@ const extendedAnimeBody = animeBody.extend({
     })
     .optional(),
   average_episode_duration: z.number(),
-  rating: z.string(),
+  rating: z.string().optional(),
   studios: z.array(z.any()),
 });
 
