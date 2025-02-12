@@ -1,9 +1,51 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Icon,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+  confirmAlert,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import Details from "./details";
 import { isDirectory } from "./utils";
 import Fuse from "fuse.js";
+import CreateEditPassword from "./create-edit";
+
+export async function removePassword(entry: string): Promise<void> {
+  try {
+    if (
+      await confirmAlert({ title: `Confirm you want to delete password "${entry}". This action cannot be undone.` })
+    ) {
+      const toast = await showToast({ title: `Deleting password "${entry}"...`, style: Toast.Style.Animated });
+      await gopass.remove(entry, true);
+      await toast.hide();
+      await closeMainWindow();
+      await showHUD("Password deleted");
+    } else {
+      await showToast({ title: `Password "${entry}" deletion canceled`, style: Toast.Style.Success });
+    }
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not delete password", style: Toast.Style.Failure });
+  }
+}
+
+export async function sync(): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Syncing Passwords", style: Toast.Style.Animated });
+    await gopass.sync();
+    await toast.hide();
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not sync password", style: Toast.Style.Failure });
+  }
+}
 
 export async function copyPassword(entry: string): Promise<void> {
   try {
@@ -81,6 +123,8 @@ const passwordActions = (entry: string) => (
       onAction={() => pasteOTP(entry)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
     />
+    <Action.Push title="Edit Password" icon={Icon.EditShape} target={<CreateEditPassword inputPassword={entry} />} />
+    <Action title="Delete Password" icon={Icon.DeleteDocument} onAction={() => removePassword(entry)} />
   </>
 );
 
@@ -108,7 +152,17 @@ export default function Main({ prefix = "" }): JSX.Element {
   }, [searchText]);
 
   return (
-    <List isLoading={loading} enableFiltering={false} onSearchTextChange={setSearchText}>
+    <List
+      isLoading={loading}
+      enableFiltering={false}
+      onSearchTextChange={setSearchText}
+      actions={
+        <ActionPanel>
+          <Action title="Sync Passwords" icon={Icon.Network} onAction={sync} />
+          <Action.Push title="New Password" icon={Icon.NewDocument} target={<CreateEditPassword />} />
+        </ActionPanel>
+      }
+    >
       <List.Section title={searchText ? "Results" : "/" + prefix} subtitle={searchText && String(entries.length)}>
         {entries.map((entry, i) => {
           const fullPath = prefix + entry;

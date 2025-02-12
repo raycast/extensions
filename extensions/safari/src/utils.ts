@@ -7,10 +7,6 @@ import { langAdaptor, PinyinHandler } from "./lang-adaptor";
 import { HistoryItem, LooseTab } from "./types";
 import { runAppleScript } from "@raycast/utils";
 
-type Preferences = {
-  safariAppIdentifier: string;
-};
-
 export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {

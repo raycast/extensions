@@ -4,7 +4,10 @@
   "title": "AI Text to Calendar",
   "description": "Convert selected text to Google Calendar event with OpenAI",
   "icon": "extension-icon.png",
-  "author": "tatsuhiko_imaizumi",
+  "author": "izm51",
+  "contributors": [
+    "ViGeng"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -17,18 +20,49 @@
       "mode": "no-view",
       "preferences": [
         {
-          "name": "openAiApiKey",
-          "title": "OpenAI API Key",
-          "description": "API Key is used to authenticate with OpenAI API",
+          "name": "apiKey",
+          "title": "AI Service API Key",
+          "description": "API Key is used to authenticate with OpenAI or other AI service",
           "type": "password",
           "required": true
+        },
+        {
+          "name": "endpoint",
+          "title": "Custom API Endpoint",
+          "description": "Overide the default API endpoint",
+          "type": "textfield",
+          "default": "https://api.openai.com/v1",
+          "required": false
+        },
+        {
+          "name": "model",
+          "title": "Model Name",
+          "description": "Model name to use for the AI service",
+          "type": "textfield",
+          "default": "gpt-4o-mini",
+          "required": false
         },
         {
           "name": "language",
           "title": "Language",
           "description": "Language of the output",
-          "type": "textfield",
-          "required": true
+          "type": "dropdown",
+          "default": "English",
+          "data": [
+            { "title": "English","value": "English" },
+            { "title": "Chinese", "value": "Chinese"},
+            { "title": "Japanese", "value": "Japanese"},
+            { "title": "Korean", "value": "Korean"},
+            { "title": "Spanish", "value": "Spanish"},
+            { "title": "French", "value": "French"},
+            { "title": "German", "value": "German"},
+            { "title": "Italian", "value": "Italian"},
+            { "title": "Dutch", "value": "Dutch"},
+            { "title": "Portuguese", "value": "Portuguese"},
+            { "title": "Russian", "value": "Russian"},
+            { "title": "Arabic", "value": "Arabic"}
+          ],
+          "required": false
         }
       ]
     }

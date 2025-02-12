@@ -10,7 +10,7 @@ import { LocalStorage } from "@raycast/api";
 export class HltbSearch {
   public static BASE_URL = "https://howlongtobeat.com/";
   public static DETAIL_URL = `${HltbSearch.BASE_URL}game?id=`;
-  public static SEARCH_URL = `${HltbSearch.BASE_URL}api/find/`;
+  public static SEARCH_URL = `${HltbSearch.BASE_URL}api/s/`;
   public static IMAGE_URL = `${HltbSearch.BASE_URL}games/`;
 
   payload: SearchPayload = {
@@ -51,7 +51,7 @@ export class HltbSearch {
     }
 
     try {
-      const result = await ApiService.getInstance().post(`api/find/${localHash}`, search, {
+      const result = await ApiService.getInstance().post(`api/s/${localHash}`, search, {
         timeout: 20000,
         signal,
       });

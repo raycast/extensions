@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { TimeInfo, TimezoneId } from "../types/types";
+import { CurrentTime, TimezoneId } from "../types/types";
 import { filterTag } from "../utils/costants";
 import { isEmpty } from "../utils/common-utils";
 import { ListEmptyView } from "./list-empty-view";
@@ -9,7 +9,7 @@ import { useShowDetail } from "../hooks/useShowDetail";
 import { rememberTag } from "../types/preferences";
 import { useStarTimezones } from "../hooks/useStarTimezones";
 import { useAllTimezones } from "../hooks/useAllTimezones";
-import { useRegionTimeInfo } from "../hooks/useRegionTimeInfo";
+import { useCurrentTime } from "../hooks/useCurrentTime";
 
 export function QueryWorldListLayout() {
   const [tag, setTag] = useState<string>("");
@@ -34,10 +34,10 @@ export function QueryWorldListLayout() {
     return showDetailData || false;
   }, [showDetailData]);
 
-  const { data: timeInfoData, isLoading: detailLoading } = useRegionTimeInfo(region);
-  const timeInfo = useMemo(() => {
-    return timeInfoData || ({} as TimeInfo);
-  }, [timeInfoData]);
+  const { data: currentTimeData, isLoading: detailLoading } = useCurrentTime(region);
+  const currentTime = useMemo(() => {
+    return currentTimeData || ({} as CurrentTime);
+  }, [currentTimeData]);
 
   return (
     <List
@@ -57,7 +57,7 @@ export function QueryWorldListLayout() {
               return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} icon={value.icon} />;
             })}
           </List.Dropdown>
-        ) : null
+        ) : undefined
       }
     >
       <ListEmptyView title={"No timezones"} command={true} extension={true} />
@@ -68,8 +68,8 @@ export function QueryWorldListLayout() {
               <StarredTimeZoneListItem
                 key={index}
                 index={index}
-                timezone={value.timezone}
-                timeInfo={timeInfo}
+                currentTime={currentTime}
+                timezone={value}
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
                 mutate={mutate}
@@ -88,7 +88,7 @@ export function QueryWorldListLayout() {
                 key={index}
                 index={index}
                 timezone={value}
-                timeInfo={timeInfo}
+                currentTime={currentTime}
                 detailLoading={detailLoading}
                 starTimezones={starTimezones}
                 mutate={mutate}

@@ -1,5 +1,14 @@
 # Timers Changelog
 
+## [Chore] - 2025-01-14
+
+- Moved contributor to past contributors list
+
+## [Pausable timers, custom timer form bypass] - 2025-01-03
+
+- Timers can now be paused/unpaused!
+- Added "Custom Timer Form Bypass" preference, allowing the form in "Start Custom Timer" to be skipped when args are provided (thanks to @a-laughlin for the contribution)
+
 ## [Fix commands finishing before timer launch due to alert] - 2024-09-24
 
 ## [Fix date formatter and residual timer files] - 2024-09-21

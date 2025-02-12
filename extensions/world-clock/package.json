@@ -162,19 +162,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.2",
-    "axios": "^1.7.2",
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.18.1",
+    "axios": "1.7.4",
     "file-url": "^4.0.0",
-    "date-fns": "^3.6.0"
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.14.12",
-    "@types/react": "18.3.3",
+    "@types/node": "22.10.7",
+    "@types/react": "18.3.18",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

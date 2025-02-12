@@ -7,7 +7,9 @@
   "author": "EvanZhouDev",
   "contributors": [
     "ridemountainpig",
-    "d0zingcat"
+    "d0zingcat",
+    "ViGeng",
+    "anwarulislam"
   ],
   "categories": [
     "Productivity",
@@ -780,15 +782,23 @@
           "description": "The prompt to use for this command.",
           "type": "textfield",
           "required": false,
-          "default": "Translate the following text to {targetLanguage}. Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
+          "default": "Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
         },
         {
           "name": "defaultTargetLanguage",
-          "title": "Default Target Language",
-          "description": "The default target language to use for this command.",
+          "title": "First Target Language",
+          "description": "Translate all other languages to this language",
           "type": "textfield",
           "required": false,
-          "default": "en"
+          "default": "English"
+        },
+        {
+          "name": "secondTargetLanguage",
+          "title": "Second Target Language",
+          "description": "Translate the first target language to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Chinese"
         }
       ]
     }
@@ -837,7 +847,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.9.0",
     "gemini-ai": "^2.0.1",
     "jimp": "^0.22.10",
@@ -857,6 +867,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
   }
 }

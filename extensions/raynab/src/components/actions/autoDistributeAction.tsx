@@ -18,7 +18,7 @@ export function AutoDistributeAction({
       title="Distribute Total Equally"
       onAction={() => {
         const distributedAmounts = autoDistribute(formatToYnabAmount(amount, currency), categoryList.length).map(
-          (amount) => formatToReadableAmount({ amount, currency, displayFull: false }),
+          (amount) => formatToReadableAmount({ amount, currency, includeSymbol: false }),
         );
         setSubtransactions(categoryList.map((c, idx) => ({ category_id: c ?? '', amount: distributedAmounts[idx] })));
       }}

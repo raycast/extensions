@@ -9,7 +9,12 @@ import {
 } from "@pieces.app/pieces-os-client";
 import ConnectorSingleton from "../connection/ConnectorSingleton";
 import Notifications from "../ui/Notifications";
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Preferences,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import ContextService from "../connection/Context";
 import { getClassificationSpecificEnum } from "../utils/converters/getClassificationSpecificEnum";
 import isImage from "../utils/isImage";

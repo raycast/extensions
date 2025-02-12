@@ -9,6 +9,8 @@
 - Fixed relative time of locally created transactions being set at midnight of the same day
 - Fixed error messages of certain API calls being swallowed without a proper error toast
 
+## [Update dependencies] - 2025-02-12
+
 ## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features

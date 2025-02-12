@@ -1,5 +1,13 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-02-05
+
+Add option to specify sorting behavior
+
+## [Enhancements] - 2025-01-05
+
+Add tags display preference and update bookmark item rendering
+
 ## [Enhancements] - 2025-01-02
 
 - Close Raycast after saving browser tab ([#16052](https://github.com/raycast/extensions/issues/16052))

@@ -30,7 +30,7 @@ export default function TwoFactorAuthForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit Code" onSubmit={handleSubmit} />
-          <Action title="Resend Code" onAction={resendCode} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} />
+          <Action title="Resend Code" onAction={resendCode} shortcut={{ modifiers: ["cmd"], key: "n" }} />
         </ActionPanel>
       }
     >
@@ -39,6 +39,7 @@ export default function TwoFactorAuthForm({
         placeholder="Enter 6-digit code"
         {...itemProps.code}
         info="You can resend the code using the corresponding action."
+        autoFocus={true}
       />
     </Form>
   );

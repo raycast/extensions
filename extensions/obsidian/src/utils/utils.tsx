@@ -445,7 +445,7 @@ export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",
   DailyNote = "obsidian://advanced-uri?daily=true&vault=",
-  DailyNoteAppend = "obsidian://advanced-uri?daily=true&mode=append",
+  DailyNoteAppend = "obsidian://advanced-uri?daily=true",
   NewNote = "obsidian://new?vault=",
   AppendTask = "obsidian://advanced-uri?mode=append&filepath=",
 }
@@ -454,7 +454,14 @@ export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenVault; vault: Vault }
   | { type: ObsidianTargetType.OpenPath; path: string }
   | { type: ObsidianTargetType.DailyNote; vault: Vault }
-  | { type: ObsidianTargetType.DailyNoteAppend; vault: Vault; text: string; heading?: string; silent?: boolean }
+  | {
+      type: ObsidianTargetType.DailyNoteAppend;
+      vault: Vault;
+      text: string;
+      heading?: string;
+      prepend?: boolean;
+      silent?: boolean;
+    }
   | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string }
   | {
       type: ObsidianTargetType.AppendTask;
@@ -480,6 +487,7 @@ export function getObsidianTarget(target: ObsidianTarget) {
       const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
       return (
         ObsidianTargetType.DailyNoteAppend +
+        (target.prepend ? "&mode=prepend" : "&mode=append") +
         "&data=" +
         encodeURIComponent(target.text) +
         "&vault=" +

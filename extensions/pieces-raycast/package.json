@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "name": "pieces-raycast",
   "title": "Pieces for Raycast",
   "description": "Pieces for Developers Raycast Extension",

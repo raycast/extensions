@@ -86,7 +86,10 @@ Pressing Enter (`↵`) will show the transaction detail view which provides more
 - Edit Transaction (`⌘` + `↵`): Edit any of the provided transaction information:
 
   - Date
-  - Amount (Positive or Negative)
+    <<<<<<< HEAD
+  - # Amount (Positive or Negative)
+  - Amount
+    > > > > > > > ca8d09f914433d457d59334d89a92eda03a89c1b
   - Payee Name
   - Memo
   - Flag
@@ -197,6 +200,18 @@ The following fields are required:
 
 - Date
 - Amount (Positive or negative)
+- Repeats (defaults to "Never")
+- Payee Name
+- Category
+
+### Schedule Transaction
+
+Create a new scheduled transaction which will be applied at the specified future date with an option for repetition.
+
+The following fields are required:
+
+- Date
+- Amount (Must be a non-zero floating point number)
 - Repeats (defaults to "Never")
 - Payee Name
 - Category

@@ -53,7 +53,7 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
         }}
       />
       <Action.CreateQuicklink
-        title="Create QuickLink"
+        title="Create Quicklink"
         shortcut={{ modifiers: ["cmd"], key: "l" }}
         quicklink={{
           name: `Create ${width}x${height} Image`,
@@ -63,7 +63,7 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
 
       <ActionPanel.Section title="Clipboard Actions">
         <Action
-          title="Paste Placeholder In Active App"
+          title="Paste Placeholder in Active App"
           icon={Icon.Clipboard}
           shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           onAction={async () => {
