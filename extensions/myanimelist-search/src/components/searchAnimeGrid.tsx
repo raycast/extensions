@@ -48,6 +48,7 @@ export default function SearchAnimeGrid() {
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard

@@ -50,6 +50,11 @@ export default function SearchAnimeList() {
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
                 <Action
+                  title="Toggle Detailed View"
+                  onAction={() => setShowingDetail(!showingDetail)}
+                  icon={Icon.AppWindowSidebarLeft}
+                />
+                <Action
                   title={anime.isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
                   onAction={async () => {
                     await authorize();
@@ -70,11 +75,7 @@ export default function SearchAnimeList() {
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
-                />
-                <Action
-                  title="Toggle Detailed View"
-                  onAction={() => setShowingDetail(!showingDetail)}
-                  icon={Icon.AppWindowSidebarLeft}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
