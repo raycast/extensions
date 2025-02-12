@@ -40,7 +40,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   try {
     getCliPath();
-  } catch (ignore) {
+  } catch {
     return <Guide />;
   }
 
