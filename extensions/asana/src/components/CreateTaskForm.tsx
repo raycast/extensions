@@ -132,7 +132,7 @@ export default function CreateTaskForm(props: {
 
   const hasCustomFields = customFields && customFields.length > 0;
   const selectedWorkspace = workspaces?.find((workspace) => values.workspace === workspace.gid);
-  const { showStartDate } = getPreferenceValues<{ showStartDate: boolean }>();
+  const { showStartDate } = getPreferenceValues<Preferences.CreateTask>();
 
   return (
     <Form
