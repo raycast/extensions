@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Adds support for Figma's updated API] - 2025 - 02 - 07
+## [Adds support for Figma's updated API] - 2025-02-07
 
 - Updated oauth endpoints via new Raycast Proxies.
 
