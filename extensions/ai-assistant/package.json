@@ -12,6 +12,9 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=20.15.1"
+  },
   "keywords": [
     "ai",
     "translation",
