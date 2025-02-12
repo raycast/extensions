@@ -67,7 +67,8 @@
     "ali-oss": "^6.22.0",
     "dayjs": "^1.10.7",
     "execa": "^6.1.0",
-    "iconv-lite": "^0.6.3"
+    "iconv-lite": "^0.6.3",
+    "proxy-agent": "^5.0.0"
   },
   "devDependencies": {
     "@types/ali-oss": "^6.16.3",
