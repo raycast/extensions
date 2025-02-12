@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon, showHUD, PopToRootType } from "@raycast/api";
 import useSearch from "../api/useSearch";
-import { addAnime, cacheRemove, removeAnime, removeCachedWatchlist } from "../api/api";
+import { addAnime, removeAnime, removeCachedWatchlist } from "../api/api";
 import { authorize } from "../api/oauth";
 
 export default function SearchAnimeGrid() {
