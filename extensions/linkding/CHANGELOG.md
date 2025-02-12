@@ -1,5 +1,13 @@
 # Linkding Changelog
 
+## [] - {PR_MERGE_DATE}
+
+- Show proper "isLoading" in search-bookmarks
+- Add `Icon` to search-bookmarks items
+- `Action` to open manage-bookmark when no accounts added
+- Use hook in manage-bookmark for better form control
+- Add `Icon`s in manage-bookmark
+
 ## [Copy Shortcut & Creation and Deletion of Bookmarks] - 2023-11-04
 
 - Adds action and shortcut to copy bookmark to clipboard

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
@@ -6,16 +6,14 @@ import { getPersistedLinkdingAccounts } from "./service/user-account-service";
 import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
 import { showErrorToast, showSuccessToast } from "./util/bookmark-util";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
+import { getFavicon, usePromise } from "@raycast/utils";
 
 export default function searchLinkding() {
   const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
     null
   );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
-  const [isLoading, setLoading] = useState(true);
   const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
-  const [linkdingBookmarks, setLinkdingBookmarks] = useState<LinkdingBookmark[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
@@ -27,38 +25,17 @@ export default function searchLinkding() {
     });
   }, [setLinkdingAccountMap]);
 
-  useEffect(() => {
-    fetchBookmarks(searchText, selectedLinkdingAccount);
-  }, [selectedLinkdingAccount, searchText]);
-
-  function createAbortController(timeoutMs: number) {
-    abortControllerRef.current?.abort();
-    const abortController = new AbortController();
-    setTimeout(() => abortController.abort(), timeoutMs || 0);
-    abortControllerRef.current = abortController;
-    return abortController;
-  }
-
-  function fetchBookmarks(searchText: string, linkdingAccount: LinkdingAccountForm | null) {
-    if (linkdingAccount) {
-      createAbortController(5000);
-      setLoading(true);
-      searchBookmarks(linkdingAccount, searchText, abortControllerRef)
-        .then((data) => {
-          setLinkdingBookmarks(data.data.results);
-        })
-        .catch(showErrorToast)
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }
+  const { isLoading, revalidate, data: linkdingBookmarks } = usePromise(async (account: LinkdingAccount | null, searchText: string) => {
+    if (!account) return [];
+    const bookmarks = await searchBookmarks(account, searchText);
+    return bookmarks.data.results;
+  }, [selectedLinkdingAccount, searchText], { execute: !!selectedLinkdingAccount });
 
   function deleteBookmarkCallback(bookmarkId: number) {
     if (selectedLinkdingAccount) {
       deleteBookmark(selectedLinkdingAccount, bookmarkId).then(() => {
         showSuccessToast("Bookmark deleted");
-        fetchBookmarks(searchText, selectedLinkdingAccount);
+        revalidate();
       });
     }
   }
@@ -67,7 +44,7 @@ export default function searchLinkding() {
     function setSelectedAccount(name: string): void {
       const linkdingAccount = { name, ...linkdingAccountMap[name] };
       setSelectedLinkdingAccount(linkdingAccount);
-      fetchBookmarks("", linkdingAccount);
+      revalidate();
     }
 
     return (
@@ -103,8 +80,11 @@ export default function searchLinkding() {
     return (
       <List>
         <List.EmptyView
-          title="You dont have a Linkding Account"
-          description="Please create a linking account before searching for bookmarks."
+          title="You don't have a Linkding Account"
+          description="Please create a linkding account before searching for bookmarks."
+          actions={<ActionPanel>
+            <Action icon={Icon.ArrowRight} title="Go to Manage Account" onAction={() => launchCommand({ name: "manage-account", type: LaunchType.UserInitiated })} />
+          </ActionPanel>}
         />
       </List>
     );
@@ -124,6 +104,7 @@ function SearchListItem({
 
   return (
     <List.Item
+    icon={getFavicon(linkdingBookmark.url, {fallback: Icon.Globe} )}
       title={
         linkdingBookmark.title.length > 0
           ? linkdingBookmark.title

@@ -15,12 +15,12 @@ function createAxiosAgentConfig(linkdingAccount: LinkdingAccount): AxiosRequestC
 export function searchBookmarks(
   linkdingAccount: LinkdingAccount,
   searchText: string,
-  abortControllerRef: React.MutableRefObject<AbortController | null>
+  // abortControllerRef: React.MutableRefObject<AbortController | null>
 ) {
   return axios<GetLinkdingBookmarkResponse>(
     `${linkdingAccount.serverUrl}/api/bookmarks?` + new URLSearchParams({ q: searchText }),
     {
-      signal: abortControllerRef.current?.signal,
+      // signal: abortControllerRef.current?.signal,
       ...createAxiosAgentConfig(linkdingAccount),
     }
   );
