@@ -1,5 +1,7 @@
 # Raynab Changelog
 
+## [Update dependencies] - 2025-02-12
+
 ## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features

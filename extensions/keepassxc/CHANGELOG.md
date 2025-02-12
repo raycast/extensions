@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.5.4] - 2025-02-10
+
+### Fixed
+
+- Use OTPAuth to retrieve TOTP codes since `keepassxc-cli show` can't retrieve details from entries with the same name.
+
 ## [1.5.3] - 2025-01-28
 
 ### Fixed
