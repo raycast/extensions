@@ -31,11 +31,12 @@ export default function Command() {
     },
   );
 
-  // Filter cards based on search text
+  // Filter cards based on search text and tags
   const filteredCards = Object.entries(cards || {}).filter(
     ([_, card]) =>
       card.title?.toLowerCase().includes(searchText.toLowerCase()) ||
-      card.description?.toLowerCase().includes(searchText.toLowerCase()),
+      card.description?.toLowerCase().includes(searchText.toLowerCase()) ||
+      card.tags?.some((tag) => tag.content.toLowerCase().includes(searchText.toLowerCase())),
   );
 
   return (
