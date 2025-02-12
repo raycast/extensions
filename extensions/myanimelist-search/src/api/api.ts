@@ -2,6 +2,7 @@ import { z } from "zod";
 import fetch from "node-fetch";
 
 import { clientId, getTokens } from "./oauth";
+import { Cache } from "@raycast/api";
 
 type AnimeStatus = "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
 
@@ -105,6 +106,34 @@ const fields = [
   "statistics",
 ];
 
+const cache = new Cache();
+
+type CacheEntry<T> = {
+  data: T;
+  expires: number;
+};
+
+export function cacheGet<T>(key: string): T | undefined {
+  const entry = cache.get(key);
+  if (!entry) return undefined;
+
+  const parsed = JSON.parse(entry) as CacheEntry<T>;
+  if (parsed.expires < Date.now()) {
+    cache.remove(key);
+    return undefined;
+  }
+
+  return parsed.data;
+}
+
+export function cacheSet<T>(key: string, data: T, expires: number) {
+  cache.set(key, JSON.stringify({ data, expires: Date.now() + expires }));
+}
+
+export function cacheRemove(key: string) {
+  cache.remove(key);
+}
+
 export async function request(
   url: string,
   body: string | undefined = undefined,
@@ -189,34 +218,6 @@ export async function fetchSuggestions({ nsfw, anon }: SearchAnimeOptions): Prom
   return parsed.data.data?.map((item) => item.node) ?? [];
 }
 
-export async function fetchAnimeList(status: AnimeStatus | undefined = undefined): Promise<Anime[]> {
-  const params = new URLSearchParams();
-  if (status) params.append("status", status);
-  params.append("fields", "num_episodes_watched");
-
-  const response = await fetch("https://api.myanimelist.net/v2/users/@me/animelist?" + params, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
-    },
-  });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
-
-  const json = await response.json();
-
-  const parsed = animelistBody.safeParse(json);
-  if (!parsed.success) {
-    console.error("fetch items error:", parsed.error);
-    throw new Error("Failed to parse response");
-  }
-  const data = parsed.data.data;
-
-  return data?.map((item) => item.node) ?? [];
-}
-
 export async function addAnime(anime: Anime) {
   const params = new URLSearchParams();
   params.append("status", "plan_to_watch");
@@ -237,7 +238,20 @@ export async function addAnime(anime: Anime) {
   }
 }
 
+export async function removeAnime(anime: Anime) {
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, undefined, "DELETE");
+
+  if (!res.ok) {
+    console.error("remove anime error:", await res.text());
+    throw new Error(res.statusText);
+  }
+}
+
 export async function getAnimeDetails(anime: Anime): Promise<ExtendedAnime> {
+  const cacheKey = `anime_${anime.id}`;
+  const cached = cacheGet<ExtendedAnime>(cacheKey);
+  if (cached) return cached;
+
   const params = new URLSearchParams();
   params.append("fields", fields.join(","));
 
@@ -251,6 +265,9 @@ export async function getAnimeDetails(anime: Anime): Promise<ExtendedAnime> {
     throw new Error("Failed to parse response");
   }
 
+  // Cache for 24 hours
+  cacheSet(cacheKey, parsed.data, 1000 * 60 * 60 * 24);
+
   return parsed.data;
 }
 
@@ -258,14 +275,12 @@ export async function getAnimeDetails(anime: Anime): Promise<ExtendedAnime> {
  * Get the anime details from the user's list
  * **NOTE:** If the anime is not in the user's list, it will create a new entry. Only use this function if you are sure this is the users wish.
  */
-export async function getAnimeEpisodesWatched(anime: Anime): Promise<number> {
-  const res = await fetch(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
-    },
-  });
+export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean = true): Promise<number> {
+  const cacheKey = `episodes_${anime.id}`;
+  const cached = allowCache && cacheGet<number>(cacheKey);
+  if (cached) return cached;
+
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, undefined, "PUT");
 
   if (!res.ok) {
     console.error("get episodes watched error:", await res.text());
@@ -273,8 +288,12 @@ export async function getAnimeEpisodesWatched(anime: Anime): Promise<number> {
   }
 
   const json = await res.json();
+  const episodes = json.num_episodes_watched ?? 0;
 
-  return json.num_episodes_watched ?? 0;
+  // Cache for 5 minutes
+  if (allowCache) cacheSet(cacheKey, episodes, 1000 * 60 * 60 * 1);
+
+  return episodes;
 }
 
 export async function incrementEpisodes(anime: ExtendedAnime): Promise<number> {
@@ -322,4 +341,47 @@ export async function setEpisodes(anime: ExtendedAnime, episodes: number) {
   }
 
   await res.text();
+}
+
+async function _getAnimeWatchlist(status: AnimeStatus): Promise<Anime[]> {
+  const cacheKey = "watchlist_" + status;
+  const _cache = cacheGet<Anime[]>(cacheKey);
+  if (_cache) return _cache;
+
+  const params = new URLSearchParams();
+  params.append("limit", "1000");
+
+  const res = await request("https://api.myanimelist.net/v2/users/@me/animelist?" + params, undefined, "GET");
+
+  if (!res.ok) {
+    console.error("get watchlist error:", await res.text());
+    throw new Error(res.statusText);
+  }
+
+  const json = await res.json();
+  const parsed = animelistBody.safeParse(json);
+
+  if (!parsed.success) {
+    console.error("fetch items error:", parsed.error);
+    throw new Error("Failed to parse response");
+  }
+
+  const data = parsed.data.data?.map((d) => d.node) ?? [];
+  cacheSet(cacheKey, data as Anime[], 1000 * 60 * 10);
+
+  return data;
+}
+
+export async function getWatchlist(statuses: AnimeStatus[]): Promise<(ExtendedAnime & { status: string })[]> {
+  const getStatusCategory = async (status: AnimeStatus) => {
+    const list = await _getAnimeWatchlist(status);
+
+    const animes = await Promise.all(list.map(async (anime) => ({ ...(await getAnimeDetails(anime)), status })));
+
+    return animes;
+  };
+
+  const promises = await Promise.all(statuses.map(getStatusCategory));
+
+  return [...promises.flat()];
 }

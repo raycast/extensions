@@ -35,7 +35,10 @@ interface SetEpisodesWatchedValues {
 function SetEpisodesWatched({ anime }: { anime: api.ExtendedAnime }) {
   const { handleSubmit, itemProps } = useForm<SetEpisodesWatchedValues>({
     onSubmit: async (values) => {
+      const cacheKey = `episodes_${anime.id}`;
+
       await api.setEpisodes(anime, parseInt(values.episodes));
+      api.cacheRemove(cacheKey);
       await showHUD(`${anime.title} now has ${values.episodes} episodes watched.`, {
         popToRootType: PopToRootType.Immediate,
       });
@@ -79,30 +82,16 @@ export default function Command() {
       try {
         await oauth.authorize();
 
-        const watching = api.fetchAnimeList("watching").then((items) =>
-          Promise.all(
-            items.map(async (item) => ({
-              ...(await api.getAnimeDetails(item)),
-              ...item,
-              status: "watching",
-              episodesWatched: await api.getAnimeEpisodesWatched(item),
-            }))
-          )
-        );
-        const planToWatch = api.fetchAnimeList("plan_to_watch").then((items) =>
-          Promise.all(
-            items.map(async (item) => ({
-              ...(await api.getAnimeDetails(item)),
-              ...item,
-              status: "plan_to_watch",
-              episodesWatched: await api.getAnimeEpisodesWatched(item),
-            }))
-          )
+        const watchlist = await api.getWatchlist(["watching", "plan_to_watch"]);
+
+        const fetchedItems = await Promise.all(
+          watchlist.map(async (item) => ({
+            ...item,
+            episodesWatched: await api.getAnimeEpisodesWatched(item, true),
+          }))
         );
 
-        const fetchedItems = await Promise.all([watching, planToWatch]);
-
-        setItems(fetchedItems.flat());
+        setItems(fetchedItems);
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -142,7 +131,10 @@ export default function Command() {
                 <Action
                   title="Increment Episodes Watched"
                   onAction={async () => {
+                    const cacheKey = `episodes_${item.id}`;
+
                     const newEps = await api.incrementEpisodes(item);
+                    api.cacheRemove(cacheKey);
                     await showHUD(`${item.title} now has ${newEps} episodes watched.`, {
                       popToRootType: PopToRootType.Immediate,
                     });
