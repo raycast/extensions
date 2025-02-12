@@ -2,6 +2,7 @@ import {
   autoDistribute,
   easyGetColorFromId,
   formatToReadableFrequency,
+  formatToReadableAmount,
   formatToYnabAmount,
   getSubtransacionCategoryname,
   time,
@@ -123,30 +124,46 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
             amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
           }));
 
-          const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-          const difference = subtransactionsTotal - +values.amount;
+          const subtransactionsTotal = subtransactions.reduce(
+            (total, { amount }) => total + formatToYnabAmount(amount, activeBudgetCurrency),
+            0,
+          );
+          const difference = subtransactionsTotal - transactionData.amount;
 
           if (difference !== 0) {
+            const fmtSubTotal = formatToReadableAmount({
+              amount: subtransactionsTotal,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+            const fmtDifference = formatToReadableAmount({
+              amount: difference,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+
+            const onAutoDistribute = () => {
+              const distributedAmounts = autoDistribute(transactionData.amount, subtransactions.length).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
+              );
+              setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+            };
+
             const options: Alert.Options = {
               title: `Something Doesn't Add Up`,
               message: `The total is ${
                 values.amount
-              }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-                2,
-              )}?`,
+              }, but the splits add up to ${fmtSubTotal}. How would you like to handle the unassigned ${fmtDifference}?`,
               primaryAction: {
                 title: 'Auto-Distribute the amounts',
-                onAction: () => {
-                  const distributedAmounts = autoDistribute(+values.amount, subtransactions.length).map((amount) =>
-                    amount.toString(),
-                  );
-                  setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-                },
+                onAction: onAutoDistribute,
               },
               dismissAction: {
                 title: 'Adjust manually',
               },
             };
+
+            await toast.hide();
             await confirmAlert(options);
             return;
           }
@@ -206,10 +223,23 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
       if (isDualSplitTransaction && preferences.liveDistribute) {
         const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
         const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-        const otherAmount = +amount - +newAmount;
+
+        let otherAmount: number = NaN;
+
+        try {
+          otherAmount =
+            formatToYnabAmount(amount, activeBudgetCurrency) - formatToYnabAmount(newAmount, activeBudgetCurrency);
+        } catch (error) {
+          // The above calc might throw but we don't care much
+          // Might be better to debounce it
+        }
 
         if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = otherAmount.toString();
+          otherSubTransaction.amount = formatToReadableAmount({
+            amount: otherAmount,
+            currency: activeBudgetCurrency,
+            includeSymbol: false,
+          });
           newList[otherSubTransactionIdx] = otherSubTransaction;
         }
       }
@@ -276,8 +306,11 @@ export function ScheduleTransactionCreateForm({ categoryId, accountId }: { categ
           value={categoryList}
           onChange={(newCategories) => {
             if (newCategories.length > 1) {
-              const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                amount.toString(),
+              const distributedAmounts = autoDistribute(
+                formatToYnabAmount(amount, activeBudgetCurrency),
+                newCategories.length,
+              ).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
               );
               setCategoryList(newCategories);
               setSubtransactions(

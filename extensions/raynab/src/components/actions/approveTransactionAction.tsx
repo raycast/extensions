@@ -2,7 +2,7 @@ import { TransactionEditForm } from '@components/transactions/transactionEditFor
 import { Shortcuts } from '@constants';
 import { useTransactions } from '@hooks/useTransactions';
 import { updateTransaction } from '@lib/api';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
 import {
   Action,
   confirmAlert,
@@ -41,7 +41,7 @@ export function ApproveTransactionAction({ transaction }: ApproveTransactionActi
           // Show a modal to make sure the user really wants to update
           const options: Alert.Options = {
             title: 'Approve the transaction?',
-            message: `The ${formatToReadablePrice({
+            message: `The ${formatToReadableAmount({
               amount: transaction.amount,
               currency: activeBudgetCurrency,
             })} transaction with ${transaction.payee_name} will be approved`,

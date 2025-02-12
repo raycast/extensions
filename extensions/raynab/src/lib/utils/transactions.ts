@@ -11,23 +11,25 @@ import { isNumberLike } from './validation';
  * @param prefixNegativeSign - Whether to place negative sign before currency symbol (default: true)
  * @returns The formatted string (e.g. "$1,234.56", "-$1,234.56", "1,234.56", or "1234.56")
  */
-export function formatToReadablePrice({
+export function formatToReadableAmount({
   amount,
   currency,
   locale = true,
   prefixNegativeSign = true,
+  includeSymbol = true,
 }: {
   amount: number;
   currency?: CurrencyFormat;
   locale?: boolean;
   prefixNegativeSign?: boolean;
+  includeSymbol?: boolean;
 }) {
   const fmtAmount = utils.convertMilliUnitsToCurrencyAmount(amount, currency?.decimal_digits ?? 2);
 
   // Using locale string helps format larger numbers with commas
   const localizedAmount = localizeToBudgetSettings(fmtAmount, currency);
 
-  if (currency) {
+  if (currency && includeSymbol) {
     const { currency_symbol: symbol, symbol_first, display_symbol } = currency;
 
     // This is an edge case where negative amounts appear as $-X for symbol_first currencies

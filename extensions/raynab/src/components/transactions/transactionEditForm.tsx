@@ -2,7 +2,7 @@ import { updateTransaction } from '@lib/api';
 import {
   autoDistribute,
   easyGetColorFromId,
-  formatToReadablePrice,
+  formatToReadableAmount,
   formatToYnabAmount,
   getSubtransacionCategoryname,
   isSplitTransaction,
@@ -64,11 +64,13 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
   const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
-  const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
+  const [amount, setAmount] = useState(() =>
+    formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency, includeSymbol: false }),
+  );
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
     return transaction.subtransactions.map((s) => ({
       ...s,
-      amount: formatToReadablePrice({ amount: s.amount, locale: false }),
+      amount: formatToReadableAmount({ amount: s.amount, currency: activeBudgetCurrency, includeSymbol: false }),
     }));
   });
   const [categoryList, setCategoryList] = useState(() => {
@@ -102,7 +104,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       date: new Date(transaction.date),
-      amount: formatToReadablePrice({ amount: transaction.amount, locale: false }),
+      amount: formatToReadableAmount({ amount: transaction.amount, locale: false }),
       payee_id: transaction.payee_id ?? undefined,
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
@@ -143,30 +145,46 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
             amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
           }));
 
-          const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-          const difference = subtransactionsTotal - +values.amount;
+          const subtransactionsTotal = subtransactions.reduce(
+            (total, { amount }) => total + formatToYnabAmount(amount, activeBudgetCurrency),
+            0,
+          );
+          const difference = subtransactionsTotal - transactionData.amount;
 
           if (difference !== 0) {
+            const fmtSubTotal = formatToReadableAmount({
+              amount: subtransactionsTotal,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+            const fmtDifference = formatToReadableAmount({
+              amount: difference,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+
+            const onAutoDistribute = () => {
+              const distributedAmounts = autoDistribute(transactionData.amount, subtransactions.length).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
+              );
+              setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+            };
+
             const options: Alert.Options = {
               title: `Something Doesn't Add Up`,
               message: `The total is ${
                 values.amount
-              }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-                2,
-              )}?`,
+              }, but the splits add up to ${fmtSubTotal}. How would you like to handle the unassigned ${fmtDifference}?`,
               primaryAction: {
                 title: 'Auto-Distribute the amounts',
-                onAction: () => {
-                  const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
-                    amount.toString(),
-                  );
-                  setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-                },
+                onAction: onAutoDistribute,
               },
               dismissAction: {
                 title: 'Adjust manually',
               },
             };
+
+            await toast.hide();
             await confirmAlert(options);
             return;
           }
@@ -248,10 +266,23 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
       if (isDualSplitTransaction && preferences.liveDistribute) {
         const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
         const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-        const otherAmount = +amount - +newAmount;
+
+        let otherAmount: number = NaN;
+
+        try {
+          otherAmount =
+            formatToYnabAmount(amount, activeBudgetCurrency) - formatToYnabAmount(newAmount, activeBudgetCurrency);
+        } catch (error) {
+          // The above calc might throw but we don't care much
+          // Might be better to debounce it
+        }
 
         if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = otherAmount.toString();
+          otherSubTransaction.amount = formatToReadableAmount({
+            amount: otherAmount,
+            currency: activeBudgetCurrency,
+            includeSymbol: false,
+          });
           newList[otherSubTransactionIdx] = otherSubTransaction;
         }
       }
@@ -271,7 +302,12 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           {subtransactions.length > 1 && !isSplitTransaction(transaction) ? (
-            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+            <AutoDistributeAction
+              amount={amount}
+              currency={activeBudgetCurrency}
+              categoryList={categoryList}
+              setSubtransactions={setSubtransactions}
+            />
           ) : null}
           <Action
             title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
@@ -325,8 +361,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           !isSplitTransaction(transaction)
             ? (newCategories) => {
                 if (newCategories.length > 1) {
-                  const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                    amount.toString(),
+                  const distributedAmounts = autoDistribute(
+                    formatToYnabAmount(amount, activeBudgetCurrency),
+                    newCategories.length,
+                  ).map((amount) =>
+                    formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
                   );
                   setCategoryList(newCategories);
                   setSubtransactions(

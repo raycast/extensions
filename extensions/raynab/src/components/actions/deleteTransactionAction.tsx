@@ -1,7 +1,7 @@
 import { Shortcuts } from '@constants';
 import { useTransactions } from '@hooks/useTransactions';
 import { deleteTransaction } from '@lib/api';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
 import { Action, confirmAlert, Icon, showToast, Toast, Alert, getPreferenceValues } from '@raycast/api';
 import { useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, TransactionDetail } from '@srcTypes';
@@ -25,7 +25,7 @@ export function DeleteTransactionAction({ transaction }: DeleteTransactionAction
       onAction={async () => {
         const options: Alert.Options = {
           title: 'Are you sure?',
-          message: `The ${formatToReadablePrice({
+          message: `The ${formatToReadableAmount({
             amount: transaction.amount,
             currency: activeBudgetCurrency,
           })} transaction with ${transaction.payee_name} will be deleted`,
