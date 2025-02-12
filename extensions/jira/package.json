@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira",
+  "title": "Jira",
+  "description": "Create, access, and modify issues and sprints.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "contributors": [
+    "FezVrasta",
+    "teziovsky",
+    "rifont",
+    "gavinroderick",
+    "lusit",
+    "literallyjustroy",
+    "mheidinger",
+    "luarmr",
+    "horumy",
+    "santiago_perez",
+    "silv",
+    "EyLuismi",
+    "pernielsentikaer",
+    "BehnH",
+    "jokeychen"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "mikybars"
+  ],
+  "owner": "raycast",
+  "access": "public",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Jira",
+      "description": "Create and assign new issues.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyURLtoClipboard",
+          "description": "If checked, copies the newly created issue URL to the clipboard.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Copy created issue URL to clipboard"
+        }
+      ]
+    },
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "subtitle": "Jira",
+      "description": "View and modify open issues that are assigned to you.",
+      "mode": "view"
+    },
+    {
+      "name": "reported-issues",
+      "title": "Reported Issues",
+      "subtitle": "Jira",
+      "description": "View and modify issues that were reported by you.",
+      "mode": "view"
+    },
+    {
+      "name": "watched-issues",
+      "title": "Watched Issues",
+      "subtitle": "Jira",
+      "description": "View and modify issues that you are watching.",
+      "mode": "view"
+    },
+    {
+      "name": "active-sprints",
+      "title": "Active Sprints",
+      "subtitle": "Jira",
+      "description": "View and modify issues of active sprints.",
+      "mode": "view"
+    },
+    {
+      "name": "my-filters",
+      "title": "My Filters",
+      "subtitle": "Jira",
+      "description": "View and modify issues of your saved filters.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortByFavourite",
+          "description": "If checked, any filters marked as favourite in Jira will be displayed first in the filter selection dropdown.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Favourite Filters",
+          "default": false,
+          "label": "Show favourite filters ahead of others"
+        }
+      ]
+    },
+    {
+      "name": "recently-updated-issues",
+      "title": "Recently Updated Issues",
+      "subtitle": "Jira",
+      "description": "View and modify issues that have recently been updated.",
+      "mode": "view"
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "subtitle": "Jira",
+      "description": "Search issues globally in all projects.",
+      "mode": "view"
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Open Issue from Clipboard",
+      "subtitle": "Jira",
+      "description": "Open an issue by its key from the clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "baseUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Jira Base URL",
+          "description": "Optional Base URL for Self-Hosted Jira (e.g. https://jira.acme-inc.com). Defaults to the public Jira."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site URL",
+      "description": "Your Jira site URL (e.g foo.atlassian.net)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "foo.atlassian.com"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Account Email",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "API Token",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "open_in",
+      "type": "appPicker",
+      "title": "Open Issues in",
+      "required": false,
+      "description": "Select the browser or application to open Issues with."
+    },
+    {
+      "name": "branch_name",
+      "title": "Git Branch Name",
+      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
+      "type": "textfield",
+      "required": false,
+      "default": "{issueKey}-{issueSummary}",
+      "placeholder": "{issueKey}-{issueSummary}"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.16.2",
+    "date-fns": "^2.30.0",
+    "filesize": "^10.1.0",
+    "form-data": "^4.0.0",
+    "lodash": "^4.17.21",
+    "md-to-adf": "^0.6.4",
+    "node-fetch": "^3.3.2",
+    "node-html-markdown": "^1.3.0",
+    "remove-markdown": "^0.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

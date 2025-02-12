@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aleph",
+  "title": "Aleph Tools",
+  "description": "A set of text tools to work with Hebrew text in Raycast.",
+  "icon": "extension_icon.png",
+  "author": "d7mtg",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "remove",
+      "title": "Remove Niqqud",
+      "description": "Removes all niqqud from your current selection and paste it back to your selection.",
+      "mode": "no-view",
+      "icon": "remove.png"
+    },
+    {
+      "name": "reverse",
+      "title": "Reverse Text",
+      "description": "Reverses the order of the letters in your current selection and paste it back to your selection.",
+      "mode": "no-view",
+      "icon": "reverse.png"
+    },
+    {
+      "name": "to-hebrew",
+      "title": "To Hebrew",
+      "description": "Converts your current selection to Hebrew and paste it back to your selection.",
+      "mode": "no-view",
+      "icon": "tohebrew.png"
+    },
+    {
+      "name": "to-latin",
+      "title": "To Latin",
+      "description": "Converts your current selection to Latin and paste it back to your selection.",
+      "mode": "no-view",
+      "icon": "tolatin.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.0",
+    "js-base64": "3.7.2",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "16.11.7",
+    "@types/react": "17.0.34",
+    "eslint": "8.2.0",
+    "react-devtools": "4.21.0",
+    "typescript": "4.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

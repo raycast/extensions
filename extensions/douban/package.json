@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "douban",
+  "title": "Douban",
+  "description": "Search Something on Douban",
+  "icon": "douban.png",
+  "author": "crazyczy",
+  "contributors": [
+    "iiwenwen"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "description": "Search Movies on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-books",
+      "title": "Search Books",
+      "description": "Search Books on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-music",
+      "title": "Search Music",
+      "description": "Search Music on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-groups",
+      "title": "Search Groups",
+      "description": "Search Groups on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "description": "Search Users on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-sites",
+      "title": "Search Sites",
+      "description": "Search Sites on Douban",
+      "mode": "view"
+    },
+    {
+      "name": "search-games",
+      "title": "Search Games",
+      "description": "Search Games on Douban",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "2.8.7",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

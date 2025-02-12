@@ -1,0 +1,49 @@
+{
+  "Start": [
+    { "url": "https://laravel-livewire.com/docs/2.x/quickstart", "title": "Quickstart" },
+    { "url": "https://laravel-livewire.com/docs/2.x/reference", "title": "Reference" },
+    { "url": "https://laravel-livewire.com/docs/2.x/upgrading", "title": "Upgrading From 1.x" }
+  ],
+  "The Essentials": [
+    { "url": "https://laravel-livewire.com/docs/2.x/installation", "title": "Installation" },
+    { "url": "https://laravel-livewire.com/docs/2.x/making-components", "title": "Making Components" },
+    { "url": "https://laravel-livewire.com/docs/2.x/rendering-components", "title": "Rendering Components" },
+    { "url": "https://laravel-livewire.com/docs/2.x/properties", "title": "Properties" },
+    { "url": "https://laravel-livewire.com/docs/2.x/actions", "title": "Actions" },
+    { "url": "https://laravel-livewire.com/docs/2.x/events", "title": "Events" },
+    { "url": "https://laravel-livewire.com/docs/2.x/lifecycle-hooks", "title": "Lifecycle Hooks" },
+    { "url": "https://laravel-livewire.com/docs/2.x/nesting-components", "title": "Nesting Components" }
+  ],
+  "Component Features": [
+    { "url": "https://laravel-livewire.com/docs/2.x/input-validation", "title": "Validation" },
+    { "url": "https://laravel-livewire.com/docs/2.x/file-uploads", "title": "File Uploads" },
+    { "url": "https://laravel-livewire.com/docs/2.x/file-downloads", "title": "File Downloads" },
+    { "url": "https://laravel-livewire.com/docs/2.x/query-string", "title": "Query String" },
+    { "url": "https://laravel-livewire.com/docs/2.x/authorization", "title": "Authorization" },
+    { "url": "https://laravel-livewire.com/docs/2.x/pagination", "title": "Pagination" },
+    { "url": "https://laravel-livewire.com/docs/2.x/redirecting", "title": "Redirecting" },
+    { "url": "https://laravel-livewire.com/docs/2.x/flash-messages", "title": "Flash Messages" },
+    { "url": "https://laravel-livewire.com/docs/2.x/traits", "title": "Traits" }
+  ],
+  "UI NICETIES": [
+    { "url": "https://laravel-livewire.com/docs/2.x/loading-states", "title": "Loading States" },
+    { "url": "https://laravel-livewire.com/docs/2.x/polling", "title": "Polling" },
+    { "url": "https://laravel-livewire.com/docs/2.x/prefetching", "title": "Prefetching" },
+    { "url": "https://laravel-livewire.com/docs/2.x/offline-state", "title": "Offline State" },
+    { "url": "https://laravel-livewire.com/docs/2.x/dirty-states", "title": "Dirty States" },
+    { "url": "https://laravel-livewire.com/docs/2.x/defer-loading", "title": "Defer Loading" }
+  ],
+  "JS Integrations": [
+    { "url": "https://laravel-livewire.com/docs/2.x/alpine-js", "title": "AlpineJS" },
+    { "url": "https://laravel-livewire.com/docs/2.x/laravel-echo", "title": "Laravel Echo" },
+    { "url": "https://laravel-livewire.com/docs/2.x/inline-scripts", "title": "Inline Scripts" }
+  ],
+  "Other": [
+    { "url": "https://laravel-livewire.com/docs/2.x/testing", "title": "Testing" },
+    { "url": "https://laravel-livewire.com/docs/2.x/security", "title": "Security" },
+    { "url": "https://laravel-livewire.com/docs/2.x/troubleshooting", "title": "Troubleshooting" },
+    { "url": "https://laravel-livewire.com/docs/2.x/package-dev", "title": "Package Development" },
+    { "url": "https://laravel-livewire.com/docs/2.x/artisan-commands", "title": "Artisan Commands" },
+    { "url": "https://laravel-livewire.com/docs/2.x/contribution-guide", "title": "Contribution Guide" }
+  ]
+}

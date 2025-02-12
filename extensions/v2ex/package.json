@@ -1,0 +1,46 @@
+{
+  "name": "v2ex",
+  "title": "v2ex",
+  "description": "You can quickly access the 10 most popular posts of v2ex at the moment. Note: The v2ex home page can be reached by visiting https://www.v2ex.com/ through your browser. For users in China, proxy access is supported.",
+  "icon": "icon-v2ex.png",
+  "author": "leo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hot",
+      "title": "Show v2ex Top 10",
+      "subtitle": "v2ex",
+      "description": "Show v2ex Top 10",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "proxy",
+      "type": "textfield",
+      "required": false,
+      "title": "Proxy URL",
+      "description": "URL of proxy",
+      "placeholder": "URL of proxy e.g. http://127.0.0.1:7890"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "https-proxy-agent": "^5.0.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

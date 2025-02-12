@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vatlayer",
+  "title": "vatlayer",
+  "description": "Validate VAT numbers, retrieve all or single EU VAT rates based on IP address or country code, convert prices in compliance with EU VAT rates and types, and more.",
+  "icon": "vatlayer.png",
+  "author": "xmok",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "validate-vat-number",
+      "title": "Validate VAT Number",
+      "subtitle": "vatlayer",
+      "description": "Validate a VAT Number",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "vat_number",
+          "placeholder": "VAT_NUMBER",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-vat-rates-via-country-code",
+      "title": "Get VAT Rates via Country Code",
+      "subtitle": "vatlayer",
+      "description": "Get VAT Rates via Country Code",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "country_code",
+          "placeholder": "2_LETTER_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-vat-rates-via-ip-address",
+      "title": "Get VAT Rates via IP Address",
+      "subtitle": "vatlayer",
+      "description": "Get VAT Rates via IP Address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip_address",
+          "placeholder": "IP_ADDRESS",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-vat-rates-via-client-ip",
+      "title": "Get VAT Rates via Client IP",
+      "subtitle": "vatlayer",
+      "description": "Get VAT Rates via Client IP",
+      "mode": "view"
+    },
+    {
+      "name": "get-all-vat-rates",
+      "title": "Get VAT Rates for All EU members",
+      "subtitle": "vatlayer",
+      "description": "Get VAT Rates for all EU members",
+      "mode": "view"
+    },
+    {
+      "name": "calculate-vat-compliant-price",
+      "title": "Calculate VAT Compliant Price",
+      "subtitle": "vatlayer",
+      "description": "Calculate VAT Compliant Price",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "access_key",
+      "title": "Access Key",
+      "description": "vatboxlayer API Access Key",
+      "placeholder": "123x....",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "use_https",
+      "label": "Use HTTPS",
+      "description": "Check this to use 'https' endpoint (requires a Paid vatlayer plan)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

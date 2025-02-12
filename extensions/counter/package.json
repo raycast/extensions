@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "counter",
+  "title": "Counter",
+  "description": "A simple counter, in the comfort of Raycast root!",
+  "icon": "command-icon.png",
+  "author": "EvanZhouDev",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "increment-counter",
+      "title": "Increment Counter",
+      "description": "Increments the count of the counter.",
+      "mode": "no-view",
+      "subtitle": "Value: 0"
+    },
+    {
+      "name": "decrement-counter",
+      "title": "Decrement Counter",
+      "description": "Decrements the count of the counter.",
+      "mode": "no-view",
+      "subtitle": "Value: 0"
+    },
+    {
+      "name": "reset-counter",
+      "title": "Reset Counter",
+      "description": "Resets the counter.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

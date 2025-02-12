@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitcoin-price",
+  "title": "Bitcoin Price",
+  "description": "See the current price of Bitcoin in various currencies.",
+  "icon": "btc-price-icon.png",
+  "author": "futantan",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "hideIcon",
+      "description": "Hide icon from the menu bar",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Hide icon"
+    }
+  ],
+  "commands": [
+    {
+      "name": "bitcoin-menu-bar",
+      "title": "Bitcoin Price",
+      "subtitle": "Crypto",
+      "description": "See the current price of Bitcoin",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

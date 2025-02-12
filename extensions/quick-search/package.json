@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-search",
+  "title": "Quick Search",
+  "icon": "icon.png",
+  "description": "Quickly search selected text or clipboard text via Google or Github or DeepL etc.",
+  "author": "iwfan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "google-search",
+      "title": "Google Search",
+      "subtitle": "Clipboard Searches",
+      "description": "Search selected text or clipboard text via Google.",
+      "mode": "no-view"
+    },
+    {
+      "name": "github-search",
+      "title": "GitHub Search",
+      "subtitle": "Clipboard Searches",
+      "description": "Search selected text or clipboard text via Github.",
+      "mode": "no-view"
+    },
+    {
+      "name": "github-repo",
+      "title": "GitHub Repo",
+      "subtitle": "Clipboard Searches",
+      "description": "Search selected text or clipboard text via Github repo.",
+      "mode": "no-view"
+    },
+    {
+      "name": "deepl-trans",
+      "title": "Deepl Translation",
+      "subtitle": "Clipboard Searches",
+      "description": "Translate selected text or clipboard text via DeepL.",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.3"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "homepage",
+  "title": "Homepage",
+  "description": "Homepage services and bookmarks in Raycast",
+  "icon": "homepage.png",
+  "author": "bgiovand",
+  "license": "MIT",
+  "categories": [
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "services",
+      "icon": "services.png",
+      "title": "Show Services",
+      "subtitle": "Homepage",
+      "description": "Show your services",
+      "mode": "view",
+      "keywords": [
+        "homepage",
+        "services"
+      ]
+    },
+    {
+      "name": "bookmarks",
+      "icon": "bookmarks.png",
+      "title": "Show Bookmarks",
+      "subtitle": "Homepage",
+      "description": "Show your bookmarks",
+      "mode": "view",
+      "keywords": [
+        "homepage",
+        "bookmarks"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "homepageUrl",
+      "title": "Homepage URL",
+      "description": "The URL of your Homepage instance",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://example.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

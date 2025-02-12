@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "memorable-generate-password",
+  "title": "Memorable Password Generator",
+  "description": "Generate a set of passwords that are easy to remember and use·",
+  "icon": "extension_icon.png",
+  "author": "gandli",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Memorable Password Generator",
+      "description": "Generate a set of passwords that are easy to remember and use",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "wordCount",
+          "placeholder": "Number of word(3)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "passwordCount",
+          "placeholder": "Number of password(9)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
+    "lodash": "^4.17.21"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

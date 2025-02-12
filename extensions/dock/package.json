@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock",
+  "title": "Dock",
+  "description": "Change the dock's position to the left, right, or bottom edge of the screen.",
+  "icon": "dock.png",
+  "author": "pradeepb28",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "move-dock-to-the-left",
+      "title": "Move Dock To The Left",
+      "subtitle": "Dock",
+      "icon": "dock-left.png",
+      "description": "Change the dock's position to the left",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-dock-to-the-right",
+      "title": "Move Dock To The Right",
+      "subtitle": "Dock",
+      "icon": "dock-right.png",
+      "description": "Change the dock's position to the right",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-dock-to-the-bottom",
+      "title": "Move Dock To The Bottom",
+      "subtitle": "Dock",
+      "icon": "dock-bottom.png",
+      "description": "Change the dock's position to the bottom",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

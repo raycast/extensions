@@ -1,0 +1,184 @@
+{
+  "Preface": [
+    {
+      "title": "Introduction",
+      "url": "https://laravel.com/docs/4.2/introduction"
+    },
+    {
+      "title": "Quickstart",
+      "url": "https://laravel.com/docs/4.2/quick"
+    },
+    {
+      "title": "Release Notes",
+      "url": "https://laravel.com/docs/4.2/releases"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://laravel.com/docs/4.2/upgrade"
+    },
+    {
+      "title": "Contribution Guide",
+      "url": "https://laravel.com/docs/4.2/contributions"
+    },
+    {
+      "title": "API Documentation",
+      "url": "https://laravel.com/api/4.2/"
+    }
+  ],
+  "Getting Started": [
+    {
+      "title": "Installation",
+      "url": "https://laravel.com/docs/4.2/installation"
+    },
+    {
+      "title": "Configuration",
+      "url": "https://laravel.com/docs/4.2/configuration"
+    },
+    {
+      "title": "Homestead",
+      "url": "https://laravel.com/docs/4.2/homestead"
+    },
+    {
+      "title": "Request Lifecycle",
+      "url": "https://laravel.com/docs/4.2/lifecycle"
+    },
+    {
+      "title": "Routing",
+      "url": "https://laravel.com/docs/4.2/routing"
+    },
+    {
+      "title": "Requests & Input",
+      "url": "https://laravel.com/docs/4.2/requests"
+    },
+    {
+      "title": "Views & Responses",
+      "url": "https://laravel.com/docs/4.2/responses"
+    },
+    {
+      "title": "Controllers",
+      "url": "https://laravel.com/docs/4.2/controllers"
+    },
+    {
+      "title": "Errors & Logging",
+      "url": "https://laravel.com/docs/4.2/errors"
+    }
+  ],
+  "Learning More": [
+    {
+      "title": "Authentication",
+      "url": "https://laravel.com/docs/4.2/security"
+    },
+    {
+      "title": "Billing",
+      "url": "https://laravel.com/docs/4.2/billing"
+    },
+    {
+      "title": "Cache",
+      "url": "https://laravel.com/docs/4.2/cache"
+    },
+    {
+      "title": "Core Extension",
+      "url": "https://laravel.com/docs/4.2/extending"
+    },
+    {
+      "title": "Events",
+      "url": "https://laravel.com/docs/4.2/events"
+    },
+    {
+      "title": "Facades",
+      "url": "https://laravel.com/docs/4.2/facades"
+    },
+    {
+      "title": "Forms & HTML",
+      "url": "https://laravel.com/docs/4.2/html"
+    },
+    {
+      "title": "Helpers",
+      "url": "https://laravel.com/docs/4.2/helpers"
+    },
+    {
+      "title": "IoC Container",
+      "url": "https://laravel.com/docs/4.2/ioc"
+    },
+    {
+      "title": "Localization",
+      "url": "https://laravel.com/docs/4.2/localization"
+    },
+    {
+      "title": "Mail",
+      "url": "https://laravel.com/docs/4.2/mail"
+    },
+    {
+      "title": "Package Development",
+      "url": "https://laravel.com/docs/4.2/packages"
+    },
+    {
+      "title": "Pagination",
+      "url": "https://laravel.com/docs/4.2/pagination"
+    },
+    {
+      "title": "Queues",
+      "url": "https://laravel.com/docs/4.2/queues"
+    },
+    {
+      "title": "Security",
+      "url": "https://laravel.com/docs/4.2/security"
+    },
+    {
+      "title": "Session",
+      "url": "https://laravel.com/docs/4.2/session"
+    },
+    {
+      "title": "SSH",
+      "url": "https://laravel.com/docs/4.2/ssh"
+    },
+    {
+      "title": "Templates",
+      "url": "https://laravel.com/docs/4.2/templates"
+    },
+    {
+      "title": "Unit Testing",
+      "url": "https://laravel.com/docs/4.2/testing"
+    },
+    {
+      "title": "Validation",
+      "url": "https://laravel.com/docs/4.2/validation"
+    }
+  ],
+  "Database": [
+    {
+      "title": "Basic Usage",
+      "url": "https://laravel.com/docs/4.2/database"
+    },
+    {
+      "title": "Query Builder",
+      "url": "https://laravel.com/docs/4.2/queries"
+    },
+    {
+      "title": "Eloquent ORM",
+      "url": "https://laravel.com/docs/4.2/eloquent"
+    },
+    {
+      "title": "Schema Builder",
+      "url": "https://laravel.com/docs/4.2/schema"
+    },
+    {
+      "title": "Migrations & Seeding",
+      "url": "https://laravel.com/docs/4.2/migrations"
+    },
+    {
+      "title": "Redis",
+      "url": "https://laravel.com/docs/4.2/redis"
+    }
+  ],
+  "Artisan CLI": [
+    {
+      "title": "Overview",
+      "url": "https://laravel.com/docs/4.2/artisan"
+    },
+    {
+      "title": "Development",
+      "url": "https://laravel.com/docs/4.2/commands"
+    }
+  ]
+}

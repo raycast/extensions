@@ -1,0 +1,415 @@
+[
+  {
+    "category": "digits",
+    "displayName": "Digits",
+    "variations": [
+      {
+        "name": "Whole Numbers",
+        "regexp": "^d+$",
+        "link": "https://www.regexpal.com/?fam=104020"
+      },
+      {
+        "name": "Decimal Numbers",
+        "regexp": "^\\d*\\.\\d+$",
+        "link": "https://www.regexpal.com/?fam=104021"
+      },
+      {
+        "name": "Combined (Whole + Decimal)",
+        "regexp": "^/\\d*(\\.\\d+)?$",
+        "link": "https://www.regexpal.com/?fam=104022"
+      },
+      {
+        "name": "Negative, Positive Whole + Decimal",
+        "regexp": "^-?\\d*(\\.\\d+)?$",
+        "link": "https://www.regexpal.com/?fam=104023"
+      },
+      {
+        "name": "Whole + Decimal + Fractions",
+        "regexp": "[-]?[0-9]+[,.]?[0-9]*([\\/][0-9]+[,.]?[0-9]*)*",
+        "link": "https://www.regexpal.com/94462"
+      }
+    ]
+  },
+  {
+    "category": "characters",
+    "displayName": "Alphanumeric characters",
+    "variations": [
+      {
+        "name": "Alphanumeric characters without space",
+        "regexp": "^[a-zA-Z0-9]*$",
+        "link": "https://www.regexpal.com/?fam=104024"
+      },
+      {
+        "name": "Alphanumeric with space",
+        "regexp": "^[a-zA-Z0-9 ]*$",
+        "link": "https://www.regexpal.com/?fam=104025"
+      }
+    ]
+  },
+  {
+    "category": "email",
+    "displayName": "Email",
+    "variations": [
+      {
+        "name": "Common email ids",
+        "regexp": "^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6})*$",
+        "link": "https://www.regexpal.com/?fam=104026"
+      },
+      {
+        "name": "Uncommon email ids",
+        "regexp": "^([a-z0-9_\\.\\+-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$",
+        "link": "https://www.regexpal.com/?fam=104027"
+      }
+    ]
+  },
+  {
+    "category": "password",
+    "displayName": "Password Strength",
+    "variations": [
+      {
+        "name": "Complex",
+        "regexp": "(?=(.*[0-9]))(?=.*[\\!@#$%^&*()\\[\\]{}\\-_+=~`|:;\\\"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}",
+        "description": "Should have 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long",
+        "link": "https://www.regexpal.com/?fam=104028"
+      },
+      {
+        "name": "Moderate",
+        "regexp": "(?=(.*[0-9]))((?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z]))^.{8,}$",
+        "description": "Should have 1 lowercase letter, 1 uppercase letter, 1 number, and be at least 8 characters long",
+        "link": "https://www.regexpal.com/?fam=104029"
+      }
+    ]
+  },
+  {
+    "category": "url",
+    "displayName": "URL",
+    "variations": [
+      {
+        "name": "With Protocol",
+        "regexp": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#()?&//=]*)",
+        "link": "https://www.regexpal.com/?fam=104034"
+      },
+      {
+        "name": "Protocol optional",
+        "regexp": "(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)",
+        "link": "https://www.regexpal.com/?fam=104035"
+      }
+    ]
+  },
+  {
+    "category": "ip",
+    "displayName": "IP Address",
+    "variations": [
+      {
+        "name": "IPv4 address",
+        "regexp": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+        "link": "https://www.regexpal.com/?fam=104036"
+      },
+      {
+        "name": "IPv6 address",
+        "regexp": "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))",
+        "link": "https://www.regexpal.com/?fam=104037"
+      },
+      {
+        "name": "Both IPv4/IPv6 address",
+        "regexp": "((^\\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\\s*$)|(^\\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:)))(%.+)?\\s*$))",
+        "link": "https://www.regexpal.com/?fam=104038"
+      }
+    ]
+  },
+  {
+    "category": "dates",
+    "displayName": "Dates",
+    "variations": [
+      {
+        "name": "YYYY-MM-dd using separator -",
+        "regexp": "([12]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))",
+        "link": "https://www.regexpal.com/?fam=104039"
+      },
+      {
+        "name": "dd-MM-YYYY using separators - or . or ",
+        "regexp": "^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$",
+        "link": "https://regexr.com/?346hf"
+      },
+      {
+        "name": "dd-mmm-YYYY using separators - or . or ",
+        "regexp": "^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)(?:0?2|(?:Feb))\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$",
+        "link": "https://regexr.com/39tr1"
+      }
+    ]
+  },
+  {
+    "category": "time",
+    "displayName": "Time",
+    "variations": [
+      {
+        "name": "Time Format HH:MM 12-hour, optional leading 0",
+        "regexp": "^(0?[1-9]|1[0-2]):[0-5][0-9]$",
+        "link": "https://www.regexpal.com/?fam=104040"
+      },
+      {
+        "name": "Time Format HH:MM 12-hour, optional leading 0, Meridiems (AM/PM)",
+        "regexp": "((1[0-2]|0?[1-9]):([0-5][0-9]) ?([AaPp][Mm]))",
+        "link": "https://www.regexpal.com/?fam=104041"
+      },
+      {
+        "name": "Time Format HH:MM 24-hour with leading 0",
+        "regexp": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
+        "link": "https://www.regexpal.com/?fam=104042"
+      },
+      {
+        "name": "Time Format HH:MM 24-hour, optional leading 0",
+        "regexp": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",
+        "link": "https://www.regexpal.com/?fam=104043"
+      },
+      {
+        "name": "Time Format HH:MM:SS 24-hour",
+        "regexp": "(?:[01]\\d|2[0123]):(?:[012345]\\d):(?:[012345]\\d)",
+        "link": "https://www.regexpal.com/?fam=104044"
+      }
+    ]
+  },
+  {
+    "category": "html",
+    "displayName": "HTML Tags",
+    "variations": [
+      {
+        "name": "Elements with Attributes",
+        "regexp": "<\\/?[\\w\\s]*>|<.+[\\W]>",
+        "link": "https://www.regexpal.com/95941"
+      }
+    ]
+  },
+  {
+    "category": "filePath",
+    "displayName": "File Path",
+    "variations": [
+      {
+        "name": "File Path with Filename and extension",
+        "regexp": "((\\/|\\|\\/\\/|https?:\\\\|https?:\\/\\/)[a-z0-9 _@\\-^!#$%&+={}.\\/\\\\[\\]]+)+\\.[a-z]+$",
+        "link": "https://www.regexpal.com/?fam=104047"
+      },
+      {
+        "name": "File Path with optional Filename, extension",
+        "regexp": "^(.+)/([^/]+)$"
+      },
+      {
+        "name": "File Name with extension having 3 chars",
+        "regexp": "^[\\w,\\s-]+\\.[A-Za-z]{3}$",
+        "link": "https://www.regexpal.com/?fam=104048"
+      }
+    ]
+  },
+  {
+    "category": "phone",
+    "displayName": "Phone numbers",
+    "variations": [
+      {
+        "name": "International Phone Numbers",
+        "regexp": "^(?:(?:\\(?(?:00|\\+)([1-4]\\d\\d|[1-9]\\d?)\\)?)?[\\-\\.\\ \\/]?)?((?:\\(?\\d{1,}\\)?[\\-\\.\\ \\/]?){0,})(?:[\\-\\.\\ \\/]?(?:#|ext\\.?|extension|x)[\\-\\.\\ \\/]?(\\d+))?$",
+        "link": "https://www.regexpal.com/?fam=99127"
+      }
+    ]
+  },
+  {
+    "category": "zipcode",
+    "displayName": "ZIP Codes",
+    "variations": [
+      {
+        "name": "GB",
+        "regexp": "GIR[ ]?0AA|((AB|AL|B|BA|BB|BD|BH|BL|BN|BR|BS|BT|CA|CB|CF|CH|CM|CO|CR|CT|CV|CW|DA|DD|DE|DG|DH|DL|DN|DT|DY|E|EC|EH|EN|EX|FK|FY|G|GL|GY|GU|HA|HD|HG|HP|HR|HS|HU|HX|IG|IM|IP|IV|JE|KA|KT|KW|KY|L|LA|LD|LE|LL|LN|LS|LU|M|ME|MK|ML|N|NE|NG|NN|NP|NR|NW|OL|OX|PA|PE|PH|PL|PO|PR|RG|RH|RM|S|SA|SE|SG|SK|SL|SM|SN|SO|SP|SR|SS|ST|SW|SY|TA|TD|TF|TN|TQ|TR|TS|TW|UB|W|WA|WC|WD|WF|WN|WR|WS|WV|YO|ZE)(d[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}))|BFPO[ ]?d{1,4}"
+      },
+      { "name": "JE", "regexp": "JEd[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}" },
+      { "name": "GG", "regexp": "GYd[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}" },
+      { "name": "IM", "regexp": "IMd[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}" },
+      { "name": "US", "regexp": "d{5}([ -]d{4})?" },
+      { "name": "CA", "regexp": "[ABCEGHJKLMNPRSTVXY]d[ABCEGHJ-NPRSTV-Z][ ]?d[ABCEGHJ-NPRSTV-Z]d" },
+      { "name": "DE", "regexp": "d{5}" },
+      { "name": "JP", "regexp": "d{3}-d{4}" },
+      { "name": "FR", "regexp": "d{2}[ ]?d{3}" },
+      { "name": "AU", "regexp": "d{4}" },
+      { "name": "IT", "regexp": "d{5}" },
+      { "name": "CH", "regexp": "d{4}" },
+      { "name": "AT", "regexp": "d{4}" },
+      { "name": "ES", "regexp": "d{5}" },
+      { "name": "NL", "regexp": "d{4}[ ]?[A-Z]{2}" },
+      { "name": "BE", "regexp": "d{4}" },
+      { "name": "DK", "regexp": "d{4}" },
+      { "name": "SE", "regexp": "d{3}[ ]?d{2}" },
+      { "name": "NO", "regexp": "d{4}" },
+      { "name": "BR", "regexp": "d{5}[-]?d{3}" },
+      { "name": "PT", "regexp": "d{4}([-]d{3})?" },
+      { "name": "FI", "regexp": "d{5}" },
+      { "name": "AX", "regexp": "22d{3}" },
+      { "name": "KR", "regexp": "d{3}[-]d{3}" },
+      { "name": "CN", "regexp": "d{6}" },
+      { "name": "TW", "regexp": "d{3}(d{2})?" },
+      { "name": "SG", "regexp": "d{6}" },
+      { "name": "DZ", "regexp": "d{5}" },
+      { "name": "AD", "regexp": "ADd{3}" },
+      { "name": "AR", "regexp": "([A-HJ-NP-Z])?d{4}([A-Z]{3})?" },
+      { "name": "AM", "regexp": "(37)?d{4}" },
+      { "name": "AZ", "regexp": "d{4}" },
+      { "name": "BH", "regexp": "((1[0-2]|[2-9])d{2})?" },
+      { "name": "BD", "regexp": "d{4}" },
+      { "name": "BB", "regexp": "(BBd{5})?" },
+      { "name": "BY", "regexp": "d{6}" },
+      { "name": "BM", "regexp": "[A-Z]{2}[ ]?[A-Z0-9]{2}" },
+      { "name": "BA", "regexp": "d{5}" },
+      { "name": "IO", "regexp": "BBND 1ZZ" },
+      { "name": "BN", "regexp": "[A-Z]{2}[ ]?d{4}" },
+      { "name": "BG", "regexp": "d{4}" },
+      { "name": "KH", "regexp": "d{5}" },
+      { "name": "CV", "regexp": "d{4}" },
+      { "name": "CL", "regexp": "d{7}" },
+      { "name": "CR", "regexp": "d{4,5}|d{3}-d{4}" },
+      { "name": "HR", "regexp": "d{5}" },
+      { "name": "CY", "regexp": "d{4}" },
+      { "name": "CZ", "regexp": "d{3}[ ]?d{2}" },
+      { "name": "DO", "regexp": "d{5}" },
+      { "name": "EC", "regexp": "([A-Z]d{4}[A-Z]|(?:[A-Z]{2})?d{6})?" },
+      { "name": "EG", "regexp": "d{5}" },
+      { "name": "EE", "regexp": "d{5}" },
+      { "name": "FO", "regexp": "d{3}" },
+      { "name": "GE", "regexp": "d{4}" },
+      { "name": "GR", "regexp": "d{3}[ ]?d{2}" },
+      { "name": "GL", "regexp": "39d{2}" },
+      { "name": "GT", "regexp": "d{5}" },
+      { "name": "HT", "regexp": "d{4}" },
+      { "name": "HN", "regexp": "(?:d{5})?" },
+      { "name": "HU", "regexp": "d{4}" },
+      { "name": "IS", "regexp": "d{3}" },
+      { "name": "IN", "regexp": "d{6}" },
+      { "name": "ID", "regexp": "d{5}" },
+      { "name": "IL", "regexp": "d{5}" },
+      { "name": "JO", "regexp": "d{5}" },
+      { "name": "KZ", "regexp": "d{6}" },
+      { "name": "KE", "regexp": "d{5}" },
+      { "name": "KW", "regexp": "d{5}" },
+      { "name": "LA", "regexp": "d{5}" },
+      { "name": "LV", "regexp": "d{4}" },
+      { "name": "LB", "regexp": "(d{4}([ ]?d{4})?)?" },
+      { "name": "LI", "regexp": "(948[5-9])|(949[0-7])" },
+      { "name": "LT", "regexp": "d{5}" },
+      { "name": "LU", "regexp": "d{4}" },
+      { "name": "MK", "regexp": "d{4}" },
+      { "name": "MY", "regexp": "d{5}" },
+      { "name": "MV", "regexp": "d{5}" },
+      { "name": "MT", "regexp": "[A-Z]{3}[ ]?d{2,4}" },
+      { "name": "MU", "regexp": "(d{3}[A-Z]{2}d{3})?" },
+      { "name": "MX", "regexp": "d{5}" },
+      { "name": "MD", "regexp": "d{4}" },
+      { "name": "MC", "regexp": "980d{2}" },
+      { "name": "MA", "regexp": "d{5}" },
+      { "name": "NP", "regexp": "d{5}" },
+      { "name": "NZ", "regexp": "d{4}" },
+      { "name": "NI", "regexp": "((d{4}-)?d{3}-d{3}(-d{1})?)?" },
+      { "name": "NG", "regexp": "(d{6})?" },
+      { "name": "OM", "regexp": "(PC )?d{3}" },
+      { "name": "PK", "regexp": "d{5}" },
+      { "name": "PY", "regexp": "d{4}" },
+      { "name": "PH", "regexp": "d{4}" },
+      { "name": "PL", "regexp": "d{2}-d{3}" },
+      { "name": "PR", "regexp": "00[679]d{2}([ -]d{4})?" },
+      { "name": "RO", "regexp": "d{6}" },
+      { "name": "RU", "regexp": "d{6}" },
+      { "name": "SM", "regexp": "4789d" },
+      { "name": "SA", "regexp": "d{5}" },
+      { "name": "SN", "regexp": "d{5}" },
+      { "name": "SK", "regexp": "d{3}[ ]?d{2}" },
+      { "name": "SI", "regexp": "d{4}" },
+      { "name": "ZA", "regexp": "d{4}" },
+      { "name": "LK", "regexp": "d{5}" },
+      { "name": "TJ", "regexp": "d{6}" },
+      { "name": "TH", "regexp": "d{5}" },
+      { "name": "TN", "regexp": "d{4}" },
+      { "name": "TR", "regexp": "d{5}" },
+      { "name": "TM", "regexp": "d{6}" },
+      { "name": "UA", "regexp": "d{5}" },
+      { "name": "UY", "regexp": "d{5}" },
+      { "name": "UZ", "regexp": "d{6}" },
+      { "name": "VA", "regexp": "00120" },
+      { "name": "VE", "regexp": "d{4}" },
+      { "name": "ZM", "regexp": "d{5}" },
+      { "name": "AS", "regexp": "96799" },
+      { "name": "CC", "regexp": "6799" },
+      { "name": "CK", "regexp": "d{4}" },
+      { "name": "RS", "regexp": "d{6}" },
+      { "name": "ME", "regexp": "8d{4}" },
+      { "name": "CS", "regexp": "d{5}" },
+      { "name": "YU", "regexp": "d{5}" },
+      { "name": "CX", "regexp": "6798" },
+      { "name": "ET", "regexp": "d{4}" },
+      { "name": "FK", "regexp": "FIQQ 1ZZ" },
+      { "name": "NF", "regexp": "2899" },
+      { "name": "FM", "regexp": "(9694[1-4])([ -]d{4})?" },
+      { "name": "GF", "regexp": "9[78]3d{2}" },
+      { "name": "GN", "regexp": "d{3}" },
+      { "name": "GP", "regexp": "9[78][01]d{2}" },
+      { "name": "GS", "regexp": "SIQQ 1ZZ" },
+      { "name": "GU", "regexp": "969[123]d([ -]d{4})?" },
+      { "name": "GW", "regexp": "d{4}" },
+      { "name": "HM", "regexp": "d{4}" },
+      { "name": "IQ", "regexp": "d{5}" },
+      { "name": "KG", "regexp": "d{6}" },
+      { "name": "LR", "regexp": "d{4}" },
+      { "name": "LS", "regexp": "d{3}" },
+      { "name": "MG", "regexp": "d{3}" },
+      { "name": "MH", "regexp": "969[67]d([ -]d{4})?" },
+      { "name": "MN", "regexp": "d{6}" },
+      { "name": "MP", "regexp": "9695[012]([ -]d{4})?" },
+      { "name": "MQ", "regexp": "9[78]2d{2}" },
+      { "name": "NC", "regexp": "988d{2}" },
+      { "name": "NE", "regexp": "d{4}" },
+      { "name": "VI", "regexp": "008(([0-4]d)|(5[01]))([ -]d{4})?" },
+      { "name": "PF", "regexp": "987d{2}" },
+      { "name": "PG", "regexp": "d{3}" },
+      { "name": "PM", "regexp": "9[78]5d{2}" },
+      { "name": "PN", "regexp": "PCRN 1ZZ" },
+      { "name": "PW", "regexp": "96940" },
+      { "name": "RE", "regexp": "9[78]4d{2}" },
+      { "name": "SH", "regexp": "(ASCN|STHL) 1ZZ" },
+      { "name": "SJ", "regexp": "d{4}" },
+      { "name": "SO", "regexp": "d{5}" },
+      { "name": "SZ", "regexp": "[HLMS]d{3}" },
+      { "name": "TC", "regexp": "TKCA 1ZZ" },
+      { "name": "WF", "regexp": "986d{2}" },
+      { "name": "XK", "regexp": "d{5}" },
+      { "name": "YT", "regexp": "976d{2}" }
+    ]
+  },
+  {
+    "category": "payments",
+    "displayName": "Payments validation",
+    "variations": [
+      {
+        "name": "Common",
+        "regexp": "^(?:4[0-9]{12}(?:[0-9]{3})?|(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(?:2131|1800|35\\d{3})\\d{11})$"
+      },
+      {
+        "name": "Mastercard",
+        "regexp": "^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$"
+      },
+      {
+        "name": "Visa",
+        "regexp": "^4[0-9]{12}(?:[0-9]{3})?$"
+      },
+      {
+        "name": "American Express",
+        "regexp": "^3[47][0-9]{13}$"
+      },
+      {
+        "name": "Diners Club",
+        "regexp": "^3(?:0[0-5]|[68][0-9])[0-9]{11}$"
+      },
+      {
+        "name": "Discover",
+        "regexp": "^6(?:011|5[0-9]{2})[0-9]{12}$"
+      },
+      {
+        "name": "JCB",
+        "regexp": "^(?:2131|1800|35\\d{3})\\d{11}$"
+      }
+    ]
+  }
+]

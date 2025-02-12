@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "decentraland",
+  "title": "Decentraland",
+  "description": "Search and go directly to events and places in Decentraland",
+  "icon": "command-icon.png",
+  "author": "fmiras",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "Applications",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "description": "Search and go directly to current Decentraland events",
+      "mode": "view"
+    },
+    {
+      "name": "search-districts",
+      "title": "Search Districts",
+      "description": "Search and go directly to Decentraland districts",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

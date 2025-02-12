@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "script-commands",
+  "title": "Script Commands Store – Find and manage your Raycast Script Commands",
+  "description": "Your new way to manage Script Commands without having to deal with GitHub.",
+  "icon": "store-icon.png",
+  "author": "tholanda",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Search Script Command",
+      "subtitle": "Script Commands Store",
+      "description": "List all and search for Script Commands available in the Raycast Script Commands repository on GitHub",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "folderPath",
+      "description": "Folder where your Script Commands will be installed. In case the folder doesn't exist, we will create it for you.",
+      "title": "Folder Path",
+      "required": true,
+      "type": "textfield",
+      "default": "~/raycast/script-commands",
+      "placeholder": "~/raycast/script-commands"
+    },
+    {
+      "name": "addedFolderToRaycast",
+      "type": "checkbox",
+      "required": true,
+      "label": "I will manually add the Folder Path to Raycast Preferences",
+      "default": false,
+      "description": "I understood that I need to add the folder defined in the Folder Path to Raycast Preferences > Extensions > Scripts > Script Commands > Add Directories."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.3",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/download": "^8.0.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "download": "^8.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "prune": "ts-prune"
+  }
+}

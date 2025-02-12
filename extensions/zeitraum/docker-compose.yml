@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  database:
+    image: postgres:15
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: zeitraum
+      POSTGRES_USER: zeitraum
+      POSTGRES_DB: zeitraum
+  server:
+    image: ghcr.io/kennethwussmann/zeitraum/server:develop
+    ports:
+      - 3030:3000
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: postgresql://zeitraum:zeitraum@database:5432/zeitraum
+      API_TOKENS: raycast

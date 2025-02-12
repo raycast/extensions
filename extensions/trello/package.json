@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trello",
+  "title": "Trello",
+  "description": "Raycast extension for showing, searching, and interacting with cards from Trello",
+  "icon": "command-icon.png",
+  "author": "ChrisChinchilla",
+  "contributors": [
+    "jimmy-b36",
+    "brittanyjoiner15",
+    "ajaypremshankar"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Fetch Todos",
+      "subtitle": "Trello",
+      "description": "Fetch all assigned todos",
+      "mode": "view"
+    },
+    {
+      "name": "searchTodos",
+      "title": "Search Todos",
+      "subtitle": "Trello",
+      "description": "Search all todos across all your boards",
+      "mode": "view"
+    },
+    {
+      "name": "searchBoards",
+      "title": "Search Boards",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
+    },
+    {
+      "name": "createTodo",
+      "title": "Create a Todo",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Add your Trello Username",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "name": "username",
+      "required": true,
+      "title": "Trello Username",
+      "type": "textfield"
+    },
+    {
+      "description": "Trello Access token, open this link to get one",
+      "default": "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read,write&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
+      "name": "token",
+      "required": true,
+      "title": "Personal Access Token",
+      "type": "textfield"
+    },
+    {
+      "default": "13f8c59607ba6d82531d3db5f46999c1",
+      "description": "Application Trello API token, leave as is.",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "name": "apitoken",
+      "placeholder": "13f8c59607ba6d82531d3db5f46999c1",
+      "required": true,
+      "title": "API Token",
+      "type": "textfield"
+    },
+    {
+      "name": "closedboards",
+      "title": "Include closed boards",
+      "required": false,
+      "type": "checkbox",
+      "default": false,
+      "description": "Include closed board in list",
+      "label": "Include closed boards"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2"
+  },
+  "devDependencies": {
+    "@types/node": "~20.14.1",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "node-fetch": "^3.3.2",
+    "prettier": "3.3.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

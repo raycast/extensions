@@ -1,0 +1,55 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "colbyfayock",
+      "name": "Colby Fayock",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1045274?v=4",
+      "profile": "https://colbyfayock.com/newsletter",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "daniel-shuy",
+      "name": "Daniel Shuy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17351764?v=4",
+      "profile": "https://github.com/daniel-shuy",
+      "contributions": [
+        "infra",
+        "tool"
+      ]
+    },
+    {
+      "login": "doingandlearning",
+      "name": "Kevin Cunningham",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8320213?v=4",
+      "profile": "http://www.kevincunningham.co.uk",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "xmok",
+      "name": "xmok",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30526133?v=4",
+      "profile": "https://xmok.me?utm_source=gh-raycast-cloudinary",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "raycast-cloudinary",
+  "projectOwner": "colbyfayock"
+}

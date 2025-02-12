@@ -1,0 +1,185 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "safari",
+  "title": "Safari",
+  "description": "Manage your Safari Tabs, History and Reading List",
+  "categories": [
+    "Applications",
+    "Web"
+  ],
+  "icon": "safari-icon.png",
+  "author": "loris",
+  "contributors": [
+    "thomas",
+    "HelloImSteven",
+    "axsuul",
+    "iwex",
+    "xilopaint",
+    "ChangeHow",
+    "ridemountainpig",
+    "1weiho"
+  ],
+  "pastContributors": [
+    "marcjulian"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cloud-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Safari",
+      "description": "Browse your open tabs",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "areRemoteTabsUsed",
+          "type": "checkbox",
+          "required": false,
+          "title": "Devices",
+          "description": "Include iCloud tabs across all your devices",
+          "default": true,
+          "label": "iCloud"
+        },
+        {
+          "name": "fallbackSearchType",
+          "type": "dropdown",
+          "required": false,
+          "title": "Fallback Search",
+          "description": "Switch between Safari search and Safari search history.",
+          "label": "iCloud",
+          "default": "Search",
+          "data": [
+            {
+              "value": "search",
+              "title": "Search"
+            },
+            {
+              "value": "searchHistory",
+              "title": "Search History"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reading-list",
+      "title": "Search Reading List",
+      "subtitle": "Safari",
+      "description": "Browse your reading list",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupByStatus",
+          "type": "checkbox",
+          "required": false,
+          "label": "Group by status",
+          "default": true,
+          "description": "Group items by Read/Unread status"
+        },
+        {
+          "name": "hideReadItems",
+          "type": "checkbox",
+          "required": false,
+          "label": "Hide read items",
+          "default": false,
+          "description": "Hide read items"
+        }
+      ]
+    },
+    {
+      "name": "add-to-reading-list",
+      "title": "Add to Reading List",
+      "subtitle": "Safari",
+      "description": "Add the current Safari tab to your Reading List",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Safari",
+      "description": "Browse your history",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Safari",
+      "description": "Browse your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "copy-to-clipboard",
+      "title": "Copy URL to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab URL to your clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-title-as-link-to-clipboard",
+      "title": "Copy Title as Link to Clipboard",
+      "subtitle": "Safari",
+      "description": "Copy the current Safari tab title as Markdown link ([title](url)) to your clipboard",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "cleanUpTitleWithAI",
+          "type": "checkbox",
+          "title": "Advanced Settings",
+          "required": false,
+          "label": "Clean up title with AI",
+          "default": true,
+          "description": "Cleans up the title with AI to make it more readable (Pro only)"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "safariAppIdentifier",
+      "type": "dropdown",
+      "required": false,
+      "title": "Local Safari Browser",
+      "description": "Switch between Safari or Safari Technology Preview",
+      "default": "Safari",
+      "data": [
+        {
+          "value": "Safari",
+          "title": "Safari"
+        },
+        {
+          "value": "Safari Technology Preview",
+          "title": "Safari Technology Preview"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.3",
+    "@raycast/utils": "1.17.0",
+    "ahooks": "^3.8.1",
+    "bplist-creator": "^0.1.1",
+    "fuse.js": "^7.0.0",
+    "lodash": "^4.17.21",
+    "lru-cache": "^11.0.2",
+    "osascript-tag": "^0.1.2",
+    "pinyin": "^4.0.0-alpha.2",
+    "simple-plist": "^1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "~18.11.10",
+    "@types/pinyin": "^2.10.2",
+    "@types/react": "^18.3.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

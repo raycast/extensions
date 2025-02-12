@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wikipedia",
+  "title": "Wikipedia",
+  "description": "Search Wikipedia from Raycast",
+  "icon": "wikipedia.png",
+  "author": "vimtor",
+  "contributors": [
+    "shubzkothekar",
+    "nikos",
+    "menahishayan",
+    "pernielsentikaer",
+    "Ek217",
+    "sergiivelykodnyi",
+    "j3lte",
+    "peterbrinck",
+    "r22"
+  ],
+  "pastContributors": [
+    "igor9silva",
+    "JonathanWbn"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the Wikipedia page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-page",
+      "title": "Search Page",
+      "subtitle": "Wikipedia",
+      "description": "Search Wikipedia pages by title",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "viewType",
+          "title": "View Type",
+          "description": "View type to use when searching for a Wikipedia page",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ],
+          "default": "list",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-page",
+      "title": "Open Page",
+      "subtitle": "Wikipedia",
+      "description": "Open Wikipedia page in Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "random-page",
+      "title": "Random Page",
+      "subtitle": "Wikipedia",
+      "description": "Open a random Wikipedia page in browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "featured-page",
+      "title": "Featured Page",
+      "subtitle": "Wikipedia",
+      "description": "Open today's featured Wikipedia page in browser",
+      "mode": "no-view"
+    }
+  ],
+  "categories": [
+    "Web",
+    "News"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.14.0",
+    "node-fetch": "^3.3.2",
+    "wikijs": "^6.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/debug": "^4.1.12",
+    "@types/node": "20.11.17",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

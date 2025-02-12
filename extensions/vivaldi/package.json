@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vivaldi",
+  "title": "Vivaldi",
+  "description": "Search open tabs, bookmarks and history in Vivaldi.",
+  "icon": "vivaldi-logo.png",
+  "author": "crisboarna",
+  "contributors": [
+    "iwex"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Vivaldi",
+      "description": "Open a new Vivaldi tab.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Vivaldi",
+      "description": "Open a new Vivaldi window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Vivaldi",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Vivaldi",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Vivaldi",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Vivaldi profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "openTabInProfile",
+      "title": "Open Tab In Profile",
+      "type": "dropdown",
+      "required": false,
+      "description": "When 'Default(classic), the tab will be opened in the profile open, or topmost profile window if multiple windows are open. When 'Current Profile', the tab will be opened in the profile specified in the 'Profile' field. When 'Original Profile' it will open in original profile tab is sourced from",
+      "default": "default",
+      "data": [
+        {
+          "title": "Default(classic)",
+          "value": "default"
+        },
+        {
+          "title": "Current Profile",
+          "value": "profile_current"
+        },
+        {
+          "title": "Original Profile",
+          "value": "profile_original"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

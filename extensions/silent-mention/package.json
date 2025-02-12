@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "silent-mention",
+  "title": "Silent Mention",
+  "description": "Silently mention a handle, a URL or a hashtag.",
+  "icon": "extension-icon.png",
+  "author": "peduarte",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Silent Mention",
+      "description": "Silently mention a handle, a URL or a hashtag.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Handle, URL or Hashtag"
+        }
+      ]
+    },
+    {
+      "name": "copy-zero-width-space",
+      "title": "Copy Zero Width Space",
+      "description": "Simply copy a zero width space to your clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

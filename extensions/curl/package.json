@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "curl",
+  "title": "cURL",
+  "description": "Keyboard-first HTTP client",
+  "icon": "app-icon.png",
+  "author": "jonathangiardino",
+  "contributors": [
+    "pernielsentikaer",
+    "bkeys818",
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Make HTTP Request",
+      "subtitle": "cURL",
+      "description": "Shortcut to make an HTTP request",
+      "mode": "view"
+    },
+    {
+      "name": "requests",
+      "title": "Requests History",
+      "subtitle": "cURL",
+      "description": "HTTP requests history",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "axios": "^0.27.2",
+    "curl-string": "^1.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

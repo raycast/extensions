@@ -1,0 +1,65 @@
+fragment Build on Build {
+  id
+  branch
+  createdAt
+  message
+  number
+  state
+  url
+  pipeline {
+    name
+  }
+}
+
+query myBuilds {
+  viewer {
+    user {
+      builds(first: 20) {
+        edges {
+          node {
+            ...Build
+          }
+        }
+      }
+    }
+  }
+}
+
+query listBuilds($pipeline: ID!) {
+  pipeline(slug: $pipeline) {
+    builds(first: 20) {
+      edges {
+        node {
+          ...Build
+        }
+      }
+    }
+  }
+}
+
+fragment Pipeline on Pipeline {
+  slug
+  name
+  description
+  favorite
+  url
+  builds(first: 1) {
+    edges {
+      node {
+        state
+      }
+    }
+  }
+}
+
+query searchPipelines($org: ID!, $search: String) {
+  organization(slug: $org) {
+    pipelines(first: 20, archived: false, order: NAME_WITH_FAVORITES_FIRST, search: $search) {
+      edges {
+        node {
+          ...Pipeline
+        }
+      }
+    }
+  }
+}

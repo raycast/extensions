@@ -1,0 +1,343 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-history",
+  "title": "Browser History",
+  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium, Orion and Sidekick.",
+  "icon": "icon.png",
+  "author": "crisboarna",
+  "contributors": [
+    "tkdkid1000",
+    "mikugeek"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search Browser History",
+      "subtitle": "Browser History",
+      "description": "Search browser history across your browsers and open across browsers.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "firstInResults",
+          "type": "dropdown",
+          "required": false,
+          "title": "First in results",
+          "description": "Which browser history shows up first in results",
+          "data": [
+            {
+              "title": "Google Chrome",
+              "value": "Chrome"
+            },
+            {
+              "title": "Mozilla Firefox",
+              "value": "Firefox"
+            },
+            {
+              "title": "Safari",
+              "value": "Safari"
+            },
+            {
+              "title": "Microsoft Edge",
+              "value": "Edge"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "Vivaldi",
+              "value": "Vivaldi"
+            },
+            {
+              "title": "Arc",
+              "value": "Arc"
+            },
+            {
+              "title": "Opera",
+              "value": "Opera"
+            },
+            {
+              "title": "Iridium",
+              "value": "Iridium"
+            },
+            {
+              "title": "Orion",
+              "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
+            }
+          ]
+        },
+        {
+          "name": "defaultBrowser",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default browser to open in",
+          "description": "Which browser opens upon pressing enter on an entry",
+          "data": [
+            {
+              "title": "Default",
+              "value": "Default"
+            },
+            {
+              "title": "Originating Browser",
+              "value": "Originator"
+            },
+            {
+              "title": "Google Chrome",
+              "value": "Chrome"
+            },
+            {
+              "title": "Mozilla Firefox",
+              "value": "Firefox"
+            },
+            {
+              "title": "Safari",
+              "value": "Safari"
+            },
+            {
+              "title": "Microsoft Edge",
+              "value": "Edge"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "Vivaldi",
+              "value": "Vivaldi"
+            },
+            {
+              "title": "Arc",
+              "value": "Arc"
+            },
+            {
+              "title": "Opera",
+              "value": "Opera"
+            },
+            {
+              "title": "Iridium",
+              "value": "Iridium"
+            },
+            {
+              "title": "Orion",
+              "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
+            }
+          ]
+        },
+        {
+          "name": "enableChrome",
+          "type": "checkbox",
+          "required": false,
+          "title": "Browsers",
+          "description": "Enable Chrome history to show up in results",
+          "default": false,
+          "label": "Google Chrome"
+        },
+        {
+          "name": "enableFirefox",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Firefox history to show up in results",
+          "default": false,
+          "label": "Mozilla Firefox"
+        },
+        {
+          "name": "enableSafari",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Safari history to show up in results",
+          "default": false,
+          "label": "Safari"
+        },
+        {
+          "name": "enableEdge",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Edge history to show up in results",
+          "default": false,
+          "label": "Edge"
+        },
+        {
+          "name": "enableBrave",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Brave history to show up in results",
+          "default": false,
+          "label": "Brave"
+        },
+        {
+          "name": "enableVivaldi",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Vivaldi history to show up in results",
+          "default": false,
+          "label": "Vivaldi"
+        },
+        {
+          "name": "enableArc",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Arc history to show up in results",
+          "default": false,
+          "label": "Arc"
+        },
+        {
+          "name": "enableOpera",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Opera history to show up in results",
+          "default": false,
+          "label": "Opera"
+        },
+        {
+          "name": "enableIridium",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Iridium history to show up in results",
+          "default": false,
+          "label": "Iridium"
+        },
+        {
+          "name": "enableOrion",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Orion history to show up in results",
+          "default": false,
+          "label": "Orion"
+        },
+        {
+          "name": "enableSidekick",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Sidekick history to show up in results",
+          "default": false,
+          "label": "Sidekick"
+        },
+        {
+          "name": "profilePathChrome",
+          "type": "textfield",
+          "required": false,
+          "title": "Chrome Profile Path",
+          "description": "Path to Chrome profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Google/Chrome/Default",
+          "placeholder": "/Users/username/Library/Application Support/Google/Chrome/Default"
+        },
+        {
+          "name": "profilePathFirefox",
+          "type": "textfield",
+          "required": false,
+          "title": "Firefox Profile Path",
+          "description": "Path to Firefox profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Firefox/Profiles/xxxxxxxx.default-release",
+          "placeholder": "/Users/username/Library/Application Support/Firefox/Profiles/xxxxxxxx.default-release"
+        },
+        {
+          "name": "profilePathSafari",
+          "type": "textfield",
+          "required": false,
+          "title": "Safari Profile Path",
+          "description": "Path to Safari profile folder. Leave empty to use default profile. Default at /Users/username/Library/Safari",
+          "placeholder": "/Users/username/Library/Safari"
+        },
+        {
+          "name": "profilePathEdge",
+          "type": "textfield",
+          "required": false,
+          "title": "Edge Profile Path",
+          "description": "Path to Edge profile folder. Leave empty to use default profile. /Users/username/Library/Application Support/Microsoft Edge/Default",
+          "placeholder": "/Users/username/Library/Application Support/Microsoft Edge/Default"
+        },
+        {
+          "name": "profilePathBrave",
+          "type": "textfield",
+          "required": false,
+          "title": "Brave Profile Path",
+          "description": "Path to Brave profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/BraveSoftware/Brave-Browser/Default",
+          "placeholder": "/Users/username/Library/Application Support/BraveSoftware/Brave-Browser/Default"
+        },
+        {
+          "name": "profilePathVivaldi",
+          "type": "textfield",
+          "required": false,
+          "title": "Vivaldi Profile Path",
+          "description": "Path to Vivaldi profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Vivaldi/Default",
+          "placeholder": "/Users/username/Library/Application Support/Vivaldi/Default"
+        },
+        {
+          "name": "profilePathArc",
+          "type": "textfield",
+          "required": false,
+          "title": "Arc Profile Path",
+          "description": "Path to Arc profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Arc/User Data/Default",
+          "placeholder": "/Users/username/Library/Application Support/Arc/User Data/Default"
+        },
+        {
+          "name": "profilePathOpera",
+          "type": "textfield",
+          "required": false,
+          "title": "Opera Profile Path",
+          "description": "Path to Opera profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/com.operasoftware.Opera",
+          "placeholder": "/Users/username/Library/Application Support/com.operasoftware.Opera"
+        },
+        {
+          "name": "profilePathIridium",
+          "type": "textfield",
+          "required": false,
+          "title": "Iridium Profile Path",
+          "description": "Path to Iridium profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Iridium/Default",
+          "placeholder": "/Users/username/Library/Application Support/Iridium/Default"
+        },
+        {
+          "name": "profilePathOrion",
+          "type": "textfield",
+          "required": false,
+          "title": "Orion Profile Path",
+          "description": "Path to Orion profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Orion/Defaults",
+          "placeholder": "/Users/username/Library/Application Support/Orion/Defaults"
+        },
+        {
+          "name": "profilePathSidekick",
+          "type": "textfield",
+          "required": false,
+          "title": "Sidekick Profile Path",
+          "description": "Path to Sidekick profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Sidekick/Default",
+          "placeholder": "/Users/username/Library/Application Support/Sidekick/Default"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

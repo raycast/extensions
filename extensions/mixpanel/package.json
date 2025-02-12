@@ -1,0 +1,71 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "mixpanel",
+	"title": "Mixpanel",
+	"description": "Collection of handful handles for mixpanel",
+	"icon": "mixpanel_logo.png",
+	"author": "iamsmaso",
+	"categories": [
+		"Developer Tools",
+		"Data",
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "index",
+			"title": "Search User",
+			"subtitle": "Find user byt it's name on mixpanel",
+			"description": "Search for a user inside your mixpanel dashboard",
+			"mode": "view",
+			"preferences": [
+				{
+					"label": "Project id",
+					"type": "textfield",
+					"title": "Project id",
+					"name": "project_id",
+					"description": "Mixpanel project id",
+					"required": true
+				},
+				{
+					"label": "Service account",
+					"type": "textfield",
+					"title": "Service account",
+					"name": "service_account",
+					"description": "Service account username",
+					"required": true
+				},
+				{
+					"label": "Service account secret",
+					"type": "textfield",
+					"title": "Service account secret",
+					"name": "service_account_secret",
+					"description": "Service account secret",
+					"required": true
+				}
+			]
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.48.3",
+		"dayjs": "^1.11.7",
+		"node-fetch": "^3.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "18.8.3",
+		"@types/react": "18.0.9",
+		"@typescript-eslint/eslint-plugin": "^5.0.0",
+		"@typescript-eslint/parser": "^5.0.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"prettier": "^2.5.1",
+		"typescript": "^4.4.3"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "ray publish"
+	}
+}

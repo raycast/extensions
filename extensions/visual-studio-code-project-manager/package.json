@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vscode-project-manager",
+  "title": "Visual Studio Code - Project Manager",
+  "description": "Search and open projects from Visual Studio Code Project Manager",
+  "icon": "command-icon.png",
+  "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek",
+    "4very",
+    "theherk",
+    "TobiasYin",
+    "yossizahn",
+    "eduwass",
+    "grrrck",
+    "hsm"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-project-manager-projects",
+      "title": "Search Project Manager",
+      "subtitle": "Visual Studio Code",
+      "description": "Search and open projects from Visual Studio Code Project Manager",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "groupProjectsByTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Group Projects...",
+      "default": true,
+      "label": "by tag",
+      "description": "Groups projects by tag instead of just showing"
+    },
+    {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Projects...",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tag"
+    },
+    {
+      "name": "vscodeApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "VSCode",
+      "default": "/Applications/Visual Studio Code.app",
+      "description": "Path to the VSCode app"
+    },
+    {
+      "name": "projectManagerDataPath",
+      "type": "directory",
+      "required": false,
+      "title": "Projects Location",
+      "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "required": false,
+      "default": "/Applications/iTerm.app",
+      "title": "Terminal App Path",
+      "description": "Path to the terminal app"
+    },
+    {
+      "name": "gitClientApp",
+      "type": "appPicker",
+      "required": false,
+      "default": "/Applications/Fork.app",
+      "title": "Git Client App Path",
+      "description": "Path to the Git client app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.0",
+    "@raycast/utils": "^1.16.1",
+    "parse-git-config": "^3.0.0",
+    "prettier": "^3.2.5",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/parse-git-config": "^3.0.1",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
+    "react-devtools": "^5.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

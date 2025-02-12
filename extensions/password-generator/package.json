@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "password-generator",
+  "title": "Password Generator",
+  "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
+  "icon": "password-generator-icon.png",
+  "author": "joshuaiz",
+  "contributors": [
+    "teziovsky",
+    "pernielsentikaer",
+    "hnsn"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "hideAfterCopy",
+      "description": "Hide the raycast panel after the password is copied to the clipboard.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Options",
+      "label": "Hide Raycast after copy"
+    }
+  ],
+  "commands": [
+    {
+      "name": "generate-random-password",
+      "title": "Generate Random Password",
+      "description": "Generates a password from 5–64 characters in length with options for case, numbers, special characters, and more.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "storePasswordLength",
+          "description": "Remember the last password length between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Remember password length"
+        }
+      ]
+    },
+    {
+      "name": "generate-memorable-password",
+      "title": "Generate Memorable Password",
+      "description": "Generates a password with a specified format, with options for words, special characters, and random characters and numbers.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberCustomFormat",
+          "description": "Remember the last custom format between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Remember custom format"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hidemyemail",
+  "title": "Hide My Email",
+  "description": "Quick and easy way to view and manage your Hide My Email addresses.",
+  "icon": "extension-icon.png",
+  "author": "svenhofman",
+  "contributors": [
+    "pernielsentikaer",
+    "dany"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "list-emails",
+      "title": "List Emails",
+      "description": "Lists all the Hide My Email addresses associated with iCloud account.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortByCreationDate",
+          "title": "Sort list by creation date",
+          "label": "Sort list on most recently created address",
+          "description": "If enabled, the email list is sorted on most recently created.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "create-new-email",
+      "title": "Create New Email",
+      "description": "Opens form to create a new email Hide My Email address",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useChineseAccount",
+      "label": "Use Chinese Account",
+      "description": "Use Chinese Apple ID account",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.7.7",
+    "axios-cookiejar-support": "^5.0.3",
+    "fast-srp-hap": "^2.0.4",
+    "patch-package": "^8.0.0",
+    "tough-cookie": "^5.0.0",
+    "uuid": "^11.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "postinstall": "patch-package"
+  }
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 531.36 538.77">
+  <defs>
+    <style>
+      .c {
+        fill: url(#b);
+      }
+
+      .c, .d {
+        fill-rule: evenodd;
+      }
+
+      .e {
+        fill: #fff;
+      }
+    </style>
+    <linearGradient id="b" x1="535.04" y1="534.27" x2="-3.68" y2="2.96" gradientTransform="translate(0 538) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a9ffe0"/>
+      <stop offset="1" stop-color="#86d5ff"/>
+    </linearGradient>
+  </defs>
+  <circle class="e" cx="265.68" cy="269.39" r="135.25"/>
+  <g>
+    <path class="c" d="M127.53,0H403.84c70.43,0,127.53,57.89,127.53,129.3V409.47c0,71.41-57.1,129.3-127.53,129.3H127.53C57.1,538.77,0,480.88,0,409.47V129.3C0,57.89,57.1,0,127.53,0Zm139.06,442.55c94.38,0,170.89-77.53,170.89-173.17s-76.51-173.17-170.89-173.17S95.7,173.75,95.7,269.39s76.51,173.17,170.89,173.17Z"/>
+    <path class="d" d="M266.59,442.55c94.38,0,170.89-77.53,170.89-173.17s-76.51-173.17-170.89-173.17S95.7,173.75,95.7,269.39s76.51,173.17,170.89,173.17Zm-30.16-264.84h60.31v61.76h-60.31v59.83h60.31v61.76h-60.31v-59.83h-60.31v-61.76h60.31v-61.76Zm60.32,61.76h60.31v61.76h-60.31v-61.76Z"/>
+  </g>
+</svg>

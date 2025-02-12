@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hide-all-apps",
+  "title": "Hide All Apps",
+  "description": "This extension hides all Applications—including Finder—leaving you with only the Desktop.",
+  "icon": "hide-icon.png",
+  "author": "peduarte",
+  "contributors": [
+    "pernielsentikaer",
+    "andrewsardone",
+    "hayden_barnes"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Hide All Apps",
+      "description": "Hides All Applications",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "alsoHideRaycast",
+      "type": "checkbox",
+      "required": false,
+      "title": "Also hide Raycast",
+      "description": "Whether to close Raycast when hiding all apps or not",
+      "label": "Also hide Raycast",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
