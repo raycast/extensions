@@ -1,6 +1,6 @@
 # Sav Changelog
 
-## [Toggle Auto Renewal & Privacy] - {PR_MERGE_DATE}
+## [Toggle Auto Renewal & Privacy] - 2025-02-12
 
 Use new `Action`s to:
 - Toggle Domain/Whois Privacy
