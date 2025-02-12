@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { files } from "dropbox";
 import Directory from "./Directory";
+import { getDirectoryViewURL } from "../api";
 
 export interface IDirectoryItemProps {
   file: files.FolderMetadataReference;
@@ -22,6 +23,7 @@ export default function DirectoryItem(props: IDirectoryItemProps) {
             icon={Icon.ArrowRight}
             target={<Directory path={file.id} parent={file.path_display} />}
           />
+          {file.path_display && <Action.OpenInBrowser url={encodeURI(getDirectoryViewURL(file.path_display))} />}
         </ActionPanel>
       }
     />

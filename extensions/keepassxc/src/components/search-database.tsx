@@ -13,6 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { KeePassLoader, showToastCliErrors } from "../utils/keepass-loader";
+import { getTOTPCode } from "../utils/totp";
 
 /**
  * Get an array of unique folder names from the given entries.
@@ -158,9 +159,15 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       icon={Icon.BlankDocument}
                       shortcut={{ modifiers: ["opt"], key: "enter" }}
                       onAction={() => {
-                        entry[6] !== ""
-                          ? KeePassLoader.pasteTOTP(entry[1]).catch(errorHandler)
-                          : showToast(Toast.Style.Failure, "Error", "No TOTP Set");
+                        if (entry[6] !== "") {
+                          try {
+                            Clipboard.paste(getTOTPCode(entry[6])).then(() => closeMainWindow());
+                          } catch {
+                            showToast(Toast.Style.Failure, "Error", "Invalid TOTP URL");
+                          }
+                        } else {
+                          showToast(Toast.Style.Failure, "Error", "No TOTP Set");
+                        }
                       }}
                     />
                   </ActionPanel.Section>
@@ -171,8 +178,8 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       shortcut={{ modifiers: ["cmd"], key: "g" }}
                       onAction={() => {
                         if (entry[3] !== "") {
-                          showHUD("Password has been copied to clipboard");
                           Clipboard.copy(entry[3], { concealed: true });
+                          showHUD("Password has been copied to clipboard");
                         } else showToast(Toast.Style.Failure, "Error", "No Password Set");
                       }}
                     />
@@ -182,8 +189,8 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
                       onAction={() => {
                         if (entry[2] !== "") {
-                          showHUD("Username has been copied to clipboard");
                           Clipboard.copy(entry[2]);
+                          showHUD("Username has been copied to clipboard");
                         } else showToast(Toast.Style.Failure, "Error", "No Username Set");
                       }}
                     />
@@ -193,7 +200,12 @@ export default function SearchDatabase({ setIsUnlocked }: { setIsUnlocked: (isUn
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => {
                         if (entry[6] !== "") {
-                          KeePassLoader.copyTOTP(entry[1]).catch(errorHandler);
+                          try {
+                            Clipboard.copy(getTOTPCode(entry[6]), { concealed: true });
+                            showHUD("TOTP has been copied to clipboard");
+                          } catch {
+                            showToast(Toast.Style.Failure, "Error", "Invalid TOTP URL");
+                          }
                         } else showToast(Toast.Style.Failure, "Error", "No TOTP Set");
                       }}
                     />
