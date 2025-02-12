@@ -7,6 +7,10 @@ import os from "os";
 
 const execAsync = promisify(exec);
 
+// Homebrew binary paths
+const FFMPEG_PATH = "/opt/homebrew/bin/ffmpeg";
+const FFPROBE_PATH = "/opt/homebrew/bin/ffprobe";
+
 const WHISPER_MODELS = {
   tiny: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
   base: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
@@ -330,42 +334,88 @@ export function isLocalTranscriptionAvailable(model: string): boolean {
 }
 
 /**
- * Transcribe audio using local Whisper or fallback to online
+ * Transcribe audio using local Whisper
  */
-export async function transcribeAudio(
-  audioPath: string,
-  model: string,
-  language?: string,
-  onlineTranscribe?: (path: string) => Promise<string>,
-): Promise<string> {
+export async function transcribeAudio(audioPath: string, model: string, language?: string): Promise<string> {
+  console.log("Starting local transcription:", {
+    audioPath,
+    model,
+    language,
+  });
+
   // Check if local transcription is available
   const whisperInstalled = await isWhisperInstalled();
-  if (whisperInstalled && isModelDownloaded(model)) {
-    const modelPath = path.join(WHISPER_MODELS_DIR, `ggml-${model}.bin`);
-    const whisperPath = path.join(WHISPER_BIN_DIR, "whisper");
+  if (!whisperInstalled) {
+    throw new Error("Whisper is not installed");
+  }
 
+  if (!isModelDownloaded(model)) {
+    throw new Error(`Model ${model} is not downloaded`);
+  }
+
+  const modelPath = path.join(WHISPER_MODELS_DIR, `ggml-${model}.bin`);
+  const whisperPath = path.join(WHISPER_BIN_DIR, "whisper");
+
+  console.log("Using Whisper configuration:", {
+    modelPath,
+    whisperPath,
+    exists: {
+      model: fs.existsSync(modelPath),
+      binary: fs.existsSync(whisperPath),
+      audio: fs.existsSync(audioPath),
+    },
+  });
+
+  // Verify audio file format
+  try {
+    const { stdout: ffprobeOut } = await execAsync(`"${FFPROBE_PATH}" -i "${audioPath}" 2>&1`);
+    console.log("Audio file info:", ffprobeOut);
+  } catch (error) {
+    console.warn("Could not get audio file info:", error);
+  }
+
+  try {
+    // Convert audio to the correct format for Whisper
+    const wavPath = `${audioPath}.converted.wav`;
+    console.log("Converting audio to compatible format...");
+    await execAsync(`"${FFMPEG_PATH}" -y -i "${audioPath}" -ar 16000 -ac 1 -c:a pcm_s16le "${wavPath}"`);
+    console.log("Audio conversion completed");
+
+    // Build Whisper command with all necessary options
+    const languageParam = language && language !== "auto" ? ` -l ${language}` : "";
+    // Disable translation when in auto mode, otherwise translate to target language
+    const translateParam = !language || language === "auto" ? " --language auto" : "";
+    const command = `${whisperPath} -m ${modelPath} -f "${wavPath}" -osrt -nt${languageParam}${translateParam}`;
+    console.log("Executing Whisper command:", command);
+
+    const { stdout, stderr } = await execAsync(command);
+
+    if (stderr) {
+      console.warn("Whisper stderr output:", stderr);
+    }
+
+    console.log("Whisper stdout length:", stdout.length);
+    console.log("Whisper stdout preview:", stdout.substring(0, 200));
+
+    // Clean up converted file
     try {
-      const { stdout } = await execAsync(
-        `${whisperPath} -m ${modelPath} -f ${audioPath}${language ? ` -l ${language}` : ""}`,
-      );
-
-      return stdout.trim();
+      fs.unlinkSync(wavPath);
     } catch (error) {
-      console.error("Error transcribing audio locally:", error);
-      // If local transcription fails and we have an online fallback, use it
-      if (onlineTranscribe) {
-        console.log("Falling back to online transcription");
-        return onlineTranscribe(audioPath);
-      }
-      throw new Error("Failed to transcribe audio");
+      console.warn("Could not delete converted audio file:", error);
     }
-  } else {
-    // If local transcription is not available and we have an online fallback, use it
-    if (onlineTranscribe) {
-      console.log("Local transcription not available, using online service");
-      return onlineTranscribe(audioPath);
+
+    const text = stdout.trim();
+    if (!text) {
+      throw new Error("Whisper produced empty output");
     }
-    throw new Error("No transcription service available");
+
+    return text;
+  } catch (error) {
+    console.error("Error executing Whisper:", error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to execute Whisper: ${error.message}`);
+    }
+    throw error;
   }
 }
 

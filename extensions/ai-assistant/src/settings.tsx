@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, LocalStorage, popToRoot, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isModelDownloaded } from "./utils/whisper-local";
+import { LANGUAGE_OPTIONS } from "./constants";
 
 export const DICTATE_TARGET_LANG_KEY = "dictate-target-language";
 export const WHISPER_MODE_KEY = "whisper-mode";
@@ -11,21 +12,10 @@ export const SECONDARY_LANG_KEY = "secondary-language";
 export const LLM_MODEL_KEY = "llm-model";
 export const FIX_TEXT_KEY = "fix-text";
 export const SHOW_EXPLORE_MORE_KEY = "show-explore-more";
-
-const LANGUAGE_OPTIONS = [
-  { value: "auto", title: "Auto-detect" },
-  { value: "en", title: "English" },
-  { value: "fr", title: "French" },
-  { value: "es", title: "Spanish" },
-  { value: "de", title: "German" },
-  { value: "it", title: "Italian" },
-  { value: "pt", title: "Portuguese" },
-  { value: "nl", title: "Dutch" },
-  { value: "ru", title: "Russian" },
-  { value: "zh", title: "Chinese" },
-  { value: "ja", title: "Japanese" },
-  { value: "ko", title: "Korean" },
-];
+export const SILENCE_TIMEOUT_KEY = "silence-timeout";
+export const USE_PERSONAL_DICTIONARY_KEY = "use-personal-dictionary";
+export const MUTE_DURING_DICTATION_KEY = "mute-during-dictation";
+export const USE_CACHE_KEY = "use-cache";
 
 const WHISPER_MODE_OPTIONS = [
   { value: "online", title: "Online (OpenAI API)" },
@@ -56,6 +46,10 @@ export default function Command() {
   const [fixText, setFixText] = useState<boolean>(true);
   const [showExploreMore, setShowExploreMore] = useState<boolean>(true);
   const [experimentalSingleCall, setExperimentalSingleCall] = useState<boolean>(false);
+  const [silenceTimeout, setSilenceTimeout] = useState<string>("2.0");
+  const [usePersonalDictionary, setUsePersonalDictionary] = useState<boolean>(false);
+  const [useCache, setUseCache] = useState<boolean>(true);
+  const [muteDuringDictation, setMuteDuringDictation] = useState<boolean>(true);
 
   useEffect(() => {
     // Load all saved preferences
@@ -69,6 +63,10 @@ export default function Command() {
       const savedFixText = await LocalStorage.getItem<string>(FIX_TEXT_KEY);
       const savedShowExploreMore = await LocalStorage.getItem<string>(SHOW_EXPLORE_MORE_KEY);
       const savedExperimentalSingleCall = await LocalStorage.getItem<string>(EXPERIMENTAL_SINGLE_CALL_KEY);
+      const savedSilenceTimeout = await LocalStorage.getItem<string>(SILENCE_TIMEOUT_KEY);
+      const savedUsePersonalDictionary = await LocalStorage.getItem<string>(USE_PERSONAL_DICTIONARY_KEY);
+      const savedUseCache = await LocalStorage.getItem<string>(USE_CACHE_KEY);
+      const savedMuteDuringDictation = await LocalStorage.getItem<string>(MUTE_DURING_DICTATION_KEY);
 
       // Update download status for each model
       WHISPER_MODEL_OPTIONS.forEach((model) => {
@@ -84,6 +82,10 @@ export default function Command() {
       if (savedFixText) setFixText(savedFixText === "true");
       if (savedShowExploreMore) setShowExploreMore(savedShowExploreMore === "true");
       if (savedExperimentalSingleCall) setExperimentalSingleCall(savedExperimentalSingleCall === "true");
+      if (savedSilenceTimeout) setSilenceTimeout(savedSilenceTimeout);
+      if (savedUsePersonalDictionary) setUsePersonalDictionary(savedUsePersonalDictionary === "true");
+      if (savedUseCache !== null) setUseCache(savedUseCache === "true");
+      if (savedMuteDuringDictation !== null) setMuteDuringDictation(savedMuteDuringDictation === "true");
     };
 
     loadSettings();
@@ -101,6 +103,10 @@ export default function Command() {
       LocalStorage.setItem(FIX_TEXT_KEY, fixText.toString()),
       LocalStorage.setItem(SHOW_EXPLORE_MORE_KEY, showExploreMore.toString()),
       LocalStorage.setItem(EXPERIMENTAL_SINGLE_CALL_KEY, experimentalSingleCall.toString()),
+      LocalStorage.setItem(SILENCE_TIMEOUT_KEY, silenceTimeout),
+      LocalStorage.setItem(USE_PERSONAL_DICTIONARY_KEY, usePersonalDictionary.toString()),
+      LocalStorage.setItem(USE_CACHE_KEY, useCache.toString()),
+      LocalStorage.setItem(MUTE_DURING_DICTATION_KEY, muteDuringDictation.toString()),
     ]);
 
     await showHUD("Settings saved successfully");
@@ -201,7 +207,11 @@ export default function Command() {
               />
             ))}
           </Form.Dropdown>
-          <Form.Description text="⚠️ Models need to be downloaded before use. Use the 'Manage Whisper Models' command to download and manage models." />
+          {!WHISPER_MODEL_OPTIONS.find((model) => model.value === whisperModel)?.isDownloaded ? (
+            <Form.Description text="⚠️ Models need to be downloaded before use. Use the 'Manage Whisper Models' command to download and manage models." />
+          ) : (
+            <Form.Description text="Selected model is downloaded and ready to use." />
+          )}
         </>
       )}
 
@@ -223,6 +233,28 @@ export default function Command() {
 
       <Form.Separator />
 
+      <Form.Description text="Recording Settings" />
+
+      <Form.TextField
+        id="silenceTimeout"
+        title="Silence Timeout"
+        placeholder="2.0"
+        info="Number of seconds of silence before stopping recording (e.g. 2.0)"
+        value={silenceTimeout}
+        onChange={setSilenceTimeout}
+      />
+
+      <Form.Checkbox
+        id="muteDuringDictation"
+        label="Mute system audio during dictation"
+        title="Mute During Dictation"
+        info="Automatically mute system audio output while recording"
+        value={muteDuringDictation}
+        onChange={setMuteDuringDictation}
+      />
+
+      <Form.Separator />
+
       <Form.Description text="Feature Settings" />
 
       <Form.Checkbox
@@ -241,6 +273,32 @@ export default function Command() {
         info="Include additional resources and related topics in page summaries"
         value={showExploreMore}
         onChange={setShowExploreMore}
+      />
+
+      <Form.Separator />
+
+      <Form.Description text="Personal Dictionary Settings" />
+
+      <Form.Checkbox
+        id="usePersonalDictionary"
+        label="Use personal dictionary for transcription"
+        title="Personal Dictionary"
+        info="Apply personal dictionary corrections during speech recognition"
+        value={usePersonalDictionary}
+        onChange={setUsePersonalDictionary}
+      />
+
+      <Form.Separator />
+
+      <Form.Description text="Performance Settings" />
+
+      <Form.Checkbox
+        id="useCache"
+        label="Use cache for AI operations"
+        title="Cache Results"
+        info="Cache AI results for 24 hours to improve performance (recommended)"
+        value={useCache}
+        onChange={setUseCache}
       />
     </Form>
   );

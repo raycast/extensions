@@ -17,6 +17,22 @@ A powerful collection of AI-powered tools to enhance your productivity, featurin
 • Automatic language detection
 • Optional translation to target language
 • Text improvement and cleanup
+• Automatic system audio muting during dictation
+• Active application detection for better context
+• Transcription history with metadata
+• Personal dictionary integration
+• Complete history management system
+• Metadata tracking and search capabilities
+
+📜 Transcription History
+• Complete history of all dictations
+• Search functionality
+• Detailed metadata for each transcription
+• Audio recording replay
+• Automatic file cleanup
+• Export and copy capabilities
+• History management interface
+• Date and application filtering
 
 🤖 Dictate Prompt Everywhere
 • Dictate prompts to generate or improve content
@@ -24,6 +40,7 @@ A powerful collection of AI-powered tools to enhance your productivity, featurin
 • Context-aware text modifications
 • Multi-language support
 • Seamless integration with any text editor
+• Support for various use cases (emails, essays, code, etc.)
 
 📄 Page Summarizer
 • Extracts main content from web pages
@@ -34,10 +51,19 @@ A powerful collection of AI-powered tools to enhance your productivity, featurin
 
 ⚙️ Settings & Configuration
 • Language preferences (primary/secondary)
-• AI model selection
+• AI model selection (GPT-4o, GPT-4o Mini, o1, o1-mini)
 • Speech recognition mode (online/local)
 • Whisper model management
+• Personal dictionary management
+• Audio settings (muting during dictation)
 • Feature toggles
+
+📖 Personal Dictionary
+• Add custom word replacements
+• Support for technical terms and proper nouns
+• Automatic correction during dictation
+• Case-sensitive replacements
+• Export/Import dictionary
 
 ## Requirements
 
@@ -52,9 +78,11 @@ A powerful collection of AI-powered tools to enhance your productivity, featurin
 • Only sends necessary data to OpenAI API
 • Processes text locally when possible
 • Does not track usage or collect analytics
+• Open-source and transparent code
 
 ## Support
 
 For issues, feature requests, or questions:
 • GitHub: https://github.com/pezzos/raycast-ai-assistant
 • Author: Alexandre Pezzotta (https://github.com/pezzos)
+• LinkedIn: https://www.linkedin.com/in/alexandrepezzotta/

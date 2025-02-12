@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-assistant",
-  "title": "AI Assistant",
-  "description": "Powerful AI tools for translation, dictation, text improvement, and page summarization. Features smart language detection, offline speech recognition, and seamless browser integration.",
+  "title": "🤖 AI Assistant",
+  "description": "Your personal AI assistant for Mac!\n\nFeaturing smart translation, voice dictation with offline support, AI-powered text improvement, and web page summarization.\nSeamlessly integrates with your workflow for instant translations, voice-to-text, content generation, and quick summaries - all without leaving your current app.",
   "icon": "extension-icon.png",
   "author": "pezzos",
   "version": "1.0.0",
@@ -28,44 +28,65 @@
     {
       "name": "translate",
       "title": "Translate Selected Text",
-      "description": "Smart translation between your primary languages (auto-detects source language)",
+      "description": "Smart translation between your primary languages with automatic language detection.\nPreserves formatting, punctuation, and technical terms while optionally improving grammar.\nExample: Write an email in English, select the text and instantly translate it to French while maintaining its tone.",
       "mode": "no-view",
       "icon": "command-icon-translate.png"
     },
     {
       "name": "dictate",
       "title": "Dictate Text",
-      "description": "Convert speech to text with optional translation",
+      "description": "Convert speech to text with high accuracy using online (OpenAI) or local Whisper models.\nFeatures automatic language detection, optional translation, text improvement, and personal dictionary integration.\n\nExample: Dictate meeting notes in any language and have them automatically cleaned up and formatted.",
       "mode": "no-view",
       "icon": "command-icon-dictate.png"
     },
     {
       "name": "dictate-prompt",
       "title": "Dictate AI Prompt",
-      "description": "Use voice commands to generate or modify text with AI",
+      "description": "Use voice commands to generate or modify text with AI.\nPerfect for emails, essays, code comments, drafting new docs, or any text content.\n\nExample: Say 'Write a professional email to decline the meeting invitation from John, explain I already have another meeting with Steve about the new features' and get a perfectly crafted response.",
       "mode": "no-view",
       "icon": "command-icon-prompt.png"
     },
     {
       "name": "settings",
       "title": "Settings",
-      "description": "Configure AI Assistant preferences and features",
+      "description": "Configure AI Assistant preferences including language settings, AI models, speech recognition mode, audio settings, and feature toggles.\nManage your personal dictionary and local Whisper models for offline use.",
       "mode": "view",
       "icon": "command-icon-settings.png"
     },
     {
       "name": "summarize-page",
       "title": "Summarize a Text or the Current Page",
-      "description": "Get a quick AI summary",
+      "description": "Get an AI-powered summary of any selected text or full web page with key points highlighted.\nIncludes optional 'Explore More' suggestions and supports multiple languages.\n\nExample: Quickly understand a long article by getting a concise summary with main takeaways.",
       "mode": "view",
       "icon": "command-icon-summarize.png"
     },
     {
       "name": "dictate-models",
       "title": "Manage Whisper Models",
-      "description": "Install Whisper and manage local speech recognition models",
+      "description": "Install and manage local Whisper speech recognition models for offline use.\nChoose between different model sizes (Tiny, Base, Small, Medium) to balance speed and accuracy based on your needs.",
       "mode": "view",
       "icon": "command-icon-models.png"
+    },
+    {
+      "name": "dictate-dictionary",
+      "title": "Manage Personal Dictionary",
+      "description": "Create and manage your custom dictionary for accurate transcription of technical terms, names, and specific phrases.\nPerfect for ensuring consistent spelling and formatting of industry-specific terminology.",
+      "mode": "view",
+      "icon": "command-icon-models.png"
+    },
+    {
+      "name": "dictate-dictionary-add",
+      "title": "Add Selected Word to Dictionary",
+      "description": "Quickly add selected words or phrases to your personal dictionary with their correct spelling or preferred format directly from everywhere.\nUseful for adding technical terms, proper nouns, or frequently used expressions on the fly if they are not well transcribed.",
+      "mode": "view",
+      "icon": "command-icon-models.png"
+    },
+    {
+      "name": "dictate-history",
+      "title": "View Dictation History",
+      "description": "Access and manage your past dictation sessions with full metadata including timestamps, source language, and any translations or improvements applied.\nEasily copy or reuse previous transcriptions.",
+      "mode": "view",
+      "icon": "command-icon-dictate.png"
     }
   ],
   "preferences": [
@@ -76,79 +97,13 @@
       "title": "OpenAI API Key",
       "description": "Your OpenAI API key (starts with 'sk-')",
       "placeholder": "sk-..."
-    },
-    {
-      "name": "primaryLang",
-      "type": "dropdown",
-      "required": true,
-      "title": "Primary Language",
-      "description": "Your primary language (fallback for unknown languages)",
-      "default": "fr",
-      "data": [
-        {
-          "title": "French",
-          "value": "fr"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        }
-      ]
-    },
-    {
-      "name": "secondaryLang",
-      "type": "dropdown",
-      "required": true,
-      "title": "Secondary Language",
-      "description": "Your secondary language (alternates with primary)",
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "French",
-          "value": "fr"
-        }
-      ]
-    },
-    {
-      "name": "fixText",
-      "type": "checkbox",
-      "required": false,
-      "title": "Improve Text",
-      "label": "Fix grammar and spelling issues during translation",
-      "description": "Fix grammar and spelling issues during translation",
-      "default": true
-    },
-    {
-      "name": "llmModel",
-      "type": "dropdown",
-      "required": false,
-      "title": "LLM Model",
-      "description": "The OpenAI model to use for AI operations",
-      "default": "gpt-4o-mini",
-      "data": [
-        {
-          "title": "GPT-4o Mini",
-          "value": "gpt-4o-mini"
-        },
-        {
-          "title": "GPT-4",
-          "value": "gpt-4"
-        },
-        {
-          "title": "GPT-3.5 Turbo",
-          "value": "gpt-3.5-turbo"
-        }
-      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.17.0",
     "cheerio": "^1.0.0",
+    "date-fns": "^3.3.1",
     "node-fetch": "^2.7.0",
     "openai": "^4.28.0"
   },

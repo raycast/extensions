@@ -1,29 +1,23 @@
-import { Detail, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Detail, showToast, Toast, getPreferenceValues, LocalStorage, ActionPanel, Action, Icon } from "@raycast/api";
 import OpenAI from "openai";
 import { execSync } from "child_process";
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 import { useState, useEffect } from "react";
 import { getLLMModel, getSelectedText } from "./utils/common";
+import { PRIMARY_LANG_KEY, SHOW_EXPLORE_MORE_KEY, USE_CACHE_KEY } from "./settings";
+import { getCacheValue, setCacheValue, CacheableData, clearCache } from "./utils/cache";
 
 interface Preferences {
   openaiApiKey: string;
-  primaryLang: string;
-  showExploreMore: boolean;
 }
 
-interface PageSummary {
-  title: string;
-  topic: string;
-  summary: string;
-  highlights: string[];
-  resources: string[];
-  url: string;
-}
+// Use the type from CacheableData
+type PageSummary = NonNullable<CacheableData["summary"]>;
 
 // Constants for content limits
-const MAX_CONTENT_LENGTH = 8000; // Reduced maximum characters for content
-const MAX_TITLE_LENGTH = 500; // Maximum characters for title
+const MAX_CONTENT_LENGTH = 6000; // Reduced maximum characters for content
+const MAX_TITLE_LENGTH = 300; // Maximum characters for title
 
 // Browser configuration for AppleScript commands
 const browsers = [
@@ -99,13 +93,69 @@ const sectionTitles: { [key: string]: { [key: string]: string } } = {
     exploreMore: "Explore More",
     source: "Source",
   },
+  es: {
+    summary: "Resumen",
+    keyHighlights: "Puntos Clave",
+    exploreMore: "Para explorar más",
+    source: "Fuente",
+  },
+  de: {
+    summary: "Zusammenfassung",
+    keyHighlights: "Wichtige Punkte",
+    exploreMore: "Zum Weiterlesen",
+    source: "Quelle",
+  },
+  it: {
+    summary: "Riepilogo",
+    keyHighlights: "Punti Chiave",
+    exploreMore: "Per approfondire",
+    source: "Fonte",
+  },
+  pt: {
+    summary: "Resumo",
+    keyHighlights: "Pontos-Chave",
+    exploreMore: "Para explorar mais",
+    source: "Fonte",
+  },
+  nl: {
+    summary: "Samenvatting",
+    keyHighlights: "Belangrijkste Punten",
+    exploreMore: "Om verder te verkennen",
+    source: "Bron",
+  },
+  ru: {
+    summary: "Краткое содержание",
+    keyHighlights: "Ключевые моменты",
+    exploreMore: "Для дальнейшего изучения",
+    source: "Источник",
+  },
+  zh: {
+    summary: "摘要",
+    keyHighlights: "要点",
+    exploreMore: "深入探索",
+    source: "来源",
+  },
+  ja: {
+    summary: "要約",
+    keyHighlights: "重要なポイント",
+    exploreMore: "さらに探る",
+    source: "ソース",
+  },
+  ko: {
+    summary: "요약",
+    keyHighlights: "주요 포인트",
+    exploreMore: "더 알아보기",
+    source: "출처",
+  },
 };
 
 // Function to get the default browser
 function getDefaultBrowser(): string | null {
   try {
-    const command = `defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | grep 'LSHandlerRoleAll.*http' -B 1 | grep LSHandlerURLScheme -A 1 | grep LSHandlerRole -A 1 | grep LSHandlerURLScheme -A 2 | grep bundleid | cut -d '"' -f 2`;
+    // Simplified and more reliable browser detection
+    const command = `defaults read com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'"' '/http;/{getline; getline; print $2}'`;
     const bundleId = execSync(command).toString().trim();
+    console.log("Detected bundle ID:", bundleId);
 
     const bundleIdToName: { [key: string]: string } = {
       "company.thebrowser.Browser": "Arc",
@@ -117,7 +167,9 @@ function getDefaultBrowser(): string | null {
       "org.mozilla.firefox": "Firefox",
     };
 
-    return bundleIdToName[bundleId] || null;
+    const browser = bundleIdToName[bundleId];
+    console.log("Mapped browser name:", browser);
+    return browser;
   } catch (error) {
     console.error("Could not detect default browser:", error);
     return null;
@@ -159,17 +211,17 @@ async function getCurrentURL(): Promise<string | null> {
 // Function to clean and truncate text
 function cleanAndTruncateText(text: string, maxLength: number): string {
   return text
-    .replace(/\s+/g, " ") // Replace multiple spaces with single space
-    .replace(/\n+/g, " ") // Replace newlines with spaces
-    .replace(/\t+/g, " ") // Replace tabs with spaces
+    .replace(/[\s\n\t]+/g, " ") // Combine multiple whitespace characters
     .trim()
-    .slice(0, maxLength); // Truncate to max length
+    .slice(0, maxLength);
 }
 
-// Function to extract main content from HTML
+// Optimized function to extract main content from HTML
 function extractMainContent($: cheerio.CheerioAPI): string {
-  // Remove unwanted elements
-  $("script, style, nav, footer, header, aside, iframe, noscript").remove();
+  // Remove unwanted elements more aggressively
+  $(
+    "script, style, nav, footer, header, aside, iframe, noscript, .nav, .footer, .header, .sidebar, .ad, .advertisement, .social, .comments",
+  ).remove();
 
   // Try to find the main content container
   const selectors = ["main", "article", '[role="main"]', "#content", ".content", ".article", ".post", ".entry"];
@@ -182,7 +234,6 @@ function extractMainContent($: cheerio.CheerioAPI): string {
     if (element.length > 0) {
       content = element.text();
       if (content.length > 100) {
-        // Only use if content is substantial
         break;
       }
     }
@@ -278,17 +329,44 @@ async function summarizeContent(
   isSelectedText: boolean,
   showExploreMore: boolean,
 ): Promise<string> {
-  const systemPrompt = isSelectedText
-    ? `You are a text summarization assistant. Provide the requested information in ${language} in the exact format specified, without any additional text or explanations.`
-    : `You are a webpage summarization assistant. Provide the requested information in ${language} in the exact format specified, without any additional text or explanations.`;
+  const languageNames = {
+    fr: "French",
+    en: "English",
+    es: "Spanish",
+    de: "German",
+    it: "Italian",
+    pt: "Portuguese",
+    nl: "Dutch",
+    ru: "Russian",
+    zh: "Chinese",
+    ja: "Japanese",
+    ko: "Korean",
+  };
 
-  const userPrompt = `Please analyze this ${isSelectedText ? "text" : "webpage content"} and provide in ${language}:
+  const fullLanguageName = languageNames[language as keyof typeof languageNames] || language;
+
+  const systemPrompt = isSelectedText
+    ? `You are a text summarization assistant. You MUST write EVERYTHING in ${fullLanguageName} ONLY. This includes the topic, summary, highlights, and explore more sections. Do not use any other language. Even if the input is in another language, your output must be in ${fullLanguageName} only.`
+    : `You are a webpage summarization assistant. You MUST write EVERYTHING in ${fullLanguageName} ONLY. This includes the topic, summary, highlights, and explore more sections. Do not use any other language. Even if the input is in another language, your output must be in ${fullLanguageName} only.`;
+
+  const completion = await openai.chat.completions.create({
+    model: getLLMModel(),
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
+      {
+        role: "user",
+        content: `Please analyze this ${isSelectedText ? "text" : "webpage content"} and provide a complete summary in ${fullLanguageName} ONLY. Remember: ALL your output MUST be in ${fullLanguageName}, regardless of the input language.
+
+Required sections (ALL IN ${fullLanguageName.toUpperCase()}):
 1. A concise summary in 2-3 sentences maximum
 2. The main topic or category (one word or short phrase)
 3. Key highlights (2-3 bullet points maximum), use emojis to make it more interesting
-${showExploreMore ? `4. Suggest 2-3 related resources or topics to explore further. ${!isSelectedText ? "For each suggestion, include a URL if relevant." : ""}` : ""}
+${showExploreMore ? `4. Suggest 1-2 related resources or topics to explore further. ${!isSelectedText ? "CRITICAL: You must ONLY suggest resources with URLs that you are 100% certain exist and are accessible. Prefer well-known, authoritative websites (e.g. Wikipedia, official documentation, major news sites, established platforms). NEVER generate or guess URLs. If you cannot find a reliable, existing URL from the content or your knowledge, provide fewer suggestions or none at all. Quality is more important than quantity." : ""}` : ""}
 
-Format the response EXACTLY like this (keep the empty lines between sections):
+Format the response EXACTLY like this (keep the empty lines between sections, EVERYTHING IN ${fullLanguageName.toUpperCase()}):
 TOPIC: <topic>
 
 SUMMARY: <your 2-3 sentence summary>
@@ -301,28 +379,16 @@ ${
   showExploreMore
     ? `
 EXPLORE MORE:
-• <first suggestion with brief explanation> ${!isSelectedText ? "<url if available>" : ""}
-• <second suggestion with brief explanation> ${!isSelectedText ? "<url if available>" : ""}
-• <optional third suggestion> ${!isSelectedText ? "<url if available>" : ""}`
+• <title> - <brief description> - <source> <verified_url>
+• <optional_second_title> - <brief description> - <source> <verified_url>`
     : ""
 }
 
-Content: "${content}"`;
-
-  const completion = await openai.chat.completions.create({
-    model: getLLMModel(),
-    messages: [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
-      {
-        role: "user",
-        content: userPrompt,
+Content: "${content}"`,
       },
     ],
-    temperature: 0.7,
-    max_tokens: 600,
+    temperature: 0.5, // Reduced for more consistent output
+    max_tokens: 500, // Reduced while maintaining quality
   });
 
   return completion.choices[0].message.content || "No summary generated";
@@ -355,11 +421,21 @@ function parseOpenAIResponse(response: string, url: string): PageSummary {
       currentSection = "highlights";
     } else if (trimmedLine === "EXPLORE MORE:") {
       currentSection = "resources";
-    } else if (trimmedLine.startsWith("•")) {
-      if (currentSection === "highlights") {
-        summary.highlights.push(trimmedLine);
-      } else if (currentSection === "resources") {
-        summary.resources.push(trimmedLine);
+    } else if (trimmedLine.startsWith("•") || trimmedLine.startsWith("-") || trimmedLine.startsWith("*")) {
+      const content = trimmedLine.replace(/^[•\-*]\s*/, "").trim();
+      if (content) {
+        if (currentSection === "highlights") {
+          summary.highlights.push(trimmedLine);
+        } else if (currentSection === "resources") {
+          // Extract URL from the resource line
+          const urlMatch = content.match(/https?:\/\/[^\s]+$/);
+          if (urlMatch) {
+            const url = urlMatch[0];
+            const description = content.slice(0, -url.length).trim();
+            // Format as markdown link
+            summary.resources.push(`• [${description}](${url})`);
+          }
+        }
       }
     }
   }
@@ -371,12 +447,36 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<PageSummary | null>(null);
+  const [primaryLang, setPrimaryLang] = useState<string>("");
+  const [showExploreMore, setShowExploreMore] = useState<boolean>(true);
+  const [useCache, setUseCache] = useState<boolean>(true);
   const preferences = getPreferenceValues<Preferences>();
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load preferences from LocalStorage
+    const loadPreferences = async () => {
+      const [savedPrimaryLang, savedShowExploreMore, savedUseCache] = await Promise.all([
+        LocalStorage.getItem<string>(PRIMARY_LANG_KEY),
+        LocalStorage.getItem<string>(SHOW_EXPLORE_MORE_KEY),
+        LocalStorage.getItem<string>(USE_CACHE_KEY),
+      ]);
+
+      if (savedPrimaryLang) setPrimaryLang(savedPrimaryLang);
+      if (savedShowExploreMore !== null) setShowExploreMore(savedShowExploreMore === "true");
+      if (savedUseCache !== null) setUseCache(savedUseCache === "true");
+      setPreferencesLoaded(true);
+    };
+
+    loadPreferences();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     async function fetchSummary() {
+      if (!preferencesLoaded || !primaryLang) return;
+
       try {
         const openai = new OpenAI({
           apiKey: preferences.openaiApiKey,
@@ -386,22 +486,58 @@ export default function Command() {
         if (!isMounted) return;
         await showToast({ style: Toast.Style.Animated, title: "Getting content..." });
         const { content, source } = await getContent();
+        const isSelectedText = source === "selection";
+
+        // Check cache first if enabled
+        if (useCache) {
+          console.log("Cache is enabled, checking for cached content...");
+          const cacheKey = {
+            source: isSelectedText ? "selection" : "webpage",
+            type: "summary" as const,
+            language: primaryLang,
+            content: content,
+          };
+          console.log("Cache key:", cacheKey);
+
+          const cachedSummary = await getCacheValue<"summary">(cacheKey);
+          console.log("Cache result:", cachedSummary ? "Found in cache" : "Not found in cache");
+
+          if (cachedSummary) {
+            if (isMounted) {
+              console.log("Using cached summary");
+              setSummary(cachedSummary);
+              await showToast({ style: Toast.Style.Success, title: "Summary loaded from cache!" });
+              setIsLoading(false);
+              return;
+            }
+          }
+        } else {
+          console.log("Cache is disabled");
+        }
 
         // Generate summary
         if (!isMounted) return;
         await showToast({ style: Toast.Style.Animated, title: "Generating summary..." });
-        const isSelectedText = source === "selection";
-        const summaryText = await summarizeContent(
-          content,
-          openai,
-          preferences.primaryLang,
-          isSelectedText,
-          preferences.showExploreMore,
-        );
+
+        const summaryText = await summarizeContent(content, openai, primaryLang, isSelectedText, showExploreMore);
         const parsedSummary = parseOpenAIResponse(summaryText, source);
 
         if (isMounted) {
           setSummary(parsedSummary);
+
+          // Cache the result if enabled
+          if (useCache) {
+            console.log("Caching new summary...");
+            const cacheKey = {
+              source: isSelectedText ? "selection" : "webpage",
+              type: "summary" as const,
+              language: primaryLang,
+              content: content,
+            };
+            await setCacheValue<"summary">(cacheKey, parsedSummary);
+            console.log("Summary cached successfully");
+          }
+
           await showToast({ style: Toast.Style.Success, title: "Summary generated!" });
         }
       } catch (e) {
@@ -426,34 +562,79 @@ export default function Command() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [preferencesLoaded, primaryLang]);
 
   // Prepare markdown content with proper formatting and translated titles
   const markdown = summary
     ? `# ${summary.topic}
 
-## ${sectionTitles[preferences.primaryLang]?.summary || "Summary"}
+## ${sectionTitles[primaryLang]?.summary || "Summary"}
 ${summary.summary}
 
-## ${sectionTitles[preferences.primaryLang]?.keyHighlights || "Key Highlights"}
-
+## ${sectionTitles[primaryLang]?.keyHighlights || "Key Highlights"}
 ${summary.highlights.join("\n\n")}
 
 ${
-  preferences.showExploreMore
-    ? `## ${sectionTitles[preferences.primaryLang]?.exploreMore || "Explore More"}
-
+  showExploreMore && summary.resources.length > 0
+    ? `## ${sectionTitles[primaryLang]?.exploreMore || "Explore More"}
 ${summary.resources.join("\n\n")}`
     : ""
 }
 
 ---
-${sectionTitles[preferences.primaryLang]?.source || "Source"}: ${summary.url}`
+${sectionTitles[primaryLang]?.source || "Source"}: ${summary.url}`
     : "";
 
   if (error) {
     return <Detail markdown={`# Error\n\n${error}`} />;
   }
 
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  if (!preferencesLoaded || !primaryLang) {
+    return <Detail isLoading={true} markdown="" />;
+  }
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Summary Only"
+              content={summary?.summary || ""}
+              shortcut={{ modifiers: [], key: "enter" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Full Content"
+              content={markdown}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Clear Summaries Cache"
+              icon={Icon.Trash}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              onAction={async () => {
+                try {
+                  await clearCache();
+                  await showToast({ style: Toast.Style.Success, title: "Cache cleared successfully" });
+                  // Refresh the current summary
+                  setIsLoading(true);
+                  setSummary(null);
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to clear cache",
+                    message: error instanceof Error ? error.message : "An error occurred",
+                  });
+                }
+              }}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
 }

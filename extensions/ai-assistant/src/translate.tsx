@@ -1,17 +1,20 @@
-import { showHUD, getPreferenceValues } from "@raycast/api";
+import { showHUD, getPreferenceValues, LocalStorage } from "@raycast/api";
 import OpenAI from "openai";
 import { getSelectedText, replaceSelectedText, getLLMModel } from "./utils/common";
+import { PRIMARY_LANG_KEY, SECONDARY_LANG_KEY, FIX_TEXT_KEY } from "./settings";
+import { LANGUAGE_OPTIONS } from "./constants";
 
 // Debug logging function
 function log(message: string, data?: unknown) {
   console.log(`[Translate] ${message}`, data ? JSON.stringify(data, null, 2) : "");
 }
 
+function getLanguageName(code: string): string {
+  return LANGUAGE_OPTIONS.find((lang) => lang.value === code)?.title || code;
+}
+
 interface Preferences {
   openaiApiKey: string;
-  primaryLang: string;
-  secondaryLang: string;
-  fixText: boolean;
 }
 
 // Initialize OpenAI client
@@ -22,7 +25,17 @@ const translationCache = new Map<string, string>();
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  log("Starting translation with preferences", preferences);
+
+  // Get language preferences from LocalStorage
+  const primaryLanguage = (await LocalStorage.getItem<string>(PRIMARY_LANG_KEY)) || "en";
+  const secondaryLanguage = (await LocalStorage.getItem<string>(SECONDARY_LANG_KEY)) || "fr";
+  const fixText = (await LocalStorage.getItem<string>(FIX_TEXT_KEY)) === "true";
+
+  log("Starting translation with preferences", {
+    primaryLanguage,
+    secondaryLanguage,
+    fixText,
+  });
 
   try {
     // Initialize OpenAI client
@@ -41,12 +54,12 @@ export default async function Command() {
     log("Selected text", { length: selectedText?.length, text: selectedText });
 
     if (!selectedText || selectedText.trim().length === 0) {
-      await showHUD("❌ No text selected - Please select some text to translate");
+      await showHUD("ℹ️ Please select some text to translate");
       return;
     }
 
     // Check cache
-    const cacheKey = `${selectedText}_${preferences.primaryLang}_${preferences.secondaryLang}`;
+    const cacheKey = `${selectedText}_${primaryLanguage}_${secondaryLanguage}`;
     const cachedTranslation = translationCache.get(cacheKey);
 
     if (cachedTranslation) {
@@ -59,18 +72,20 @@ export default async function Command() {
     await showHUD("🌐 Translating...");
 
     // Create the translation prompt
-    const prompt = `Translate this text between ${preferences.primaryLang} and ${preferences.secondaryLang}:
+    const prompt = `Translate this text between ${getLanguageName(primaryLanguage)} and ${getLanguageName(secondaryLanguage)}:
 "${selectedText}"
 
 Rules:
-- First detect the source language between ${preferences.primaryLang}, ${preferences.secondaryLang}
+- First detect the source language between ${getLanguageName(primaryLanguage)}, ${getLanguageName(secondaryLanguage)}
 - Translate to the other language
-- If the source language is not ${preferences.primaryLang} or ${preferences.secondaryLang}, translate to ${preferences.primaryLang}
+- If the source language is not ${getLanguageName(primaryLanguage)} or ${getLanguageName(secondaryLanguage)}, translate to ${getLanguageName(primaryLanguage)}
 - Keep formatting and punctuation
 - Preserve special characters and technical terms
-- Match the original tone${preferences.fixText ? "\n- Fix any grammar, punctuation and spelling issues" : ""}
+- Match the original tone${fixText ? "\n- Fix any grammar, punctuation and spelling issues" : ""}
 
 Respond ONLY with the translation, no explanations or language detection info.`;
+
+    log("Translation prompt", { prompt });
 
     // Call OpenAI API for translation
     log("Calling OpenAI API for translation");
