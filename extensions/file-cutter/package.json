@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-cutter",
+  "title": "File Cutter",
+  "description": "Cut and paste files in Finder",
+  "icon": "cut-icon.png",
+  "author": "rokartur",
+  "categories": [
+    "Productivity",
+    "System",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cut-files",
+      "icon": "cut-icon.png",
+      "title": "Cut files",
+      "subtitle": "Cut selected files in Finder",
+      "description": "Cuts the selected files in Finder and stores them in the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-files",
+      "icon": "paste-icon.png",
+      "title": "Paste files",
+      "subtitle": "Paste files from clipboard in Finder",
+      "description": "Pastes the files from the clipboard into the current Finder window",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
