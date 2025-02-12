@@ -13,7 +13,8 @@
     "tdkn",
     "j3lte",
     "rien7",
-    "teziovsky"
+    "teziovsky",
+    "peteroltmann"
   ],
   "license": "MIT",
   "commands": [
@@ -64,6 +65,52 @@
       "description": "Search on title only.",
       "default": false,
       "label": "Search on title only"
+    },
+    {
+      "name": "sortBy",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "",
+          "title": "Default"
+        },
+        {
+          "value": "-sort",
+          "title": "Manual"
+        },
+        {
+          "value": "created",
+          "title": "Date \u2191"
+        },
+        {
+          "value": "-created",
+          "title": "Date \u2193"
+        },
+        {
+          "value": "title",
+          "title": "Name \u2191"
+        },
+        {
+          "value": "-title",
+          "title": "Name \u2193"
+        },
+        {
+          "value": "domain",
+          "title": "Sites \u2191"
+        },
+        {
+          "value": "-domain",
+          "title": "Sites \u2193"
+        },
+        {
+          "value": "score",
+          "title": "Relevance"
+        }
+      ],
+      "title": "Sort by",
+      "description": "Select the sort order for the search results.",
+      "default": "link"
     },
     {
       "name": "useLastCollection",

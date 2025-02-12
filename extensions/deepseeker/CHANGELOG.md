@@ -1,9 +1,19 @@
 # DeepSeeker - Quick Actions Changelog
 
+
 ## [New Features] - {PR_MERGE_DATE}
 
 - 💸 Fix `deepseek-reasoner` prices
 - 🧮 allow to use `input_price` & `output_price` with `deepseek-reasoner`
+
+## [New Features] - 2025-02-10
+
+- 🖱️ New Command: `Ask on Selected`: ask questions or instruct on the selected text.
+- 🧑‍💻 Minor refactor code
+- 💤 Minor improvements
+- 🐳 Minor title adjustment of DeepSeek series and add a new name `deepseek-r1` for Alicloud.
+- 🌍 Minor fix on `Translate` command
+- 🙋 Add custom model support, now you can manually input customized model names if it's not listed
 
 ## [New Features] - 2025-01-30
 

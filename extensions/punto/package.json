@@ -42,9 +42,9 @@
       "default": "control"
     },
     {
-      "name": "ruLayoutName",
-      "title": "Russian Layout",
-      "description": "The name of the Russian layout",
+      "name": "cyrLayoutName",
+      "title": "Cyrillic Layout",
+      "description": "The name of the Cyrillic layout",
       "type": "dropdown",
       "required": true,
       "data": [
@@ -59,14 +59,25 @@
         {
           "title": "Russian - QWERTY",
           "value": "Russian - Phonetic"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "Ukrainian - PC"
+        },
+        {
+          "title": "Ukrainian - Legacy",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "Ukrainian - QWERTY",
+          "value": "Ukrainian-QWERTY"
         }
-      ],
-      "default": "Russian"
+      ]
     },
     {
-      "name": "enLayoutName",
-      "title": "English Layout",
-      "description": "The name of the English layout",
+      "name": "latLayoutName",
+      "title": "Latin Layout",
+      "description": "The name of the Latin layout",
       "type": "textfield",
       "required": true,
       "default": "ABC"

@@ -18,7 +18,7 @@ export default function FlagDetails({ flag }: FlagDetailsProps) {
   return (
     <List navigationTitle={flag.name || flag.key} isShowingDetail isLoading={isLoading}>
       <List.Section title="General">
-        <FlagDetailsHeader flag={detailedFlag} />
+        <FlagDetailsHeader flag={detailedFlag} environmentOrder={environmentOrder} />
       </List.Section>
 
       {detailedFlag.environments && (

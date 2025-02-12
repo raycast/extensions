@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Fix `Paste Latest OTP Code` Command for Phone numbers] - 2025-02-10
+
+Added a number filter for OTP Code messages that include phone/cellular numbers that should not be used as OTP Codes for this command.
+
 ## [Direct link to System Settings] - 2025-01-19
 
 Added a direct link to System Settings when full disk access is required for the `Paste Latest OTP Code` command.

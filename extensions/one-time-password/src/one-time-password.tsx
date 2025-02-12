@@ -96,23 +96,31 @@ export default () => {
   async function scanQRCode(type: ScanType) {
     if (qrCodeScanType) return;
 
-    setQRCodeScanType(type);
-    const response = await readDataFromQRCodeOnScreen(type);
-    setQRCodeScanType(null);
+    try {
+      setQRCodeScanType(type);
+      const response = await readDataFromQRCodeOnScreen(type);
+      setQRCodeScanType(null);
 
-    if (!response?.data) {
+      if (!response?.data) {
+        throw new Error('Unable to read QR code');
+      }
+
+      if (response.isGoogleAuthenticatorMigration) {
+        await handleGoogleAuthenticatorMigration(response.data);
+        await loadAccounts();
+      } else {
+        navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
+      }
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (err instanceof Error) {
+        message = err.message;
+      }
       showToast({
         style: Toast.Style.Failure,
         title: 'QR code detection failed',
+        message,
       });
-      return;
-    }
-
-    if (response.isGoogleAuthenticatorMigration) {
-      await handleGoogleAuthenticatorMigration(response.data);
-      await loadAccounts();
-    } else {
-      navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
     }
   }
 
