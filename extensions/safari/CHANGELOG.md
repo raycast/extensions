@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-12
 
 - Add an action to set the color of a bookmark tag.
 
