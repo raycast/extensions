@@ -25,32 +25,27 @@ export function countToken(content: string) {
   return encode(content).length;
 }
 
-// get priceoutput, priceinput from preference
-const { input_price, output_price } = getPreferenceValues();
+const { priceinput, priceoutput } = getPreferenceValues();
 
-export function estimatePrice(prompt_token: number, output_token: number, model: string) {
-  // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
-  // from : https://openai.com/api/pricing/
-  //
-  let price = 0;
-  if (model == "gpt-3.5-turbo") {
-    price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
-  } else if (model == "gpt-4-turbo") {
-    price = (prompt_token * 10.0 + output_token * 30.0) / 10000;
-  } else if (model == "gpt-4") {
-    price = (prompt_token * 30.0 + output_token * 60.0) / 10000;
-  } else if (model == "gpt-4o-mini") {
-    price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
-  } else if (model == "gpt-4o") {
-    price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
-  } else if (model == "deepseek-reasoner") {
-    price = (prompt_token * (input_price || 0.55) + output_token * (output_price || 2.19)) / 10000;
-  } else if (model == "deepseek-chat") {
-    price = (prompt_token * (input_price || 0.27) + output_token * (output_price || 1.1)) / 10000;
-  } else {
-    return -1;
-  }
-  return naiveRound(price, 3);
+const prices: Record<string, { in: number; out: number }> = {
+  "gpt-3.5-turbo": { in: 0.5, out: 1.5 },
+  "gpt-4-turbo": { in: 10, out: 30 },
+  "gpt-4": { in: 30, out: 60 },
+  "gpt-4o-mini": { in: 0.15, out: 0.6 },
+  "gpt-4o": { in: 5, out: 15 },
+  "deepseek-reasoner": { in: 0.55, out: 2.19 },
+  "deepseek-chat": { in: 0.27, out: 1.1 },
+};
+
+export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number {
+  const modelPrices = prices[model];
+  if (!modelPrices) return -1;
+
+  const inRate = (model.startsWith("deepseek") && priceinput) ?? modelPrices.in;
+  const outRate = (model.startsWith("deepseek") && priceoutput) ?? modelPrices.out;
+
+  const price = (promptTokens * +inRate + outputTokens * +outRate) / 10000;
+  return Number(price.toFixed(3));
 }
 
 export async function runAppleScriptSilently(appleScript: string) {
