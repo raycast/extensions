@@ -6,6 +6,7 @@ import {
   formatToYnabAmount,
   getSubtransacionCategoryname,
   isSplitTransaction,
+  onSubtransactionAmountChangeHandler,
 } from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
 import {
@@ -249,49 +250,12 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
     },
   });
 
-  const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts,
-  ): ((newValue: string) => void) | undefined => {
-    const eventHandler = (newAmount: string) => {
-      const oldList = [...subtransactions];
-      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
-
-      if (previousSubtransactionIdx === -1) return;
-
-      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
-      const newList = [...oldList];
-      newList[previousSubtransactionIdx] = newSubtransaction;
-
-      const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction && preferences.liveDistribute) {
-        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
-        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-
-        let otherAmount: number = NaN;
-
-        try {
-          otherAmount =
-            formatToYnabAmount(amount, activeBudgetCurrency) - formatToYnabAmount(newAmount, activeBudgetCurrency);
-        } catch (error) {
-          // The above calc might throw but we don't care much
-          // Might be better to debounce it
-        }
-
-        if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = formatToReadableAmount({
-            amount: otherAmount,
-            currency: activeBudgetCurrency,
-            includeSymbol: false,
-          });
-          newList[otherSubTransactionIdx] = otherSubTransaction;
-        }
-      }
-
-      setSubtransactions(newList);
-    };
-
-    return eventHandler;
-  };
+  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
+    amount,
+    currency: activeBudgetCurrency,
+    subtransactions,
+    setSubtransactions,
+  });
 
   const isNewSplitTransaction = subtransactions.length > 0 && !isSplitTransaction(transaction);
   return (

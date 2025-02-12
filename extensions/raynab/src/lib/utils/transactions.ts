@@ -1,6 +1,9 @@
-import { CurrencyFormat } from '@srcTypes';
+import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { ScheduledTransactionDetailFrequencyEnum, utils } from 'ynab';
 import { isNumberLike } from './validation';
+import { getPreferenceValues } from '@raycast/api';
+
+const preferences = getPreferenceValues<Preferences>();
 
 /**
  * Format a YNAB currency amount with optional currency formatting.
@@ -148,4 +151,57 @@ export function formatToReadableFrequency(frequency: ScheduledTransactionDetailF
   if (prefix && frequency === 'never') return 'Never repeats';
 
   return prefix ? `Repeats ${formatted}` : formatted;
+}
+
+export function onSubtransactionAmountChangeHandler({
+  subtransactions,
+  amount,
+  currency,
+  setSubtransactions,
+}: {
+  subtransactions: SaveSubTransactionWithReadableAmounts[];
+  amount: string;
+  currency: CurrencyFormat;
+  setSubtransactions: React.Dispatch<React.SetStateAction<SaveSubTransactionWithReadableAmounts[]>>;
+}) {
+  return (sub: SaveSubTransactionWithReadableAmounts): ((newValue: string) => void) | undefined => {
+    const eventHandler = (newAmount: string) => {
+      const oldList = [...subtransactions];
+      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
+
+      if (previousSubtransactionIdx === -1) return;
+
+      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
+      const newList = [...oldList];
+      newList[previousSubtransactionIdx] = newSubtransaction;
+
+      // If there are exactly 2 subtransactions, we can automatically calculate the second amount
+      // based on the total transaction amount and the first subtransaction amount
+      const isDualSplitTransaction = oldList.length === 2;
+      if (isDualSplitTransaction && preferences.liveDistribute) {
+        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
+        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
+        let otherAmount: number = NaN;
+        try {
+          otherAmount = formatToYnabAmount(amount, currency) - formatToYnabAmount(newAmount, currency);
+        } catch (error) {
+          // The above calc might throw but we don't care much
+          // Might be better to debounce it
+        }
+
+        if (!Number.isNaN(otherAmount)) {
+          otherSubTransaction.amount = formatToReadableAmount({
+            amount: otherAmount,
+            currency,
+            includeSymbol: false,
+          });
+          newList[otherSubTransactionIdx] = otherSubTransaction;
+        }
+      }
+
+      setSubtransactions(newList);
+    };
+
+    return eventHandler;
+  };
 }
