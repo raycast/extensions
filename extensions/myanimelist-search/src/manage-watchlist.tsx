@@ -4,6 +4,7 @@ import {
   Form,
   getPreferenceValues,
   Icon,
+  Image,
   List,
   PopToRootType,
   showHUD,
@@ -106,19 +107,17 @@ export default function Command() {
       {items.map((item) => (
         <List.Item
           key={item.id}
-          icon={item.main_picture.medium}
+          icon={{
+            source: item.main_picture.medium,
+            mask: Image.Mask.Circle,
+          }}
           title={item.title}
           accessories={
-            [
-              showingDetail ? undefined : { tag: statusToText(item.status) },
-              { tag: `${item.episodesWatched}/${item.num_episodes}` },
-            ].filter(Boolean) as { tag: string }[]
+            showingDetail
+              ? [{ tag: `${item.episodesWatched}/${item.num_episodes}` }]
+              : [{ tag: statusToText(item.status) }, { tag: `${item.episodesWatched}/${item.num_episodes}` }]
           }
-          {...(showingDetail
-            ? {
-                detail: <AnimeDetails anime={item} />,
-              }
-            : { accessories: [{ tag: item.mean?.toString() || "-" }] })}
+          detail={showingDetail && <AnimeDetails anime={item} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://myanimelist.net/anime/${item.id}`} />
