@@ -4,8 +4,8 @@ A raycast extension to view scores, standings, and stats across your favorite sp
 
 ## Links
 
-- Raycast Github Repo:
-- Raycast Store:
+- Raycast Github Repo: https://github.com/daniyalmaster693/sportssync
+- Raycast Store: https://www.raycast.com/daniyal_master/sportssync
 
 ## Commands:
 

@@ -55,7 +55,7 @@ export default function command() {
       <List.Item
         key={index}
         title={`${team1.team.displayName}`}
-        accessoryTitle={`${team1.stats[3].displayValue} GP | ${team1.stats[19].summary} | ROW ${team1.stats[16].displayValue} | GF ${team1.stats[9].displayValue} | GA ${team1.stats[8].displayValue} | Dif ${team1.stats[6].displayValue}`}
+        accessoryTitle={`${team1.stats[3].displayValue} GP | ${team1.stats[21].summary} | ${team1.stats[7].displayValue} pts | ROW ${team1.stats[16].displayValue} | GF ${team1.stats[9].displayValue} | GA ${team1.stats[8].displayValue} | Dif ${team1.stats[6].displayValue}`}
         icon={{ source: team1.team.logos[0].href }}
         actions={
           <ActionPanel>
@@ -71,7 +71,7 @@ export default function command() {
       <List.Item
         key={index}
         title={`${team2.team.displayName}`}
-        accessoryTitle={`${team2.stats[3].displayValue} GP | ${team2.stats[19].summary} | ROW ${team2.stats[16].displayValue} | GF ${team2.stats[9].displayValue} | GA ${team2.stats[8].displayValue} | Dif ${team2.stats[6].displayValue}`}
+        accessoryTitle={`${team2.stats[3].displayValue} GP | ${team2.stats[21].summary} | ${team2.stats[7].displayValue} pts | ROW ${team2.stats[16].displayValue} | GF ${team2.stats[9].displayValue} | GA ${team2.stats[8].displayValue} | Dif ${team2.stats[6].displayValue}`}
         icon={{ source: team2.team.logos[0].href }}
         actions={
           <ActionPanel>
