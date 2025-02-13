@@ -7,7 +7,7 @@ export const useErrorHandler = () => {
     let errorMessage = error.error_message || "Failed to load feeds";
 
     if (error?.code === "401") {
-      errorMessage = "Invalid Credentials, check your API key and try again";
+      errorMessage = "Invalid credentials, check your API key and try again";
       popToRoot({ clearSearchBar: true });
     }
 

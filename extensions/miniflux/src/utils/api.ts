@@ -5,7 +5,6 @@ import {
   MinifluxApiError,
   MinifluxEntries,
   MinifluxEntry,
-  // IconInfo,
   OriginArticle,
   Category,
   EntryStatus,
@@ -74,9 +73,6 @@ const getEntryUrlInMiniflux = ({ id, status }: MinifluxEntry): string => {
 
   return `${baseUrl}/${entryStatus}/entry/${id}`;
 };
-
-// const getIconForFeed = async ({ feed_id }: MinifluxEntry): Promise<IconInfo> =>
-//   requestApi<IconInfo>(`/v1/feeds/${feed_id}/icon`);
 
 const getOriginArticle = async ({ id }: MinifluxEntry): Promise<OriginArticle> =>
   requestApi<OriginArticle>(`/v1/entries/${id}/fetch-content`);

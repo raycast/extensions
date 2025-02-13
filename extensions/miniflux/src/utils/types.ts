@@ -1,12 +1,3 @@
-// export interface Preferences {
-//   baseUrl: string;
-//   apiKey: string;
-//   searchLimit?: number;
-//   feedLimit?: number;
-//   entryStarred?: boolean;
-//   readwiseToken?: string;
-// }
-
 export interface State {
   isLoading: boolean;
   error?: MinifluxApiError;
@@ -91,12 +82,6 @@ export interface Icon {
   feed_id: number;
   icon_id: number;
 }
-
-// export interface IconInfo {
-//   id: number;
-//   mime_type: string;
-//   data: string;
-// }
 
 export interface OriginArticle {
   content: string;
