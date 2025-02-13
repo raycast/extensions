@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, List } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
 import { getPersistedLinkdingAccounts } from "./service/user-account-service";
 import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
-import { showErrorToast, showSuccessToast } from "./util/bookmark-util";
+import { showSuccessToast } from "./util/bookmark-util";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
 import { getFavicon, usePromise } from "@raycast/utils";
 
@@ -25,18 +25,33 @@ export default function searchLinkding() {
     });
   }, [setLinkdingAccountMap]);
 
-  const { isLoading, revalidate, data: linkdingBookmarks } = usePromise(async (account: LinkdingAccount | null, searchText: string) => {
-    if (!account) return [];
-    const bookmarks = await searchBookmarks(account, searchText);
-    return bookmarks.data.results;
-  }, [selectedLinkdingAccount, searchText], { execute: !!selectedLinkdingAccount });
+  const {
+    isLoading,
+    revalidate,
+    data: linkdingBookmarks,
+    mutate,
+  } = usePromise(
+    async (account: LinkdingAccount | null, searchText: string) => {
+      if (!account) return [];
+      const bookmarks = await searchBookmarks(account, searchText);
+      return bookmarks.data.results;
+    },
+    [selectedLinkdingAccount, searchText],
+    { execute: !!selectedLinkdingAccount }
+  );
 
-  function deleteBookmarkCallback(bookmarkId: number) {
+  async function deleteBookmarkCallback(bookmarkId: number) {
     if (selectedLinkdingAccount) {
-      deleteBookmark(selectedLinkdingAccount, bookmarkId).then(() => {
-        showSuccessToast("Bookmark deleted");
-        revalidate();
-      });
+      const toast = await showToast(Toast.Style.Animated, "Deleting bookmark", bookmarkId.toString());
+      try {
+        await mutate(deleteBookmark(selectedLinkdingAccount, -1));
+        toast.style = Toast.Style.Success;
+        toast.title = "Bookmark deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not delete";
+        toast.message = `${error}`;
+      }
     }
   }
 
@@ -82,9 +97,15 @@ export default function searchLinkding() {
         <List.EmptyView
           title="You don't have a Linkding Account"
           description="Please create a linkding account before searching for bookmarks."
-          actions={<ActionPanel>
-            <Action icon={Icon.ArrowRight} title="Go to Manage Account" onAction={() => launchCommand({ name: "manage-account", type: LaunchType.UserInitiated })} />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.ArrowRight}
+                title="Go to Manage Account"
+                onAction={() => launchCommand({ name: "manage-account", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel>
+          }
         />
       </List>
     );
@@ -104,7 +125,7 @@ function SearchListItem({
 
   return (
     <List.Item
-    icon={getFavicon(linkdingBookmark.url, {fallback: Icon.Globe} )}
+      icon={getFavicon(linkdingBookmark.url, { fallback: Icon.Globe })}
       title={
         linkdingBookmark.title.length > 0
           ? linkdingBookmark.title
@@ -129,6 +150,7 @@ function SearchListItem({
               icon={{ source: Icon.Trash }}
               title="Delete"
               shortcut={LinkdingShortcut.DELETE_SHORTCUT}
+              style={Action.Style.Destructive}
             />
           </ActionPanel.Section>
         </ActionPanel>

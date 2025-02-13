@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { LinkdingAccountForm, LinkdingAccountMap } from "./types/linkding-types";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPersistedLinkdingAccounts, setPersistedLinkdingAccounts } from "./service/user-account-service";
 import { validateUrl } from "./util/bookmark-util";
 import { LinkdingShortcut } from "./types/linkding-shortcuts";
@@ -24,6 +24,7 @@ export default function ManageAccounts() {
   }, [setLinkdingAccountMap, searchText]);
 
   function deleteAccount(name: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [name]: removed, ...filteredMapEntries } = linkdingAccountMap;
     updateLinkdingAccountMap(filteredMapEntries);
   }
@@ -78,9 +79,13 @@ export default function ManageAccounts() {
               actions={
                 <ActionPanel title="Manage Accounts">
                   <Action icon={Icon.Plus} title="Create Account" onAction={() => showCreateEditAccount()} />
-                  <Action icon={Icon.Pencil} title="Edit Account" onAction={() => showCreateEditAccount({ name, ...linkdingAccount })} />
                   <Action
-                  icon={Icon.Trash}
+                    icon={Icon.Pencil}
+                    title="Edit Account"
+                    onAction={() => showCreateEditAccount({ name, ...linkdingAccount })}
+                  />
+                  <Action
+                    icon={Icon.Trash}
                     title="Delete Account"
                     shortcut={LinkdingShortcut.DELETE_SHORTCUT}
                     onAction={() => deleteAccount(name)}
@@ -110,7 +115,7 @@ function CreateEditAccount({
   const { handleSubmit, itemProps } = useForm<LinkdingAccountForm>({
     onSubmit(values) {
       const url = new URL(values.serverUrl).toString();
-      const serverUrl = url.endsWith("/") ? url.slice(0,-1) : url;
+      const serverUrl = url.endsWith("/") ? url.slice(0, -1) : url;
       onSubmit({
         name: values.name?.trim() ?? initialValue?.name,
         apiKey: values.apiKey.trim(),
@@ -133,29 +138,22 @@ function CreateEditAccount({
       apiKey(value) {
         if (!value) return "API Key is required";
       },
-    }
-  })
+    },
+  });
 
   return (
     <Form
       navigationTitle={initialValue ? `Edit Linkding "${initialValue.name}" Account` : "Create new Linkding Account"}
       actions={
         <ActionPanel title="Manage Accounts">
-          <Action.SubmitForm
-            title={initialValue ? "Edit Account" : "Create Account"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={initialValue ? "Edit Account" : "Create Account"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       {initialValue?.name ? (
         <Form.Description title="Account Name" text="Account Name can't be changed" />
       ) : (
-        <Form.TextField
-          title="Account Name"
-          placeholder="A Name for the Account"
-          {...itemProps.name}
-        />
+        <Form.TextField title="Account Name" placeholder="A Name for the Account" {...itemProps.name} />
       )}
       <Form.TextField
         title="Linkding Server URL"

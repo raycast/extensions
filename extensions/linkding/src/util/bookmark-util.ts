@@ -24,7 +24,7 @@ export function validateUrl(url: string) {
     new URL(url);
     return true;
   } catch (error) {
-    return false;  
+    return false;
   }
 }
 
