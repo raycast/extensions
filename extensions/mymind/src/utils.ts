@@ -226,3 +226,266 @@ export function proseToMarkdown(content: any[] | undefined): string {
     })
     .join("");
 }
+
+export async function deleteMyMindCard(slug: string): Promise<void> {
+  // Get securely stored credentials from preferences
+  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+
+  const myHeaders = {
+    "x-authenticity-token": authenticityToken,
+    cookie: `_cid=${cid}; _jwt=${cookie}`,
+  };
+
+  const response = await fetch(`https://access.mymind.com/objects/${slug}`, {
+    method: "DELETE",
+    headers: myHeaders,
+    redirect: "manual",
+  });
+
+  if (!response.ok) {
+    // Handle specific HTTP status codes
+    if (response.status === 401 || response.status === 403 || response.status === 302) {
+      throw new Error("Unauthorized: Your authentication token may have expired");
+    }
+    throw new Error(`Failed to delete card: ${response.statusText}`);
+  }
+}
+
+interface CreateNotePayload {
+  title: string;
+  prose: {
+    type: "doc";
+    content: any[];
+  };
+  type: "Note";
+}
+
+const CreateNoteResponseSchema = z.object({
+  id: z.string(),
+  type: z.literal("Note"),
+  title: z.string(),
+  created: z.string(),
+});
+
+type CreateNoteResponse = z.infer<typeof CreateNoteResponseSchema>;
+
+export async function createMyMindNote(markdown: string, title: string = ""): Promise<CreateNoteResponse> {
+  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+
+  const payload: CreateNotePayload = {
+    title,
+    prose: {
+      type: "doc",
+      content: markdownToProse(markdown),
+    },
+    type: "Note",
+  };
+
+  const myHeaders = {
+    "x-authenticity-token": authenticityToken,
+    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    "Content-Type": "application/json",
+  };
+
+  const response = await fetch("https://access.mymind.com/objects", {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify(payload),
+    redirect: "manual",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403 || response.status === 302) {
+      throw new Error("Unauthorized: Your authentication token may have expired");
+    }
+    throw new Error(`Failed to create note: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return CreateNoteResponseSchema.parse(data);
+}
+
+function markdownToProse(markdown: string): any[] {
+  const lines = markdown.split("\n");
+  const content: any[] = [];
+  let currentList: any[] = [];
+  let isInCodeBlock = false;
+  let codeBlockContent = "";
+  let codeBlockLanguage = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Handle code blocks
+    if (line.startsWith("```")) {
+      if (!isInCodeBlock) {
+        isInCodeBlock = true;
+        codeBlockLanguage = line.slice(3).trim();
+        codeBlockContent = "";
+      } else {
+        content.push({
+          type: "codeBlock",
+          attrs: { language: codeBlockLanguage },
+          content: [{ type: "text", text: codeBlockContent.trim() }],
+        });
+        isInCodeBlock = false;
+      }
+      continue;
+    }
+
+    if (isInCodeBlock) {
+      codeBlockContent += line + "\n";
+      continue;
+    }
+
+    // Handle headings
+    const headingMatch = line.match(/^(#{1,6})\s(.+)/);
+    if (headingMatch) {
+      content.push({
+        type: "heading",
+        attrs: { level: headingMatch[1].length },
+        content: [{ type: "text", text: headingMatch[2] }],
+      });
+      continue;
+    }
+
+    // Handle task lists
+    const taskMatch = line.match(/^- \[(x| )\] (.+)/);
+    if (taskMatch) {
+      if (currentList.length === 0 || currentList[0].type !== "taskList") {
+        if (currentList.length > 0) {
+          content.push({ type: "taskList", content: currentList });
+          currentList = [];
+        }
+      }
+      currentList.push({
+        type: "taskItem",
+        attrs: { checked: taskMatch[1] === "x" },
+        content: [{ type: "paragraph", content: [{ type: "text", text: taskMatch[2] }] }],
+      });
+      continue;
+    }
+
+    // Handle horizontal rule
+    if (line.match(/^-{3,}$/)) {
+      content.push({ type: "horizontalRule" });
+      continue;
+    }
+
+    // Handle regular paragraphs with inline formatting
+    if (line.trim()) {
+      const paragraph = {
+        type: "paragraph",
+        content: parseInlineFormatting(line),
+      };
+      content.push(paragraph);
+    } else if (currentList.length > 0) {
+      // End of a list
+      content.push({ type: currentList[0].type === "taskItem" ? "taskList" : "orderedList", content: currentList });
+      currentList = [];
+    } else {
+      // Empty line
+      content.push({ type: "paragraph" });
+    }
+  }
+
+  // Add any remaining list
+  if (currentList.length > 0) {
+    content.push({ type: currentList[0].type === "taskItem" ? "taskList" : "orderedList", content: currentList });
+  }
+
+  return content;
+}
+
+function parseInlineFormatting(text: string): any[] {
+  const content: any[] = [];
+  let currentText = "";
+  let marks: { type: string }[] = [];
+
+  // Helper function to add accumulated text with current marks
+  const addText = () => {
+    if (currentText) {
+      content.push({ type: "text", text: currentText, ...(marks.length && { marks }) });
+      currentText = "";
+    }
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    // Handle bold
+    if (text.slice(i, i + 2) === "**") {
+      addText();
+      marks = marks.some((m) => m.type === "bold")
+        ? marks.filter((m) => m.type !== "bold")
+        : [...marks, { type: "bold" }];
+      i++;
+      continue;
+    }
+
+    // Handle italic
+    if (text[i] === "*") {
+      addText();
+      marks = marks.some((m) => m.type === "italic")
+        ? marks.filter((m) => m.type !== "italic")
+        : [...marks, { type: "italic" }];
+      continue;
+    }
+
+    // Handle highlight
+    if (text.slice(i, i + 2) === "==") {
+      addText();
+      marks = marks.some((m) => m.type === "highlight")
+        ? marks.filter((m) => m.type !== "highlight")
+        : [...marks, { type: "highlight" }];
+      i++;
+      continue;
+    }
+
+    // Handle strikethrough
+    if (text.slice(i, i + 2) === "~~") {
+      addText();
+      marks = marks.some((m) => m.type === "strike")
+        ? marks.filter((m) => m.type !== "strike")
+        : [...marks, { type: "strike" }];
+      i++;
+      continue;
+    }
+
+    // Handle inline code
+    if (text[i] === "`") {
+      addText();
+      marks = marks.some((m) => m.type === "code")
+        ? marks.filter((m) => m.type !== "code")
+        : [...marks, { type: "code" }];
+      continue;
+    }
+
+    currentText += text[i];
+  }
+
+  addText(); // Add any remaining text
+  return content;
+}
+
+export async function addTagToCard(slug: string, tagName: string): Promise<void> {
+  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+
+  const myHeaders = {
+    "x-authenticity-token": authenticityToken,
+    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    "Content-Type": "application/json",
+  };
+
+  const response = await fetch(`https://access.mymind.com/objects/${slug}/tags`, {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify({ name: tagName }),
+    redirect: "manual",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403 || response.status === 302) {
+      throw new Error("Unauthorized: Your authentication token may have expired");
+    }
+    throw new Error(`Failed to add tag: ${response.statusText}`);
+  }
+}

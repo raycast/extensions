@@ -69,7 +69,7 @@ export default function Command() {
           title={card.title || "Untitled"}
           subtitle={card.description}
           accessories={[{ date: new Date(card.modified) }]}
-          actions={<CardActions card={card} />}
+          actions={<CardActions card={card} onDelete={revalidate} />}
         />
       ))}
     </List>
