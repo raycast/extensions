@@ -1,5 +1,6 @@
 import { List, showToast, Toast, Cache } from "@raycast/api";
 import apiServer from "./utils/api";
+import { MinifluxEntry } from "./utils/types";
 import { useEffect, useState, useMemo } from "react";
 import { MinifluxEntries, MinifluxApiError, State } from "./utils/types";
 import ControlActions from "./components/ControlActions";
@@ -34,8 +35,8 @@ export default function readRecentEntries() {
 
         const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
 
-        setState({ entries, isLoading: false });
         cache.set("latest-entries", JSON.stringify(entries));
+        setState({ entries, isLoading: false });
 
         showToast(Toast.Style.Success, "Latest entries have been loaded");
       } catch (error) {
@@ -57,15 +58,23 @@ export default function readRecentEntries() {
       searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="categories" />}
     >
       {filteredEntries.map((entry) => (
-        <List.Item
-          key={entry.id}
-          title={entry.title}
-          keywords={[...entry.title]}
-          detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
-          actions={<ControlActions entry={entry} />}
-          icon={useEntryIcon(entry)}
-        />
+        <ListItem key={entry.id} entry={entry} />
       ))}
     </List>
   );
 }
+
+const ListItem = ({ entry }: { entry: MinifluxEntry }) => {
+  const icon = useEntryIcon(entry);
+
+  return (
+    <List.Item
+      key={entry.id}
+      title={entry.title}
+      keywords={[...entry.title]}
+      detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
+      actions={<ControlActions entry={entry} />}
+      icon={icon}
+    />
+  );
+};
