@@ -6,6 +6,9 @@
   "icon": "miniflux-icon.png",
   "author": "SevicheCC",
   "license": "MIT",
+  "contributors": [
+    "revcd"
+  ],
   "categories": [
     "News",
     "Web"
