@@ -99,6 +99,9 @@
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
+  "overrides": {
+    "rollup": "^4.22.4"
+  },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

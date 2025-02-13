@@ -1,5 +1,9 @@
 # TinyPNG Changelog
 
+## [Override rollup version] - 2025-02-13
+
+- Updates `rollup` to `>=4.22.4`, as `3.x.x` have a security vulnerability, and `arxivjs` is using `rollup` as a dependency.
+
 ## [Minor improvements] - 2024-09-20
 
 - Update dependencies
