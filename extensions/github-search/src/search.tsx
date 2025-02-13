@@ -522,6 +522,7 @@ const ReusableFilterForm = ({ reusableFilters: f, onSelect, selectedFilter }: Re
             <>
               <Action.SubmitForm
                 title="Select Filter"
+                shortcut={Keyboard.Shortcut.Common.Open}
                 icon={Icon.Checkmark}
                 onSubmit={() => {
                   onSelect(reusableFilters, reusableFilterId);
@@ -564,6 +565,7 @@ const ReusableFilterForm = ({ reusableFilters: f, onSelect, selectedFilter }: Re
           ) : (
             <Action.SubmitForm
               title="Save Filter"
+              shortcut={{ modifiers: ['cmd'], key: 's' }}
               icon={Icon.PlusCircle}
               onSubmit={() => {
                 if (!name?.trim()) {
