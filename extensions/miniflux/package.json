@@ -30,7 +30,7 @@
           "type": "textfield",
           "required": false,
           "title": "Max search results",
-          "description": "high numbers could lead to worse performance",
+          "description": "High numbers could lead to worse performance",
           "placeholder": "10"
         }
       ]
@@ -57,7 +57,7 @@
       "title": "Open Miniflux",
       "subtitle": "Miniflux",
       "description": "Open Miniflux RSS reader",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "refresh-all-feeds",
@@ -91,7 +91,7 @@
       "required": false,
       "title": "Readwise Access Token",
       "description": "Generate a token at: https://readwise.io/access_token",
-      "placeholder": "Generate a token at: https://readwise.io/access_toke"
+      "placeholder": "Generate a token at: https://readwise.io/access_token"
     }
   ],
   "dependencies": {

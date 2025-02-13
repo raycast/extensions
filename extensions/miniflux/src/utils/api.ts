@@ -28,7 +28,7 @@ const requestApi = async <T>(
   const { baseUrl, apiKey }: Preferences = getPreferenceValues();
 
   if (!baseUrl || !apiKey) {
-    throw new Error("baseUrl and apikey are required!");
+    throw new Error("baseUrl and apikey are required");
   }
 
   const apiUrl = removeTrailingSlash(baseUrl);
@@ -114,7 +114,7 @@ const saveToReadwise = async (body: ReadwiseRequest): Promise<ReadwiseResponse> 
   });
 
   if (response.status === 201) {
-    throw new Error("Document already exist");
+    throw new Error("Document already exists");
   }
 
   if (!response.ok) {

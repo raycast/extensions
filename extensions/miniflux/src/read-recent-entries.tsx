@@ -35,9 +35,9 @@ export default function readRecentEntries() {
         const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
 
         setState({ entries, isLoading: false });
-
-        showToast(Toast.Style.Success, "Latest entries has been loaded !");
         cache.set("latest-entries", JSON.stringify(entries));
+
+        showToast(Toast.Style.Success, "Latest entries have been loaded");
       } catch (error) {
         handleError(error as MinifluxApiError);
         setState((oldState) => ({ ...oldState, isLoading: false }));
@@ -53,7 +53,7 @@ export default function readRecentEntries() {
       isLoading={state.isLoading}
       throttle={true}
       navigationTitle="Search entries"
-      searchBarPlaceholder="Search from your miniflux feeds"
+      searchBarPlaceholder="Search from your Miniflux feeds"
       searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="categories" />}
     >
       {filteredEntries.map((entry) => (

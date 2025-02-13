@@ -16,7 +16,7 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
 
         showToast(Toast.Style.Success, `The entry has been ${entry.starred ? "unstarred" : "starred"}`);
       } catch (error) {
-        showToast(Toast.Style.Failure, `Failed to ${entry.starred ? "unstar" : "star"} the article`);
+        showToast(Toast.Style.Failure, `Failed to ${entry.starred ? "unstar" : "star"} the entry`);
       }
     },
     [entry]
@@ -26,7 +26,7 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
     try {
       showToast(Toast.Style.Animated, "Refreshing all feeds...");
       await apiServer.refreshAllFeed();
-      showToast(Toast.Style.Success, "Feeds have been refreshed!");
+      showToast(Toast.Style.Success, "Feeds have been refreshed");
     } catch (error) {
       handleError(error as MinifluxApiError);
     }
@@ -35,9 +35,9 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
   const saveToReadwise = useCallback(
     async ({ url }: MinifluxEntry) => {
       try {
-        showToast(Toast.Style.Animated, "Saving to Readwise Reader ...");
+        showToast(Toast.Style.Animated, "Saving to Readwise Reader...");
         await apiServer.saveToReadwise({ url });
-        showToast(Toast.Style.Success, "Saved!");
+        showToast(Toast.Style.Success, "Saved");
       } catch (error) {
         const newError = error as ReadwiseError;
         showToast(Toast.Style.Failure, newError.detail);
@@ -68,7 +68,7 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
         url={apiServer.getEntryUrlInMiniflux(entry)}
         icon={{ source: "miniflux-icon.png" }}
       />
-      <Action onAction={hanleRefresh} title={"Fresh All Feeds"} icon={Icon.RotateClockwise} />
+      <Action onAction={hanleRefresh} title={"Refresh All Feeds"} icon={Icon.RotateClockwise} />
     </ActionPanel>
   );
 };
