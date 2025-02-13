@@ -318,7 +318,76 @@ export default function scoresAndSchedule() {
     );
   });
 
-  if (eplScheduleStats || sllScheduleStats || gerScheduleStats || itaScheduleStats) {
+  // Fetch UEFA Games
+
+  const { isLoading: uefaScheduleStats, data: uefaScoresAndSchedule } = useFetch<Response>(
+    "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard",
+  );
+  const uefaGames = uefaScoresAndSchedule?.events || [];
+  const uefaItems = uefaGames.map((uefaGame, index) => {
+    const gameTime = new Date(uefaGame.date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    let accessoryTitle = gameTime;
+    let accessoryColor = Color.SecondaryText;
+    let accessoryToolTip;
+
+    function getSoccerHalfWithSuffix(half: number) {
+      if (half === 1) return `${half}st Half`;
+      if (half === 2) return `${half}nd Half`;
+      return `${half}th Half`;
+    }
+
+    const half = uefaGame.status.period ?? 0;
+    const halfWithSuffix = getSoccerHalfWithSuffix(half);
+
+    if (uefaGame.status.type.state === "in") {
+      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${uefaGame.status.displayClock}`;
+      accessoryColor = Color.Green;
+      accessoryToolTip = "In Progress";
+    }
+
+    if (uefaGame.status.type.state === "post") {
+      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}`;
+      accessoryColor = Color.SecondaryText;
+      accessoryToolTip = "Final";
+    }
+
+    if (uefaGame.status.type.state === "post" && uefaGame.status.type.completed === false) {
+      accessoryTitle = `Postponed`;
+      accessoryColor = Color.Orange;
+    }
+
+    return (
+      <List.Item
+        key={index}
+        title={`${uefaGame.name}`}
+        icon={{ source: uefaGame.competitions[0].competitors[1].team.logo }}
+        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Game Details on ESPN" url={`${uefaGame.links[0].href}`} />
+            {uefaGame.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={`${uefaGame.competitions[0].competitors[1].team.links[0].href}`}
+              />
+            )}
+            {uefaGame.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={`${uefaGame.competitions[0].competitors[0].team.links[0].href}`}
+              />
+            )}
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
+  if (eplScheduleStats || sllScheduleStats || gerScheduleStats || itaScheduleStats || uefaScheduleStats) {
     return <Detail isLoading={true} />;
   }
 
@@ -326,6 +395,7 @@ export default function scoresAndSchedule() {
   const sllGamesDate = sllScoresAndSchedule?.day?.date ?? "No date available";
   const gerGamesDate = gerScoresAndSchedule?.day?.date ?? "No date available";
   const itaGamesDate = itaScoresAndSchedule?.day?.date ?? "No date available";
+  const uefaGamesDate = uefaScoresAndSchedule?.day?.date ?? "No date available";
 
   return (
     <List
@@ -333,6 +403,7 @@ export default function scoresAndSchedule() {
       searchBarAccessory={
         <List.Dropdown tooltip="Sort by" onChange={displaySelectLeague} defaultValue="EPL">
           <List.Dropdown.Item title="EPL" value="EPL" />
+          <List.Dropdown.Item title="UEFA" value="UEFA" />
           <List.Dropdown.Item title="SLL" value="SLL" />
           <List.Dropdown.Item title="GER" value="GER" />
           <List.Dropdown.Item title="ITA" value="ITA" />
@@ -347,6 +418,17 @@ export default function scoresAndSchedule() {
             subtitle={`${eplItems.length} Game${eplItems.length !== 1 ? "s" : ""}`}
           >
             {eplItems}
+          </List.Section>
+        </>
+      )}
+
+      {currentLeague === "UEFA" && (
+        <>
+          <List.Section
+            title={`${uefaGamesDate}`}
+            subtitle={`${uefaItems.length} Game${uefaItems.length !== 1 ? "s" : ""}`}
+          >
+            {uefaItems}
           </List.Section>
         </>
       )}
