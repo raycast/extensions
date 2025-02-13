@@ -18,13 +18,20 @@ const SourceSchema = z.object({
   url: z.string(),
 });
 
-const ProseContentSchema = z.object({
-  type: z.string(),
-  content: z.array(z.any()).optional(),
-  text: z.string().optional(),
-  attrs: z.record(z.any()).optional(),
-  marks: z.array(z.object({ type: z.string() })).optional(),
-});
+const ProseContentSchema = z
+  .object({
+    type: z.string(),
+    content: z.array(z.any()).optional(),
+    text: z.string().optional(),
+    attrs: z.record(z.any()).optional(),
+    marks: z.array(z.object({ type: z.string() })).optional(),
+  })
+  .or(
+    z.object({
+      type: z.string(),
+      text: z.string(),
+    }),
+  );
 
 const ProseSchema = z.object({
   type: z.string(),
@@ -42,7 +49,7 @@ const CardSchema = z.object({
   domain: z.string().optional(),
   description: z.string().optional(),
   source: SourceSchema.optional(),
-  tags: z.array(TagSchema),
+  tags: z.array(TagSchema).optional(),
   modified: z.string(),
   bumped: z.string(),
   created: z.string(),
@@ -70,13 +77,21 @@ export async function fetchMyMindCards(): Promise<MyMindResponseWithSlugs> {
   const requestOptions: RequestInit = {
     method: "GET",
     headers: myHeaders,
+    // Disable automatic redirect following
+    redirect: "manual",
   };
 
   try {
     const response = await fetch("https://access.mymind.com/cards.json", requestOptions);
+
     if (!response.ok) {
+      // Handle specific HTTP status codes
+      if (response.status === 401 || response.status === 403 || response.status === 302) {
+        throw new Error("Unauthorized: Your authentication token may have expired");
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const data = await response.json();
 
     // First validate with original schema
@@ -88,7 +103,21 @@ export async function fetchMyMindCards(): Promise<MyMindResponseWithSlugs> {
       return acc;
     }, {} as MyMindResponseWithSlugs);
   } catch (error) {
-    console.error("Error fetching MyMind cards:", error);
+    // Check for redirect error specifically
+    if (error instanceof Error && error.message.includes("maximum redirect")) {
+      throw new Error("Unauthorized: Your authentication token may have expired");
+    }
+
+    // Other error handling
+    if (error instanceof Error) {
+      console.error("Error fetching MyMind cards:", {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+    } else {
+      console.error("Unknown error fetching MyMind cards:", error);
+    }
     throw error;
   }
 }
