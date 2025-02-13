@@ -4,10 +4,10 @@ import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from
 import { readFileSync } from "node:fs";
 
 export interface Preferences {
-  version: "beta" | "stable";
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
   gridItemSize: Grid.ItemSize;
   showName: boolean;
+  minimumVersionOS: "iOS" | "macOS" | "watchOS" | "tvOS" | "visionOS" | "disabled";
 }
 
 export type sfsymbol = {
@@ -15,12 +15,21 @@ export type sfsymbol = {
   symbol: string;
   categories: string[];
   searchTerms: string[];
+  availableFrom: number;
 };
 
 export type category = {
   name: string;
   title: string;
   symbol: string;
+};
+
+export type version = {
+  iOS: string;
+  macOS: string;
+  tvOS: string;
+  visionOS: string;
+  watchOS: string;
 };
 
 export interface SymbolProps {
@@ -30,22 +39,23 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { version, primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
+const { primaryAction, gridItemSize, showName, minimumVersionOS }: Preferences = getPreferenceValues();
 
 function getDataPath() {
-  return `${environment.assetsPath}/symbols/data${version === "beta" ? "_beta" : ""}.json`;
+  return `${environment.assetsPath}/symbols/data.json`;
 }
 
 function getImageURL(name: string) {
-  return `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${name}.png`;
+  return `https://raw.githubusercontent.com/ndckj/sf-symbols/main/images/100/${name}.png`;
 }
 
-export default function Command() {
-  const data: {
-    symbols: sfsymbol[];
-    categories: category[];
-  } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
+const data: {
+  symbols: sfsymbol[];
+  categories: category[];
+  versions: { [key: string]: version };
+} = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
+export default function Command() {
   const [pinned, setPinned] = useState(getPinnedSymbols());
   const [recent, setRecent] = useState(getRecentSymbols());
 
@@ -127,13 +137,25 @@ export default function Command() {
 
 const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
+
+  let subtitle;
+  if (minimumVersionOS != "disabled") {
+    subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
+  } else {
+    subtitle = undefined;
+  }
+
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
+      subtitle={subtitle}
       content={{
-        source: getImageURL(symbol.name),
-        fallback: Icon.Warning,
-        tintColor: Color.PrimaryText,
+        tooltip: symbol.name,
+        value: {
+          source: getImageURL(symbol.name),
+          fallback: Icon.Warning,
+          tintColor: Color.PrimaryText,
+        },
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
       actions={<SymbolActions {...props} />}
@@ -148,7 +170,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     paste: (
       <Action.Paste
         key="paste"
-        title="Paste sfsymbol"
+        title="Paste Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "opt"], key: "v" }}
         onPaste={() => {
@@ -160,7 +182,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     copy: (
       <Action.CopyToClipboard
         key="copy"
-        title="Copy sfsymbol"
+        title="Copy Symbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "opt"], key: "c" }}
         onCopy={() => {

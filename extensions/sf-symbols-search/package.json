@@ -16,24 +16,6 @@
   ],
   "preferences": [
     {
-      "name": "version", 
-      "title": "SF Symbols Version",
-      "description": "Show symbols from specified SF Symbols version.",
-      "type": "dropdown",
-      "required": false,
-      "default": "beta",
-      "data": [
-        {
-          "value": "beta",
-          "title": "Beta"
-        },
-        {
-          "value": "stable",
-          "title": "Stable"
-        }
-      ]
-    },
-    {
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
@@ -80,12 +62,28 @@
     {
       "name": "showName", 
       "type": "checkbox", 
-      "title": "Show SF Symbols Name",
+      "title": "Show Symbol Names",
       "label": "Show Name", 
       "description": "Show SF Symbols name in grid view",
       "required": false, 
       "default": true
-    }, 
+    },
+    {
+      "name": "minimumVersionOS", 
+      "type": "dropdown",
+      "title": "Show Minimum OS Version (Show Name required)",
+      "description": "Show the minimum OS version that's required for an SF Symbol below its name",
+      "data": [
+        { "title": "iOS", "value": "iOS"},
+        { "title": "macOS", "value": "macOS"},
+        { "title": "watchOS", "value": "watchOS"},
+        { "title": "tvOS", "value": "tvOS"},
+        { "title": "visionOS", "value": "visionOS"},
+        { "title": "Disabled", "value": "disabled"}
+      ],
+      "required": false,
+      "default": "iOS"
+    },
     {
       "name": "showRecent", 
       "type": "checkbox", 
