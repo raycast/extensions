@@ -1,6 +1,6 @@
 # Oracle Cloud Changelog
 
-## [Perform Instance Actions] - {PR_MERGE_DATE}
+## [Perform Instance Actions] - 2025-02-13
 
 - Add instance actions:
     - Reset
