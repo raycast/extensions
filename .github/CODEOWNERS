@@ -3,7 +3,7 @@
 /extensions/0x0                                                     @pseudobun @pernielsentikaer @jatindotdev
 /extensions/1-click-confetti                                        @peduarte
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
-/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @justspacedog @superwhys @Luk4h @LitoMore @bxb100 @vimtor
+/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @bxb100 @vimtor
 /extensions/2fa-directory                                           @andreaselia @pernielsentikaer @xmok
 /extensions/5devs                                                   @gustavo-fior @guivictorr
 /extensions/8-divide                                                @pakliem
@@ -592,6 +592,7 @@
 /extensions/github-menu-bar                                         @fe9lix
 /extensions/github-repository-search                                @thomaspaulmann @immint023 @mheidinger @j3lte
 /extensions/github-review-requests                                  @resessh @kudrykv @Hephaest
+/extensions/github-search                                           @webpro
 /extensions/github-spark                                            @colebemis
 /extensions/github-stars                                            @mrmartineau @Princeyadav05
 /extensions/github-status                                           @FezVrasta
@@ -720,7 +721,7 @@
 /extensions/imageoptim                                              @marckohlbrugge
 /extensions/images-compression                                      @okooo5km
 /extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv @owain-williams
-/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus
+/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus @taschaub
 /extensions/imgur                                                   @BalliAsghar @pernielsentikaer @caumeira
 /extensions/improvmx                                                @ImprovMX @xmok
 /extensions/inbox-ai                                                @foeken
@@ -1009,7 +1010,7 @@
 /extensions/myanimelist-search                                      @luknl
 /extensions/myip                                                    @kkange @iwyvi @j3lte @HsuQ @pernielsentikaer
 /extensions/mynaui-icons                                            @praveenjuge
-/extensions/n8n                                                     @koinzhang
+/extensions/n8n                                                     @koinzhang @xmok
 /extensions/namesilo                                                @xmok
 /extensions/namespaces                                              @GastroGeek @xmok
 /extensions/nanoid                                                  @roelvan @mikevalstar
@@ -1174,6 +1175,7 @@
 /extensions/pdb-explorer                                            @mattgra
 /extensions/pdf-tools                                               @xilopaint
 /extensions/pdfsearch                                               @kevin-pek @xilopaint
+/extensions/penflow-ai                                              @Feng6611
 /extensions/penpot                                                  @bobbymannino
 /extensions/pera-explorer                                           @akgunberk
 /extensions/perchance-generator                                     @Visual-Studio-Coder
@@ -1546,6 +1548,7 @@
 /extensions/splix                                                   @cwooldridge1
 /extensions/spoiler-converter                                       @Visual-Studio-Coder @varunsatish2017
 /extensions/spoqify                                                 @ajtruex
+/extensions/sportssync                                              @daniyalmaster693
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq @amureki
 /extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme
