@@ -1,10 +1,14 @@
 # 1bookmark Changelog
 
-## [Fix Some Issues and Improve README Guide] - {PR_MERGE_DATE}
+## [Prepare for Production] - {PR_MERGE_DATE}
+
+- 0.3.3
+- 💻 Prepare for production build using Raycast Extension default settings.
+
+## [Fix Preferences Issue and Improve README Guide] - {PR_MERGE_DATE}
 
 - 0.3.2
 - 🐛 Fix about raycast preferences bug in production build.
-- ✨ Change the term **Team** to the more appropriate term **Space**.
 - 📚 Add Sign-Up, Sign-In, Sign-Out and **'What can you do in 1Bookmark?'** guide in README.
 
 ## [Support Tag and URL Search] - 2025-01-29

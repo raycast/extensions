@@ -1,20 +1,20 @@
-import { ActionPanel, Action, List, Icon } from '@raycast/api'
-import { CachedQueryClientProvider } from '../components/CachedQueryClientProvider'
-import { trpc } from '@/utils/trpc.util'
-import { NewSpaceForm } from './NewSpaceForm'
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
+import { trpc } from "@/utils/trpc.util";
+import { NewSpaceForm } from "./NewSpaceForm";
 
 function Body() {
-  const me = trpc.user.me.useQuery()
-  const associatedSpaces = me.data?.associatedSpaces
+  const me = trpc.user.me.useQuery();
+  const associatedSpaces = me.data?.associatedSpaces;
 
   if (!me.isFetched || !associatedSpaces) {
-    return <List isLoading />
+    return <List isLoading />;
   }
 
   return (
     <List>
       <List.Item
-        title={'Create new Team'}
+        title={"Create new Team"}
         icon={Icon.Plus}
         actions={
           <ActionPanel>
@@ -23,7 +23,7 @@ function Body() {
         }
       />
     </List>
-  )
+  );
 }
 
 export function SpaceDetailView() {
@@ -31,5 +31,5 @@ export function SpaceDetailView() {
     <CachedQueryClientProvider>
       <Body />
     </CachedQueryClientProvider>
-  )
+  );
 }

@@ -60,11 +60,12 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "echo \"ray 커맨드가 Turbo 환경을 지원하지 않아 GitHub Actions에서만 빌드하고 있어요\"",
+    "build": "ray build",
     "dev": "ray develop",
     "tsc": "npx tsc --project tsconfig.json",
     "fix-lint": "ray lint --fix",
-    "lint": "npx eslint --ext .js,.jsx,.ts,.tsx .",
+    "lint": "ray lint",
+    "eslint": "npx eslint --ext .js,.jsx,.ts,.tsx .",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "clean": "rm -rf dist"

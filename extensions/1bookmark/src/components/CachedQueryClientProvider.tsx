@@ -1,18 +1,18 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { showToast, Toast } from '@raycast/api'
-import { useState } from 'react'
-import SuperJSON from 'superjson'
-import fetch from 'node-fetch'
-import { httpBatchLink } from '@trpc/client'
-import { trpc } from '../utils/trpc.util.js'
-import { getSessionToken, sessionTokenAtom } from '@/states/session-token.state.js'
-import axios from 'axios'
-import { useAtom } from 'jotai'
-import { API_URL_TRPC } from '../utils/constants.util.js'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import SuperJSON from "superjson";
+import fetch from "node-fetch";
+import { httpBatchLink } from "@trpc/client";
+import { trpc } from "../utils/trpc.util.js";
+import { getSessionToken, sessionTokenAtom } from "@/states/session-token.state.js";
+import axios from "axios";
+import { useAtom } from "jotai";
+import { API_URL_TRPC } from "../utils/constants.util.js";
 
 if (!globalThis.fetch) {
   // @ts-expect-error 잘 동작하는 듯
-  globalThis.fetch = fetch
+  globalThis.fetch = fetch;
 }
 
 // 나중에 Cache 사용할 필요가 있을 때.
@@ -72,10 +72,10 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
             // gcTime: ms('30d'),
           },
         },
-      })
-  )
+      }),
+  );
 
-  const [, setSessionToken] = useAtom(sessionTokenAtom)
+  const [, setSessionToken] = useAtom(sessionTokenAtom);
 
   // sessionToken이 바뀔 때마다 trpcClient를 새로 만들오주고 싶은데,
   // 잘 안되서 일단은 매번 getSessionToken() 하는 구조로 변경.
@@ -89,7 +89,7 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
           transformer: SuperJSON,
           // headers: headers,
           async fetch(url, options) {
-            const token = await getSessionToken()
+            const token = await getSessionToken();
             const headers = token
               ? {
                   ...options?.headers,
@@ -97,7 +97,7 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
                   // 이런식으로 다 저장하고 있다.
                   Cookie: token,
                 }
-              : options?.headers
+              : options?.headers;
 
             try {
               const res = await axios({
@@ -105,31 +105,34 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
                 method: options?.method,
                 data: options?.body,
                 // signal: options?.signal!,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 headers: headers as any,
-              })
+              });
 
-              const setCookieHeaders = res?.headers?.['set-cookie']
+              const setCookieHeaders = res?.headers?.["set-cookie"];
               const sessionTokenLine = setCookieHeaders?.find((header: string) =>
-                header.includes('authjs.session-token=')
-              )
+                header.includes("authjs.session-token="),
+              );
               if (sessionTokenLine) {
                 // 토큰 업데이트. 토큰 만료전에 사용하면 만료가 늘리기위해.
-                setSessionToken(sessionTokenLine)
+                setSessionToken(sessionTokenLine);
               }
 
               return {
                 json: () => res.data,
-              }
+              };
             } catch (err) {
-              const msg = (err as any)?.response?.data?.[0]?.error?.json?.message
-              console.log('rTRPC Error: ')
-              console.log(err)
-              console.log((err as any)?.response?.data?.[0]?.error?.json)
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const msg = (err as any)?.response?.data?.[0]?.error?.json?.message;
+              console.log("rTRPC Error: ");
+              console.log(err);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              console.log((err as any)?.response?.data?.[0]?.error?.json);
               // console.log((err as any)?.response.data)
               showToast({
                 style: Toast.Style.Failure,
-                title: msg || 'Unknown API Error',
-              })
+                title: msg || "Unknown API Error",
+              });
 
               return {
                 json: () => {
@@ -138,15 +141,16 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.code)
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.httpStatus)
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.path)
-                  return (err as any)?.response?.data
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  return (err as any)?.response?.data;
                 },
-              }
+              };
             }
           },
         }),
       ],
-    })
-  )
+    }),
+  );
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
@@ -159,5 +163,5 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
     //     {children}
     //   </PersistQueryClientProvider>
     // </trpc.Provider>
-  )
+  );
 }

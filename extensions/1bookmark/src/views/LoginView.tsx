@@ -1,37 +1,35 @@
-import { useEffect, useRef, useState } from 'react'
-import { ActionPanel, Action, Form } from '@raycast/api'
-import { CachedQueryClientProvider } from '../components/CachedQueryClientProvider'
-import { trpc } from '@/utils/trpc.util'
-import { handleSignIn } from '@/handle-signin'
-import { useAtom } from 'jotai'
-import { useNavigation } from '@raycast/api'
-import { sessionTokenAtom } from '@/states/session-token.state'
+import { useEffect, useRef, useState } from "react";
+import { ActionPanel, Action, Form } from "@raycast/api";
+import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
+import { trpc } from "@/utils/trpc.util";
+import { handleSignIn } from "@/handle-signin";
+import { useAtom } from "jotai";
+import { sessionTokenAtom } from "@/states/session-token.state";
 
 function Body() {
-  const { pop } = useNavigation()
-  const [, setSessionToken] = useAtom(sessionTokenAtom)
-  const [sentToken, setSentToken] = useState(false)
-  const { mutateAsync, isPending } = trpc.login.generateMagicLink.useMutation()
-  const verificationTokenRef = useRef<Form.TextField>(null)
+  const [, setSessionToken] = useAtom(sessionTokenAtom);
+  const [sentToken, setSentToken] = useState(false);
+  const { mutateAsync, isPending } = trpc.login.generateMagicLink.useMutation();
+  const verificationTokenRef = useRef<Form.TextField>(null);
 
-  const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
 
-  const [isLoginPending, setIsLoginPending] = useState(false)
-  const isLoading = isPending || isLoginPending
+  const [isLoginPending, setIsLoginPending] = useState(false);
+  const isLoading = isPending || isLoginPending;
   const requestToToken = async (email: string) => {
-    await mutateAsync({ email })
+    await mutateAsync({ email });
 
-    setSentToken(true)
-  }
+    setSentToken(true);
+  };
 
   useEffect(() => {
     if (!sentToken) {
-      return
+      return;
     }
 
-    verificationTokenRef.current?.focus()
-  }, [sentToken])
+    verificationTokenRef.current?.focus();
+  }, [sentToken]);
 
   return (
     <Form
@@ -39,25 +37,25 @@ function Body() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={sentToken && email ? 'Login' : 'Send Login Code to Email'}
+            title={sentToken && email ? "Login" : "Send Login Code to Email"}
             onSubmit={async () => {
               if (!sentToken && email) {
-                requestToToken(email)
-                return
+                requestToToken(email);
+                return;
               }
 
               if (sentToken && email && code) {
-                setIsLoginPending(true)
+                setIsLoginPending(true);
                 await handleSignIn({
                   email,
                   token: code,
                   onSuccess: (sessionToken: string) => {
-                    setSessionToken(sessionToken)
+                    setSessionToken(sessionToken);
                     // Onboarding 뷰를 거치지 않고 사용할 땐 pop하지 않는다.
                     // pop()
                   },
-                })
-                setIsLoginPending(false)
+                });
+                setIsLoginPending(false);
               }
             }}
           />
@@ -87,7 +85,7 @@ function Body() {
         </>
       )}
     </Form>
-  )
+  );
 }
 
 export function LoginView() {
@@ -95,5 +93,5 @@ export function LoginView() {
     <CachedQueryClientProvider>
       <Body />
     </CachedQueryClientProvider>
-  )
+  );
 }

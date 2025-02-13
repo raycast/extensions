@@ -1,22 +1,18 @@
-import { CachedQueryClientProvider } from '@/components/CachedQueryClientProvider'
-import { Bookmark } from '@/types'
-import { trpc } from '@/utils/trpc.util'
-import { Form, Icon } from '@raycast/api'
-import { useRef } from 'react'
+import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
+import { Bookmark } from "@/types";
+import { trpc } from "@/utils/trpc.util";
+import { Form, Icon } from "@raycast/api";
+import { useRef } from "react";
 
 type Props = {
-  bookmark: Bookmark
-}
+  bookmark: Bookmark;
+};
 
 const Body = ({ bookmark }: Props) => {
-  const { data: userInfo } = trpc.user.me.useQuery()
+  const { data: userInfo } = trpc.user.me.useQuery();
 
-  const handleSubmit = () => {
-    console.log(bookmark)
-  }
-
-  const textAreaRef = useRef<Form.TextArea>(null)
-  const tagPickerRef = useRef<Form.TagPicker>(null)
+  const textAreaRef = useRef<Form.TextArea>(null);
+  const tagPickerRef = useRef<Form.TagPicker>(null);
 
   return (
     <Form>
@@ -26,28 +22,28 @@ const Body = ({ bookmark }: Props) => {
         ref={textAreaRef}
         placeholder="여기에 북마크 복사할 팀 이름을 적으세요."
         value={[
-          '## 내가 속한 팀',
-          '',
+          "## 내가 속한 팀",
+          "",
           JSON.stringify(userInfo, null, 2),
-          '',
-          '## Bookmark 정보',
-          '',
+          "",
+          "## Bookmark 정보",
+          "",
           JSON.stringify(bookmark, null, 2),
-          '',
-        ].join('\n')}
+          "",
+        ].join("\n")}
       />
       <Form.TagPicker
         id="tagPicker"
         title="TagPicker"
         ref={tagPickerRef}
         onChange={(t) => {
-          console.log('🔍 t', t)
+          console.log("🔍 t", t);
         }}
       >
         <Form.TagPicker.Item
           key={userInfo?.email}
-          value={userInfo?.email || ''}
-          title={'Copy to My Bookmark'}
+          value={userInfo?.email || ""}
+          title={"Copy to My Bookmark"}
           icon={userInfo?.image || Icon.Person}
         />
         {userInfo?.associatedSpaces.map((space) => (
@@ -55,13 +51,13 @@ const Body = ({ bookmark }: Props) => {
         ))}
       </Form.TagPicker>
     </Form>
-  )
-}
+  );
+};
 
 export const CopyBookmarkToOtherTeam = ({ bookmark }: Props) => {
   return (
     <CachedQueryClientProvider>
       <Body bookmark={bookmark} />
     </CachedQueryClientProvider>
-  )
-}
+  );
+};

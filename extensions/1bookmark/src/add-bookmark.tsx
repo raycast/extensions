@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -10,34 +10,27 @@ import {
   Icon,
   showHUD,
   getFrontmostApplication,
-  Cache,
-} from '@raycast/api'
-import { runAppleScript } from '@raycast/utils'
-import { useAtom } from 'jotai'
-import { RouterOutputs, trpc } from './utils/trpc.util'
-import { CachedQueryClientProvider } from './components/CachedQueryClientProvider'
-import MyAccount from './views/MyAccount'
-import { sessionTokenAtom } from './states/session-token.state'
-import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from './states/recent-selected.state'
-import { LoginView } from './views/LoginView'
-import { useTags } from './hooks/use-tags'
-import { Bookmark } from './types'
-import { NewTagForm } from './views/NewTagForm'
-import { useMe } from './hooks/use-me.hook'
+} from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { useAtom } from "jotai";
+import { trpc } from "./utils/trpc.util";
+import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
+import MyAccount from "./views/MyAccount";
+import { sessionTokenAtom } from "./states/session-token.state";
+import { recentSelectedSpaceAtom, recentSelectedTagsAtom } from "./states/recent-selected.state";
+import { LoginView } from "./views/LoginView";
+import { NewTagForm } from "./views/NewTagForm";
+import { useMe } from "./hooks/use-me.hook";
 
 interface ScriptsPerBrowser {
-  getURL: () => Promise<string>
-  getTitle: () => Promise<string>
+  getURL: () => Promise<string>;
+  getTitle: () => Promise<string>;
 
   // 브라우저 현재 페이지를 url로 설정한다.
-  setUrl: (url: string) => Promise<void>
+  setUrl: (url: string) => Promise<void>;
 }
 
-type Browser = 'chrome' | 'safari' | 'arc'
-
-const cache = new Cache()
-const cachedMe = cache.get('me')
-const cachedBookmarks = cache.get('bookmarks')
+type Browser = "chrome" | "safari" | "arc";
 
 const actions: Record<Browser, ScriptsPerBrowser> = {
   chrome: {
@@ -46,23 +39,23 @@ const actions: Record<Browser, ScriptsPerBrowser> = {
         tell application "Google Chrome"
           get URL of active tab of first window
         end tell
-      `)
-      return result
+      `);
+      return result;
     },
     async getTitle() {
       const result = await runAppleScript(`
         tell application "Google Chrome"
           get title of active tab of first window
         end tell
-      `)
-      return result
+      `);
+      return result;
     },
     async setUrl(url: string) {
       await runAppleScript(`
         tell application "Google Chrome"
           set URL of active tab of window 1 to "${url}"
         end tell
-      `)
+      `);
     },
   },
 
@@ -70,23 +63,23 @@ const actions: Record<Browser, ScriptsPerBrowser> = {
     async getURL() {
       const result = await runAppleScript(`
         tell application "Safari" to get URL of front document
-      `)
-      return result
+      `);
+      return result;
     },
     async getTitle() {
       const result = await runAppleScript(`
         tell application "Safari"
           get title of active tab of first window
         end tell
-      `)
-      return result
+      `);
+      return result;
     },
     async setUrl(url: string) {
       await runAppleScript(`
         tell application "Safari"
           set URL of current tab of front window to "${url}"
         end tell
-      `)
+      `);
     },
   },
 
@@ -96,86 +89,86 @@ const actions: Record<Browser, ScriptsPerBrowser> = {
         tell application "Arc"
           get URL of active tab of first window
         end tell
-      `)
-      return result
+      `);
+      return result;
     },
     async getTitle() {
       const result = await runAppleScript(`
         tell application "Arc"
           get title of active tab of first window
         end tell
-      `)
-      return result
+      `);
+      return result;
     },
     async setUrl(url: string) {
       await runAppleScript(`
         tell application "Arc"
           set URL of active tab of front window to "${url}"
         end tell
-      `)
+      `);
     },
   },
-}
+};
 
 const actionsByBrowserName: { [key: string]: ScriptsPerBrowser } = {
-  'Google Chrome': actions.chrome,
+  "Google Chrome": actions.chrome,
   Safari: actions.safari,
   Arc: actions.arc,
-}
+};
 
 async function getCurrentBrowserPageInfo() {
   try {
-    const frontmostApp = await getFrontmostApplication()
-    const action = actionsByBrowserName[frontmostApp.name] || null
+    const frontmostApp = await getFrontmostApplication();
+    const action = actionsByBrowserName[frontmostApp.name] || null;
 
     if (!action) {
-      return
+      return;
     }
 
-    const currentBrowserUrl = await action.getURL()
-    const currentBrowserTitle = await action.getTitle()
+    const currentBrowserUrl = await action.getURL();
+    const currentBrowserTitle = await action.getTitle();
 
     return {
       browser: action !== null ? frontmostApp.name : null,
       title: currentBrowserTitle,
       url: currentBrowserUrl,
-    }
+    };
   } catch (e) {
-    return undefined
+    return undefined;
   }
 }
 
 function Body(props: { onlyPop?: boolean }) {
-  const { onlyPop = false } = props
-  const { pop } = useNavigation()
-  const [title, setTitle] = useState<string>('')
-  const [url, setUrl] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom)
-  const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom)
-  const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom)
+  const { onlyPop = false } = props;
+  const { pop } = useNavigation();
+  const [title, setTitle] = useState<string>("");
+  const [url, setUrl] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom);
+  const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom);
+  const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom);
 
   useEffect(() => {
     getCurrentBrowserPageInfo().then((info) => {
-      setTitle(info ? info.title : '')
-      setUrl(info ? info.url : '')
-    })
-  }, [])
+      setTitle(info ? info.title : "");
+      setUrl(info ? info.url : "");
+    });
+  }, []);
 
-  const me = useMe(sessionToken)
+  const me = useMe(sessionToken);
 
   const spaceIds = useMemo(() => {
-    return me?.data?.associatedSpaces.map((s) => s.id) || []
-  }, [me.data])
+    return me?.data?.associatedSpaces.map((s) => s.id) || [];
+  }, [me.data]);
 
-  const tags = trpc.tag.list.useQuery({ spaceIds })
+  const tags = trpc.tag.list.useQuery({ spaceIds });
   const spaceTags = useMemo(() => {
-    if (!tags.data) return undefined
+    if (!tags.data) return undefined;
 
-    return tags.data.filter((tag) => tag.spaceId === selectedSpace)
-  }, [tags.data, selectedSpace])
+    return tags.data.filter((tag) => tag.spaceId === selectedSpace);
+  }, [tags.data, selectedSpace]);
 
-  const bookmarkCreate = trpc.bookmark.create.useMutation()
+  const bookmarkCreate = trpc.bookmark.create.useMutation();
 
   const handleSubmit = async () => {
     await bookmarkCreate.mutateAsync({
@@ -184,39 +177,39 @@ function Body(props: { onlyPop?: boolean }) {
       url: url,
       spaceId: selectedSpace,
       tags: selectedTags.map((tag) => tag.name),
-    })
+    });
 
     if (onlyPop) {
       showToast({
         style: Toast.Style.Success,
-        title: 'Bookmark added',
-        message: 'Bookmark added successfully',
-      })
-      pop()
+        title: "Bookmark added",
+        message: "Bookmark added successfully",
+      });
+      pop();
     } else {
-      showHUD('Bookmark added')
-      popToRoot({ clearSearchBar: true })
+      showHUD("Bookmark added");
+      popToRoot({ clearSearchBar: true });
     }
-  }
+  };
 
-  const [after1Sec, setAfter1Sec] = useState(false)
+  const [after1Sec, setAfter1Sec] = useState(false);
 
   useEffect(() => {
     // 이게 없으면 아주 잠깐동안 Onboarding이 보이게됨.
-    setTimeout(() => setAfter1Sec(true), 1000)
-  }, [])
+    setTimeout(() => setAfter1Sec(true), 1000);
+  }, []);
 
   useEffect(() => {
-    if (!me.error) return
+    if (!me.error) return;
 
     // 토큰 만료등으로 로그인에 실패한 것.
     // sessionToken을 클리어 시키고 Onboarding으로 보낸다.
-    console.log('🚀 ~ session clear')
-    setSessionToken('')
-  }, [me.error, setSessionToken])
+    console.log("🚀 ~ session clear");
+    setSessionToken("");
+  }, [me.error, setSessionToken]);
 
   if (!sessionToken && after1Sec) {
-    return <LoginView />
+    return <LoginView />;
   }
 
   return (
@@ -229,19 +222,19 @@ function Body(props: { onlyPop?: boolean }) {
             icon={Icon.Person}
             target={<MyAccount />}
             onPush={() => {
-              setAfter1Sec(false)
+              setAfter1Sec(false);
             }}
             onPop={() => {
-              setTimeout(() => setAfter1Sec(true), 100)
+              setTimeout(() => setAfter1Sec(true), 100);
             }}
           />
           <Action.Push
             title="Create New Tag"
             icon="🏷️"
-            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={<NewTagForm spaceId={selectedSpace} />}
             onPop={() => {
-              tags.refetch()
+              tags.refetch();
             }}
           />
         </ActionPanel>
@@ -256,7 +249,7 @@ function Body(props: { onlyPop?: boolean }) {
         defaultValue={selectedSpace}
         isLoading={!me.data}
         onChange={(value) => {
-          setSelectedSpace(value)
+          setSelectedSpace(value);
         }}
       >
         {me.data?.associatedSpaces.map((s) => (
@@ -269,11 +262,11 @@ function Body(props: { onlyPop?: boolean }) {
         title="Tags"
         value={selectedTags.map((tag) => tag.name)}
         onChange={(values) => {
-          console.log('change')
-          if (!tags) return
+          console.log("change");
+          if (!tags) return;
 
-          const selected = values.map((v) => ({ name: v, spaceId: selectedSpace }))
-          setSelectedTags(selected)
+          const selected = values.map((v) => ({ name: v, spaceId: selectedSpace }));
+          setSelectedTags(selected);
         }}
       >
         {spaceTags?.map((tag) => <Form.TagPicker.Item key={tag.name} value={tag.name} title={tag.name} />)}
@@ -282,14 +275,14 @@ function Body(props: { onlyPop?: boolean }) {
 
       <Form.TextArea id="description" title="Description" value={description} onChange={setDescription} />
     </Form>
-  )
+  );
 }
 
 export default function AddBookmark(props: { onlyPop?: boolean }) {
-  const { onlyPop = false } = props
+  const { onlyPop = false } = props;
   return (
     <CachedQueryClientProvider>
       <Body onlyPop={onlyPop} />
     </CachedQueryClientProvider>
-  )
+  );
 }

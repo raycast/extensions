@@ -1,11 +1,11 @@
-import { trpc } from '@/utils/trpc.util'
-import { Icon, List } from '@raycast/api'
-import { CachedQueryClientProvider } from '../components/CachedQueryClientProvider'
-import { SpaceMemberItemActionPanel } from '../components/SpaceMemberItemActionPanel'
+import { trpc } from "@/utils/trpc.util";
+import { Icon, List } from "@raycast/api";
+import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
+import { SpaceMemberItemActionPanel } from "../components/SpaceMemberItemActionPanel";
 
 export const Body = (props: { spaceId: string }) => {
-  const { spaceId } = props
-  const { data } = trpc.user.listBySpaceId.useQuery(spaceId)
+  const { spaceId } = props;
+  const { data } = trpc.user.listBySpaceId.useQuery(spaceId);
 
   return (
     <List>
@@ -19,14 +19,14 @@ export const Body = (props: { spaceId: string }) => {
         />
       ))}
     </List>
-  )
-}
+  );
+};
 
 export function SpaceMembersView(props: { spaceId: string }) {
-  const { spaceId } = props
+  const { spaceId } = props;
   return (
     <CachedQueryClientProvider>
       <Body spaceId={spaceId} />
     </CachedQueryClientProvider>
-  )
+  );
 }

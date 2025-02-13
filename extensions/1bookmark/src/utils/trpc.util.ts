@@ -1,10 +1,12 @@
-import type { inferReactQueryProcedureOptions } from '@trpc/react-query'
-import { createTRPCReact } from '@trpc/react-query'
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
-import type { AppRouter } from '@repo/trpc-router'
+import type { inferReactQueryProcedureOptions } from "@trpc/react-query";
+import { createTRPCReact } from "@trpc/react-query";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "@repo/trpc-router";
 
-export const trpc = createTRPCReact<AppRouter>()
+export const trpc = createTRPCReact<AppRouter>();
 
+/*
+// This function is not used yet.
 function getBaseUrl() {
   if (typeof window !== 'undefined')
     // browser should use relative path
@@ -18,7 +20,8 @@ function getBaseUrl() {
   // assume localhost
   return `http://localhost:${process.env.PORT ?? 3000}`
 }
+*/
 
-export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>
-export type RouterInputs = inferRouterInputs<AppRouter>
-export type RouterOutputs = inferRouterOutputs<AppRouter>
+export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

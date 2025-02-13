@@ -1,47 +1,47 @@
-import { RouterOutputs, trpc } from '@/utils/trpc.util'
-import { EditBookmark } from '@/views/EditBookmarkForm'
+import { RouterOutputs, trpc } from "@/utils/trpc.util";
+import { EditBookmark } from "@/views/EditBookmarkForm";
 // import { CopyBookmarkToOtherTeam } from '@/views/CopyBookmarkToOtherTeamForm'
-import MyAccount from '@/views/MyAccount'
-import { Spaces } from '@/views/SpacesView'
-import { Action, ActionPanel, Alert, confirmAlert } from '@raycast/api'
-import AddBookmark from '../add-bookmark'
+import MyAccount from "@/views/MyAccount";
+import { Spaces } from "@/views/SpacesView";
+import { Action, ActionPanel, Alert, confirmAlert } from "@raycast/api";
+import AddBookmark from "../add-bookmark";
 
 export const BookmarkItemActionPanel = (props: {
-  bookmark: RouterOutputs['bookmark']['listAll'][number]
-  me: RouterOutputs['user']['me'] | undefined
-  toggleBookmarkDetail: () => void
-  refetch: () => void
+  bookmark: RouterOutputs["bookmark"]["listAll"][number];
+  me: RouterOutputs["user"]["me"] | undefined;
+  toggleBookmarkDetail: () => void;
+  refetch: () => void;
 }) => {
-  const { bookmark, toggleBookmarkDetail, me, refetch } = props
-  const { url } = bookmark
+  const { bookmark, me, refetch } = props;
+  const { url } = bookmark;
 
-  const spaceIds = me?.associatedSpaces.map((s) => s.id) || []
-  const deleteBookmark = trpc.bookmark.delete.useMutation()
-  const utils = trpc.useUtils()
+  const spaceIds = me?.associatedSpaces.map((s) => s.id) || [];
+  const deleteBookmark = trpc.bookmark.delete.useMutation();
+  const utils = trpc.useUtils();
 
   // icon은 여기꺼가 더 깔끔한 듯:
   // https://developers.raycast.com/api-reference/user-interface/icons-and-images
 
   const handleDelete = async () => {
     const confirmed = await confirmAlert({
-      title: 'Delete Bookmark?',
+      title: "Delete Bookmark?",
       primaryAction: {
-        title: 'Delete',
+        title: "Delete",
         style: Alert.ActionStyle.Destructive,
       },
-    })
-    if (!confirmed) return
+    });
+    if (!confirmed) return;
 
-    await deleteBookmark.mutateAsync(bookmark.id)
+    await deleteBookmark.mutateAsync(bookmark.id);
     utils.bookmark.listAll.setData({ spaceIds }, (prev) => {
-      if (!prev) return prev
+      if (!prev) return prev;
 
-      return prev.filter((b) => b.id !== bookmark.id)
-    })
-    utils.bookmark.listAll.refetch({ spaceIds })
-  }
+      return prev.filter((b) => b.id !== bookmark.id);
+    });
+    utils.bookmark.listAll.refetch({ spaceIds });
+  };
 
-  const createActivity = trpc.activity.create.useMutation()
+  const createActivity = trpc.activity.create.useMutation();
 
   return (
     <ActionPanel>
@@ -50,22 +50,22 @@ export const BookmarkItemActionPanel = (props: {
         url={url}
         onOpen={() => {
           createActivity.mutate({
-            type: 'BOOKMARK_OPEN',
+            type: "BOOKMARK_OPEN",
             spaceId: bookmark.spaceId,
             data: { bookmarkId: bookmark.id },
-          })
+          });
         }}
       />
       <Action.CopyToClipboard
         title="Copy URL to Clipboard"
         content={url}
-        shortcut={{ modifiers: ['cmd'], key: 'c' }}
+        shortcut={{ modifiers: ["cmd"], key: "c" }}
         onCopy={() => {
           createActivity.mutate({
-            type: 'BOOKMARK_COPY',
+            type: "BOOKMARK_COPY",
             spaceId: bookmark.spaceId,
             data: { bookmarkId: bookmark.id },
-          })
+          });
         }}
       />
 
@@ -83,7 +83,7 @@ export const BookmarkItemActionPanel = (props: {
       <Action.Push
         title="Edit Bookmark"
         icon="📝"
-        shortcut={{ modifiers: ['cmd'], key: 'e' }}
+        shortcut={{ modifiers: ["cmd"], key: "e" }}
         target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
 
@@ -98,9 +98,9 @@ export const BookmarkItemActionPanel = (props: {
       /> */}
 
       <Action
-        title={'Delete Bookmark'}
-        icon={'❌'}
-        shortcut={{ modifiers: ['ctrl'], key: 'x' }}
+        title={"Delete Bookmark"}
+        icon={"❌"}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
         onAction={handleDelete}
       />
 
@@ -119,10 +119,10 @@ export const BookmarkItemActionPanel = (props: {
           icon="➕"
           target={<AddBookmark onlyPop />}
           onPop={refetch}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
-        <Action.Push title="My Account" icon="👤" target={<MyAccount />} shortcut={{ modifiers: ['cmd'], key: 'm' }} />
-        <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ['cmd'], key: 't' }} target={<Spaces />} />
+        <Action.Push title="My Account" icon="👤" target={<MyAccount />} shortcut={{ modifiers: ["cmd"], key: "m" }} />
+        <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ["cmd"], key: "t" }} target={<Spaces />} />
         {/* 기능 완성되면 다시 추가할 예정 */}
         {/* <Action
           title={'Tags'}
@@ -132,5 +132,5 @@ export const BookmarkItemActionPanel = (props: {
         />*/}
       </ActionPanel.Section>
     </ActionPanel>
-  )
-}
+  );
+};

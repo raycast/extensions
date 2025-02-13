@@ -1,23 +1,23 @@
-import { trpc } from '@/utils/trpc.util'
-import { Action, ActionPanel, Icon, List, showToast, Toast } from '@raycast/api'
-import { CachedQueryClientProvider } from '../components/CachedQueryClientProvider'
-import { NewTagForm } from './NewTagForm'
-import { useMe } from '../hooks/use-me.hook'
-import { useAtom } from 'jotai'
-import { sessionTokenAtom } from '../states/session-token.state'
-import { Tag } from '../types'
-import { useEffect } from 'react'
+import { trpc } from "@/utils/trpc.util";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
+import { NewTagForm } from "./NewTagForm";
+import { useMe } from "../hooks/use-me.hook";
+import { useAtom } from "jotai";
+import { sessionTokenAtom } from "../states/session-token.state";
+import { Tag } from "../types";
+import { useEffect } from "react";
 
 const TagItem = (props: {
-  tag: Tag
-  selectedTags: string[]
-  handleToggle: (tag: Tag) => void
-  refetch: () => void
+  tag: Tag;
+  selectedTags: string[];
+  handleToggle: (tag: Tag) => void;
+  refetch: () => void;
 }) => {
-  const { tag, selectedTags, handleToggle, refetch } = props
-  const selected = selectedTags.find((t) => t === `${tag.spaceId}:${tag.name}`)
+  const { tag, selectedTags, handleToggle, refetch } = props;
+  const selected = selectedTags.find((t) => t === `${tag.spaceId}:${tag.name}`);
 
-  const title = tag.icon ? `${tag.icon} ${tag.name}` : tag.name
+  const title = tag.icon ? `${tag.icon} ${tag.name}` : tag.name;
 
   return (
     <List.Item
@@ -27,63 +27,63 @@ const TagItem = (props: {
       subtitle={tag.space.name}
       actions={
         <ActionPanel>
-          <Action title={'Select Tag'} onAction={() => handleToggle(tag)} />
+          <Action title={"Select Tag"} onAction={() => handleToggle(tag)} />
           <Action.Push
-            title={'Create New Tag'}
+            title={"Create New Tag"}
             icon="🏷️"
-            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={<NewTagForm spaceId={tag.spaceId} />}
             onPop={() => refetch()}
           />
         </ActionPanel>
       }
     />
-  )
-}
+  );
+};
 
 export const Body = (props: {
-  spaceIds: string[]
-  toggleTag: string // filter DropDown UI에서 찍고 들어온 태그.
-  toggleTagType: 'subscribe' | 'unsubscribe' // filter DropDown UI에서 찍고 들어온 태그.
-  promise: Promise<void>
+  spaceIds: string[];
+  toggleTag: string; // filter DropDown UI에서 찍고 들어온 태그.
+  toggleTagType: "subscribe" | "unsubscribe"; // filter DropDown UI에서 찍고 들어온 태그.
+  promise: Promise<void>;
 }) => {
-  const { spaceIds, toggleTag, toggleTagType, promise } = props
-  const [sessionToken, setSessionToken] = useAtom(sessionTokenAtom)
-  const me = useMe(sessionToken)
-  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds })
+  const { spaceIds, toggleTag, toggleTagType, promise } = props;
+  const [sessionToken] = useAtom(sessionTokenAtom);
+  const me = useMe(sessionToken);
+  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds });
 
   const selectedTags = me.data?.associatedSpaces.flatMap((space) => {
-    return space.myTags.map((tag) => `${space.id}:${tag}`)
-  })
+    return space.myTags.map((tag) => `${space.id}:${tag}`);
+  });
 
-  const subscribeTag = trpc.user.subscribeTag.useMutation()
-  const unsubscribeTag = trpc.user.unsubscribeTag.useMutation()
-  const loading = subscribeTag.isPending || unsubscribeTag.isPending || isFetching || me.isRefetching
-  console.log('loading', subscribeTag.isPending, unsubscribeTag.isPending, isFetching, me.isRefetching)
+  const subscribeTag = trpc.user.subscribeTag.useMutation();
+  const unsubscribeTag = trpc.user.unsubscribeTag.useMutation();
+  const loading = subscribeTag.isPending || unsubscribeTag.isPending || isFetching || me.isRefetching;
+  console.log("loading", subscribeTag.isPending, unsubscribeTag.isPending, isFetching, me.isRefetching);
 
   const handleToggle = async (tag: Tag) => {
-    if (!selectedTags) return
-    if (loading) return
+    if (!selectedTags) return;
+    if (loading) return;
 
     if (selectedTags.includes(`${tag.spaceId}:${tag.name}`)) {
-      await unsubscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name })
+      await unsubscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name });
     } else {
-      await subscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name })
+      await subscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name });
     }
 
-    me.refetch()
-  }
+    me.refetch();
+  };
 
-  const refetchMe = me.refetch
+  const refetchMe = me.refetch;
   useEffect(() => {
     promise.then(() => {
-      refetchMe()
+      refetchMe();
       showToast({
         style: Toast.Style.Success,
-        title: `${toggleTagType === 'subscribe' ? 'Subscribed' : 'Unsubscribed'} Tag: ${toggleTag.split(':')[1]}`,
-      })
-    })
-  }, [promise, refetchMe, toggleTag, toggleTagType])
+        title: `${toggleTagType === "subscribe" ? "Subscribed" : "Unsubscribed"} Tag: ${toggleTag.split(":")[1]}`,
+      });
+    });
+  }, [promise, refetchMe, toggleTag, toggleTagType]);
 
   if (tags && tags.length === 0) {
     return (
@@ -95,9 +95,9 @@ export const Body = (props: {
           actions={
             <ActionPanel>
               <Action.Push
-                title={'Create New Tag'}
+                title={"Create New Tag"}
                 icon="🏷️"
-                shortcut={{ modifiers: ['cmd'], key: 'n' }}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<NewTagForm spaceId={spaceIds[0]!} />}
                 onPop={() => refetch()}
               />
@@ -105,7 +105,7 @@ export const Body = (props: {
           }
         />
       </List>
-    )
+    );
   }
 
   return (
@@ -120,19 +120,19 @@ export const Body = (props: {
         />
       ))}
     </List>
-  )
-}
+  );
+};
 
 export function TagSelectView(props: {
-  spaceIds: string[]
-  toggleTag: string
-  toggleTagType: 'unsubscribe' | 'subscribe'
-  promise: Promise<void>
+  spaceIds: string[];
+  toggleTag: string;
+  toggleTagType: "unsubscribe" | "subscribe";
+  promise: Promise<void>;
 }) {
-  const { spaceIds, toggleTag, toggleTagType, promise } = props
+  const { spaceIds, toggleTag, toggleTagType, promise } = props;
   return (
     <CachedQueryClientProvider>
       <Body spaceIds={spaceIds} toggleTag={toggleTag} toggleTagType={toggleTagType} promise={promise} />
     </CachedQueryClientProvider>
-  )
+  );
 }
