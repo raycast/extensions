@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [SF Symbols 5 and 6] - {PR_MERGE_DATE}
+## [SF Symbols 5 and 6] - 2025-02-13
 
 - Added SF Symbols added in SF Symbols 5 and 6
 - Removed the option to pick between beta and release version of SF Symbols. Instead, the minimum OS version for each symbol is now shown. By default this is iOS, you can change this to any OS you want in the extension settings.
