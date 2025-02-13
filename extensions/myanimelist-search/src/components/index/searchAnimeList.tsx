@@ -1,9 +1,9 @@
 import { ActionPanel, List, Action, Image, Icon, getPreferenceValues, showHUD, PopToRootType } from "@raycast/api";
 import { useState } from "react";
-import useSearch from "../api/useSearch";
-import AnimeDetails from "./listDetail";
-import { authorize } from "../api/oauth";
-import { addAnime, removeAnime, removeCachedWatchlist } from "../api/api";
+import useSearch from "../../api/useSearch";
+import AnimeDetails from "../listDetail";
+import { authorize } from "../../api/oauth";
+import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
@@ -75,7 +75,7 @@ export default function SearchAnimeList() {
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={{ modifiers: ["cmd"], key: "f" }}
                 />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard

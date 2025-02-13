@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ActionPanel, Action, Grid, Icon, showHUD, PopToRootType } from "@raycast/api";
-import useSearch from "../api/useSearch";
-import { addAnime, removeAnime, removeCachedWatchlist } from "../api/api";
-import { authorize } from "../api/oauth";
+import useSearch from "../../api/useSearch";
+import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
+import { authorize } from "../../api/oauth";
 
 export default function SearchAnimeGrid() {
   const [searchText, setSearchText] = useState("");
@@ -48,7 +48,7 @@ export default function SearchAnimeGrid() {
                     }
                   }}
                   icon={anime.isInWatchlist ? Icon.Xmark : Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={{ modifiers: ["cmd"], key: "f" }}
                 />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
