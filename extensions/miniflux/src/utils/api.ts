@@ -85,9 +85,15 @@ const getCategories = async (): Promise<Category[]> => requestApi<Category[]>("/
 const toggleBookmark = async ({ id }: MinifluxEntry): Promise<boolean> =>
   (await requestApi<number>(`/v1/entries/${id}/bookmark`, "", "PUT")) === 204;
 
-const updateEntries = async (id: number, status: EntryStatus): Promise<boolean> =>
+const updateEntry = async (id: number, status: EntryStatus): Promise<boolean> =>
   (await requestApi<number>(`/v1/entries`, "", "PUT", {
     entry_ids: [id],
+    status,
+  })) === 204;
+
+export const updateEntries = async (ids: number[], status: EntryStatus): Promise<boolean> =>
+  (await requestApi<number>(`/v1/entries`, "", "PUT", {
+    entry_ids: ids,
     status,
   })) === 204;
 
@@ -130,6 +136,7 @@ export default {
   getOriginArticle,
   getCategories,
   toggleBookmark,
+  updateEntry,
   updateEntries,
   discoverFeed,
   createFeed,

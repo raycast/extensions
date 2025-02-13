@@ -19,7 +19,7 @@ const FeedInDetail = ({ entry }: { entry: MinifluxEntry }) => {
         const origin = await apiServer.getOriginArticle(entry);
         setState({ origin, isLoading: false });
         showToast(Toast.Style.Success, "Original article has been loaded");
-        await apiServer.updateEntries(entry.id, "read");
+        await apiServer.updateEntry(entry.id, "read");
       } catch (error) {
         handleError(error as MinifluxApiError);
         setState((oldState) => ({ ...oldState, isLoading: false }));
