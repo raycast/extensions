@@ -123,9 +123,9 @@
       "mode": "view"
     },
     {
-      "name": "f1-scores-and-schedule",
+      "name": "f1-races-and-schedule",
       "title": "F1 Scores and Schedule",
-      "description": "View scores and upcoming races across F1",
+      "description": "View race results and upcoming races across F1",
       "mode": "view"
     },
     {

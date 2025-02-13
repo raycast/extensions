@@ -1,4 +1,4 @@
-# Sportssync
+Sportssync
 
 A raycast extension to view scores, standings, and stats across your favorite sports leagues
 
