@@ -26,14 +26,14 @@ export function CardActions({ card }: { card: CardWithSlug }) {
   }
   
   ---
-  
-  ==highlight==
   `}
               metadata={
                 <Detail.Metadata>
                   <Detail.Metadata.Label title="Created" text={new Date(card.created).toLocaleDateString()} />
                   <Detail.Metadata.Label title="Modified" text={new Date(card.modified).toLocaleDateString()} />
-                  {card.domain && <Detail.Metadata.Label title="Domain" text={card.domain} />}
+                  {card.source?.url && card.domain && (
+                    <Detail.Metadata.Link title="Source" target={card.source.url} text={card.domain} />
+                  )}
                   {card.tags && card.tags.length > 0 && (
                     <Detail.Metadata.TagList title="Tags">
                       {card.tags.map((tag) => (
