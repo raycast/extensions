@@ -11,7 +11,7 @@ const ControlActions = ({ entry }: { entry: MinifluxEntry }) => {
   const handleBookmarkd = useCallback(
     async (entry: MinifluxEntry): Promise<void> => {
       try {
-        showToast(Toast.Style.Animated, `${entry.starred ? "Unstarred" : "Starred"} entry`);
+        showToast(Toast.Style.Animated, `Marking entry as ${entry.starred ? "unstarred" : "starred"}...`);
         await apiServer.toggleBookmark(entry);
 
         showToast(Toast.Style.Success, `The entry has been ${entry.starred ? "unstarred" : "starred"}`);

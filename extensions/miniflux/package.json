@@ -75,7 +75,7 @@
       "required": true,
       "title": "Miniflux URL",
       "description": "The URL of your Miniflux server",
-      "placeholder": "E.g. https://hosting.miniflux.app/"
+      "placeholder": "e.g. https://hosting.miniflux.app"
     },
     {
       "name": "apiKey",
