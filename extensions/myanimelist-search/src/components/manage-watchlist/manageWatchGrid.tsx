@@ -1,13 +1,16 @@
 import { Action, ActionPanel, Grid, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import * as api from "../../api/api";
 import * as oauth from "../../api/oauth";
 import { getWatchlistItems, SetEpisodesWatched } from "./utils";
+import { ViewTypeCtx } from "../ViewTypeCtx";
 
 export function ManageWatchGrid() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [items, setItems] = useState<(api.ExtendedAnime & { status: string; episodesWatched: number })[]>([]);
+
+  const { setViewType } = useContext(ViewTypeCtx);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +41,14 @@ export function ManageWatchGrid() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
+                <Action
+                  title="Switch to List View"
+                  onAction={() => {
+                    setViewType("list");
+                  }}
+                  icon={Icon.List}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                />
                 <Action
                   title={"Remove from Watchlist"}
                   onAction={async () => {

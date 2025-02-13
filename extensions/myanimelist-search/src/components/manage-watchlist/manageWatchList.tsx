@@ -1,30 +1,17 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  Image,
-  List,
-  PopToRootType,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, Image, List, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { useContext, useEffect, useState } from "react";
 
 import * as api from "../../api/api";
 import * as oauth from "../../api/oauth";
 import AnimeDetails from "../listDetail";
 import { getWatchlistItems, SetEpisodesWatched, statusToText } from "./utils";
+import { ViewTypeCtx } from "../ViewTypeCtx";
 
 export function ManageWatchList() {
-  const preferences = getPreferenceValues();
-  const showDetailDefault = preferences.view;
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [items, setItems] = useState<(api.ExtendedAnime & { status: string; episodesWatched: number })[]>([]);
 
-  const [showingDetail, setShowingDetail] = useState(showDetailDefault == "list-detailed");
+  const { showingDetails: showingDetail, setShowingDetails: setShowingDetail, setViewType } = useContext(ViewTypeCtx);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +53,14 @@ export function ManageWatchList() {
                 title="Toggle Detailed View"
                 onAction={() => setShowingDetail(!showingDetail)}
                 icon={Icon.AppWindowSidebarLeft}
+              />
+              <Action
+                title="Switch to Grid View"
+                onAction={() => {
+                  setViewType("grid");
+                }}
+                icon={Icon.AppWindowGrid2x2}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               />
               <Action
                 title={"Remove from Watchlist"}

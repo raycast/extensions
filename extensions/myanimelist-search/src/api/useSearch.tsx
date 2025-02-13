@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { type ExtendedAnime, fetchAnimes, fetchSuggestions, getAnimeWatchlist } from "./api";
 import { isSignedIn } from "./oauth";
+import { ViewType } from "../types";
 
 type SearchProps = {
   q: string;
@@ -10,7 +11,7 @@ type SearchProps = {
 };
 
 type Preferences = {
-  view?: "list-detailed" | "list" | "grid";
+  view?: ViewType;
   hide_nsfw?: boolean;
 };
 

@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { ActionPanel, Action, Grid, Icon, showHUD, PopToRootType } from "@raycast/api";
-import useSearch from "../../api/useSearch";
+import { Action, ActionPanel, Grid, Icon, PopToRootType, showHUD } from "@raycast/api";
+import { useContext, useState } from "react";
+
 import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
 import { authorize } from "../../api/oauth";
+import useSearch from "../../api/useSearch";
+import { ViewTypeCtx } from "../ViewTypeCtx";
 
 export default function SearchAnimeGrid() {
   const [searchText, setSearchText] = useState("");
+  const { setViewType } = useContext(ViewTypeCtx);
   const { isLoading, items: data, clearCache: clearSearchCache } = useSearch({ q: searchText });
 
   return (
@@ -27,6 +30,14 @@ export default function SearchAnimeGrid() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
+                <Action
+                  title="Switch to List View"
+                  onAction={() => {
+                    setViewType("list");
+                  }}
+                  icon={Icon.List}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                />
                 <Action
                   title={anime.isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
                   onAction={async () => {

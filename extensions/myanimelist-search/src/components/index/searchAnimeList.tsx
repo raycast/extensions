@@ -1,13 +1,16 @@
-import { ActionPanel, List, Action, Image, Icon, getPreferenceValues, showHUD, PopToRootType } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, Image, List, PopToRootType, getPreferenceValues, showHUD } from "@raycast/api";
+import { useContext, useState } from "react";
+
+import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
+import { authorize } from "../../api/oauth";
 import useSearch from "../../api/useSearch";
 import AnimeDetails from "../listDetail";
-import { authorize } from "../../api/oauth";
-import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
+import { ViewTypeCtx } from "../ViewTypeCtx";
 
 export default function SearchAnimeList() {
   const preferences = getPreferenceValues();
   const showDetailDefault = preferences.view;
+  const { setViewType } = useContext(ViewTypeCtx);
   const [searchText, setSearchText] = useState("");
   const [showingDetail, setShowingDetail] = useState(showDetailDefault == "list-detailed");
   const { isLoading, items: data, clearCache: clearSearchCache } = useSearch({ q: searchText });
@@ -53,6 +56,14 @@ export default function SearchAnimeList() {
                   title="Toggle Detailed View"
                   onAction={() => setShowingDetail(!showingDetail)}
                   icon={Icon.AppWindowSidebarLeft}
+                />
+                <Action
+                  title="Switch to Grid View"
+                  onAction={() => {
+                    setViewType("grid");
+                  }}
+                  icon={Icon.AppWindowGrid2x2}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                 />
                 <Action
                   title={anime.isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}

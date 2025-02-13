@@ -1,10 +1,19 @@
-import { getPreferenceValues } from "@raycast/api";
+import { useContext } from "react";
+
 import { ManageWatchList } from "./components/manage-watchlist/manageWatchList";
 import { ManageWatchGrid } from "./components/manage-watchlist/manageWatchGrid";
+import { ViewTypeCtx, ViewTypeCtxProvider } from "./components/ViewTypeCtx";
 
-export default function Index() {
-  const preferences = getPreferenceValues();
-  const chosenView = preferences.view;
-  if (chosenView === "grid") return <ManageWatchGrid />;
-  else return <ManageWatchList />;
+function RenderView() {
+  const { viewType } = useContext(ViewTypeCtx);
+
+  return viewType === "grid" ? <ManageWatchGrid /> : <ManageWatchList />;
+}
+
+export default function ManageWatchlist() {
+  return (
+    <ViewTypeCtxProvider>
+      <RenderView />
+    </ViewTypeCtxProvider>
+  );
 }
