@@ -15,6 +15,7 @@
     {
       "name": "search-servers",
       "title": "Search Servers",
+      "subtitle": "Discord",
       "description": "Get a list of your servers and go to them",
       "mode": "view"
     }
