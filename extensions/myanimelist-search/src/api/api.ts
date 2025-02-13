@@ -155,7 +155,7 @@ export async function alertRemoveAnime(anime: Anime): Promise<boolean> {
 
 export async function request(
   url: string,
-  body: string | undefined = undefined,
+  body: string | URLSearchParams | undefined = undefined,
   method: "GET" | "PUT" | "POST" | "DELETE" = "GET"
 ): Promise<fetch.Response> {
   return fetch(url, {
@@ -170,7 +170,7 @@ export async function request(
 
 export async function request_anon(
   url: string,
-  body: string | undefined = undefined,
+  body: string | URLSearchParams | undefined = undefined,
   method: "GET" | "PUT" | "POST" | "DELETE" = "GET"
 ): Promise<fetch.Response> {
   return fetch(url, {
@@ -242,14 +242,7 @@ export async function addAnime(anime: Anime) {
   params.append("status", "plan_to_watch");
   params.append("num_watched_episodes", "0");
 
-  const res = await fetch(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
-    },
-    body: params,
-  });
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT");
 
   if (!res.ok) {
     console.error("add anime error:", await res.text());
@@ -294,10 +287,11 @@ export async function getAnimeDetails(anime: Anime): Promise<ExtendedAnime> {
  * Get the anime details from the user's list
  * **NOTE:** If the anime is not in the user's list, it will create a new entry. Only use this function if you are sure this is the users wish.
  */
-export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean = true): Promise<number> {
+export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean = false): Promise<number> {
   const cacheKey = `episodes_${anime.id}`;
-  const cached = allowCache && cacheGet<number>(cacheKey);
-  if (cached) return cached;
+  let cached: number | undefined = undefined;
+  if (allowCache) cached = cacheGet<number>(cacheKey);
+  if (cached !== undefined) return cached;
 
   const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, undefined, "PUT");
 
@@ -322,14 +316,7 @@ export async function incrementEpisodes(anime: ExtendedAnime): Promise<number> {
   params.append("num_watched_episodes", String(episodes + 1));
   params.append("status", episodes + 1 >= anime.num_episodes ? "completed" : "watching");
 
-  const res = await fetch(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
-    },
-    body: params,
-  });
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT");
 
   if (!res.ok) {
     console.error("increment episodes error:", await res.text());
@@ -345,14 +332,7 @@ export async function setEpisodes(anime: ExtendedAnime, episodes: number) {
   params.append("num_watched_episodes", String(episodes));
   params.append("status", episodes >= anime.num_episodes ? "completed" : "watching");
 
-  const res = await fetch(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
-    },
-    body: params,
-  });
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT");
 
   if (!res.ok) {
     console.error("set episodes error:", await res.text());

@@ -49,7 +49,6 @@ export async function isSignedIn(): Promise<boolean> {
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
-  console.log("fetchTokens", authRequest, authCode);
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("code", authCode);
@@ -69,7 +68,6 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  console.log("refreshTokens", refreshToken);
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("refresh_token", refreshToken);
