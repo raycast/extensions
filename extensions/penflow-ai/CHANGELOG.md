@@ -1,6 +1,6 @@
 # Penflow AI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-02-13
 
 - Add AI-powered writing assistance
 - Support multiple writing styles (Professional, Casual, Academic)
