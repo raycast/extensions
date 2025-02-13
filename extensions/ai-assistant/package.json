@@ -13,7 +13,7 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=20.15.1"
+    "node": ">=20.17.0"
   },
   "keywords": [
     "ai",
@@ -103,12 +103,17 @@
     }
   ],
   "dependencies": {
+    "@eslint/config-array": "^0.19.2",
+    "@eslint/object-schema": "^2.1.6",
     "@raycast/api": "^1.91.1",
     "@raycast/utils": "^1.17.0",
     "cheerio": "^1.0.0",
     "date-fns": "^3.3.1",
+    "glob": "^11.0.1",
+    "lru-cache": "^11.0.2",
     "node-fetch": "^2.7.0",
-    "openai": "^4.28.0"
+    "openai": "^4.28.0",
+    "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
