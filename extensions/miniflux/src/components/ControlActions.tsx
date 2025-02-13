@@ -6,7 +6,15 @@ import { MinifluxEntry, MinifluxApiError, ReadwiseError } from "../utils/types";
 import FeedInDetail from "./FeedInDetail";
 import { useErrorHandler } from "../utils/useErrorHandler";
 
-const ControlActions = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh?: () => Promise<void> }) => {
+const ControlActions = ({
+  entry,
+  onRefresh,
+  entries,
+}: {
+  entry: MinifluxEntry;
+  onRefresh?: () => Promise<void>;
+  entries?: MinifluxEntry[];
+}) => {
   const handleError = useErrorHandler();
 
   const handleBookmarked = useCallback(
@@ -27,6 +35,22 @@ const ControlActions = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh?
       try {
         showToast(Toast.Style.Animated, "Marking entry as read...");
         await apiServer.updateEntry(entry.id, "read");
+        showToast(Toast.Style.Success, "Marked as read");
+        if (onRefresh) await onRefresh();
+      } catch (error) {
+        handleError(error as MinifluxApiError);
+      }
+    },
+    [entry]
+  );
+
+  const handleMarkPageAsRead = useCallback(
+    async (entries: MinifluxEntry[]): Promise<void> => {
+      const entryIDs = entries.map((entry) => entry.id);
+
+      try {
+        showToast(Toast.Style.Animated, "Marking entries as read...");
+        await apiServer.updateEntries(entryIDs, "read");
         showToast(Toast.Style.Success, "Marked as read");
         if (onRefresh) await onRefresh();
       } catch (error) {
@@ -70,6 +94,14 @@ const ControlActions = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh?
         icon={Icon.Checkmark}
         shortcut={{ modifiers: ["opt"], key: "m" }}
       />
+      {entries && (
+        <Action
+          onAction={() => handleMarkPageAsRead(entries)}
+          title={"Mark Page as Read"}
+          icon={Icon.CheckCircle}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
+        />
+      )}
       <Action
         onAction={() => handleBookmarked(entry)}
         title={`${entry.starred ? "Unstar" : "Star"}`}

@@ -58,13 +58,21 @@ export default function readRecentEntries() {
       searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="categories" />}
     >
       {filteredEntries.map((entry) => (
-        <ListItem key={entry.id} entry={entry} onRefresh={fetchData} />
+        <ListItem key={entry.id} entry={entry} onRefresh={fetchData} entries={filteredEntries} />
       ))}
     </List>
   );
 }
 
-const ListItem = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh: () => Promise<void> }) => {
+const ListItem = ({
+  entry,
+  onRefresh,
+  entries,
+}: {
+  entry: MinifluxEntry;
+  onRefresh: () => Promise<void>;
+  entries: MinifluxEntry[];
+}) => {
   const icon = useEntryIcon(entry);
 
   return (
@@ -73,7 +81,7 @@ const ListItem = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh: () =>
       title={entry.title}
       keywords={[...entry.title]}
       detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
-      actions={<ControlActions entry={entry} onRefresh={onRefresh} />}
+      actions={<ControlActions entry={entry} onRefresh={onRefresh} entries={entries} />}
       icon={icon}
     />
   );
