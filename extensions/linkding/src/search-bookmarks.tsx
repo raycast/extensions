@@ -44,7 +44,7 @@ export default function searchLinkding() {
     if (selectedLinkdingAccount) {
       const toast = await showToast(Toast.Style.Animated, "Deleting bookmark", bookmarkId.toString());
       try {
-        await mutate(deleteBookmark(selectedLinkdingAccount, -1));
+        await mutate(deleteBookmark(selectedLinkdingAccount, bookmarkId));
         toast.style = Toast.Style.Success;
         toast.title = "Bookmark deleted";
       } catch (error) {

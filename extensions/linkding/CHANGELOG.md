@@ -4,7 +4,7 @@
 
 ### General
 - fix: API would not be called if saved with trailing slash (we now strip trailing slash before saving) [Issue ref: [#16999](https://github.com/raycast/extensions/issues/16999)]
-- Smiplify "types/linkding-shortcuts"
+- Simplify "types/linkding-shortcuts"
 
 ### Create Bookmark
 - `useForm` hook for control
