@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-13
 
 - Add support for Email 2FA codes alongside iMessage
 - Add ability to switch between iMessage, Email, or both sources
