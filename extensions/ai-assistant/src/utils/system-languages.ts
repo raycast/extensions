@@ -1,9 +1,8 @@
-import { environment } from "@raycast/api";
 import { execSync } from "child_process";
 
 // Get the system language from environment
 export function getSystemLanguage(): string {
-  return environment.systemLanguage || "en";
+  return "en";
 }
 
 // Get keyboard layout language using system commands
