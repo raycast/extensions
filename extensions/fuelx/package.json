@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "fuel",
-      "title": "Fuelx",
+      "title": "FuelCast",
       "description": "Fuel AI Agent",
       "mode": "view"
     }
