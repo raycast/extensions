@@ -37,7 +37,7 @@ export function ManageWatchGrid() {
             key={anime.id}
             content={anime.main_picture.large}
             title={anime?.title}
-            subtitle={`${anime.mean ?? "-"}/10`}
+            subtitle={`${anime.episodesWatched}/${anime.num_episodes}`}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
