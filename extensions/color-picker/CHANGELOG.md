@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Accessibility] - {PR_MERGE_DATE}
+## [Accessibility] - 2025-02-13
 
 - Add support for showing color name after picking color
 
