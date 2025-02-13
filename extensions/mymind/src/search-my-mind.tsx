@@ -1,4 +1,4 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { fetchMyMindCards } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
@@ -17,6 +17,22 @@ export default function Command() {
       try {
         return await fetchMyMindCards();
       } catch (error) {
+        // Check if error is related to authentication
+        if (error instanceof Error && error.message.toLowerCase().includes("unauthorized")) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Authentication Required",
+            message: "Please update your API token in extension preferences",
+            primaryAction: {
+              title: "Open Extension Preferences",
+              onAction: () => {
+                openExtensionPreferences();
+              },
+            },
+          });
+          return {};
+        }
+
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch cards",
