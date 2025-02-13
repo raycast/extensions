@@ -65,6 +65,7 @@ export function ManageWatchList() {
               <Action
                 title={"Remove from Watchlist"}
                 onAction={async () => {
+                  if (!(await api.alertRemoveAnime(item))) return;
                   await api.removeAnime(item);
                   api.removeCachedWatchlist();
                   await showHUD("Removed from Watchlist", {

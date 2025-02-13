@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Grid, Icon, PopToRootType, showHUD } from "@raycast/api";
 import { useContext, useState } from "react";
 
-import { addAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
+import { addAnime, alertRemoveAnime, removeAnime, removeCachedWatchlist } from "../../api/api";
 import { authorize } from "../../api/oauth";
 import useSearch from "../../api/useSearch";
 import { ViewTypeCtx } from "../ViewTypeCtx";
@@ -43,6 +43,7 @@ export default function SearchAnimeGrid() {
                   onAction={async () => {
                     await authorize();
                     if (anime.isInWatchlist) {
+                      if (!(await alertRemoveAnime(anime))) return;
                       await removeAnime(anime);
                       clearSearchCache();
                       removeCachedWatchlist();

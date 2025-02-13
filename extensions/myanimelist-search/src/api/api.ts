@@ -1,8 +1,8 @@
 import { z } from "zod";
 import fetch from "node-fetch";
+import { Alert, Cache, confirmAlert } from "@raycast/api";
 
 import { clientId, getTokens } from "./oauth";
-import { Cache } from "@raycast/api";
 
 type AnimeStatus = "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
 
@@ -140,6 +140,17 @@ export function removeCachedWatchlist() {
   (["watching", "plan_to_watch", "completed", "dropped", "on_hold"] as AnimeStatus[]).map((status) =>
     cacheRemove(`watchlist_${status}`)
   );
+}
+
+export async function alertRemoveAnime(anime: Anime): Promise<boolean> {
+  return await confirmAlert({
+    title: `Remove ${anime.title} from your watchlist?`,
+    message: "Episode and status information will be lost",
+    primaryAction: {
+      title: "Remove",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
 }
 
 export async function request(
