@@ -28,23 +28,23 @@ export default function readRecentEntries() {
     [filterValue, state.entries]
   );
 
+  const fetchData = async () => {
+    try {
+      showToast(Toast.Style.Animated, "Fetching latest entries...");
+
+      const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
+
+      cache.set("latest-entries", JSON.stringify(entries));
+      setState({ entries, isLoading: false });
+
+      showToast(Toast.Style.Success, "Latest entries have been loaded");
+    } catch (error) {
+      handleError(error as MinifluxApiError);
+      setState((oldState) => ({ ...oldState, isLoading: false }));
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        showToast(Toast.Style.Animated, "Fetching latest entries...");
-
-        const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
-
-        cache.set("latest-entries", JSON.stringify(entries));
-        setState({ entries, isLoading: false });
-
-        showToast(Toast.Style.Success, "Latest entries have been loaded");
-      } catch (error) {
-        handleError(error as MinifluxApiError);
-        setState((oldState) => ({ ...oldState, isLoading: false }));
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -58,13 +58,13 @@ export default function readRecentEntries() {
       searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="categories" />}
     >
       {filteredEntries.map((entry) => (
-        <ListItem key={entry.id} entry={entry} />
+        <ListItem key={entry.id} entry={entry} onRefresh={fetchData} />
       ))}
     </List>
   );
 }
 
-const ListItem = ({ entry }: { entry: MinifluxEntry }) => {
+const ListItem = ({ entry, onRefresh }: { entry: MinifluxEntry; onRefresh: () => Promise<void> }) => {
   const icon = useEntryIcon(entry);
 
   return (
@@ -73,7 +73,7 @@ const ListItem = ({ entry }: { entry: MinifluxEntry }) => {
       title={entry.title}
       keywords={[...entry.title]}
       detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
-      actions={<ControlActions entry={entry} />}
+      actions={<ControlActions entry={entry} onRefresh={onRefresh} />}
       icon={icon}
     />
   );
