@@ -9,6 +9,7 @@
 ### Create Bookmark
 - `useForm` hook for control
 - Add placeholders and info where relevant
+- fix: would always show Success Toast even on fail
 
 ### Search Bookmarks
 - make "Delete" `ActionStyle` _Destructive_

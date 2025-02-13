@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { LinkdingAccountMap, PostLinkdingBookmarkPayload } from "./types/linkding-types";
 import { useEffect, useState } from "react";
 import { getPersistedLinkdingAccounts } from "./service/user-account-service";
-import { showSuccessToast, validateUrl } from "./util/bookmark-util";
+import { validateUrl } from "./util/bookmark-util";
 import { createBookmark, getWebsiteMetadata } from "./service/bookmark-service";
 import { useForm } from "@raycast/utils";
 
@@ -18,17 +18,25 @@ export default function CreateBookmarks() {
   }, [setLinkdingAccountMap]);
 
   const { handleSubmit, itemProps, setValue } = useForm<PostLinkdingBookmarkPayload & { linkdingAccountName: string }>({
-    onSubmit(values) {
+    async onSubmit(values) {
       const linkdingAccount = linkdingAccountMap[values.linkdingAccountName];
+
+      const toast = await showToast(Toast.Style.Animated, "Creating bookmark", values.title);
       createBookmark(linkdingAccount, {
         ...values,
         shared: false,
         is_archived: false,
         tag_names: [],
-      }).then(() => {
-        showSuccessToast("Bookmark created successfully");
-        popToRoot();
-      });
+      })
+        .then(() => {
+          toast.title = "Bookmark created successfully";
+          popToRoot();
+        })
+        .catch((error) => {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Could not create";
+          toast.message = `${error}`;
+        });
     },
     validation: {
       url(value) {

@@ -28,11 +28,9 @@ export function deleteBookmark(linkdingAccount: LinkdingAccount, bookmarkId: num
 }
 
 export function createBookmark(linkdingAccount: LinkdingAccount, bookmark: PostLinkdingBookmarkPayload) {
-  return axios
-    .post(`${linkdingAccount.serverUrl}/api/bookmarks/`, bookmark, {
-      ...createAxiosAgentConfig(linkdingAccount),
-    })
-    .catch(showErrorToast);
+  return axios.post(`${linkdingAccount.serverUrl}/api/bookmarks/`, bookmark, {
+    ...createAxiosAgentConfig(linkdingAccount),
+  });
 }
 
 export function getWebsiteMetadata(url: string) {
