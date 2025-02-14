@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Application, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, type Application, Grid, Icon } from "@raycast/api";
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
-import { OpenProjectFileAction } from "./OpenProjectFileAction";
-import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
+import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
+import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { StarFileAction } from "./StarFileAction";
 
 export default function FileGridItem(props: {
@@ -68,15 +68,23 @@ function getRelativeTime(timestamp: number): string {
 
   if (seconds < 60) {
     return "Edited just now";
-  } else if (minutes < 60) {
-    return `Edited ${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-  } else if (hours < 24) {
-    return `Edited ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-  } else if (days < 30) {
-    return `Edited ${days} ${days === 1 ? "day" : "days"} ago`;
-  } else if (months < 12) {
-    return `Edited ${months} ${months === 1 ? "month" : "months"} ago`;
-  } else {
-    return `Edited ${years} ${years === 1 ? "year" : "years"} ago`;
   }
+
+  if (minutes < 60) {
+    return `Edited ${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+
+  if (hours < 24) {
+    return `Edited ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  if (days < 30) {
+    return `Edited ${days} ${days === 1 ? "day" : "days"} ago`;
+  }
+
+  if (months < 12) {
+    return `Edited ${months} ${months === 1 ? "month" : "months"} ago`;
+  }
+
+  return `Edited ${years} ${years === 1 ? "year" : "years"} ago`;
 }

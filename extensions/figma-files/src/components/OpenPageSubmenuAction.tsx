@@ -1,10 +1,10 @@
 import { ActionPanel, Icon } from "@raycast/api";
-import { Application } from "@raycast/api";
-import { useState } from "react";
-import { File } from "../types";
-import { OpenPageAction } from "./OpenPageAction";
+import type { Application } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { fetchPages } from "../api";
+import type { File } from "../types";
+import { OpenPageAction } from "./OpenPageAction";
 
 export function OpenPageSubmenuAction(props: {
   file: File;
