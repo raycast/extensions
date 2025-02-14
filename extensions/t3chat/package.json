@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3chat",
+  "title": "T3chat",
+  "description": "Interact with the T3Chat API, single responses only - Not Affiliated with T3Chat",
+  "icon": "icon.png",
+  "author": "parkersm1th",
+  "license": "MIT",
+  "categories": ["Productivity", "Communication"],
+  "commands": [
+    {
+      "name": "ask-question",
+      "title": "Ask Question",
+      "description": "Allows you to ask a question to a model hosted on t3chat",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Access Token (Cookie)",
+      "description": "You can get this access token by looking at the cookies on t3.chat and copying the access_token value.",
+      "placeholder": "Enter your access token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "The model to use",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        { "value": "gemini-2.0-flash", "title": "Gemini 2.0 Flash" },
+        { "value": "gpt-4o-mini", "title": "GPT-4o-mini" },
+        { "value": "gpt-4o", "title": "GPT-4o" },
+        { "value": "gpt-o3-mini", "title": "o3-mini" },
+        { "value": "deepseek-r1-groq", "title": "DeepSeek R1 (Llama Distilled)" }
+      ],
+      "default": "gpt-o3-mini"
+    },
+    {
+      "name": "reasoningEffort",
+      "title": "Reasoning Effort",
+      "description": "The reasoning effort to use",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "value": "low", "title": "Low" },
+        { "value": "medium", "title": "Medium" },
+        { "value": "high", "title": "High" }
+      ],
+      "default": "low"
+    },
+    {
+      "name": "name",
+      "title": "Name",
+      "description": "Your name",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "occupation",
+      "title": "Occupation",
+      "description": "Your occupation",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "traits",
+      "title": "Traits",
+      "description": "Your traits",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "additionalInfo",
+      "title": "Additional Info",
+      "description": "Additional info",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "showThinking",
+      "label": "Show Thinking",
+      "description": "Show thinking",
+      "type": "checkbox",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "jwt-decode": "^4.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
