@@ -21,11 +21,13 @@ interface Status {
 
 interface Competition {
   competitors: Competitor[];
+  type: { id: number };
 }
 
 interface Game {
   id: string;
   name: string;
+  shortName: string;
   date: string;
   status: Status;
   competitions: Competition[];
@@ -73,23 +75,36 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
+    let gameTitle = nhlGame.name.replace(" at ", " vs ");
+
+    const team1 = nhlGame.competitions[0].competitors[0].team.abbreviation;
+    const team2 = nhlGame.competitions[0].competitors[1].team.abbreviation;
+
+    if (gameTitle.includes(`${team1} ${team1}`) || gameTitle.includes(`${team2} ${team2}`)) {
+      gameTitle = `${team2} vs ${team1}`;
+    }
+
     nhlItems.push(
       <List.Item
         key={index}
-        title={nhlGame.name.replace(" at ", " vs ")}
+        title={gameTitle}
         icon={{ source: nhlGame.competitions[0].competitors[1].team.logo }}
         accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${nhlGame.links[0].href}`} />
-            <Action.OpenInBrowser
-              title="View Away Team Details"
-              url={`${nhlGame.competitions[0].competitors[1].team.links[0].href}`}
-            />
-            <Action.OpenInBrowser
-              title="View Home Team Details"
-              url={`${nhlGame.competitions[0].competitors[0].team.links[0].href}`}
-            />
+            {nhlGame.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={nhlGame.competitions[0].competitors[1].team.links[0].href}
+              />
+            )}
+            {nhlGame.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={nhlGame.competitions[0].competitors[0].team.links[0].href}
+              />
+            )}
           </ActionPanel>
         }
       />,
