@@ -10,55 +10,56 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { getFavicon, useCachedState } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { Storage } from "./storage";
 import { verifySite, getStatsForAllWebsites } from "./api";
 import { Stats } from "./types";
 
-const { hostedDomain } = getPreferenceValues() ?? "https://plausible.io";
+const { hostedDomain } = getPreferenceValues<Preferences>() ?? "https://plausible.io";
 
 function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
   const { pop } = useNavigation();
-  const [domainError, setDomainError] = useState<string | undefined>();
 
   const handleFormSubmit = async (values: { domain: string }) => {
     const { domain } = values;
+    const toast = await showToast(Toast.Style.Animated, "Verifying");
     const isValidDomain = await verifySite(domain);
 
     if (!isValidDomain) {
-      setDomainError("Invalid domain or API key. Please check your Plausible settings.");
+      toast.style = Toast.Style.Failure;
+      toast.title = "Verification failed";
+      setValidationError("domain", "Invalid domain or API key. Please check your Plausible settings.");
       return;
     }
 
     await Storage.addDomain(domain);
-    await showToast(Toast.Style.Success, "Website successfully added");
+    toast.style = Toast.Style.Success;
+    toast.title = "Website successfully added";
     refreshSiteList();
     pop();
   };
+
+  const { handleSubmit, itemProps, setValidationError } = useForm<{ domain: string }>({
+    onSubmit: handleFormSubmit,
+    validation: {
+      domain: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleFormSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="domain"
-        title="Domain"
-        placeholder="example.com, blog.example.com"
-        error={domainError}
-        onChange={() => {
-          setDomainError(undefined);
-        }}
-      />
+      <Form.TextField title="Domain" placeholder="example.com, blog.example.com" {...itemProps.domain} />
     </Form>
   );
 }
 
 function SiteList() {
-  const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [cachedStats, setCachedStats] = useCachedState<{
     [key: string]: Stats;
@@ -105,6 +106,7 @@ function SiteList() {
               <ActionPanel>
                 <Action.OpenInBrowser title="Show in Plausible" url={`${hostedDomain}/${domain}`} />
                 <Action
+                  icon={Icon.Xmark}
                   title={`Remove ${domain}`}
                   style={Action.Style.Destructive}
                   onAction={async () => {
@@ -124,12 +126,7 @@ function SiteList() {
         icon={Icon.Plus}
         actions={
           <ActionPanel>
-            <Action
-              title="Add Website"
-              onAction={() => {
-                push(<AddSite refreshSiteList={refreshSiteList} />);
-              }}
-            />
+            <Action.Push title="Add Website" target={<AddSite refreshSiteList={refreshSiteList} />} />
           </ActionPanel>
         }
       />
