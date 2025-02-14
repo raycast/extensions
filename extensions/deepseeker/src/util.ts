@@ -37,15 +37,25 @@ const prices: Record<string, { in: number; out: number }> = {
   "deepseek-chat": { in: 0.27, out: 1.1 },
 };
 
+function isValidNumber(value: unknown): value is number {
+  return typeof value === "number" && !Number.isNaN(value) && value > 0;
+}
+
+function calculate_cost(token_in: number, token_out: number, price_in: number, price_out: number): number {
+  const cost = (token_in * price_in + token_out * price_out) / 10000;
+  return naiveRound(cost, 3);
+}
+
 export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number {
-  const modelPrices = prices[model];
-  if (!modelPrices) return -1;
+  if (isValidNumber(+priceinput) && isValidNumber(+priceoutput)) {
+    return calculate_cost(promptTokens, outputTokens, priceinput, priceoutput);
+  }
 
-  const inRate = (model.startsWith("deepseek") && priceinput) ?? modelPrices.in;
-  const outRate = (model.startsWith("deepseek") && priceoutput) ?? modelPrices.out;
+  if (model in prices) {
+    return calculate_cost(promptTokens, outputTokens, prices[model].in, prices[model].out);
+  }
 
-  const price = (promptTokens * +inRate + outputTokens * +outRate) / 10000;
-  return Number(price.toFixed(3));
+  return -1;
 }
 
 export async function runAppleScriptSilently(appleScript: string) {
