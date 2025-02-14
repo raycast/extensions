@@ -14,14 +14,14 @@
     {
       "name": "daisyui-colors",
       "title": "Search Colors",
-      "subtitle": "daisyUI Colors",
+      "subtitle": "daisyUI",
       "description": "Browse comprehensive daisyUI color palette with theme variations",
       "mode": "view"
     },
     {
       "name": "daisyui-components",
       "title": "Search Components",
-      "subtitle": "daisyUI Components",
+      "subtitle": "daisyUI",
       "description": "View detailed information and code snippets for daisyUI components",
       "mode": "view"
     }
