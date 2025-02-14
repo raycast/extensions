@@ -5,10 +5,6 @@ import { fetchInverterInfo, fetchPowerFlowRealtimeData } from "./api";
 import { InverterInfo } from "./types";
 import t from "./i18n";
 
-interface Preferences {
-  baseUrl: string;
-}
-
 interface InverterItem {
   id: string;
   info: InverterInfo;
