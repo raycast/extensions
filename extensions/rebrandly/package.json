@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rebrandly",
   "title": "Rebrandly",
-  "description": "Browse Rebrandly shortlinks and create new ones",
+  "description": "Browse Rebrandly shortlinks, create new and delete old",
   "version": "0.0.1",
   "author": "grikomsn",
   "contributors": [
@@ -28,7 +28,7 @@
       "name": "rebrandly",
       "title": "Browse Shortlinks",
       "subtitle": "Rebrandly",
-      "description": "Browse Rebrandly shortlinks and create new ones",
+      "description": "Browse Rebrandly shortlinks, create new and delete old",
       "mode": "view"
     }
   ],
@@ -41,8 +41,9 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.84.8",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

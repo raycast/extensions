@@ -70,10 +70,10 @@ export default function Command() {
     }
 
     if (item.ext) {
-      return `${item.ext} Snippet`;
+      return `${item.ext} Material`;
     }
 
-    return `Code snippet from ${item.browser.tab.title ?? item.browser.tab.url}`;
+    return `Saved from ${item.browser.tab.title ?? item.browser.tab.url}`;
   }
 
   /**

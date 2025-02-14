@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - 2025-02-04
+
+- Added ability to search containers by their image-name or id.
+
 ## [Standard Shortcuts] - 2025-01-25
 
 - Standardized the removal shortcut with other extensions
