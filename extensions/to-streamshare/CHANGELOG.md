@@ -1,6 +1,6 @@
 # Streamshare Uploader Changelog
 
-## [v1.1] - {PR_MERGE_DATE}
+## [v1.1] - 2025-02-14
 
 - Rename "Upload File" command to "Upload Selected File"
 - Add "Copy Last Upload URL" command
