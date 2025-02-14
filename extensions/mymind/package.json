@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mymind",
-  "title": "mymind",
-  "description": "Manage and add your thoughts to mymind",
+  "title": "my mind",
+  "description": "Manage and add your thoughts to my mind",
   "icon": "mymind-logo.svg",
   "author": "arian",
   "categories": [
@@ -15,6 +15,12 @@
       "name": "search-my-mind",
       "title": "Search my mind",
       "description": "Go through past mind entries",
+      "mode": "view"
+    },
+    {
+      "name": "add-a-new-note",
+      "title": "Add a new note",
+      "description": "Adds a new note to mymind",
       "mode": "view"
     }
   ],
@@ -45,22 +51,22 @@
       "name": "cookie",
       "type": "password",
       "required": true,
-      "title": "JWT Cookie",
-      "description": "Your MyMind JWT cookie value"
+      "title": "JWT Token",
+      "description": "Your MyMind JWT token value. Go to arian.gg/blog/setup for instructions."
     },
     {
       "name": "cid",
       "type": "password",
       "required": true,
       "title": "CID",
-      "description": "Your MyMind CID value"
+      "description": "Your MyMind CID value. Go to arian.gg/blog/setup for instructions."
     },
     {
       "name": "authenticityToken",
       "type": "password",
       "required": true,
       "title": "Authenticity Token",
-      "description": "Your MyMind x-authenticity-token value"
+      "description": "Your MyMind Authenticity Token value. Go to arian.gg/blog/setup for instructions."
     }
   ]
 }
