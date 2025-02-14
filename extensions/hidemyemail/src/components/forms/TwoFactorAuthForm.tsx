@@ -39,6 +39,7 @@ export default function TwoFactorAuthForm({
         placeholder="Enter 6-digit code"
         {...itemProps.code}
         info="You can resend the code using the corresponding action."
+        autoFocus={true}
       />
     </Form>
   );

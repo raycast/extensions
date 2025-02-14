@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Artist Name Visibility Option] - 2025-02-07
+
+- Added the option to hide the artist's name in the Menu Bar Player.
+
 ## [Fix Your Library] - 2025-02-04
 
 - Fix a possibly null issue from `getMeAlbums` API.
