@@ -1,11 +1,6 @@
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  pushoverToken: string;
-  pushoverUser: string;
-}
-
 export default async function Command(props: { arguments: { message: string } }) {
   try {
     const preferences = getPreferenceValues<Preferences>();
