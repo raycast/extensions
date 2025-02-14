@@ -1,77 +1,23 @@
 import { getPreferenceValues } from "@raycast/api";
-import { z } from "zod";
 import fetch, { RequestInit } from "node-fetch";
-
-interface Preferences {
-  cookie: string;
-  cid: string;
-  authenticityToken: string;
-}
-
-// Define the schemas
-const TagSchema = z.object({
-  type: z.string(),
-  content: z.string(),
-});
-
-const SourceSchema = z.object({
-  url: z.string(),
-});
-
-const ProseContentSchema = z
-  .object({
-    type: z.string(),
-    content: z.array(z.any()).optional(),
-    text: z.string().optional(),
-    attrs: z.record(z.any()).optional(),
-    marks: z.array(z.object({ type: z.string() })).optional(),
-  })
-  .or(
-    z.object({
-      type: z.string(),
-      text: z.string(),
-    }),
-  );
-
-const ProseSchema = z.object({
-  type: z.string(),
-  content: z.array(ProseContentSchema),
-});
-
-const NoteSchema = z.object({
-  id: z.string(),
-  prose: ProseSchema,
-});
-
-const CardSchema = z.object({
-  title: z.string().optional(),
-  siteName: z.string().optional(),
-  domain: z.string().optional(),
-  description: z.string().optional(),
-  source: SourceSchema.optional(),
-  tags: z.array(TagSchema).optional(),
-  modified: z.string(),
-  bumped: z.string(),
-  created: z.string(),
-  prose: ProseSchema.optional(),
-  note: NoteSchema.optional(),
-  brand: z.string().optional(),
-  ocr: z.string().optional(),
-});
-
-const MyMindResponseSchema = z.record(CardSchema);
-
-// Add this type after the MyMindResponseSchema definition
-export type CardWithSlug = z.infer<typeof CardSchema> & { slug: string };
-type MyMindResponseWithSlugs = Record<string, CardWithSlug>;
+import {
+  MyMindResponseWithSlugs,
+  Preferences,
+  MyMindResponseSchema,
+  ProseContent,
+  ListItem,
+  CreateNoteResponse,
+  CreateNoteResponseSchema,
+  CreateNotePayload,
+} from "./schemas";
 
 export async function fetchMyMindCards(): Promise<MyMindResponseWithSlugs> {
   // Get securely stored credentials from preferences
-  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+  const { jwt, cid, authenticityToken } = getPreferenceValues<Preferences>();
 
   const myHeaders = {
     "x-authenticity-token": authenticityToken,
-    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    cookie: `_cid=${cid}; _jwt=${jwt}`,
   };
 
   const requestOptions: RequestInit = {
@@ -122,8 +68,8 @@ export async function fetchMyMindCards(): Promise<MyMindResponseWithSlugs> {
   }
 }
 
-// Add this new function to convert prose content to markdown
-export function proseToMarkdown(content: any[] | undefined): string {
+// Update the proseToMarkdown function
+export function proseToMarkdown(content: ProseContent[]): string {
   if (!content || !Array.isArray(content)) return "";
 
   return content
@@ -131,15 +77,16 @@ export function proseToMarkdown(content: any[] | undefined): string {
       if (!node) return "";
 
       switch (node.type) {
-        case "heading":
-          const level = node.attrs?.level || 1;
-          const headingText = node.content?.map((c: any) => c?.text || "").join("") || "";
+        case "heading": {
+          const level = (node.attrs?.level as number) || 1;
+          const headingText = node.content?.map((c) => c?.text || "").join("") || "";
           return "#".repeat(level) + " " + headingText + "\n\n";
+        }
 
-        case "paragraph":
+        case "paragraph": {
           if (!node.content) return "\n\n";
           const paragraphText = node.content
-            .map((c: any) => {
+            .map((c) => {
               if (!c) return "";
               let text = c.text || "";
 
@@ -169,19 +116,21 @@ export function proseToMarkdown(content: any[] | undefined): string {
             })
             .join("");
           return paragraphText + "\n\n";
+        }
 
-        case "orderedList":
+        case "orderedList": {
           if (!node.content) return "";
-          let listIndex = node.attrs?.start || 1;
+          const startIndex = (node.attrs?.start as number) || 1;
+          let listIndex = startIndex;
           return (
             node.content
-              .map((item: any) => {
+              .map((item: ListItem) => {
                 if (!item?.content) return "";
                 const listItemContent = item.content
-                  .map((content: any) => {
+                  .map((content) => {
                     if (!content) return "";
                     if (content.type === "paragraph") {
-                      return content.content?.map((c: any) => c?.text || "").join("") || "";
+                      return content.content?.map((c) => c?.text || "").join("") || "";
                     }
                     return "";
                   })
@@ -191,18 +140,19 @@ export function proseToMarkdown(content: any[] | undefined): string {
               })
               .join("") + "\n"
           );
+        }
 
-        case "taskList":
+        case "taskList": {
           if (!node.content) return "";
           return (
             node.content
-              .map((item: any) => {
+              .map((item: ListItem) => {
                 if (!item?.content) return "";
                 const checked = item.attrs?.checked ? "x" : " ";
                 const taskContent = item.content
-                  .map((content: any) => {
+                  .map((content) => {
                     if (content.type === "paragraph") {
-                      return content.content?.map((c: any) => c?.text || "").join("") || "";
+                      return content.content?.map((c) => c?.text || "").join("") || "";
                     }
                     return "";
                   })
@@ -211,11 +161,13 @@ export function proseToMarkdown(content: any[] | undefined): string {
               })
               .join("") + "\n"
           );
+        }
 
-        case "codeBlock":
-          const language = node.attrs?.language || "";
-          const code = node.content?.map((c: any) => c?.text || "").join("") || "";
+        case "codeBlock": {
+          const language = (node.attrs?.language as string) || "";
+          const code = node.content?.map((c) => c?.text || "").join("") || "";
           return "```" + language + "\n" + code + "\n```\n\n";
+        }
 
         case "horizontalRule":
           return "---\n\n";
@@ -229,11 +181,11 @@ export function proseToMarkdown(content: any[] | undefined): string {
 
 export async function deleteMyMindCard(slug: string): Promise<void> {
   // Get securely stored credentials from preferences
-  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+  const { jwt, cid, authenticityToken } = getPreferenceValues<Preferences>();
 
   const myHeaders = {
     "x-authenticity-token": authenticityToken,
-    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    cookie: `_cid=${cid}; _jwt=${jwt}`,
   };
 
   const response = await fetch(`https://access.mymind.com/objects/${slug}`, {
@@ -251,26 +203,8 @@ export async function deleteMyMindCard(slug: string): Promise<void> {
   }
 }
 
-interface CreateNotePayload {
-  title: string;
-  prose: {
-    type: "doc";
-    content: any[];
-  };
-  type: "Note";
-}
-
-const CreateNoteResponseSchema = z.object({
-  id: z.string(),
-  type: z.literal("Note"),
-  title: z.string(),
-  created: z.string(),
-});
-
-type CreateNoteResponse = z.infer<typeof CreateNoteResponseSchema>;
-
 export async function createMyMindNote(markdown: string, title: string = ""): Promise<CreateNoteResponse> {
-  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+  const { jwt, cid, authenticityToken } = getPreferenceValues<Preferences>();
 
   const payload: CreateNotePayload = {
     title,
@@ -283,7 +217,7 @@ export async function createMyMindNote(markdown: string, title: string = ""): Pr
 
   const myHeaders = {
     "x-authenticity-token": authenticityToken,
-    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    cookie: `_cid=${cid}; _jwt=${jwt}`,
     "Content-Type": "application/json",
   };
 
@@ -305,10 +239,10 @@ export async function createMyMindNote(markdown: string, title: string = ""): Pr
   return CreateNoteResponseSchema.parse(data);
 }
 
-function markdownToProse(markdown: string): any[] {
+function markdownToProse(markdown: string): ProseContent[] {
   const lines = markdown.split("\n");
-  const content: any[] = [];
-  let currentList: any[] = [];
+  const content: ProseContent[] = [];
+  let currentList: ProseContent[] = [];
   let isInCodeBlock = false;
   let codeBlockContent = "";
   let codeBlockLanguage = "";
@@ -397,8 +331,8 @@ function markdownToProse(markdown: string): any[] {
   return content;
 }
 
-function parseInlineFormatting(text: string): any[] {
-  const content: any[] = [];
+function parseInlineFormatting(text: string): ProseContent[] {
+  const content: ProseContent[] = [];
   let currentText = "";
   let marks: { type: string }[] = [];
 
@@ -465,13 +399,12 @@ function parseInlineFormatting(text: string): any[] {
   addText(); // Add any remaining text
   return content;
 }
-
 export async function addTagToCard(slug: string, tagName: string): Promise<void> {
-  const { cookie, cid, authenticityToken } = getPreferenceValues<Preferences>();
+  const { jwt, cid, authenticityToken } = getPreferenceValues<Preferences>();
 
   const myHeaders = {
     "x-authenticity-token": authenticityToken,
-    cookie: `_cid=${cid}; _jwt=${cookie}`,
+    cookie: `_cid=${cid}; _jwt=${jwt}`,
     "Content-Type": "application/json",
   };
 

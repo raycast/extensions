@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mymind",
-  "title": "my mind",
+  "title": "My Mind",
   "description": "Manage and add your thoughts to my mind",
-  "icon": "mymind-logo.svg",
+  "icon": "extension-icon.png",
   "author": "arian",
   "categories": [
     "Applications",
@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "search-my-mind",
-      "title": "Search my mind",
+      "title": "Search My Mind",
       "description": "Go through past mind entries",
       "mode": "view"
     },
     {
       "name": "add-a-new-note",
-      "title": "Add a new note",
+      "title": "Add a New Note",
       "description": "Adds a new note to mymind",
       "mode": "view"
     }
@@ -48,7 +48,7 @@
   },
   "preferences": [
     {
-      "name": "cookie",
+      "name": "jwt",
       "type": "password",
       "required": true,
       "title": "JWT Token",

@@ -49,7 +49,7 @@ export default function Command() {
 
   // Filter cards based on search text and tags
   const filteredCards = Object.entries(cards || {}).filter(
-    ([_, card]) =>
+    ([, card]) =>
       card.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       card.description?.toLowerCase().includes(searchText.toLowerCase()) ||
       card.tags?.some((tag) => tag.content.toLowerCase().includes(searchText.toLowerCase())),
@@ -62,7 +62,7 @@ export default function Command() {
       searchBarPlaceholder="Search your mind cards..."
       throttle
     >
-      {filteredCards.map(([_, card]) => (
+      {filteredCards.map(([, card]) => (
         <List.Item
           key={card.slug}
           icon={card.source?.url ? getFavicon(card.source.url) : "../assets/mymind-logo.svg"}

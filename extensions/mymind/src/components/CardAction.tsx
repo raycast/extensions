@@ -1,6 +1,7 @@
 import { ActionPanel, Detail, Action, Icon, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
-import { CardWithSlug, proseToMarkdown, deleteMyMindCard } from "../utils";
+import { proseToMarkdown, deleteMyMindCard } from "../utils";
 import AddNote from "../add-a-new-note";
+import { CardWithSlug } from "../schemas";
 
 export function CardActions({
   card,
@@ -90,12 +91,12 @@ ${proseToMarkdown(card.note.prose.content)}`
         )}
         {card.source?.url && <Action.OpenInBrowser url={card.source.url} />}
         {card.slug && (
-          <Action.OpenInBrowser title="Open mymind" url={`https://access.mymind.com/everything/#${card.slug}`} />
+          <Action.OpenInBrowser title="Open in Mymind" url={`https://access.mymind.com/everything/#${card.slug}`} />
         )}
         {card.source?.url && <Action.CopyToClipboard title="Copy Source URL" content={card.source.url} />}
         {card.slug && (
           <Action.CopyToClipboard
-            title="Copy mymind URL"
+            title="Copy the Mymind URL"
             content={`https://access.mymind.com/everything/#${card.slug}`}
           />
         )}
