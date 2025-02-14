@@ -14,8 +14,7 @@
         {
             "name": "uninstall",
             "title": "Uninstall Application",
-            "subtitle": "with AppCleaner",
-            "description": "with AppCleaner",
+            "description": "Uninstall applications with AppCleaner or PearCleaner",
             "mode": "view"
         }
     ],
