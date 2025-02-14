@@ -2,13 +2,12 @@ import { Clipboard, getPreferenceValues, LaunchProps, showHUD, showToast, Toast 
 import { fromString, toUUID } from "typeid-js";
 
 export default async (props: LaunchProps<{ arguments: { typeID: string } }>) => {
-  console.log("hi")
   const { typeID } = props.arguments;
   const { defaultAction } = getPreferenceValues<{ defaultAction: "copy" | "paste" }>();
 
   try {
     const typeIdInstance = fromString(typeID);
-    const uuid = toUUID(typeIdInstance)
+    const uuid = toUUID(typeIdInstance);
 
     if (defaultAction === "copy") {
       await Clipboard.copy(uuid);
