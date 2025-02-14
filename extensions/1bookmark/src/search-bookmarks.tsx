@@ -87,10 +87,6 @@ export function Body() {
 
   const [keyword, setKeyword] = useState("");
 
-  useEffect(() => {
-    console.log("keyword: " + keyword);
-  }, [keyword]);
-
   const selectedTags = useMemo(() => {
     if (!me.data) return [];
 

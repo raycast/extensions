@@ -1,5 +1,10 @@
 # 1bookmark Changelog
 
+## [Improve Login UX] - {PR_MERGE_DATE}
+
+- 0.3.4
+- 💅🏼 The issue of having to re-enter email after seeing the login code has been resolved.
+
 ## [Prepare for Production] - {PR_MERGE_DATE}
 
 - 0.3.3
