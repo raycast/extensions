@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Update] - 2025-02-14
+
+- Added a preference to enable pinyin search for Chinese characters.
+
 ## [Update] - 2025-02-12
 
 - Add an action to set the color of a bookmark tag.
