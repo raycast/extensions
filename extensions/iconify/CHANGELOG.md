@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-02-14
 
 - Add "Paste SVG File" to actions and primaryActions
 - Add "Copy SVG Name" and "Copy SVG URL" to the primary actions preference.
