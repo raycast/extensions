@@ -15,7 +15,8 @@
     "litomore",
     "samuelkraft",
     "ridemountainpig",
-    "xilopaint"
+    "xilopaint",
+    "anwarulislam"
   ],
   "categories": [
     "Design Tools"
@@ -38,6 +39,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "extract-color",
+      "title": "Extract Color",
+      "subtitle": "Extract Color",
+      "description": "Extract color from image",
+      "mode": "view"
     },
     {
       "name": "menu-bar",
@@ -223,6 +231,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "pull": "ray pull-contributions",
     "publish": "ray publish"
   }
 }
