@@ -16,7 +16,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "uploadSelectedFile",
+      "name": "index",
       "title": "Upload Selected File",
       "description": "Upload a file selected in Finder",
       "mode": "no-view"
