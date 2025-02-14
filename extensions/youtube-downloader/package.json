@@ -63,6 +63,24 @@
       "required": false
     },
     {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "enableBrowserExtensionSupport",
       "title": "Enable Browser Extension Support",
       "description": "Enable browser extension support for reading video URLs from the browser",
