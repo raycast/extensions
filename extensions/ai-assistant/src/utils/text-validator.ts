@@ -133,7 +133,6 @@ async function tryModifyText(originalText: string): Promise<TextValidationResult
     // Clear the clipboard and paste the original text
     await enhancedClipboardOps.paste("");
     await selectLeftCharacters(originalText.length);
-    // await enhancedClipboardOps.paste(originalText);
 
     return {
       isEditable,
