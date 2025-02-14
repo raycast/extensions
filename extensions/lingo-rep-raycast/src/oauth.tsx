@@ -1,14 +1,7 @@
 import _ from "lodash";
 import { useEffect, useState } from "react";
 import { Detail, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
-import {
-  OAuthService,
-  withAccessToken,
-  getAccessToken,
-  useCachedState,
-  useFetch,
-  showFailureToast,
-} from "@raycast/utils";
+import { OAuthService, withAccessToken, useCachedState, showFailureToast } from "@raycast/utils";
 
 import { useGet } from "./hooks";
 import { config } from "./config";
@@ -24,37 +17,10 @@ export const googleService = OAuthService.google({
 });
 
 function UserProfileDetails() {
-  const { token } = getAccessToken();
-  const [, setJWT] = useCachedState<string>("jwt", "");
-  const [authProviderInState] = useCachedState<string>("authProvider", "");
-  const [, setUserId] = useCachedState<string>("userId", "");
-
   // TODO:
   // - decide on the refresh strategy for github
 
-  const { data: responseData } = useFetch<{ message: string; jwt: string }>(
-    `${config.apiURL}/auth/${authProviderInState}/get-jwt`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-
-  useEffect(() => {
-    if (responseData?.jwt) {
-      setJWT(responseData.jwt);
-    } else {
-      console.log("No JWT received");
-      setJWT("");
-    }
-  }, [responseData?.jwt]);
-
   const { isLoading, response } = useGet("/auth/profile");
-
-  useEffect(() => {
-    setUserId(_.get(response, "user.id", ""));
-  }, [response]);
 
   const markdown = `
   <img src="${_.get(response, "user.imageUrl")}" width="300" height="300">

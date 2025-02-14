@@ -3,6 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 import { get, post } from "./fetch";
+import { config } from "./config";
 
 import { githubService, googleService, googleClientId } from "./oauth";
 
@@ -72,9 +73,41 @@ export const useIsAuthenticated = () => {
 
   useEffect(() => {
     void (async () => {
+      const getJWTAndUserId = async (token: string) => {
+        const response = await fetch(`${config.apiURL}/auth/${authProvider}/get-jwt`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Error getting JWT", await response.text());
+          throw new Error(response.statusText);
+        }
+        const tokenResponse = (await response.json()) as { message: string; jwt: string };
+        if (tokenResponse?.jwt) {
+          setJWT(tokenResponse.jwt);
+          const userProfileRes = await fetch(`${config.apiURL}/auth/profile`, {
+            headers: {
+              Authorization: `Bearer ${tokenResponse.jwt}`,
+            },
+          });
+          if (!userProfileRes.ok) {
+            console.error("Error getting user profile", await userProfileRes.text());
+            throw new Error(userProfileRes.statusText);
+          }
+          const userProfile = (await userProfileRes.json()) as { message: string; user: { id: string } };
+          setUserId(userProfile.user.id);
+        }
+      };
+
       if (authProvider === "github") {
         const tokenSet = await githubService.client.getTokens();
-        if (tokenSet && !tokenSet.isExpired()) setIsAuthenticated(true);
+        if (tokenSet && !tokenSet.isExpired()) {
+          setIsAuthenticated(true);
+          await getJWTAndUserId(tokenSet.accessToken);
+        }
       } else if (authProvider === "google") {
         let tokenSet = await googleService.client.getTokens();
         if (tokenSet?.accessToken) {
@@ -82,7 +115,10 @@ export const useIsAuthenticated = () => {
             await googleService.client.setTokens(await refreshGoogleTokens(tokenSet.refreshToken));
           }
           tokenSet = await googleService.client.getTokens();
-          if (tokenSet?.accessToken && !tokenSet?.isExpired()) setIsAuthenticated(true);
+          if (tokenSet?.accessToken && !tokenSet?.isExpired()) {
+            setIsAuthenticated(true);
+            await getJWTAndUserId(tokenSet.accessToken);
+          }
         }
       } else {
         setIsAuthenticated(false);
