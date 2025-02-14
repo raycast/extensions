@@ -125,7 +125,7 @@ function SiteList() {
         actions={
           <ActionPanel>
             <Action
-              title="Add website"
+              title="Add Website"
               onAction={() => {
                 push(<AddSite refreshSiteList={refreshSiteList} />);
               }}
