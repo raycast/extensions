@@ -109,5 +109,17 @@ function getAccessories(item: VaultCredential) {
     });
   }
 
+  accessories.push({
+    icon: { source: Icon.Dot, tintColor: getStrengthColor(item.strength) },
+    tooltip: "Strength",
+  });
+
   return accessories;
+}
+
+function getStrengthColor(strength: number): Color {
+  if (strength < 25) return Color.Red;
+  if (strength < 50) return Color.Orange;
+  if (strength < 75) return Color.Yellow;
+  return Color.Green;
 }
