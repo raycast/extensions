@@ -22,4 +22,7 @@
       "description": "Your MyMind x-authenticity-token value"
     }
   ]
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
 }

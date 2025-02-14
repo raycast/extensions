@@ -3,7 +3,7 @@
 /extensions/0x0                                                     @pseudobun @pernielsentikaer @jatindotdev
 /extensions/1-click-confetti                                        @peduarte
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
-/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @justspacedog @superwhys @Luk4h @LitoMore @bxb100 @vimtor
+/extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @bxb100 @vimtor
 /extensions/2fa-directory                                           @andreaselia @pernielsentikaer @xmok
 /extensions/5devs                                                   @gustavo-fior @guivictorr
 /extensions/8-divide                                                @pakliem
@@ -68,6 +68,7 @@
 /extensions/app-icon-generator                                      @hunter-ji @pernielsentikaer
 /extensions/app-keeper-manager                                      @onlysunjun
 /extensions/app-store-connect                                       @bangerang
+/extensions/appcleaner                                              @tborychowski
 /extensions/append-clipboard                                        @koinzhang @cyrusn
 /extensions/apple-books                                             @vimtor
 /extensions/apple-developer-docs                                    @CaliCastle
@@ -339,7 +340,7 @@
 /extensions/currency-exchange                                       @xeric @daudln
 /extensions/cursor                                                  @degouville
 /extensions/cursor-directory                                        @escwxyz @LitoMore
-/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz @LitoMore
+/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz @LitoMore @michalzuch
 /extensions/cursors                                                 @andreasstorm @pernielsentikaer
 /extensions/curto-io-url-shortener                                  @birobirobiro
 /extensions/custom-folder                                           @Ph-lo
@@ -349,6 +350,7 @@
 /extensions/cyberpanel                                              @xmok
 /extensions/cypress-docs                                            @robertguss
 /extensions/dad-jokes                                               @pernielsentikaer @xmok @xmok
+/extensions/daisyui                                                 @joeynotjoe
 /extensions/daminik                                                 @xmok
 /extensions/danbooru                                                @kaitomomotta
 /extensions/dash                                                    @RSO @sxn @JasonBoy
@@ -559,6 +561,7 @@
 /extensions/french-verb-conjugation                                 @J0
 /extensions/frill                                                   @xmok
 /extensions/ftrack                                                  @lucaas
+/extensions/fuelx                                                   @naz3eh
 /extensions/fvm                                                     @leoafarias
 /extensions/gather                                                  @yannglt
 /extensions/geist-ui-components                                     @Rahuls-Coding
@@ -592,6 +595,7 @@
 /extensions/github-menu-bar                                         @fe9lix
 /extensions/github-repository-search                                @thomaspaulmann @immint023 @mheidinger @j3lte
 /extensions/github-review-requests                                  @resessh @kudrykv @Hephaest
+/extensions/github-search                                           @webpro
 /extensions/github-spark                                            @colebemis
 /extensions/github-stars                                            @mrmartineau @Princeyadav05
 /extensions/github-status                                           @FezVrasta
@@ -706,7 +710,7 @@
 /extensions/iata-code-decoder                                       @timrogers
 /extensions/icd10-lookup                                            @ubergraham @pernielsentikaer
 /extensions/icloud-global-pricing-comparison                        @elonwoo @elonwoo
-/extensions/iconify                                                 @Destiner @sxn @robertvanhoesel @kuddl @kevinxo328
+/extensions/iconify                                                 @Destiner @sxn @robertvanhoesel @kuddl @kevinxo328 @ridemountainpig
 /extensions/iconpark                                                @koinzhang @j3lte
 /extensions/icons8                                                  @yug2005
 /extensions/idonthavespotify                                        @sjdonado
@@ -720,7 +724,7 @@
 /extensions/imageoptim                                              @marckohlbrugge
 /extensions/images-compression                                      @okooo5km
 /extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv @owain-williams
-/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus
+/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus @taschaub
 /extensions/imgur                                                   @BalliAsghar @pernielsentikaer @caumeira
 /extensions/improvmx                                                @ImprovMX @xmok
 /extensions/inbox-ai                                                @foeken
@@ -944,6 +948,7 @@
 /extensions/mercury                                                 @atkinsmatt10
 /extensions/messages                                                @thomaslombart @tim-the-bearded @ramsaysewell @thomaspaulmann @aeorge @haydencbarnes
 /extensions/meta-music                                              @teziovsky
+/extensions/metabase                                                @vimtor
 /extensions/metaphor                                                @QIanGua
 /extensions/metaphorpsum                                            @jsumnersmith
 /extensions/metronome                                               @Visual-Studio-Coder
@@ -1009,7 +1014,7 @@
 /extensions/myanimelist-search                                      @luknl
 /extensions/myip                                                    @kkange @iwyvi @j3lte @HsuQ @pernielsentikaer
 /extensions/mynaui-icons                                            @praveenjuge
-/extensions/n8n                                                     @koinzhang
+/extensions/n8n                                                     @koinzhang @xmok
 /extensions/namesilo                                                @xmok
 /extensions/namespaces                                              @GastroGeek @xmok
 /extensions/nanoid                                                  @roelvan @mikevalstar
@@ -1174,6 +1179,7 @@
 /extensions/pdb-explorer                                            @mattgra
 /extensions/pdf-tools                                               @xilopaint
 /extensions/pdfsearch                                               @kevin-pek @xilopaint
+/extensions/penflow-ai                                              @Feng6611
 /extensions/penpot                                                  @bobbymannino
 /extensions/pera-explorer                                           @akgunberk
 /extensions/perchance-generator                                     @Visual-Studio-Coder
@@ -1259,6 +1265,7 @@
 /extensions/punto                                                   @red-avtovo
 /extensions/purelymail                                              @xmok
 /extensions/purpleair                                               @omarshahine
+/extensions/pushover                                                @nandastone
 /extensions/putio                                                   @altaywtf
 /extensions/px-to-rem-converter                                     @raulanatol
 /extensions/px-to-tailwind                                          @kemiljk
@@ -1546,6 +1553,7 @@
 /extensions/splix                                                   @cwooldridge1
 /extensions/spoiler-converter                                       @Visual-Studio-Coder @varunsatish2017
 /extensions/spoqify                                                 @ajtruex
+/extensions/sportssync                                              @daniyalmaster693
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq @amureki
 /extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @jatindotdev @the-devbear @rfaccio @badta5te @andyburris @thomaslombart @rhesamu @mpatel283 @LitoMore @EnneEmme
@@ -1682,7 +1690,7 @@
 /extensions/tmdb                                                    @Aayush9029 @andreaselia @thomaslombart @j3lte @joeynotjoe @VBenny42
 /extensions/tmux-sessioner                                          @louishuyng @sxn @jasonshanks @guidefari @janwvjaarsveld
 /extensions/tny                                                     @stayallive @stayallive
-/extensions/to-streamshare                                          @0PandaDEV
+/extensions/to-streamshare                                          @0PandaDEV @bkuzmanoski
 /extensions/todo-list                                               @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen @ridemountainpig
 /extensions/todoist                                                 @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05 @jfkisafk @ridemountainpig @kcole93 @RobErskine
 /extensions/toggl-track                                             @franzwilhelm @bkeys818 @michaelfaisst @teziovsky @lukebars @tangerine1202
