@@ -13,7 +13,7 @@ import {
   type Period,
 } from '@srcTypes';
 import { useTransactions } from '@hooks/useTransactions';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
 import { useLocalStorage } from '@raycast/utils';
 import { useScheduledTransactions } from '@hooks/useScheduledTransactions';
 import { ScheduledTransactionItem } from './scheduledTransactionItem';
@@ -229,7 +229,7 @@ function TransactionViewItems({
     return Array.from(transactions).map(([, group]) => (
       <List.Section
         title={group.title}
-        subtitle={formatToReadablePrice({
+        subtitle={formatToReadableAmount({
           amount: group.items.reduce((total, { amount }) => total + +amount, 0),
           currency,
         })}
