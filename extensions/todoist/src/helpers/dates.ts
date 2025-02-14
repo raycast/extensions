@@ -1,7 +1,6 @@
 import { addDays, format, formatISO, isThisYear, isBefore, isSameDay, parseISO } from "date-fns";
 
 import { Task } from "../api";
-import useCachedData from "../hooks/useCachedData";
 
 export function isRecurring(task: Task) {
   return task.due?.is_recurring || false;
@@ -64,19 +63,13 @@ export function displayDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
-export function DisplayDateTime(dateString: string) {
+export function displayDateTime(dateString: string, use12HourFormat: boolean) {
   const date = parseISO(dateString);
-  const [data] = useCachedData();
-  const use12HourFormat = data?.user?.time_format === 1;
-
   return `${displayDate(dateString)} ${format(date, use12HourFormat ? "h:mm a" : "HH:mm")}`;
 }
 
-export function DisplayTime(dateString: string) {
+export function displayTime(dateString: string, use12HourFormat: boolean) {
   const date = parseISO(dateString);
-  const [data] = useCachedData();
-  const use12HourFormat = data?.user?.time_format === 1;
-
   return format(date, use12HourFormat ? "h:mm a" : "HH:mm");
 }
 

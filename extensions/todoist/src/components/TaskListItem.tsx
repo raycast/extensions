@@ -4,7 +4,7 @@ import removeMarkdown from "remove-markdown";
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { DisplayDateTime, DisplayTime, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
+import { displayTime, displayDate, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -80,7 +80,7 @@ export default function TaskListItem({
   }
 
   if (task.deadline?.date) {
-    const text = DisplayDateTime(task.deadline.date);
+    const text = displayDate(task.deadline.date);
     const overdue = isOverdue(task.deadline.date);
 
     accessories.unshift({
@@ -97,15 +97,16 @@ export default function TaskListItem({
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
     const overdue = isOverdue(task.due.date);
+    const use12HourFormat = data?.user?.time_format === 1;
 
-    const text = DisplayDateTime(task.due.date);
+    const text = displayDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });
     }
 
     if (mode === ViewMode.date && exactTime) {
-      const time = DisplayTime(task.due.date);
+      const time = displayTime(task.due.date, use12HourFormat);
 
       accessories.unshift({ icon: Icon.Clock, text: time, tooltip: `Due time: ${time}` });
     }
@@ -145,10 +146,11 @@ export default function TaskListItem({
     }) ?? [];
 
   if (reminders.length > 0) {
+    const use12HourFormat = data?.user?.time_format === 1;
     accessories.unshift({
       icon: Icon.Alarm,
       tooltip: `${reminders.length} reminder${reminders.length === 1 ? "" : "s"}: ${reminders
-        .map(displayReminderName)
+        .map((r) => displayReminderName(r, use12HourFormat))
         .join(", ")}`,
       ...(reminders.length > 1 ? { text: `${reminders.length}` } : {}),
     });
