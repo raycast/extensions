@@ -1,6 +1,6 @@
 # Sportssync Changelog
 
-## [Added a bunch of new feedback] - {PR_MERGE_DATE}
+## [Added a bunch of new feedback] - 2025-02-14
 
 - Added a new league: Champions League
 - Fixed an issue causing the record in nhl standings command to show up as undefined
