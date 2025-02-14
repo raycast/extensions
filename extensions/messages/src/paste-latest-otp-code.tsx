@@ -26,7 +26,7 @@ export default async function Command() {
       LIMIT 50;
     `;
 
-    const messages = await executeSQL<{ body: string; message_date: string }>(DB_PATH, query);
+    const messages = await executeSQL<{ body: string }>(DB_PATH, query);
 
     if (messages.length === 0) {
       return showToast({
@@ -37,13 +37,52 @@ export default async function Command() {
 
     for (const message of messages) {
       const decodedBody = decodeHexString(message.body);
-      const otp = extractOTP(decodedBody);
 
-      if (otp) {
-        return Clipboard.paste(otp);
+      // 1) Gather all digit sequences of length >= 4
+      const potentialMatches = decodedBody.match(/\b\d{4,}\b/g);
+      let phoneFilteredOTP: string | null = null;
+
+      if (potentialMatches) {
+        // We'll skip any that are right next to parentheses, dashes, or plus signs
+        const phoneChars = /[()\-+]/;
+        const validCodes: string[] = [];
+
+        for (const code of potentialMatches) {
+          const index = decodedBody.indexOf(code);
+          if (index < 0) {
+            continue;
+          }
+
+          // Check two characters before and after this code
+          const preceding = decodedBody.slice(Math.max(0, index - 2), index);
+          const following = decodedBody.slice(index + code.length, index + code.length + 2);
+
+          // If it's adjacent to phone-like punctuation, skip
+          if (phoneChars.test(preceding) || phoneChars.test(following)) {
+            continue;
+          }
+
+          validCodes.push(code);
+        }
+
+        // If any valid codes remain, pick the last
+        if (validCodes.length > 0) {
+          phoneFilteredOTP = validCodes[validCodes.length - 1];
+        }
+      }
+
+      // 2) If the phone-filtered approach found something, use it; else fallback
+      if (phoneFilteredOTP) {
+        return Clipboard.paste(phoneFilteredOTP);
+      } else {
+        const fallbackOTP = extractOTP(decodedBody);
+        if (fallbackOTP) {
+          return Clipboard.paste(fallbackOTP);
+        }
       }
     }
 
+    // If no OTP found at all
     return showToast({
       style: Toast.Style.Failure,
       title: "No OTP code found in recent messages",

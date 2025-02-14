@@ -20,7 +20,7 @@ interface DailyNoteAppendArgs {
 export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs }) {
   const { vaults, ready } = useObsidianVaults();
   const { text } = props.arguments;
-  const { appendTemplate, heading, vaultName, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
+  const { appendTemplate, heading, vaultName, prepend, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState("");
   useEffect(() => {
@@ -59,6 +59,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
       vault: vaultToUse,
       text: content,
       heading: heading,
+      prepend: prepend,
       silent: silent,
     });
     open(target);
@@ -83,6 +84,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
                   vault: vault,
                   text: content,
                   heading: heading,
+                  prepend: prepend,
                 })}
               />
             </ActionPanel>

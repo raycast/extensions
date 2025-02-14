@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { ReactElement } from "react";
 import { User } from "./lib/models";
 
 export default function UserDetails({ user }: { user: User }) {
@@ -14,17 +13,20 @@ export default function UserDetails({ user }: { user: User }) {
         title="Name"
         subtitle={user.name}
         icon={Icon.Person}
-        accessoryIcon={{
-          source: user.photo_thumb,
-          mask: Image.Mask.Circle,
-        }}
         actions={
           <ActionPanel>
             <Action.CopyToClipboard content={user.name} />
           </ActionPanel>
         }
+        accessories={[
+          {
+            icon: {
+              source: user.photo_thumb,
+              mask: Image.Mask.Circle,
+            },
+          },
+        ]}
       />
-
       <List.Item
         key="role"
         id="role"
@@ -37,7 +39,6 @@ export default function UserDetails({ user }: { user: User }) {
           </ActionPanel>
         }
       />
-
       <List.Item
         key="email"
         id="email"
@@ -48,13 +49,12 @@ export default function UserDetails({ user }: { user: User }) {
           <ActionPanel>
             <Action.CopyToClipboard content={user.email} />
             <Action.Open
-              title="Send an email"
+              title="Send an Email"
               target={`mailto:${user.email}`}
             />
           </ActionPanel>
         }
       />
-
       <List.Item
         key="phone"
         id="phone"
@@ -64,11 +64,11 @@ export default function UserDetails({ user }: { user: User }) {
         actions={
           <ActionPanel>
             <Action.CopyToClipboard content={phone} />
+            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.Open title="Call on FaceTime" target={`tel:${phone}`} />
           </ActionPanel>
         }
       />
-
       <List.Item
         key="location"
         id="location"
@@ -83,7 +83,6 @@ export default function UserDetails({ user }: { user: User }) {
           </ActionPanel>
         }
       />
-
       <List.Item
         key="birthday"
         id="birthday"

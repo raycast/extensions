@@ -1,5 +1,5 @@
 import { V1PersistentVolume } from "@kubernetes/client-node";
-import { ResourceList } from "./components/resource-list";
+import { ResourceList } from "./components/ResourceList";
 import { KubernetesContextProvider } from "./states/context";
 import { KubernetesNamespaceProvider } from "./states/namespace";
 import { kubernetesObjectAge } from "./utils/duration";

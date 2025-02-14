@@ -5,6 +5,9 @@
   "description": "Browse MacRumors headlines from the comfort of Raycast.",
   "icon": "macrumors-extension-icon.png",
   "author": "hughmcmillanv",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
