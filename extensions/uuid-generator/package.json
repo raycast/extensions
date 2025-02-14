@@ -124,6 +124,20 @@
       ]
     },
     {
+      "name": "parseTypeID",
+      "title": "Parse TypeIDs",
+      "description": "Parse TypeID and copy resulting UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typeID",
+          "type": "text",
+          "placeholder": "prefix_1234567890",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "viewHistory",
       "title": "View History",
       "description": "View the UUID history",
