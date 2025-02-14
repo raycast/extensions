@@ -48,7 +48,7 @@ jobs:
           days-before-pr-close: 7
 
           # Limiting
-          operations-per-run: 200
+          operations-per-run: 400
 
           # Debug
           #debug-only: true
