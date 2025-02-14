@@ -34,20 +34,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -80,20 +80,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -110,7 +110,7 @@
           "title": "Prompt",
           "description": "Enter instructions for correcting spelling and grammar.",
           "type": "textfield",
-          "default": "Fix spelling, grammar, and punctuation. It is important that you only correct the text and do not write any explanations.",
+          "default": "Fix spelling, grammar, and punctuation. Only write the corrected version without explanations and without wrapping it in quotation marks.",
           "required": false
         },
         {
@@ -126,20 +126,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -172,20 +172,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -218,20 +218,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -264,20 +264,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -326,28 +326,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-online",
-              "title": "Sonar Small 8B Online"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-online",
-              "title": "Sonar Large 70B Online"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
-            },
-            {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
-            },
-            {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -397,20 +389,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -444,20 +436,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -491,20 +483,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -538,20 +530,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -585,20 +577,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -632,20 +624,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -679,20 +671,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -726,20 +718,20 @@
               "title": "Follow global model"
             },
             {
-              "value": "llama-3.1-sonar-small-128k-chat",
-              "title": "Sonar Small 8B 132k"
+              "value": "sonar",
+              "title": "Sonar 128k"
             },
             {
-              "value": "llama-3.1-sonar-large-128k-chat",
-              "title": "Sonar Large 70B 132k"
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
             },
             {
-              "value": "llama-3.1-8b-instruct",
-              "title": "Llama3.1 8B 132k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
             },
             {
-              "value": "llama-3.1-70b-instruct",
-              "title": "Llama3.1 70B 132k"
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -761,23 +753,23 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.1-sonar-small-128k-chat",
+      "default": "sonar",
       "data": [
         {
-          "value": "llama-3.1-sonar-small-128k-chat",
-          "title": "Sonar Small 8B 132k"
+          "value": "sonar",
+          "title": "Sonar 128k"
         },
         {
-          "value": "llama-3.1-sonar-large-128k-chat",
-          "title": "Sonar Large 70B 132k"
+          "value": "sonar-pro",
+          "title": "Sonar Pro 200k"
         },
         {
-          "value": "llama-3.1-8b-instruct",
-          "title": "Llama3.1 8B 132k"
+          "value": "sonar-reasoning",
+          "title": "Sonar Reasoning 128k"
         },
         {
-          "value": "llama-3.1-70b-instruct",
-          "title": "Llama3.1 70B 132k"
+          "value": "sonar-reasoning-pro",
+          "title": "Sonar Reasoning Pro 128k"
         }
       ]
     },
@@ -792,17 +784,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "openai": "^4.28.4",
-    "gpt-tokenizer": "^2.2.1"
+    "@raycast/api": "^1.89.1",
+    "gpt-tokenizer": "^2.8.1",
+    "openai": "^4.80.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

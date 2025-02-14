@@ -83,6 +83,13 @@ ${Object.entries(monitor.locations)
                     ) : (
                       <List.Item.Detail.Metadata.Label title="Keyword" icon={Icon.Minus} />
                     )}
+                    {monitor.category ? (
+                      <List.Item.Detail.Metadata.TagList title="Category">
+                        <List.Item.Detail.Metadata.TagList.Item text={monitor.category} />
+                      </List.Item.Detail.Metadata.TagList>
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Category" icon={Icon.Minus} />
+                    )}
                     <List.Item.Detail.Metadata.Label title="Timeout" text={`${monitor.timeout} seconds`} />
                     <List.Item.Detail.Metadata.Label
                       title="Checkup Frequency"

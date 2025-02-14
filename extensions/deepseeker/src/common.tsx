@@ -12,7 +12,13 @@ import { useEffect, useState } from "react";
 import { global_model, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
 
-export default function ResultView(prompt: string, model_override: string, toast_title: string, user_input?: string) {
+export default function ResultView(
+  prompt: string,
+  model_override: string,
+  toast_title: string,
+  use_selected_text: boolean,
+  user_input?: string
+) {
   const pref = getPreferenceValues();
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
@@ -28,24 +34,36 @@ export default function ResultView(prompt: string, model_override: string, toast
     const toast = await showToast(Toast.Style.Animated, toast_title);
     let selectedText = "";
 
-    try {
-      selectedText = user_input || (await getSelectedText()); // TODO: a temporary fix for not using selected text but user input. Need refactoring.
-    } catch (error) {
-      toast.title = "Error";
-      toast.style = Toast.Style.Failure;
-      setLoading(false);
-      setResponse(
-        "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
-      );
-      return;
+    if (use_selected_text) {
+      try {
+        selectedText = await getSelectedText();
+      } catch (error) {
+        toast.title = "Error";
+        toast.style = Toast.Style.Failure;
+        setLoading(false);
+        setResponse(
+          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
+        );
+        return;
+      }
     }
+
+    let user_prompt = "";
+    if (user_input) {
+      user_prompt = "USER PROMPT: " + user_input;
+    }
+    if (selectedText) {
+      user_prompt += "\n\nUSER PROVIDED TEXT: " + selectedText;
+    }
+
+    console.log("Prompt:\n " + user_prompt);
 
     try {
       const stream = await openai.chat.completions.create({
         model: model,
         messages: [
           { role: "system", content: prompt },
-          { role: "user", content: selectedText },
+          { role: "user", content: user_prompt },
         ],
         stream: true,
       });
@@ -103,6 +121,13 @@ export default function ResultView(prompt: string, model_override: string, toast
     getResult();
   }
 
+  async function retryWithDeepSeekReasoner() {
+    setModel("deepseek-reasoner");
+    setLoading(true);
+    setResponse("");
+    getResult();
+  }
+
   useEffect(() => {
     getResult();
   }, []);
@@ -151,6 +176,14 @@ export default function ResultView(prompt: string, model_override: string, toast
                 title="Retry with DeepSeek Chat"
                 onAction={retryWithDeepSeekChat}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                icon={Icon.ArrowNe}
+              />
+            )}
+            {model != "deepseek-reasoner" && (
+              <Action
+                title="Retry with DeepSeek Reasoner"
+                onAction={retryWithDeepSeekReasoner}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 icon={Icon.ArrowNe}
               />
             )}

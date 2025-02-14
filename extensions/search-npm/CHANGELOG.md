@@ -1,5 +1,13 @@
 # Search npm Changelog
 
+## [Fixes] - 2025-02-05
+
+- Fix URL parsing issue
+
+## [Added a shortcut] - 2025-01-22
+
+- Added a shortcut to copy the package version
+
 ## [Chore & Fixes] - 2025-01-13
 
 - Hide toast when `historyCount` is zero

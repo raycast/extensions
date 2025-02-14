@@ -1,5 +1,5 @@
 import { ContainerInfo } from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action, Keyboard } from '@raycast/api';
 import ContainerDetail from './container_detail';
 import { useDocker } from './docker';
 import { containerName, isContainerRunning } from './docker/container';
@@ -22,82 +22,87 @@ export default function ContainerList(props: { projectFilter?: string }) {
 
   return (
     <List isLoading={isLoading}>
-      {filterContainers(containers, props.projectFilter)?.map((containerInfo) => (
-        <List.Item
-          key={containerInfo.Id}
-          title={containerName(containerInfo)}
-          subtitle={containerInfo.Image}
-          accessories={[{ text: { value: containerInfo.State } }]}
-          icon={
-            isContainerRunning(containerInfo)
-              ? { source: 'icon-container-running.png', tintColor: Color.Green }
-              : { source: 'icon-container.png', tintColor: Color.SecondaryText }
-          }
-          actions={
-            <ActionPanel>
-              {isContainerRunning(containerInfo) && (
+      {filterContainers(containers, props.projectFilter)?.map((containerInfo) => {
+        const cName = containerName(containerInfo);
+        return (
+          <List.Item
+            keywords={[containerInfo.Id, cName, containerInfo.Image]}
+            key={containerInfo.Id}
+            title={cName}
+            subtitle={containerInfo.Image}
+            accessories={[{ text: { value: containerInfo.State } }]}
+            icon={
+              isContainerRunning(containerInfo)
+                ? { source: 'icon-container-running.png', tintColor: Color.Green }
+                : { source: 'icon-container.png', tintColor: Color.SecondaryText }
+            }
+            actions={
+              <ActionPanel>
+                {isContainerRunning(containerInfo) && (
+                  <Action
+                    title="Stop Container"
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+                    icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
+                    onAction={withToast({
+                      action: () => stopContainer(containerInfo),
+                      onSuccess: () => `Container ${cName} stopped`,
+                      onFailure: (error) => formatContainerError(error, containerInfo),
+                    })}
+                  />
+                )}
+                {isContainerRunning(containerInfo) && (
+                  <Action
+                    title="Restart Container"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ['opt'], key: 'r' }}
+                    onAction={withToast({
+                      action: () => restartContainer(containerInfo),
+                      onSuccess: () => `Container ${cName} restarted`,
+                      onFailure: (error) => formatContainerError(error, containerInfo),
+                    })}
+                  />
+                )}
+                {isContainerRunning(containerInfo) && (
+                  <Action.CopyToClipboard
+                    title="Copy Container Id"
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                    content={containerInfo.Id}
+                  />
+                )}
+                {!isContainerRunning(containerInfo) && (
+                  <Action
+                    title="Start Container"
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+                    icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
+                    onAction={withToast({
+                      action: () => startContainer(containerInfo),
+                      onSuccess: () => `Container ${cName} started`,
+                      onFailure: (error) => formatContainerError(error, containerInfo),
+                    })}
+                  />
+                )}
+                <Action.Push
+                  title="Inspect"
+                  icon={{ source: Icon.Binoculars }}
+                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
+                />
                 <Action
-                  title="Stop Container"
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                  icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
+                  title="Remove Container"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={withToast({
-                    action: () => stopContainer(containerInfo),
-                    onSuccess: () => `Container ${containerName(containerInfo)} stopped`,
+                    action: () => removeContainer(containerInfo),
+                    onSuccess: () => `Container ${cName} removed`,
                     onFailure: (error) => formatContainerError(error, containerInfo),
                   })}
                 />
-              )}
-              {isContainerRunning(containerInfo) && (
-                <Action
-                  title="Restart Container"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ['opt'], key: 'r' }}
-                  onAction={withToast({
-                    action: () => restartContainer(containerInfo),
-                    onSuccess: () => `Container ${containerName(containerInfo)} restarted`,
-                    onFailure: (error) => formatContainerError(error, containerInfo),
-                  })}
-                />
-              )}
-              {isContainerRunning(containerInfo) && (
-                <Action.CopyToClipboard
-                  title="Copy Container ID"
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
-                  content={containerInfo.Id}
-                />
-              )}
-              {!isContainerRunning(containerInfo) && (
-                <Action
-                  title="Start Container"
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-                  icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
-                  onAction={withToast({
-                    action: () => startContainer(containerInfo),
-                    onSuccess: () => `Container ${containerName(containerInfo)} started`,
-                    onFailure: (error) => formatContainerError(error, containerInfo),
-                  })}
-                />
-              )}
-              <Action.Push
-                title="Inspect"
-                icon={{ source: Icon.Binoculars }}
-                shortcut={{ modifiers: ['cmd'], key: 'i' }}
-                target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
-              />
-              <Action
-                title="Remove Container"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
-                onAction={withToast({
-                  action: () => removeContainer(containerInfo),
-                  onSuccess: () => `Container ${containerName(containerInfo)} removed`,
-                  onFailure: (error) => formatContainerError(error, containerInfo),
-                })}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

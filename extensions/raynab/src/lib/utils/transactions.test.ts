@@ -1,6 +1,6 @@
 import { test, describe, expect } from 'vitest';
 
-import { autoDistribute, formatToReadablePrice, formatToReadableFrequency } from './transactions';
+import { autoDistribute, formatToReadableAmount, formatToReadableFrequency } from './transactions';
 import { CurrencyFormat } from '@srcTypes';
 
 describe('properly format milliunit amounts to readable amounts', () => {
@@ -8,11 +8,11 @@ describe('properly format milliunit amounts to readable amounts', () => {
     const MILLUNIT_AMOUNT = 120_000_000;
 
     test('with a locale', () => {
-      expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT })).toBe('120,000');
+      expect(formatToReadableAmount({ amount: MILLUNIT_AMOUNT })).toBe('120,000');
     });
 
     test('without a locale', () => {
-      expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT, locale: false })).toBe('120000');
+      expect(formatToReadableAmount({ amount: MILLUNIT_AMOUNT, locale: false })).toBe('120000');
     });
   });
 
@@ -27,13 +27,13 @@ describe('properly format milliunit amounts to readable amounts', () => {
       };
 
       test('positive amount with decimals', () => {
-        expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
+        expect(formatToReadableAmount({ amount: MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
           '$123.93',
         );
       });
 
       test('negative amount with decimals', () => {
-        expect(formatToReadablePrice({ amount: -1 * MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
+        expect(formatToReadableAmount({ amount: -1 * MILLUNIT_AMOUNT, currency: USD_FORMAT as CurrencyFormat })).toBe(
           '-$123.93',
         );
       });
@@ -48,13 +48,13 @@ describe('properly format milliunit amounts to readable amounts', () => {
       };
 
       test('positive amount with decimals', () => {
-        expect(formatToReadablePrice({ amount: MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
+        expect(formatToReadableAmount({ amount: MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
           '123.93€',
         );
       });
 
       test('negative amount with decimals', () => {
-        expect(formatToReadablePrice({ amount: -1 * MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
+        expect(formatToReadableAmount({ amount: -1 * MILLUNIT_AMOUNT, currency: EURO_FORMAT as CurrencyFormat })).toBe(
           '-123.93€',
         );
       });

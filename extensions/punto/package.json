@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "punto",
   "title": "Punto Switcher",
-  "description": "Changes the layout of selected text",
+  "description": "Changes the layout of selected text. Requires Accessibility access",
   "icon": "punto-icon.png",
   "author": "red.avtovo",
   "categories": [
@@ -14,22 +14,96 @@
     {
       "name": "index",
       "title": "Switch Layout",
-      "description": "The script changes layout of selected text. EN-RU supported only. For eg: руддщ -> hello | ghbdtn -> привет",
+      "description": "The script changes layout of selected text. EN-RU supported only.\nFor eg:\n- руддщ -> hello\n- ghbdtn -> привет",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "layoutSwitchModifier",
+      "title": "Layout Switch Shortcut",
+      "description": "The shortcut to switch the layout of the selected text",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "⌘Space",
+          "value": "command"
+        },
+        {
+          "title": "⌃Space",
+          "value": "control"
+        },
+        {
+          "title": "⌥Space",
+          "value": "option"
+        }
+      ],
+      "default": "control"
+    },
+    {
+      "name": "cyrLayoutName",
+      "title": "Cyrillic Layout",
+      "description": "The name of the Cyrillic layout",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Russian - PC",
+          "value": "RussianWin"
+        },
+        {
+          "title": "Russian - QWERTY",
+          "value": "Russian - Phonetic"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "Ukrainian - PC"
+        },
+        {
+          "title": "Ukrainian - Legacy",
+          "value": "Ukrainian"
+        },
+        {
+          "title": "Ukrainian - QWERTY",
+          "value": "Ukrainian-QWERTY"
+        }
+      ]
+    },
+    {
+      "name": "latLayoutName",
+      "title": "Latin Layout",
+      "description": "The name of the Latin layout",
+      "type": "textfield",
+      "required": true,
+      "default": "ABC"
+    },
+    {
+      "name": "showSuccessHUD",
+      "title": "Show Success HUD",
+      "description": "Show a HUD when the layout is switched",
+      "type": "checkbox",
+      "label": "Show Success HUD",
+      "default": false,
+      "required": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.45.2"
+    "@raycast/api": "^1.89.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
