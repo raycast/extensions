@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gemini-assistant",
+  "title": "Gemini Assistant",
+  "description": "Gemini Assistant is a versatile extension for Raycast that harnesses the power of Google's Gemini API to enhance your productivity. Whether you need automated code reviews, intelligent suggestions, or quick answers to complex questions, Gemini Assistant is your go-to tool for AI-driven insights and support. The extension operates for free using your own Gemini API key, ensuring seamless integration and cost-effective usage.",
+  "icon": "gemini-review.png",
+  "author": "dorian_frances",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "defaultValue": "",
+      "required": true,
+      "title": "Gemini API Key",
+      "description": "Enter your Gemini API key to enable code reviews."
+    }
+  ],
+  "commands": [
+    {
+      "name": "review-my-code",
+      "title": "Review My Code",
+      "subtitle": "Get instant, AI-driven code feedback with Gemini",
+      "description": "The Automated Code Review command utilizes Google's Gemini API to analyze your code and provide detailed feedback. It highlights syntax errors, suggests best practices, and offers optimization tips to improve code quality and maintainability.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
