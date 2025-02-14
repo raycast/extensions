@@ -44,7 +44,7 @@ interface StandingsData {
 }
 
 export default function scoresAndSchedule() {
-  // Fetch Driver Standings
+  // Fetch EPL Standings
 
   const [currentLeague, displaySelectLeague] = useState("EPL");
   const { isLoading: eplStats, data: eplData } = useFetch<StandingsData>(
@@ -52,7 +52,6 @@ export default function scoresAndSchedule() {
   );
 
   const eplItems = eplData?.children?.[0]?.standings?.entries || [];
-
   const eplTeams = eplItems.map((epl, index) => {
     return (
       <List.Item
@@ -69,14 +68,13 @@ export default function scoresAndSchedule() {
     );
   });
 
-  // Fetch Constructor Standings
+  // Fetch SLL Standings
 
   const { isLoading: sllStats, data: sllData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/ESP.1/standings",
   );
 
   const sllItems = sllData?.children?.[0]?.standings?.entries || [];
-
   const sllTeams = sllItems.map((sll, index) => {
     return (
       <List.Item
@@ -93,14 +91,13 @@ export default function scoresAndSchedule() {
     );
   });
 
-  // Fetch NBA Standings
+  // Fetch GER Standings
 
   const { isLoading: gerStats, data: gerData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/GER.1/standings",
   );
 
   const gerItems = gerData?.children?.[0]?.standings?.entries || [];
-
   const gerTeams = gerItems.map((ger, index) => {
     return (
       <List.Item
@@ -116,6 +113,8 @@ export default function scoresAndSchedule() {
       />
     );
   });
+
+  // Fetch ITA Standings
 
   const { isLoading: itaStats, data: itaData } = useFetch<StandingsData>(
     "https://site.web.api.espn.com/apis/v2/sports/soccer/ITA.1/standings",
@@ -139,7 +138,31 @@ export default function scoresAndSchedule() {
     );
   });
 
-  if (eplStats || sllStats || gerStats || itaStats) {
+  // Fetch UEFA Standings
+
+  const { isLoading: uefaStats, data: uefaData } = useFetch<StandingsData>(
+    "https://site.web.api.espn.com/apis/v2/sports/soccer/uefa.champions/standings",
+  );
+
+  const uefaItems = uefaData?.children?.[0]?.standings?.entries || [];
+
+  const uefaTeams = uefaItems.map((uefa, index) => {
+    return (
+      <List.Item
+        key={index}
+        title={`${uefa.team.displayName}`}
+        icon={{ source: uefa.team.logos[0].href }}
+        accessoryTitle={`${uefa.stats[0].displayValue} GP | ${uefa.stats[12].displayValue} | ${uefa.stats[3].displayValue} pts | ${uefa.stats[5].displayValue} GF | ${uefa.stats[4].displayValue} GA | Dif: ${uefa.stats[2].displayValue}`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Team Details on ESPN" url={`${uefa.team.links[0].href}`} />
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
+  if (eplStats || sllStats || gerStats || itaStats || uefaStats) {
     return <Detail isLoading={true} />;
   }
 
@@ -149,6 +172,7 @@ export default function scoresAndSchedule() {
       searchBarAccessory={
         <List.Dropdown tooltip="Sort by" onChange={displaySelectLeague} defaultValue="EPL">
           <List.Dropdown.Item title="EPL" value="EPL" />
+          <List.Dropdown.Item title="UEFA" value="UEFA" />
           <List.Dropdown.Item title="SLL" value="SLL" />
           <List.Dropdown.Item title="GER" value="GER" />
           <List.Dropdown.Item title="ITA" value="ITA" />
@@ -159,6 +183,11 @@ export default function scoresAndSchedule() {
       {currentLeague === "EPL" && (
         <>
           <List.Section title={`${eplData?.children[0]?.name}`}>{eplTeams}</List.Section>
+        </>
+      )}
+      {currentLeague === "UEFA" && (
+        <>
+          <List.Section title={`${uefaData?.children[0]?.name}`}>{uefaTeams}</List.Section>
         </>
       )}
 

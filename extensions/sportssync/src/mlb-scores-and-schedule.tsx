@@ -93,14 +93,18 @@ export default function command() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${game.links[0].href}`} />
-            <Action.OpenInBrowser
-              title="View Away Team Details"
-              url={`${game.competitions[0].competitors[1].team.links[0].href}`}
-            />
-            <Action.OpenInBrowser
-              title="View Home Team Details"
-              url={`${game.competitions[0].competitors[0].team.links[0].href}`}
-            />
+            {game.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={`${game.competitions[0].competitors[1].team.links[0].href}`}
+              />
+            )}
+            {game.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={`${game.competitions[0].competitors[0].team.links[0].href}`}
+              />
+            )}
           </ActionPanel>
         }
       />,
