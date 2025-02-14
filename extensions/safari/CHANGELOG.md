@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-14
 
 - Added a preference to enable pinyin search for Chinese characters.
 
