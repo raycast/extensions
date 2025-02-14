@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Improvements & Bug fixes] - {PR_MERGE_DATE}
+## [Improvements & Bug fixes] - 2025-02-14
 
 - Add a dropdown to choose the transaction's payee. Optionally allow manual input
 - Aligned currency formatting support with budget settings
