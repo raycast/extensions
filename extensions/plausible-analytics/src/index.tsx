@@ -15,7 +15,7 @@ import { Storage } from "./storage";
 import { verifySite, getStatsForAllWebsites } from "./api";
 import { Stats } from "./types";
 
-const { hostedDomain } = getPreferenceValues<Preferences>() ?? "https://plausible.io";
+const hostedDomain = getPreferenceValues<Preferences>().hostedDomain || "https://plausible.io";
 
 function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
   const { pop } = useNavigation();
