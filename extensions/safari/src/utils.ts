@@ -70,7 +70,7 @@ export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 })
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 
 function installLangHandlers() {
-  const enablePinyin = getPreferenceValues().enablePinyin;
+  const enablePinyin = getPreferenceValues<Preferences>().enablePinyin;
   if (enablePinyin) {
     import("./lang-adaptor/pinyin").then((pinyinModule) => {
       const pinyinHandler = new pinyinModule.PinyinHandler();
