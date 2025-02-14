@@ -1,5 +1,9 @@
 # Bluesky Changelog
 
+## [Maintenance Release] - {PR_MERGE_DATE}
+
+- chore: update `@atproto/api` so we have better TS typing
+
 ## [Updated Logo] - 2025-01-10
 
 - Update logo to use Bluesky logo from Press Kit
