@@ -3,17 +3,43 @@ import { Color } from "@raycast/api";
 import type { WarmupScheme } from "../types/warmup";
 
 export const WARMUP_SCHEMES: WarmupScheme[] = [
-  { percentage: 0.4, reps: 10, color: Color.Green }, // Light warmup
-  { percentage: 0.5, reps: 8, color: Color.Yellow }, // Medium warmup
-  { percentage: 0.6, reps: 5, color: Color.Orange }, // Moderate warmup
-  { percentage: 0.8, reps: 3, color: Color.Red }, // Heavy warmup
-  { percentage: 1.0, reps: 0, color: Color.Purple }, // Working set
+  { percentage: 0.5, reps: 5, color: Color.Green }, // First warmup: 50% x 5
+  { percentage: 0.6, reps: 4, color: Color.Yellow }, // Second: 60% x 4
+  { percentage: 0.7, reps: 3, color: Color.Orange }, // Third: 70% x 3
+  { percentage: 0.8, reps: 2, color: Color.Red }, // Fourth: 80% x 2
+  { percentage: 0.9, reps: 1, color: Color.Purple }, // Last warmup: 90% x 1
+  { percentage: 1.0, reps: 1, color: Color.Blue }, // Working weight: 100% x 1
 ];
 
+// Based on Prilepin's Chart principles
 export const WARMUP_DESCRIPTIONS = {
-  light: "Light warmup to get blood flowing",
-  medium: "Medium intensity to practice form",
-  moderate: "Moderate load to prepare for working sets",
-  heavy: "Heavy warmup to prime nervous system",
-  working: "Working set weight",
+  methodology: `## Warmup Methodology
+
+This warmup scheme is based on principles from Prilepin's Chart, a fundamental tool in strength training. The progression gradually increases intensity while decreasing volume to optimally prepare for your working weight.
+
+### Benefits
+- Properly warms up muscles and CNS
+- Practices movement pattern
+- Prevents fatigue before working sets
+- Gradually acclimates to heavier weights
+
+### Application
+Start with 50% of your working weight for 5 reps, then progressively increase weight while decreasing reps. This allows for:
+- Movement pattern practice
+- Neural preparation
+- Minimal fatigue accumulation`,
+
+  light: "50% intensity for movement pattern practice",
+  medium: "60-70% for technical refinement",
+  moderate: "70-80% for neural activation",
+  heavy: "80-90% for final preparation",
+  working: "Working weight - ready for performance",
+};
+
+export const WARMUP_RESOURCES = {
+  LINKS: {
+    PRILEPIN: "https://www.strongerbyscience.com/warm-up/",
+    RESEARCH: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4482302/",
+    GUIDE: "https://www.jtsstrength.com/warm-up-like-pro/",
+  },
 };

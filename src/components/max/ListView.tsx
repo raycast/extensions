@@ -16,6 +16,9 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
   const [showingDetail, setShowingDetail] = useState(false);
   const { unitSystem } = getPreferenceValues<Preferences>();
 
+  console.log("ListView Results:", results);
+  console.log("Results Length:", results.length);
+
   return (
     <List
       searchBarPlaceholder="Enter weight * repetitions (e.g. 70*6)"
@@ -23,7 +26,7 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
       searchText={searchText}
       isShowingDetail={showingDetail}
     >
-      {results.length > 1 ? (
+      {results.length > 0 ? (
         results.map((result, index) => (
           <MaxItem key={index} result={result} unitSystem={unitSystem} setShowingDetail={setShowingDetail} />
         ))
