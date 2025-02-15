@@ -21,8 +21,6 @@ export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
 `;
 
-  
-
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const NOT_INSTALLED_MESSAGE = "Chromium not installed";
