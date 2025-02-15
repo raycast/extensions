@@ -9,7 +9,6 @@ import {
 } from '@raycast/api'
 import { useFetch, useCachedState } from '@raycast/utils'
 import { useState, useEffect } from 'react'
-import type { Preferences } from './components/PackagListItem'
 import { PackageListItem } from './components/PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
 import { HistoryListItem } from './components/HistoryListItem'
@@ -23,16 +22,18 @@ export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
   const [favorites, fetchFavorites] = useFavorites()
-  const { historyCount, showLinkToSearchResultsInListView }: Preferences =
-    getPreferenceValues()
+  const { historyCount, showLinkToSearchResultsInListView } =
+    getPreferenceValues<ExtensionPreferences>()
 
   const { isLoading, data, revalidate } = useFetch<NpmFetchResponse>(
     `${API_PATH}${searchTerm.replace(/\s/g, '+')}`,
     {
       execute: !!searchTerm,
       onError: (error) => {
-        console.error(error)
-        showToast(Toast.Style.Failure, 'Could not fetch packages')
+        if (searchTerm) {
+          console.error(error)
+          showToast(Toast.Style.Failure, 'Could not fetch packages')
+        }
       },
       keepPreviousData: true,
     },

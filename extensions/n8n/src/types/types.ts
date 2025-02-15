@@ -6,7 +6,7 @@ export interface Workflow {
   connections: Connections;
   createdAt: string;
   updatedAt: string;
-  settings: any;
+  settings: Record<string, boolean | string | number>;
   staticData: null;
   tags: string[];
 }

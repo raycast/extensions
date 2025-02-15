@@ -11,7 +11,8 @@
     "jondelgado",
     "phil_s",
     "michalzuch",
-    "ridemountainpig"
+    "ridemountainpig",
+    "maxnyby"
   ],
   "owner": "raycast",
   "access": "public",
@@ -58,6 +59,14 @@
           "type": "checkbox",
           "label": "Initially select the default list",
           "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "selectTodayAsDefault",
+          "type": "checkbox",
+          "label": "Initially select \"Today\" for new reminders",
+          "description": "When enabled, \"Today\" will be initially selected for new reminders instead of no due date.",
           "default": false,
           "required": false
         }
@@ -207,14 +216,14 @@
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.18.1",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.12.4",
     "@types/react": "^18.2.74",

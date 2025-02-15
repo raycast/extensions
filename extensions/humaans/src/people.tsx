@@ -40,7 +40,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={`https://app.humaans.io/?profile=${id}`} />
+                  <Action.OpenInBrowser url={`https://app.humaans.io/people?profile=${id}`} />
                   {email && (
                     <Action.CopyToClipboard
                       title="Copy Email"

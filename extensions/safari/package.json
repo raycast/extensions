@@ -15,10 +15,12 @@
     "axsuul",
     "iwex",
     "xilopaint",
-    "marcjulian",
     "ChangeHow",
     "ridemountainpig",
     "1weiho"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "license": "MIT",
   "commands": [
@@ -149,6 +151,15 @@
           "title": "Safari Technology Preview"
         }
       ]
+    },
+    {
+      "name": "enablePinyin",
+      "type": "checkbox",
+      "required": false,
+      "title": "Pinyin Support",
+      "label": "Enable Pinyin search for Chinese characters",
+      "description": "When enabled, allows searching Chinese characters using pinyin romanization",
+      "default": false
     }
   ],
   "dependencies": {

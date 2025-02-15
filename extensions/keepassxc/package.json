@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keepassxc",
   "title": "KeePassXC",
-  "description": "Access a KeePass database through KeePassXC",
+  "description": "Access a KeePass database through KeePassXC.",
   "icon": "keepassxc.png",
-  "author": "Sulfyderz",
+  "author": "pabroux",
   "contributors": [
     "zkytech"
   ],
@@ -89,11 +89,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.18.1",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "csv-parse": "^5.6.0",
+    "otpauth": "^9.3.6",
     "run-applescript": "^6.1.0"
   },
   "devDependencies": {
