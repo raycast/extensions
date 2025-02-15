@@ -6,19 +6,17 @@ import {
   List,
   LocalStorage,
   Toast,
-  closeMainWindow,
   confirmAlert,
   getPreferenceValues,
   getSelectedFinderItems,
-  popToRoot,
   showToast,
+  closeMainWindow,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { getProgressIcon } from "@raycast/utils";
 import EditDestination from "./destination-form";
 import { Destination, destinationRepo } from "./repo/destination";
-import { checkFileExists, copyFile, getFilenameFromPath, moveFile } from "./utils/filesystem";
+import { checkExistence, copy, getFilenameFromPath, isDirectory, isFile, move } from "./utils/filesystem";
 
 interface CopyMoveToProps {
   mode: "copy" | "move";
@@ -28,9 +26,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
   const preferences = getPreferenceValues<Preferences>();
   const isMove = props.mode === "move";
   const actionText = isMove ? "move" : "copy";
-  const actionTextPast = isMove ? "moved" : "copied";
-
-  const [progress, setProgress] = useState<number>(0);
+  const actionTextPast = isMove ? "Moved" : "Copied";
 
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [activeDestination, setActiveDestination] = useState<Destination | null>(null);
@@ -75,7 +71,7 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
 
   async function handleAction(name: string) {
     try {
-      const fileAction = isMove ? moveFile : copyFile;
+      const fileAction = isMove ? move : copy;
       const destination = destinations.find((destination) => destination.name === name);
       if (!destination) {
         await showToast({
@@ -94,10 +90,11 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
         return;
       }
 
-      let completed = 0;
+      let completedFiles = 0;
+      let completedDirectories = 0;
       for (const item of selectedItems) {
         const filename = await getFilenameFromPath(item.path);
-        const alreadyExists = await checkFileExists(item.path, destination.directory);
+        const alreadyExists = await checkExistence(item.path, destination.directory);
         if (alreadyExists) {
           switch (preferences.fileConflictAction) {
             case "overwrite":
@@ -117,7 +114,10 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
                 },
               });
               if (shouldOverwrite) {
+                await closeMainWindow();
                 await fileAction(item.path, destination.directory);
+              } else {
+                return;
               }
               break;
             }
@@ -125,34 +125,41 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
               continue;
           }
         } else {
+          await closeMainWindow();
           await fileAction(item.path, destination.directory);
         }
-        completed += 1;
-        setProgress(completed / selectedItems.length);
+
+        const itemIsFile = await isFile(item.path);
+        const itemIsDirectory = await isDirectory(item.path);
+        if (itemIsFile) {
+          completedFiles += 1;
+        }
+        if (itemIsDirectory) {
+          completedDirectories += 1;
+        }
       }
-      setProgress(0);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Files ${actionTextPast} successfully`,
-      });
-
-      switch (preferences.afterCompletionAction) {
-        case "close":
-          await popToRoot();
-          await closeMainWindow();
-          break;
-        case "popToRoot":
-          await popToRoot();
-          break;
-        case "nothing":
-          break;
+      const hudMessage = (() => {
+        if (completedFiles === 0 && completedDirectories > 0) {
+          return `${actionTextPast} ${completedDirectories} folder${completedDirectories > 1 ? "s" : ""}`;
+        }
+        if (completedFiles > 0 && completedDirectories === 0) {
+          return `${actionTextPast} ${completedFiles} file${completedFiles > 1 ? "s" : ""}`;
+        }
+        if (completedFiles > 0 && completedDirectories > 0) {
+          return `${actionTextPast} ${completedFiles} file${completedFiles > 1 ? "s" : ""} and ${completedDirectories} folder${completedDirectories > 1 ? "s" : ""}`;
+        }
+      })();
+      if (hudMessage) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: hudMessage,
+        });
       }
     } catch (error) {
       await showToast({
-        style: Toast.Style.Failure,
         title: `Failed to ${actionText} files`,
-        message: error instanceof Error ? error.message : "Unknown error",
+        style: Toast.Style.Success,
       });
     }
   }
@@ -225,7 +232,6 @@ export default function CopyMoveTo(props: CopyMoveToProps) {
             key={destination.name}
             title={destination.name}
             subtitle={preferences.showPath ? destination.directory : undefined}
-            icon={progress > 0 ? getProgressIcon(progress) : undefined}
             accessories={[
               {
                 icon: destination.pinned ? Icon.Star : undefined,

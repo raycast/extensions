@@ -46,28 +46,6 @@
 	],
 	"preferences": [
 		{
-			"name": "afterCompletionAction",
-			"title": "What to do after completion?",
-			"description": "Action to take after files are copied or moved",
-			"type": "dropdown",
-			"required": false,
-			"default": "close",
-			"data": [
-				{
-					"title": "Close Raycast",
-					"value": "close"
-				},
-				{
-					"title": "Pop to Root",
-					"value": "popToRoot"
-				},
-				{
-					"title": "Nothing",
-					"value": "nothing"
-				}
-			]
-		},
-		{
 			"name": "fileConflictAction",
 			"title": "What to do if file already exists?",
 			"description": "Action to take when a file with same name exists in destination",

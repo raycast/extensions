@@ -3,86 +3,118 @@ import path from "node:path";
 
 export async function checkDirExists(dirPath: string) {
   try {
-    const exists = await fs
-      .access(dirPath)
-      .then(() => true)
-      .catch(() => false);
-    const isDirectory = await fs
-      .stat(dirPath)
-      .then((stat) => stat.isDirectory())
-      .catch(() => false);
-
-    return exists && isDirectory;
+    const stat = await fs.stat(dirPath);
+    return stat.isDirectory();
   } catch (error) {
     return false;
   }
 }
 
-export async function copyFile(source: string, destination: string): Promise<void> {
+export async function transfer(source: string, destination: string, operation: "copy" | "move"): Promise<void> {
   try {
-    const destStat = await fs.stat(destination); // Added await
-    if (!destStat.isDirectory()) {
-      throw new Error("Destination is not a directory");
+    const srcStat = await fs.lstat(source);
+
+    if (srcStat.isDirectory()) {
+      if (!(await checkDirExists(source))) {
+        throw new Error(`Source directory does not exist: ${source}`);
+      }
+
+      let destDir = destination;
+      try {
+        const destStat = await fs.stat(destination);
+        if (destStat.isDirectory()) {
+          destDir = path.join(destination, path.basename(source));
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+          throw error;
+        }
+      }
+      await fs.mkdir(destDir, { recursive: true });
+
+      const entries = await fs.readdir(source);
+      for (const entry of entries) {
+        const srcPath = path.join(source, entry);
+        const destPath = path.join(destDir, entry);
+        await transfer(srcPath, destPath, operation);
+      }
+
+      if (operation === "move") {
+        await fs.rmdir(source);
+      }
+    } else if (srcStat.isFile()) {
+      let destPath = destination;
+      try {
+        const destStat = await fs.stat(destination);
+        if (destStat.isDirectory()) {
+          destPath = path.join(destination, path.basename(source));
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+          throw error;
+        }
+      }
+
+      if (operation === "copy") {
+        await fs.copyFile(source, destPath);
+      } else {
+        await fs.rename(source, destPath);
+      }
+    } else if (srcStat.isSymbolicLink()) {
+      let destPath = destination;
+      try {
+        const destStat = await fs.stat(destination);
+        if (destStat.isDirectory()) {
+          destPath = path.join(destination, path.basename(source));
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+          throw error;
+        }
+      }
+      if (operation === "copy") {
+        const linkTarget = await fs.readlink(source);
+        await fs.symlink(linkTarget, destPath);
+      } else {
+        await fs.rename(source, destPath);
+      }
+    } else {
+      throw new Error(`Source is neither a file, directory, nor a symbolic link: ${source}`);
     }
-
-    const filename = path.basename(source);
-    const destPath = path.join(destination, filename);
-
-    const srcStat = await fs.stat(source);
-    if (!srcStat.isFile()) {
-      throw new Error(`Source is not a file: ${source}`);
-    }
-
-    await fs.copyFile(source, destPath);
   } catch (error) {
-    throw new Error(`Failed to copy files: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new Error(
+      `Failed to ${operation} ${source} to ${destination}: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
-export async function moveFile(source: string, destination: string): Promise<void> {
-  try {
-    const destStat = await fs.stat(destination);
-    if (!destStat.isDirectory()) {
-      throw new Error("Destination is not a directory");
-    }
-
-    const filename = path.basename(source);
-    const destPath = path.join(destination, filename);
-
-    const srcStat = await fs.stat(source);
-    if (!srcStat.isFile()) {
-      throw new Error(`Source is not a file: ${source}`);
-    }
-
-    await fs.rename(source, destPath);
-  } catch (error) {
-    throw new Error(`Failed to move files: ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
+export async function copy(source: string, destination: string): Promise<void> {
+  return transfer(source, destination, "copy");
 }
 
-export async function checkFileExists(sourceFilePath: string, destinationDir: string) {
+export async function move(source: string, destination: string): Promise<void> {
+  return transfer(source, destination, "move");
+}
+
+export async function checkExistence(sourceFilePath: string, destinationDir: string) {
   const filename = path.basename(sourceFilePath);
   const destinationPath = path.join(destinationDir, filename);
-
   try {
-    const exists = await fs
-      .access(destinationPath)
-      .then(() => true)
-      .catch(() => false);
-
-    if (!exists) return false;
-
-    const isFile = await fs
-      .stat(destinationPath)
-      .then((stat) => stat.isFile())
-      .catch(() => false);
-
-    return exists && isFile;
-  } catch (error) {
-    return false;
+    await fs.access(destinationPath);
+    return true; // If access is successful, it exists
+  } catch {
+    return false; // If access throws an error, it doesn't exist
   }
 }
 
 export async function getFilenameFromPath(filePath: string) {
   return path.basename(filePath);
+}
+
+export async function isFile(filePath: string): Promise<boolean> {
+  return fs.stat(filePath).then((stat) => stat.isFile());
+}
+
+export async function isDirectory(filePath: string): Promise<boolean> {
+  return fs.stat(filePath).then((stat) => stat.isDirectory());
 }
