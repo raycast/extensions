@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-downloader",
   "title": "Video Downloader",
-  "description": "Download videos from YouTube, X, etc uses yt-dlp",
+  "description": "Download videos from YouTube, Twitter, Twitch, Instagram and more using yt-dlp CLI",
   "type": "module",
   "icon": "youtube.png",
   "author": "vimtor",
