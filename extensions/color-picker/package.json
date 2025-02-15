@@ -42,9 +42,8 @@
     },
     {
       "name": "extract-color",
-      "title": "Extract Color",
-      "subtitle": "Extract Color",
-      "description": "Extract color from image",
+      "title": "Extract Color from Selected Image",
+      "description": "Extract color from the selected finder image",
       "mode": "view"
     },
     {
