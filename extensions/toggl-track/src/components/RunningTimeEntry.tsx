@@ -48,7 +48,7 @@ function RunningTimeEntry({
             />
             <Action.PickDate
               icon={{ source: Icon.RotateAntiClockwise }}
-              title="Set Start Time"
+              title="Change Start Time"
               onChange={async (date) => {
                 if (date) {
                   await updateTimeEntry(runningTimeEntry.workspace_id, runningTimeEntry.id, {
