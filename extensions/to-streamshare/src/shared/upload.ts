@@ -3,11 +3,10 @@ import { getPreferences } from "./preferences";
 import fs from "fs";
 import path from "path";
 import axios from "axios";
-import WebSocket from "ws";
 import { saveUploadRecord } from "./storage";
 import { fileTypeFromFile } from "file-type";
 
-const CHUNK_SIZE = 8 * 1024 * 1024;
+const CHUNK_SIZE = 4 * 1024 * 1024;
 
 export async function uploadFile(filePath: string) {
   let fileName = path.basename(filePath);
@@ -26,7 +25,8 @@ export async function uploadFile(filePath: string) {
   }
 
   try {
-    const createResponse = await axios.post("https://streamshare.wireway.ch/api/create", { name: fileName });
+    const totalChunks = Math.ceil(fileSize / CHUNK_SIZE);
+    const createResponse = await axios.post("https://streamshare.wireway.ch/api/create", { name: fileName, totalChunks });
     const { fileIdentifier, deletionToken } = createResponse.data;
 
     const toast = await showToast({
@@ -35,36 +35,24 @@ export async function uploadFile(filePath: string) {
       message: "0%",
     });
 
-    const ws = new WebSocket(`wss://streamshare.wireway.ch/api/upload/${fileIdentifier}`);
+    const fileStream = fs.createReadStream(filePath, { highWaterMark: CHUNK_SIZE });
+    let uploadedSize = 0;
+    let chunkId = 0;
 
-    await new Promise<void>((resolve, reject) => {
-      ws.on("open", async () => {
-        const fileStream = fs.createReadStream(filePath, { highWaterMark: CHUNK_SIZE });
-        let uploadedSize = 0;
-
-        for await (const chunk of fileStream) {
-          ws.send(chunk);
-          await new Promise<void>((resolveAck) => {
-            ws.once("message", (ack) => {
-              if (ack.toString() !== "ACK") {
-                reject(new Error("Failed to receive ACK"));
-              }
-              resolveAck();
-            });
-          });
-          uploadedSize += chunk.length;
-          const percentCompleted = Math.round((uploadedSize * 100) / fileSize);
-          toast.message = `${percentCompleted}%`;
-        }
-
-        ws.close(1000, "FILE_UPLOAD_DONE");
-        resolve();
+    for await (const chunk of fileStream) {
+      await axios.post(`https://streamshare.wireway.ch/api/upload/${fileIdentifier}/${chunkId}`, chunk, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Content-Length": chunk.length,
+        },
       });
+      chunkId++;
+      uploadedSize += chunk.length;
+      const percentCompleted = Math.round((uploadedSize * 100) / fileSize);
+      toast.message = `${percentCompleted}%`;
+    }
 
-      ws.on("error", (error) => {
-        reject(error);
-      });
-    });
+    await axios.post(`https://streamshare.wireway.ch/api/upload-complete/${fileIdentifier}`);
 
     const downloadUrl = `https://streamshare.wireway.ch/download/${fileIdentifier}`;
     const deletionUrl = `https://streamshare.wireway.ch/api/delete/${fileIdentifier}/${deletionToken}`;
