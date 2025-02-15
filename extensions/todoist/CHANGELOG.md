@@ -1,5 +1,8 @@
 # Todoist Changelog
 
+## [Add Manual Sorting Option] - {PR_MERGE_DATE}
+Added a new Manual sort option to match the order of Todoist default sort option
+
 ## [Add Complete Task Shortcut Preferences] - 2025-01-31
 
 - Adjusting shortcuts for the following task actions:
