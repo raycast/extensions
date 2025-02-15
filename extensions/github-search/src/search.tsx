@@ -80,6 +80,7 @@ const FORK_OPTIONS = [
 
 const EXCLUDE_APPS = [
   'app/alithya-oss-backstage-ci',
+  'apps/pull',
   'app/backstage-goalie',
   'app/dependabot',
   'app/depfu',
