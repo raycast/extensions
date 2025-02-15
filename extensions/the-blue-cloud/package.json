@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "the-blue-cloud",
   "title": "The Blue Cloud",
-  "description": "List and Search Files using the Raycast Extension for Dropbox.",
+  "description": "List, Search and Download Files using the Raycast Extension for Dropbox.",
   "icon": "the-blue-cloud.png",
   "author": "chyroc",
   "contributors": [
@@ -17,6 +17,13 @@
       "type": "password",
       "placeholder": "xx.xxx...xxx",
       "required": false
+    },
+    {
+      "name": "download_directory",
+      "title": "Download Directory",
+      "type": "directory",
+      "required": false,
+      "description": "Files will be downloaded here"
     }
   ],
   "commands": [
@@ -28,10 +35,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.6",
-    "@raycast/utils": "^1.18.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "dropbox": "^10.34.0",
-    "dropbox-v2-api": "^2.5.2",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
@@ -41,7 +47,7 @@
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",

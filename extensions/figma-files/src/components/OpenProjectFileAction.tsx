@@ -1,4 +1,4 @@
-import { Action, Application } from "@raycast/api";
+import { Action, type Application } from "@raycast/api";
 import type { File } from "../types";
 
 export function OpenProjectFileAction(props: {

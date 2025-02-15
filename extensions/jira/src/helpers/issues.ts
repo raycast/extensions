@@ -6,6 +6,7 @@ import markdownToAdf from "md-to-adf";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
+import { slugify } from "../helpers/string";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -319,7 +320,7 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
 export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {
   const issueKey = issue.key;
   const issueSummary = issue.fields.summary.toLowerCase();
-  const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join("-");
+  const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join(" ");
 
   if (!nameFormat) {
     nameFormat = "{issueKey}-{issueSummary}";
@@ -328,8 +329,8 @@ export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: stri
   // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
   return nameFormat
     .replace("{issueKey}", issueKey)
-    .replace("{issueSummary}", issueSummary)
-    .replace("{issueSummaryShort}", issueSummaryShort)
+    .replace("{issueSummary}", slugify(issueSummary))
+    .replace("{issueSummaryShort}", slugify(issueSummaryShort))
     .replace("{issueType}", issue.fields.issuetype.name)
     .replace("{projectKey}", issue.fields.project?.key || "");
 }
