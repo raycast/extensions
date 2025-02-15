@@ -1,14 +1,32 @@
-// components/max/ItemActions.tsx
-import { Action, ActionPanel } from "@raycast/api";
+// For max/ItemActions.tsx
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { RESOURCES } from "../../constants/shared";
+import { MaxResult } from "../../types/max";
+import { formatWeight, formatPercentage } from "../../utils/formatting";
 
 interface ItemActionsProps {
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  results: MaxResult[];
+  unitSystem: "kg" | "lbs";
 }
 
-export const ItemActions: React.FC<ItemActionsProps> = ({ setShowingDetail }) => (
-  <ActionPanel>
-    <Action title="Toggle Detail" onAction={() => setShowingDetail((prev) => !prev)} />
-    <Action.OpenInBrowser title="Learn More" url={RESOURCES.LINKS.WIKI} />
-  </ActionPanel>
-);
+export const ItemActions: React.FC<ItemActionsProps> = ({ setShowingDetail, results, unitSystem }) => {
+  const clipboardText = results
+    .map(
+      (result) =>
+        `${result.label}: ${formatWeight(result.value, unitSystem)} (${formatPercentage(result.percentage || 0)})`,
+    )
+    .join("\n");
+
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <Action title="Toggle Detail" icon={Icon.Sidebar} onAction={() => setShowingDetail((prev) => !prev)} />
+        <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy List to Clipboard" content={clipboardText} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.OpenInBrowser title="Learn More" url={RESOURCES.LINKS.WIKI} />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+};

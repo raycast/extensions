@@ -9,16 +9,28 @@ import { ItemActions } from "./ItemActions";
 interface WarmupItemProps {
   set: WarmupSet;
   unitSystem: "kg" | "lbs";
+  sets: WarmupSet[]; // Add this prop
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const WarmupItem: React.FC<WarmupItemProps> = ({ set, unitSystem, setShowingDetail }) => {
+export const WarmupItem: React.FC<WarmupItemProps> = ({
+  set,
+  unitSystem,
+  sets, // Destructure the new prop
+  setShowingDetail,
+}) => {
   const { color } = WARMUP_SCHEMES[set.setNumber - 1];
   const isWorkingSet = set.percentage === 1.0;
 
   return (
     <List.Item
-      actions={<ItemActions setShowingDetail={setShowingDetail} />}
+      actions={
+        <ItemActions
+          setShowingDetail={setShowingDetail}
+          sets={sets} // Pass sets to ItemActions
+          unitSystem={unitSystem}
+        />
+      }
       icon={{
         source: Icon.Weights,
         tintColor: color,

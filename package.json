@@ -42,6 +42,21 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "lift-volume",
+      "title": "Calculate Volume",
+      "subtitle": "Training Volume Calculator",
+      "description": "Get training volume recommendations based on your one rep max",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "oneRepMax",
+          "placeholder": "Your 1RM weight (e.g. 225)",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [

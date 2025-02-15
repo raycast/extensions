@@ -18,7 +18,13 @@ export const ListView: React.FC<ListViewProps> = ({ sets }) => {
     <List isShowingDetail={showingDetail}>
       {sets.length > 0 ? (
         sets.map((set) => (
-          <WarmupItem key={set.setNumber} set={set} unitSystem={unitSystem} setShowingDetail={setShowingDetail} />
+          <WarmupItem
+            key={set.setNumber}
+            set={set}
+            unitSystem={unitSystem}
+            sets={sets} // Pass the full sets array
+            setShowingDetail={setShowingDetail}
+          />
         ))
       ) : (
         <EmptyView />

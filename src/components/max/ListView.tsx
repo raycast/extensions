@@ -25,7 +25,13 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
     >
       {results.length > 0 ? (
         results.map((result, index) => (
-          <MaxItem key={index} result={result} unitSystem={unitSystem} setShowingDetail={setShowingDetail} />
+          <MaxItem
+            key={index}
+            result={result}
+            unitSystem={unitSystem}
+            results={results} // Pass the full results array
+            setShowingDetail={setShowingDetail}
+          />
         ))
       ) : (
         <EmptyView />

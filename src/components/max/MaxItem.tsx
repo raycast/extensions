@@ -8,12 +8,24 @@ import { DetailView } from "./DetailView";
 interface MaxItemProps {
   result: MaxResult;
   unitSystem: "kg" | "lbs";
+  results: MaxResult[]; // Add this prop
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const MaxItem: React.FC<MaxItemProps> = ({ result, unitSystem, setShowingDetail }) => (
+export const MaxItem: React.FC<MaxItemProps> = ({
+  result,
+  unitSystem,
+  results, // Destructure the new prop
+  setShowingDetail,
+}) => (
   <List.Item
-    actions={<ItemActions setShowingDetail={setShowingDetail} />}
+    actions={
+      <ItemActions
+        setShowingDetail={setShowingDetail}
+        results={results} // Pass results to ItemActions
+        unitSystem={unitSystem}
+      />
+    }
     icon={{ source: result.icon, tintColor: result.tintColor }}
     subtitle={formatWeight(result.value, unitSystem)}
     title={result.label}
