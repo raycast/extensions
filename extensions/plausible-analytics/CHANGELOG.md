@@ -3,7 +3,7 @@
 ## [Fix URL not being picked up] - {PR_MERGE_DATE}
 
 - Show toast when verifying domain
-- When adding domain, the domain is checked to be present
+- When adding domain, the domain checking is more robust
 - fix: proper hostname not picked up when no self-hosted URL (ref: [Issue #17051](https://github.com/raycast/extensions/issues/17051))
 - add: metadata image 
 

@@ -10,7 +10,7 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { Storage } from "./storage";
 import { verifySite, getStatsForAllWebsites } from "./api";
 import { Stats } from "./types";
@@ -42,7 +42,11 @@ function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
   const { handleSubmit, itemProps, setValidationError } = useForm<{ domain: string }>({
     onSubmit: handleFormSubmit,
     validation: {
-      domain: FormValidation.Required,
+      domain(value) {
+        if (!value) return "The item is required";
+        const regex = /^[-.\\/:\p{L}\d]*$/u; // Regex pattern https://github.com/plausible/analytics/blob/417e996c1afd83c3871b219843c0c61c73670c0c/lib/plausible/site.ex#L200-L204
+        if (!regex.test(value)) return "Only letters, numbers, slashes and period allowed";
+      },
     },
   });
 
@@ -50,11 +54,12 @@ function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField title="Domain" placeholder="example.com, blog.example.com" {...itemProps.domain} />
+      <Form.Description text="Just the naked domain or subdomain without 'www', 'https' etc." />
     </Form>
   );
 }
