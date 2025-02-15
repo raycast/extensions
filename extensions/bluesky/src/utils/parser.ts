@@ -1,21 +1,19 @@
 import { Account, BskyRecord, Post, PostReason } from "../types/types";
-import { AppBskyActorDefs, AppBskyEmbedImages, AppBskyEmbedRecord, AppBskyFeedDefs, AppBskyFeedPost } from "@atproto/api";
+import { $Typed, AppBskyActorDefs, AppBskyEmbedImages, AppBskyEmbedRecord, AppBskyFeedDefs, AppBskyFeedPost } from "@atproto/api";
 import {
   BlueskyPostEmbedType,
   BlueskyProfileUrlBase,
-  BlueskyRepostType,
   PostEndHorizontalLine,
 } from "./constants";
 
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
 import { NotificationReasonMapping } from "../config/notificationReasonMapping";
-import { isBlockedPost, isReasonRepost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
+import { isBlockedPost, isPostView, isReasonRepost, PostView } from "@atproto/api/dist/client/types/app/bsky/feed/defs";
 import { ViewRecord } from "@atproto/api/dist/client/types/app/bsky/embed/record";
 import { getMarkdownText } from "../libs/atp";
 import { getPostUrl } from "./common";
 import { getReadableDate } from "./date";
-import { ProfileViewBasic } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 
 export const getLikesUrl = (handle: string, uri: string) => {
   return `${getPostUrl(handle, uri)}/liked-by`;
@@ -156,12 +154,12 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           const author = item.reason.by;
           postReason = {
             type: "repost",
-            authorName: author.displayName ? author.displayName : author.handle,
+            authorName: author.displayName || author.handle,
           };
         }
 
-        if (item.reply && Object.keys(item.reply).length > 0 && item.reply.parent.notFound !== true) {
-          const author = item.reply.parent.author as ProfileViewBasic;
+        if (item.reply && Object.keys(item.reply).length > 0 && isPostView(item.reply.parent)) {
+          const { author } = item.reply.parent;
           postReason = {
             type: "reply",
             authorName: author.displayName ? author.displayName : author.handle,
@@ -176,17 +174,16 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
 
         let markdownView = "";
 
-        if (item.reply?.root && item.reply?.root.uri !== item.reply?.parent.uri && item.reply.root.notFound !== true) {
+        if (item.reply && isPostView(item.reply.root) && isPostView(item.reply.parent) && item.reply.root.uri !== item.reply.parent.uri) {
           let imageEmbeds: string[] = [];
-          const root = item.reply.root as PostView;
+          const {root} = item.reply;
           if (AppBskyEmbedImages.isView(root.embed)) {
             imageEmbeds = root.embed.images.map(item => item.thumb);
           }
 
           markdownView = markdownView + (await getPostMarkdownView(root, imageEmbeds));
         }
-
-        if (item.reply?.parent && item.reply.parent.notFound !== true) {
+        if (isPostView(item.reply?.parent)) {
           let imageEmbeds: string[] = [];
           const parent = item.reply.parent as PostView;
           if (AppBskyEmbedImages.isView(parent.embed)) {
@@ -223,20 +220,20 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
         }
 
         let repostMarkdown = "";
-        if (item.reason && item.reason.$type === BlueskyRepostType && item.post.embed?.$type !== BlueskyPostEmbedType) {
-          const repostAuthor = item.reason.by as AppBskyActorDefs.ProfileViewBasic;
-          const displayName = repostAuthor.displayName ? repostAuthor.displayName : "";
+        if (item.reason && isReasonRepost(item.reason)) {
+          const repostAuthor = item.reason.by;
+          const displayName = repostAuthor.displayName || "";
           repostMarkdown = getRepostMarkdown(displayName, repostAuthor.handle);
         }
-
+        
         return {
           uri: item.post.uri,
           cid: item.post.cid,
           viewer: item.post.author.viewer,
-          text: (item.post.record as BskyRecord).text,
+          text: (item.post.record as $Typed<AppBskyFeedPost.Record>).text,
           imageEmbeds,
           reason: postReason,
-          createdAt: (item.post.record as BskyRecord).createdAt,
+          createdAt: (item.post.record as $Typed<AppBskyFeedPost.Record>).createdAt,
           createdByUser: {
             did: item.post.author.did,
             handle: item.post.author.handle,
