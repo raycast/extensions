@@ -3,7 +3,7 @@
 ## [Extract Color] - {PR_MERGE_DATE}
 
 - Select image from finder
-- Run `Extract Color` command from raycast
+- Run `Extract Color` command from Raycast
 - Get color palette from the image
 
 ## [Accessibility] - 2025-02-13
