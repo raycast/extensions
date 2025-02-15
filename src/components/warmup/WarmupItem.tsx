@@ -4,18 +4,21 @@ import { WarmupSet } from "../../types/warmup";
 import { formatWeight } from "../../utils/formatting";
 import { WARMUP_SCHEMES } from "../../constants/warmup";
 import { DetailView } from "./DetailView";
+import { ItemActions } from "./ItemActions";
 
 interface WarmupItemProps {
   set: WarmupSet;
   unitSystem: "kg" | "lbs";
+  setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const WarmupItem: React.FC<WarmupItemProps> = ({ set, unitSystem }) => {
+export const WarmupItem: React.FC<WarmupItemProps> = ({ set, unitSystem, setShowingDetail }) => {
   const { color } = WARMUP_SCHEMES[set.setNumber - 1];
   const isWorkingSet = set.percentage === 1.0;
 
   return (
     <List.Item
+      actions={<ItemActions setShowingDetail={setShowingDetail} />}
       icon={{
         source: Icon.Weights,
         tintColor: color,

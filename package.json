@@ -51,7 +51,7 @@
       "description": "Choose between pounds (lbs) or kilograms (kg)",
       "type": "dropdown",
       "required": false,
-      "default": "lbs",
+      "default": "kg",
       "data": [
         {
           "title": "Pounds (lbs)",

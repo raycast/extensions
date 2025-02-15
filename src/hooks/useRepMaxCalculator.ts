@@ -24,15 +24,12 @@ export const useRepMaxCalculator = (initialWeight?: string, initialReps?: string
         const repMax = calculateOneRepMax(weight, reps);
         const generatedResults = generateResults(repMax);
 
-        console.log("Generated Results:", generatedResults);
-
         setResults(generatedResults);
         setSearchText(`${weight}*${reps}`);
 
         // Mark initial calculation as done
         initialCalculationDone.current = true;
       } catch (error) {
-        console.error("Initial Calculation Error:", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Error calculating one rep max",

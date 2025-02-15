@@ -16,9 +16,6 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
   const [showingDetail, setShowingDetail] = useState(false);
   const { unitSystem } = getPreferenceValues<Preferences>();
 
-  console.log("ListView Results:", results);
-  console.log("Results Length:", results.length);
-
   return (
     <List
       searchBarPlaceholder="Enter weight * repetitions (e.g. 70*6)"

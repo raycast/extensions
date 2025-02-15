@@ -4,11 +4,11 @@ import type { WarmupScheme } from "../types/warmup";
 
 export const WARMUP_SCHEMES: WarmupScheme[] = [
   { percentage: 0.5, reps: 5, color: Color.Green }, // First warmup: 50% x 5
-  { percentage: 0.6, reps: 4, color: Color.Yellow }, // Second: 60% x 4
-  { percentage: 0.7, reps: 3, color: Color.Orange }, // Third: 70% x 3
-  { percentage: 0.8, reps: 2, color: Color.Red }, // Fourth: 80% x 2
-  { percentage: 0.9, reps: 1, color: Color.Purple }, // Last warmup: 90% x 1
-  { percentage: 1.0, reps: 1, color: Color.Blue }, // Working weight: 100% x 1
+  { percentage: 0.6, reps: 4, color: Color.Green }, // Second: 60% x 4
+  { percentage: 0.7, reps: 3, color: Color.Yellow }, // Third: 70% x 3
+  { percentage: 0.8, reps: 2, color: Color.Yellow }, // Fourth: 80% x 2
+  { percentage: 0.9, reps: 1, color: Color.Orange }, // Last warmup: 90% x 1
+  { percentage: 1.0, reps: 1, color: Color.Red }, // Working weight: 100% x 1
 ];
 
 // Based on Prilepin's Chart principles
