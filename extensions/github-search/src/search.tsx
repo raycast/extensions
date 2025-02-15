@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard } from '@raycast/api';
+import { Form, ActionPanel, Action, open, getDefaultApplication, useNavigation, showToast, Icon, Toast, Keyboard, closeMainWindow } from '@raycast/api';
 import { focusOrOpenUrl, isSupportBrowser } from './open-url';
 import { useLocalStorage } from '@raycast/utils';
 import type { FormFields, ReusableFilter, ReusableFilterFormProps, SavedSearch } from './types';
@@ -237,6 +237,7 @@ export default function Command() {
               getDefaultApplication(url).then(({ name }) => {
                 if (isSupportBrowser(name)) focusOrOpenUrl(url, 'https://github.com/search', name);
                 else open(url);
+                closeMainWindow();
               });
             }}
           />
