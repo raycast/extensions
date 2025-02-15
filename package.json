@@ -1,36 +1,65 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "one-rep-max",
-  "title": "one-rep-max",
-  "description": "An extension to easily calculate your one rep max in weight lifting by providing your current weight and repetitons.",
+  "name": "lift-calculator",
+  "title": "Lift Calculator",
+  "description": "Calculate various lifting numbers including 1RM, warmup sets, and training volumes.",
   "icon": "command-icon.png",
   "author": "marianbreitmeyer",
   "license": "MIT",
-  "arguments": [
-    {
-      "type": "textfield",
-      "required": "true"
-    }
-  ],
   "commands": [
     {
-      "name": "rep-max",
-      "title": "rep max",
-      "subtitle": "calculate your one rep max",
-      "description": "",
+      "name": "lift-max",
+      "title": "Calculate 1RM",
+      "subtitle": "One Rep Max Calculator",
+      "description": "Calculate your one rep max based on weight and repetitions",
       "mode": "view",
       "arguments": [
         {
           "name": "weight",
-          "placeholder": "weight",
+          "placeholder": "Enter weight (e.g. 225)",
           "type": "text",
           "required": true
         },
         {
           "name": "reps",
-          "placeholder": "repetitions",
+          "placeholder": "Enter repetitions (e.g. 8)",
           "type": "text",
           "required": true
+        }
+      ]
+    },
+    {
+      "name": "lift-warmup",
+      "title": "Calculate Warmup",
+      "subtitle": "Warmup Sets Calculator",
+      "description": "Calculate appropriate warmup sets based on your working weight",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "weight",
+          "placeholder": "Working weight (e.g. 225)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "unitSystem",
+      "title": "Weight Unit",
+      "description": "Choose between pounds (lbs) or kilograms (kg)",
+      "type": "dropdown",
+      "required": false,
+      "default": "lbs",
+      "data": [
+        {
+          "title": "Pounds (lbs)",
+          "value": "lbs"
+        },
+        {
+          "title": "Kilograms (kg)",
+          "value": "kg"
         }
       ]
     }
