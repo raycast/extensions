@@ -185,28 +185,33 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     (async () => {
-      const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) {
-        setValue("url", clipboardText);
-        return;
-      }
-
-      try {
-        const selectedText = await getSelectedText();
-        if (selectedText && isYouTubeURL(selectedText)) {
-          setValue("url", selectedText);
+      if (preferences.autoLoadUrlFromClipboard) {
+        const clipboardText = await Clipboard.readText();
+        if (clipboardText && isYouTubeURL(clipboardText)) {
+          setValue("url", clipboardText);
           return;
         }
-      } catch {
-        // Suppress the error if Raycast didn't find any selected text
       }
 
-      try {
-        if (!preferences.enableBrowserExtensionSupport) return;
-        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
-      } catch {
-        // Suppress the error if Raycast didn't find browser extension
+      if (preferences.autoLoadUrlFromSelectedText) {
+        try {
+          const selectedText = await getSelectedText();
+          if (selectedText && isYouTubeURL(selectedText)) {
+            setValue("url", selectedText);
+            return;
+          }
+        } catch {
+          // Suppress the error if Raycast didn't find any selected text
+        }
+      }
+
+      if (preferences.enableBrowserExtensionSupport) {
+        try {
+          const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+          if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+        } catch {
+          // Suppress the error if Raycast didn't find browser extension
+        }
       }
     })();
   }, []);
