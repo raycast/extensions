@@ -186,6 +186,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^22.13.4",
     "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
     "eslint": "^9.20.1",
     "eslint-plugin-import": "^2.31.0",
     "react-devtools": "^5.2.0",
