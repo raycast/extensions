@@ -23,7 +23,8 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
     setSearchText(text);
 
     // Try to parse weight and reps
-    const match = text.match(/^(\d*(\.\d*)?)[x\*]?(\d*)?$/);
+    const match = text.match(/^(\d*(\.\d*)?)[x*]?(\d*)?$/);
+
     if (match) {
       // Set weight if available
       const parsedWeight = match[1] || "";
@@ -49,7 +50,7 @@ export const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, r
     }
 
     // Check for a complete weight x reps pattern
-    const completeMatch = searchText.match(/^(\d+(\.\d+)?)[x\*](\d+)$/);
+    const completeMatch = searchText.match(/^(\d+(\.\d+)?)[x*](\d+)$/);
 
     // Show EmptyView if no complete match
     if (!completeMatch) {
