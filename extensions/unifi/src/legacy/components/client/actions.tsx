@@ -8,7 +8,7 @@ export function CopyClientIPAction(props: { client: Client }) {
   }
   return (
     <Action.CopyToClipboard
-      title="Copy IP to Clipboard"
+      title="Copy Ip to Clipboard"
       shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
       content={ip}
     />
@@ -22,7 +22,7 @@ export function CopyClientMacAddressAction(props: { client: Client }) {
   }
   return (
     <Action.CopyToClipboard
-      title="Copy MAC Address to Clipboard"
+      title="Copy Mac Address to Clipboard"
       shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       content={mac}
     />

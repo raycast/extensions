@@ -1,7 +1,7 @@
 import { ActionPanel, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Site, tDevice } from "unifi-client";
-import { showErrorToast } from "../../../utils";
+import { showErrorToast } from "../../utils";
 import { RevalidateAction, ToggleDetailsAction } from "../actions";
 import { deviceStateToString } from "./utils";
 import { CopyDeviceIPAction, CopyDeviceMacAddressAction } from "./actions";

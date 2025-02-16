@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 import { Site } from "unifi-client";
-import { showErrorToast } from "../../../utils";
+import { showErrorToast } from "../../utils";
 import { useSites } from "./hooks";
 import { useEffect, type ReactNode } from "react";
 

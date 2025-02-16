@@ -18,8 +18,8 @@ import useDevices from "../hooks/use-devices";
 import useUnifi from "../hooks/use-unifi";
 import type { Device } from "../lib/unifi/types/device";
 import { connectionTypeIcon, getDeviceTypeIcon } from "../lib/utils";
-import ViewDevicePorts from "../view-device-ports";
-import ViewDeviceRadios from "../view-device-radios";
+import ViewDevicePorts from "./view-device-ports";
+import ViewDeviceRadios from "./view-device-radios";
 import SelectSite from "../select-site";
 
 function ViewDevices(props: LaunchProps) {
