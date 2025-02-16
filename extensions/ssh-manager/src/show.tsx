@@ -1,4 +1,4 @@
-import { ActionPanel, Clipboard, closeMainWindow, getPreferenceValues, List, showHUD } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { getConnections, saveConnections } from "./storage.api";
@@ -437,6 +437,7 @@ export default function Command() {
 
     await saveConnections(items);
     setConnectionsList(items);
+    await showHUD(`🗑 Connection [${item.name}] removed!`);
   }
 
   return (
@@ -444,7 +445,7 @@ export default function Command() {
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<Action item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -456,39 +457,40 @@ export default function Command() {
   );
 }
 
-function Action({
+function GetAction({
   item,
   onItemRemove,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
 }) {
+  const itemString = getConnectionString(item);
   return (
-    <>
-      <ActionPanel>
-        <ActionPanel.Item
-          title="Connect"
-          onAction={async () => {
-            await runTerminal(item);
-          }}
-        />
-        <ActionPanel.Item
-          title="Copy SSH Command"
+    <ActionPanel>
+      <ActionPanel.Section title="Operations">
+        <Action icon={Icon.Terminal} title="Open Connection" onAction={() => runTerminal(item)} />
+        <Action.CopyToClipboard
+          title="Copy Connection String"
+          content={itemString}
           shortcut={{ modifiers: ["cmd"], key: "c" }}
-          onAction={async () => {
-            await Clipboard.copy(getConnectionString(item));
-            await showHUD(`📋 Connection [${item.name}] copied to clipboard`);
-          }}
         />
-        <ActionPanel.Item
-          title="Remove"
+        <Action.Paste
+          icon={Icon.Text}
+          title="Paste Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "v" }}
+          onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger zone">
+        <Action
+          title="Remove Connection"
+          icon={Icon.Trash}
+          onAction={() => onItemRemove(item)}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () => {
-            await onItemRemove(item);
-          }}
         />
-      </ActionPanel>
-    </>
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }
 
