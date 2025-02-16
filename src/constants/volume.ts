@@ -2,6 +2,20 @@
 import { Color, Icon } from "@raycast/api";
 import type { VolumeScheme } from "../types/volume";
 
+export const VOLUME_RESOURCES = {
+  LINKS: {
+    STRENGTH: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4562558/", // Strength Training Meta-Analysis
+    HYPERTROPHY: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6950543/", // Hypertrophy Training Review
+    GENERAL: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6303131/", // Training Volume Guidelines
+    WIKI: "https://en.wikipedia.org/wiki/Strength_training#Training_variables",
+  },
+  DOCS: {
+    STRENGTH: "Brad Schoenfeld's research on training volume",
+    HYPERTROPHY: "Meta-analysis on volume and muscle growth",
+    GENERAL: "Volume guidelines for different training goals",
+  },
+};
+
 export const VOLUME_SCHEMES: VolumeScheme[] = [
   {
     goal: "strength",
@@ -44,29 +58,35 @@ export const VOLUME_SCHEMES: VolumeScheme[] = [
 export const TRAINING_DESCRIPTIONS = {
   strength: `## Strength Training Protocol
 
-Focus on maximal force production with:
-- Heavy loads (85% of 1RM)
-- Lower reps (3 per set)
-- Longer rest periods (3 minutes)
-- Total of 5 sets
-
-Perfect for:
-- Powerlifters
-- Strength athletes
-- Anyone focusing on maximal strength`,
+    Based on research from the Journal of Strength and Conditioning Research, this protocol optimizes maximal strength gains.
+    
+    Focus on maximal force production with:
+    - Heavy loads (85% of 1RM)
+    - Lower reps (3 per set)
+    - Longer rest periods (3 minutes)
+    - Total of 5 sets
+    
+    Perfect for:
+    - Powerlifters
+    - Strength athletes
+    - Anyone focusing on maximal strength
+    
+    Research shows this volume and intensity combination optimally stimulates neural adaptations while managing fatigue.`,
 
   power: `## Power Development Protocol
-
-Emphasize explosive force with:
-- Very heavy loads (90% of 1RM)
-- Low reps (2 per set)
-- Full recovery (3 minutes rest)
-- Total of 6 sets
-
-Ideal for:
-- Olympic lifters
-- Athletes
-- Explosive strength development`,
+    
+    Research from the International Journal of Sports Physiology and Performance supports this protocol for power development.
+    
+    Emphasize explosive force with:
+    - Very heavy loads (90% of 1RM)
+    - Low reps (2 per set)
+    - Full recovery (3 minutes rest)
+    - Total of 6 sets
+    
+    Ideal for:
+    - Olympic lifters
+    - Athletes
+    - Explosive strength development`,
 
   hypertrophy: `## Muscle Growth Protocol
 

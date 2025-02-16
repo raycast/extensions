@@ -2,6 +2,7 @@
 import { List } from "@raycast/api";
 import { VolumeResult } from "../../types/volume";
 import { formatWeight } from "../../utils/formatting";
+import { VOLUME_RESOURCES } from "../../constants/volume";
 
 interface DetailViewProps {
   result: VolumeResult;
@@ -33,6 +34,18 @@ export const DetailView: React.FC<DetailViewProps> = ({ result, unitSystem }) =>
         <List.Item.Detail.Metadata.Label
           title="Intensity"
           text={`${(result.scheme.percentage * 100).toFixed(0)}% of 1RM`}
+        />
+        <List.Item.Detail.Metadata.Separator />
+        <List.Item.Detail.Metadata.Label title="Research & Resources" />
+        <List.Item.Detail.Metadata.Link
+          title="Training Volume Guidelines"
+          target={VOLUME_RESOURCES.LINKS.GENERAL}
+          text={VOLUME_RESOURCES.DOCS.GENERAL}
+        />
+        <List.Item.Detail.Metadata.Link
+          title="Scientific Research"
+          target={result.goal === "strength" ? VOLUME_RESOURCES.LINKS.STRENGTH : VOLUME_RESOURCES.LINKS.HYPERTROPHY}
+          text={result.goal === "strength" ? VOLUME_RESOURCES.DOCS.STRENGTH : VOLUME_RESOURCES.DOCS.HYPERTROPHY}
         />
       </List.Item.Detail.Metadata>
     }

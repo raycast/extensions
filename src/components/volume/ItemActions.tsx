@@ -2,6 +2,7 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { VolumeResult } from "../../types/volume";
 import { formatWeight } from "../../utils/formatting";
+import { VOLUME_RESOURCES } from "../../constants/volume";
 
 interface ItemActionsProps {
   results: VolumeResult[];
@@ -27,10 +28,9 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ results, unitSystem, s
         <Action.CopyToClipboard title="Copy List to Clipboard" icon={Icon.CopyClipboard} content={formattedResults} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser
-          title="Learn More"
-          url="https://www.jtsstrength.com/scientific-principles-of-strength-training/"
-        />
+        <Action.OpenInBrowser title="Training Volume Research" url={VOLUME_RESOURCES.LINKS.GENERAL} />
+        <Action.OpenInBrowser title="Volume & Hypertrophy" url={VOLUME_RESOURCES.LINKS.HYPERTROPHY} />
+        <Action.OpenInBrowser title="Strength Training Wiki" url={VOLUME_RESOURCES.LINKS.WIKI} />
       </ActionPanel.Section>
     </ActionPanel>
   );
