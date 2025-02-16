@@ -31,7 +31,8 @@
     "rhesamu",
     "themitpatel",
     "litomore",
-    "enneemme"
+    "enneemme",
+    "daniel_andersson"
   ],
   "pastContributors": [
     "bkeys818"
@@ -441,6 +442,14 @@
       "title": "Start DJ",
       "subtitle": "Spotify",
       "description": "Start the DJ.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyEmbed",
+      "title": "Copy Embed Code",
+      "subtitle": "Spotify",
+      "description": "Copy the iframe embed code for the currently playing song.",
       "mode": "no-view",
       "disabledByDefault": true
     }

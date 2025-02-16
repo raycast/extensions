@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add Copy Embed Code Command] - 2025-02-16
+
+- Added new command to copy the iframe embed code for the currently playing song.
+
 ## [Artist Name Visibility Option] - 2025-02-07
 
 - Added the option to hide the artist's name in the Menu Bar Player.
