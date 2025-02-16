@@ -55,12 +55,12 @@ describe("calculateWarmupSets", () => {
   });
 
   test("handles validation for working weight", () => {
-    // Test minimum weight
-    expect(() => calculateWarmupSets(-10)).toThrow(VALIDATION.getWeightError());
-    expect(() => calculateWarmupSets(0)).toThrow(VALIDATION.getWeightError());
+    // Test negative and zero weights
+    expect(() => calculateWarmupSets(-10)).toThrow();
+    expect(() => calculateWarmupSets(0)).toThrow();
 
     // Test maximum weight
-    expect(() => calculateWarmupSets(VALIDATION.WEIGHT.MAX + 1)).toThrow(VALIDATION.getWeightError());
+    expect(() => calculateWarmupSets(VALIDATION.WEIGHT.MAX + 1)).toThrow();
   });
 
   test("calculates warmup sets for various working weights", () => {

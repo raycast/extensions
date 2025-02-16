@@ -6,20 +6,18 @@ const config: Config.InitialOptions = {
   testEnvironment: "jsdom",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+      },
+    ],
   },
   testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   moduleNameMapper: {
-    // Mock Raycast API
     "@raycast/api": "<rootDir>/__mocks__/raycast-api.ts",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  // Additional TypeScript-specific settings
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.json",
-    },
-  },
 };
 
 export default config;

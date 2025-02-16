@@ -4,7 +4,7 @@ import { WARMUP_SCHEMES } from "../constants/warmup";
 import { VALIDATION, UNITS } from "../constants/shared";
 
 export const calculateWarmupSets = (workingWeight: number): WarmupSet[] => {
-  if (workingWeight < VALIDATION.WEIGHT.MIN || workingWeight > VALIDATION.WEIGHT.MAX) {
+  if (workingWeight <= 0 || workingWeight > VALIDATION.WEIGHT.MAX) {
     throw new Error(VALIDATION.getWeightError());
   }
 

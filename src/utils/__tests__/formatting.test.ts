@@ -41,7 +41,8 @@ describe("formatWeight", () => {
   test("uses correct conversion factors", () => {
     const weight = 100;
     const lbsResult = parseFloat(formatWeight(weight, "lbs").split(" ")[0]);
-    expect(lbsResult).toBe(weight * UNITS.CONVERSION.KG_TO_LBS);
+    // Use toBeCloseTo instead of toBe for floating point comparisons
+    expect(lbsResult).toBeCloseTo(weight * UNITS.CONVERSION.KG_TO_LBS, 1);
   });
 });
 

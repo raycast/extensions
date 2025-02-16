@@ -4,7 +4,7 @@ import { VOLUME_SCHEMES, TRAINING_DESCRIPTIONS } from "../constants/volume";
 import { VALIDATION } from "../constants/shared";
 
 export const calculateVolume = (oneRepMax: number): VolumeResult[] => {
-  if (oneRepMax < VALIDATION.WEIGHT.MIN || oneRepMax > VALIDATION.WEIGHT.MAX) {
+  if (oneRepMax <= 0 || oneRepMax > VALIDATION.WEIGHT.MAX) {
     throw new Error(VALIDATION.getWeightError());
   }
 

@@ -5,22 +5,39 @@ export const Icon = {
   Person: "person",
   LightBulb: "light-bulb",
   Clock: "clock",
+  Circle: "circle",
+  Stars: "stars",
+  Sidebar: "sidebar",
   CopyClipboard: "copy-clipboard",
 };
 
 export const Color = {
-  Red: "#FF0000",
-  Orange: "#FFA500",
-  Yellow: "#FFFF00",
-  Green: "#00FF00",
-  Blue: "#0000FF",
-  Purple: "#800080",
+  Red: "red",
+  Orange: "orange",
+  Yellow: "yellow",
+  Green: "green",
+  Blue: "blue",
+  Purple: "purple",
+  SecondaryText: "secondary-text",
 };
 
 export const Toast = {
   Style: {
     Failure: "failure",
     Success: "success",
+  },
+};
+
+export const List = {
+  EmptyView: jest.fn(),
+  Item: {
+    Detail: {
+      Metadata: {
+        Label: jest.fn(),
+        Link: jest.fn(),
+        Separator: jest.fn(),
+      },
+    },
   },
 };
 
