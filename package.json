@@ -3,26 +3,45 @@
   "name": "lift-calculator",
   "title": "Lift Calculator",
   "description": "Calculate various lifting numbers including 1RM, warmup sets, and training volumes.",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "marianbreitmeyer",
   "license": "MIT",
+  "categories": [
+    "Health",
+    "Productivity",
+    "Other"
+  ],
+  "keywords": [
+    "workout",
+    "fitness",
+    "strength",
+    "gym",
+    "calculator",
+    "1rm",
+    "one rep max",
+    "warmup",
+    "training",
+    "weightlifting",
+    "powerlifting",
+    "volume"
+  ],
   "commands": [
     {
       "name": "lift-max",
       "title": "Calculate 1RM",
       "subtitle": "One Rep Max Calculator",
-      "description": "Calculate your one rep max based on weight and repetitions",
+      "description": "Calculate your one rep max based on any weight and rep combination. Get percentage-based recommendations for different training zones.",
       "mode": "view",
       "arguments": [
         {
           "name": "weight",
-          "placeholder": "Enter weight (e.g. 225)",
+          "placeholder": "Weight (e.g. 225)",
           "type": "text",
           "required": true
         },
         {
           "name": "reps",
-          "placeholder": "Enter repetitions (e.g. 8)",
+          "placeholder": "Reps (e.g. 8)",
           "type": "text",
           "required": true
         }
@@ -32,12 +51,12 @@
       "name": "lift-warmup",
       "title": "Calculate Warmup",
       "subtitle": "Warmup Sets Calculator",
-      "description": "Calculate appropriate warmup sets based on your working weight",
+      "description": "Generate a scientifically-based warmup progression with exact weights, reps, and rest periods.",
       "mode": "view",
       "arguments": [
         {
           "name": "weight",
-          "placeholder": "Working weight (e.g. 225)",
+          "placeholder": "Weight (e.g. 225)",
           "type": "text",
           "required": true
         }
@@ -47,12 +66,12 @@
       "name": "lift-volume",
       "title": "Calculate Volume",
       "subtitle": "Training Volume Calculator",
-      "description": "Get training volume recommendations based on your one rep max",
+      "description": "Get personalized training volume recommendations based on your one rep max. Includes schemes for strength, power, hypertrophy, and endurance.",
       "mode": "view",
       "arguments": [
         {
           "name": "oneRepMax",
-          "placeholder": "Your 1RM weight (e.g. 225)",
+          "placeholder": "1RM (e.g. 225)",
           "type": "text",
           "required": true
         }
