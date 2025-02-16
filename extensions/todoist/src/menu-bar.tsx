@@ -19,6 +19,7 @@ import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
+import { truncateMiddle } from "./helpers/menu-bar";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
@@ -30,7 +31,7 @@ function MenuBar(props: MenuBarProps) {
   // Don't perform a full sync if the command was launched from within another commands
   const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
-  const { view, filter, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
+  const { view, filter, upcomingDays, hideMenuBarCount, showNextMostPriorityTask, taskWidth } = getPreferenceValues<Preferences.MenuBar>();
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
   const tasks = useMemo(() => {
@@ -71,6 +72,18 @@ function MenuBar(props: MenuBarProps) {
   const menuBarExtraTitle = useMemo(() => {
     if (focusedTask.id) {
       return removeMarkdown(focusedTask.content);
+    }
+
+    if (showNextMostPriorityTask) {
+      if (tasks && view !== "filter" && tasks.length > 0) {
+        const task = tasks.sort((a, b) => a.child_order - b.child_order)[0];
+        const content = truncateMiddle(task.content, parseInt(taskWidth ?? "40"));
+        return removeMarkdown(content);
+      } else if (filterTasks && filterTasks.length > 0) {
+        const task = filterTasks.sort((a, b) => a.child_order - b.child_order)[0];
+        const content = truncateMiddle(task.content, parseInt(taskWidth ?? "40"));
+        return removeMarkdown(content);
+      }
     }
 
     if (hideMenuBarCount) {

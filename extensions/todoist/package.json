@@ -137,6 +137,15 @@
           "required": false
         },
         {
+          "name": "showNextMostPriorityTask",
+          "type": "checkbox",
+          "title": "Show Next Most Prioirity Task as Title",
+          "label": "Show the next first task as title",
+          "description": "When enabled, If focused task is not selected, Shows the top prioirity task as title.",
+          "default": false,
+          "required": false
+        },
+        {
           "name": "view",
           "type": "dropdown",
           "data": [

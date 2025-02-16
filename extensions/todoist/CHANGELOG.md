@@ -1,7 +1,7 @@
 # Todoist Changelog
 
-## [Add Manual Sorting Option] - {PR_MERGE_DATE}
-Added a new Manual sort option to match the order of Todoist default sort option
+## [Add Next First Task as Title in Menu Bar] - {PR_MERGE_DATE}
+Added a new Show next first task in preferences to show that as title if no focused task is selected
 
 ## [Add Complete Task Shortcut Preferences] - 2025-01-31
 
