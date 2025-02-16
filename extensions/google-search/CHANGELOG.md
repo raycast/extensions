@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- Add a fall back to clipboard if no text is selected
+- Add clipboard fallback preference for selected text searches
 
 ## [Update] - 2024-11-21
 

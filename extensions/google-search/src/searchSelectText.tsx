@@ -7,18 +7,28 @@ import {
   open,
   LocalStorage,
   Clipboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getSearchHistory } from "./utils/handleResults";
 import { SearchResult, HISTORY_KEY } from "./utils/types";
 
+interface Preferences {
+  useClipboardFallback: boolean;
+}
+
 export default async function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+
   try {
-    // Try to get selected text first, fall back to clipboard
+    // Try to get selected text first, fall back to clipboard if enabled
     let searchText: string;
     try {
       searchText = await getSelectedText();
     } catch {
+      if (!preferences.useClipboardFallback) {
+        throw new Error("No text selected");
+      }
       const clipboardText = await Clipboard.readText();
       if (!clipboardText) {
         throw new Error("No text selected and clipboard is empty");
