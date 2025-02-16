@@ -1,32 +1,11 @@
 // lift-volume.tsx
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 import { VolumeCommandArgs } from "./types/volume";
 import { ListView } from "./components/volume/ListView";
-import { calculateVolume } from "./utils/volume";
-import { VALIDATION } from "./constants/shared";
+import { useVolumeCalculator } from "./hooks/useVolumeCalculator";
 
 export default function Command(props: LaunchProps<{ arguments: VolumeCommandArgs }>) {
-  const { oneRepMax } = props.arguments;
+  const { weight, setWeight, results } = useVolumeCalculator(props.arguments.oneRepMax);
 
-  try {
-    const maxWeight = parseFloat(oneRepMax);
-    if (isNaN(maxWeight)) {
-      throw new Error("Invalid weight value");
-    }
-
-    if (maxWeight < VALIDATION.WEIGHT.MIN || maxWeight > VALIDATION.WEIGHT.MAX) {
-      throw new Error(VALIDATION.getWeightError());
-    }
-
-    const volumeResults = calculateVolume(maxWeight);
-    return <ListView results={volumeResults} />;
-  } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Error calculating training volume",
-      message: error instanceof Error ? error.message : "Invalid input",
-    });
-
-    return <ListView results={[]} />;
-  }
+  return <ListView weight={weight} setWeight={setWeight} results={results} />;
 }
