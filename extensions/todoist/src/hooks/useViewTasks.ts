@@ -26,7 +26,6 @@ import {
   sortByDate,
   sortByName,
   sortByPriority,
-  sortByManual,
   sortByProject,
 } from "../helpers/sortBy";
 
@@ -73,9 +72,6 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
         break;
       case "priority":
         sortedTasks.sort(applySortOrder(orderBy, sortByPriority));
-        break;
-      case "manual":
-        sortedTasks.sort(applySortOrder(orderBy, sortByManual));
         break;
       case "project":
         sortedTasks.sort(applySortOrder(orderBy, (a: Task, b: Task) => sortByProject(projects, a, b)));
