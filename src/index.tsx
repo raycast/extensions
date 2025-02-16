@@ -1,141 +1,157 @@
-import { Action, ActionPanel, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showHUD } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { Clipboard } from "@raycast/api";
 import { useState } from "react";
 
-import { Clipboard } from "@raycast/api";
-
-interface PhoneticTranslationFormValues {
+interface TransliterationFormValues {
   latinInput: string;
   cyrillicOutput: string;
 }
 
-const phoneticMapLowercase = {
-  "а": ["a"],
-  "б": ["b"],
-  "в": ["v"],
-  "г": ["g"],
-  "д": ["d"],
-  "е": ["e"],
-  "ё": ["yo", "jo", "ö"],
-  "ж": ["zh"],
-  "з": ["z"],
-  "и": ["i"],
-  "й": ["j"],
-  "к": ["k"],
-  "л": ["l"],
-  "м": ["m"],
-  "н": ["n"],
-  "о": ["o"],
-  "п": ["p"],
-  "р": ["r"],
-  "с": ["s"],
-  "т": ["t"],
-  "у": ["u"],
-  "ф": ["f"],
-  "х": ["h", "x"],
-  "ц": ["c"],
-  "ч": ["ch"],
-  "ш": ["sh"],
-  "щ": ["shh", "w"],
-  "ъ": ["#", "##", "tvz"],
-  "ы": ["y"],
-  "ь": ["'", "''", "mjz"],
-  "э": ["je", "ä"],
-  "ю": ["yu", "ju", "ü"],
-  "я": ["ya", "ja", "q"],
+const MAX_MUNCH_LENGTH = 3;
+const MAX_HUD_PREVIEW_LENGTH = 50;
+const DEFAULT_PLACEHOLDER = "Privet...";
+const DEFAULT_OUTPUT = "Привет...";
+
+const PHONETIC_MAP: Record<string, string[]> = {
+  а: ["a"],
+  б: ["b"],
+  в: ["v"],
+  г: ["g"],
+  д: ["d"],
+  е: ["e"],
+  ё: ["yo", "jo", "ö"],
+  ж: ["zh"],
+  з: ["z"],
+  и: ["i"],
+  й: ["j"],
+  к: ["k"],
+  л: ["l"],
+  м: ["m"],
+  н: ["n"],
+  о: ["o"],
+  п: ["p"],
+  р: ["r"],
+  с: ["s"],
+  т: ["t"],
+  у: ["u"],
+  ф: ["f"],
+  х: ["h", "x"],
+  ц: ["c"],
+  ч: ["ch"],
+  ш: ["sh"],
+  щ: ["shh", "w"],
+  ъ: ["#", "tvz"],
+  Ъ: ["##"],
+  ы: ["y"],
+  ь: ["'", "mjz"],
+  Ь: ["''"],
+  э: ["je", "ä"],
+  ю: ["yu", "ju", "ü"],
+  я: ["ya", "ja", "q"],
 };
 
-const reversePhoneticMapLowercase = Object.entries(phoneticMapLowercase).reduce<
-  Record<string, string>
->(
-  (acc, [key, value]) => {
-    value.forEach((v) => {
-      acc[v] = key;
+// Create reverse mapping for Latin to Cyrillic conversion
+const REVERSE_PHONETIC_MAP = Object.entries(PHONETIC_MAP).reduce<Record<string, string>>(
+  (acc, [cyrillic, latinVariants]) => {
+    latinVariants.forEach((latin) => {
+      acc[latin] = cyrillic;
     });
     return acc;
   },
   {},
 );
 
-const MAXIMUM_MUNCH = 3;
+/**
+ * Checks if a character is a letter
+ * @param char - Single character to check
+ * @returns boolean indicating if the character is a letter
+ */
+function isLetter(char: string): boolean {
+  return char.toLowerCase() !== char.toUpperCase();
+}
 
-const phoneticMap = (input: string) => {
-  let translated = "";
-
+/**
+ * Converts Latin text to Cyrillic using phonetic transliteration
+ * @param input - Latin text to convert
+ * @returns Transliterated Cyrillic text
+ */
+function transliterateLatinToCyrillic(input: string): string {
+  let result = "";
   let i = 0;
+
   while (i < input.length) {
-    let currentMunch = MAXIMUM_MUNCH;
+    let currentLength = MAX_MUNCH_LENGTH;
     let matched = false;
 
-    while (currentMunch >= 1) {
-      const end = i + currentMunch;
-      const sequence = input.slice(i, end);
-      const found = reversePhoneticMapLowercase[sequence.toLocaleLowerCase()];
+    // Try to match longest possible sequence first
+    while (currentLength >= 1) {
+      const sequence = input.slice(i, i + currentLength);
+      const cyrillicChar = REVERSE_PHONETIC_MAP[sequence.toLowerCase()];
 
-      if (found) {
-        const shouldUppercase = sequence[0].toLocaleUpperCase() === sequence[0];
-        translated += shouldUppercase ? found.toLocaleUpperCase() : found;
-        i += currentMunch;
+      if (cyrillicChar) {
+        const shouldUppercase = isLetter(sequence[0]) && sequence[0] === sequence[0].toUpperCase();
+        result += shouldUppercase ? cyrillicChar.toUpperCase() : cyrillicChar;
+        i += currentLength;
         matched = true;
         break;
-      } else {
-        currentMunch--;
       }
+      currentLength--;
     }
 
+    // If no match found, keep the original character
     if (!matched) {
-      translated += input[i];
+      result += input[i];
       i++;
     }
   }
 
-  return translated;
-};
+  return result;
+}
+
+/**
+ * Creates a preview text for the HUD notification
+ * @param text - Text to create preview from
+ * @returns Truncated text with ellipsis if necessary
+ */
+function createHUDPreview(text: string): string {
+  return text.length <= MAX_HUD_PREVIEW_LENGTH ? text : `${text.slice(0, MAX_HUD_PREVIEW_LENGTH)}...`;
+}
 
 export default function Command() {
   const [input, setInput] = useState("");
   const [cyrillicOutput, setCyrillicOutput] = useState("");
-  const { handleSubmit } = useForm<PhoneticTranslationFormValues>({
+
+  const { handleSubmit } = useForm<TransliterationFormValues>({
     async onSubmit() {
       await Clipboard.copy(cyrillicOutput);
-      await showHUD(
-        `${
-          cyrillicOutput.length < 50
-            ? cyrillicOutput
-            : cyrillicOutput.slice(0, 50) + "..."
-        } copied!`,
-      );
+      await showHUD(`${createHUDPreview(cyrillicOutput)} copied!`);
+      setInput("");
+      setCyrillicOutput("");
     },
   });
+
+  const handleInputChange = (value: string) => {
+    setInput(value);
+    setCyrillicOutput(transliterateLatinToCyrillic(value));
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Copy to Clipboard"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Copy to Clipboard" icon={Icon.Clipboard} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
-        title="🔤"
-        placeholder="Privet..."
-        value={input}
-        onChange={(value) => {
-          setInput(value);
-
-          const cyrillicOutput = phoneticMap(value);
-
-          setCyrillicOutput(cyrillicOutput);
-        }}
         id="input"
+        title="Latin Input"
+        placeholder={DEFAULT_PLACEHOLDER}
+        value={input}
+        onChange={handleInputChange}
       />
-      <Form.Description
-        title="🇷🇺"
-        text={cyrillicOutput || "Привет..."}
-      />
+      <Form.Description title="Cyrillic Output" text={cyrillicOutput || DEFAULT_OUTPUT} />
     </Form>
   );
 }
