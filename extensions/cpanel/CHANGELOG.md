@@ -1,8 +1,10 @@
 # cPanel Changelog
 
-## [Copy File Contents] - {PR_MERGE_DATE}
+## [View FTP Accounts + Copy File Contents] - {PR_MERGE_DATE}
 
 - Copy file contents after viewing in `Files`
+- View FTP Accounts in `FTP Accounts`
+- Create FTP Account in `FTP Accounts`
 
 ## [Enhancements: Files & DB + New Account Command] - 2024-10-21
 
