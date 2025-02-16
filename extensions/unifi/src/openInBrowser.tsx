@@ -1,5 +1,5 @@
 import { open, showHUD } from "@raycast/api";
-import { getUnifiControllerUrlPreference } from "./lib/unifi";
+import { getUnifiControllerUrlPreference } from "./legacy/lib/unifi";
 import { showErrorToast } from "./utils";
 
 export default async function Main() {
