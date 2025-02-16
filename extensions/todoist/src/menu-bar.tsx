@@ -31,7 +31,8 @@ function MenuBar(props: MenuBarProps) {
   // Don't perform a full sync if the command was launched from within another commands
   const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
-  const { view, filter, upcomingDays, hideMenuBarCount, showNextMostPriorityTask, taskWidth } = getPreferenceValues<Preferences.MenuBar>();
+  const { view, filter, upcomingDays, hideMenuBarCount, showNextMostPriorityTask, taskWidth } =
+    getPreferenceValues<Preferences.MenuBar>();
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
   const tasks = useMemo(() => {
