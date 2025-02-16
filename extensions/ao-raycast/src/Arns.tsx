@@ -194,8 +194,8 @@ export default function Command() {
                   record.name.toLowerCase().includes(searchText.toLowerCase()),
                 )
                 .sort((a, b) => {
-                  const commonA = getCommonCharCount(a.name, searchText);
-                  const commonB = getCommonCharCount(b.name, searchText);
+                  const commonA = getSimilarityScore(a.name, searchText);
+                  const commonB = getSimilarityScore(b.name, searchText);
                   if (commonB !== commonA) {
                     return commonB - commonA; // Sort by most common characters first
                   }
@@ -254,16 +254,22 @@ export default function Command() {
     return typeof value === "string" ? value : null;
   };
 
-  // Helper to calculate the number of common characters between two strings
-  const getCommonCharCount = (str1: string, str2: string): number => {
-    const set1 = new Set(str1.toLowerCase());
-    const set2 = new Set(str2.toLowerCase());
-    let common = 0;
-    set1.forEach((char) => {
-      if (set2.has(char)) common++;
-    });
-    return common;
-  };
+  // Replace or remove the old getCommonCharCount function if desired.
+  // Here's a new similarity function that penalizes extra characters:
+  function getSimilarityScore(str1: string, str2: string): number {
+    let score = 0;
+    const minLen = Math.min(str1.length, str2.length);
+    for (let i = 0; i < minLen; i++) {
+      if (str1[i] === str2[i]) {
+        score++;
+      } else {
+        score--;
+      }
+    }
+    // Extra characters penalize the score but less harshly
+    score -= Math.abs(str1.length - str2.length) * 0.5;
+    return score;
+  }
 
   // Initial load and background refresh setup
   useEffect(() => {
@@ -312,7 +318,7 @@ export default function Command() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Modify the search effect to handle pagination efficiently
+  // Update the effect that searches records to use the new similarity approach
   useEffect(() => {
     const searchRecords = async () => {
       try {
@@ -339,7 +345,7 @@ export default function Command() {
         // Sort all records alphabetically first
         allLoadedRecords.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Filter and sort by search if needed
+        // Filter and then sort by similarity if there's search text
         let displayRecords = allLoadedRecords;
         if (searchText) {
           displayRecords = allLoadedRecords
@@ -347,10 +353,16 @@ export default function Command() {
               record.name.toLowerCase().includes(searchText.toLowerCase()),
             )
             .sort((a, b) => {
-              const commonA = getCommonCharCount(a.name, searchText);
-              const commonB = getCommonCharCount(b.name, searchText);
-              if (commonB !== commonA) {
-                return commonB - commonA;
+              const similarityA = getSimilarityScore(
+                a.name.toLowerCase(),
+                searchText.toLowerCase(),
+              );
+              const similarityB = getSimilarityScore(
+                b.name.toLowerCase(),
+                searchText.toLowerCase(),
+              );
+              if (similarityB !== similarityA) {
+                return similarityB - similarityA;
               }
               return a.name.localeCompare(b.name);
             });
