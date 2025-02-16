@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12" viewBox="0 0 24 12" fill="none" class="injected-svg"
+    data-src="https://arweave.net/AzM59q2tcYzkySUUZUN1HCwfKGVHi--71UdoIk5gPUE"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g clip-path="url(#clip0_209_2030-1)">
+        <g clip-path="url(#clip1_209_2030-2)">
+            <g clip-path="url(#clip2_209_2030-3)">
+                <path d="M0.00201416 11.99H3.99442L4.80919 9.78673L2.97595 6.03296L0.00201416 11.99Z" fill="black">
+                </path>
+                <path d="M10.5941 9.01148L6.1536 0.0759277L4.8092 3.13605L9.00531 11.99H12.028L10.5941 9.01148Z"
+                    fill="black"></path>
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M18.013 11.99C21.3184 11.99 23.998 9.31042 23.998 6.00502C23.998 2.69959 21.3184 0.0200195 18.013 0.0200195C14.7076 0.0200195 12.028 2.69959 12.028 6.00502C12.028 9.31042 14.7076 11.99 18.013 11.99ZM18.013 9.64077C20.0209 9.64077 21.6487 8.01301 21.6487 6.00502C21.6487 3.99705 20.0209 2.36927 18.013 2.36927C16.005 2.36927 14.3772 3.99705 14.3772 6.00502C14.3772 8.01301 16.005 9.64077 18.013 9.64077Z"
+                    fill="black"></path>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <clipPath id="clip0_209_2030-1">
+            <rect width="24" height="11.97" fill="white" transform="translate(0 0.0200195)"></rect>
+        </clipPath>
+        <clipPath id="clip1_209_2030-2">
+            <rect width="24" height="11.97" fill="white" transform="translate(0 0.0200195)"></rect>
+        </clipPath>
+        <clipPath id="clip2_209_2030-3">
+            <rect width="24" height="11.97" fill="white" transform="translate(0 0.0200195)"></rect>
+        </clipPath>
+    </defs>
+</svg>

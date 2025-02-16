@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ao-raycast",
+  "type": "module",
+  "title": "Ao Raycast",
+  "description": "Search and browse ArNS names with gateway support",
+  "icon": "ao-512.png",
+  "author": "dpshade22",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "arns",
+      "title": "Search Arweave Domains",
+      "label": "Search Arweave Domains",
+      "description": "Search and browse ArNS names with gateway support",
+      "mode": "view"
+    },
+    {
+      "name": "openData",
+      "title": "Open Transaction Data",
+      "label": "Open Transaction Data",
+      "description": "View raw data of an Arweave transaction using configurable gateways",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "txId",
+          "type": "text",
+          "placeholder": "Arweave Transaction ID",
+          "required": false,
+          "validation": "^.{43}$"
+        }
+      ]
+    },
+    {
+      "name": "openExplorer",
+      "title": "Open in Explorer",
+      "label": "Open in Explorer",
+      "description": "View an Arweave transaction in ao.link explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "txId",
+          "type": "text",
+          "placeholder": "Arweave Transaction ID",
+          "required": false,
+          "validation": "^.{43}$"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useWayfinder",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Wayfinder Protocol",
+      "description": "Use the wayfinder protocol to automatically select the best gateway",
+      "default": false,
+      "label": "Enable Wayfinder Protocol"
+    },
+    {
+      "name": "defaultGateway",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Gateway",
+      "description": "The default gateway to use when wayfinder is disabled (e.g., ar.io, arweave.net, defi.ao)",
+      "default": "ar.io",
+      "label": "Default Gateway URL"
+    },
+    {
+      "name": "explorer",
+      "type": "textfield",
+      "required": false,
+      "title": "Explorer",
+      "description": "The explorer URL template. Use {txId} as placeholder (e.g., ao.link/#/message/{txId}, viewblock.io/arweave/tx/{txId})",
+      "default": "ao.link/#/message/{txId}",
+      "label": "Explorer URL Template"
+    }
+  ],
+  "dependencies": {
+    "@ar.io/sdk": "^3.5.3",
+    "@permaweb/aoconnect": "^0.0.69",
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0",
+    "buffer": "^6.0.3",
+    "cross-fetch": "^4.1.0",
+    "process": "^0.11.10",
+    "sharp": "^0.33.5",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^9.20.1",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^15.15.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.24.0"
+  },
+  "scripts": {
+    "build": "bun run ray build",
+    "dev": "bun run ray develop",
+    "fix-lint": "bun run ray lint --fix",
+    "lint": "bun run ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`bun publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`bun run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "bun x @raycast/api@latest publish",
+    "send-message": "bun src/sendPaginatedRecordsMessage.js"
+  }
+}
