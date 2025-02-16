@@ -1,5 +1,12 @@
 # Brand Icons Changelog
 
+## [Maintenance & Improvements] - {PR_MERGE_DATE}
+
+- Add support for viewing release notes
+- Add support for copying SVG path
+- Replace `execa` with `nano-spawn`
+- Bump all dependencies to the latest
+
 ## [Chore] - 2025-01-12
 
 - Improve searcher performance with `useMemo`
