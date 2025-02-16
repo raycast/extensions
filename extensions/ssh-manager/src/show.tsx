@@ -1,8 +1,8 @@
-import { List, ActionPanel, showHUD, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Clipboard, closeMainWindow, getPreferenceValues, List, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 interface Preferences {
   terminal: string;
@@ -400,6 +400,22 @@ async function runTerminal(item: ISSHConnection) {
   await showHUD("Success ✅");
 }
 
+function getConnectionString(item: ISSHConnection) {
+  if (onlyName) {
+    return item.name;
+  }
+
+  const parts = [];
+  if (item.sshKey) parts.push(`-i ${item.sshKey}`);
+  if (item.port) parts.push(`-p ${item.port}`);
+  if (item.command) parts.push(`"${item.command}"`);
+
+  const address = item.user ? `${item.user}@${item.address}` : item.address;
+  parts.unshift("ssh", address);
+
+  return parts.filter(Boolean).join(" ");
+}
+
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<ISSHConnection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -454,6 +470,14 @@ function Action({
           title="Connect"
           onAction={async () => {
             await runTerminal(item);
+          }}
+        />
+        <ActionPanel.Item
+          title="Copy SSH Command"
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          onAction={async () => {
+            await Clipboard.copy(getConnectionString(item));
+            await showHUD(`📋 Connection [${item.name}] copied to clipboard`);
           }}
         />
         <ActionPanel.Item
