@@ -18,8 +18,8 @@ import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
-import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import { truncateMiddle } from "./helpers/menu-bar";
+import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
@@ -95,7 +95,7 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view]);
+  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextMostPriorityTask, taskWidth]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
