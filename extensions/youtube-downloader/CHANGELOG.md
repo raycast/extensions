@@ -1,5 +1,10 @@
 # YouTube Downloader Changelog
 
+## [Improvement] - 2025-02-15
+
+- Add a preference option for toggling read URL from clipboard support
+- Add a preference option for toggling read URL from selected text support
+
 ## [Fixes] - 2025-02-12
 
 - Add a preference option for toggling Browser Extension support
