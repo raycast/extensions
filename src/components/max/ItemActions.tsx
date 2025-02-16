@@ -1,6 +1,6 @@
 // For max/ItemActions.tsx
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { RESOURCES } from "../../constants/shared";
+import { MAX_RESOURCES } from "../../constants/max";
 import { MaxResult } from "../../types/max";
 import { formatWeight, formatPercentage } from "../../utils/formatting";
 
@@ -25,7 +25,8 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ setShowingDetail, resu
         <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy List to Clipboard" content={clipboardText} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser title="Learn More" url={RESOURCES.LINKS.WIKI} />
+        <Action.OpenInBrowser title="Wikipedia" url={MAX_RESOURCES.LINKS.WIKI} />
+        <Action.OpenInBrowser title="Epley Formula" url={MAX_RESOURCES.LINKS.EPLEY_FORMULA} />
       </ActionPanel.Section>
     </ActionPanel>
   );

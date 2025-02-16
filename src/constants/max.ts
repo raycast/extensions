@@ -2,6 +2,14 @@
 import { Color } from "@raycast/api";
 import type { MaxScheme } from "../types/max";
 
+// External resource links
+export const MAX_RESOURCES = {
+  LINKS: {
+    WIKI: "https://en.wikipedia.org/wiki/One-repetition_maximum",
+    EPLEY_FORMULA: "https://en.wikipedia.org/wiki/One-repetition_maximum#Epley_formula",
+  },
+} as const;
+
 export const MAX_SCHEMES: MaxScheme[] = [
   { reps: 1, percentage: 1.0, tintColor: Color.Red, scheme: "low" },
   { reps: 3, percentage: 0.94, tintColor: Color.Orange, scheme: "low" },

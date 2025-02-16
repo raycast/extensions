@@ -36,7 +36,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ result, unitSystem }) =>
           text={`${(result.scheme.percentage * 100).toFixed(0)}% of 1RM`}
         />
         <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label title="Research & Resources" />
+        <List.Item.Detail.Metadata.Label title="Resources" />
+        <List.Item.Detail.Metadata.Link title="Wikipedia" target={VOLUME_RESOURCES.LINKS.WIKI} text="Wikipedia" />
         <List.Item.Detail.Metadata.Link
           title="Training Volume Guidelines"
           target={VOLUME_RESOURCES.LINKS.GENERAL}

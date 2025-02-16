@@ -1,44 +1,78 @@
 // hooks/useRepMaxCalculator.ts
-import { useState, useEffect, useRef } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useCallback } from "react";
 import { MaxResult } from "../types/max";
-import { calculateOneRepMax, generateResults } from "../utils/calculations";
+import { calculateOneRepMax, generateResults, getErrorResult } from "../utils/calculations";
 import { VALIDATION } from "../constants/shared";
+
 export const useRepMaxCalculator = (initialWeight?: string, initialReps?: string) => {
-  const [searchText, setSearchText] = useState("");
+  const [weight, setWeight] = useState(initialWeight || "");
+  const [reps, setReps] = useState(initialReps || "");
+  const [searchText, setSearchText] = useState(initialWeight && initialReps ? `${initialWeight}*${initialReps}` : "");
   const [results, setResults] = useState<MaxResult[]>([]);
 
-  // Add a ref to track if initial calculation has been done
-  const initialCalculationDone = useRef(false);
-
-  useEffect(() => {
-    if (initialWeight && initialReps && !initialCalculationDone.current) {
-      try {
-        const weight = parseFloat(initialWeight);
-        const reps = parseInt(initialReps);
-
-        if (isNaN(reps) || isNaN(weight) || reps < VALIDATION.REPS.MIN || weight < VALIDATION.WEIGHT.MIN) {
-          throw new Error(`Weight ${VALIDATION.getWeightError()} and ${VALIDATION.getRepsError()}`);
-        }
-
-        const repMax = calculateOneRepMax(weight, reps);
-        const generatedResults = generateResults(repMax);
-
-        setResults(generatedResults);
-        setSearchText(`${weight}*${reps}`);
-
-        // Mark initial calculation as done
-        initialCalculationDone.current = true;
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error calculating one rep max",
-          message: error instanceof Error ? error.message : "Invalid input",
-        });
-      }
+  const calculateResults = useCallback(() => {
+    // Clear results if either weight or reps is missing
+    if (!weight || !reps) {
+      setResults([]);
+      return;
     }
-  }, [initialWeight, initialReps]); // Ensure this only runs when these change
 
-  // Rest of the existing code remains the same
-  return { searchText, setSearchText, results };
+    try {
+      // Parse inputs
+      const parsedWeight = parseFloat(weight);
+      const parsedReps = parseInt(reps);
+
+      // Validate inputs
+      if (
+        isNaN(parsedReps) ||
+        isNaN(parsedWeight) ||
+        parsedReps < VALIDATION.REPS.MIN ||
+        parsedReps > VALIDATION.REPS.MAX ||
+        parsedWeight < VALIDATION.WEIGHT.MIN ||
+        parsedWeight > VALIDATION.WEIGHT.MAX
+      ) {
+        setResults(getErrorResult());
+        return;
+      }
+
+      // Calculate 1RM
+      const repMax = calculateOneRepMax(parsedWeight, parsedReps);
+
+      // Check for negative result
+      if (repMax <= 0) {
+        setResults(
+          getErrorResult(
+            "Calculation resulted in an invalid one-rep max. This can occur with unusual weight and rep combinations.",
+          ),
+        );
+        return;
+      }
+
+      // Generate results
+      const generatedResults = generateResults(repMax);
+
+      // Update state
+      setResults(generatedResults);
+      setSearchText(`${weight}*${reps}`);
+    } catch (error) {
+      // Use getErrorResult for any calculation errors
+      setResults(getErrorResult(error instanceof Error ? error.message : "Invalid input"));
+    }
+  }, [weight, reps]);
+
+  // Calculate results when weight or reps change
+  useEffect(() => {
+    calculateResults();
+  }, [weight, reps, calculateResults]);
+
+  return {
+    weight,
+    setWeight,
+    reps,
+    setReps,
+    searchText,
+    setSearchText,
+    results,
+    calculateResults,
+  };
 };

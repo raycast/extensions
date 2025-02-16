@@ -25,9 +25,8 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ setShowingDetail, sets
         <Action.CopyToClipboard title="Copy List to Clipboard" icon={Icon.CopyClipboard} content={clipboardText} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.OpenInBrowser title="Research Paper" url={WARMUP_RESOURCES.LINKS.RESEARCH} />
-        <Action.OpenInBrowser title="Prilepin's Chart" url={WARMUP_RESOURCES.LINKS.PRILEPIN} />
-        <Action.OpenInBrowser title="Training Guide" url={WARMUP_RESOURCES.LINKS.GUIDE} />
+        <Action.OpenInBrowser title="Wikipedia" url={WARMUP_RESOURCES.LINKS.WIKI} />
+        <Action.OpenInBrowser title="Stronger by Science" url={WARMUP_RESOURCES.LINKS.SBS} />
       </ActionPanel.Section>
     </ActionPanel>
   );

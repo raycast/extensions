@@ -28,9 +28,9 @@ export const ItemActions: React.FC<ItemActionsProps> = ({ results, unitSystem, s
         <Action.CopyToClipboard title="Copy List to Clipboard" icon={Icon.CopyClipboard} content={formattedResults} />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action.OpenInBrowser title="Wikipedia" url={VOLUME_RESOURCES.LINKS.WIKI} />
         <Action.OpenInBrowser title="Training Volume Research" url={VOLUME_RESOURCES.LINKS.GENERAL} />
         <Action.OpenInBrowser title="Volume & Hypertrophy" url={VOLUME_RESOURCES.LINKS.HYPERTROPHY} />
-        <Action.OpenInBrowser title="Strength Training Wiki" url={VOLUME_RESOURCES.LINKS.WIKI} />
       </ActionPanel.Section>
     </ActionPanel>
   );

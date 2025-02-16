@@ -7,7 +7,7 @@ export const VOLUME_RESOURCES = {
     STRENGTH: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4562558/", // Strength Training Meta-Analysis
     HYPERTROPHY: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6950543/", // Hypertrophy Training Review
     GENERAL: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6303131/", // Training Volume Guidelines
-    WIKI: "https://en.wikipedia.org/wiki/Strength_training#Training_variables",
+    WIKI: "https://en.wikipedia.org/wiki/Strength_training",
   },
   DOCS: {
     STRENGTH: "Brad Schoenfeld's research on training volume",

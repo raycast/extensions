@@ -38,8 +38,7 @@ Start with 50% of your working weight for 5 reps, then progressively increase we
 
 export const WARMUP_RESOURCES = {
   LINKS: {
-    PRILEPIN: "https://www.strongerbyscience.com/warm-up/",
-    RESEARCH: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4482302/",
-    GUIDE: "https://www.jtsstrength.com/warm-up-like-pro/",
+    SBS: "https://www.strongerbyscience.com/warm-up/",
+    WIKI: "https://en.wikipedia.org/wiki/Strength_training",
   },
 };

@@ -36,15 +36,3 @@ export const EPLEY = {
   COEFFICIENT_A: 1.0278,
   COEFFICIENT_B: 0.0278,
 } as const;
-
-// External resource links
-export const RESOURCES = {
-  LINKS: {
-    WIKI: "https://en.wikipedia.org/wiki/One-repetition_maximum",
-    EPLEY_FORMULA: "https://en.wikipedia.org/wiki/One-repetition_maximum#Epley_formula",
-  },
-  DOCS: {
-    WARMUP: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4482302/",
-    TRAINING: "https://pubmed.ncbi.nlm.nih.gov/34755829/",
-  },
-} as const;

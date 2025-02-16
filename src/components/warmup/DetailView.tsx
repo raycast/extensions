@@ -38,20 +38,11 @@ export const DetailView: React.FC<DetailViewProps> = ({ set, unitSystem }) => {
           <List.Item.Detail.Metadata.Label title="Purpose" text={WARMUP_DESCRIPTIONS[intensityLevel]} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Resources" />
+          <List.Item.Detail.Metadata.Link title="Wikipedia" target={WARMUP_RESOURCES.LINKS.WIKI} text="Wikipedia" />
           <List.Item.Detail.Metadata.Link
-            title="Warm-up Science"
-            target={WARMUP_RESOURCES.LINKS.RESEARCH}
-            text="Research Paper"
-          />
-          <List.Item.Detail.Metadata.Link
-            title="Prilepin's Chart"
-            target={WARMUP_RESOURCES.LINKS.PRILEPIN}
-            text="Background"
-          />
-          <List.Item.Detail.Metadata.Link
-            title="Practical Guide"
-            target={WARMUP_RESOURCES.LINKS.GUIDE}
-            text="JTS Guide"
+            title="Stronger by Science"
+            target={WARMUP_RESOURCES.LINKS.SBS}
+            text="Stronger by Science"
           />
         </List.Item.Detail.Metadata>
       }
