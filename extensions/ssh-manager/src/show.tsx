@@ -397,7 +397,7 @@ async function runTerminal(item: ISSHConnection) {
     await runAppleScript(scriptTerminal);
   }
 
-  await showHUD("Success ✅");
+  await showHUD(`✅ Connection [${item.name}] opened with [${terminal}].`);
 }
 
 function getConnectionString(item: ISSHConnection) {
@@ -482,6 +482,7 @@ function Action({
         />
         <ActionPanel.Item
           title="Remove"
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             await onItemRemove(item);
           }}
