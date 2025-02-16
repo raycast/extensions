@@ -4,8 +4,11 @@ import { MaxResult } from "../types/max";
 import { MAX_SCHEMES, SCHEME_DESCRIPTIONS } from "../constants/max";
 import { VALIDATION, EPLEY } from "../constants/shared";
 
+// utils/calculations.ts
+
 export const calculateOneRepMax = (weight: number, reps: number): number => {
-  if (weight < VALIDATION.WEIGHT.MIN || weight > VALIDATION.WEIGHT.MAX) {
+  // Change validation to be more strict - weight must be > 0
+  if (weight <= 0 || weight > VALIDATION.WEIGHT.MAX) {
     throw new Error(VALIDATION.getWeightError());
   }
   if (reps < VALIDATION.REPS.MIN || reps > VALIDATION.REPS.MAX) {

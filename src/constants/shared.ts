@@ -3,7 +3,7 @@
 // Input validation ranges and patterns
 export const VALIDATION = {
   WEIGHT: {
-    MIN: 0,
+    MIN: 0, // Check if this should be > 0
     MAX: 1000,
     PATTERN: /^(\d+(?:\.\d+)?)\*(\d+)$/,
   },
@@ -13,7 +13,7 @@ export const VALIDATION = {
   },
   getWeightError: () => `Weight must be between ${VALIDATION.WEIGHT.MIN} and ${VALIDATION.WEIGHT.MAX}`,
   getRepsError: () => `Reps must be between ${VALIDATION.REPS.MIN} and ${VALIDATION.REPS.MAX}`,
-} as const; // Making it a const assertion for better type inference
+} as const;
 
 // Unit conversion factors
 export const UNITS = {
