@@ -52,7 +52,7 @@
     {
       "name": "useWayfinder",
       "type": "checkbox",
-      "required": false,
+      "required": true,
       "title": "Use Wayfinder Protocol",
       "description": "Use the wayfinder protocol to automatically select the best gateway",
       "default": false,
