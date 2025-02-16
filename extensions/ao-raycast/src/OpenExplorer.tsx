@@ -1,4 +1,10 @@
-import { open, getSelectedText, getPreferenceValues } from "@raycast/api";
+import {
+  open,
+  getSelectedText,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 interface CommandArguments {
   txId?: string;
@@ -19,16 +25,25 @@ export default async function Command(props: { arguments: CommandArguments }) {
     try {
       txId = await getSelectedText();
     } catch {
-      throw new Error(
-        "No transaction ID provided. Please provide a 43-character Arweave transaction ID.",
-      );
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Missing Transaction ID",
+        message: "Please input a 43-character Arweave transaction ID.",
+      });
+      return;
     }
   }
 
   if (!txId || txId.length !== 43) {
-    throw new Error("Transaction ID must be 43 characters long");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid Transaction ID",
+      message: "Transaction ID must be 43 characters long.",
+    });
+    return;
   }
 
   const { explorer } = getPreferenceValues<Preferences>();
-  await open(getExplorerUrl(txId, explorer));
+  const explorerUrl = getExplorerUrl(txId, explorer);
+  await open(explorerUrl);
 }

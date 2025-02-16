@@ -61,20 +61,24 @@
     {
       "name": "defaultGateway",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "title": "Default Gateway",
       "description": "The default gateway to use when wayfinder is disabled (e.g., ar.io, arweave.net, defi.ao)",
       "default": "ar.io",
-      "label": "Default Gateway URL"
+      "placeholder": "Enter gateway URL (e.g., ar.io)",
+      "label": "Default Gateway URL",
+      "validation": "^[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     },
     {
       "name": "explorer",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "title": "Explorer",
-      "description": "The explorer URL template. Use {txId} as placeholder (e.g., ao.link/#/message/{txId}, viewblock.io/arweave/tx/{txId})",
-      "default": "ao.link/#/message/{txId}",
-      "label": "Explorer URL Template"
+      "description": "The explorer URL template. Use {txId} as placeholder",
+      "default": "https://ao.link/#/message/{txId}",
+      "placeholder": "Enter explorer URL template with {txId} placeholder",
+      "label": "Explorer URL Template",
+      "validation": ".*\\{txId\\}.*"
     }
   ],
   "dependencies": {
