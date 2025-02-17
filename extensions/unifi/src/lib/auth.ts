@@ -7,7 +7,7 @@ export function hasAuth() {
 
 export function isLegacy() {
   const preferences = getPreferenceValues();
-  return !!preferences.username && !!preferences.password && !!preferences.controllerUrl;
+  return !!preferences.username && !!preferences.password && !!preferences.controllerUrl && !preferences.apiKey;
 }
 
 export function getAuthPreferences() {
