@@ -1,6 +1,6 @@
 # Azure DevOps Repository Search
 
-## [Add Menu PR items] - {PR_MERGE_DATE}
+## [Add Menu PR items] - 2025-02-17
 Added the projectfilter
 
 ## [Add Menu PR items] - 2024-04-13
