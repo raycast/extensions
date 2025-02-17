@@ -96,11 +96,22 @@ async function fetchWithTimeout(url: URL, options: FetchRequestInit = {}, timeou
   }
 }
 
-// API Methods
+// API Actions
+async function makeApiCall(path: ApiPath, method: "GET" | "POST" = "GET"): Promise<FetchResponse> {
+  try {
+    const url = getValidatedEndpoint(path);
+    return await fetchWithTimeout(url, { method });
+  } catch (error) {
+    throw new MuteDeckError(
+      `Failed to call ${path}: ${error instanceof Error ? error.message : String(error)}`,
+      error instanceof MuteDeckError ? error.code : undefined,
+    );
+  }
+}
+
 export async function getStatus(): Promise<MuteDeckStatus> {
   try {
-    const url = getValidatedEndpoint("/v1/status");
-    const response = await fetchWithTimeout(url);
+    const response = await makeApiCall("/v1/status");
     const data = (await response.json()) as MuteDeckStatus;
     return data;
   } catch (error) {
@@ -109,6 +120,18 @@ export async function getStatus(): Promise<MuteDeckStatus> {
       error instanceof MuteDeckError ? error.code : undefined,
     );
   }
+}
+
+export async function toggleMute(): Promise<void> {
+  await makeApiCall("/v1/mute", "POST");
+}
+
+export async function toggleVideo(): Promise<void> {
+  await makeApiCall("/v1/video", "POST");
+}
+
+export async function leaveMeeting(): Promise<void> {
+  await makeApiCall("/v1/leave", "POST");
 }
 
 // Helper Functions
@@ -134,41 +157,4 @@ export function isPresenting(status: MuteDeckStatus): boolean {
 
 export function isRecording(status: MuteDeckStatus): boolean {
   return status.record === "active";
-}
-
-// API Actions
-export async function toggleMute(): Promise<void> {
-  try {
-    const url = getValidatedEndpoint("/v1/mute");
-    await fetchWithTimeout(url, { method: "POST" });
-  } catch (error) {
-    throw new MuteDeckError(
-      `Failed to toggle mute: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined,
-    );
-  }
-}
-
-export async function toggleVideo(): Promise<void> {
-  try {
-    const url = getValidatedEndpoint("/v1/video");
-    await fetchWithTimeout(url, { method: "POST" });
-  } catch (error) {
-    throw new MuteDeckError(
-      `Failed to toggle video: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined,
-    );
-  }
-}
-
-export async function leaveMeeting(): Promise<void> {
-  try {
-    const url = getValidatedEndpoint("/v1/leave");
-    await fetchWithTimeout(url, { method: "POST" });
-  } catch (error) {
-    throw new MuteDeckError(
-      `Failed to leave meeting: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined,
-    );
-  }
 }
