@@ -28,8 +28,8 @@ function formatTime(date: Date, use24HourFormat: boolean): string {
 
 export default async function main() {
   const preferences = getPreferenceValues();
-  const use24HourFormat = preferences.use24HourFormat;
-  const dateFormat = preferences.dateFormat;
+  const use24HourFormat = Boolean(preferences.use24HourFormat);
+  const dateFormat = ['EU', 'ISO', 'US'].includes(preferences.dateFormat) ? preferences.dateFormat : 'EU';
 
   const now = new Date();
   const formattedDate = formatDate(now, dateFormat);
