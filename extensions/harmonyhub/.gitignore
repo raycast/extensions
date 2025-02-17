@@ -1,0 +1,33 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# Windsurf specific files
+.windsurfrules
+cursor-tools.config.json
+global_rules.md
+.Plan
+Plan/
+.windsurf/
+.windsurf-cache/
+.windsurf-history/
+*.windsurf.tmp
+*.windsurf.bak
+
+# Development files
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# Keep example files
+!.windsurfrules.example
+!cursor-tools.config.json.example
+!global_rules.md.example
