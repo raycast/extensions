@@ -35,7 +35,10 @@ export interface MuteDeckStatus {
 
 // API Error Types
 export class MuteDeckError extends Error {
-  constructor(message: string, public readonly code?: number) {
+  constructor(
+    message: string,
+    public readonly code?: number,
+  ) {
     super(message);
     this.name = "MuteDeckError";
   }
@@ -61,9 +64,7 @@ function getValidatedEndpoint(path: ApiPath): URL {
     const baseUrl = new URL(apiEndpoint);
     return new URL(path, baseUrl);
   } catch (error) {
-    throw new MuteDeckConfigError(
-      `Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`
-    );
+    throw new MuteDeckConfigError(`Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -71,7 +72,7 @@ function getValidatedEndpoint(path: ApiPath): URL {
 async function fetchWithTimeout(
   url: URL,
   options: RequestInit & { body?: string | null } = {},
-  timeout = 5000
+  timeout = 5000,
 ): Promise<FetchResponse> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
@@ -109,7 +110,7 @@ export async function getStatus(): Promise<MuteDeckStatus> {
   } catch (error) {
     throw new MuteDeckError(
       `Failed to get MuteDeck status: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
@@ -147,7 +148,7 @@ export async function toggleMute(): Promise<void> {
   } catch (error) {
     throw new MuteDeckError(
       `Failed to toggle mute: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
@@ -159,7 +160,7 @@ export async function toggleVideo(): Promise<void> {
   } catch (error) {
     throw new MuteDeckError(
       `Failed to toggle video: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
@@ -171,7 +172,7 @@ export async function leaveMeeting(): Promise<void> {
   } catch (error) {
     throw new MuteDeckError(
       `Failed to leave meeting: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
