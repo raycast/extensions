@@ -11,6 +11,10 @@ function formatTime(date: Date, use24HourFormat: boolean): string {
 
 export default async function main() {
   const preferences = getPreferenceValues();
+  interface Preferences {
+    use24HourFormat: boolean;
+  }
+  const preferences = getPreferenceValues<Preferences>();
   const use24HourFormat = preferences.use24HourFormat;
 
   const now = new Date();
