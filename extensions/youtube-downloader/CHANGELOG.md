@@ -1,5 +1,10 @@
 # YouTube Downloader Changelog
 
+## [Improvement] - 2025-02-17
+
+- Add an experimental preference option for forcing IPv4 to solve some network issues
+- Add a message to remind users not to close the current window while installing homebrew packages
+
 ## [Improvement] - 2025-02-15
 
 - Add a preference option for toggling read URL from clipboard support
