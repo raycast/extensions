@@ -18,7 +18,7 @@ function formatDate(date: Date, format: string): string {
 }
 
 export default async function main() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<{ dateFormat: 'EU' | 'ISO' | 'US' }>();
   const dateFormat = preferences.dateFormat;
 
   const now = new Date();
