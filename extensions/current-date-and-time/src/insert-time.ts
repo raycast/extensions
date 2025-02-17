@@ -16,7 +16,11 @@ export default async function main() {
   const now = new Date();
   const formattedTime = formatTime(now, use24HourFormat);
 
-  await Clipboard.copy(formattedTime);
-  await showHUD(`📋 Time pasted: ${formattedTime}`);
-  await Clipboard.paste(formattedTime);
+  try {
+    await Clipboard.copy(formattedTime);
+    await showHUD(`📋 Time copied: ${formattedTime}`);
+    await Clipboard.paste(formattedTime);
+  } catch (error) {
+    await showHUD('Failed to copy/paste time');
+  }
 }
