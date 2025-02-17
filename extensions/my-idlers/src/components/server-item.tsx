@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Form, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { Item, Server, ServerType } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
 import { numOrUnlimited } from "../utils";
-import { showFailureToast, useForm } from "@raycast/utils";
+import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import useGet, { usePut } from "../hooks";
 
-export default function ServerItem({ server }: { server: Server }) {
+export default function ServerItem({ server, mutate }: { server: Server; mutate: MutatePromise<Server[]> }) {
   return (
     <List.Item
       icon={Icon.HardDrive}
@@ -50,68 +50,127 @@ export default function ServerItem({ server }: { server: Server }) {
           }
         />
       }
-      actions={<ActionPanel>
-        <Action.Push icon={Icon.Pencil} title="Update Server" target={<EditServer server={server} />} />
-      </ActionPanel>}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Pencil}
+            title="Update Server"
+            target={<EditServer server={server} mutate={mutate} />}
+          />
+        </ActionPanel>
+      }
     />
   );
 }
 
-function EditServer({ server }: { server: Server }) {
+function EditServer({ server, mutate }: { server: Server; mutate: MutatePromise<Server[]> }) {
   const [execute, setExecute] = useState(false);
-  const { isLoading: isLoadingProviders, data: providers } = useGet<Item>("providers")
+  const { isLoading: isLoadingProviders, data: providers } = useGet<Item>("providers");
+  const { isLoading: isLoadingLocations, data: locations } = useGet<Item>("locations");
+  const { isLoading: isLoadingOS, data: os } = useGet<Item>("os");
+  const { pop } = useNavigation();
 
   type EditServer = {
     hostname: string;
+    os_id: string;
     provider_id: string;
+    cpu: string;
+    ram: string;
+    ram_type: string;
+    disk: string;
+    disk_type: string;
+    location_id: string;
+    owned_since: Date | null;
     active: boolean;
-  }
-  const {handleSubmit, itemProps, values} = useForm<EditServer>({
+    show_public: boolean;
+  };
+  const { handleSubmit, itemProps, values } = useForm<EditServer>({
     onSubmit() {
       setExecute(true);
     },
     initialValues: {
       hostname: server.hostname,
+      os_id: server.os_id.toString(),
       provider_id: server.provider_id.toString(),
-      active: !!server.active 
-    }
-  })
+      cpu: server.cpu.toString(),
+      ram: server.ram.toString(),
+      ram_type: server.ram_type,
+      disk: server.disk.toString(),
+      disk_type: server.disk_type,
+      location_id: server.location_id.toString(),
+      owned_since: new Date(server.owned_since),
+      active: !!server.active,
+      show_public: !!server.show_public,
+    },
+  });
 
-  const { isLoading } = usePut(`servers/${server.id}`, {
+  const body = {
+    ...values,
+    owned_since: values.owned_since?.toISOString().split("T")[0],
+    active: +values.active as Server["active"],
+    show_public: +values.show_public as Server["show_public"],
+  };
+  const { isLoading: isUpdating } = usePut(`servers/${server.id}`, {
     execute,
-    body: values,
+    body,
+    onData() {
+      mutate(undefined, {
+        optimisticUpdate(data) {
+          const index = data.findIndex((s) => s.id === server.id);
+          data[index] = { ...server, ...body } as unknown as Server;
+          return data;
+        },
+      });
+      showToast(Toast.Style.Success, "Updated server", server.id);
+      pop();
+    },
     onError(error) {
       showFailureToast(error);
       setExecute(false);
     },
-  })
+  });
 
-  return <Form isLoading={isLoadingProviders || isLoading} actions={<ActionPanel>
-    <Action.SubmitForm icon={Icon.Check} title="Update Server" onSubmit={handleSubmit} />
-  </ActionPanel>}>
+  const isLoading = isLoadingProviders || isLoadingLocations || isLoadingOS || isUpdating;
 
-    {/* "show_public": 0, */}
-    <Form.TextField title="Hostname" placeholder={server.hostname} {...itemProps.hostname} />
-    {/* "server_type": 1, */}
-    {/* "os_id": 2, */}
-    {/* "ns1": "ns1",
-    "ns2": "ns2", */}
-    {/* "ssh_port": 22, */}
-    <Form.Dropdown title="Provider" {...itemProps.provider_id}>
-      {providers.map(provider => <Form.Dropdown.Item key={provider.id} title={provider.name} value={provider.id.toString()} />)}
-    </Form.Dropdown>
-    {/* "location_id": 15,
-    "bandwidth": 2000,
-    "ram": 2024,
-    "ram_type": "MB",
-    "ram_as_mb": 2024,
-    "disk": 30,
-    "disk_type": "GB",
-    "disk_as_gb": 30,
-    "cpu": 2,
-    "has_yabs": 0,
-    "was_promo": 1,
-    "owned_since": "2022-01-01" */}
-    <Form.Checkbox label="I still have this server" {...itemProps.active} />
-  </Form>
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Check} title="Update Server" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Hostname" placeholder={server.hostname} {...itemProps.hostname} />
+      <Form.Dropdown title="OS" {...itemProps.os_id}>
+        {os.map((item) => (
+          <Form.Dropdown.Item key={item.id} title={item.name} value={item.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown title="Provider" {...itemProps.provider_id}>
+        {providers.map((provider) => (
+          <Form.Dropdown.Item key={provider.id} title={provider.name} value={provider.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField title="CPU" placeholder={server.cpu.toString()} {...itemProps.cpu} />
+      <Form.TextField title="RAM" placeholder={server.ram.toString()} {...itemProps.ram} />
+      <Form.Dropdown title="RAM type" {...itemProps.ram_type}>
+        <Form.Dropdown.Item title="MB" value="MB" />
+        <Form.Dropdown.Item title="GB" value="GB" />
+      </Form.Dropdown>
+      <Form.TextField title="Disk" placeholder={server.disk.toString()} {...itemProps.disk} />
+      <Form.Dropdown title="Disk type" {...itemProps.disk_type}>
+        <Form.Dropdown.Item title="GB" value="GB" />
+        <Form.Dropdown.Item title="TB" value="TB" />
+      </Form.Dropdown>
+      <Form.Dropdown title="Location" {...itemProps.location_id}>
+        {locations.map((location) => (
+          <Form.Dropdown.Item key={location.id} title={location.name} value={location.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.DatePicker title="Owned since" type={Form.DatePicker.Type.Date} {...itemProps.owned_since} />
+      <Form.Checkbox label="I still have this server" {...itemProps.active} />
+      <Form.Checkbox label="Allow some of this data to be public" {...itemProps.show_public} />
+    </Form>
+  );
 }

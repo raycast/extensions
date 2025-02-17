@@ -120,7 +120,14 @@ export function useGetPricing({ execute = true, onData }: { execute?: boolean; o
 
 export function usePut(
   endpoint: string,
-  { body, execute = false, onData, onError }: { body: object; execute?: boolean; onData?: (data: unknown) => void; onError?: (error: Error) => void } = { body: {} },
+  {
+    body,
+    execute = false,
+    onData,
+    onError,
+  }: { body: object; execute?: boolean; onData?: (data: unknown) => void; onError?: (error: Error) => void } = {
+    body: {},
+  },
 ) {
   const { url, api_key } = getPreferenceValues<Preferences>();
   const api_url = new URL(`api/${endpoint}`, url).toString();
@@ -134,15 +141,16 @@ export function usePut(
     body: JSON.stringify(body),
     async parseResponse(response) {
       if (!response.ok) {
-        const result: ErrorResponse = await response.json();
+        const result: ErrorResponse | { result: "fail"; request: object } = await response.json();
         if ("message" in result) throw new Error(result.message);
         if ("messages" in result) throw new Error(Object.values(result.messages)[0][0]);
-        throw new Error();
+        throw new Error(response.statusText);
       }
-      const result: { result: "success"; server_id: string; } = await response.json();
+      const result: { result: "success"; server_id: string } = await response.json();
       return result;
     },
     execute,
-    onError
+    onData,
+    onError,
   });
 }
