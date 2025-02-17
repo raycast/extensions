@@ -11,13 +11,6 @@ export default function Command() {
   const { push } = useNavigation(); // Enables navigation to new views
   const { handleSubmit, itemProps } = useForm<RequestValues>({
     onSubmit(values) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Request Sent!",
-        message: `Succefully sent a ${values.type} request to ${values.url}`,
-      });
-
-      // Navigate to the new page and display request details
       push(<RequestResult values={values} />);
     },
     validation: {
@@ -31,6 +24,15 @@ export default function Command() {
         }
       },
       type: FormValidation.Required,
+      body: (value) => {
+        if (!value) return undefined;
+        try {
+          JSON.parse(value);
+          return undefined;
+        } catch {
+          return "Invalid JSON format.";
+        }
+      },
     },
   });
 
@@ -43,7 +45,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="URL" placeholder="https://api.twks.net" {...itemProps.url} />
+      <Form.TextField title="URL" placeholder="https://api.github.com" {...itemProps.url} />
 
       <Form.Dropdown {...itemProps.type} title="Request Type">
         <Form.Dropdown.Item value="GET" title="GET" />
@@ -57,7 +59,7 @@ export default function Command() {
       )}
 
       <Form.Separator />
-      <Form.Description title="About" text="2025 - Tobias Klingenberg" />
+      <Form.Description title="About" text="Tobias Klingenberg" />
     </Form>
   );
 }
@@ -65,9 +67,19 @@ export default function Command() {
 function RequestResult({ values }: { values: { url: string; type: string; body?: string } }) {
   const { isLoading, data, revalidate } = useFetch(values.url, {
     method: values.type,
-    body: values.body ? JSON.stringify(values.body) : undefined,
+    body: values.body ? values.body : undefined,
     headers: { "Content-Type": "application/json" },
-    parseResponse: async (response) => response.text(), // Ensure response is text
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Request Failed",
+          message: `${response.status}: ${response.statusText}`,
+        });
+        return response.statusText;
+      }
+      return response.text();
+    },
   });
 
   // Escape special markdown characters to avoid breaking the format
