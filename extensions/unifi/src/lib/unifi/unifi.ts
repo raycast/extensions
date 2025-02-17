@@ -28,6 +28,7 @@ interface UnifiConfig {
   remote?: boolean;
 }
 
+const PUBLIC_API_URL = "https://unifi.ui.com";
 const LOCAL_API_SUFFIX = "/proxy/network";
 const URL_SUFFIX = "/integration/v1/";
 const DEVICE_WEB_SUFFIX = "/network/default/devices/properties/{macAddress}";
@@ -40,13 +41,15 @@ export class UnifiClient {
   private readonly agent: https.Agent;
   private readonly timeout = 10000; // 10s default timeout
   private readonly maxRetries = 3;
-  public site?: string;
+  private site?: string;
+  private remote: boolean;
 
   constructor({ host = "https://192.168.1.1", apiKey, remote = false, site }: UnifiConfig) {
     if (!apiKey) throw new Error("API key is required");
 
     this.host = host;
-    this.baseURL = `${host}${LOCAL_API_SUFFIX}${URL_SUFFIX}`;
+    this.remote = remote;
+    this.baseURL = remote ? `${PUBLIC_API_URL}${URL_SUFFIX}` : `${host}${LOCAL_API_SUFFIX}${URL_SUFFIX}`;
     this.site = site;
     this.headers = {
       "Content-Type": "application/json",
@@ -115,6 +118,10 @@ export class UnifiClient {
 
   SetSite(site: string) {
     this.site = site;
+  }
+
+  SetRemote(remote: boolean) {
+    this.remote = remote;
   }
 
   async GetSites(abortable?: AbortController): Promise<Sites> {

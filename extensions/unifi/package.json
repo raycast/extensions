@@ -10,13 +10,11 @@
   ],
   "categories": [
     "Other",
-    "System",
-    "Applications"
+    "System"
   ],
   "keywords": [
     "Ubiquiti",
-    "UniFi",
-    "network"
+    "UniFi"
   ],
   "license": "MIT",
   "commands": [
@@ -120,10 +118,10 @@
     },
     {
       "name": "apiKey",
-      "description": "Api Key of Local UniFi User",
+      "title": "UniFi API Key",
+      "description": "The API key for your UniFi controller",
       "type": "password",
-      "required": false,
-      "title": "API Key"
+      "required": false
     },
     {
       "name": "username",
@@ -149,15 +147,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.91.2",
+    "@raycast/api": "1.91.1",
     "@raycast/utils": "1.18.1",
-    "date-fns": "4.1.0",
-    "fuse.js": "7.1.0",
+    "unifi-client": "^0.11.0",
     "node-fetch": "3.3.2",
-    "unifi-client": "^0.11.0"
+    "date-fns": "^4.1.0",
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node-fetch": "3.0.2",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "^7.32.0",

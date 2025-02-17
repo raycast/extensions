@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Controller, Site } from "unifi-client";
+import Controller, { Site } from "unifi-client";
 import { getAuthenticatedUnifiClient } from "../../lib/unifi";
 
 export function useSites(): {

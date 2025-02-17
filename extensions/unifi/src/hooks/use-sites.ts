@@ -45,6 +45,7 @@ export default function useSites({ unifi }: DevicesHookProps) {
 
   const setSite = useCallback(
     (site: Site) => {
+      console.log("Setting site", site);
       unifi?.SetSite(site.id);
       setValue(site);
     },

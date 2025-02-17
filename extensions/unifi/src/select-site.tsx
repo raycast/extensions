@@ -25,7 +25,7 @@ export default function SelectSite() {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search sites by name" navigationTitle="Select a Site">
+    <List isLoading={isLoading} searchBarPlaceholder="Search sites by name">
       {sites?.map((site) => (
         <List.Item
           key={site.id}

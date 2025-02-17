@@ -20,6 +20,7 @@ export default function useClients({ unifi, search }: UseClientsProps) {
 
   const fetchClients = useCallback(
     async (client: UnifiClient, abortable: AbortController) => {
+      console.log("Fetching clients", unifi?.isSiteSet());
       return client.GetClients(abortable);
     },
     [siteIsLoading],

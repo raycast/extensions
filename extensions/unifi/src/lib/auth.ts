@@ -14,6 +14,7 @@ export function getAuthPreferences() {
   const preferences = getPreferenceValues();
   return {
     apiKey: preferences.apiKey,
+    host: preferences.host,
     username: preferences.username,
     password: preferences.password,
     controllerUrl: preferences.controllerUrl,

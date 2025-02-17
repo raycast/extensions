@@ -37,6 +37,7 @@ export default function useUnifi() {
   }, [client, siteIsLoading, isLegacy, preferences]);
 
   useEffect(() => {
+    console.log("Setting site", site);
     if (isLegacy) return;
 
     if (client && site && !siteIsLoading) {
