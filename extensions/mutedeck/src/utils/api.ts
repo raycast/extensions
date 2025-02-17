@@ -31,7 +31,10 @@ export interface MuteDeckStatus {
 
 // API Error Types
 export class MuteDeckError extends Error {
-  constructor(message: string, public readonly code?: number) {
+  constructor(
+    message: string,
+    public readonly code?: number,
+  ) {
     super(message);
     this.name = "MuteDeckError";
   }
