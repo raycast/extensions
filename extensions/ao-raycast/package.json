@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ao-raycast",
   "type": "module",
-  "title": "AO Raycast",
+  "title": "Ao Raycast",
   "description": "Search and browse ArNS names with gateway support",
   "icon": "ao-512.png",
   "author": "dpshade22",

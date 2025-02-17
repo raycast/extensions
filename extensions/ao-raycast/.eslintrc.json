@@ -1,0 +1,8 @@
+{
+    "extends": "@raycast/eslint-config",
+    "settings": {
+        "react": {
+            "version": "18.3.3"
+        }
+    }
+}

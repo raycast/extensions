@@ -56,19 +56,56 @@ const DOC_SOURCES = [
     section: "AR.IO Documentation",
     type: "fixed",
     navSelector:
-      "nav a, .sidebar a, .navigation a, .prose a, [class*=text-lg][class*=font-semibold] a",
+      "nav.hidden a[href], nav ul[role='list'] a[href], .relative a[href], [class*='text-zinc-600'] a[href], [class*='text-lg'] a[href], .prose a[href]:not([href^='http']), h2.flex.cursor-pointer, span.cursor-pointer.pl-4",
     contentSelector: ".prose",
     titleSelector: "h1:first-of-type",
     entryPath: "/",
   },
 ];
 
+function normalizePath(base: string, href: string): string {
+  if (href.startsWith("/")) {
+    return href;
+  }
+
+  const baseSegments = base.split("/").filter(Boolean);
+  const isFile = base.endsWith(".html") || base.endsWith(".md");
+  if (isFile) {
+    baseSegments.pop();
+  }
+
+  if (href.startsWith("./")) {
+    href = href.slice(2);
+  }
+
+  const hrefSegments = href.split("/").filter(Boolean);
+  const resultSegments = [...baseSegments];
+
+  for (const segment of hrefSegments) {
+    if (segment === "..") {
+      resultSegments.pop();
+    } else {
+      // Keep the segment as is without any transformation
+      resultSegments.push(segment);
+    }
+  }
+
+  // Normalize the path to always end with .html if it doesn't have an extension
+  let finalPath = "/" + resultSegments.join("/");
+  if (!finalPath.endsWith(".html") && !finalPath.endsWith(".md")) {
+    finalPath = finalPath.replace(/\/?$/, "/index.html");
+  }
+
+  // Remove any double slashes and normalize index paths
+  return finalPath.replace(/\/+/g, "/").replace(/\/index\.html$/, "/");
+}
+
 function shouldSkipPath(
   path: string,
   source: (typeof DOC_SOURCES)[0],
+  processedPaths: Set<string>,
 ): boolean {
   const pathWithoutHash = path.split("#")[0];
-  const segments = pathWithoutHash.split("/").filter(Boolean);
 
   if (path.startsWith("http")) {
     return true;
@@ -78,8 +115,8 @@ function shouldSkipPath(
     return true;
   }
 
-  const uniqueSegments = new Set(segments);
-  if (uniqueSegments.size < segments.length) {
+  // Check if we've already processed this path
+  if (processedPaths.has(pathWithoutHash)) {
     return true;
   }
 
@@ -105,36 +142,6 @@ function shouldSkipPath(
   }
 
   return false;
-}
-
-function normalizePath(base: string, href: string): string {
-  if (href.startsWith("/")) {
-    return href;
-  }
-
-  const baseSegments = base.split("/").filter(Boolean);
-  const isFile = base.endsWith(".html") || base.endsWith(".md");
-  if (isFile) {
-    baseSegments.pop();
-  }
-
-  if (href.startsWith("./")) {
-    href = href.slice(2);
-  }
-
-  const hrefSegments = href.split("/").filter(Boolean);
-  const resultSegments = [...baseSegments];
-
-  for (const segment of hrefSegments) {
-    if (segment === "..") {
-      resultSegments.pop();
-    } else {
-      resultSegments.push(segment);
-    }
-  }
-
-  const uniqueSegments = [...new Set(resultSegments)];
-  return "/" + uniqueSegments.join("/");
 }
 
 const cleanTitle = (title: string) => {
@@ -515,16 +522,11 @@ export default function DocsCommand() {
             const [path] = href.split("#");
             const normalizedPath = normalizePath(source.entryPath, path);
 
-            if (shouldSkipPath(normalizedPath, source)) {
+            if (shouldSkipPath(normalizedPath, source, processedPaths)) {
               return;
             }
 
-            let finalPath = normalizedPath;
-            if (!finalPath.endsWith("/") && !finalPath.endsWith(".html")) {
-              finalPath = finalPath + "/";
-            }
-
-            paths.add(finalPath);
+            paths.add(normalizedPath);
           });
 
           // Process each unique path
@@ -544,20 +546,37 @@ export default function DocsCommand() {
 
               // Extract content
               const mainContent = $(source.contentSelector).first();
-              const pageTitle =
-                cleanTitle($(source.titleSelector).first().text().trim()) ||
-                cleanTitle($("title").text().trim()) ||
-                (currentPath === "/"
-                  ? "Overview"
-                  : currentPath
-                      .split("/")
-                      .pop()
-                      ?.split(".")[0]
-                      .split("-")
-                      .map(
-                        (word) => word.charAt(0).toUpperCase() + word.slice(1),
-                      )
-                      .join(" ") || "Untitled");
+
+              // Find the title from h1 first
+              let pageTitle = "";
+              const h1Title = $("h1").first();
+
+              if (h1Title.length) {
+                pageTitle = cleanTitle(h1Title.text().trim());
+              } else {
+                // Fallback title logic if no h1 found
+                pageTitle =
+                  source.url === "cookbook_ao"
+                    ? cleanTitle(
+                        $(`${source.navSelector}[href$="${currentPath}"] .text`)
+                          .first()
+                          .text()
+                          .trim(),
+                      ) ||
+                      cleanTitle($(source.titleSelector).first().text().trim())
+                    : cleanTitle(
+                        $(source.titleSelector).first().text().trim(),
+                      ) ||
+                      cleanTitle($("title").text().trim()) ||
+                      (currentPath === "/"
+                        ? "Overview"
+                        : currentPath
+                            .split("/")
+                            .pop()
+                            ?.split(".")[0]
+                            .split("-")
+                            .join("/") || "Untitled");
+              }
 
               const content = mainContent?.length ? mainContent : $("body");
 
@@ -568,30 +587,6 @@ export default function DocsCommand() {
                 lastIndexed: Date.now(),
                 section: source.section,
               });
-
-              // Also check for important sections on the same page
-              if (source.url === "docs.ar.io") {
-                $("h2, h3").each((_, heading) => {
-                  const id = $(heading).attr("id");
-                  if (!id) return;
-
-                  const sectionContent = $(heading).parent();
-                  const sectionTitle = cleanTitle($(heading).text().trim());
-
-                  if (sectionContent.length && sectionTitle) {
-                    allDocs.push({
-                      title: sectionTitle,
-                      url: `${fullUrl}#${id}`,
-                      content: sectionContent
-                        .text()
-                        .replace(/\s+/g, " ")
-                        .trim(),
-                      lastIndexed: Date.now(),
-                      section: source.section,
-                    });
-                  }
-                });
-              }
 
               processedPaths.add(currentPath);
 
