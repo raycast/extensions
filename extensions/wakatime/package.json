@@ -23,16 +23,7 @@
       "subtitle": "WakaTime",
       "title": "Show Public Leaderboard",
       "description": "Check your rank against others all around the world.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "apiKey",
-          "description": "Use your WakaTime API key to use your account",
-          "type": "password",
-          "required": false,
-          "title": "WakaTime API Key"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "private-leaderboards",
