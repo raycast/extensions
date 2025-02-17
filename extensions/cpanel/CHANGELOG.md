@@ -1,6 +1,6 @@
 # cPanel Changelog
 
-## [View FTP Accounts + Copy File Contents] - {PR_MERGE_DATE}
+## [View FTP Accounts + Copy File Contents] - 2025-02-17
 
 - Copy file contents after viewing in `Files`
 - View FTP Accounts in `FTP Accounts`
