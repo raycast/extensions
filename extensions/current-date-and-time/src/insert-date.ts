@@ -25,6 +25,6 @@ export default async function main() {
   const formattedDate = formatDate(now, dateFormat);
 
   await Clipboard.copy(formattedDate);
-  await showHUD(`📋 Date pasted: ${formattedDate}`);
   await Clipboard.paste(formattedDate);
+  await showHUD(`📋 Date pasted: ${formattedDate}`);
 }
