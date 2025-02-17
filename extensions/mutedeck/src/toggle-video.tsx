@@ -7,22 +7,21 @@ import {
   isPresenting,
   isVideoOn,
   toggleVideo,
+  type MuteDeckStatus,
 } from "./utils/api";
+import { MESSAGES, TROUBLESHOOTING_STEPS } from "./utils/constants";
 
 export default async function Command(): Promise<void> {
-  // Clear any existing subtitle
   await updateCommandMetadata({ subtitle: null });
-
   let loadingToast: Toast | undefined;
 
   try {
-    // Show initial loading state
     loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Checking MuteDeck status...",
     });
 
-    const status = await getStatus();
+    const status: MuteDeckStatus = await getStatus();
     const { showToasts, confirmVideoInPresentation } = getPreferences();
 
     if (!isMuteDeckRunning(status)) {
@@ -30,9 +29,8 @@ export default async function Command(): Promise<void> {
         await loadingToast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "MuteDeck Not Running",
-          message:
-            "Please start MuteDeck and try again.\n\nTroubleshooting:\n1. Check if MuteDeck is installed\n2. Launch MuteDeck from your Applications\n3. Wait a few seconds and try again",
+          title: MESSAGES.STATUS.NOT_RUNNING,
+          message: TROUBLESHOOTING_STEPS,
         });
       }
       return;
@@ -43,20 +41,19 @@ export default async function Command(): Promise<void> {
         await loadingToast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "Not in Meeting",
+          title: MESSAGES.STATUS.NO_MEETING,
           message: "You are not currently in a meeting.",
         });
       }
       return;
     }
 
-    // Check if confirmation is needed when presenting
     if (confirmVideoInPresentation && isPresenting(status)) {
       await loadingToast.hide();
 
       const confirmed = await confirmAlert({
-        title: "Toggle Video",
-        message: "Are you sure you want to toggle your video while presenting?",
+        title: MESSAGES.VIDEO.CONFIRM_TITLE,
+        message: MESSAGES.VIDEO.CONFIRM_MESSAGE,
         icon: Icon.Video,
         primaryAction: {
           title: "Toggle Video",
@@ -71,13 +68,11 @@ export default async function Command(): Promise<void> {
         return;
       }
 
-      // Show new loading state after confirmation
       loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Toggling video...",
       });
     } else {
-      // Update loading state
       loadingToast = await showToast({
         style: Toast.Style.Animated,
         title: "Toggling video...",
@@ -85,9 +80,7 @@ export default async function Command(): Promise<void> {
     }
 
     await toggleVideo();
-
-    // Get the new status after toggling
-    const newStatus = await getStatus();
+    const newStatus: MuteDeckStatus = await getStatus();
 
     if (showToasts) {
       await loadingToast.hide();
@@ -102,7 +95,7 @@ export default async function Command(): Promise<void> {
       await loadingToast?.hide();
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Toggle Video",
+        title: MESSAGES.VIDEO.ERROR,
         message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }

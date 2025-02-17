@@ -1,27 +1,34 @@
-import { Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
-import { getPreferences, getStatus, isInMeeting, isMuteDeckRunning, leaveMeeting } from "./utils/api";
+import { Alert, confirmAlert, Icon, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import {
+  getPreferences,
+  getStatus,
+  isInMeeting,
+  isMuteDeckRunning,
+  leaveMeeting,
+  type MuteDeckStatus,
+} from "./utils/api";
+import { MESSAGES, TROUBLESHOOTING_STEPS } from "./utils/constants";
 
 export default async function Command(): Promise<void> {
+  await updateCommandMetadata({ subtitle: null });
   let loadingToast: Toast | undefined;
 
   try {
-    // Show initial loading state
     loadingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Checking MuteDeck status...",
     });
 
-    const status = await getStatus();
-    const { showToasts } = getPreferences();
+    const status: MuteDeckStatus = await getStatus();
+    const { showToasts, confirmLeave } = getPreferences();
 
     if (!isMuteDeckRunning(status)) {
       if (showToasts) {
         await loadingToast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "MuteDeck Not Running",
-          message:
-            "Please start MuteDeck and try again.\n\nTroubleshooting:\n1. Check if MuteDeck is installed\n2. Launch MuteDeck from your Applications\n3. Wait a few seconds and try again",
+          title: MESSAGES.STATUS.NOT_RUNNING,
+          message: TROUBLESHOOTING_STEPS,
         });
       }
       return;
@@ -32,36 +39,43 @@ export default async function Command(): Promise<void> {
         await loadingToast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "Not in Meeting",
+          title: MESSAGES.STATUS.NO_MEETING,
           message: "You are not currently in a meeting.",
         });
       }
       return;
     }
 
-    // Check if confirmation is needed
-    const confirmed = await confirmAlert({
-      title: "Leave Meeting",
-      message: "Are you sure you want to leave the current meeting?",
-      icon: Icon.ArrowRightCircle,
-      primaryAction: {
-        title: "Leave Meeting",
-        style: Alert.ActionStyle.Destructive,
-      },
-      dismissAction: {
-        title: "Cancel",
-      },
-    });
+    if (confirmLeave) {
+      await loadingToast.hide();
 
-    if (!confirmed) {
-      return;
+      const confirmed = await confirmAlert({
+        title: MESSAGES.LEAVE.CONFIRM_TITLE,
+        message: MESSAGES.LEAVE.CONFIRM_MESSAGE,
+        icon: Icon.DoorLeft,
+        primaryAction: {
+          title: "Leave Meeting",
+          style: Alert.ActionStyle.Destructive,
+        },
+        dismissAction: {
+          title: "Cancel",
+        },
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
+      loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Leaving meeting...",
+      });
+    } else {
+      loadingToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Leaving meeting...",
+      });
     }
-
-    // Show new loading state after confirmation
-    loadingToast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Leaving meeting...",
-    });
 
     await leaveMeeting();
 
@@ -69,7 +83,7 @@ export default async function Command(): Promise<void> {
       await loadingToast.hide();
       await showToast({
         style: Toast.Style.Success,
-        title: "Left Meeting",
+        title: MESSAGES.LEAVE.SUCCESS,
       });
     }
   } catch (error) {
@@ -78,7 +92,7 @@ export default async function Command(): Promise<void> {
       await loadingToast?.hide();
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Leave Meeting",
+        title: MESSAGES.LEAVE.ERROR,
         message: error instanceof Error ? error.message : "Unknown error occurred",
       });
     }

@@ -135,26 +135,26 @@ export async function leaveMeeting(): Promise<void> {
 }
 
 // Helper Functions
-export function isMuteDeckRunning(status: MuteDeckStatus): boolean {
-  return status.status >= 200 && status.status < 300;
+export function isMuteDeckRunning(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.status >= 200 && status?.status < 300;
 }
 
-export function isInMeeting(status: MuteDeckStatus): boolean {
-  return status.call === "active";
+export function isInMeeting(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.call === "active";
 }
 
-export function isMuted(status: MuteDeckStatus): boolean {
-  return status.mute === "active";
+export function isMuted(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.mute === "active";
 }
 
-export function isVideoOn(status: MuteDeckStatus): boolean {
-  return status.video === "active";
+export function isVideoOn(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.video === "active";
 }
 
-export function isPresenting(status: MuteDeckStatus): boolean {
-  return status.share === "active";
+export function isPresenting(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.share === "active";
 }
 
-export function isRecording(status: MuteDeckStatus): boolean {
-  return status.record === "active";
+export function isRecording(status: MuteDeckStatus | null | undefined): boolean {
+  return status?.record === "active";
 }
