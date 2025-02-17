@@ -49,6 +49,14 @@
       "type": "password",
       "description": "Use your WakaTime API key to use your account",
       "placeholder": "Enter your API key from https://wakatime.com/settings"
+    },
+    {
+      "name": "apiBaseUrl",
+      "description": "Config custom API base URL",
+      "type": "textfield",
+      "required": false,
+      "title": "WakaTime API Base URL",
+      "default": "https://wakatime.com/api/v1"
     }
   ],
   "dependencies": {

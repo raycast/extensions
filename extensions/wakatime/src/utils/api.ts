@@ -9,7 +9,8 @@ import { getPreferenceValues } from "@raycast/api";
  * @returns A function that returns a promise that resolves to a RouteResponse<T>
  */
 async function routeHandler<T extends object>(endpoint: string): Promise<Types.RouteResponse<T>> {
-  const baseURL = "https://wakatime.com/api/v1";
+  const { apiBaseUrl } = getPreferenceValues<{ apiBaseUrl?: string }>();
+  const baseURL = apiBaseUrl || "https://wakatime.com/api/v1";
 
   try {
     const res = await fetch(`${baseURL}${endpoint}`, { headers: getAuthToken() });
