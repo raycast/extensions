@@ -31,28 +31,31 @@ export interface MuteDeckStatus {
 
 // API Error Types
 export class MuteDeckError extends Error {
-  constructor(message: string, public readonly code?: number) {
+  constructor(
+    message: string,
+    public readonly code?: number,
+  ) {
     super(message);
-    this.name = 'MuteDeckError';
+    this.name = "MuteDeckError";
   }
 }
 
 export class MuteDeckTimeoutError extends MuteDeckError {
-  constructor(message = 'Request timed out') {
+  constructor(message = "Request timed out") {
     super(message);
-    this.name = 'MuteDeckTimeoutError';
+    this.name = "MuteDeckTimeoutError";
   }
 }
 
 export class MuteDeckConfigError extends MuteDeckError {
   constructor(message: string) {
     super(message);
-    this.name = 'MuteDeckConfigError';
+    this.name = "MuteDeckConfigError";
   }
 }
 
 // API Path type
-type ApiPath = '/v1/status' | '/v1/mute' | '/v1/video' | '/v1/leave';
+type ApiPath = "/v1/status" | "/v1/mute" | "/v1/video" | "/v1/leave";
 
 // Validate and construct API endpoint URL
 function getValidatedEndpoint(path: ApiPath): URL {
@@ -78,13 +81,13 @@ async function fetchWithTimeout(url: URL, options: RequestInit = {}, timeout = 5
       ...options,
       signal: controller.signal,
     });
-    
+
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
     throw new MuteDeckError(`HTTP error! status: ${response.status}`, response.status);
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       throw new MuteDeckTimeoutError();
     }
     if (error instanceof MuteDeckError) {
@@ -99,14 +102,14 @@ async function fetchWithTimeout(url: URL, options: RequestInit = {}, timeout = 5
 // API Methods
 export async function getStatus(): Promise<MuteDeckStatus> {
   try {
-    const url = getValidatedEndpoint('/v1/status');
+    const url = getValidatedEndpoint("/v1/status");
     const response = await fetchWithTimeout(url);
     const data = (await response.json()) as MuteDeckStatus;
     return data;
   } catch (error) {
     throw new MuteDeckError(
       `Failed to get MuteDeck status: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
@@ -139,36 +142,36 @@ export function isRecording(status: MuteDeckStatus): boolean {
 // API Actions
 export async function toggleMute(): Promise<void> {
   try {
-    const url = getValidatedEndpoint('/v1/mute');
+    const url = getValidatedEndpoint("/v1/mute");
     await fetchWithTimeout(url, { method: "POST" });
   } catch (error) {
     throw new MuteDeckError(
       `Failed to toggle mute: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
 
 export async function toggleVideo(): Promise<void> {
   try {
-    const url = getValidatedEndpoint('/v1/video');
+    const url = getValidatedEndpoint("/v1/video");
     await fetchWithTimeout(url, { method: "POST" });
   } catch (error) {
     throw new MuteDeckError(
       `Failed to toggle video: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
 
 export async function leaveMeeting(): Promise<void> {
   try {
-    const url = getValidatedEndpoint('/v1/leave');
+    const url = getValidatedEndpoint("/v1/leave");
     await fetchWithTimeout(url, { method: "POST" });
   } catch (error) {
     throw new MuteDeckError(
       `Failed to leave meeting: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined
+      error instanceof MuteDeckError ? error.code : undefined,
     );
   }
 }
