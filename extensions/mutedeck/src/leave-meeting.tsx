@@ -52,7 +52,7 @@ export default async function Command(): Promise<void> {
       const confirmed = await confirmAlert({
         title: MESSAGES.LEAVE.CONFIRM_TITLE,
         message: MESSAGES.LEAVE.CONFIRM_MESSAGE,
-        icon: Icon.DoorLeft,
+        icon: Icon.ExitFullScreen,
         primaryAction: {
           title: "Leave Meeting",
           style: Alert.ActionStyle.Destructive,
