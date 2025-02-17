@@ -98,8 +98,6 @@ export default function TaskListItem({
     const recurring = isRecurring(task);
     const overdue = isOverdue(task.due.date);
     const use12HourFormat = data?.user?.time_format === 1;
-
-
     const text = displayDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
