@@ -135,12 +135,14 @@ function EditServer({ server, mutate }: { server: Server; mutate: MutatePromise<
   return (
     <Form
       isLoading={isLoading}
+      navigationTitle="Items > Update Server"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Update Server" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.Description title="Server ID" text={server.id} />
       <Form.TextField title="Hostname" placeholder={server.hostname} {...itemProps.hostname} />
       <Form.Dropdown title="OS" {...itemProps.os_id}>
         {os.map((item) => (
