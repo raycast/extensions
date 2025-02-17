@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch, { Response as FetchResponse } from "node-fetch";
+import fetch, { RequestInit as FetchRequestInit, Response as FetchResponse } from "node-fetch";
 
 // API Preferences type
 export interface MuteDeckPreferences {
@@ -69,18 +69,14 @@ function getValidatedEndpoint(path: ApiPath): URL {
 }
 
 // Fetch with timeout
-async function fetchWithTimeout(
-  url: URL,
-  options: RequestInit & { body?: string | null } = {},
-  timeout = 5000,
-): Promise<FetchResponse> {
+async function fetchWithTimeout(url: URL, options: FetchRequestInit = {}, timeout = 5000): Promise<FetchResponse> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
   try {
     const response = await fetch(url.toString(), {
       ...options,
-      signal: controller.signal,
+      signal: controller.signal as unknown as AbortSignal,
     });
 
     if (response.status >= 200 && response.status < 300) {
