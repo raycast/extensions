@@ -9,7 +9,7 @@ The response can quickly be copied to the clipboard for easy usage.
 
 # Installation
 
-To install, install it via the Raycast Extensions Store
+Install it via the Raycast Extensions Store
 
 # Usage
 
