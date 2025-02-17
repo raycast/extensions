@@ -13,21 +13,21 @@
     {
       "name": "insert-date-and-time",
       "title": "Insert Current Date and Time",
-      "description": "Paste current date and time to actual document.",
+      "description": "Paste current date and time to active document.",
       "mode": "no-view",
       "icon": "insert-date-and-time-icon.png"
     },
     {
       "name": "insert-date",
       "title": "Insert Current Date",
-      "description": "Paste current date to actual document.",
+      "description": "Paste current date to active document.",
       "mode": "no-view",
       "icon": "insert-date-icon.png"
     },
     {
       "name": "insert-time",
       "title": "Insert Current Time",
-      "description": "Paste current time to actual document.",
+      "description": "Paste current time to active document.",
       "mode": "no-view",
       "icon": "insert-time-icon.png"
     }
