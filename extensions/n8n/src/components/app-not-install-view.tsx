@@ -12,6 +12,7 @@ export function AppNotInstallView(props: { extensionPreferences: boolean }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
+            // eslint-disable-next-line @raycast/prefer-title-case
             title={"Get n8n"}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
             url={"https://n8n.io/get-started/"}

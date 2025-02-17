@@ -1,12 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 
-export const preferences = getPreferenceValues<{
-  downloadPath: string;
-  ytdlPath: string;
-  ffmpegPath: string;
-  ffprobePath: string;
-}>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
   url: string;
@@ -52,7 +47,26 @@ export function isValidHHMM(input: string) {
   }
 }
 
-export function isYouTubeURL(url: string) {
-  const pattern = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
-  return pattern.test(url);
+export function isYouTubeURL(input: string) {
+  const validHostnames = new Set(["youtube.com", "www.youtube.com", "youtu.be"]);
+  const videoIdPattern = /^[a-zA-Z0-9_-]{11}$/;
+  const linkProtocolPrefix = "https://";
+  if (!input.startsWith(linkProtocolPrefix)) input = linkProtocolPrefix + input;
+  try {
+    const url = new URL(input);
+    if (!validHostnames.has(url.hostname)) return false;
+
+    if (url.hostname === "youtu.be") {
+      return videoIdPattern.test(url.pathname.slice(1));
+    }
+
+    if (url.pathname.startsWith("/embed/")) {
+      return videoIdPattern.test(url.pathname.slice(7));
+    }
+
+    const videoId = url.searchParams.get("v");
+    return videoId ? videoIdPattern.test(videoId) : false;
+  } catch {
+    return false;
+  }
 }

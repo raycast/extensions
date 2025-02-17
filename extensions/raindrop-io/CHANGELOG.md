@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-02-05
+
+Add option to specify sorting behavior
+
 ## [Enhancements] - 2025-01-05
 
 Add tags display preference and update bookmark item rendering

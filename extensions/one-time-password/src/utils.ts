@@ -28,34 +28,30 @@ export async function readDataFromQRCodeOnScreen(type: ScanType) {
     data?: string;
     isGoogleAuthenticatorMigration?: boolean;
   };
-  try {
-    const path = `${TEMP_DIR}/raycast-one-time-password-qr.png`;
-    const output: Output = {};
+  const path = `${TEMP_DIR}/raycast-one-time-password-qr.png`;
+  const output: Output = {};
 
-    switch (type) {
-      case 'scan': {
-        for (let i = 0; i < (await getDisplayCount()); i++) {
-          await execAsync(`/usr/sbin/screencapture -xD ${i + 1} ${path}`);
-          output.data = await extractQRCodeFromImage(path);
-          if (output.data) break;
-        }
-        break;
-      }
-      case 'select': {
-        await execAsync(`/usr/sbin/screencapture -xi ${path}`);
+  switch (type) {
+    case 'scan': {
+      for (let i = 0; i < (await getDisplayCount()); i++) {
+        await execAsync(`/usr/sbin/screencapture -xD ${i + 1} ${path}`);
         output.data = await extractQRCodeFromImage(path);
-        break;
+        if (output.data) break;
       }
+      break;
     }
-
-    output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);
-
-    await execAsync(`rm ${path}`);
-
-    return output;
-  } catch {
-    /* empty */
+    case 'select': {
+      await execAsync(`/usr/sbin/screencapture -xi ${path}`);
+      output.data = await extractQRCodeFromImage(path);
+      break;
+    }
   }
+
+  output.isGoogleAuthenticatorMigration = isGoogleAuthenticatorMigration(output.data);
+
+  await execAsync(`rm ${path}`);
+
+  return output;
 }
 
 export function getCurrentSeconds() {

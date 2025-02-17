@@ -1,23 +1,40 @@
 import { setInterval } from "timers";
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Detail, environment, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  environment,
+  Form,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { toDataURL } from "qrcode";
 import { webln } from "@getalby/sdk";
 
 import ConnectionError from "./components/ConnectionError";
 import { connectWallet } from "./utils/wallet";
+import { fiat } from "@getalby/lightning-tools";
+import "cross-fetch/polyfill";
 
 export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.Createinvoice }>) {
-  const [amount, setAmount] = useState(props.arguments.input);
+  const [amount, setAmount] = useState<string>(props.arguments.input);
   const [description, setDescription] = useState("");
   const [invoice, setInvoice] = useState<string | undefined>();
   const [invoiceMarkdown, setInvoiceMarkdown] = useState<string | undefined>();
   const [invoiceState, setInvoiceState] = useState("pending");
   const [loading, setLoading] = useState<boolean>(false);
   const [connectionError, setConnectionError] = useState<unknown>(null);
+  const [isSatDenomination, setSatDenomination] = useState(true);
+
   const invoiceCheckerIntervalRef = useRef<NodeJS.Timeout>();
   const invoiceCheckCounterRef = useRef(0);
   const nwc = useRef<webln.NostrWebLNProvider>();
+
+  const fiatCurrency = getPreferenceValues<{ currency: string }>().currency;
 
   const checkInvoicePayment = (invoice: string) => {
     if (invoiceCheckerIntervalRef && invoiceCheckerIntervalRef.current) {
@@ -56,10 +73,15 @@ export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.
 
     try {
       setLoading(true);
+      let satoshis: string | number = amount;
       nwc.current = await connectWallet();
       await showToast(Toast.Style.Animated, "Requesting invoice...");
+      if (!isSatDenomination) {
+        satoshis = await fiat.getSatoshiValue({ amount: amount, currency: fiatCurrency });
+        console.log(satoshis);
+      }
       const invoiceResponse = await nwc.current.makeInvoice({
-        amount, // This should be the amount in satoshis
+        amount: satoshis, // This should be the amount in satoshis
         defaultMemo: description,
       });
 
@@ -74,6 +96,7 @@ export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.
     } catch (error) {
       setConnectionError(error);
       await showToast(Toast.Style.Failure, "Error creating invoice");
+      console.trace(error);
     } finally {
       setLoading(false);
     }
@@ -117,13 +140,19 @@ export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.
           actions={
             <ActionPanel>
               <Action title="Create Invoice" onAction={handleCreateInvoice} />
+
+              <Action
+                title={`Swap Currency to ${isSatDenomination ? fiatCurrency : "Satoshi"}`}
+                onAction={() => setSatDenomination(!isSatDenomination)}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+              />
             </ActionPanel>
           }
         >
           <Form.TextField
             id="amount"
-            title="Amount (Satoshis)"
-            placeholder="Enter the amount in satoshis"
+            title={`Amount (${isSatDenomination ? "Satoshis" : fiatCurrency})`}
+            placeholder={`Enter the amount in ${isSatDenomination ? "satoshis" : fiatCurrency}`}
             value={amount}
             onChange={setAmount}
           />
@@ -147,7 +176,11 @@ export default function CreateInvoice(props: LaunchProps<{ arguments: Arguments.
           }
           metadata={
             <Detail.Metadata>
-              <Detail.Metadata.Label title="Amount" text={`${amount} sats`} icon={Icon.Bolt} />
+              <Detail.Metadata.Label
+                title="Amount"
+                text={`${amount} ${isSatDenomination ? "sats" : fiatCurrency}`}
+                icon={Icon.Bolt}
+              />
               <Detail.Metadata.Label title="Description" text={description} />
               <Detail.Metadata.TagList title="Status">
                 <Detail.Metadata.TagList.Item

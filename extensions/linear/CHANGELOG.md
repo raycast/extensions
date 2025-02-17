@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Focus Shortcuts] - 2025-02-07
+
+- Added input focus sub-commands to the `Create Issue` command for changing the focused form input quicker.
+
 ## [Search Projects Fixes] - 2024-11-08
 
 - [#15052](https://github.com/raycast/extensions/issues/15052): Fixed incomplete project list by adding pagination and utilizing search text to fetch projects directly.
