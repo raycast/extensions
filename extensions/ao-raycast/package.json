@@ -46,6 +46,13 @@
           "validation": "^.{43}$"
         }
       ]
+    },
+    {
+      "name": "docs",
+      "title": "Arweave Docs",
+      "label": "Search Arweave Documentation",
+      "description": "Search through Arweave documentation with automatic indexing",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -86,7 +93,9 @@
     "@permaweb/aoconnect": "^0.0.69",
     "@raycast/api": "^1.91.2",
     "@raycast/utils": "^1.17.0",
+    "axios": "^1.6.8",
     "buffer": "^6.0.3",
+    "cheerio": "^1.0.0-rc.12",
     "cross-fetch": "^4.1.0",
     "process": "^0.11.10",
     "sharp": "^0.33.5",
@@ -95,6 +104,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/cheerio": "^0.22.35",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^9.20.1",

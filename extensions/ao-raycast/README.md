@@ -20,7 +20,13 @@ This Raycast extension integrates with the AR.IO SDK to make working with Arweav
    - Attempts to find the healthiest gateway using built-in caching and metrics.
    - Caches resource availability to shorten load times.
 
-5. Additional Utilities:
+5. Search Arweave Documentation:
+   - Search across official Arweave documentation sources
+   - Automatic daily indexing of documentation
+   - Supports AO Cookbook, Arweave Cookbook, and AR.IO docs
+   - Uses the same gateway infrastructure for reliable access
+
+6. Additional Utilities:
    - Copy domain names, transaction IDs, or domain-based gateways directly to your clipboard.
 
 ## Requirements
@@ -66,7 +72,8 @@ After building or running this extension in Raycast:
 
 • "Arns" Command: Search and browse Arweave Domains.  
 • "Open Transaction Data" Command: Quickly open a transaction's data on the best gateway.  
-• "Open in Explorer" Command: Open a transaction in your configured explorer (defaults to ao.link).
+• "Open in Explorer" Command: Open a transaction in your configured explorer (defaults to ao.link).  
+• "Arweave Docs" Command: Search through Arweave documentation with automatic daily updates.
 
 You can configure preferences in the Raycast "Extensions" tab to:
 - Toggle whether to use the "Wayfinder Protocol" to evaluate gateways automatically.
