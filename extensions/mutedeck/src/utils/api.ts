@@ -40,13 +40,6 @@ export class MuteDeckError extends Error {
   }
 }
 
-export class MuteDeckTimeoutError extends MuteDeckError {
-  constructor(message = "Request timed out") {
-    super(message);
-    this.name = "MuteDeckTimeoutError";
-  }
-}
-
 export class MuteDeckConfigError extends MuteDeckError {
   constructor(message: string) {
     super(message);
@@ -88,7 +81,7 @@ async function fetchWithTimeout(url: URL, options: RequestInit = {}, timeout = 5
     throw new MuteDeckError(`HTTP error! status: ${response.status}`, response.status);
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw new MuteDeckTimeoutError();
+      throw new MuteDeckError("Request timed out");
     }
     if (error instanceof MuteDeckError) {
       throw error;
