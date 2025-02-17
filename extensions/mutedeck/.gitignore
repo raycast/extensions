@@ -5,30 +5,9 @@
 
 # Raycast specific files
 raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
-
-# Windsurf specific files
-.windsurfrules
-cursor-tools.config.json
-global_rules.md
-.Plan
-Plan/
-.windsurf/
-.windsurf-cache/
-.windsurf-history/
-*.windsurf.tmp
-*.windsurf.bak
 
 # Development files
-Plan.md
 .vscode/
 .idea/
 *.log
 .DS_Store
-
-# Keep example files
-!.windsurfrules.example
-!cursor-tools.config.json.example
-!global_rules.md.example

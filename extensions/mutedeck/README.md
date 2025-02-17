@@ -50,6 +50,27 @@ Configure confirmation dialogs to prevent accidental actions:
 - **Confirm Video While Presenting**: Extra protection while presenting
 - **Show Toast Notifications**: Enable/disable feedback notifications
 
+## Screenshots
+
+All screenshots are in dark mode with consistent styling (2000×1250 pixels):
+
+1. **Command List View**
+   - Shows all available MuteDeck commands
+   - Quick access to microphone, video, and meeting controls
+   - Clear command descriptions and icons
+
+2. **Status Display**
+   - Real-time meeting status overview
+   - Current microphone and camera state
+   - Platform-specific indicators
+   - Quick toggle actions
+
+3. **Confirmation Dialog**
+   - Smart protection while presenting
+   - Clear action confirmation
+   - Prevents accidental meeting exits
+   - User-friendly warning messages
+
 ## Commands
 
 ### Toggle Microphone
@@ -86,7 +107,20 @@ Need help or want to contribute?
 
 ## Privacy & Security
 
-- Communicates only with local MuteDeck instance
-- No data sent to external servers
-- Secure preference handling
-- Local API communication only
+### API Communication
+- Extension connects to MuteDeck's built-in HTTP API
+- HTTP protocol is required as per MuteDeck's implementation
+- Default endpoint is http://localhost:3491
+- Custom endpoints are supported while maintaining HTTP protocol compatibility
+
+### Data Security
+- No sensitive data transmitted
+- All preferences stored securely by Raycast
+- No external API calls or data collection
+- No logging or tracking
+
+### Best Practices
+- Keep MuteDeck up to date
+- Default endpoint (http://localhost:3491) recommended for most users
+- Custom endpoints must follow MuteDeck's API specifications
+- Contact support if you experience connection issues
