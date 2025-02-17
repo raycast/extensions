@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "harmony-control",
+  "title": "Harmony Control",
+  "description": "Control your Logitech Harmony Hub devices",
+  "icon": "command-icon.png",
+  "author": "chad_walters",
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "control",
+      "title": "Control Harmony Hub",
+      "description": "Control your Harmony Hub devices and activities",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Choose whether to show Activities or Devices by default",
+      "default": "activities",
+      "label": "Default View",
+      "data": [
+        {
+          "title": "Activities",
+          "value": "activities"
+        },
+        {
+          "title": "Devices",
+          "value": "devices"
+        }
+      ]
+    },
+    {
+      "name": "commandHoldTime",
+      "type": "textfield",
+      "required": false,
+      "title": "Command Hold Time",
+      "description": "Duration to hold a command in milliseconds",
+      "default": "100",
+      "label": "Command Hold Time (ms)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
