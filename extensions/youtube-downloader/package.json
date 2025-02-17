@@ -88,6 +88,15 @@
       "label": "Enable",
       "default": false,
       "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

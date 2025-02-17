@@ -147,7 +147,10 @@ export default function DownloadVideo() {
       if (!url) return;
       if (!isYouTubeURL(url)) return;
 
-      const result = await nanoSpawn(preferences.ytdlPath, ["-j", url]);
+      const result = await nanoSpawn(
+        preferences.ytdlPath,
+        [preferences.forceIpv4 ? "--force-ipv4" : undefined, "-j", url].filter((x) => Boolean(x)),
+      );
       return JSON.parse(result.stdout) as {
         title: string;
         duration: number;
@@ -282,6 +285,8 @@ This extension depends on a command-line utilty that is not detected on your sys
 
 If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
 **it can take up 2 minutes to install**.
+
+**Please do not close Raycast while the installation is in progress.**
 
 To install homebrew, visit [this link](https://brew.sh)
   `}
