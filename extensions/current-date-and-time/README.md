@@ -13,7 +13,7 @@ This Raycast extension allows you to quickly insert the current date and/or time
 You can customize the following preferences in the Raycast extension settings:
 
 - **Use 24-hour format**: Choose whether to use the 24-hour format for time.
-- **Date format**: Choose the date format to use (EU, ISO, or US).
+- **Date format**: Choose the date format to use (EU: DD.MM.YYYY, ISO: YYYY-MM-DD, US: MM/DD/YYYY).
 
 ## Commands
 
