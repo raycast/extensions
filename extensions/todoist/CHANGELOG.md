@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Add time format preference from Todoist preferences] - {PR_MERGE_DATE}
+## [Add time format preference from Todoist preferences] - 2025-02-17
 
 - Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
 
