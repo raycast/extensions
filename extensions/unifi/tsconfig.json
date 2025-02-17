@@ -6,10 +6,10 @@
   ],
   "compilerOptions": {
     "lib": [
-      "ES2023"
+      "ESNext"
     ],
     "module": "commonjs",
-    "target": "ES2022",
+    "target": "ESNext",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
