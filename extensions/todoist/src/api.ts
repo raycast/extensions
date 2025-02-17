@@ -767,6 +767,7 @@ export type User = {
   full_name: string;
   id: string;
   is_premium: boolean;
+  time_format: number;
 };
 
 export type Event = {
