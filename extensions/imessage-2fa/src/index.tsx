@@ -3,13 +3,15 @@
  * Combines and displays 2FA codes from both iMessage and Email sources
  */
 
-import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import useInterval from "@use-it/interval";
 import { useState, useCallback, useEffect } from "react";
 import { useMessages } from "./messages";
 import { useEmails } from "./emails";
 import { Message, SearchType, MessageSource, Preferences } from "./types";
 import { extractCode, formatDate } from "./utils";
+import applescript from "applescript";
+import { promisify } from "util";
 
 // Interval for polling new messages (1 second)
 const POLLING_INTERVAL = 1_000;
@@ -185,8 +187,9 @@ function Actions(props: { message: Message; code: string }) {
   return (
     <ActionPanel title="Action">
       <ActionPanel.Section>
-        <Action.Paste content={props.code} title="Paste Code" />
-        <Action.CopyToClipboard content={props.code} title="Copy Code" />
+        <Action title="Type Code" icon={Icon.Keyboard} onAction={() => TypeCode({ code: props.code })} />
+        <Action.Paste title="Paste Code" content={props.code} />
+        <Action.CopyToClipboard title="Copy Code" content={props.code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard
@@ -202,4 +205,31 @@ function Actions(props: { message: Message; code: string }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
+}
+
+async function TypeCode(props: { code: string }) {
+  const { code } = props;
+
+  const script = `
+    tell application "System Events"
+      delay 0.3
+      ${code
+        .split("")
+        .map(
+          (char, i) => `
+        delay 0.15
+        keystroke "${char}"
+      `
+        )
+        .join("")}
+    end tell
+  `;
+  const runApplescript = promisify(applescript.execString);
+
+  await closeMainWindow();
+
+  runApplescript(script).catch((error: Error) => {
+    console.error("Error typing code:", error);
+    throw error;
+  });
 }

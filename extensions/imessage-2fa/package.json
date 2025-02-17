@@ -10,7 +10,8 @@
     "arronhunt",
     "ronaldheft",
     "hitolaus",
-    "taschaub"
+    "taschaub",
+    "omaerkhan"
   ],
   "pastContributors": [
     "navtoj"
@@ -143,6 +144,7 @@
     "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.15.0",
     "@use-it/interval": "^1.0.0",
+    "applescript": "^1.0.0",
     "googleapis-common": "^7.0.0"
   },
   "devDependencies": {
