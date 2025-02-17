@@ -22,6 +22,7 @@ interface DocEntry {
   content: string;
   lastIndexed: number;
   section: string;
+  relevanceScore?: number;
 }
 
 interface Preferences {
@@ -641,57 +642,65 @@ export default function DocsCommand() {
   }
 
   const filteredDocs = useMemo(() => {
-    if (!docs) return [];
+    if (!docs) return { titleMatches: [], contentMatches: [] };
 
-    const filtered = [...docs];
+    if (!searchText) {
+      // When no search, put everything in title matches
+      const sorted = [...docs].sort((a, b) => {
+        const sectionCompare = a.section.localeCompare(b.section);
+        if (sectionCompare !== 0) return sectionCompare;
+        return a.title.localeCompare(b.title);
+      });
+      return { titleMatches: sorted, contentMatches: [] };
+    }
 
-    // Always sort alphabetically first by section, then by title
-    filtered.sort((a, b) => {
+    const searchLower = searchText.toLowerCase();
+    const titleMatches: DocEntry[] = [];
+    const contentMatches: DocEntry[] = [];
+
+    docs.forEach((doc) => {
+      const titleScore = getSimilarityScore(doc.title, searchText);
+      const sectionScore = getSimilarityScore(doc.section, searchText);
+      const contentScore = getSimilarityScore(doc.content, searchText);
+
+      // If title or section contains the search term, it goes in title matches
+      if (
+        doc.title.toLowerCase().includes(searchLower) ||
+        doc.section.toLowerCase().includes(searchLower)
+      ) {
+        titleMatches.push({
+          ...doc,
+          relevanceScore: titleScore + sectionScore,
+        });
+      }
+      // If only content contains the search term, it goes in content matches
+      else if (doc.content.toLowerCase().includes(searchLower)) {
+        contentMatches.push({ ...doc, relevanceScore: contentScore });
+      }
+    });
+
+    // Sort both arrays by relevance score
+    titleMatches.sort((a, b) => {
+      const scoreCompare = (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0);
+      if (scoreCompare !== 0) return scoreCompare;
+
       const sectionCompare = a.section.localeCompare(b.section);
       if (sectionCompare !== 0) return sectionCompare;
+
       return a.title.localeCompare(b.title);
     });
 
-    if (!searchText) return filtered;
+    contentMatches.sort((a, b) => {
+      const scoreCompare = (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0);
+      if (scoreCompare !== 0) return scoreCompare;
 
-    // Filter and sort by relevance when searching
-    return filtered
-      .filter((doc) => {
-        const searchLower = searchText.toLowerCase();
-        return (
-          doc.title.toLowerCase().includes(searchLower) ||
-          doc.content.toLowerCase().includes(searchLower) ||
-          doc.section.toLowerCase().includes(searchLower)
-        );
-      })
-      .sort((a, b) => {
-        // First try to match by title
-        const titleScoreA = getSimilarityScore(a.title, searchText);
-        const titleScoreB = getSimilarityScore(b.title, searchText);
+      const sectionCompare = a.section.localeCompare(b.section);
+      if (sectionCompare !== 0) return sectionCompare;
 
-        if (titleScoreA !== titleScoreB) {
-          return titleScoreB - titleScoreA;
-        }
+      return a.title.localeCompare(b.title);
+    });
 
-        // Then try to match by section
-        const sectionScoreA = getSimilarityScore(a.section, searchText);
-        const sectionScoreB = getSimilarityScore(b.section, searchText);
-
-        if (sectionScoreA !== sectionScoreB) {
-          return sectionScoreB - sectionScoreA;
-        }
-
-        // Finally, try to match by content
-        const contentScoreA = getSimilarityScore(a.content, searchText);
-        const contentScoreB = getSimilarityScore(b.content, searchText);
-
-        if (contentScoreA !== contentScoreB) {
-          return contentScoreB - contentScoreA;
-        }
-
-        // If all scores are equal, sort alphabetically
-        return a.title.localeCompare(b.title);
-      });
+    return { titleMatches, contentMatches };
   }, [docs, searchText]);
 
   const getLastUpdateText = () => {
@@ -736,7 +745,8 @@ export default function DocsCommand() {
         </List.Dropdown>
       }
     >
-      {filteredDocs.length === 0 ? (
+      {filteredDocs.titleMatches.length === 0 &&
+      filteredDocs.contentMatches.length === 0 ? (
         <List.EmptyView
           icon={Icon.Document}
           title="No Documentation Found"
@@ -756,113 +766,230 @@ export default function DocsCommand() {
           }
         />
       ) : (
-        filteredDocs.map((doc) => (
-          <List.Item
-            key={doc.url}
-            title={doc.title}
-            subtitle={doc.section}
-            accessories={[
-              {
-                text: getLastUpdateText(),
-                tooltip: new Date(doc.lastIndexed).toLocaleString(),
-              },
-            ]}
-            detail={
-              <List.Item.Detail
-                markdown={getMarkdownContent(
-                  doc,
-                  searchText
-                    .toLowerCase()
-                    .split(/\s+/)
-                    .filter((term) => term.length > 0),
-                )}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Section"
-                      text={doc.section}
+        <>
+          {filteredDocs.titleMatches.length > 0 && (
+            <List.Section title="Title Matches">
+              {filteredDocs.titleMatches.map((doc) => (
+                <List.Item
+                  key={`title-${doc.url}`}
+                  title={doc.title}
+                  subtitle={doc.section}
+                  accessories={[
+                    {
+                      text: getLastUpdateText(),
+                      tooltip: new Date(doc.lastIndexed).toLocaleString(),
+                    },
+                  ]}
+                  detail={
+                    <List.Item.Detail
+                      markdown={getMarkdownContent(
+                        doc,
+                        searchText
+                          .toLowerCase()
+                          .split(/\s+/)
+                          .filter((term) => term.length > 0),
+                      )}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Section"
+                            text={doc.section}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Last Updated"
+                            text={getLastUpdateText()}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.Link
+                            title="Open in Browser"
+                            target={doc.url}
+                            text="View Online"
+                          />
+                        </List.Item.Detail.Metadata>
+                      }
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Last Updated"
-                      text={getLastUpdateText()}
+                  }
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section>
+                        <Action.OpenInBrowser
+                          title="Open in Browser"
+                          url={doc.url}
+                          shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        />
+                        <Action.Push
+                          title="Show Details"
+                          icon={Icon.Sidebar}
+                          target={
+                            <Detail
+                              markdown={getMarkdownContent(
+                                doc,
+                                searchText
+                                  .toLowerCase()
+                                  .split(/\s+/)
+                                  .filter((term) => term.length > 0),
+                              )}
+                              navigationTitle={doc.title}
+                              metadata={
+                                <Detail.Metadata>
+                                  <Detail.Metadata.Label
+                                    title="Section"
+                                    text={doc.section}
+                                  />
+                                  <Detail.Metadata.Label
+                                    title="Last Updated"
+                                    text={getLastUpdateText()}
+                                  />
+                                  <Detail.Metadata.Separator />
+                                  <Detail.Metadata.Link
+                                    title="Open in Browser"
+                                    target={doc.url}
+                                    text="View Online"
+                                  />
+                                </Detail.Metadata>
+                              }
+                              actions={
+                                <ActionPanel>
+                                  <Action.OpenInBrowser url={doc.url} />
+                                  <Action.CopyToClipboard content={doc.url} />
+                                </ActionPanel>
+                              }
+                            />
+                          }
+                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        />
+                        <Action
+                          title="Refresh Documentation"
+                          icon={Icon.ArrowClockwise}
+                          onAction={refreshDocs}
+                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section>
+                        <Action.CopyToClipboard
+                          title="Copy URL"
+                          content={doc.url}
+                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+          {filteredDocs.contentMatches.length > 0 && (
+            <List.Section title="Content Matches">
+              {filteredDocs.contentMatches.map((doc) => (
+                <List.Item
+                  key={`content-${doc.url}`}
+                  title={doc.title}
+                  subtitle={doc.section}
+                  accessories={[
+                    {
+                      text: getLastUpdateText(),
+                      tooltip: new Date(doc.lastIndexed).toLocaleString(),
+                    },
+                  ]}
+                  detail={
+                    <List.Item.Detail
+                      markdown={getMarkdownContent(
+                        doc,
+                        searchText
+                          .toLowerCase()
+                          .split(/\s+/)
+                          .filter((term) => term.length > 0),
+                      )}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Section"
+                            text={doc.section}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Last Updated"
+                            text={getLastUpdateText()}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.Link
+                            title="Open in Browser"
+                            target={doc.url}
+                            text="View Online"
+                          />
+                        </List.Item.Detail.Metadata>
+                      }
                     />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Link
-                      title="Open in Browser"
-                      target={doc.url}
-                      text="View Online"
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={doc.url}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  />
-                  <Action.Push
-                    title="Show Details"
-                    icon={Icon.Sidebar}
-                    target={
-                      <Detail
-                        markdown={getMarkdownContent(
-                          doc,
-                          searchText
-                            .toLowerCase()
-                            .split(/\s+/)
-                            .filter((term) => term.length > 0),
-                        )}
-                        navigationTitle={doc.title}
-                        metadata={
-                          <Detail.Metadata>
-                            <Detail.Metadata.Label
-                              title="Section"
-                              text={doc.section}
+                  }
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section>
+                        <Action.OpenInBrowser
+                          title="Open in Browser"
+                          url={doc.url}
+                          shortcut={{ modifiers: ["cmd"], key: "return" }}
+                        />
+                        <Action.Push
+                          title="Show Details"
+                          icon={Icon.Sidebar}
+                          target={
+                            <Detail
+                              markdown={getMarkdownContent(
+                                doc,
+                                searchText
+                                  .toLowerCase()
+                                  .split(/\s+/)
+                                  .filter((term) => term.length > 0),
+                              )}
+                              navigationTitle={doc.title}
+                              metadata={
+                                <Detail.Metadata>
+                                  <Detail.Metadata.Label
+                                    title="Section"
+                                    text={doc.section}
+                                  />
+                                  <Detail.Metadata.Label
+                                    title="Last Updated"
+                                    text={getLastUpdateText()}
+                                  />
+                                  <Detail.Metadata.Separator />
+                                  <Detail.Metadata.Link
+                                    title="Open in Browser"
+                                    target={doc.url}
+                                    text="View Online"
+                                  />
+                                </Detail.Metadata>
+                              }
+                              actions={
+                                <ActionPanel>
+                                  <Action.OpenInBrowser url={doc.url} />
+                                  <Action.CopyToClipboard content={doc.url} />
+                                </ActionPanel>
+                              }
                             />
-                            <Detail.Metadata.Label
-                              title="Last Updated"
-                              text={getLastUpdateText()}
-                            />
-                            <Detail.Metadata.Separator />
-                            <Detail.Metadata.Link
-                              title="Open in Browser"
-                              target={doc.url}
-                              text="View Online"
-                            />
-                          </Detail.Metadata>
-                        }
-                        actions={
-                          <ActionPanel>
-                            <Action.OpenInBrowser url={doc.url} />
-                            <Action.CopyToClipboard content={doc.url} />
-                          </ActionPanel>
-                        }
-                      />
-                    }
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  />
-                  <Action
-                    title="Refresh Documentation"
-                    icon={Icon.ArrowClockwise}
-                    onAction={refreshDocs}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action.CopyToClipboard
-                    title="Copy URL"
-                    content={doc.url}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))
+                          }
+                          shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        />
+                        <Action
+                          title="Refresh Documentation"
+                          icon={Icon.ArrowClockwise}
+                          onAction={refreshDocs}
+                          shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section>
+                        <Action.CopyToClipboard
+                          title="Copy URL"
+                          content={doc.url}
+                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
