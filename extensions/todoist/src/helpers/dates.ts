@@ -63,9 +63,14 @@ export function displayDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
-export function displayDateTime(dateString: string) {
-  const date = displayDate(dateString);
-  return `${date} ${format(new Date(dateString), "HH:mm")}`;
+export function displayDateTime(dateString: string, use12HourFormat: boolean) {
+  const date = parseISO(dateString);
+  return `${displayDate(dateString)} ${format(date, use12HourFormat ? "h:mm a" : "HH:mm")}`;
+}
+
+export function displayTime(dateString: string, use12HourFormat: boolean) {
+  const date = parseISO(dateString);
+  return format(date, use12HourFormat ? "h:mm a" : "HH:mm");
 }
 
 export function getAPIDate(date: Date): string {
