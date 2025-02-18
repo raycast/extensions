@@ -1,8 +1,9 @@
 # Beeminder Changelog
 
-## [A better placeholder when entering data] - 2024-09-25
+## [Show how many days goals are above the red line] - 2025-02-18
 
-The data entry field will now show the most recent data point as its placeholder value.
+- Adds a preference to show how many days goals are above the red line.
+- Adds a preference to sort and color goals by how many days they are above the red line.
 
 ## [Better synchronization after submitting data] - 2024-08-23
 
