@@ -166,7 +166,7 @@ export default function Command() {
     };
 
     const getGoalIcon = (safebuf: number, daysAbove: number) => {
-      let value = sortByDaysAboveLine ? daysAbove : safebuf;
+      const value = sortByDaysAboveLine ? daysAbove : safebuf;
       if (!Number.isFinite(value)) return "🟣";
       if (colorProgression === "rainbow") {
         if (value < 1) return "🔴";
