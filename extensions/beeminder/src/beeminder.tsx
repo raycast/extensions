@@ -10,6 +10,7 @@ import {
   Cache,
   Icon,
   Keyboard,
+  Color,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import moment from "moment";
@@ -175,22 +176,31 @@ export default function Command() {
       return Math.floor(goal.delta / dailyRate + 1);
     };
 
-    const getGoalIcon = (safebuf: number, daysAbove: number) => {
-      const value = sortByDaysAboveLine ? daysAbove : safebuf;
-      if (!Number.isFinite(value)) return "🟣";
+    const getGoalColor = (value: number): Color => {
+      if (!Number.isFinite(value)) return Color.Purple;
       if (colorProgression === "rainbow") {
-        if (value < 1) return "🔴";
-        if (value < 2) return "🟠";
-        if (value < 3) return "🟡";
-        if (value < 7) return "🟢";
-        if (value < 14) return "🔵";
-        return "🟣";
+        if (value < 1) return Color.Red;
+        if (value < 2) return Color.Orange;
+        if (value < 3) return Color.Yellow;
+        if (value < 7) return Color.Green;
+        if (value < 14) return Color.Blue;
+        return Color.Purple;
       } else {
-        if (value < 1) return "🔴";
-        if (value < 2) return "🟠";
-        if (value < 3) return "🔵";
-        return "🟢";
+        if (value < 1) return Color.Red;
+        if (value < 2) return Color.Orange;
+        if (value < 3) return Color.Blue;
+        return Color.Green;
       }
+    };
+
+    const getEmoji = (color: Color): string => {
+      if (color === Color.Purple) return "🟣";
+      if (color === Color.Red) return "🔴";
+      if (color === Color.Orange) return "🟠";
+      if (color === Color.Yellow) return "🟡";
+      if (color === Color.Green) return "🟢";
+      if (color === Color.Blue) return "🔵";
+      return "🟣";
     };
 
     // Sort goals by days above line if the preference is enabled
@@ -215,46 +225,49 @@ export default function Command() {
           const diff = moment.unix(goal.losedate).diff(new Date());
           const timeDiffDuration = moment.duration(diff);
           const goalRate = goal.baremin;
-
-          const goalIcon = getGoalIcon(goal.safebuf, getDaysAboveLine(goal));
-          let dueText = `${goalRate} ${goal.gunits} due in `;
-          if (goal.safebuf > 1) {
-            dueText += showDaysAboveLine ? `${goal.safebuf}d` : `${goal.safebuf} days`;
-          } else if (goal.safebuf === 1) {
-            dueText += showDaysAboveLine ? `${goal.safebuf}d` : `${goal.safebuf} day`;
-          }
+          const dueText = `${goalRate} ${goal.gunits} due`;
+          const daysAbove = getDaysAboveLine(goal);
+          const sortValue = sortByDaysAboveLine ? daysAbove : goal.safebuf;
+          const emoji = getEmoji(getGoalColor(sortValue));
+          let dayAmount = `${goal.safebuf}d`;
 
           if (goal.safebuf < 1) {
             const hours = timeDiffDuration.hours();
             const minutes = timeDiffDuration.minutes();
 
-            if (showDaysAboveLine) {
-              if (hours > 0) {
-                dueText += `${hours}h`;
-              }
-              if (minutes > 0) {
-                dueText += `${minutes}m`;
-              }
-            } else {
-              if (hours > 0) {
-                dueText += `${hours} ${hours > 1 ? "hours" : "hour"}`;
-              }
-              if (minutes > 0) {
-                if (hours > 0) dueText += " ";
-                dueText += `${minutes} ${minutes > 1 ? "minutes" : "minute"}`;
-              }
+            if (hours > 0) {
+              dayAmount += `${hours}h`;
             }
-          }
-
-          if (showDaysAboveLine) {
-            const daysAbove = getDaysAboveLine(goal);
-            if (Number.isFinite(daysAbove)) {
-              dueText += ` (${daysAbove}d above line)`;
+            if (minutes > 0) {
+              dayAmount += `${minutes}m`;
             }
           }
 
           const hasDataForToday =
             goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
+
+          const accessories: List.Item.Accessory[] = [
+            {
+              text: dueText,
+            },
+            {
+              tag: {
+                value: dayAmount,
+                color: getGoalColor(goal.safebuf),
+              },
+            },
+          ];
+          if (showDaysAboveLine && Number.isFinite(daysAbove)) {
+            accessories.push({
+              tag: {
+                value: `${daysAbove}d delta`,
+                color: getGoalColor(daysAbove),
+              },
+            });
+          }
+          accessories.push({
+            icon: emoji,
+          });
 
           return (
             <List.Item
@@ -266,14 +279,7 @@ export default function Command() {
                   ? { value: Icon.Checkmark, tooltip: "Data entered today" }
                   : undefined
               }
-              accessories={[
-                {
-                  text: dueText,
-                },
-                {
-                  icon: goalIcon,
-                },
-              ]}
+              accessories={accessories}
               keywords={goal.title
                 .split(" ")
                 .map((word) => word.replace(/[^\w\s]/g, ""))
