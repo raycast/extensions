@@ -21,6 +21,6 @@ export default async function main() {
     await showHUD(`📋 ${formattedTime}`);
     await Clipboard.paste(formattedTime);
   } catch (error) {
-    await showHUD('Failed to copy/paste time');
+    await showHUD("Failed to copy/paste time");
   }
 }

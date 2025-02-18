@@ -29,7 +29,7 @@ function formatTime(date: Date, use24HourFormat: boolean): string {
 export default async function main() {
   const preferences = getPreferenceValues();
   const use24HourFormat = Boolean(preferences.use24HourFormat);
-  const dateFormat = ['EU', 'ISO', 'US'].includes(preferences.dateFormat) ? preferences.dateFormat : 'EU';
+  const dateFormat = ["EU", "ISO", "US"].includes(preferences.dateFormat) ? preferences.dateFormat : "EU";
 
   const now = new Date();
   const formattedDate = formatDate(now, dateFormat);
@@ -41,6 +41,6 @@ export default async function main() {
     await showHUD(`📋 ${formattedDateTime}`);
     await Clipboard.paste(formattedDateTime);
   } catch (error) {
-    await showHUD('Failed to copy/paste!');
+    await showHUD("Failed to copy/paste!");
   }
 }
