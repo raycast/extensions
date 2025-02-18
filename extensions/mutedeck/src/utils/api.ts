@@ -63,6 +63,37 @@ function getValidTimeout(timeout: string): number {
   return isNaN(parsed) || parsed <= 0 ? 5000 : parsed;
 }
 
+// Type validation utilities
+function isValidActiveStatus(value: unknown): value is ActiveStatus {
+  return value === "active" || value === "inactive";
+}
+
+function isValidFeatureStatus(value: unknown): value is FeatureStatus {
+  return value === "active" || value === "inactive" || value === "disabled";
+}
+
+function isValidControlSystem(value: unknown): value is ControlSystem {
+  return value === "system" || value === "zoom" || value === "webex" || value === "teams" || value === "google-meet";
+}
+
+function isValidMuteDeckStatus(value: unknown): value is MuteDeckStatus {
+  if (!value || typeof value !== "object") return false;
+  const status = value as Record<string, unknown>;
+
+  // Required fields
+  if (typeof status.status !== "number") return false;
+  if (!isValidActiveStatus(status.mute)) return false;
+  if (!isValidFeatureStatus(status.video)) return false;
+  if (!isValidFeatureStatus(status.share)) return false;
+  if (!isValidFeatureStatus(status.record)) return false;
+
+  // Optional fields
+  if (status.call !== undefined && status.call !== "active") return false;
+  if (status.control !== undefined && !isValidControlSystem(status.control)) return false;
+
+  return true;
+}
+
 class MuteDeckClient {
   private static instance: MuteDeckClient;
   private readonly timeout: number;
@@ -134,7 +165,12 @@ class MuteDeckClient {
   public async getStatus(): Promise<MuteDeckStatus> {
     try {
       const response = await this.makeApiCall("/v1/status");
-      const data = (await response.json()) as MuteDeckStatus;
+      const data = await response.json();
+
+      if (!isValidMuteDeckStatus(data)) {
+        throw new MuteDeckError("Invalid API response format");
+      }
+
       return data;
     } catch (error) {
       throw new MuteDeckError(
