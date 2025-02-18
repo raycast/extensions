@@ -40,12 +40,6 @@ be added in future releases.
 | dobryj den' | добрый день      |
 | shhuka      | щука             |
 
-## Feedback
-
-If you have any feedback or issues, please:
-
-- Open an issue on GitHub
-
 ## Credits
 
 Created by [tsibog](https://github.com/tsibog)
