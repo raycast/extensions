@@ -53,8 +53,8 @@ export default function SearchAndCopyCommand() {
 
     // If user typed only digits, use ?organisasjonsnummer=, else ?navn=
     const isNumeric = isAllDigits(searchText.trim());
-    // Org. No.'s are exactly 9 digits in Norway,
-    const paramName = isNumeric ? "organisasjonsnummer" : "navn";
+    // Org. No.'s are exactly 9 digits in Norway
+    const paramName = isNumeric && searchText.trim().length === 9 ? "organisasjonsnummer" : "navn";
 
     async function fetchEnheter() {
       setIsLoading(true);
