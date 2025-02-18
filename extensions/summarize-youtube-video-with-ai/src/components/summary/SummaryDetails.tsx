@@ -9,13 +9,18 @@ export type Question = {
   answer: string;
 };
 
-type SummaryDetailsProps = {
-  questions: Question[];
-  summary?: string;
+interface SummaryDetailsProps {
+  questions: Array<{
+    id: string;
+    question: string;
+    answer: string;
+  }>;
+  summary: string | undefined;
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
-};
+  onQuestionSubmit?: (question: string) => void;
+}
 
 export default function SummaryDetails({ summary, summaryIsLoading, transcript, videoData }: SummaryDetailsProps) {
   if (!summary) return null;

@@ -65,8 +65,12 @@ export default function SummarizeVideoWithRaycast(
       });
   }, [videoURL]);
 
+  const handleAdditionalQuestion = (newQuestion: string) => {
+    setQuestion(newQuestion);
+  };
+
   useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
-  useRaycastFollowUpQuestion(questions, setQuestions, transcript, question, setQuestion, setSelectedQuestionId);
+  useRaycastFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;
@@ -81,7 +85,7 @@ export default function SummarizeVideoWithRaycast(
   return (
     <SummaryDetails
       questions={questions}
-      handleQuestion={handleAdditionalQuestion}
+      onQuestionSubmit={handleAdditionalQuestion}
       summary={markdown}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
