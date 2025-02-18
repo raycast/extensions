@@ -2,7 +2,8 @@
 
 ## [] - {PR_MERGE_DATE}
 
-chore: migrate ray
+- View Roles & Databases in Project Branches
+- chore: migrate ray
 
 ## [Initial Version] - 2025-01-20
 

@@ -68,9 +68,34 @@ function ProjectBranches({ id }: { id: string }) {
             title={branch.name}
             subtitle={branch.default ? "DEFAULT" : ""}
             accessories={accessories}
+            actions={<ActionPanel>
+              <Action.Push title="View Roles & Databases" target={<RolesAndDatabases projectId={id} branchId={branch.id} />} />
+            </ActionPanel>}
           />
         );
       })}
     </List>
   );
+}
+
+function RolesAndDatabases({ projectId, branchId }: { projectId: string, branchId: string }) {
+  const { isLoading, data = { roles: [], databases: [] } } = usePromise(async () => {
+    const [resRoles, resDatabases] = await Promise.all([
+      neon.listProjectBranchRoles(projectId, branchId),
+      neon.listProjectBranchDatabases(projectId, branchId)
+    ])
+    return {
+      roles: resRoles.data.roles,
+      databases: resDatabases.data.databases
+    }
+  });
+
+  return <List isLoading={isLoading}>
+    <List.Section title="Roles">
+      {data.roles.map(role => <List.Item key={role.name} icon={Icon.Person} title={role.name} />)}
+    </List.Section>
+    <List.Section title="Databases">
+      {data.databases.map(database => <List.Item key={database.id} icon={Icon.Coin} title={database.name} />)}
+    </List.Section>
+  </List>
 }
