@@ -19,7 +19,7 @@
     {
       "name": "brreg-search",
       "title": "Brreg Search",
-      "description": "Input org. name",
+      "description": "Search for Norwegian companies by name or organization number",
       "mode": "view"
     }
   ],
