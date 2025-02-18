@@ -6,9 +6,19 @@ export interface State {
   total?: number;
 }
 
-export interface MinifluxApiError {
+export interface MinifluxApiErrorResponse {
   code: string;
   error_message: string;
+}
+
+export class MinifluxApiError extends Error {
+  code: string;
+
+  constructor(errorJson: MinifluxApiErrorResponse) {
+    super(errorJson.error_message);
+    this.name = "MinifluxApiError";
+    this.code = errorJson.code;
+  }
 }
 
 export interface MinifluxEntries {

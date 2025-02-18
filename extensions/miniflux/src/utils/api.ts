@@ -14,6 +14,7 @@ import {
   ReadwiseRequest,
   ReadwiseResponse,
   ReadwiseError,
+  MinifluxApiErrorResponse,
 } from "./types";
 
 const removeTrailingSlash = (baseUrl: string): string => (baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl);
@@ -48,7 +49,8 @@ const requestApi = async <T>(
   }
 
   if (!response.ok) {
-    throw (await response.json()) as MinifluxApiError;
+    const errorJson = (await response.json()) as MinifluxApiErrorResponse;
+    throw new MinifluxApiError(errorJson);
   }
 
   return (await response.json()) as T;
