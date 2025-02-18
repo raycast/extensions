@@ -366,13 +366,16 @@ export default function TaskActions({
                 icon={Icon.Minus}
                 shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
               >
-                {reminders.map((reminder) => (
-                  <Action
-                    key={reminder.id}
-                    title={displayReminderName(reminder)}
-                    onAction={() => deleteReminder(reminder)}
-                  />
-                ))}
+                {reminders.map((reminder) => {
+                  const use12HourFormat = data?.user?.time_format === 1;
+                  return (
+                    <Action
+                      key={reminder.id}
+                      title={displayReminderName(reminder, use12HourFormat)}
+                      onAction={() => deleteReminder(reminder)}
+                    />
+                  );
+                })}
               </ActionPanel.Submenu>
             ) : null}
           </>
