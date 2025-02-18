@@ -57,20 +57,19 @@ export function isSuccessStatus(status: number): boolean {
   return status >= 200 && status < 300;
 }
 
+// Utility function to ensure valid timeout
+function getValidTimeout(timeout: string): number {
+  const parsed = Number(timeout);
+  return isNaN(parsed) || parsed <= 0 ? 5000 : parsed;
+}
+
 class MuteDeckClient {
   private static instance: MuteDeckClient;
   private readonly timeout: number;
 
   private constructor() {
     const { apiTimeout } = getPreferences();
-    if (apiTimeout === undefined) {
-      throw new MuteDeckConfigError("API timeout is required");
-    }
-    const parsed = Number(apiTimeout);
-    if (isNaN(parsed) || parsed <= 0) {
-      throw new MuteDeckConfigError("API timeout must be a positive number");
-    }
-    this.timeout = parsed;
+    this.timeout = getValidTimeout(apiTimeout);
   }
 
   public static getInstance(): MuteDeckClient {
@@ -89,11 +88,16 @@ class MuteDeckClient {
       const baseUrl = new URL(apiEndpoint);
       return new URL(path, baseUrl);
     } catch (error) {
-      throw new MuteDeckConfigError(`Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`);
+      throw new MuteDeckConfigError(
+        `Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
-  private async fetchWithTimeout(url: URL, options: FetchRequestInit = {}): Promise<FetchResponse> {
+  private async fetchWithTimeout(
+    url: URL,
+    options: FetchRequestInit = {},
+  ): Promise<FetchResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeout);
 

@@ -60,11 +60,11 @@
     },
     {
       "name": "apiTimeout",
-      "type": "number",
-      "required": true,
+      "type": "textfield",
+      "required": false,
       "title": "API Timeout",
       "description": "Timeout for API requests in milliseconds",
-      "default": 5000
+      "default": "5000"
     },
     {
       "name": "confirmLeave",
