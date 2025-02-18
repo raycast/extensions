@@ -62,7 +62,7 @@ class MuteDeckClient {
   private readonly timeout: number;
 
   private constructor() {
-    const { apiTimeout = 5000 } = getPreferences();
+    const { apiTimeout } = getPreferences();
     this.timeout = apiTimeout;
   }
 

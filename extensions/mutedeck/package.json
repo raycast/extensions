@@ -61,7 +61,7 @@
     {
       "name": "apiTimeout",
       "type": "number",
-      "required": false,
+      "required": true,
       "title": "API Timeout",
       "description": "Timeout for API requests in milliseconds",
       "default": 5000
