@@ -9,6 +9,7 @@ export interface MuteDeckPreferences {
   confirmMuteInPresentation: boolean;
   confirmVideoInPresentation: boolean;
   confirmLeave: boolean;
+  apiTimeout: number;
 }
 
 // Export preferences getter
@@ -60,15 +61,13 @@ class MuteDeckClient {
   private static instance: MuteDeckClient;
   private readonly timeout: number;
 
-  private constructor(timeout = 5000) {
-    this.timeout = timeout;
+  private constructor() {
+    this.timeout = getPreferences().apiTimeout;
   }
 
-  public static getInstance(timeout?: number): MuteDeckClient {
+  public static getInstance(): MuteDeckClient {
     if (!MuteDeckClient.instance) {
-      MuteDeckClient.instance = new MuteDeckClient(timeout);
-    } else if (timeout !== undefined && MuteDeckClient.instance.timeout !== timeout) {
-      MuteDeckClient.instance = new MuteDeckClient(timeout);
+      MuteDeckClient.instance = new MuteDeckClient();
     }
     return MuteDeckClient.instance;
   }

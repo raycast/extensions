@@ -59,6 +59,14 @@
       "default": "1"
     },
     {
+      "name": "apiTimeout",
+      "type": "number",
+      "required": false,
+      "title": "API Timeout",
+      "description": "Timeout for API requests in milliseconds",
+      "default": 5000
+    },
+    {
       "name": "confirmLeave",
       "type": "checkbox",
       "required": false,
