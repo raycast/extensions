@@ -3,7 +3,8 @@ import nodeFetch from "node-fetch";
 
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import ActionOpenAIFollowUp from "./components/openai/ActionOpenAIFollowUp";
+import { v4 as uuid } from "uuid";
+import { useOpenAIFollowUpQuestion } from "./components/openai/hooks/useOpenAIFollowUpQuestion";
 import { useOpenAISummary } from "./components/openai/hooks/useOpenAISummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
@@ -33,6 +34,14 @@ export default function SummarizeVideoWithOpenAI(
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
+  const [question, setQuestion] = useState("");
+  const [questions, setQuestions] = useState([
+    {
+      id: uuid(),
+      question: "Initial Summary of the video",
+      answer: summary ?? "",
+    },
+  ]);
 
   useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
     setVideoURL(url),
@@ -60,7 +69,12 @@ export default function SummarizeVideoWithOpenAI(
       });
   }, [videoURL]);
 
+  const handleAdditionalQuestion = (newQuestion: string) => {
+    setQuestion(newQuestion);
+  };
+
   useOpenAISummary({ transcript, setSummaryIsLoading, setSummary });
+  useOpenAIFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;
@@ -74,9 +88,9 @@ export default function SummarizeVideoWithOpenAI(
 
   return (
     <SummaryDetails
-      AskFollowUpQuestion={ActionOpenAIFollowUp}
+      questions={questions}
+      onQuestionSubmit={handleAdditionalQuestion}
       summary={markdown}
-      setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
       videoData={videoData}

@@ -1,58 +1,75 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
+import { useEffect } from "react";
+import { v4 as uuid } from "uuid";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-export const useOpenAIFollowUpQuestion = async (
+export function useOpenAIFollowUpQuestion(
+  questions: Array<{ id: string; question: string; answer: string }>,
+  setQuestions: React.Dispatch<React.SetStateAction<Array<{ id: string; question: string; answer: string }>>>,
+  setQuestion: React.Dispatch<React.SetStateAction<string>>,
+  transcript: string | undefined,
   question: string,
-  transcript: string,
-  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>,
-  pop: () => void,
-) => {
-  const preferences = getPreferenceValues() as OpenAIPreferences;
-  const { openaiApiToken, openaiEndpoint, openaiModel } = preferences;
-  setSummary(undefined);
+) {
+  useEffect(() => {
+    const handleAdditionalQuestion = async () => {
+      if (!question || !transcript) return;
+      const qID = uuid();
 
-  const openai = new OpenAI({
-    apiKey: openaiApiToken,
-  });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: FINDING_ANSWER.title,
+        message: FINDING_ANSWER.message,
+      });
 
-  if (openaiEndpoint !== "") {
-    openai.baseURL = openaiEndpoint;
-  }
+      const preferences = getPreferenceValues() as OpenAIPreferences;
+      const { openaiApiToken, openaiEndpoint, openaiModel } = preferences;
 
-  const toast = showToast({
-    style: Toast.Style.Animated,
-    title: FINDING_ANSWER.title,
-    message: FINDING_ANSWER.message,
-  });
+      const openai = new OpenAI({
+        apiKey: openaiApiToken,
+      });
 
-  const answer = openai.beta.chat.completions.stream({
-    model: openaiModel || OPENAI_MODEL,
-    messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-    stream: true,
-  });
+      if (openaiEndpoint !== "") {
+        openai.baseURL = openaiEndpoint;
+      }
 
-  pop();
+      setQuestions((prevQuestions) => [
+        {
+          id: qID,
+          question,
+          answer: "",
+        },
+        ...prevQuestions,
+      ]);
 
-  answer.on("content", (delta) => {
-    setSummary((result) => {
-      if (result === undefined) return delta;
-      return result + delta;
-    });
-  });
+      const stream = openai.beta.chat.completions.stream({
+        model: openaiModel || OPENAI_MODEL,
+        messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
+        stream: true,
+      });
 
-  answer.finalChatCompletion().then(() => {
-    toast.then((t) => t.hide());
-  });
+      stream.on("content", (delta) => {
+        toast.show();
+        setQuestions((prevQuestions) =>
+          prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
+        );
+      });
 
-  answer.on("error", (error) => {
-    toast.then((t) => {
-      t.style = Toast.Style.Failure;
-      t.title = ALERT.title;
-      t.message = error.message;
-    });
-  });
-};
+      stream.finalChatCompletion().then(() => {
+        toast.hide();
+        setQuestion("");
+      });
+
+      stream.on("error", (error) => {
+        toast.style = Toast.Style.Failure;
+        toast.title = ALERT.title;
+        toast.message = error.message;
+      });
+    };
+
+    handleAdditionalQuestion();
+  }, [question, transcript]);
+}
