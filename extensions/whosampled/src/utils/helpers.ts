@@ -1,7 +1,7 @@
 import { showHUD, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-import { WhoSampledURL } from "./constants";
+import { constructWhoSampledURL } from "./constants";
 
 export async function searchByCurrentlyPlaying(script: string, applicationName: string) {
   const result = await runAppleScript(script);
@@ -17,14 +17,14 @@ export async function searchByCurrentlyPlaying(script: string, applicationName: 
 
   const strippedResult = result.replace(/ \([^)]*\)/g, "").replace(/ *\[[^)]*\]/g, "");
   console.log(strippedResult);
-  const searchURL = WhoSampledURL.replace("*", encodeURIComponent(strippedResult));
+  const searchURL = constructWhoSampledURL(encodeURIComponent(strippedResult));
   await open(searchURL);
   await showHUD(`Searching WhoSampled for ${result}...`);
 }
 
 export async function searchByTrackAndArtist(track: string, artists?: string) {
-  const query = `${track} ${artists}`;
-  const searchURL = WhoSampledURL.replace("*", encodeURIComponent(query));
+  const query = `${track}${artists ? ` ${artists}` : ""}`;
+  const searchURL = constructWhoSampledURL(encodeURIComponent(query));
   await open(searchURL);
   await showHUD(`Searching WhoSampled for ${query}...`);
 }
