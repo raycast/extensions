@@ -14,9 +14,6 @@ export interface MuteDeckPreferences {
 // Export preferences getter
 export const getPreferences = getPreferenceValues<MuteDeckPreferences>;
 
-// Cache preferences to avoid multiple calls
-const preferences = getPreferences();
-
 // API Response Types
 export type CallStatus = "active";
 export type ControlSystem = "system" | "zoom" | "webex" | "teams" | "google-meet";
@@ -54,90 +51,116 @@ export class MuteDeckConfigError extends MuteDeckError {
 // API Path type
 type ApiPath = "/v1/status" | "/v1/mute" | "/v1/video" | "/v1/leave";
 
-// Validate and construct API endpoint URL
-function getValidatedEndpoint(path: ApiPath): URL {
-  const { apiEndpoint } = preferences;
-  if (!apiEndpoint) {
-    throw new MuteDeckConfigError("API endpoint is not configured");
+class MuteDeckClient {
+  private static instance: MuteDeckClient;
+  private readonly timeout: number;
+
+  private constructor(timeout = 5000) {
+    this.timeout = timeout;
   }
-  try {
-    const baseUrl = new URL(apiEndpoint);
-    return new URL(path, baseUrl);
-  } catch (error) {
-    throw new MuteDeckConfigError(`Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
 
-// Fetch with timeout
-async function fetchWithTimeout(url: URL, options: FetchRequestInit = {}, timeout = 5000): Promise<FetchResponse> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url.toString(), {
-      ...options,
-      signal: controller.signal as unknown as AbortSignal,
-    });
-
-    if (response.status >= 200 && response.status < 300) {
-      return response;
+  public static getInstance(timeout = 5000): MuteDeckClient {
+    if (!MuteDeckClient.instance) {
+      MuteDeckClient.instance = new MuteDeckClient(timeout);
     }
-    throw new MuteDeckError(`HTTP error! status: ${response.status}`, response.status);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new MuteDeckError("Request timed out");
+    return MuteDeckClient.instance;
+  }
+
+  private getValidatedEndpoint(path: ApiPath): URL {
+    const { apiEndpoint } = getPreferences();
+    if (!apiEndpoint) {
+      throw new MuteDeckConfigError("API endpoint is not configured");
     }
-    if (error instanceof MuteDeckError) {
-      throw error;
+    try {
+      const baseUrl = new URL(apiEndpoint);
+      return new URL(path, baseUrl);
+    } catch (error) {
+      throw new MuteDeckConfigError(`Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`);
     }
-    throw new MuteDeckError(error instanceof Error ? error.message : String(error));
-  } finally {
-    clearTimeout(id);
+  }
+
+  private isSuccessStatus(status: number): boolean {
+    return status >= 200 && status < 300;
+  }
+
+  private async fetchWithTimeout(url: URL, options: FetchRequestInit = {}): Promise<FetchResponse> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url.toString(), {
+        ...options,
+        signal: controller.signal as unknown as AbortSignal,
+      });
+
+      if (this.isSuccessStatus(response.status)) {
+        return response;
+      }
+      throw new MuteDeckError(`HTTP error! status: ${response.status}`, response.status);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new MuteDeckError("Request timed out");
+      }
+      if (error instanceof MuteDeckError) {
+        throw error;
+      }
+      throw new MuteDeckError(error instanceof Error ? error.message : String(error));
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
+  private async makeApiCall(path: ApiPath, method: "GET" | "POST" = "GET"): Promise<FetchResponse> {
+    try {
+      const url = this.getValidatedEndpoint(path);
+      return await this.fetchWithTimeout(url, { method });
+    } catch (error) {
+      throw new MuteDeckError(
+        `Failed to call ${path}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof MuteDeckError ? error.code : undefined,
+      );
+    }
+  }
+
+  public async getStatus(): Promise<MuteDeckStatus> {
+    try {
+      const response = await this.makeApiCall("/v1/status");
+      const data = (await response.json()) as MuteDeckStatus;
+      return data;
+    } catch (error) {
+      throw new MuteDeckError(
+        `Failed to get MuteDeck status: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof MuteDeckError ? error.code : undefined,
+      );
+    }
+  }
+
+  public async toggleMute(): Promise<void> {
+    await this.makeApiCall("/v1/mute", "POST");
+  }
+
+  public async toggleVideo(): Promise<void> {
+    await this.makeApiCall("/v1/video", "POST");
+  }
+
+  public async leaveMeeting(): Promise<void> {
+    await this.makeApiCall("/v1/leave", "POST");
   }
 }
 
-// API Actions
-async function makeApiCall(path: ApiPath, method: "GET" | "POST" = "GET"): Promise<FetchResponse> {
-  try {
-    const url = getValidatedEndpoint(path);
-    return await fetchWithTimeout(url, { method });
-  } catch (error) {
-    throw new MuteDeckError(
-      `Failed to call ${path}: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined,
-    );
-  }
-}
+// Export singleton instance
+const client = MuteDeckClient.getInstance();
 
-export async function getStatus(): Promise<MuteDeckStatus> {
-  try {
-    const response = await makeApiCall("/v1/status");
-    const data = (await response.json()) as MuteDeckStatus;
-    return data;
-  } catch (error) {
-    throw new MuteDeckError(
-      `Failed to get MuteDeck status: ${error instanceof Error ? error.message : String(error)}`,
-      error instanceof MuteDeckError ? error.code : undefined,
-    );
-  }
-}
-
-export async function toggleMute(): Promise<void> {
-  await makeApiCall("/v1/mute", "POST");
-}
-
-export async function toggleVideo(): Promise<void> {
-  await makeApiCall("/v1/video", "POST");
-}
-
-export async function leaveMeeting(): Promise<void> {
-  await makeApiCall("/v1/leave", "POST");
-}
+// Export API methods
+export const getStatus = () => client.getStatus();
+export const toggleMute = () => client.toggleMute();
+export const toggleVideo = () => client.toggleVideo();
+export const leaveMeeting = () => client.leaveMeeting();
 
 // Helper Functions
 export function isMuteDeckRunning(status: MuteDeckStatus | null | undefined): boolean {
   if (!status) return false;
-  return status.status >= 200 && status.status < 300;
+  return client.isSuccessStatus(status.status);
 }
 
 export function isInMeeting(status: MuteDeckStatus | null | undefined): boolean {
