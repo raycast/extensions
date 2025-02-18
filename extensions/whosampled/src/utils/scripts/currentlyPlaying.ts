@@ -12,4 +12,4 @@ if application "Music" is running then
 else
   return "NOT_RUNNING"
 end if
-  `;
+`;
