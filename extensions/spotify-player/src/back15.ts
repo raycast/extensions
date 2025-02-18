@@ -14,10 +14,6 @@ export default async function Command() {
     return await showHUD("Nothing is currently playing");
   }
 
-  if (currentlyPlayingData.currently_playing_type === "track") {
-    return await showHUD("Can't skip in a song, only available for episodes");
-  }
-
   try {
     const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
     await seek(Math.max(currentPositionSeconds - 15, 0));
