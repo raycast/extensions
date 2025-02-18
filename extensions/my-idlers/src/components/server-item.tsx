@@ -117,8 +117,9 @@ function EditServer({ server, mutate }: { server: Server; mutate: MutatePromise<
       mutate(undefined, {
         optimisticUpdate(data) {
           const index = data.findIndex((s) => s.id === server.id);
-          data[index] = { ...server, ...body } as unknown as Server;
-          return data;
+          const newData = [...data];
+          newData[index] = { ...server, ...body } as unknown as Server;
+          return newData;
         },
       });
       showToast(Toast.Style.Success, "Updated server", server.id);

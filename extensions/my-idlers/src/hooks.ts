@@ -118,6 +118,7 @@ export function useGetPricing({ execute = true, onData }: { execute?: boolean; o
   });
 }
 
+type PutBody = Record<string, string | number | boolean | undefined>;
 export function usePut(
   endpoint: string,
   {
@@ -125,7 +126,12 @@ export function usePut(
     execute = false,
     onData,
     onError,
-  }: { body: object; execute?: boolean; onData?: (data: unknown) => void; onError?: (error: Error) => void } = {
+  }: {
+    body: PutBody;
+    execute?: boolean;
+    onData?: (data: unknown) => void;
+    onError?: (error: Error) => void;
+  } = {
     body: {},
   },
 ) {
@@ -141,12 +147,12 @@ export function usePut(
     body: JSON.stringify(body),
     async parseResponse(response) {
       if (!response.ok) {
-        const result: ErrorResponse | { result: "fail"; request: object } = await response.json();
+        const result: ErrorResponse | { result: "fail"; request: PutBody } = await response.json();
         if ("message" in result) throw new Error(result.message);
         if ("messages" in result) throw new Error(Object.values(result.messages)[0][0]);
         throw new Error(response.statusText);
       }
-      const result: { result: "success"; server_id: string } = await response.json();
+      const result: { result: "success" } = await response.json();
       return result;
     },
     execute,
