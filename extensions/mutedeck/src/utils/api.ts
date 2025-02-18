@@ -1,6 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch, { RequestInit as FetchRequestInit, Response as FetchResponse } from "node-fetch";
 
+// Constants
+const MAX_TIMEOUT = 30000; // 30 seconds
+
 // API Preferences type
 export interface MuteDeckPreferences {
   apiEndpoint: string;
@@ -60,7 +63,10 @@ export function isSuccessStatus(status: number): boolean {
 // Utility function to ensure valid timeout
 function getValidTimeout(timeout: string): number {
   const parsed = Number(timeout);
-  return isNaN(parsed) || parsed <= 0 ? 5000 : parsed;
+  if (isNaN(parsed) || parsed <= 0) {
+    return 5000;
+  }
+  return Math.min(parsed, MAX_TIMEOUT);
 }
 
 // Type validation utilities
@@ -130,7 +136,7 @@ class MuteDeckClient {
     try {
       const response = await fetch(url.toString(), {
         ...options,
-        signal: controller.signal as unknown as AbortSignal,
+        signal: controller.signal,
       });
 
       if (isSuccessStatus(response.status)) {
@@ -162,6 +168,24 @@ class MuteDeckClient {
     }
   }
 
+  private async validateToggleResponse(response: FetchResponse): Promise<void> {
+    let data: unknown;
+    try {
+      data = await response.json();
+    } catch {
+      // If there's no JSON body but status is success, that's fine
+      return;
+    }
+
+    // If we got JSON, validate it has a success status
+    if (typeof data === "object" && data !== null && "status" in data) {
+      const status = (data as { status: unknown }).status;
+      if (typeof status === "number" && !isSuccessStatus(status)) {
+        throw new MuteDeckError("Operation failed", status);
+      }
+    }
+  }
+
   public async getStatus(): Promise<MuteDeckStatus> {
     try {
       const response = await this.makeApiCall("/v1/status");
@@ -187,15 +211,18 @@ class MuteDeckClient {
   }
 
   public async toggleMute(): Promise<void> {
-    await this.makeApiCall("/v1/mute", "POST");
+    const response = await this.makeApiCall("/v1/mute", "POST");
+    await this.validateToggleResponse(response);
   }
 
   public async toggleVideo(): Promise<void> {
-    await this.makeApiCall("/v1/video", "POST");
+    const response = await this.makeApiCall("/v1/video", "POST");
+    await this.validateToggleResponse(response);
   }
 
   public async leaveMeeting(): Promise<void> {
-    await this.makeApiCall("/v1/leave", "POST");
+    const response = await this.makeApiCall("/v1/leave", "POST");
+    await this.validateToggleResponse(response);
   }
 }
 
