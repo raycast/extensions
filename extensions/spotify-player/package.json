@@ -32,7 +32,7 @@
     "themitpatel",
     "litomore",
     "enneemme",
-    "daniel_andersson"
+    "tsibog"
   ],
   "pastContributors": [
     "bkeys818"
@@ -449,7 +449,7 @@
       "name": "copyEmbed",
       "title": "Copy Embed Code",
       "subtitle": "Spotify",
-      "description": "Copy the iframe embed code for the currently playing song.",
+      "description": "Copy the iframe embed code for the currently playing song or podcast episode.",
       "mode": "no-view",
       "disabledByDefault": true
     }
