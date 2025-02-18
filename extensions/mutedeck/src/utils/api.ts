@@ -82,6 +82,19 @@ function isValidControlSystem(value: unknown): value is ControlSystem {
   return value === "system" || value === "zoom" || value === "webex" || value === "teams" || value === "google-meet";
 }
 
+interface StatusResponse {
+  status: number;
+}
+
+function isStatusResponse(value: unknown): value is StatusResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "status" in value &&
+    typeof (value as Record<string, unknown>).status === "number"
+  );
+}
+
 function isValidMuteDeckStatus(value: unknown): value is MuteDeckStatus {
   if (!value || typeof value !== "object") return false;
   const status = value as Record<string, unknown>;
@@ -178,11 +191,8 @@ class MuteDeckClient {
     }
 
     // If we got JSON, validate it has a success status
-    if (typeof data === "object" && data !== null && "status" in data) {
-      const status = (data as { status: unknown }).status;
-      if (typeof status === "number" && !isSuccessStatus(status)) {
-        throw new MuteDeckError("Operation failed", status);
-      }
+    if (isStatusResponse(data) && !isSuccessStatus(data.status)) {
+      throw new MuteDeckError("Operation failed", data.status);
     }
   }
 
