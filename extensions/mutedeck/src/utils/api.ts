@@ -64,8 +64,10 @@ class MuteDeckClient {
     this.timeout = timeout;
   }
 
-  public static getInstance(timeout = 5000): MuteDeckClient {
+  public static getInstance(timeout?: number): MuteDeckClient {
     if (!MuteDeckClient.instance) {
+      MuteDeckClient.instance = new MuteDeckClient(timeout);
+    } else if (timeout !== undefined && MuteDeckClient.instance.timeout !== timeout) {
       MuteDeckClient.instance = new MuteDeckClient(timeout);
     }
     return MuteDeckClient.instance;
