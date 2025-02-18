@@ -9,7 +9,7 @@ export interface MuteDeckPreferences {
   confirmMuteInPresentation: boolean;
   confirmVideoInPresentation: boolean;
   confirmLeave: boolean;
-  apiTimeout: number;
+  apiTimeout: string;
 }
 
 // Export preferences getter
@@ -63,7 +63,7 @@ class MuteDeckClient {
 
   private constructor() {
     const { apiTimeout } = getPreferences();
-    this.timeout = apiTimeout;
+    this.timeout = typeof apiTimeout === 'string' ? parseInt(apiTimeout, 10) : apiTimeout;
   }
 
   public static getInstance(): MuteDeckClient {
