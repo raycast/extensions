@@ -26,6 +26,10 @@ export class AppManager {
     getApplications()
       .then((_apps: Application[]) => filterApps(_apps))
       .then((_apps: Application[]) => this.enrich(_apps))
+      .catch((error) => {
+        console.error('Failed to fetch or process applications:', error);
+        this.emitter.emit('error', error);
+      })
       .then((_apps: AppItem[]) => {
         if (deepEqual(_apps, apps)) return; // no changes
         this.saveCache(_apps);
