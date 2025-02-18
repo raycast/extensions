@@ -16,7 +16,7 @@ import { useForm } from "@raycast/utils";
 import moment from "moment";
 import { Goal, GoalResponse, DataPointFormValues, Preferences } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigation } from "@raycast/api";
 
 const cache = new Cache();
@@ -203,21 +203,23 @@ export default function Command() {
       return "🟣";
     };
 
-    // Sort goals by days above line if the preference is enabled
-    const sortedGoals = goals
-      ? [...goals].sort((a, b) => {
-          if (sortByDaysAboveLine) {
-            const aDaysAbove = getDaysAboveLine(a);
-            const bDaysAbove = getDaysAboveLine(b);
-            if (!Number.isFinite(aDaysAbove) && !Number.isFinite(bDaysAbove)) return 0;
-            if (!Number.isFinite(aDaysAbove) || !Number.isFinite(bDaysAbove)) {
-              return Number.isFinite(aDaysAbove) ? -1 : 1; // Place non-finite numbers at the end
+    // Memoize sortedGoals so that it's only recalculated when `goals` or `sortByDaysAboveLine` changes
+    const sortedGoals = useMemo(() => {
+      return goals
+        ? [...goals].sort((a, b) => {
+            if (sortByDaysAboveLine) {
+              const aDaysAbove = getDaysAboveLine(a);
+              const bDaysAbove = getDaysAboveLine(b);
+              if (!Number.isFinite(aDaysAbove) && !Number.isFinite(bDaysAbove)) return 0;
+              if (!Number.isFinite(aDaysAbove) || !Number.isFinite(bDaysAbove)) {
+                return Number.isFinite(aDaysAbove) ? -1 : 1;
+              }
+              return aDaysAbove - bDaysAbove;
             }
-            return aDaysAbove - bDaysAbove; // Sort in ascending order
-          }
-          return 0;
-        })
-      : goals;
+            return 0;
+          })
+        : goals;
+    }, [goals, sortByDaysAboveLine]);
 
     return (
       <List isLoading={isLoading}>
