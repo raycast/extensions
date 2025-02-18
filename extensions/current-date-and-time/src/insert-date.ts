@@ -18,13 +18,17 @@ function formatDate(date: Date, format: string): string {
 }
 
 export default async function main() {
-  const preferences = getPreferenceValues<{ dateFormat: 'EU' | 'ISO' | 'US' }>();
-  const dateFormat = preferences.dateFormat;
+  const preferences = getPreferenceValues();
+  const dateFormat = ['EU', 'ISO', 'US'].includes(preferences.dateFormat) ? preferences.dateFormat : 'EU';
 
   const now = new Date();
   const formattedDate = formatDate(now, dateFormat);
 
-  await Clipboard.copy(formattedDate);
-  await Clipboard.paste(formattedDate);
-  await showHUD(`📋 Date pasted: ${formattedDate}`);
+  try {
+    await Clipboard.copy(formattedDate);
+    await showHUD(`📋 ${formattedDate}`);
+    await Clipboard.paste(formattedDate);
+  } catch (error) {
+    await showHUD('Failed to copy/paste!');
+  }
 }

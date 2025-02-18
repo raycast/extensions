@@ -38,9 +38,9 @@ export default async function main() {
 
   try {
     await Clipboard.copy(formattedDateTime);
-    await showHUD(`📋 Date and time pasted: ${formattedDateTime}`);
+    await showHUD(`📋 ${formattedDateTime}`);
     await Clipboard.paste(formattedDateTime);
   } catch (error) {
-    await showHUD('Failed to copy/paste date and time');
+    await showHUD('Failed to copy/paste!');
   }
 }

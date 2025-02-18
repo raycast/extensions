@@ -11,18 +11,14 @@ function formatTime(date: Date, use24HourFormat: boolean): string {
 
 export default async function main() {
   const preferences = getPreferenceValues();
-  interface Preferences {
-    use24HourFormat: boolean;
-  }
-  const preferences = getPreferenceValues<Preferences>();
-  const use24HourFormat = preferences.use24HourFormat;
+  const use24HourFormat = Boolean(preferences.use24HourFormat);
 
   const now = new Date();
   const formattedTime = formatTime(now, use24HourFormat);
 
   try {
     await Clipboard.copy(formattedTime);
-    await showHUD(`📋 Time copied: ${formattedTime}`);
+    await showHUD(`📋 ${formattedTime}`);
     await Clipboard.paste(formattedTime);
   } catch (error) {
     await showHUD('Failed to copy/paste time');
