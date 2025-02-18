@@ -1,5 +1,6 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Competitor {
   team: {
@@ -34,6 +35,11 @@ interface Game {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 interface Response {
   events: Game[];
   day: { date: string };
@@ -41,14 +47,31 @@ interface Response {
 
 export default function scoresAndSchedule() {
   // Fetch NHL Stats
+
+  const dateRange = getPastAndFutureDays(new Date());
+
   const { isLoading: nhlScheduleStats, data: nhlScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${dateRange}`,
   );
 
+  const nhlDayItems: DayItems[] = [];
   const nhlGames = nhlScoresAndSchedule?.events || [];
-  const nhlItems: JSX.Element[] = [];
 
   nhlGames.forEach((nhlGame, index) => {
+    const gameDate = new Date(nhlGame.date);
+    const nhlGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!nhlDayItems.find((nhlDay) => nhlDay.title === nhlGameDay)) {
+      nhlDayItems.push({
+        title: nhlGameDay,
+        games: [],
+      });
+    }
+
+    const nhlDay = nhlDayItems.find((nhlDay) => nhlDay.title === nhlGameDay);
+
     const gameTime = new Date(nhlGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -75,19 +98,10 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    let gameTitle = nhlGame.name.replace(" at ", " vs ");
-
-    const team1 = nhlGame.competitions[0].competitors[0].team.abbreviation;
-    const team2 = nhlGame.competitions[0].competitors[1].team.abbreviation;
-
-    if (gameTitle.includes(`${team1} ${team1}`) || gameTitle.includes(`${team2} ${team2}`)) {
-      gameTitle = `${team2} vs ${team1}`;
-    }
-
-    nhlItems.push(
+    nhlDay?.games.push(
       <List.Item
         key={index}
-        title={gameTitle}
+        title={nhlGame.name.replace(" at ", " vs ")}
         icon={{ source: nhlGame.competitions[0].competitors[1].team.logo }}
         accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
         actions={
@@ -119,13 +133,23 @@ export default function scoresAndSchedule() {
     return <Detail markdown="No data found." />;
   }
 
-  const nhlGamesDate = nhlScoresAndSchedule.day.date;
+  nhlDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   return (
     <List searchBarPlaceholder="Search for your favorite team" isLoading={nhlScheduleStats}>
-      <List.Section title={`${nhlGamesDate}`} subtitle={`${nhlItems.length} Game${nhlItems.length !== 1 ? "s" : ""}`}>
-        {nhlItems}
-      </List.Section>
+      {nhlDayItems.map((nhlDay, index) => (
+        <List.Section
+          key={index}
+          title={`${nhlDay.title}`}
+          subtitle={`${nhlDay.games.length} Game${nhlDay.games.length !== 1 ? "s" : ""}`}
+        >
+          {nhlDay.games}
+        </List.Section>
+      ))}
     </List>
   );
 }

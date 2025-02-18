@@ -1,6 +1,7 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Competitor {
   team: {
@@ -33,6 +34,11 @@ interface Game {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 interface Response {
   events: Game[];
   day: { date: string };
@@ -42,12 +48,30 @@ interface Response {
 export default function scoresAndSchedule() {
   // Fetch Men's NCAA Stats
 
+  const dateRange = getPastAndFutureDays(new Date());
+
   const [currentLeague, displaySelectLeague] = useState("Men's NCAA Games");
   const { isLoading: mncaaScheduleStats, data: mncaaScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${dateRange}`,
   );
+
+  const mncaaDayItems: DayItems[] = [];
   const mncaaGames = mncaaScoresAndSchedule?.events || [];
-  const mncaaItems = mncaaGames.map((mncaaGame, index) => {
+
+  mncaaGames.forEach((mncaaGame, index) => {
+    const gameDate = new Date(mncaaGame.date);
+    const mncaaGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!mncaaDayItems.find((mncaaDay) => mncaaDay.title === mncaaGameDay)) {
+      mncaaDayItems.push({
+        title: mncaaGameDay,
+        games: [],
+      });
+    }
+
+    const mncaaDay = mncaaDayItems.find((mncaaDay) => mncaaDay.title === mncaaGameDay);
     const gameTime = new Date(mncaaGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -74,7 +98,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    mncaaDay?.games.push(
       <List.Item
         key={index}
         title={`${mncaaGame.name}`}
@@ -98,18 +122,33 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
   // Fetch Women's NCAA Stats
 
   const { isLoading: wncaaScheduleStats, data: wncaaScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/scoreboard?dates=${dateRange}`,
   );
 
+  const wncaaDayItems: DayItems[] = [];
   const wncaaGames = wncaaScoresAndSchedule?.events || [];
-  const wncaaItems = wncaaGames.map((wncaaGame, index) => {
+
+  wncaaGames.forEach((wncaaGame, index) => {
+    const gameDate = new Date(wncaaGame.date);
+    const wncaaGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!wncaaDayItems.find((wncaaDay) => wncaaDay.title === wncaaGameDay)) {
+      wncaaDayItems.push({
+        title: wncaaGameDay,
+        games: [],
+      });
+    }
+
+    const wncaaDay = wncaaDayItems.find((wncaaDay) => wncaaDay.title === wncaaGameDay);
     const gameTime = new Date(wncaaGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -136,7 +175,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    wncaaDay?.games.push(
       <List.Item
         key={index}
         title={`${wncaaGame.name}`}
@@ -159,7 +198,7 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
@@ -167,18 +206,16 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  const mncaaGamesDate = mncaaScoresAndSchedule?.eventsDate?.date ?? "No date available";
-  const mncaaSectionDate = new Date(mncaaGamesDate).toLocaleDateString([], {
-    month: "long",
-    day: "2-digit",
-    year: "numeric",
+  mncaaDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
   });
 
-  const wncaaGamesDate = wncaaScoresAndSchedule?.eventsDate?.date ?? "No date available";
-  const wncaaSectionDate = new Date(wncaaGamesDate).toLocaleDateString([], {
-    month: "long",
-    day: "2-digit",
-    year: "numeric",
+  wncaaDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
   });
 
   return (
@@ -194,23 +231,29 @@ export default function scoresAndSchedule() {
     >
       {currentLeague === "MNCAA" && (
         <>
-          <List.Section
-            title={`${mncaaSectionDate}`}
-            subtitle={`${mncaaItems.length} Game${mncaaItems.length !== 1 ? "s" : ""}`}
-          >
-            {mncaaItems}
-          </List.Section>
+          {mncaaDayItems.map((mncaaDay, index) => (
+            <List.Section
+              key={index}
+              title={`${mncaaDay.title}`}
+              subtitle={`${mncaaDay.games.length} Game${mncaaDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {mncaaDay.games}
+            </List.Section>
+          ))}
         </>
       )}
 
       {currentLeague === "WNCAA" && (
         <>
-          <List.Section
-            title={`${wncaaSectionDate}`}
-            subtitle={`${wncaaItems.length} Game${wncaaItems.length !== 1 ? "s" : ""}`}
-          >
-            {wncaaItems}
-          </List.Section>
+          {wncaaDayItems.map((wncaaDay, index) => (
+            <List.Section
+              key={index}
+              title={`${wncaaDay.title}`}
+              subtitle={`${wncaaDay.games.length} Game${wncaaDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {wncaaDay.games}
+            </List.Section>
+          ))}
         </>
       )}
     </List>

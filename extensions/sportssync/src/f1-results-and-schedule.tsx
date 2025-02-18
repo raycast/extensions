@@ -1,5 +1,6 @@
 import { Detail, List, Color, Action, ActionPanel, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Athlete {
   shortName: string;
@@ -33,13 +34,24 @@ interface Race {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  races: JSX.Element[];
+}
+
 interface Response {
   events: Race[];
   day: { date: string };
   leagues: { logos: { href: string }[] }[];
 }
 export default function command() {
-  const { isLoading, data } = useFetch<Response>("https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard");
+  // Fetch F1 Races
+
+  const dateRange = getPastAndFutureDays(new Date());
+
+  const { isLoading, data } = useFetch<Response>(
+    `https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard?dates=${dateRange}`,
+  );
 
   if (isLoading) {
     return <Detail isLoading={true} />;
@@ -49,10 +61,24 @@ export default function command() {
     return <Detail markdown="No data found." />;
   }
 
-  const races = data?.events || [];
-  const raceItems: JSX.Element[] = [];
+  const f1DayItems: DayItems[] = [];
+  const f1Races = data?.events || [];
 
-  races.forEach((race, index) => {
+  f1Races.forEach((race, index) => {
+    const gameDate = new Date(race.date);
+    const f1RaceDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!f1DayItems.find((f1Day) => f1Day.title === f1RaceDay)) {
+      f1DayItems.push({
+        title: f1RaceDay,
+        races: [],
+      });
+    }
+
+    const f1Day = f1DayItems.find((f1Day) => f1Day.title === f1RaceDay);
+
     const gameTime = new Date(race.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -82,7 +108,7 @@ export default function command() {
       accessoryColor = Color.Orange;
     }
 
-    raceItems.push(
+    f1Day?.races.push(
       <List.Item
         key={index}
         title={`${race.shortName}`}
@@ -104,14 +130,23 @@ export default function command() {
     );
   });
 
+  f1DayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
   return (
     <List searchBarPlaceholder="Search for an upcoming race" isLoading={isLoading}>
-      <List.Section
-        title={`${data.day.date}`}
-        subtitle={`${raceItems.length} Race${raceItems.length !== 1 ? "s" : ""}`}
-      >
-        {raceItems}
-      </List.Section>
+      {f1DayItems.map((f1Day, index) => (
+        <List.Section
+          key={index}
+          title={`${f1Day.title}`}
+          subtitle={`${f1Day.races.length} Race${f1Day.races.length !== 1 ? "s" : ""}`}
+        >
+          {f1Day.races}
+        </List.Section>
+      ))}
     </List>
   );
 }

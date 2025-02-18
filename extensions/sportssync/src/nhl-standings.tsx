@@ -21,22 +21,44 @@ interface StandingsData {
   children: [
     {
       name: string;
-      standings: {
-        entries: StandingsEntry[];
-      };
+      children: [
+        {
+          name: string;
+          standings: {
+            entries: StandingsEntry[];
+          };
+        },
+        {
+          name: string;
+          standings: {
+            entries: StandingsEntry[];
+          };
+        },
+      ];
     },
     {
       name: string;
-      standings: {
-        entries: StandingsEntry[];
-      };
+      children: [
+        {
+          name: string;
+          standings: {
+            entries: StandingsEntry[];
+          };
+        },
+        {
+          name: string;
+          standings: {
+            entries: StandingsEntry[];
+          };
+        },
+      ];
     },
   ];
 }
 
 export default function command() {
   const { isLoading, data } = useFetch<StandingsData>(
-    "https://site.web.api.espn.com/apis/v2/sports/hockey/nhl/standings",
+    "https://site.web.api.espn.com/apis/v2/sports/hockey/nhl/standings?type=0&level=3&sort=playoffseed:asc,points:desc,gamesplayed:asc",
   );
 
   if (isLoading) {
@@ -47,10 +69,12 @@ export default function command() {
     return <Detail markdown="No data found." />;
   }
 
-  const easternItems = data.children[0].standings.entries;
-  const westernItems = data.children[1].standings.entries;
+  const atlanticItems = data.children[0].children[0].standings.entries;
+  const metroItems = data.children[0].children[1].standings.entries;
+  const centralItems = data.children[1].children[0].standings.entries;
+  const pacificItems = data.children[1].children[1].standings.entries;
 
-  const easternTeams = easternItems.map((team1, index) => {
+  const atlanticTeams = atlanticItems.map((team1, index) => {
     return (
       <List.Item
         key={index}
@@ -66,7 +90,7 @@ export default function command() {
     );
   });
 
-  const westernTeams = westernItems.map((team2, index) => {
+  const metroTeams = metroItems.map((team2, index) => {
     return (
       <List.Item
         key={index}
@@ -82,10 +106,44 @@ export default function command() {
     );
   });
 
+  const centralTeams = centralItems.map((team3, index) => {
+    return (
+      <List.Item
+        key={index}
+        title={`${team3.team.displayName}`}
+        accessoryTitle={`${team3.stats[3].displayValue} GP | ${team3.stats[21].summary} | ${team3.stats[7].displayValue} pts | ROW ${team3.stats[16].displayValue} | GF ${team3.stats[9].displayValue} | GA ${team3.stats[8].displayValue} | Dif ${team3.stats[6].displayValue}`}
+        icon={{ source: team3.team.logos[0].href }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Team Details on ESPN" url={`${team3.team.links[0].href}`} />
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
+  const pacificTeams = pacificItems.map((team4, index) => {
+    return (
+      <List.Item
+        key={index}
+        title={`${team4.team.displayName}`}
+        accessoryTitle={`${team4.stats[3].displayValue} GP | ${team4.stats[21].summary} | ${team4.stats[7].displayValue} pts | ROW ${team4.stats[16].displayValue} | GF ${team4.stats[9].displayValue} | GA ${team4.stats[8].displayValue} | Dif ${team4.stats[6].displayValue}`}
+        icon={{ source: team4.team.logos[0].href }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Team Details on ESPN" url={`${team4.team.links[0].href}`} />
+          </ActionPanel>
+        }
+      />
+    );
+  });
+
   return (
     <List searchBarPlaceholder="Search for your favorite team" isLoading={isLoading}>
-      <List.Section title={`${data.children[0].name}`}>{easternTeams}</List.Section>
-      <List.Section title={`${data.children[1].name}`}>{westernTeams}</List.Section>
+      <List.Section title={`${data.children[0].children[0].name}`}>{atlanticTeams}</List.Section>
+      <List.Section title={`${data.children[0].children[1].name}`}>{metroTeams}</List.Section>
+      <List.Section title={`${data.children[1].children[0].name}`}>{centralTeams}</List.Section>
+      <List.Section title={`${data.children[1].children[1].name}`}>{pacificTeams}</List.Section>
     </List>
   );
 }

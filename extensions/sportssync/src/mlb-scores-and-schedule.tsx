@@ -1,5 +1,6 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Competitor {
   team: {
@@ -32,20 +33,42 @@ interface Game {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 interface Response {
   events: Game[];
   day: { date: string };
 }
 
 export default function command() {
+  // Fetch MLB Data
+
+  const dateRange = getPastAndFutureDays(new Date());
+
   const { isLoading, data } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${dateRange}`,
   );
 
-  const games = data?.events || [];
-  const gameItems: JSX.Element[] = [];
+  const mlbDayItems: DayItems[] = [];
+  const mlbGames = data?.events || [];
 
-  games.forEach((game, index) => {
+  mlbGames.forEach((game, index) => {
+    const gameDate = new Date(game.date);
+    const mlbGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!mlbDayItems.find((mlbDay) => mlbDay.title === mlbGameDay)) {
+      mlbDayItems.push({
+        title: mlbGameDay,
+        games: [],
+      });
+    }
+
+    const mlbDay = mlbDayItems.find((mlbDay) => mlbDay.title === mlbGameDay);
     const gameTime = new Date(game.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -84,7 +107,7 @@ export default function command() {
       accessoryColor = Color.Orange;
     }
 
-    gameItems.push(
+    mlbDay?.games.push(
       <List.Item
         key={index}
         title={`${game.name}`}
@@ -119,14 +142,23 @@ export default function command() {
     return <Detail markdown="No data found." />;
   }
 
+  mlbDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
   return (
     <List searchBarPlaceholder="Search for your favorite team" isLoading={isLoading}>
-      <List.Section
-        title={`${data.day.date}`}
-        subtitle={`${gameItems.length} Game${gameItems.length !== 1 ? "s" : ""}`}
-      >
-        {gameItems}
-      </List.Section>
+      {mlbDayItems.map((mlbDay, index) => (
+        <List.Section
+          key={index}
+          title={`${mlbDay.title}`}
+          subtitle={`${mlbDay.games.length} Game${mlbDay.games.length !== 1 ? "s" : ""}`}
+        >
+          {mlbDay.games}
+        </List.Section>
+      ))}
     </List>
   );
 }

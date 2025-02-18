@@ -1,6 +1,7 @@
 import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Competitor {
   team: {
@@ -33,6 +34,11 @@ interface Game {
   links: { href: string }[];
 }
 
+interface DayItems {
+  title: string;
+  games: JSX.Element[];
+}
+
 interface Response {
   events: Game[];
   day: { date: string };
@@ -41,13 +47,30 @@ interface Response {
 export default function scoresAndSchedule() {
   // Fetch EPL Stats
 
+  const dateRange = getPastAndFutureDays(new Date());
+
   const [currentLeague, displaySelectLeague] = useState("EPL");
   const { isLoading: eplScheduleStats, data: eplScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/ENG.1/scoreboard?dates=${dateRange}`,
   );
 
+  const eplDayItems: DayItems[] = [];
   const eplGames = eplScoresAndSchedule?.events || [];
-  const eplItems = eplGames.map((eplGame, index) => {
+
+  eplGames.forEach((eplGame, index) => {
+    const gameDate = new Date(eplGame.date);
+    const eplGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!eplDayItems.find((eplDay) => eplDay.title === eplGameDay)) {
+      eplDayItems.push({
+        title: eplGameDay,
+        games: [],
+      });
+    }
+
+    const eplDay = eplDayItems.find((eplDay) => eplDay.title === eplGameDay);
     const gameTime = new Date(eplGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -84,7 +107,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    eplDay?.games.push(
       <List.Item
         key={index}
         title={`${eplGame.name}`}
@@ -107,17 +130,33 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
   // Fetch SLL Stats
 
   const { isLoading: sllScheduleStats, data: sllScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/ESP.1/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/ESP.1/scoreboard?dates=${dateRange}`,
   );
+
+  const sllDayItems: DayItems[] = [];
   const sllGames = sllScoresAndSchedule?.events || [];
-  const sllItems = sllGames.map((sllGame, index) => {
+
+  sllGames.forEach((sllGame, index) => {
+    const gameDate = new Date(sllGame.date);
+    const sllGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!sllDayItems.find((sllDay) => sllDay.title === sllGameDay)) {
+      sllDayItems.push({
+        title: sllGameDay,
+        games: [],
+      });
+    }
+
+    const sllDay = sllDayItems.find((sllDay) => sllDay.title === sllGameDay);
     const gameTime = new Date(sllGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -153,7 +192,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    sllDay?.games.push(
       <List.Item
         key={index}
         title={`${sllGame.name}`}
@@ -176,17 +215,33 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
   // Fetch Ger Games
 
   const { isLoading: gerScheduleStats, data: gerScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/GER.1/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/GER.1/scoreboard?dates=${dateRange}`,
   );
+
+  const gerDayItems: DayItems[] = [];
   const gerGames = gerScoresAndSchedule?.events || [];
-  const gerItems = gerGames.map((gerGame, index) => {
+
+  gerGames.forEach((gerGame, index) => {
+    const gameDate = new Date(gerGame.date);
+    const gerGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!gerDayItems.find((gerDay) => gerDay.title === gerGameDay)) {
+      gerDayItems.push({
+        title: gerGameDay,
+        games: [],
+      });
+    }
+
+    const gerDay = gerDayItems.find((gerDay) => gerDay.title === gerGameDay);
     const gameTime = new Date(gerGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -222,7 +277,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    gerDay?.games.push(
       <List.Item
         key={index}
         title={`${gerGame.name}`}
@@ -245,17 +300,33 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
   // Fetch Ita Games
 
   const { isLoading: itaScheduleStats, data: itaScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/ITA.1/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/ITA.1/scoreboard?dates=${dateRange}`,
   );
+
+  const itaDayItems: DayItems[] = [];
   const itaGames = itaScoresAndSchedule?.events || [];
-  const itaItems = itaGames.map((itaGame, index) => {
+
+  itaGames.forEach((itaGame, index) => {
+    const gameDate = new Date(itaGame.date);
+    const itaGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!itaDayItems.find((itaDay) => itaDay.title === itaGameDay)) {
+      itaDayItems.push({
+        title: itaGameDay,
+        games: [],
+      });
+    }
+
+    const itaDay = itaDayItems.find((itaDay) => itaDay.title === itaGameDay);
     const gameTime = new Date(itaGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -291,7 +362,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    itaDay?.games.push(
       <List.Item
         key={index}
         title={`${itaGame.name}`}
@@ -314,17 +385,33 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
   // Fetch UEFA Games
 
   const { isLoading: uefaScheduleStats, data: uefaScoresAndSchedule } = useFetch<Response>(
-    "https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard",
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard?dates=${dateRange}`,
   );
+
+  const uefaDayItems: DayItems[] = [];
   const uefaGames = uefaScoresAndSchedule?.events || [];
-  const uefaItems = uefaGames.map((uefaGame, index) => {
+
+  uefaGames.forEach((uefaGame, index) => {
+    const gameDate = new Date(uefaGame.date);
+    const uefaGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay)) {
+      uefaDayItems.push({
+        title: uefaGameDay,
+        games: [],
+      });
+    }
+
+    const uefaDay = uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay);
     const gameTime = new Date(uefaGame.date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -360,7 +447,7 @@ export default function scoresAndSchedule() {
       accessoryColor = Color.Orange;
     }
 
-    return (
+    uefaDay?.games.push(
       <List.Item
         key={index}
         title={`${uefaGame.name}`}
@@ -383,7 +470,7 @@ export default function scoresAndSchedule() {
             )}
           </ActionPanel>
         }
-      />
+      />,
     );
   });
 
@@ -391,11 +478,35 @@ export default function scoresAndSchedule() {
     return <Detail isLoading={true} />;
   }
 
-  const eplGamesDate = eplScoresAndSchedule?.day?.date ?? "No date available";
-  const sllGamesDate = sllScoresAndSchedule?.day?.date ?? "No date available";
-  const gerGamesDate = gerScoresAndSchedule?.day?.date ?? "No date available";
-  const itaGamesDate = itaScoresAndSchedule?.day?.date ?? "No date available";
-  const uefaGamesDate = uefaScoresAndSchedule?.day?.date ?? "No date available";
+  eplDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  sllDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  itaDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  gerDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  uefaDayItems.sort((a, b) => {
+    const dateA = new Date(a.title);
+    const dateB = new Date(b.title);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   return (
     <List
@@ -413,56 +524,71 @@ export default function scoresAndSchedule() {
     >
       {currentLeague === "EPL" && (
         <>
-          <List.Section
-            title={`${eplGamesDate}`}
-            subtitle={`${eplItems.length} Game${eplItems.length !== 1 ? "s" : ""}`}
-          >
-            {eplItems}
-          </List.Section>
+          {eplDayItems.map((eplDay, index) => (
+            <List.Section
+              key={index}
+              title={`${eplDay.title}`}
+              subtitle={`${eplDay.games.length} Game${eplDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {eplDay.games}
+            </List.Section>
+          ))}
         </>
       )}
 
       {currentLeague === "UEFA" && (
         <>
-          <List.Section
-            title={`${uefaGamesDate}`}
-            subtitle={`${uefaItems.length} Game${uefaItems.length !== 1 ? "s" : ""}`}
-          >
-            {uefaItems}
-          </List.Section>
+          {uefaDayItems.map((uefaDay, index) => (
+            <List.Section
+              key={index}
+              title={`${uefaDay.title}`}
+              subtitle={`${uefaDay.games.length} Game${uefaDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {uefaDay.games}
+            </List.Section>
+          ))}
         </>
       )}
 
       {currentLeague === "SLL" && (
         <>
-          <List.Section
-            title={`${sllGamesDate}`}
-            subtitle={`${sllItems.length} Game${sllItems.length !== 1 ? "s" : ""}`}
-          >
-            {sllItems}
-          </List.Section>
+          {sllDayItems.map((sllDay, index) => (
+            <List.Section
+              key={index}
+              title={`${sllDay.title}`}
+              subtitle={`${sllDay.games.length} Game${sllDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {sllDay.games}
+            </List.Section>
+          ))}
         </>
       )}
 
       {currentLeague === "GER" && (
         <>
-          <List.Section
-            title={`${gerGamesDate}`}
-            subtitle={`${gerItems.length} Game${gerItems.length !== 1 ? "s" : ""}`}
-          >
-            {gerItems}
-          </List.Section>
+          {gerDayItems.map((gerDay, index) => (
+            <List.Section
+              key={index}
+              title={`${gerDay.title}`}
+              subtitle={`${gerDay.games.length} Game${gerDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {gerDay.games}
+            </List.Section>
+          ))}
         </>
       )}
 
       {currentLeague === "ITA" && (
         <>
-          <List.Section
-            title={`${itaGamesDate}`}
-            subtitle={`${itaItems.length} Game${itaItems.length !== 1 ? "s" : ""}`}
-          >
-            {itaItems}
-          </List.Section>
+          {itaDayItems.map((itaDay, index) => (
+            <List.Section
+              key={index}
+              title={`${itaDay.title}`}
+              subtitle={`${itaDay.games.length} Game${itaDay.games.length !== 1 ? "s" : ""}`}
+            >
+              {itaDay.games}
+            </List.Section>
+          ))}
         </>
       )}
     </List>
