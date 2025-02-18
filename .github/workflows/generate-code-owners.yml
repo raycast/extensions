@@ -18,11 +18,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
-      - name: Check Git Identity
-        run: |
-          git config --global user.name
-          git config --global user.email
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
