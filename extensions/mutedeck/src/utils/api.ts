@@ -51,6 +51,11 @@ export class MuteDeckConfigError extends MuteDeckError {
 // API Path type
 type ApiPath = "/v1/status" | "/v1/mute" | "/v1/video" | "/v1/leave";
 
+// Shared utility function
+export function isSuccessStatus(status: number): boolean {
+  return status >= 200 && status < 300;
+}
+
 class MuteDeckClient {
   private static instance: MuteDeckClient;
   private readonly timeout: number;
@@ -79,10 +84,6 @@ class MuteDeckClient {
     }
   }
 
-  private isSuccessStatus(status: number): boolean {
-    return status >= 200 && status < 300;
-  }
-
   private async fetchWithTimeout(url: URL, options: FetchRequestInit = {}): Promise<FetchResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeout);
@@ -93,7 +94,7 @@ class MuteDeckClient {
         signal: controller.signal as unknown as AbortSignal,
       });
 
-      if (this.isSuccessStatus(response.status)) {
+      if (isSuccessStatus(response.status)) {
         return response;
       }
       throw new MuteDeckError(`HTTP error! status: ${response.status}`, response.status);
@@ -160,7 +161,7 @@ export const leaveMeeting = () => client.leaveMeeting();
 // Helper Functions
 export function isMuteDeckRunning(status: MuteDeckStatus | null | undefined): boolean {
   if (!status) return false;
-  return client.isSuccessStatus(status.status);
+  return isSuccessStatus(status.status);
 }
 
 export function isInMeeting(status: MuteDeckStatus | null | undefined): boolean {
