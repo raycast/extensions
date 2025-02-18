@@ -32,6 +32,7 @@ interface DateFormatter {
 
 interface Preferences {
   defaultFormat: string;
+  secondaryFormat: string;
   copyAction: "copy" | "paste" | "both";
   displayFormat: string;
   humanFormat: string;
@@ -169,15 +170,21 @@ function copy(text: string) {
 }
 
 function getSortedFormats(): DateFormatter[] {
-  const { defaultFormat } = getPreferenceValues<Preferences>();
+  const { defaultFormat, secondaryFormat } = getPreferenceValues<Preferences>();
 
   return DATE_FORMATS.sort((a, b) => {
-    const aIsPreferred = a.id === defaultFormat;
-    const bIsPreferred = b.id === defaultFormat;
+    const aIsDefault = a.id === defaultFormat;
+    const bIsDefault = b.id === defaultFormat;
+    const aIsSecondary = a.id === secondaryFormat;
+    const bIsSecondary = b.id === secondaryFormat;
 
-    // Sort the preferred format first
-    if (aIsPreferred && !bIsPreferred) return -1;
-    if (!aIsPreferred && bIsPreferred) return 1;
+    // Default format goes first
+    if (aIsDefault && !bIsDefault) return -1;
+    if (!aIsDefault && bIsDefault) return 1;
+
+    // Secondary format goes second
+    if (aIsSecondary && !bIsSecondary) return -1;
+    if (!aIsSecondary && bIsSecondary) return 1;
 
     return 0;
   });

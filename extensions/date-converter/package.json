@@ -45,9 +45,35 @@
         {
           "name": "defaultFormat",
           "title": "Preferred Format",
-          "description": "Default date format that will be used in the copy action",
+          "description": "Default date format used in the copy action when ⏎ is pressed",
           "type": "dropdown",
           "default": "unix-ms",
+          "required": false,
+          "data": [
+            {
+              "title": "Unix Timestamp (ms)",
+              "value": "unix-ms"
+            },
+            {
+              "title": "Unix Timestamp (seconds)",
+              "value": "unix-s"
+            },
+            {
+              "title": "ISO Date",
+              "value": "iso"
+            },
+            {
+              "title": "Human Date",
+              "value": "human"
+            }
+          ]
+        },
+        {
+          "name": "secondaryFormat",
+          "title": "Secondary Format",
+          "description": "Secondary date format used in the copy action when ⌘ + ⏎ is pressed",
+          "type": "dropdown",
+          "default": "iso",
           "required": false,
           "data": [
             {
