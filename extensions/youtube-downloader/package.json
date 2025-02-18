@@ -63,9 +63,36 @@
       "required": false
     },
     {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "enableBrowserExtensionSupport",
       "title": "Enable Browser Extension Support",
       "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
       "type": "checkbox",
       "label": "Enable",
       "default": false,

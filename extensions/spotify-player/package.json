@@ -70,7 +70,7 @@
           "default": false,
           "description": "Only show results for music. Podcasts and episodes are excluded.",
           "name": "musicOnly",
-          "required": true,
+          "required": false,
           "type": "checkbox"
         },
         {

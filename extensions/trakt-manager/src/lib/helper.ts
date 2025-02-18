@@ -3,7 +3,8 @@ import { appendFile, readFile } from "fs/promises";
 import { existsSync } from "node:fs";
 import { unlink } from "node:fs/promises";
 import path from "path";
-import { IMDB_APP_URL, TMDB_IMG_URL, TRAKT_APP_URL } from "./constants";
+import { IMDB_APP_URL, TRAKT_APP_URL } from "./constants";
+import { ImagesResponse } from "./schema";
 
 export const setFileCache = async (key: string, content: string) => {
   const filePath = path.join(`${environment.supportPath}`, `${key}.txt`);
@@ -24,22 +25,30 @@ export const getFileCache = async (key: string) => {
   return await readFile(filePath, "utf-8");
 };
 
-export const getPosterUrl = (posterPath: string | undefined, fallback: "poster.png" | "episode.png") => {
-  if (posterPath) {
-    return `${TMDB_IMG_URL}${posterPath}`;
+export const getPosterUrl = (images: ImagesResponse | undefined, fallback: "poster.png") => {
+  if (images && images.poster && images.poster.length > 0) {
+    return `https://${images.poster[0]}`;
+  }
+
+  return fallback;
+};
+
+export const getScreenshotUrl = (images: ImagesResponse | undefined, fallback: "episode.png") => {
+  if (images && images.screenshot && images.screenshot.length > 0) {
+    return `https://${images.screenshot[0]}`;
   }
 
   return fallback;
 };
 
 export const getTraktUrl = (
-  type: "movie" | "shows" | "season" | "episode",
+  type: "movies" | "shows" | "season" | "episode",
   slug: string,
   seasonNumber: number = 0,
   episodeNumber: number = 0,
 ) => {
   switch (type) {
-    case "movie":
+    case "movies":
     case "shows":
       return `${TRAKT_APP_URL}/${type}/${slug}`;
     case "season":
@@ -51,7 +60,7 @@ export const getTraktUrl = (
 
 export const getIMDbUrl = (imdbId: string, seasonNumber?: number): string => {
   if (seasonNumber) {
-    return `${IMDB_APP_URL}/${imdbId}/episodes?season=${seasonNumber}`;
+    return `${IMDB_APP_URL}/title/${imdbId}/episodes?season=${seasonNumber}`;
   }
-  return `${IMDB_APP_URL}/${imdbId}`;
+  return `${IMDB_APP_URL}/title/${imdbId}`;
 };

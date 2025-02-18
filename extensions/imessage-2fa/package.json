@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imessage-2fa",
-  "title": "iMessage 2FA",
-  "description": "View messages and two factor authentication codes",
+  "title": "2FA Code Finder",
+  "description": "View 2FA codes from iMessage and Email",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "contributors": [
     "thomas",
     "arronhunt",
     "ronaldheft",
-    "hitolaus"
+    "hitolaus",
+    "taschaub"
   ],
   "pastContributors": [
     "navtoj"
@@ -22,12 +23,82 @@
     {
       "name": "index",
       "title": "View 2FA Codes",
-      "subtitle": "Messages",
-      "description": "View messages and two factor authentication codes",
+      "subtitle": "Messages & Email",
+      "description": "View two factor authentication codes from iMessage and Email",
       "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "enabledSources",
+      "type": "dropdown",
+      "required": false,
+      "title": "Enabled Sources",
+      "description": "Choose which sources to enable for 2FA codes",
+      "default": "imessage",
+      "data": [
+        {
+          "title": "Both iMessage and Email",
+          "value": "both"
+        },
+        {
+          "title": "iMessage Only",
+          "value": "imessage"
+        },
+        {
+          "title": "Email Only",
+          "value": "email"
+        }
+      ]
+    },
+    {
+      "name": "emailSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Email Source",
+      "description": "Choose between Apple Mail or Gmail for email source",
+      "default": "applemail",
+      "data": [
+        {
+          "title": "Apple Mail",
+          "value": "applemail"
+        },
+        {
+          "title": "Gmail",
+          "value": "gmail"
+        }
+      ]
+    },
+    {
+      "name": "gmailClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Gmail OAuth Client ID",
+      "description": "OAuth Client ID for Gmail API access (only needed if using Gmail as email source)",
+      "placeholder": "your-client-id.apps.googleusercontent.com"
+    },
+    {
+      "name": "defaultSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Default source to show in the list (only applies when both sources are enabled)",
+      "default": "all",
+      "data": [
+        {
+          "title": "All Sources",
+          "value": "all"
+        },
+        {
+          "title": "iMessage Only",
+          "value": "imessage"
+        },
+        {
+          "title": "Email Only",
+          "value": "email"
+        }
+      ]
+    },
     {
       "data": [
         {
@@ -43,16 +114,16 @@
           "value": "MINUTES"
         }
       ],
-      "default": "DAYS",
-      "description": "Temporal unit type for searching iMessage",
+      "default": "MINUTES",
+      "description": "Temporal unit type for searching messages",
       "name": "lookBackUnit",
       "required": false,
       "title": "Search unit for 2FA",
       "type": "dropdown"
     },
     {
-      "default": "1",
-      "description": "For searching iMessage from N units ago and now",
+      "default": "10",
+      "description": "For searching messages from N units ago and now",
       "name": "lookBackAmount",
       "required": false,
       "title": "Search amount for 2FA",
@@ -68,13 +139,16 @@
     }
   ],
   "dependencies": {
+    "@googleapis/gmail": "^1.2.0",
     "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.15.0",
-    "@use-it/interval": "^1.0.0"
+    "@use-it/interval": "^1.0.0",
+    "googleapis-common": "^7.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "16.10.3",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "18.3.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
