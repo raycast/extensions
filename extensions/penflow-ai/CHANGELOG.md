@@ -1,9 +1,14 @@
 # Penflow AI Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## 1.0.1 - 2025-02-28
+
+- Switched AI model to Gemini 2.0 Flash
+- Fixed input lag issues
+- Removed style selection window on first launch
+
+## 1.0.0
 
 - Add AI-powered writing assistance
-- Support multiple writing styles (Professional, Casual, Academic)
 - Add real-time word completion
 - Add text polishing feature
 - Add translation support
