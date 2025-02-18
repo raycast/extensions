@@ -63,7 +63,11 @@ class MuteDeckClient {
 
   private constructor() {
     const { apiTimeout } = getPreferences();
-    this.timeout = typeof apiTimeout === 'string' ? parseInt(apiTimeout, 10) : apiTimeout;
+    const parsed = typeof apiTimeout === 'string' ? parseInt(apiTimeout, 10) : apiTimeout;
+    if (isNaN(parsed) || parsed <= 0) {
+      throw new MuteDeckConfigError("API timeout must be a positive number");
+    }
+    this.timeout = parsed;
   }
 
   public static getInstance(): MuteDeckClient {
