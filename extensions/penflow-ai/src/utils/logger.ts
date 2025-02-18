@@ -40,4 +40,4 @@ export const logger = {
   info: (...args: any[]) => log(LogLevel.INFO, ...args),
   warn: (...args: any[]) => log(LogLevel.WARN, ...args),
   error: (...args: any[]) => log(LogLevel.ERROR, ...args),
-}; 
+};
