@@ -165,7 +165,13 @@ class MuteDeckClient {
   public async getStatus(): Promise<MuteDeckStatus> {
     try {
       const response = await this.makeApiCall("/v1/status");
-      const data = await response.json();
+
+      let data: unknown;
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new MuteDeckError("Invalid JSON response from API");
+      }
 
       if (!isValidMuteDeckStatus(data)) {
         throw new MuteDeckError("Invalid API response format");
