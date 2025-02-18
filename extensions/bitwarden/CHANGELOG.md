@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Feature] - 2025-02-19
+
+- Add options to search vault using url or username
+
 ## [Feature] - 2025-01-02
 
 - Add button to show/hide password in unlock form

@@ -14,7 +14,8 @@
     "undefinedzack",
     "anirudhganwal06",
     "samuel_ivarsson",
-    "gaspihabif"
+    "gaspihabif",
+    "marinsokol"
   ],
   "pastContributors": [
     "pomdtr"
@@ -77,6 +78,24 @@
               "value": "never"
             }
           ]
+        },
+        {
+          "name": "shouldSearchUsername",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Include username when searching",
+          "label": "Search by Username",
+          "description": "By default search uses only title, this will also include username."
+        },
+        {
+          "name": "shouldSearchUrl",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Include url when searching",
+          "label": "Search by URL",
+          "description": "By default search uses only title, this will also include url."
         },
         {
           "name": "shouldCacheVaultItems",

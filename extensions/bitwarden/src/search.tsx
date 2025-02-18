@@ -7,9 +7,10 @@ import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
 import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites";
 import { SessionProvider } from "~/context/session";
-import { useVaultContext, VaultProvider } from "~/context/vault";
+import { VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
+import { useVaultWithSearch } from "./context/search";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
@@ -28,15 +29,16 @@ const SearchVaultCommand = () => (
 );
 
 function SearchVaultComponent() {
-  const { items, folders, isLoading, isEmpty } = useVaultContext();
+  const { items, folders, isLoading, isEmpty, setSearchText } = useVaultWithSearch();
   const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
 
   return (
     <List
       searchBarPlaceholder="Search vault"
-      filtering={{ keepSectionOrder: true }}
+      filtering={false}
       isLoading={isLoading}
       searchBarAccessory={<ListFolderDropdown />}
+      onSearchTextChange={setSearchText}
     >
       {favoriteItems.length > 0 ? (
         <>
