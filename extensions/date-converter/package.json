@@ -44,8 +44,8 @@
       "preferences": [
         {
           "name": "defaultFormat",
-          "title": "Preferred Machine Format",
-          "description": "Default machine-readable output format to use when converting a human-readable date",
+          "title": "Preferred Format",
+          "description": "Default date format that will be used in the copy action",
           "type": "dropdown",
           "default": "unix-ms",
           "required": false,
@@ -61,6 +61,10 @@
             {
               "title": "ISO Date",
               "value": "iso"
+            },
+            {
+              "title": "Human Date",
+              "value": "human"
             }
           ]
         },
@@ -106,7 +110,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.91.2",
     "chrono-node": "^2.7.7",
     "dayjs": "^1.11.13",
     "javascript-time-ago": "^2.5.11",

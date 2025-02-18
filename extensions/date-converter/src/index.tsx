@@ -21,14 +21,12 @@ const timeAgo = new TimeAgo("en-US");
 
 interface LabeledDate {
   label?: string;
-  human: boolean;
   date: Date;
 }
 
 interface DateFormatter {
   id: string;
   title: string;
-  human: boolean;
   format: (date: Date, tz: string) => string;
 }
 
@@ -49,7 +47,6 @@ const DATE_FORMATS: DateFormatter[] = [
   {
     id: "human",
     title: "Human Date",
-    human: true,
     format: (date: Date, tz: string) =>
       dayjs(date)
         .tz(tz)
@@ -58,19 +55,16 @@ const DATE_FORMATS: DateFormatter[] = [
   {
     id: "unix-ms",
     title: "Unix Timestamp (ms)",
-    human: false,
     format: (date: Date, tz: string) => dayjs(date).tz(tz).valueOf().toString(),
   },
   {
     id: "unix-s",
     title: "Unix Timestamp (seconds)",
-    human: false,
     format: (date: Date, tz: string) => dayjs(date).tz(tz).unix().toString(),
   },
   {
     id: "iso",
     title: "ISO Date",
-    human: false,
     format: (date: Date, tz: string) => dayjs(date).tz(tz).toISOString(),
   },
 ];
@@ -86,7 +80,6 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
     return {
       date: parsedDate,
       label: "ISO Date",
-      human: false,
     };
   }
 
@@ -95,7 +88,6 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
     return {
       date: new Date(Number(BigInt(query) / 1_000_000n)),
       label: "Unix Timestamp (ns)",
-      human: false,
     };
   }
   const isMicroSecondTimestamp = /^\d{16}$/.test(query);
@@ -103,7 +95,6 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
     return {
       date: new Date(Number(BigInt(query) / 1_000n)),
       label: "Unix Timestamp (μs)",
-      human: false,
     };
   }
 
@@ -125,7 +116,6 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
       return {
         date,
         label: seconds ? "Unix Timestamp (seconds)" : "Unix Timestamp (ms)",
-        human: false,
       };
     }
   }
@@ -152,7 +142,6 @@ function getResults(query: string): LabeledDate[] {
       },
     ].map((x) => ({
       label: x.label,
-      human: true,
       date: new Date(x.date),
     }));
   }
@@ -160,7 +149,7 @@ function getResults(query: string): LabeledDate[] {
   query = query.trim();
 
   const machine = parseMachineReadableDate(query);
-  const human = chrono.parse(query).map((x) => ({ date: x.date(), human: true, label: x.text }));
+  const human = chrono.parse(query).map((x) => ({ date: x.date(), label: x.text }));
 
   return [machine, ...human].filter(Boolean).filter((x, i, arr) => {
     const date = x.date.toISOString();
@@ -179,17 +168,10 @@ function copy(text: string) {
   }
 }
 
-function getSortedFormats({ human }: Pick<LabeledDate, "human">): DateFormatter[] {
+function getSortedFormats(): DateFormatter[] {
   const { defaultFormat } = getPreferenceValues<Preferences>();
 
   return DATE_FORMATS.sort((a, b) => {
-    const aMatchesType = a.human === human;
-    const bMatchesType = b.human === human;
-
-    // Sort the opposite type first
-    if (aMatchesType && !bMatchesType) return 1;
-    if (!aMatchesType && bMatchesType) return -1;
-
     const aIsPreferred = a.id === defaultFormat;
     const bIsPreferred = b.id === defaultFormat;
 
@@ -238,14 +220,14 @@ export default function Command() {
       }
     >
       <List.EmptyView title="Invalid Date" description="Failed to parse your date in a human or machine format." />
-      {results.map(({ date, label, human }) => (
+      {results.map(({ date, label }) => (
         <List.Item
           key={date.toISOString()}
           title={displayFormatter(date, tz)}
           subtitle={`${label} - ${timeAgo.format(date)}`}
           actions={
             <ActionPanel>
-              {getSortedFormats({ human }).map(({ id, title, format }) => (
+              {getSortedFormats().map(({ id, title, format }) => (
                 <Action key={id} title={`Copy as ${title}`} onAction={() => copy(format(date, tz))} />
               ))}
             </ActionPanel>
