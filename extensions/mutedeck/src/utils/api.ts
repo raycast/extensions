@@ -88,16 +88,11 @@ class MuteDeckClient {
       const baseUrl = new URL(apiEndpoint);
       return new URL(path, baseUrl);
     } catch (error) {
-      throw new MuteDeckConfigError(
-        `Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new MuteDeckConfigError(`Invalid API endpoint: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
-  private async fetchWithTimeout(
-    url: URL,
-    options: FetchRequestInit = {},
-  ): Promise<FetchResponse> {
+  private async fetchWithTimeout(url: URL, options: FetchRequestInit = {}): Promise<FetchResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeout);
 
