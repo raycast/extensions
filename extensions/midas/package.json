@@ -15,7 +15,7 @@
       "title": "Call Agent",
       "subtitle": "Make a call to Midas",
       "description": "Helps you to make a call to Midas",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "call-agent-pk",
