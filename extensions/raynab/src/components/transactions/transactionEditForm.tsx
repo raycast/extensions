@@ -2,11 +2,11 @@ import { updateTransaction } from '@lib/api';
 import {
   autoDistribute,
   easyGetColorFromId,
-  formatToReadablePrice,
+  formatToReadableAmount,
   formatToYnabAmount,
   getSubtransacionCategoryname,
-  isNumberLike,
   isSplitTransaction,
+  onSubtransactionAmountChangeHandler,
 } from '@lib/utils';
 import { TransactionClearedStatus, TransactionFlagColor } from 'ynab';
 import {
@@ -21,6 +21,7 @@ import {
   Toast,
   useNavigation,
   getPreferenceValues,
+  captureException,
 } from '@raycast/api';
 import { FormValidation, useForm, useLocalStorage } from '@raycast/utils';
 import { CurrencyFormat, Period, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
@@ -62,13 +63,15 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { mutate } = useTransactions(activeBudgetId, timeline);
   const { data: payees, isLoading: isLoadingPayees } = usePayees(activeBudgetId);
   const { data: categoryGroups, isLoading: isLoadingCategories } = useCategoryGroups(activeBudgetId);
-  const categories = categoryGroups?.flatMap((group) => group.categories);
+  const categories = categoryGroups?.flatMap((group) => group.categories).filter((c) => !c.hidden);
 
-  const [amount, setAmount] = useState(() => formatToReadablePrice({ amount: transaction.amount, locale: false }));
+  const [amount, setAmount] = useState(() =>
+    formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency, includeSymbol: false }),
+  );
   const [subtransactions, setSubtransactions] = useState<SaveSubTransactionWithReadableAmounts[]>(() => {
     return transaction.subtransactions.map((s) => ({
       ...s,
-      amount: formatToReadablePrice({ amount: s.amount, locale: false }),
+      amount: formatToReadableAmount({ amount: s.amount, currency: activeBudgetCurrency, includeSymbol: false }),
     }));
   });
   const [categoryList, setCategoryList] = useState(() => {
@@ -102,7 +105,7 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       date: new Date(transaction.date),
-      amount: formatToReadablePrice({ amount: transaction.amount, locale: false }),
+      amount: formatToReadableAmount({ amount: transaction.amount, locale: false }),
       payee_id: transaction.payee_id ?? undefined,
       memo: transaction.memo ?? '',
       flag_color: transaction.flag_color?.toString() ?? undefined,
@@ -110,106 +113,126 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         categoryList.length > 0 && !!categoryList[0] ? categoryList : subtransactions.map((s) => s.category_id ?? ''),
     },
     onSubmit: async (values) => {
-      const transactionData = {
-        ...transaction,
-        date: (values.date ?? new Date()).toISOString(),
-        flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
-        amount: formatToYnabAmount(values.amount),
-        payee_id: values.payee_id,
-        memo: values.memo || null,
-        category_id: values.categoryList?.[0] || undefined,
-        payee_name: values.payee_name || transaction.payee_name,
-        approved: true,
-      };
-
-      if (isReconciled) {
-        await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
-        return;
-      }
-
-      /**
-       * We need make sure the total of subtransactions is equal to the transaction.
-       * That validation makes sense to keep at this level
-       * */
-      if (subtransactions.length > 0) {
-        transactionData.category_id = undefined;
-
-        /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
-        transactionData.subtransactions = subtransactions.map((s) => ({ ...s, amount: formatToYnabAmount(s.amount) }));
-
-        const subtransactionsTotal = subtransactions.reduce((total, { amount }) => total + +amount, 0);
-        const difference = subtransactionsTotal - +values.amount;
-
-        if (difference !== 0) {
-          const options: Alert.Options = {
-            title: `Something Doesn't Add Up`,
-            message: `The total is ${
-              values.amount
-            }, but the splits add up to ${subtransactionsTotal}. How would you like to handle the unassigned ${difference.toFixed(
-              2,
-            )}?`,
-            primaryAction: {
-              title: 'Auto-Distribute the amounts',
-              onAction: () => {
-                const distributedAmounts = autoDistribute(+amount, subtransactions.length).map((amount) =>
-                  amount.toString(),
-                );
-                setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
-              },
-            },
-            dismissAction: {
-              title: 'Adjust manually',
-            },
-          };
-          await confirmAlert(options);
-          return;
-        }
-      }
-
       const toast = await showToast({ style: Toast.Style.Animated, title: 'Updating Transaction' });
 
-      mutate(
-        updateTransaction(activeBudgetId, transaction.id, {
-          ...transactionData,
-          payee_id: selectOwnPayee ? null : values.payee_id,
-        }),
-        {
-          optimisticUpdate(currentData) {
-            if (!currentData) return;
+      try {
+        const transactionData = {
+          ...transaction,
+          date: (values.date ?? new Date()).toISOString(),
+          flag_color: values.flag_color ? (values.flag_color as TransactionFlagColor) : null,
+          amount: formatToYnabAmount(values.amount, activeBudgetCurrency),
+          payee_id: values.payee_id,
+          memo: values.memo || null,
+          category_id: values.categoryList?.[0] || undefined,
+          payee_name: values.payee_name || transaction.payee_name,
+          approved: true,
+        };
 
-            const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+        if (isReconciled) {
+          await showToast({ style: Toast.Style.Failure, title: 'Cannot edit reconciled transaction' });
+          return;
+        }
 
-            if (transactionIdx < 0) return currentData;
+        /**
+         * We need make sure the total of subtransactions is equal to the transaction.
+         * That validation makes sense to keep at this level
+         * */
+        if (subtransactions.length > 0) {
+          transactionData.category_id = undefined;
 
-            const newData = [...currentData];
+          /* @ts-expect-error we're not allowing updates to existing subtransactions so this doesn't matter */
+          transactionData.subtransactions = subtransactions.map((s) => ({
+            ...s,
+            amount: formatToYnabAmount(s.amount, activeBudgetCurrency),
+          }));
 
-            newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+          const subtransactionsTotal = subtransactions.reduce(
+            (total, { amount }) => total + formatToYnabAmount(amount, activeBudgetCurrency),
+            0,
+          );
+          const difference = subtransactionsTotal - transactionData.amount;
 
-            return newData;
-          },
-          shouldRevalidateAfter: !preferences.quickRevalidate,
-        },
-      )
-        .then(() => {
-          toast.style = Toast.Style.Success;
-          toast.title = 'Transaction updated successfully';
+          if (difference !== 0) {
+            const fmtSubTotal = formatToReadableAmount({
+              amount: subtransactionsTotal,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
+            const fmtDifference = formatToReadableAmount({
+              amount: difference,
+              currency: activeBudgetCurrency,
+              includeSymbol: false,
+            });
 
-          if (forApproval) {
-            pop();
+            const onAutoDistribute = () => {
+              const distributedAmounts = autoDistribute(transactionData.amount, subtransactions.length).map((amount) =>
+                formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
+              );
+              setSubtransactions(subtransactions.map((s, idx) => ({ ...s, amount: distributedAmounts[idx] })));
+            };
+
+            const options: Alert.Options = {
+              title: `Something Doesn't Add Up`,
+              message: `The total is ${
+                values.amount
+              }, but the splits add up to ${fmtSubTotal}. How would you like to handle the unassigned ${fmtDifference}?`,
+              primaryAction: {
+                title: 'Auto-Distribute the amounts',
+                onAction: onAutoDistribute,
+              },
+              dismissAction: {
+                title: 'Adjust manually',
+              },
+            };
+
+            await toast.hide();
+            await confirmAlert(options);
+            return;
           }
-        })
-        .catch(() => {
-          toast.style = Toast.Style.Failure;
-          toast.title = 'Failed to update transaction';
-        });
+        }
+
+        await mutate(
+          updateTransaction(activeBudgetId, transaction.id, {
+            ...transactionData,
+            payee_id: selectOwnPayee ? null : values.payee_id,
+          }),
+          {
+            optimisticUpdate(currentData) {
+              if (!currentData) return;
+
+              const transactionIdx = currentData.findIndex((tx) => tx.id === transaction.id);
+
+              if (transactionIdx < 0) return currentData;
+
+              const newData = [...currentData];
+
+              newData.splice(transactionIdx, 1, { ...transaction, ...transactionData });
+
+              return newData;
+            },
+            shouldRevalidateAfter: !preferences.quickRevalidate,
+          },
+        );
+
+        toast.style = Toast.Style.Success;
+        toast.title = 'Transaction updated successfully';
+
+        if (forApproval) {
+          pop();
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        captureException(error);
+        toast.title = 'Failed to create transaction';
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
+      }
     },
     validation: {
       date: FormValidation.Required,
-      amount: (value) => {
-        if (!value) return 'Please enter a valid amount';
-
-        if (isNumberLike(value) === false) return `${value} is not a valid number`;
-      },
+      amount: FormValidation.Required,
       payee_id: (value) => {
         const errorMessage = 'Please select or enter a payee';
 
@@ -227,36 +250,12 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
     },
   });
 
-  const onSubcategoryAmountChange = (
-    sub: SaveSubTransactionWithReadableAmounts,
-  ): ((newValue: string) => void) | undefined => {
-    const eventHandler = (newAmount: string) => {
-      const oldList = [...subtransactions];
-      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
-
-      if (previousSubtransactionIdx === -1) return;
-
-      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
-      const newList = [...oldList];
-      newList[previousSubtransactionIdx] = newSubtransaction;
-
-      const isDualSplitTransaction = oldList.length === 2;
-      if (isDualSplitTransaction && preferences.liveDistribute) {
-        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
-        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
-        const otherAmount = +amount - +newAmount;
-
-        if (!Number.isNaN(otherAmount)) {
-          otherSubTransaction.amount = otherAmount.toString();
-          newList[otherSubTransactionIdx] = otherSubTransaction;
-        }
-      }
-
-      setSubtransactions(newList);
-    };
-
-    return eventHandler;
-  };
+  const onSubcategoryAmountChange = onSubtransactionAmountChangeHandler({
+    amount,
+    currency: activeBudgetCurrency,
+    subtransactions,
+    setSubtransactions,
+  });
 
   const isNewSplitTransaction = subtransactions.length > 0 && !isSplitTransaction(transaction);
   return (
@@ -267,7 +266,12 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           {subtransactions.length > 1 && !isSplitTransaction(transaction) ? (
-            <AutoDistributeAction amount={amount} categoryList={categoryList} setSubtransactions={setSubtransactions} />
+            <AutoDistributeAction
+              amount={amount}
+              currency={activeBudgetCurrency}
+              categoryList={categoryList}
+              setSubtransactions={setSubtransactions}
+            />
           ) : null}
           <Action
             title={selectOwnPayee ? 'Show Payee Dropdown' : 'Show Payee Textfield'}
@@ -321,8 +325,11 @@ export function TransactionEditForm({ transaction, forApproval = false }: Transa
           !isSplitTransaction(transaction)
             ? (newCategories) => {
                 if (newCategories.length > 1) {
-                  const distributedAmounts = autoDistribute(+amount, newCategories.length).map((amount) =>
-                    amount.toString(),
+                  const distributedAmounts = autoDistribute(
+                    formatToYnabAmount(amount, activeBudgetCurrency),
+                    newCategories.length,
+                  ).map((amount) =>
+                    formatToReadableAmount({ amount, currency: activeBudgetCurrency, includeSymbol: false }),
                   );
                   setCategoryList(newCategories);
                   setSubtransactions(

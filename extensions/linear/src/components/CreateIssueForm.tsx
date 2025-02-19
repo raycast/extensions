@@ -289,6 +289,102 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Issue" />
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus("title")}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+            />
+            <Action
+              title="Focus Description"
+              icon={Icon.TextInput}
+              onAction={() => focus("description")}
+              shortcut={{ modifiers: ["ctrl"], key: "e" }}
+            />
+            <Action
+              title="Focus Status"
+              icon={Icon.Circle}
+              onAction={() => focus("stateId")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+            <Action
+              title="Focus Priority"
+              icon={Icon.LevelMeter}
+              onAction={() => focus("priority")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            />
+            <Action
+              title="Focus Assignee"
+              icon={Icon.AddPerson}
+              onAction={() => focus("assigneeId")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            />
+            {scale ? (
+              <Action
+                title="Focus Estimate"
+                icon={{ source: { light: "light/estimate.svg", dark: "dark/estimate.svg" } }}
+                onAction={() => focus("estimate")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+              />
+            ) : null}
+            <Action
+              title="Focus Due Date"
+              icon={Icon.Calendar}
+              onAction={() => focus("dueDate")}
+              shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+            />
+            <Action
+              title="Focus Labels"
+              icon={Icon.Tag}
+              onAction={() => focus("labelIds")}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            />
+            {hasCycles ? (
+              <Action
+                title="Focus Cycle"
+                icon={{ source: { light: "light/cycle.svg", dark: "dark/cycle.svg" } }}
+                onAction={() => focus("cycleId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            ) : null}
+            {hasProjects ? (
+              <Action
+                title="Focus Project"
+                icon={{ source: { light: "light/project.svg", dark: "dark/project.svg" } }}
+                onAction={() => focus("projectId")}
+                shortcut={{ modifiers: ["ctrl", "shift"], key: "p" }}
+              />
+            ) : null}
+            {hasMilestones ? (
+              <Action
+                title="Focus Milestone"
+                icon={{ source: { light: "light/milestone.svg", dark: "dark/milestone.svg" } }}
+                onAction={() => focus("milestoneId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+              />
+            ) : null}
+            {hasIssues ? (
+              <Action
+                title="Focus Parent Issue"
+                icon={{ source: { light: "light/backlog.svg", dark: "dark/backlog.svg" } }}
+                onAction={() => focus("parentId")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+              />
+            ) : null}
+            <Action
+              title="Focus Attachments"
+              icon={Icon.NewDocument}
+              onAction={() => focus("attachments")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "a" }}
+            />
+            <Action
+              title="Focus Links"
+              icon={Icon.Link}
+              onAction={() => focus("links")}
+              shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}

@@ -11,7 +11,8 @@
     "pernielsentikaer",
     "oasaleh",
     "xilopaint",
-    "ridemountainpig"
+    "ridemountainpig",
+    "zakj"
   ],
   "license": "MIT",
   "commands": [
@@ -86,6 +87,21 @@
           "placeholder": "Seconds",
           "type": "text",
           "required": false
+        }
+      ]
+    },
+    {
+      "name": "caffeinateUntil",
+      "title": "Caffeinate Until",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping until a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Time",
+          "type": "text",
+          "required": true
         }
       ]
     },

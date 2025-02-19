@@ -11,7 +11,7 @@
 
 import { Color, Icon } from '@raycast/api';
 import { CategoryGoalTypeEnum } from 'ynab';
-import { formatToReadablePrice } from './transactions';
+import { formatToReadableAmount } from './transactions';
 import type { Category, CurrencyFormat, SaveSubTransactionWithReadableAmounts, TransactionDetail } from '@srcTypes';
 import { time } from './time';
 
@@ -91,7 +91,7 @@ export function displayGoalType(category: Category) {
 function formatGoalType(category: Category, currency: CurrencyFormat): string {
   if (!category.goal_type) return 'No Goal';
 
-  const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
+  const target = formatToReadableAmount({ amount: category.goal_target ?? 0, currency });
 
   switch (category.goal_type) {
     case CategoryGoalTypeEnum.Tb: {
@@ -122,7 +122,7 @@ export function formatGoalCadenceAndFrequency(category: Category, currency: Curr
     return formatGoalType(category, currency);
   }
 
-  const target = formatToReadablePrice({ amount: category.goal_target ?? 0, currency });
+  const target = formatToReadableAmount({ amount: category.goal_target ?? 0, currency });
 
   const baseString = `${target}`;
 
@@ -134,8 +134,7 @@ export function formatGoalCadenceAndFrequency(category: Category, currency: Curr
   if (GOAL_CADENCES_WITH_FREQUENCY.includes(category.goal_cadence)) {
     const frequency = category.goal_cadence_frequency;
 
-    if (!frequency) {
-      console.error(`Encountered goal cadence [0-2, 13] without a frequency`);
+    if (frequency == undefined) {
       return baseString;
     }
 

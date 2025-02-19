@@ -3,6 +3,7 @@
   "name": "youtube-downloader",
   "title": "YouTube Downloader",
   "description": "Download YouTube video from Raycast",
+  "type": "module",
   "icon": "youtube.png",
   "author": "vimtor",
   "contributors": [
@@ -10,7 +11,8 @@
     "d2a",
     "ridemountainpig",
     "xmorse",
-    "litomore"
+    "litomore",
+    "anwarulislam"
   ],
   "categories": [
     "Applications",
@@ -59,13 +61,49 @@
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffprobe",
       "required": false
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Enable Browser Extension Support",
+      "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",
     "date-fns": "^4.1.0",
-    "execa": "^7.2.0",
+    "nano-spawn": "^0.2.0",
     "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
@@ -81,6 +119,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "pull": "ray pull-contributions",
     "publish": "ray publish"
   }
 }

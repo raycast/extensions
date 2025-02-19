@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "nba-viewer",
+  "name": "nba-game-viewer",
   "title": "NBA & WNBA Viewer",
-  "description": "View upcoming NBA or WNBA games and team standings",
+  "description": "View upcoming NBA or WNBA games and team standings.",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
   "contributors": [
@@ -10,7 +10,8 @@
     "michaelli",
     "degouville",
     "stelo",
-    "jamtur01"
+    "jamtur01",
+    "gohadar"
   ],
   "preferences": [
     {
@@ -70,6 +71,15 @@
       "label": "Number of days of scores",
       "required": false,
       "default": "7"
+    },
+    {
+      "name": "showDetails",
+      "title": "Show Details",
+      "description": "Show details of the games in the Raycast window.",
+      "type": "checkbox",
+      "label": "Show details of the games in the Raycast window",
+      "required": false,
+      "default": false
     }
   ],
   "categories": [
@@ -109,14 +119,17 @@
   "dependencies": {
     "@raycast/api": "^1.81.0",
     "@raycast/utils": "^1.16.4",
-    "axios": "^1.7.4"
+    "axios": "^1.7.4",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@types/lodash": "^4.17.15",
     "@types/node": "^22.3.0",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
+    "react-devtools": "^5.2.0",
     "typescript": "^5.5.4"
   },
   "scripts": {

@@ -8,7 +8,8 @@
   "contributors": [
     "ridemountainpig",
     "d0zingcat",
-    "ViGeng"
+    "ViGeng",
+    "anwarulislam"
   ],
   "categories": [
     "Productivity",
@@ -846,7 +847,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.9.0",
     "gemini-ai": "^2.0.1",
     "jimp": "^0.22.10",
@@ -866,6 +867,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
   }
 }

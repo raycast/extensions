@@ -1,6 +1,9 @@
-import { CurrencyFormat } from '@srcTypes';
+import { CurrencyFormat, SaveSubTransactionWithReadableAmounts } from '@srcTypes';
 import { ScheduledTransactionDetailFrequencyEnum, utils } from 'ynab';
 import { isNumberLike } from './validation';
+import { getPreferenceValues } from '@raycast/api';
+
+const preferences = getPreferenceValues<Preferences>();
 
 /**
  * Format a YNAB currency amount with optional currency formatting.
@@ -11,23 +14,25 @@ import { isNumberLike } from './validation';
  * @param prefixNegativeSign - Whether to place negative sign before currency symbol (default: true)
  * @returns The formatted string (e.g. "$1,234.56", "-$1,234.56", "1,234.56", or "1234.56")
  */
-export function formatToReadablePrice({
+export function formatToReadableAmount({
   amount,
   currency,
   locale = true,
   prefixNegativeSign = true,
+  includeSymbol = true,
 }: {
   amount: number;
   currency?: CurrencyFormat;
   locale?: boolean;
   prefixNegativeSign?: boolean;
+  includeSymbol?: boolean;
 }) {
   const fmtAmount = utils.convertMilliUnitsToCurrencyAmount(amount, currency?.decimal_digits ?? 2);
 
   // Using locale string helps format larger numbers with commas
-  const localizedAmount = fmtAmount.toLocaleString('en-us');
+  const localizedAmount = localizeToBudgetSettings(fmtAmount, currency);
 
-  if (currency) {
+  if (currency && includeSymbol) {
     const { currency_symbol: symbol, symbol_first, display_symbol } = currency;
 
     // This is an edge case where negative amounts appear as $-X for symbol_first currencies
@@ -42,11 +47,51 @@ export function formatToReadablePrice({
 }
 
 /**
+ * Formats a number according to the budget's currency settings or defaults to US locale.
+ *
+ * @param fmtAmount - The amount to format (e.g. 1234.56)
+ * @param currency - Optional currency format configuration with separators and decimal settings
+ * @returns A string with the formatted amount using appropriate separators (e.g. "1,234.56" or "1.234,56")
+ *
+ * @example
+ * // With USD currency format
+ * localizeToBudgetSettings(1234.56, {
+ *   group_separator: ',',
+ *   decimal_separator: '.',
+ *   decimal_digits: 2
+ * }) // Returns "1,234.56"
+ *
+ * // Without currency format (defaults to US locale)
+ * localizeToBudgetSettings(1234.56) // Returns "1,234.56"
+ */
+function localizeToBudgetSettings(fmtAmount: number, currency?: CurrencyFormat) {
+  if (!currency) {
+    return fmtAmount.toLocaleString('en-us');
+  }
+
+  const [integerPart, decimalPart] = fmtAmount.toString().split('.');
+
+  // Group integers according to currency format
+  const integerGroups = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, currency.group_separator);
+
+  // Combine with decimal part using currency decimal separator
+  return !decimalPart
+    ? integerGroups
+    : `${integerGroups}${currency.decimal_separator}${decimalPart.padEnd(currency.decimal_digits, '0')}`;
+}
+
+/**
  * Format a number or a valid string input into a currency amount in milliunits.
  */
-export function formatToYnabAmount(amount: string | number): number {
-  if (typeof amount === 'number' || isNumberLike(amount)) {
-    return Number(amount) * 1000;
+export function formatToYnabAmount(amount: string | number, currencyFormat?: CurrencyFormat): number {
+  if (typeof amount === 'number') return Number(amount) * 1000;
+
+  const normalizedAmount = currencyFormat
+    ? amount.replaceAll(currencyFormat.group_separator, '').replaceAll(currencyFormat.decimal_separator, '.')
+    : amount;
+
+  if (isNumberLike(normalizedAmount)) {
+    return Number(normalizedAmount) * 1000;
   } else {
     throw new Error(`Amount (${amount}) cannot be converted to a number`);
   }
@@ -106,4 +151,57 @@ export function formatToReadableFrequency(frequency: ScheduledTransactionDetailF
   if (prefix && frequency === 'never') return 'Never repeats';
 
   return prefix ? `Repeats ${formatted}` : formatted;
+}
+
+export function onSubtransactionAmountChangeHandler({
+  subtransactions,
+  amount,
+  currency,
+  setSubtransactions,
+}: {
+  subtransactions: SaveSubTransactionWithReadableAmounts[];
+  amount: string;
+  currency: CurrencyFormat;
+  setSubtransactions: React.Dispatch<React.SetStateAction<SaveSubTransactionWithReadableAmounts[]>>;
+}) {
+  return (sub: SaveSubTransactionWithReadableAmounts): ((newValue: string) => void) | undefined => {
+    const eventHandler = (newAmount: string) => {
+      const oldList = [...subtransactions];
+      const previousSubtransactionIdx = oldList.findIndex((s) => s.category_id === sub.category_id);
+
+      if (previousSubtransactionIdx === -1) return;
+
+      const newSubtransaction = { ...oldList[previousSubtransactionIdx], amount: newAmount };
+      const newList = [...oldList];
+      newList[previousSubtransactionIdx] = newSubtransaction;
+
+      // If there are exactly 2 subtransactions, we can automatically calculate the second amount
+      // based on the total transaction amount and the first subtransaction amount
+      const isDualSplitTransaction = oldList.length === 2;
+      if (isDualSplitTransaction && preferences.liveDistribute) {
+        const otherSubTransactionIdx = previousSubtransactionIdx === 0 ? 1 : 0;
+        const otherSubTransaction = { ...oldList[otherSubTransactionIdx] };
+        let otherAmount: number = NaN;
+        try {
+          otherAmount = formatToYnabAmount(amount, currency) - formatToYnabAmount(newAmount, currency);
+        } catch (error) {
+          // The above calc might throw but we don't care much
+          // Might be better to debounce it
+        }
+
+        if (!Number.isNaN(otherAmount)) {
+          otherSubTransaction.amount = formatToReadableAmount({
+            amount: otherAmount,
+            currency,
+            includeSymbol: false,
+          });
+          newList[otherSubTransactionIdx] = otherSubTransaction;
+        }
+      }
+
+      setSubtransactions(newList);
+    };
+
+    return eventHandler;
+  };
 }
