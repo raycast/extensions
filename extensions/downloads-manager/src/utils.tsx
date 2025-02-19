@@ -22,6 +22,7 @@ export function getDownloads() {
         lastModifiedAt: stats.mtime,
         createdAt: stats.ctime,
         addedAt: stats.atime,
+        birthAt: stats.birthtime,
       };
     })
     .sort((a, b) => {
@@ -42,6 +43,8 @@ export function getLatestDownload() {
   if (downloads.length < 1) {
     return undefined;
   }
+
+  downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
 
   return downloads[0];
 }

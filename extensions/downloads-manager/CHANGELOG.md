@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Updated the `Show Latest Download` command to display the most recent download file.
+
 ## [Add file order preference] - 2025-01-07
 
 - Added a preference to sort files by added, modified, or created time in the `Manage Downloads` command.
