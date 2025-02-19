@@ -69,7 +69,14 @@ export default function Command() {
 
       const data = await response.json();
       console.log("Response:", data);
-      setResponse(data);
+
+      // Type guard to check if the response matches our interface
+      if (typeof data === "object" && data !== null && "response" in data && typeof data.response === "string") {
+        setResponse(data as AIResponse);
+      } else {
+        throw new Error("Invalid response format from server");
+      }
+
       setCommand("");
 
       showToast({
