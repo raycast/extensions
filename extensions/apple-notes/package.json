@@ -16,7 +16,8 @@
     "thomaslombart",
     "xilopaint",
     "ridemountainpig",
-    "teemu_suvinen"
+    "teemu_suvinen",
+    "juan_saldana"
   ],
   "license": "MIT",
   "commands": [
@@ -32,7 +33,7 @@
       "title": "New Note",
       "subtitle": "Apple Notes",
       "description": "Create a new note in your Apple Notes.",
-      "mode": "no-view",
+      "mode": "view",
       "keywords": [
         "write note",
         "add note",
@@ -41,9 +42,26 @@
       ],
       "arguments": [
         {
-          "name": "text",
+          "name": "note",
           "type": "text",
-          "placeholder": "Text"
+          "placeholder": "Titl"
+        }
+      ]
+    },
+    {
+      "name": "quick-note",
+      "title": "Quick Note from Clipboard",
+      "subtitle": "Apple Notes",
+      "description": "Create a new note in Apple Notes with the current content of your clipboard.",
+      "mode": "no-view",
+      "keywords": [
+        "clipboard note"
+      ],
+      "arguments": [
+        {
+          "name": "note",
+          "type": "text",
+          "placeholder": "Title"
         }
       ]
     },
