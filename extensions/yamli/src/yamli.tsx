@@ -129,29 +129,31 @@ export default function Command() {
     }
   }, [pendingWords]);
 
-  function CopyActions({ content }: { content: string }) {
+  function CopyActions({ title, content }: { title: string; content: string }) {
     return (
-      <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard
-          title="Copy Full Text"
-          content={content.trim()}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
-        />
+      <ActionPanel.Section>
+        <Action.CopyToClipboard title={title} content={content.trim()} shortcut={{ modifiers: ["cmd"], key: "c" }} />
       </ActionPanel.Section>
     );
   }
 
-  function TransliterationActions({ option, onSelect }: { option: string; onSelect: (opt: string) => void }) {
+  function TransliterationActions({
+    selectTitle,
+    copyTitle,
+    option,
+    onSelect,
+  }: {
+    selectTitle: string;
+    copyTitle: string;
+    option: string;
+    onSelect: (opt: string) => void;
+  }) {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Action
-            title="Use This Transliteration"
-            onAction={() => onSelect(option)}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
+          <Action title={selectTitle} onAction={() => onSelect(option)} shortcut={{ modifiers: [], key: "return" }} />
         </ActionPanel.Section>
-        <CopyActions content={option} />
+        <CopyActions title={copyTitle} content={option} />
       </ActionPanel>
     );
   }
@@ -182,11 +184,18 @@ export default function Command() {
       selectedItemId={transliterationOptions.length > 0 ? "first-arabic-option" : undefined}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Copy">
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Full Text"
               content={text.trim()}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ modifiers: [], key: "return" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Paste
+              title="Paste Full Text"
+              content={text.trim()}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -199,22 +208,12 @@ export default function Command() {
           title={currentWord}
           subtitle="Keep Input"
           actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action
-                  title="Use English Text"
-                  onAction={() => handleOptionSelect(currentWord)}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section title="Copy">
-                <Action.CopyToClipboard
-                  title="Copy English Text"
-                  content={currentWord}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
+            <TransliterationActions
+              selectTitle="Use Input Text"
+              copyTitle="Copy Input Text"
+              option={currentWord}
+              onSelect={handleOptionSelect}
+            />
           }
         />
       )}
@@ -223,7 +222,14 @@ export default function Command() {
           key={index}
           id={index === 0 ? "first-arabic-option" : `option-${index}`}
           title={option}
-          actions={<TransliterationActions option={option} onSelect={handleOptionSelect} />}
+          actions={
+            <TransliterationActions
+              selectTitle="Use This Transliteration"
+              copyTitle="Copy Transliteration"
+              option={option}
+              onSelect={handleOptionSelect}
+            />
+          }
         />
       ))}
     </List>
