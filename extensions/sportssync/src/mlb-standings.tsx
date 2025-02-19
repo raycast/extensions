@@ -51,7 +51,7 @@ export default function scoresAndSchedule() {
       <List.Item
         key={index}
         title={`${team1.team.displayName}`}
-        accessoryTitle={`${team1.stats[8].displayValue} GP | ${team1.stats[33].displayValue} | Pct: ${(Number(team1.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team1.stats[15].displayValue} | PA ${team1.stats[14].displayValue} | Dif ${team1.stats[12].displayValue}`}
+        accessoryTitle={`${team1.stats[8].displayValue} GP | ${team1?.stats[33]?.displayValue ?? "0 GP"} | Pct: ${(Number(team1.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team1.stats[15].displayValue} | PA ${team1.stats[14].displayValue} | Dif ${team1.stats[12].displayValue}`}
         icon={{ source: team1.team.logos[0].href }}
         actions={
           <ActionPanel>
@@ -67,7 +67,7 @@ export default function scoresAndSchedule() {
       <List.Item
         key={index}
         title={`${team2.team.displayName}`}
-        accessoryTitle={`${team2.stats[8].displayValue} GP | ${team2.stats[33].displayValue} | Pct: ${(Number(team2.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team2.stats[15].displayValue} | PA ${team2.stats[14].displayValue} | Dif ${team2.stats[12].displayValue}`}
+        accessoryTitle={`${team2.stats[8].displayValue} GP | ${team2?.stats[33]?.displayValue ?? "0 GP"} | Pct: ${(Number(team2.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team2.stats[15].displayValue} | PA ${team2.stats[14].displayValue} | Dif ${team2.stats[12].displayValue}`}
         icon={{ source: team2.team.logos[0].href }}
         actions={
           <ActionPanel>
