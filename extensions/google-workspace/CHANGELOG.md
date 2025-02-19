@@ -1,5 +1,10 @@
 # Google Workspace Changelog
 
+## [Add list home and open home quicklink] - {PR_MERGE_DATE}
+
+- 🏠 Add `List Google Drive Files` command to browser all your files and folders in Raycast
+- 🔗 Quickly open the Google drvie home page in browser
+
 ## [Add file path info to the file list] - 2024-10-21
 
 - Adds the file path information to the list of accessories.

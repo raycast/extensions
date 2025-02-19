@@ -22,9 +22,11 @@ function SearchGoogleDriveFiles() {
   );
 
   return (
+    // TODO: This can be refactored to use a grid layout to enhance the UI
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search files"
+      // TODO: This can be refactored to use a dropdown to filter search results
       // searchBarAccessory={
       //   <List.Dropdown
       //     tooltip="Search mode"
