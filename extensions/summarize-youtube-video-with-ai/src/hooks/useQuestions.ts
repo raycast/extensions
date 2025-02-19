@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 
-export interface Question {
+export type Question = {
   id: string;
   question: string;
   answer: string;
-}
+};
 
 export function useQuestions(summary: string | undefined) {
   const [question, setQuestion] = useState("");
@@ -20,6 +20,19 @@ export function useQuestions(summary: string | undefined) {
   const handleAdditionalQuestion = (newQuestion: string) => {
     setQuestion(newQuestion);
   };
+
+  // Set initial summary as first answered question
+  useEffect(() => {
+    if (summary) {
+      setQuestions((prevQuestions) => [
+        {
+          ...prevQuestions[0],
+          answer: summary,
+        },
+        ...prevQuestions.slice(1),
+      ]);
+    }
+  }, [summary]);
 
   return { questions, setQuestions, question, setQuestion, handleAdditionalQuestion };
 }

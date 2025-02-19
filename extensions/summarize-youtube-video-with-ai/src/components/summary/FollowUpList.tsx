@@ -1,27 +1,35 @@
+/* Copy All Q&A would be weirdly formatted otherwise */
+/* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, AI, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { v4 as uuid } from "uuid";
 import { FINDING_ANSWER } from "../../const/toast_messages";
+import { Question } from "../../hooks/useQuestions";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
 
 type FollowUpListProps = {
-  summary?: string;
-  transcript?: string;
+  transcript: string;
+  questions: Question[];
 };
 
-export default function FollowUpList({ summary, transcript }: FollowUpListProps) {
+export default function FollowUpList({ transcript, questions: initialQuestions }: FollowUpListProps) {
   const [question, setQuestion] = useState("");
-  const [selectedQuestionId, setSelectedQuestionId] = useState("");
-  const [questions, setQuestions] = useState([
-    {
-      id: uuid(),
-      question: "Initial Summary of the video",
-      answer: summary,
-    },
-  ]);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(initialQuestions[0]?.id ?? "");
+  const [questions, setQuestions] = useState(
+    initialQuestions[0]?.question === "Initial Summary of the video"
+      ? initialQuestions
+      : [
+          {
+            id: uuid(),
+            question: "Initial Summary of the video",
+            answer: initialQuestions[0]?.answer ?? "",
+          },
+          ...initialQuestions.slice(1),
+        ],
+  );
 
   const handleAdditionalQuestion = async () => {
-    if (!question || !transcript) return;
+    if (!question) return;
     const qID = uuid();
 
     const toast = await showToast({
@@ -41,13 +49,13 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
       ...prevQuestions,
     ]);
 
+    let isFirstChunk = true;
     answer.on("data", (data) => {
-      toast.show();
-      setQuestions((prevQuestions) =>
-        prevQuestions.map((question) =>
-          question.id === qID ? { ...question, answer: question.answer + data } : question,
-        ),
-      );
+      if (isFirstChunk) {
+        toast.show();
+        isFirstChunk = false;
+      }
+      setQuestions((prevQuestions) => prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + data } : q)));
     });
 
     answer.finally(() => {
@@ -55,6 +63,23 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
       setQuestion("");
       setSelectedQuestionId(qID);
     });
+  };
+
+  const copyQuestionsAndAnswers = () => {
+    const followUps = questions.length
+      ? `Questions:\n${questions.map((q) => `Q: ${q.question}\nA: ${q.answer}`).join("\n\n")}`
+      : "";
+
+    return `${followUps}`;
+  };
+
+  const copySelectedAnswer = () => {
+    const selectedQuestion = questions.find((q) => q.id === selectedQuestionId);
+    if (!selectedQuestion) return "";
+
+    return selectedQuestion.id === questions[0]?.id
+      ? selectedQuestion.answer // Just return the summary without Q/A format
+      : `Q: ${selectedQuestion.question}\nA: ${selectedQuestion.answer}`;
   };
 
   return (
@@ -69,14 +94,8 @@ export default function FollowUpList({ summary, transcript }: FollowUpListProps)
       searchBarAccessory={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleAdditionalQuestion} />
-          {/* <Action.CopyToClipboard
-            title="Copy Answer"
-            content={
-              questions.find((question) => {
-                question.id === selectedQuestionId;
-              })?.answer ?? ""
-            }
-          /> */}
+          <Action.CopyToClipboard title="Copy Selected Answer" content={copySelectedAnswer()} />
+          <Action.CopyToClipboard title="Copy All Q&A" content={copyQuestionsAndAnswers()} />
         </ActionPanel>
       }
     >
