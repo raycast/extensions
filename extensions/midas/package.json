@@ -59,7 +59,7 @@
     {
       "name": "privateKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Wallet Private Key",
       "description": "Your wallet private key for transactions",
       "default": ""
