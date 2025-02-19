@@ -1,4 +1,4 @@
-<img src="https://github.com/user-attachments/assets/0f019055-1e43-4fe4-801e-eeea02c9e951" style="width:80px">
+<img src="assets/extension-icon.png" style="width:80px">
 
 # Screenpipe
 
