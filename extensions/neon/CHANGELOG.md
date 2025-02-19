@@ -1,8 +1,11 @@
 # Neon Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Roles & Databases + Compute] - {PR_MERGE_DATE}
 
-- View Roles & Databases in Project Branches
+- Update Project (basic): Edit a few fields of an existing project
+- View Roles & Databases in Project Branches: Similar to the Neon UI
+- View Compute Endpoints in Project Branches
+- Update Database (name, owner_name)
 - chore: migrate ray
 
 ## [Initial Version] - 2025-01-20
