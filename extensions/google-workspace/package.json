@@ -82,6 +82,21 @@
       ]
     },
     {
+      "name": "open-google-drive-home",
+      "title": "Google Drive Home",
+      "description": "Open Google Drive in your default browser.",
+      "icon": "google-drive.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Directory",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "starred-google-drive-files",
       "title": "Starred Google Drive Files",
       "description": "List of your starred Google Drive files.",
@@ -92,6 +107,13 @@
       "name": "search-google-drive-files",
       "title": "Search Google Drive Files",
       "description": "Search files in your Google Drive.",
+      "icon": "google-drive.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-google-drive-files",
+      "title": "List Google Drive Files",
+      "description": "List all files in your Google Drive.",
       "icon": "google-drive.png",
       "mode": "view"
     },

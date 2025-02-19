@@ -1,6 +1,6 @@
-import { getOAuthToken } from "./googleAuth";
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
+import { getOAuthToken } from "./googleAuth";
 
 export enum QueryTypes {
   fileName = "fileName",
@@ -121,4 +121,44 @@ async function getFilePath(fileId: string): Promise<string> {
 
 export function getStarredFiles() {
   return getFiles(QueryTypes.starred, ScopeTypes.allDrives);
+}
+
+export async function listAllFiles(pageSize = 100, pageToken?: string) {
+  const params = new URLSearchParams({
+    fields:
+      "nextPageToken, files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)",
+    pageSize: pageSize.toString(),
+    q: "trashed = false",
+    orderBy: "folder,name",
+    supportsAllDrives: "true",
+    includeItemsFromAllDrives: "true",
+  });
+
+  if (pageToken) {
+    params.append("pageToken", pageToken);
+  }
+
+  const url = `https://www.googleapis.com/drive/v3/files?${params.toString()}`;
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
+  });
+
+  const data = (await response.json()) as {
+    files: File[];
+    nextPageToken?: string;
+  };
+
+  const { displayFilePath } = getPreferenceValues<Preferences>();
+  if (displayFilePath) {
+    await Promise.all(
+      data.files.map(async (file) => {
+        file.filePath = await getFilePath(file.id);
+      }),
+    );
+  }
+
+  return data;
 }
