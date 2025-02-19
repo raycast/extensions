@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { v4 as uuid } from "uuid";
+import { generateQuestionId } from "../utils/generateQuestionId";
 
 export type Question = {
   id: string;
@@ -11,7 +11,7 @@ export function useQuestions(summary: string | undefined) {
   const [question, setQuestion] = useState("");
   const [questions, setQuestions] = useState<Question[]>([
     {
-      id: uuid(),
+      id: generateQuestionId(),
       question: "Initial Summary of the video",
       answer: summary ?? "",
     },

@@ -1,11 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
-import { v4 as uuid } from "uuid";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { Question } from "../../../hooks/useQuestions";
 import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type FollowUpQuestionParams = {
@@ -24,7 +24,7 @@ export function useAnthropicFollowUpQuestion({
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
-      const qID = uuid();
+      const qID = generateQuestionId();
 
       const preferences = getPreferenceValues() as AnthropicPreferences;
       const { anthropicApiToken, anthropicModel } = preferences;

@@ -1,11 +1,11 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import OpenAI from "openai";
 import { useEffect } from "react";
-import { v4 as uuid } from "uuid";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
 import { Question } from "../../../hooks/useQuestions";
 import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import { generateQuestionId } from "../../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
 type FollowUpQuestionParams = {
@@ -19,7 +19,7 @@ export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcrip
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;
-      const qID = uuid();
+      const qID = generateQuestionId();
 
       const toast = await showToast({
         style: Toast.Style.Animated,

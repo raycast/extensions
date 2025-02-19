@@ -2,9 +2,9 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel, AI, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { v4 as uuid } from "uuid";
 import { FINDING_ANSWER } from "../../const/toast_messages";
 import { Question } from "../../hooks/useQuestions";
+import { generateQuestionId } from "../../utils/generateQuestionId";
 import { getFollowUpQuestionSnippet } from "../../utils/getAiInstructionSnippets";
 
 type FollowUpListProps = {
@@ -20,7 +20,7 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
       ? initialQuestions
       : [
           {
-            id: uuid(),
+            id: generateQuestionId(),
             question: "Initial Summary of the video",
             answer: initialQuestions[0]?.answer ?? "",
           },
@@ -30,7 +30,7 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
 
   const handleAdditionalQuestion = async () => {
     if (!question) return;
-    const qID = uuid();
+    const qID = generateQuestionId();
 
     const toast = await showToast({
       style: Toast.Style.Animated,
