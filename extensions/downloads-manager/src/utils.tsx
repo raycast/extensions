@@ -8,6 +8,7 @@ const preferences = getPreferenceValues();
 export const downloadsFolder = untildify(preferences.downloadsFolder ?? "~/Downloads");
 const showHiddenFiles = preferences.showHiddenFiles;
 const fileOrder = preferences.fileOrder;
+const lastestDownloadOrder = preferences.lastestDownloadOrder;
 
 export function getDownloads() {
   const files = readdirSync(downloadsFolder);
@@ -44,7 +45,15 @@ export function getLatestDownload() {
     return undefined;
   }
 
-  downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
+  if (lastestDownloadOrder === "addTime") {
+    downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
+  } else if (lastestDownloadOrder === "createTime") {
+    downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } else if (lastestDownloadOrder === "modifiedTime") {
+    downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+  } else if (lastestDownloadOrder === "birthTime") {
+    downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
+  }
 
   return downloads[0];
 }
