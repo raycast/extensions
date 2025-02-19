@@ -203,7 +203,6 @@ export default function Command() {
       return "🟣";
     };
 
-    // Memoize sortedGoals so that it's only recalculated when `goals` or `sortByDaysAboveLine` changes
     const sortedGoals = useMemo(() => {
       return goals
         ? [...goals].sort((a, b) => {
