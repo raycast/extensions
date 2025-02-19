@@ -1,77 +1,66 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Grid } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-
-import { listAllFiles, QueryTypes, ScopeTypes } from "./api/getFiles";
-import FileListItem from "./components/FileListItem";
-
+import { listAllFiles } from "./api/getFiles";
 import { getUserEmail } from "./api/googleAuth";
+import { FileGridItem } from "./components/FileGridItem";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
-  const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
-  const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
-
   const email = getUserEmail();
 
-  const { data, isLoading } = useCachedPromise(
-    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) => await listAllFiles(),
-    [queryType, scopeType, query],
-    { failureToastOptions: { title: "Failed to retrieve files" } },
-  );
+  const { data, isLoading } = useCachedPromise(async () => await listAllFiles(), [], {
+    failureToastOptions: { title: "Failed to retrieve files" },
+  });
+
+  const folders =
+    data?.files.filter(
+      (file) =>
+        file.mimeType === "application/vnd.google-apps.folder" && file.name.toLowerCase().includes(query.toLowerCase()),
+    ) || [];
+
+  const files =
+    data?.files.filter(
+      (file) =>
+        file.mimeType !== "application/vnd.google-apps.folder" && file.name.toLowerCase().includes(query.toLowerCase()),
+    ) || [];
 
   return (
-    // TODO: This can be refactored to use a grid layout to enhance the UI
-    <List
+    <Grid
+      columns={10}
+      inset={Grid.Inset.Zero}
       isLoading={isLoading}
-      searchBarPlaceholder="Search files"
-      // TODO: This can be refactored to use a dropdown to filter search results
-      // searchBarAccessory={
-      //   <List.Dropdown
-      //     tooltip="Search mode"
-      //     value={`${queryType}-${scopeType}`}
-      //     onChange={(value) => {
-      //       const [queryType, scopeType] = value.split("-");
-      //       setQueryType(queryType as QueryTypes);
-      //       setScopeType(scopeType as ScopeTypes);
-      //     }}
-      //   >
-      //     <List.Dropdown.Item title="By file name in My Drive" value={`${QueryTypes.fileName}-${ScopeTypes.user}`} />
-      //     <List.Dropdown.Item
-      //       title="By file name in All Drives"
-      //       value={`${QueryTypes.fileName}-${ScopeTypes.allDrives}`}
-      //     />
-      //     <List.Dropdown.Item title="In full text in My Drive" value={`${QueryTypes.fullText}-${ScopeTypes.user}`} />
-      //     <List.Dropdown.Item
-      //       title="In full text in All Drives"
-      //       value={`${QueryTypes.fullText}-${ScopeTypes.allDrives}`}
-      //     />
-      //   </List.Dropdown>
-      // }
       onSearchTextChange={setQuery}
-      throttle
+      searchBarPlaceholder="Browse and search files and folders"
+      navigationTitle="Google Drive Files"
     >
-      <List.EmptyView
+      <Grid.EmptyView
         title="No files"
-        description="You haven't any files yet"
+        description="Your Google Drive is empty"
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser
-              title="Open Google Drive"
-              icon="google-drive.png"
-              url="https://docs.google.com/document/create"
-            />
+            <Action.OpenInBrowser title="Open Google Drive" url="https://drive.google.com" />
           </ActionPanel>
         }
       />
 
-      {data?.files && data.files.length > 0 ? (
-        <List.Section title="Recent Files" subtitle={`${data.files.length}`}>
-          {data.files?.map((file) => <FileListItem file={file} key={file.id} email={email} />)}
-        </List.Section>
-      ) : null}
-    </List>
+      {folders.length > 0 && (
+        <Grid.Section title="Folders" subtitle={`${folders.length}`}>
+          {folders.map((file) => (
+            <FileGridItem key={file.id} file={file} email={email} />
+          ))}
+        </Grid.Section>
+      )}
+
+      {files.length > 0 && (
+        <Grid.Section title="Files" subtitle={`${files.length}`}>
+          {files.map((file) => (
+            <FileGridItem key={file.id} file={file} email={email} />
+          ))}
+        </Grid.Section>
+      )}
+    </Grid>
   );
 }
 

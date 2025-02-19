@@ -18,6 +18,9 @@ export type File = {
   name: string;
   mimeType: string;
   webViewLink: string;
+  thumbnailLink?: string;
+  hasThumbnail?: boolean;
+  iconLink?: string;
   webContentLink?: string;
   size?: string;
   modifiedTime: string;
@@ -123,15 +126,20 @@ export function getStarredFiles() {
   return getFiles(QueryTypes.starred, ScopeTypes.allDrives);
 }
 
-export async function listAllFiles(pageSize = 100, pageToken?: string) {
+// reference: https://developers.google.com/drive/api/reference/rest/v3/files
+export async function listAllFiles(pageSize = 200, pageToken?: string) {
   const params = new URLSearchParams({
     fields:
-      "nextPageToken, files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)",
+      "nextPageToken, files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, iconLink, thumbnailLink, starred, capabilities(canTrash), parents)",
     pageSize: pageSize.toString(),
+    // Remove the 'root' in parents restriction to show all files
     q: "trashed = false",
     orderBy: "folder,name",
-    supportsAllDrives: "true",
-    includeItemsFromAllDrives: "true",
+    spaces: "drive",
+    corpora: "user",
+    // Add these parameters to ensure we get personal files
+    includeItemsFromAllDrives: "false",
+    supportsAllDrives: "false",
   });
 
   if (pageToken) {
