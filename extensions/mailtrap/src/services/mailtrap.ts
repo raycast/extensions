@@ -71,14 +71,15 @@ export function getInboxes() {
 export function getEmails(inboxId: number) {
   return useFetch(
     (options) =>
-      `https://mailtrap.io/api/accounts/${accountId}}/inboxes/${inboxId}/messages?` +
+      `https://mailtrap.io/api/accounts/${accountId}/inboxes/${inboxId}/messages?` +
       new URLSearchParams({ page: String(options.page + 1) }).toString(),
     {
       headers,
-      mapResult(result: Email[]) {
+      mapResult(result?: Email[]) {
+        const data = result ?? [];
         return {
-          data: result,
-          hasMore: result.length === 30,
+          data,
+          hasMore: data.length === 30,
         };
       },
       initialData: [],
@@ -87,7 +88,7 @@ export function getEmails(inboxId: number) {
 }
 
 export function markAsRead(inboxId: number, emailId: number) {
-  fetch(`https://mailtrap.io/api/accounts/${accountId}}/inboxes/${inboxId}}/messages/${emailId}`, {
+  fetch(`https://mailtrap.io/api/accounts/${accountId}/inboxes/${inboxId}/messages/${emailId}`, {
     method: "PATCH",
     headers,
     body: JSON.stringify({
