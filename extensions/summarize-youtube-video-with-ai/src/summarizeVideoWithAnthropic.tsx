@@ -1,16 +1,13 @@
+import { type LaunchProps } from "@raycast/api";
 import nodeFetch from "node-fetch";
-(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
-
-import { showToast, Toast, type LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { v4 as uuid } from "uuid";
+import { useState } from "react";
 import { useAnthropicFollowUpQuestion } from "./components/anthropic/hooks/useAnthropicFollowUpQuestion";
 import { useAnthropicSummary } from "./components/anthropic/hooks/useAnthropicSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
-import { ALERT } from "./const/toast_messages";
 import { useGetVideoUrl } from "./hooks/useGetVideoUrl";
-import { getVideoData, type VideoDataTypes } from "./utils/getVideoData";
-import { getVideoTranscript } from "./utils/getVideoTranscript";
+import { useQuestions } from "./hooks/useQuestions";
+import { useVideoData } from "./hooks/useVideoData";
+(globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
 interface SummarizeVideoWithAnthropicProps {
   video: string;
@@ -30,47 +27,14 @@ export default function SummarizeVideoWithAnthropic(
 ) {
   const [summary, setSummary] = useState<string | undefined>();
   const [summaryIsLoading, setSummaryIsLoading] = useState<boolean>(false);
-  const [transcript, setTranscript] = useState<string | undefined>();
-  const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
-  const [question, setQuestion] = useState("");
-  const [questions, setQuestions] = useState([
-    {
-      id: uuid(),
-      question: "Initial Summary of the video",
-      answer: summary ?? "",
-    },
-  ]);
 
   useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
     setVideoURL(url),
   );
 
-  useEffect(() => {
-    if (!videoURL) return;
-    getVideoData(videoURL)
-      .then(setVideoData)
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: ALERT.title,
-          message: "Error fetching video data: " + error.message,
-        });
-      });
-    getVideoTranscript(videoURL)
-      .then(setTranscript)
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: ALERT.title,
-          message: "Error fetching video transcript: " + error.message,
-        });
-      });
-  }, [videoURL]);
-
-  const handleAdditionalQuestion = (newQuestion: string) => {
-    setQuestion(newQuestion);
-  };
+  const { videoData, transcript } = useVideoData(videoURL);
+  const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
   useAnthropicSummary({ transcript, setSummaryIsLoading, setSummary });
   useAnthropicFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
