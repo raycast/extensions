@@ -54,7 +54,7 @@ export default function Command() {
       const words = newText.split(" ");
       const results = words.map((word) =>
         translateWord(word).catch((error) => ({
-          state: "error",
+          state: "error" as const,
           message: error.message,
           originalText: word,
         })),
