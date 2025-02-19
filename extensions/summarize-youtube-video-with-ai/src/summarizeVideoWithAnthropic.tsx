@@ -2,9 +2,9 @@ import nodeFetch from "node-fetch";
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as never;
 
 import { showToast, Toast, type LaunchProps } from "@raycast/api";
-
 import { useEffect, useState } from "react";
-import ActionAnthropicFollowUp from "./components/anthropic/ActionAnthropicFollowUp";
+import { v4 as uuid } from "uuid";
+import { useAnthropicFollowUpQuestion } from "./components/anthropic/hooks/useAnthropicFollowUpQuestion";
 import { useAnthropicSummary } from "./components/anthropic/hooks/useAnthropicSummary";
 import SummaryDetails from "./components/summary/SummaryDetails";
 import { ALERT } from "./const/toast_messages";
@@ -33,6 +33,14 @@ export default function SummarizeVideoWithAnthropic(
   const [transcript, setTranscript] = useState<string | undefined>();
   const [videoData, setVideoData] = useState<VideoDataTypes>();
   const [videoURL, setVideoURL] = useState<string | null | undefined>(props.arguments.video);
+  const [question, setQuestion] = useState("");
+  const [questions, setQuestions] = useState([
+    {
+      id: uuid(),
+      question: "Initial Summary of the video",
+      answer: summary ?? "",
+    },
+  ]);
 
   useGetVideoUrl({ input: props.arguments.video || props.launchContext?.video, setVideoURL }).then((url) =>
     setVideoURL(url),
@@ -60,7 +68,12 @@ export default function SummarizeVideoWithAnthropic(
       });
   }, [videoURL]);
 
+  const handleAdditionalQuestion = (newQuestion: string) => {
+    setQuestion(newQuestion);
+  };
+
   useAnthropicSummary({ transcript, setSummaryIsLoading, setSummary });
+  useAnthropicFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;
@@ -74,9 +87,9 @@ export default function SummarizeVideoWithAnthropic(
 
   return (
     <SummaryDetails
-      AskFollowUpQuestion={ActionAnthropicFollowUp}
+      questions={questions}
+      onQuestionSubmit={handleAdditionalQuestion}
       summary={markdown}
-      setSummary={setSummary}
       summaryIsLoading={summaryIsLoading}
       transcript={transcript}
       videoData={videoData}
