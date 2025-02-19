@@ -4,16 +4,18 @@ import { useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, FINDING_ANSWER } from "../../../const/toast_messages";
+import { Question } from "../../../hooks/useQuestions";
 import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getFollowUpQuestionSnippet } from "../../../utils/getAiInstructionSnippets";
 
-export function useOpenAIFollowUpQuestion(
-  questions: Array<{ id: string; question: string; answer: string }>,
-  setQuestions: React.Dispatch<React.SetStateAction<Array<{ id: string; question: string; answer: string }>>>,
-  setQuestion: React.Dispatch<React.SetStateAction<string>>,
-  transcript: string | undefined,
-  question: string,
-) {
+type FollowUpQuestionParams = {
+  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
+  setQuestion: React.Dispatch<React.SetStateAction<string>>;
+  transcript: string | undefined;
+  question: string;
+};
+
+export function useOpenAIFollowUpQuestion({ setQuestions, setQuestion, transcript, question }: FollowUpQuestionParams) {
   useEffect(() => {
     const handleAdditionalQuestion = async () => {
       if (!question || !transcript) return;

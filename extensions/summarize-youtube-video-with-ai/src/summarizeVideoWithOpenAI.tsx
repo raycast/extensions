@@ -38,7 +38,12 @@ export default function SummarizeVideoWithOpenAI(
   const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
   useOpenAISummary({ transcript, setSummaryIsLoading, setSummary });
-  useOpenAIFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
+  useOpenAIFollowUpQuestion({
+    setQuestions,
+    setQuestion,
+    transcript,
+    question,
+  });
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;

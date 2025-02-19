@@ -35,7 +35,12 @@ export default function SummarizeVideoWithRaycast(
   const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
   useRaycastSummary({ transcript, setSummaryIsLoading, setSummary });
-  useRaycastFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
+  useRaycastFollowUpQuestion({
+    setQuestions,
+    setQuestion,
+    transcript,
+    question,
+  });
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;

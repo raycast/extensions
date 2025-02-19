@@ -1,20 +1,10 @@
 import { Detail } from "@raycast/api";
+import { Question } from "../../hooks/useQuestions";
 import { VideoDataTypes } from "../../utils/getVideoData";
 import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
-
-export type Question = {
-  id: string;
-  question: string;
-  answer: string;
-};
-
 interface SummaryDetailsProps {
-  questions: Array<{
-    id: string;
-    question: string;
-    answer: string;
-  }>;
+  questions: Question[];
   summary: string | undefined;
   summaryIsLoading: boolean;
   transcript: string;

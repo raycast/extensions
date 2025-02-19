@@ -37,7 +37,12 @@ export default function SummarizeVideoWithAnthropic(
   const { questions, setQuestions, question, setQuestion, handleAdditionalQuestion } = useQuestions(summary);
 
   useAnthropicSummary({ transcript, setSummaryIsLoading, setSummary });
-  useAnthropicFollowUpQuestion(questions, setQuestions, setQuestion, transcript, question);
+  useAnthropicFollowUpQuestion({
+    setQuestions,
+    setQuestion,
+    transcript,
+    question,
+  });
 
   if (!videoData || !transcript) return null;
   const { thumbnail, title } = videoData;

@@ -49,6 +49,7 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
       ...prevQuestions,
     ]);
 
+    setQuestion("");
     let isFirstChunk = true;
     answer.on("data", (data) => {
       if (isFirstChunk) {
@@ -60,7 +61,6 @@ export default function FollowUpList({ transcript, questions: initialQuestions }
 
     answer.finally(() => {
       toast.hide();
-      setQuestion("");
       setSelectedQuestionId(qID);
     });
   };
