@@ -79,9 +79,6 @@ export default function Command() {
       const pendingData: PendingWord = { word: currentWord, position: lastWordIndex };
       setPendingWords((prev) => [...prev, pendingData]);
 
-      // Process this pending word immediately.
-      processPendingWord(pendingData);
-
       setCurrentWord("");
       return;
     }
