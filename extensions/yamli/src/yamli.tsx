@@ -73,7 +73,7 @@ export default function Command() {
       return;
     }
 
-    // Check if the user just pressed space for a complete word.
+    // Check if the user just pressed space for a complete word. Add to pending words.
     if (newText.endsWith(" ") && currentWord) {
       const lastWordIndex = newText.lastIndexOf(currentWord);
       const pendingData: PendingWord = { word: currentWord, position: lastWordIndex };
