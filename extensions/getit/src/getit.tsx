@@ -102,7 +102,7 @@ function RequestResult({ values }: { values: { url: string; type: string; body?:
       
 **URL:** ${values.url}  
 **Type:** ${values.type}  
-${values.body ? `**Body:**\n\`\`\`json\n${values.body}\n\`\`\`` : ""}    
+${values.body ? `**Body:**\n\`\`\`json\n${JSON.stringify(values.body, null, 2)}\n\`\`\`` : ""}    
 ---
 
 ### Response:
