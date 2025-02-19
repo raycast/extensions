@@ -2,40 +2,48 @@ import { List, ActionPanel, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useFetchTransliteration, TransliterationResult, fetchTransliteration } from "./fetchdata";
 
+// Add a cache for transliteration results keyed by the word.
+const transliterationCache = new Map<string, TransliterationResult>();
+
+// Helper function to get the best transliteration for a word
+const getFirstTransliteration = (result: TransliterationResult): string => {
+  return result.state === "success" && result.options.length > 0 ? result.options[0] : result.originalText;
+};
+
+// Helper function to translate a word (using cache or API)
+const translateWord = async (word: string): Promise<TransliterationResult> => {
+  const cached = transliterationCache.get(word);
+  if (cached) return cached;
+
+  const result = await fetchTransliteration(word);
+  transliterationCache.set(word, result);
+  return result;
+};
+
 export default function Command() {
   const [text, setText] = useState("");
   const [currentWord, setCurrentWord] = useState("");
-  const [pendingWord, setPendingWord] = useState("");
-  const [pendingSpaceSelection, setPendingSpaceSelection] = useState(false);
 
-  // Get transliterations for the current word being typed
-  const transliterations = useFetchTransliteration(pendingSpaceSelection ? pendingWord : currentWord);
+  // Remove the old pending word states and use a queue to track multiple words.
+  type PendingWord = {
+    word: string;
+    position: number;
+  };
+
+  const [pendingWords, setPendingWords] = useState<PendingWord[]>([]);
+
+  // Get inline transliterations only for the current (not yet space-terminated) word
+  const transliterations = useFetchTransliteration(currentWord);
 
   // Handle the transliteration results
   const transliterationOptions = transliterations.state === "success" ? transliterations.options : [];
 
-  // Effect to handle delayed API response when space was pressed
-  useEffect(() => {
-    if (pendingSpaceSelection && transliterations.state === "success" && transliterations.options.length > 0) {
-      // Find and replace the pending word in the text
-      const pendingWordPosition = text.lastIndexOf(transliterations.originalText);
-      if (pendingWordPosition !== -1) {
-        const newText =
-          text.substring(0, pendingWordPosition) +
-          transliterations.options[0] +
-          text.substring(pendingWordPosition + transliterations.originalText.length);
-        setText(newText);
-      }
-      setCurrentWord("");
-      setPendingWord("");
-      setPendingSpaceSelection(false);
+  // Helper function to replace word at position with replacement
+  const replaceWordAtPosition = (text: string, position: number, originalWord: string, replacement: string): string => {
+    if (text.substring(position, position + originalWord.length) === originalWord) {
+      return text.slice(0, position) + replacement + text.slice(position + originalWord.length);
     }
-  }, [transliterations, pendingSpaceSelection]);
-
-  type TransliterationResponse = {
-    result: TransliterationResult;
-    originalWord: string;
-    index: number;
+    return text;
   };
 
   const handleTextChange = (newText: string) => {
@@ -44,31 +52,17 @@ export default function Command() {
     // If this is a paste operation (multiple words)
     if (newText.includes(" ") && newText.split(" ").length > text.split(" ").length + 1) {
       const words = newText.split(" ");
+      const results = words.map((word) =>
+        translateWord(word).catch((error) => ({
+          state: "error",
+          message: error.message,
+          originalText: word,
+        })),
+      );
 
-      Promise.all<TransliterationResponse>(
-        words.map((word, index) =>
-          fetchTransliteration(word)
-            .then((result) => ({ result, originalWord: word, index }))
-            .catch((error) => {
-              return {
-                result: { state: "error", message: error.message } as TransliterationResult,
-                originalWord: word,
-                index,
-              };
-            }),
-        ),
-      )
+      Promise.all(results)
         .then((results) => {
-          const transliteratedWords = results.map(({ result, originalWord }) => {
-            if (result.state === "error") {
-              return originalWord;
-            }
-            if (result.state === "success") {
-              return result.options.length > 0 ? result.options[0] : result.originalText;
-            }
-            return originalWord;
-          });
-
+          const transliteratedWords = results.map(getFirstTransliteration);
           setText(transliteratedWords.join(" ") + " ");
           setCurrentWord("");
         })
@@ -79,14 +73,16 @@ export default function Command() {
       return;
     }
 
-    // Check if the user just pressed space
+    // Check if the user just pressed space for a complete word.
     if (newText.endsWith(" ") && currentWord) {
-      if (transliterationOptions.length > 0) {
-        handleOptionSelect(transliterationOptions[0]);
-      } else {
-        setPendingWord(currentWord);
-        setPendingSpaceSelection(true);
-      }
+      const lastWordIndex = newText.lastIndexOf(currentWord);
+      const pendingData: PendingWord = { word: currentWord, position: lastWordIndex };
+      setPendingWords((prev) => [...prev, pendingData]);
+
+      // Process this pending word immediately.
+      processPendingWord(pendingData);
+
+      setCurrentWord("");
       return;
     }
 
@@ -108,6 +104,34 @@ export default function Command() {
     setCurrentWord(""); // Reset current word
   };
 
+  // Process each pending word individually.
+  const processPendingWord = async (pendingData: PendingWord) => {
+    try {
+      const result = await translateWord(pendingData.word);
+      const transliteration = getFirstTransliteration(result);
+
+      setText((prevText) => {
+        // Recalculate position based on current text state
+        const currentPosition = prevText.lastIndexOf(pendingData.word, pendingData.position);
+        if (currentPosition === -1) return prevText;
+
+        return replaceWordAtPosition(prevText, currentPosition, pendingData.word, transliteration);
+      });
+    } catch (error) {
+      console.error("Translation error:", error);
+    } finally {
+      setPendingWords((prev) => prev.filter((p) => p.position !== pendingData.position));
+    }
+  };
+
+  // Add useEffect to process pending words sequentially
+  useEffect(() => {
+    if (pendingWords.length > 0) {
+      const [nextWord] = pendingWords;
+      processPendingWord(nextWord);
+    }
+  }, [pendingWords]);
+
   function CopyActions({ content }: { content: string }) {
     return (
       <ActionPanel.Section title="Copy">
@@ -120,7 +144,7 @@ export default function Command() {
     );
   }
 
-  function TranslationActions({ option, onSelect }: { option: string; onSelect: (opt: string) => void }) {
+  function TransliterationActions({ option, onSelect }: { option: string; onSelect: (opt: string) => void }) {
     return (
       <ActionPanel>
         <ActionPanel.Section>
@@ -202,7 +226,7 @@ export default function Command() {
           key={index}
           id={index === 0 ? "first-arabic-option" : `option-${index}`}
           title={option}
-          actions={<TranslationActions option={option} onSelect={handleOptionSelect} />}
+          actions={<TransliterationActions option={option} onSelect={handleOptionSelect} />}
         />
       ))}
     </List>
