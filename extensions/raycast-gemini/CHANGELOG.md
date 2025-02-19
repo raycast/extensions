@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [Append Selected Text to Chat] - 2025-02-04
+
+- Ability to append selected text to the chat command with the `Append to Chat` command. Shortcut: `Ctrl + Shift + V`
+
 ## [Improved Translate Command] - 2025-01-17
 
 - 🔄 Translate Selected Text: now you can set first and second target language.

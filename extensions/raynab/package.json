@@ -87,7 +87,7 @@
     "prettier": "^3.4.2",
     "react-devtools": "^5.2.0",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "preferences": [
     {

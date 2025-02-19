@@ -1,54 +1,32 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import Parser from "rss-parser";
-import { State } from "./types";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { getIcon, getPubDate } from "./utils";
-
-const parser = new Parser();
+import Parser from "rss-parser";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-
-  useEffect(() => {
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
-        setState({ items: feed.items });
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong."),
-        });
-      }
-    }
-
-    fetchStories();
-  }, []);
-
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading stories.",
-      message: state.error.message,
-    });
-  }
+  const { data, isLoading } = useCachedPromise(async () => {
+    const parser = new Parser();
+    const feed = await parser.parseURL("https://feeds.macrumors.com/MacRumors-All");
+    return { items: feed.items };
+  });
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
+    <List isLoading={isLoading}>
+      {data?.items?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
     </List>
   );
 }
 
 function StoryListItem(props: { item: Parser.Item; index: number }) {
   const icon = getIcon(props.index + 1);
-  const pubDate = getPubDate(props.item);
+  const pubDate = new Date(getPubDate(props.item) ?? "");
 
   return (
     <List.Item
       icon={icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator ?? "No author"}
-      accessories={[{ text: pubDate ?? "No date" }]}
+      accessories={[{ date: pubDate }]}
       actions={<Actions item={props.item} />}
     />
   );
