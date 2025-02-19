@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useFetchTransliteration, TransliterationResult, fetchTransliteration } from "./fetchdata";
 
@@ -129,14 +129,6 @@ export default function Command() {
     }
   }, [pendingWords]);
 
-  function CopyActions({ title, content }: { title: string; content: string }) {
-    return (
-      <ActionPanel.Section>
-        <Action.CopyToClipboard title={title} content={content.trim()} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-      </ActionPanel.Section>
-    );
-  }
-
   function TransliterationActions({
     selectTitle,
     copyTitle,
@@ -151,9 +143,18 @@ export default function Command() {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Action title={selectTitle} onAction={() => onSelect(option)} shortcut={{ modifiers: [], key: "return" }} />
+          <Action
+            icon={Icon.ChevronRight}
+            title={selectTitle}
+            onAction={() => onSelect(option)}
+            shortcut={{ modifiers: [], key: "return" }}
+          />
+          <Action.CopyToClipboard
+            title={copyTitle}
+            content={option.trim()}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
         </ActionPanel.Section>
-        <CopyActions title={copyTitle} content={option} />
       </ActionPanel>
     );
   }
@@ -168,8 +169,8 @@ export default function Command() {
     ) : (
       <List.EmptyView
         icon="↩️"
-        title="Press ↵ to copy the whole text"
-        description="or select a suggestion when available"
+        title="Press ↵ to copy the full transliteration"
+        description={text}
       />
     );
   }
@@ -186,14 +187,12 @@ export default function Command() {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Full Text"
+              title="Copy Full Transliteration"
               content={text.trim()}
               shortcut={{ modifiers: [], key: "return" }}
             />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.Paste
-              title="Paste Full Text"
+              title="Paste Full Transliteration"
               content={text.trim()}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
             />
@@ -225,7 +224,7 @@ export default function Command() {
           actions={
             <TransliterationActions
               selectTitle="Use This Transliteration"
-              copyTitle="Copy Transliteration"
+              copyTitle="Copy This Transliteration"
               option={option}
               onSelect={handleOptionSelect}
             />
