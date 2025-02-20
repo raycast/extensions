@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix Default Sorting] - {PR_MERGE_DATE}
+## [Fix Default Sorting] - 2025-02-20
 
 Change the default sorting to align with the task order in Todoist. 
 
