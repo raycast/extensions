@@ -1,5 +1,14 @@
 # Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+- Add AI Tools to:
+    1. Get Teams
+    2. Get Domains
+    3. Get Sites
+    4. Get Deployments
+    5. Search Docs
+
 ## [Paginated Sites] - 2024-12-19
 
 ### Enhancements
