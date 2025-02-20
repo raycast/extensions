@@ -1,5 +1,9 @@
 # Hacker News Changelog
 
+## [🎉 Added all of the RSS feeds] - (2025-01-30)
+
+- Add AI tools
+
 ## [🐛 Fixes] - (2022-08-16)
 
 - Use custom User Agent + cache responses for each topic for 5 minutes to avoid being rate limited
