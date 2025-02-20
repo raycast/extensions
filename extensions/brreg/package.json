@@ -5,7 +5,6 @@
   "description": "Search and retrieve information about Norwegian companies (Enhetsregisteret)",
   "icon": "icon.png",
   "author": "kakaoduft",
-  "owner": "kynd",
   "access": "public",
   "contributors": [
     "daniel_sorenes"
