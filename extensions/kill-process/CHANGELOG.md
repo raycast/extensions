@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [AI Extensions] - 2025-02-01
+
+- Added AI Extensions support allowing natural language interaction with the extension
+
 ## [Improvements] - 2024-09-05
 
 - Adopted separate accessories for CPU and memory usage, including icons
