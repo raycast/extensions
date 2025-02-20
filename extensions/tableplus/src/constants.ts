@@ -6,9 +6,11 @@ import expandTidle from "expand-tilde";
 
 export const EmptyGroupID = "__EMPTY__";
 export const homeDirectory = os.homedir();
-export const preferences = getPreferenceValues<Preferences>();
+export const preferences = getPreferenceValues<ExtensionPreferences>();
 
-export const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
+export const appendPath = fs.existsSync(
+  `${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`,
+)
   ? "-setapp"
   : "";
 export const isSetapp = appendPath.length > 0;
