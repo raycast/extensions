@@ -10,12 +10,11 @@ function useAiven<T>(endpoint: string) {
       Authorization: `aivenv1 ${token}`,
       "Content-Type": "application/json",
     },
-    mapResult(result: ErrorResult | (object & T)) {
+    async parseResponse(response) {
+      const result: ErrorResult | (object & T) = await response.json();
       if ("message" in result) throw new Error(result.message);
-      return {
-        data: result,
-      };
-    },
+      return result;
+    }
   });
 
   return { isLoading, data };
