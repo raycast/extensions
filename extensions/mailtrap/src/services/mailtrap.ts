@@ -50,6 +50,7 @@ export type Email = {
   human_size: string;
 };
 
+const MAILTRAP_PAGE_SIZE = 30;
 const { apiKey, accountId } = getPreferenceValues<Preferences>();
 const headers = {
   "Api-Token": apiKey,
@@ -72,14 +73,14 @@ export function getEmails(inboxId: number) {
   return useFetch(
     (options) =>
       `https://mailtrap.io/api/accounts/${accountId}/inboxes/${inboxId}/messages?` +
-      new URLSearchParams({ page: String(options.page + 1) }).toString(),
+      new URLSearchParams({ last_id: options.lastItem?.id.toString() }).toString(),
     {
       headers,
       mapResult(result?: Email[]) {
         const data = result ?? [];
         return {
           data,
-          hasMore: data.length === 30,
+          hasMore: data.length === MAILTRAP_PAGE_SIZE,
         };
       },
       initialData: [],
