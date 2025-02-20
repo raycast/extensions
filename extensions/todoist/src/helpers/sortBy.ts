@@ -5,7 +5,7 @@ import { Collaborator, Project, Task } from "../api";
 
 import { isExactTimeTask } from "./dates";
 
-export type SortByOption = "default" | "name" | "assignee" | "date" | "priority" | "project" | "manual";
+export type SortByOption = "default" | "name" | "assignee" | "date" | "priority" | "project";
 
 export type SortByOptions = {
   label: string;
@@ -25,7 +25,6 @@ export const sortByOptions: SortByOptions = [
   { label: "Assignee", icon: Icon.Person, value: "assignee" },
   { label: "Date", icon: Icon.List, value: "date" },
   { label: "Priority", icon: Icon.LevelMeter, value: "priority" },
-  { label: "Manual", icon: Icon.StackedBars2, value: "manual" },
   { label: "Project", icon: Icon.Tag, value: "project" },
 ];
 
@@ -52,6 +51,10 @@ export type SectionWithTasks = {
 
 export function sortByName(a: Task, b: Task): number {
   return a.content.localeCompare(b.content);
+}
+
+export function sortByDefault(a: Task, b: Task): number {
+  return a.child_order - b.child_order;
 }
 
 export function sortByAssignee(collaborators: Collaborator[], a: Task, b: Task): number {
@@ -100,10 +103,6 @@ export function sortByDate(a: Task, b: Task): number {
 
 export function sortByPriority(a: Task, b: Task): number {
   return b.priority - a.priority;
-}
-
-export function sortByManual(a: Task, b: Task): number {
-  return a.child_order - b.child_order;
 }
 
 export function sortByProject(projects: Project[], a: Task, b: Task): number {
