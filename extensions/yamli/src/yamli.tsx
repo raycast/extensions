@@ -10,8 +10,7 @@ const getFirstTransliteration = (result: TransliterationResult): string => {
   return result.state === "success" && result.options.length > 0 ? result.options[0] : result.originalText;
 };
 
-// Helper function to translate a word (using cache or API)
-const translateWord = async (word: string): Promise<TransliterationResult> => {
+const transliterateWord = async (word: string): Promise<TransliterationResult> => {
   const cached = transliterationCache.get(word);
   if (cached) return cached;
 
@@ -24,7 +23,6 @@ export default function Command() {
   const [text, setText] = useState("");
   const [currentWord, setCurrentWord] = useState("");
 
-  // Remove the old pending word states and use a queue to track multiple words.
   type PendingWord = {
     word: string;
     position: number;
@@ -38,7 +36,6 @@ export default function Command() {
   // Handle the transliteration results
   const transliterationOptions = transliterations.state === "success" ? transliterations.options : [];
 
-  // Helper function to replace word at position with replacement
   const replaceWordAtPosition = (text: string, position: number, originalWord: string, replacement: string): string => {
     if (text.substring(position, position + originalWord.length) === originalWord) {
       return text.slice(0, position) + replacement + text.slice(position + originalWord.length);
@@ -53,7 +50,7 @@ export default function Command() {
     if (newText.includes(" ") && newText.split(" ").length > text.split(" ").length + 1) {
       const words = newText.split(" ");
       const results = words.map((word) =>
-        translateWord(word).catch((error) => ({
+        transliterateWord(word).catch((error) => ({
           state: "error" as const,
           message: error.message,
           originalText: word,
@@ -104,7 +101,7 @@ export default function Command() {
   // Process each pending word individually.
   const processPendingWord = async (pendingData: PendingWord) => {
     try {
-      const result = await translateWord(pendingData.word);
+      const result = await transliterateWord(pendingData.word);
       const transliteration = getFirstTransliteration(result);
 
       setText((prevText) => {
@@ -170,7 +167,7 @@ export default function Command() {
       <List.EmptyView
         icon="↩️"
         title="Press ↵ to copy the full transliteration"
-        description={text}
+        description="or continue typing and select a suggestion when available"
       />
     );
   }
