@@ -1,6 +1,6 @@
 # Neon Changelog
 
-## [Roles & Databases + Compute] - {PR_MERGE_DATE}
+## [Roles & Databases + Compute] - 2025-02-20
 
 - Update Project (basic): Edit a few fields of an existing project
 - View Roles & Databases in Project Branches: Similar to the Neon UI
