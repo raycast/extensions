@@ -1,5 +1,9 @@
 # Connect to VPN Changelog
 
+## [Bug fix] - 2024-12-22
+
+- Fixed spawning zombie process while updating services status in background
+
 ## [New Additions] - 2024-11-13
 
 - Menu bar icon updates in the background

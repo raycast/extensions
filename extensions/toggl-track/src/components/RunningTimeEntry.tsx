@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 
-import { TimeEntry, TimeEntryMetaData } from "@/api";
+import { TimeEntry, TimeEntryMetaData, updateTimeEntry } from "@/api";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
 
@@ -16,7 +16,7 @@ function RunningTimeEntry({
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
 }: RunningTimeEntryProps) {
-  const currentTime = useCurrentTime();
+  const { currentTime, setCurrentTime } = useCurrentTime();
 
   const { stopRunningTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
@@ -45,6 +45,19 @@ function RunningTimeEntry({
               icon={{ source: Icon.Clock }}
               onSubmit={() => stopRunningTimeEntry(runningTimeEntry)}
               title="Stop Time Entry"
+            />
+            <Action.PickDate
+              icon={{ source: Icon.RotateAntiClockwise }}
+              title="Change Start Time"
+              onChange={async (date) => {
+                if (date) {
+                  await updateTimeEntry(runningTimeEntry.workspace_id, runningTimeEntry.id, {
+                    start: date.toISOString(),
+                  });
+                  revalidateRunningTimeEntry();
+                  setCurrentTime(dayjs());
+                }
+              }}
             />
           </ActionPanel>
         }

@@ -1,6 +1,10 @@
 # React Native Directory Changelog
 
-## [Improvements] - 2024-11-05
+## [Changed] - 2025-01-18
+
+- Upgraded Raycast dependencies to latest versions
+
+## [Added] - 2024-11-05
 
 - Added expo installation copy action
 - Added "Old Architecture" compatibility tag

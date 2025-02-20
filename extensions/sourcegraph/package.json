@@ -22,30 +22,30 @@
   "preferences": [
     {
       "name": "cloudToken",
-      "title": "Sourcegraph.com: Access token",
-      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "title": "Public code on Sourcegraph.com: Access token",
+      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
       "required": false,
       "type": "password"
     },
     {
       "name": "customInstance",
-      "title": "Sourcegraph Instance: Instance URL",
-      "description": "Required to use use 'Sourcegraph Instance' commands - URL of the Sourcegraph instance you want to connect to.",
-      "placeholder": "https://sourcegraph.my-company.com",
+      "title": "Sourcegraph connection: URL",
+      "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
+      "placeholder": "https://example.sourcegraph.app",
       "required": false,
       "type": "textfield"
     },
     {
       "name": "customInstanceToken",
-      "title": "Sourcegraph Instance: Access token",
-      "description": "Required to use 'Sourcegraph Instance' commands - available under 'Profile' -> 'Access token' on your Sourcegraph instance.",
+      "title": "Sourcegraph connection: Access token",
+      "description": "Required to use 'Sourcegraph' commands - available under 'Profile' -> 'Access token' in Sourcegraph.",
       "required": false,
       "type": "password"
     },
     {
       "name": "customInstanceProxy",
-      "title": "Sourcegraph Instance: Proxy",
-      "description": "Optional proxy to use when connecting to a custom Sourcegraph instance - presently, only Unix domain sockets are supported.",
+      "title": "Sourcegraph connection: Proxy",
+      "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
       "required": false,
       "type": "textfield"
     },
@@ -61,7 +61,7 @@
     {
       "name": "featureDisableTelemetry",
       "label": "Disable telemetry",
-      "description": "Telemetry is only reported to the connected Sourcegraph instance, but can be disabled with this toggle.",
+      "description": "Telemetry is only reported to the connected Sourcegraph instance or workspace, but can be disabled with this toggle.",
       "required": false,
       "type": "checkbox",
       "default": false
@@ -70,8 +70,9 @@
   "commands": [
     {
       "name": "searchDotCom",
-      "title": "Search Code",
-      "subtitle": "Sourcegraph.com",
+      "title": "Search Public Code",
+      "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
       "description": "Search public repositories on Sourcegraph.com",
       "mode": "view",
       "keywords": [
@@ -94,10 +95,9 @@
     },
     {
       "name": "searchInstance",
-      "icon": "logo-bw.png",
       "title": "Search Code",
-      "subtitle": "Sourcegraph Instance",
-      "description": "Search code on a Sourcegraph instance.",
+      "subtitle": "Sourcegraph",
+      "description": "Search code on a Sourcegraph instance or workspace.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -119,8 +119,9 @@
     },
     {
       "name": "searchHistoryDotCom",
-      "title": "Code Search History",
-      "subtitle": "Sourcegraph.com",
+      "title": "Search Public Code History",
+      "subtitle": "Sourcegraph",
+      "icon": "logo-bw.png",
       "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
@@ -134,9 +135,8 @@
     },
     {
       "name": "searchHistoryInstance",
-      "icon": "logo-bw.png",
       "title": "Code Search History",
-      "subtitle": "Sourcegraph Instance",
+      "subtitle": "Sourcegraph",
       "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
@@ -150,10 +150,9 @@
     },
     {
       "name": "findNotebooksInstance",
-      "icon": "logo-bw.png",
       "title": "Find Search Notebooks",
-      "subtitle": "Sourcegraph Instance",
-      "description": "Browse search notebooks on a Sourcegraph instance.",
+      "subtitle": "Sourcegraph",
+      "description": "Browse search notebooks in Sourcegraph.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -161,14 +160,14 @@
         "notebook",
         "snb"
       ],
+      "disabledByDefault": true,
       "preferences": []
     },
     {
       "name": "manageBatchChangesInstance",
-      "icon": "logo-bw.png",
       "title": "Manage Batch Changes",
-      "subtitle": "Sourcegraph Instance",
-      "description": "Manage batch changes on a Sourcegraph instance.",
+      "subtitle": "Sourcegraph",
+      "description": "Manage batch changes in Sourcegraph.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -176,6 +175,7 @@
         "changes",
         "bc"
       ],
+      "disabledByDefault": true,
       "preferences": []
     }
   ],
@@ -184,12 +184,14 @@
     "@raycast/api": "^1.86.1",
     "@raycast/utils": "^1.18.1",
     "@sourcegraph/telemetry": "^0.18.0",
+    "@types/uuid": "^10.0.0",
     "cross-fetch": "^4.0.0",
     "eventsource": "^2.0.2",
     "graphql": "^16.9.0",
     "luxon": "^3.5.0",
     "nanoid": "^5.0.9",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.3",

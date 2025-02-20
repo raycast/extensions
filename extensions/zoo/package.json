@@ -1,0 +1,265 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zoo",
+  "title": "Zoo - Ask AIs with Your Prompt Library",
+  "description": "Interact with AIs with your own Github Gist prompt library with ease",
+  "icon": "zoo.png",
+  "author": "ViGeng",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-gists",
+      "title": "Search Gist Prompt",
+      "description": "Search and display your prompt from GitHub gists",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "perPage",
+          "type": "dropdown",
+          "description": "Number of gist loaded per page.",
+          "required": false,
+          "title": "Per Page",
+          "default": "30",
+          "data": [
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            },
+            {
+              "title": "80",
+              "value": "80"
+            },
+            {
+              "title": "100",
+              "value": "100"
+            }
+          ]
+        },
+        {
+          "name": "remember-tag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember gist filter tag.",
+          "default": false
+        },
+        {
+          "name": "detail",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Gist Content",
+          "description": "Show gist content details.",
+          "default": true
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Primary action for gist item.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask-gist",
+      "title": "Ask by Prompt on Selected Text",
+      "description": "Search and use GitHub gists as prompt for AI.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "perPage",
+          "type": "dropdown",
+          "description": "Number of gist loaded per page.",
+          "required": false,
+          "title": "Per Page",
+          "default": "30",
+          "data": [
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "50",
+              "value": "50"
+            },
+            {
+              "title": "80",
+              "value": "80"
+            },
+            {
+              "title": "100",
+              "value": "100"
+            }
+          ]
+        },
+        {
+          "name": "remember-tag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember gist filter tag.",
+          "default": false
+        },
+        {
+          "name": "detail",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Gist Content",
+          "description": "Show gist content details.",
+          "default": true
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "Primary action for gist item.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create-gist",
+      "title": "Create Gist Prompt",
+      "description": "Create GitHub gist from selection or clipboard.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@octokit/core": "^6.1.0",
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
+    "js-base64": "^3.7.2",
+    "openai": "^4.77.0",
+    "run-applescript": "^7.0.0"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Your API Key",
+      "type": "password",
+      "required": true,
+      "title": "LLM API Key"
+    },
+    {
+      "name": "baseurl",
+      "description": "Custom API endpoint for DeepSeek or ChatGPT, or more",
+      "type": "textfield",
+      "required": false,
+      "title": "LLM API Endpoint",
+      "default": "https://api.openai.com/v1"
+    },
+    {
+      "name": "priceinput",
+      "description": "Input price($) per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model Input Price"
+    },
+    {
+      "name": "priceoutput",
+      "description": "Output price($) per million characters for your API endpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Model Input Price"
+    },
+    {
+      "name": "model",
+      "description": "LLM to use for your commands",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "deepseek-chat",
+          "value": "deepseek-chat"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-4o mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4",
+          "value": "gpt-4"
+        },
+        {
+          "title": "GPT-4 Turbo",
+          "value": "gpt-4-turbo"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "gemini-2.0-flash-exp",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "gemini-exp-1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "learnlm-1.5-pro-experimental",
+          "value": "learnlm-1.5-pro-experimental"
+        },
+        {
+          "title": "gemini-2.0-flash-thinking-exp-1219",
+          "value": "gemini-2.0-flash-thinking-exp-1219"
+        }
+      ],
+      "required": true,
+      "default": "gpt-4o",
+      "title": "LLM Model Name"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

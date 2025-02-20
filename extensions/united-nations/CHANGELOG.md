@@ -1,5 +1,13 @@
 # United Nations Extension
 
+## [Enhancement] - 2024-12-19
+
+- Add Pinyin search support for Chinese
+- Add text contains search support for Arabic, Russian, Hindi, and Urdu
+- Add RTL display support for Urdu
+- Show UN site URLs on UN Site Index results
+- Bump all dependencies to the latest
+
 ## [Chore] - 2024-10-03
 
 - Optimize extension file size

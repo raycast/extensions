@@ -266,21 +266,29 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return btoa(binary);
 }
 
-export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
-  const theme = environment.appearance === "light" ? "0" : "1";
-  const image = await fetch(
-    `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false`,
-    {
-      method: "get",
-      headers: headers,
-    },
-  );
+export async function getScreenshotImageURL(deploymentId: Deployment["uid"], teamId?: string) {
+  try {
+    const theme = environment.appearance === "light" ? "0" : "1";
+    const response = await fetch(
+      `https://vercel.com/api/screenshot?dark=${theme}&deploymentId=${deploymentId}&withStatus=false&teamId=${teamId ?? ""}`,
+      {
+        method: "get",
+        headers: headers,
+      },
+    );
 
-  const arrayBuffer = await image.arrayBuffer();
-  const base64Flag = "data:image/png;base64,";
-  const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
+    if (response.status !== 200) {
+      return null;
+    }
 
-  return imageStr;
+    const arrayBuffer = await response.arrayBuffer();
+    const base64Flag = "data:image/png;base64,";
+    const imageStr = base64Flag + arrayBufferToBase64(arrayBuffer);
+    return imageStr;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 export function getDeploymentURL(userOrTeamSlug: string, projectName: string, deploymentId: Deployment["uid"]) {

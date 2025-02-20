@@ -28,7 +28,7 @@ import { count, sentenceCase } from "../text";
 import { useSearch } from "../hooks/search";
 
 import { ColorDefault, ColorEmphasis, ColorError, ColorPrivate, ColorSubdued } from "./colors";
-import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { copyShortcut, drilldownShortcut, tertiaryActionShortcut, deleteShortcut } from "./shortcuts";
 import { SearchHistory } from "../searchHistory";
 import { useTelemetry } from "../hooks/telemetry";
 import path from "path";
@@ -69,6 +69,23 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
   }, [searchText, patternType]);
 
   const srcName = instanceName(src);
+  const searchSummary = state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary;
+
+  const openQueryInBrowserAction = (
+    <Action.OpenInBrowser
+      icon={Icon.Window}
+      title="Continue query in browser"
+      url={getQueryURL(src, searchText, patternType)}
+    />
+  );
+  const openSearchSyntaxAction = (
+    <Action.OpenInBrowser
+      icon={Icon.Book}
+      title="View search reference"
+      url={link.new(src, "/help/code_search/reference/queries")}
+    />
+  );
+
   return (
     <List
       isLoading={state.isLoading}
@@ -79,9 +96,24 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
       searchBarAccessory={
         src.featureFlags.searchPatternDropdown ? <SearchDropdown setPatternType={setPatternType} /> : undefined
       }
+      // actions are only shown when there aren't any children.
+      actions={
+        <ActionPanel>
+          {openQueryInBrowserAction}
+          {openSearchSyntaxAction}
+          {state.isLoading && (
+            <Action
+              icon={Icon.Xmark}
+              title="Cancel search"
+              onAction={() => setSearchText("")}
+              shortcut={deleteShortcut}
+            />
+          )}
+        </ActionPanel>
+      }
     >
       {/* show suggestions IFF no results */}
-      {!state.isLoading && state.results.length === 0 ? (
+      {!state.isLoading && state.results.length === 0 && (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion, i) => (
             <SuggestionItem
@@ -113,37 +145,45 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
             <List.Item
               title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
               icon={{ source: Icon.Window }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
-                </ActionPanel>
-              }
+              actions={<ActionPanel>{openQueryInBrowserAction}</ActionPanel>}
             />
             <List.Item
               title="View search query syntax reference"
-              icon={{ source: Icon.QuestionMark }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={link.new(src, "/help/code_search/reference/queries")} />
-                </ActionPanel>
-              }
+              icon={{ source: Icon.Book }}
+              actions={<ActionPanel>{openSearchSyntaxAction}</ActionPanel>}
             />
+            {isSourcegraphDotCom(src.instance) && !src.hasCustomSourcegraphConnection && (
+              <List.Item
+                title="Create a Sourcegraph workspace"
+                subtitle="Get an AI & search experience for your private code"
+                icon={{ source: Icon.Stars, tintColor: ColorEmphasis }}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      icon={Icon.Window}
+                      title="Learn more"
+                      url="https://workspaces.sourcegraph.com"
+                    />
+                  </ActionPanel>
+                }
+              />
+            )}
           </Fragment>
         </List.Section>
-      ) : (
-        <Fragment />
+      )}
+
+      {state.isLoading && state.results.length === 0 && (
+        <List.EmptyView title={"Searching..."} description={searchSummary || "No results yet"} />
       )}
 
       {/* results */}
-      <List.Section
-        title="Results"
-        subtitle={state.summaryDetail ? `${state.summary} (${state.summaryDetail})` : state.summary}
-      >
+      <List.Section title="Results" subtitle={searchSummary || (state.isLoading ? "Searching..." : undefined)}>
         {state.results.map((searchResult, i) => (
           <SearchResultItem
             key={`result-item-${i}`}
             searchResult={searchResult}
             searchText={searchText}
+            patternType={patternType}
             src={src}
             setSearchText={setSearchText}
           />
@@ -226,8 +266,12 @@ function resultActions(url: string, customActions?: CustomResultActions) {
   );
 }
 
-function getQueryURL(src: Sourcegraph, query: string) {
-  return link.new(src, "/search", new URLSearchParams({ q: query }));
+function getQueryURL(src: Sourcegraph, query: string, pattern: PatternType | undefined) {
+  const params: Record<string, string> = { q: query };
+  if (pattern) {
+    params.patternType = pattern;
+  }
+  return link.new(src, "/search", new URLSearchParams(params));
 }
 
 // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
@@ -297,15 +341,17 @@ function makeFileActions(src: Sourcegraph, opts: { path: string; repository: str
 function SearchResultItem({
   searchResult,
   searchText,
+  patternType,
   src,
   setSearchText,
 }: {
   searchResult: SearchResult;
   searchText: string;
+  patternType: PatternType | undefined;
   src: Sourcegraph;
   setSearchText: (text: string) => void;
 }) {
-  const queryURL = getQueryURL(src, searchText);
+  const queryURL = getQueryURL(src, searchText, patternType);
   const { match } = searchResult;
 
   // Branches is a common property for setting a revision
@@ -356,16 +402,19 @@ function SearchResultItem({
   switch (match.type) {
     case "repo":
       if (match.fork) {
-        icon.source = Icon.Circle;
+        icon.source = Icon.CircleEllipsis;
         matchTypeDetails.push("forked");
       }
       if (match.archived) {
-        icon.source = Icon.XMarkCircle;
+        icon.source = Icon.CircleDisabled;
         matchTypeDetails.push("archived");
       }
       if (match.private) {
+        icon.source = Icon.CircleProgress100; // looks less imposing than Circle
         icon.tintColor = ColorPrivate;
         matchTypeDetails.push("private");
+      } else {
+        icon.source = Icon.Circle;
       }
       title = match.repository;
       subtitle = match.description || "";
@@ -588,29 +637,30 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
                   {
                     tag: {
                       value: s.kind.toLowerCase(),
-                      color: ((): Color => {
+                      color: ((): Color.ColorLike => {
                         switch (s.kind) {
                           // Functional things
                           case SymbolKind.Function:
                           case SymbolKind.Method:
                           case SymbolKind.Constructor:
-                            return Color.Purple;
+                            return "A96AF3"; // Violet-07
 
                           // Thing-y things
                           case SymbolKind.Class:
                           case SymbolKind.Interface:
                           case SymbolKind.Struct:
-                            return Color.Orange;
+                            return ColorEmphasis;
 
                           // Even more thing-y things
                           case SymbolKind.Module:
                           case SymbolKind.Namespace:
                           case SymbolKind.File:
-                            return Color.PrimaryText;
+                          case SymbolKind.Package:
+                            return "00A0C8"; // Teal-07
                         }
 
                         // Everybody else
-                        return Color.Blue;
+                        return ColorSubdued;
                       })(),
                     },
                   },

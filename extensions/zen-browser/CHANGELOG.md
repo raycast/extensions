@@ -1,5 +1,15 @@
 # Zen Changelog
 
+## [Fix Default Profile Detection] - 2025-02-09
+
+- Made the default profile detection more resilient by expanding the profile
+  directory search logic.
+- Changed the URL for the Zen Browser logo.
+
+## [Fix New Tab] - 2025-01-11
+
+- Fix new tab command, by removing unnecessary app check.
+
 ## [Update Logo] - 2024-12-11
 
 - Updated to latest logo since rebrand.

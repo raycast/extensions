@@ -9,7 +9,12 @@ import {
 } from "@pieces.app/pieces-os-client";
 import ConnectorSingleton from "../connection/ConnectorSingleton";
 import Notifications from "../ui/Notifications";
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Preferences,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import ContextService from "../connection/Context";
 import { getClassificationSpecificEnum } from "../utils/converters/getClassificationSpecificEnum";
 import isImage from "../utils/isImage";
@@ -105,7 +110,7 @@ export async function saveFileToPieces(file: string): Promise<Asset | null> {
  * Save some text to Pieces
  * @param text the text to save
  * @param file true if it's a file
- * @param ext the classification of the snippet
+ * @param ext the classification of the material
  * @returns
  */
 export async function saveTextToPieces(

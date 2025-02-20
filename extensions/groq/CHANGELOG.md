@@ -1,5 +1,18 @@
 # Groq Changelog
 
+## [Updated Models] - 2025-02-09
+
+- Removed depreacted `Gemma 7B 8k`
+- Added reasoning formatting for thinking models
+
+## [New Models] - 2025-01-27
+
+- Added `DeepSeek R1 70B`
+
+## [New Models] - 2024-12-13
+
+- Added `Llama 3.3 70B` and `Llama 3.3 70B SpecDec`
+
 ## [New Models] - 2024-07-26
 
 - Added `Llama 3.1 8B` and `Llama 3.1 70B`
@@ -28,6 +41,5 @@
 ## [New Model] - 2024-03-13
 
 - Added new model `Gemma 7B`
-
 
 ## [Initial Version] - 2024-03-01

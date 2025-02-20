@@ -10,12 +10,12 @@ import { LocalStorage } from "@raycast/api";
 export class HltbSearch {
   public static BASE_URL = "https://howlongtobeat.com/";
   public static DETAIL_URL = `${HltbSearch.BASE_URL}game?id=`;
-  public static SEARCH_URL = `${HltbSearch.BASE_URL}api/search/`;
+  public static SEARCH_URL = `${HltbSearch.BASE_URL}api/s/`;
   public static IMAGE_URL = `${HltbSearch.BASE_URL}games/`;
 
   payload: SearchPayload = {
     searchType: "games",
-    searchTerms: [] as string[],
+    searchTerms: [""],
     searchPage: 1,
     size: 20,
     searchOptions: {
@@ -24,20 +24,13 @@ export class HltbSearch {
         platform: "",
         sortCategory: "popular",
         rangeCategory: "main",
-        rangeTime: {
-          min: 0,
-          max: 0,
-        },
-        gameplay: {
-          perspective: "",
-          flow: "",
-          genre: "",
-        },
+        rangeTime: { min: null, max: null },
+        gameplay: { perspective: "", flow: "", genre: "", difficulty: "" },
+        rangeYear: { min: "", max: "" },
         modifier: "",
       },
-      users: {
-        sortCategory: "postcount",
-      },
+      users: { sortCategory: "postcount" },
+      lists: { sortCategory: "follows" },
       filter: "",
       sort: 0,
       randomizer: 0,
@@ -58,7 +51,7 @@ export class HltbSearch {
     }
 
     try {
-      const result = await ApiService.getInstance().post(`api/search/${localHash}`, search, {
+      const result = await ApiService.getInstance().post(`api/s/${localHash}`, search, {
         timeout: 20000,
         signal,
       });

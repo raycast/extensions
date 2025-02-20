@@ -7,7 +7,6 @@ import {
   showToast,
   getSelectedText,
   getPreferenceValues,
-  popToRoot,
   Keyboard,
   launchCommand,
   LaunchType,
@@ -27,13 +26,13 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
   const { apiKey, defaultModel, model } = getPreferenceValues();
-  console.log(defaultModel, model);
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedState, setSelected] = useState("");
   const [lastQuery, setLastQuery] = useState("");
   const [lastResponse, setLastResponse] = useState("");
+  const [textarea, setTextarea] = useState("");
 
   const getResponse = async (query, data) => {
     setLastQuery(query);
@@ -81,7 +80,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub."
         );
       }
-      console.log(e);
     }
 
     setIsLoading(false);
@@ -89,26 +87,23 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
 
   useEffect(() => {
     (async () => {
-      if (context || useSelected) {
+      if (useSelected) {
         try {
           let selected = await getSelectedText();
-          if (useSelected) {
-            if (argQuery === "") {
-              setSelected(selected);
-              setPage(Pages.Form);
-            } else {
-              getResponse(`${argQuery}\n${selected}`);
-            }
+          if (argQuery === "") {
+            setSelected(selected);
+            setPage(Pages.Form);
+          } else {
+            getResponse(`${context}\n${argQuery}\n${selected}`);
             return;
           }
           getResponse(`${context}\n${selected}`);
         } catch (e) {
-          console.error(e);
-          await popToRoot();
           await showToast({
             style: Toast.Style.Failure,
-            title: "Could not get the selected text",
+            title: "Could not get the selected text. Continue without it.",
           });
+          getResponse(argQuery);
         }
       } else {
         if (argQuery === "") {
@@ -169,10 +164,32 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
               getResponse(`${context ? `${context}\n\n` : ""}${values.query}`, files);
             }}
           />
+          <Action
+            icon={Icon.Clipboard}
+            title="Append Selected Text"
+            onAction={async () => {
+              try {
+                const selectedText = await getSelectedText();
+                setTextarea((text) => text + selectedText);
+              } catch (error) {
+                await showToast({
+                  title: "Could not get the selected text",
+                  style: Toast.Style.Failure,
+                });
+              }
+            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "v" }}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Prompt" id="query" />
+      <Form.TextArea
+        title="Prompt"
+        id="query"
+        value={textarea}
+        onChange={(value) => setTextarea(value)}
+        placeholder="Ask Gemini a question..."
+      />
       {!buffer.length && (
         <>
           <Form.Description title="Image" text="Image that you want Gemini to analyze along with your prompt." />

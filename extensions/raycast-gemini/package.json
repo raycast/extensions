@@ -6,7 +6,10 @@
   "icon": "gemini-icon.png",
   "author": "EvanZhouDev",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "d0zingcat",
+    "ViGeng",
+    "anwarulislam"
   ],
   "categories": [
     "Productivity",
@@ -49,8 +52,32 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "You may be given a text or a query or a picture as input, please provide a detailed and informative response."
         }
       ]
     },
@@ -97,8 +124,32 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
-          ]
+    ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
         }
       ]
     },
@@ -137,8 +188,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Given the selected text or my query, please provide a detailed and informative response."
         }
       ]
     },
@@ -168,8 +244,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Summarize the given text."
         }
       ]
     },
@@ -199,8 +300,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Explain the following text as best as you can."
         }
       ]
     },
@@ -230,8 +356,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Add comments to the given code. ONLY return the commented code and nothing else."
         }
       ]
     },
@@ -261,8 +412,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text seem more friendly. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -292,8 +468,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "In the following text, change it to use advanced vocabulary but do not overuse it. Make sure to use proper grammar and spell check thoroughly. Show expertise in the subject provided, but do not add any extra information. Try to keep your response at the same length of words as the original. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -323,8 +524,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Find one synonym for the given word. Only return that the synonym, and add nothing else. Keep the casing of the word the same. Your response should only have ONE WORD"
         }
       ]
     },
@@ -354,8 +580,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Fix the grammar in the following text. Try to keep all of the words from the given text and try to only add punctuation and correct any spelling errors. ONLY return the modified text and nothing else."
         }
       ]
     },
@@ -385,8 +636,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text longer without providing any extra information than what's given. ONLY return the elongated text and nothing else."
         }
       ]
     },
@@ -416,8 +692,33 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Make the following text shorter while keeping the core idea. ONLY return the shortened text and nothing else."
         }
       ]
     },
@@ -432,7 +733,7 @@
           "name": "TranslateLanguage",
           "placeholder": "Translate Language",
           "type": "text",
-          "required": true
+          "required": false
         }
       ],
       "preferences": [
@@ -455,8 +756,49 @@
             {
               "title": "Gemini 1.5 Flash",
               "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 2.0 Flash Experimental",
+              "value": "gemini-2.0-flash-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp-1219"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
             }
+
           ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Try to keep all of the words from the given text and maintain the original meaning as closely as possible. ONLY return the translated text and nothing else."
+        },
+        {
+          "name": "defaultTargetLanguage",
+          "title": "First Target Language",
+          "description": "Translate all other languages to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "English"
+        },
+        {
+          "name": "secondTargetLanguage",
+          "title": "Second Target Language",
+          "description": "Translate the first target language to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Chinese"
         }
       ]
     }
@@ -484,12 +826,28 @@
         {
           "title": "Gemini 1.5 Flash",
           "value": "gemini-1.5-flash-latest"
+        },
+        {
+          "title": "Gemini 2.0 Flash Experimental",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "Gemini Experimental 1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "Gemini 2.0 Flash Thinking Experimental",
+          "value": "gemini-2.0-flash-thinking-exp-1219"
+        },
+        {
+          "title": "LearnLM 1.5 Pro Experimental",
+          "value": "learnlm-1.5-pro-experimental"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.9.0",
     "gemini-ai": "^2.0.1",
     "jimp": "^0.22.10",
@@ -509,6 +867,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "pull": "ray pull-contributions",
+    "publish": "ray publish"
   }
 }

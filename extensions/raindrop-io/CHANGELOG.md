@@ -1,5 +1,21 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2025-02-05
+
+Add option to specify sorting behavior
+
+## [Enhancements] - 2025-01-05
+
+Add tags display preference and update bookmark item rendering
+
+## [Enhancements] - 2025-01-02
+
+- Close Raycast after saving browser tab ([#16052](https://github.com/raycast/extensions/issues/16052))
+
+## [Enhancements] - 2024-12-20
+
+- Add option to search on title only ([#8939](https://github.com/raycast/extensions/issues/8939) and [#13867](https://github.com/raycast/extensions/issues/13867)).
+
 ## [Enhancements] - 2024-09-14
 
 - Add title field ([#14363](https://github.com/raycast/extensions/issues/14363)).

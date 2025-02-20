@@ -1,5 +1,10 @@
 # Bluesky Changelog
 
+## [Updated Logo] - 2025-01-10
+
+- Update logo to use Bluesky logo from Press Kit
+- Fix `Timeline` not loading when there is a blocked post (ref: [Issue #16245](https://github.com/raycast/extensions/issues/))
+
 ## [Fixes] - 2024-11-13
 
 - Fix `Timeline` not loading due to error in `parser` (ref: [Issue #15318](https://github.com/raycast/extensions/issues/15318))

@@ -17,7 +17,8 @@ import { SyncData, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import View from "./components/View";
 import { getToday } from "./helpers/dates";
-import { groupByDueDates } from "./helpers/groupBy";
+import { groupByDates } from "./helpers/groupBy";
+import { truncateMiddle } from "./helpers/menu-bar";
 import { getTasksForTodayOrUpcomingView } from "./helpers/tasks";
 import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
@@ -30,7 +31,8 @@ function MenuBar(props: MenuBarProps) {
   // Don't perform a full sync if the command was launched from within another commands
   const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
-  const { view, filter, upcomingDays, hideMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
+  const { view, filter, upcomingDays, hideMenuBarCount, showNextTask, taskWidth } =
+    getPreferenceValues<Preferences.MenuBar>();
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
   const tasks = useMemo(() => {
@@ -73,6 +75,15 @@ function MenuBar(props: MenuBarProps) {
       return removeMarkdown(focusedTask.content);
     }
 
+    if (showNextTask) {
+      const taskList = view !== "filter" ? tasks : filterTasks;
+      if (taskList && taskList.length > 0) {
+        const nextTask = [...taskList].sort((a, b) => a.child_order - b.child_order)[0];
+        const content = truncateMiddle(nextTask.content, parseInt(taskWidth ?? "40"));
+        return removeMarkdown(content);
+      }
+    }
+
     if (hideMenuBarCount) {
       return "";
     }
@@ -82,7 +93,7 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view]);
+  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextTask, taskWidth]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
@@ -185,7 +196,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
   const completedToday = todayStats?.total_completed ?? 0;
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -218,7 +229,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   if (tasks.length > 0) {
@@ -245,7 +256,7 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps): JSX.Element => {
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
 
   const sections = useMemo(() => {
-    return groupByDueDates(tasks);
+    return groupByDates(tasks);
   }, [tasks]);
 
   return tasks.length > 0 ? (

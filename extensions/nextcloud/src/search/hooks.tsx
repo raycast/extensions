@@ -3,6 +3,11 @@ import { useCallback, useState } from "react";
 import { useQuery, webdavRequest } from "../nextcloud";
 import { getPreferences } from "../preferences";
 
+type propStat = {
+  "d:prop": { "oc:fileid": number; "d:getcontenttype": string; "oc:size": number };
+  "d:status": string;
+};
+
 export function useSearch() {
   const [query, setQuery] = useState<string>();
   const { data, isLoading } = useQuery((signal) => performSearch(signal, query), [query]);
@@ -56,33 +61,33 @@ async function performSearch(signal: AbortSignal, query?: string): Promise<Searc
   const body = makeBodyForSearch({ username, query, scope });
   const items = await webdavRequest({ body, signal, method: "SEARCH" });
 
-  const res = items.map(
-    (item: {
-      "d:href": string;
-      "d:propstat": { "d:prop": { "oc:fileid": number; "d:getcontenttype": string; "oc:size": number } }[];
-    }) => {
-      const href = item["d:href"];
-      const match = /^\/remote.php\/dav\/files\/[^/]+?\/(.+?)$/.exec(href);
-      if (!match) throw new Error("Invalid href: " + href);
-      const fullpath = "/" + decodeURIComponent(match[1]);
-      const dirname = path.dirname(fullpath);
-      const filename = path.basename(fullpath);
+  const availableItems = items.filter((item) => {
+    const propStat = item["d:propstat"] instanceof Array ? (item["d:propstat"] as propStat[])[0] : item["d:propstat"];
+    return propStat["d:status"].includes(`200 OK`);
+  });
 
-      const prop = item["d:propstat"][0]["d:prop"];
-      const fileId = prop["oc:fileid"];
-      const contentType = prop["d:getcontenttype"];
-      const size = prop["oc:size"];
+  const res = availableItems.map((item: { "d:href": string; "d:propstat": propStat | propStat[] }) => {
+    const href = item["d:href"];
+    const match = /^\/remote.php\/dav\/files\/[^/]+?\/(.+?)$/.exec(href);
+    if (!match) throw new Error("Invalid href: " + href);
+    const fullpath = "/" + decodeURIComponent(match[1]);
+    const dirname = path.dirname(fullpath);
+    const filename = path.basename(fullpath);
+    const propStat = item["d:propstat"] instanceof Array ? (item["d:propstat"] as propStat[])[0] : item["d:propstat"];
+    const prop = propStat["d:prop"];
+    const fileId = prop["oc:fileid"];
+    const contentType = prop["d:getcontenttype"];
+    const size = prop["oc:size"];
 
-      return {
-        fullpath,
-        dirname,
-        filename,
-        fileId,
-        contentType,
-        size,
-      };
-    }
-  );
+    return {
+      fullpath,
+      dirname,
+      filename,
+      fileId,
+      contentType,
+      size,
+    };
+  });
 
   return res;
 }

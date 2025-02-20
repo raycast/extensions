@@ -1,6 +1,19 @@
 # File Manager Changelog
 
+## [Fixes] - 2025-02-29
+
+- Fixed shell command errors caused by filenames containing single quotes.
+
+## [Fixes] - 2025-01-29
+
+- Fixed issue with show hidden files preference.
+
+## [Features] - 2025-01-28
+
+- Added the preference to show hidden files.
+
 ## [Gitignore and Rayignore] - 2024-07-24
+
 - Added support respecting `.gitignore` and `.rayignore` files.
 
 ## [Features] - 2023-02-22
