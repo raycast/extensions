@@ -1,5 +1,12 @@
 # ClickUp Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+- AI Tools to:
+    1. Get Teams
+    2. Get Spaces
+    3. Get Docs
+
 ## [Update - New Command] - 2024-09-10
 
 - New `Docs Explorer` command - for now it shows docs and their pages
