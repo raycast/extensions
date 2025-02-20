@@ -11,6 +11,18 @@ Control your Logitech Harmony Hub directly from Raycast. This extension allows y
 - 🔄 Real-time status updates
 - ⌨️ Full keyboard navigation
 
+![Hub Discovery](metadata/screenshots/harmony-control-0.png)
+*Automatic hub discovery and connection*
+
+![Device Control](metadata/screenshots/harmony-control-1.png)
+*Control your Harmony-connected devices*
+
+![Activity Management](metadata/screenshots/harmony-control-2.png)
+*Manage and control your activities*
+
+![Command Access](metadata/screenshots/harmony-control-3.png)
+*Quick access to device commands*
+
 ## Installation
 
 1. Make sure you have [Raycast](https://raycast.com/) installed
