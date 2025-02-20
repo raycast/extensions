@@ -32,6 +32,11 @@ const config = {
       audioCodec: "mp3",
       fileExtension: ".mpg",
     },
+    webm: {
+      videoCodec: "libvpx-vp9",
+      audioCodec: "libopus",
+      fileExtension: ".webm",
+    },
   },
 };
 
@@ -86,6 +91,10 @@ const imageConfig: Record<string, ImageFormatConfig> = {
     fileExtension: ".tiff",
     nsType: "NSTIFFFileType",
     sipsFormat: "tiff",
+  },
+  avif: {
+    fileExtension: ".avif",
+    useFFmpeg: true,
   },
 };
 
@@ -157,6 +166,13 @@ export async function convertImage(filePath: string, outputFormat: keyof typeof 
         return tempPngPath;
       }
 
+      if (outputFormat === "avif") {
+        const ffmpegPath = await getFFmpegPath();
+        await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
+        fs.unlinkSync(tempPngPath);
+        return finalOutputPath;
+      }
+
       if (formatOptions.sipsFormat) {
         execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${tempPngPath}" --out "${finalOutputPath}"`);
       } else if (formatOptions.nsType) {
@@ -164,6 +180,12 @@ export async function convertImage(filePath: string, outputFormat: keyof typeof 
       }
 
       fs.unlinkSync(tempPngPath);
+      return finalOutputPath;
+    }
+
+    if (outputFormat === "avif") {
+      const ffmpegPath = await getFFmpegPath();
+      await execPromise(`"${ffmpegPath}" -i "${filePath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
       return finalOutputPath;
     }
 
@@ -211,7 +233,7 @@ export async function optimizeImage(filePath: string, quality: number = 100): Pr
 
 export async function convertVideo(
   filePath: string,
-  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg",
+  outputFormat: "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm",
 ): Promise<string> {
   const formatOptions = config.ffmpegOptions[outputFormat];
   const finalOutputPath = getUniqueOutputPath(filePath, formatOptions.fileExtension);

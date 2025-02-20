@@ -4,8 +4,8 @@ import path from "path";
 import { convertImage, convertAudio, convertVideo } from "../utils/converter";
 import { execPromise } from "../utils/exec";
 
-const ALLOWED_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff"];
+const ALLOWED_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"];
 const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
@@ -18,13 +18,13 @@ export function ConverterForm() {
 
     try {
       const firstFileExtension = path.extname(files[0])?.toLowerCase() || "";
-      const isFirstFileVideo = ALLOWED_EXTENSIONS.includes(firstFileExtension);
+      const isFirstFileVideo = ALLOWED_VIDEO_EXTENSIONS.includes(firstFileExtension);
       const isFirstFileImage = ALLOWED_IMAGE_EXTENSIONS.includes(firstFileExtension);
       const isFirstFileAudio = ALLOWED_AUDIO_EXTENSIONS.includes(firstFileExtension);
 
       const hasInvalidSelection = files.some((file) => {
         const extension = path.extname(file)?.toLowerCase() || "";
-        if (isFirstFileVideo) return !ALLOWED_EXTENSIONS.includes(extension);
+        if (isFirstFileVideo) return !ALLOWED_VIDEO_EXTENSIONS.includes(extension);
         if (isFirstFileImage) return !ALLOWED_IMAGE_EXTENSIONS.includes(extension);
         if (isFirstFileAudio) return !ALLOWED_AUDIO_EXTENSIONS.includes(extension);
         return true;
@@ -64,11 +64,11 @@ export function ConverterForm() {
     }
 
     const fileExtension = path.extname(values.videoFile[0]).toLowerCase();
-    const isInputVideo = ALLOWED_EXTENSIONS.includes(fileExtension);
+    const isInputVideo = ALLOWED_VIDEO_EXTENSIONS.includes(fileExtension);
     const isInputImage = ALLOWED_IMAGE_EXTENSIONS.includes(fileExtension);
     const isInputAudio = ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension);
-    const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg"].includes(values.format);
-    const isOutputImage = ["jpg", "png", "webp", "heic", "tiff"].includes(values.format);
+    const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg", "webm"].includes(values.format);
+    const isOutputImage = ["jpg", "png", "webp", "heic", "tiff", "avif"].includes(values.format);
 
     if (!isInputVideo && !isInputImage && !isInputAudio) {
       await showToast({
@@ -97,11 +97,11 @@ export function ConverterForm() {
       try {
         let outputPath = "";
         if (isInputImage) {
-          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic" | "tiff");
+          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic" | "tiff" | "avif");
         } else if (isInputAudio) {
           outputPath = await convertAudio(item, values.format as "mp3" | "aac" | "wav" | "flac");
         } else {
-          outputPath = await convertVideo(item, values.format as "mp4" | "avi" | "mkv" | "mov" | "mpg");
+          outputPath = await convertVideo(item, values.format as "mp4" | "avi" | "mkv" | "mov" | "mpg" | "webm");
         }
 
         await toast.hide();
@@ -150,6 +150,7 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="webp" title=".webp" />
               <Form.Dropdown.Item value="heic" title=".heic" />
               <Form.Dropdown.Item value="tiff" title=".tiff" />
+              <Form.Dropdown.Item value="avif" title=".avif" />
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">
@@ -165,6 +166,7 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="mkv" title=".mkv" />
               <Form.Dropdown.Item value="mov" title=".mov" />
               <Form.Dropdown.Item value="mpg" title=".mpg" />
+              <Form.Dropdown.Item value="webm" title=".webm" />
             </Form.Dropdown.Section>
           )}
         </Form.Dropdown>
