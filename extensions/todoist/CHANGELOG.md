@@ -1,7 +1,16 @@
 # Todoist Changelog
 
 ## [Add Next First Task as Title in Menu Bar] - {PR_MERGE_DATE}
-Added a new Show next first task in preferences to show that as title if no focused task is selected
+
+A new feature has been added that allows users to display the next first task as the title in the menu bar. This option can be enabled in preferences and will be shown when no task is currently selected.
+
+## [Fix Default Sorting] - 2025-02-20
+
+Change the default sorting to align with the task order in Todoist. 
+
+## [Add time format preference from Todoist preferences] - 2025-02-17
+
+- Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
 
 ## [Add Complete Task Shortcut Preferences] - 2025-01-31
 

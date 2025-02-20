@@ -43,6 +43,8 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
     - View File
 - Account
     - Update Password
+- FTP Accounts
+    - Create FTP Account
     
 </details>
 
@@ -59,6 +61,8 @@ This is a Raycast extension for [cPanel](https://cpanel.net/) `User` level accou
 | Email | add_pop | Email Accounts > Create Email Account |
 | Email | list_pops | Email Accounts |
 | Email | list_pops_with_disk | Email Accounts > View Disk Information |
+| Ftp | list_ftp_with_disk | FTP Accounts |
+| Ftp | add_ftp | FTP Accounts > Create FTP Account |
 | Fileman | get_file_content | Files > View File |
 | Fileman | list_files | Files |
 | Mysql | dump_database_schema | Databases > View Schema |
