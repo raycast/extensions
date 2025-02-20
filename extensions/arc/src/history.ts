@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { HistoryEntry } from "./types";
-import { useSQL } from "@raycast/utils";
+import { useSQL, executeSQL } from "@raycast/utils";
 
 const BASE_PATH = join(homedir(), "Library", "Application Support", "Arc", "User Data");
 const HISTORY_FILENAME = "History";
@@ -133,4 +133,26 @@ export function useHistorySearch(
     isLoading,
     permissionView,
   };
+}
+
+export async function getHistory(searchText?: string, limit = 200): Promise<HistoryEntry[]> {
+  const data: HistoryEntry[] = [];
+
+  for (const profile of profileHistoryDatabasePaths) {
+    try {
+      const query = getHistoryQuery(searchText, limit);
+      const rows = await executeSQL<HistorySqlRow>(profile.historyDatabasePath, query);
+
+      const restructured = rows.map((row: HistorySqlRow) => ({
+        ...row,
+        profileName: profile.name || profile.id,
+      }));
+      data.push(...restructured);
+    } catch (error) {
+      console.error(`Error fetching history for profile ${profile.id}:`, error);
+    }
+  }
+
+  data.sort((a, b) => new Date(b.lastVisitedAt).getTime() - new Date(a.lastVisitedAt).getTime());
+  return data;
 }

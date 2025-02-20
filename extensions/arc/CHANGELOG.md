@@ -1,5 +1,23 @@
 # Arc Changelog
 
+## [✨ AI Enhancements] - {PR_MERGE_DATE}
+
+AI Tools to:
+
+- Search Tabs
+- Search History
+
+## [✨ AI Enhancements] - 2025-02-09
+
+AI Tools to:
+
+- Open New Window
+- Open New Blank Window
+- Open New Little Arc Window
+- Open New Incognito Window
+- Open New Tab
+- Search Spaces
+
 ## [Improvements] - 2024-10-25
 
 - `Search Tabs` now can search with url and search title with chinese pinyin.
