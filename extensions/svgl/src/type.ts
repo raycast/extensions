@@ -14,6 +14,7 @@ export interface Svg {
         dark: string;
         light: string;
       };
+  brandUrl: string;
   url: string;
 }
 
