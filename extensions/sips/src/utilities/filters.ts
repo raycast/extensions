@@ -19,7 +19,11 @@ import { getPreferenceValues } from "@raycast/api";
  * @param CIFilterName The name of the CIFilter to apply.
  * @returns The beginning of an ASObjC script with filled-in parameters.
  */
-const initializeFilterScript = (source: string, destination: string, CIFilterName: string) => {
+const initializeFilterScript = (
+  source: string,
+  destination: string,
+  CIFilterName: string,
+) => {
   return `use framework "Foundation"
     use framework "Quartz"
     use framework "PDFKit"
@@ -115,7 +119,9 @@ export const getFilterThumbnail = async (filter: Filter, source: string) => {
     ${
       filter.presets
         ? Object.entries(filter.presets)
-            .map(([key, value]) => `theFilter's setValue:${value} forKey:"${key}"`)
+            .map(
+              ([key, value]) => `theFilter's setValue:${value} forKey:"${key}"`,
+            )
             .join("\n")
         : ""
     }
@@ -145,14 +151,21 @@ export const getFilterThumbnail = async (filter: Filter, source: string) => {
  * @param filter The filter to apply to the image.
  * @returns A promise that resolves when the script has finished running.
  */
-export const applyBasicFilter = async (source: string, destination: string, filter: Filter) => {
+export const applyBasicFilter = async (
+  source: string,
+  destination: string,
+  filter: Filter,
+) => {
   return runAppleScript(`${initializeFilterScript(source, destination, filter.CIFilterName)}
           set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
           theFilter's setValue:theCIImage forKey:"inputImage"
           ${
             filter.presets
               ? Object.entries(filter.presets)
-                  .map(([key, value]) => `theFilter's setValue:${value} forKey:"${key}"`)
+                  .map(
+                    ([key, value]) =>
+                      `theFilter's setValue:${value} forKey:"${key}"`,
+                  )
                   .join("\n")
               : ""
           }
@@ -170,8 +183,10 @@ export const applyBasicFilter = async (source: string, destination: string, filt
 export const getActiveFilters = (): Filter[] => {
   const preferences = getPreferenceValues<Preferences.ApplyFilter>();
   const activeFilters = [];
-  if (preferences.hiddenFilters.trim().length > 0) {
-    const hiddenFilters = preferences.hiddenFilters.split(",").map((filter) => filter.trim());
+  if ((preferences.hiddenFilters || "").trim().length > 0) {
+    const hiddenFilters = preferences.hiddenFilters
+      .split(",")
+      .map((filter) => filter.trim());
     if (!hiddenFilters.includes("Blur")) {
       activeFilters.push(...blurFilters);
     }
@@ -193,7 +208,9 @@ export const getActiveFilters = (): Filter[] => {
     if (!hiddenFilters.includes("Tile")) {
       activeFilters.push(...tileFilters);
     }
-    return activeFilters.filter((filter) => !hiddenFilters.includes(filter.name));
+    return activeFilters.filter(
+      (filter) => !hiddenFilters.includes(filter.name),
+    );
   }
   return [
     ...blurFilters,
@@ -244,7 +261,8 @@ export const blurFilters: Filter[] = [
   },
   {
     name: "Motion Blur",
-    description: "Blur effect simulating a camera moving while capturing an image",
+    description:
+      "Blur effect simulating a camera moving while capturing an image",
     CIFilterName: "CIMotionBlur",
     thumbnail: "thumbnails/motion_blur.webp",
     category: FilterCategory.blur,
@@ -282,7 +300,8 @@ export const colorEffectFilters: Filter[] = [
   },
   {
     name: "Document Enhancement",
-    description: "Removes unwanted shadows, whitens background, and enhances contrast",
+    description:
+      "Removes unwanted shadows, whitens background, and enhances contrast",
     CIFilterName: "CIDocumentEnhancer",
     thumbnail: "thumbnails/document_enhancement.webp",
     category: FilterCategory.colorEffect,
@@ -310,7 +329,8 @@ export const colorEffectFilters: Filter[] = [
   },
   {
     name: "Maximum Component",
-    description: "Converts image to grayscale using the maximum of the three color components",
+    description:
+      "Converts image to grayscale using the maximum of the three color components",
     CIFilterName: "CIMaximumComponent",
     thumbnail: "thumbnails/maximum_component.webp",
     category: FilterCategory.colorEffect,
@@ -318,7 +338,8 @@ export const colorEffectFilters: Filter[] = [
 
   {
     name: "Minimum Component",
-    description: "Converts image to grayscale using the minimum of the three color components",
+    description:
+      "Converts image to grayscale using the minimum of the three color components",
     CIFilterName: "CIMinimumComponent",
     thumbnail: "thumbnails/minimum_component.webp",
     category: FilterCategory.colorEffect,
@@ -412,7 +433,8 @@ export const halftoneFilters: Filter[] = [
   },
   {
     name: "CMYK Halftone",
-    description: "Creates a halftoned rendition of an image using cyan, magenta, yellow, and black",
+    description:
+      "Creates a halftoned rendition of an image using cyan, magenta, yellow, and black",
     CIFilterName: "CICMYKHalftone",
     thumbnail: "thumbnails/cmyk_halftone.webp",
     category: FilterCategory.halftone,
@@ -489,7 +511,8 @@ export const distortionFilters: Filter[] = [
   },
   {
     name: "Hole",
-    description: "Creates a hole in the image, pushing the surrounding pixels outward",
+    description:
+      "Creates a hole in the image, pushing the surrounding pixels outward",
     CIFilterName: "CIHoleDistortion",
     thumbnail: "thumbnails/hole.webp",
     category: FilterCategory.distortion,
@@ -500,7 +523,8 @@ export const distortionFilters: Filter[] = [
   },
   {
     name: "Light Tunnel",
-    description: "Rotates the image around a center area to create tunneling effect",
+    description:
+      "Rotates the image around a center area to create tunneling effect",
     CIFilterName: "CILightTunnel",
     thumbnail: "thumbnails/light_tunnel.webp",
     category: FilterCategory.distortion,
@@ -605,7 +629,8 @@ export const stylizeFilters: Filter[] = [
   },
   {
     name: "Crystallize",
-    description: "Creates polygon-shaped color blocks by aggregating pixel values",
+    description:
+      "Creates polygon-shaped color blocks by aggregating pixel values",
     CIFilterName: "CICrystallize",
     thumbnail: "thumbnails/crystallize.webp",
     category: FilterCategory.stylize,
@@ -619,7 +644,8 @@ export const stylizeFilters: Filter[] = [
   },
   {
     name: "Edges",
-    description: "Detects edges and highlights them colorfully, blackening other areas",
+    description:
+      "Detects edges and highlights them colorfully, blackening other areas",
     CIFilterName: "CIEdges",
     thumbnail: "thumbnails/edges.webp",
     category: FilterCategory.stylize,
@@ -754,7 +780,8 @@ export const tileFilters: Filter[] = [
   },
   {
     name: "Perspective Tile",
-    description: "Applies a perspective transformation to an image and tiles the result",
+    description:
+      "Applies a perspective transformation to an image and tiles the result",
     CIFilterName: "CIPerspectiveTile",
     thumbnail: "thumbnails/perspective_tile.webp",
     category: FilterCategory.tile,
@@ -775,7 +802,8 @@ export const tileFilters: Filter[] = [
   },
   {
     name: "Triangle Kaleidoscope",
-    description: "Maps a triangular portion of an image to a kaleidoscopically tiled pattern",
+    description:
+      "Maps a triangular portion of an image to a kaleidoscopically tiled pattern",
     CIFilterName: "CITriangleKaleidoscope",
     thumbnail: "thumbnails/triangle_kaleidoscope.webp",
     category: FilterCategory.tile,

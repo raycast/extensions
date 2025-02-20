@@ -11,18 +11,18 @@
 import { execSync } from "child_process";
 import * as fs from "fs";
 import path from "path";
+
+import { environment, getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { optimize as svgoOptimize } from "svgo";
 
+import { getAVIFEncPaths } from "../utilities/avif";
 import {
   getDestinationPaths,
   getScopedTempFile,
   getWebPBinaryPath,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { getAVIFEncPaths } from "../utilities/avif";
-import { runAppleScript } from "@raycast/utils";
-import { environment, getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences } from "../utilities/preferences";
 
 /**
  * Optimizes a JPEG image by applying lossy compression.
@@ -31,7 +31,11 @@ import { ExtensionPreferences } from "../utilities/preferences";
  * @param newPath The path to save the optimized JPEG image to.
  * @param amount The amount of compression to apply to the JPEG image.
  */
-const optimizeJPEG = async (jpegPath: string, newPath: string, amount: number) => {
+const optimizeJPEG = async (
+  jpegPath: string,
+  newPath: string,
+  amount: number,
+) => {
   return runAppleScript(`use framework "Foundation"
   
     -- Load JPEG image from file
@@ -57,11 +61,11 @@ const optimizeJPEG = async (jpegPath: string, newPath: string, amount: number) =
  * @returns The path of the optimized WebP image.
  */
 const optimizeWEBP = async (webpPath: string, amount: number) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))} (Optimized).webp`;
+  const preferences = getPreferenceValues<Preferences>();
+  const optimizedPath = `${path.dirname(webpPath)}/${path.basename(webpPath, path.extname(webpPath))}-optimized.webp`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
-  const [, cwebpPath] = await getWebPBinaryPath();
+  const [cwebpPath] = await getWebPBinaryPath();
   execSync(
     `${cwebpPath} ${preferences.useLosslessConversion ? "-lossless" : ""} -q ${amount} "${webpPath}" -o "${newPath}"`,
   );
@@ -75,7 +79,7 @@ const optimizeWEBP = async (webpPath: string, amount: number) => {
  * @returns The path of the optimized SVG image.
  */
 const optimizeSVG = async (svgPath: string) => {
-  const optimizedPath = `${path.dirname(svgPath)}/${path.basename(svgPath, path.extname(svgPath))} (Optimized).svg`;
+  const optimizedPath = `${path.dirname(svgPath)}/${path.basename(svgPath, path.extname(svgPath))}-optimized.svg`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const data = fs.readFileSync(svgPath);
@@ -89,7 +93,7 @@ const optimizeSVG = async (svgPath: string) => {
 
 const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
   const strategy = Math.floor(5 - optimizationAmount / 20);
-  const optimizedPath = `${path.dirname(pngPath)}/${path.basename(pngPath, path.extname(pngPath))} (Optimized).png`;
+  const optimizedPath = `${path.dirname(pngPath)}/${path.basename(pngPath, path.extname(pngPath))}-optimized.png`;
   const newPath = (await getDestinationPaths([optimizedPath]))[0];
 
   const pngoutPath = `${environment.assetsPath}/pngout/pngout`;
@@ -116,15 +120,21 @@ export default async function optimize(sourcePaths: string[], amount: number) {
     } else if (imgPath.toLowerCase().endsWith("svg")) {
       // Optimize SVG using SVGO
       resultPaths.push(await optimizeSVG(imgPath));
-    } else if (imgPath.toLowerCase().endsWith("jpg") || imgPath.toLowerCase().endsWith("jpeg")) {
+    } else if (
+      imgPath.toLowerCase().endsWith("jpg") ||
+      imgPath.toLowerCase().endsWith("jpeg")
+    ) {
       // Optimize JPEG images using NSBitmapImageRep compression
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).jpeg");
+      newPath = path.join(
+        path.dirname(newPath),
+        path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg",
+      );
       resultPaths.push(newPath);
       await optimizeJPEG(imgPath, newPath, amount);
     } else if (imgPath.toLowerCase().endsWith("avif")) {
       // Optimize AVIF images using avifenc
-      const preferences = getPreferenceValues<ExtensionPreferences>();
+      const preferences = getPreferenceValues<Preferences>();
       const { encoderPath, decoderPath } = await getAVIFEncPaths();
 
       // Convert to JPEG
@@ -133,7 +143,10 @@ export default async function optimize(sourcePaths: string[], amount: number) {
 
       // Convert back to AVIF
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + " (Optimized).avif");
+      newPath = path.join(
+        path.dirname(newPath),
+        path.basename(newPath, path.extname(newPath)) + "-optimized.avif",
+      );
       resultPaths.push(newPath);
       execSync(
         `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
@@ -156,14 +169,19 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
       newPath = path.join(
         path.dirname(newPath),
-        path.basename(newPath, path.extname(newPath)) + " (Optimized)" + path.extname(newPath),
+        path.basename(newPath, path.extname(newPath)) +
+          "-optimized" +
+          path.extname(newPath),
       );
       resultPaths.push(newPath);
 
       await optimizeJPEG(imgPath, jpegFile.path, amount);
       const format = path.extname(newPath).slice(1).toLowerCase();
-      execSync(`sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`);
+      execSync(
+        `sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`,
+      );
     }
   }
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

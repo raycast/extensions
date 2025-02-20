@@ -11,10 +11,23 @@
 import os from "os";
 import path from "path";
 
-import { Action, ActionPanel, Icon, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 import { Generator } from "../utilities/types";
-import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
+import {
+  cleanup,
+  getDestinationPaths,
+  moveImageResultsToFinalDestination,
+  showErrorToast,
+} from "../utilities/utils";
+
 import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
 /**
@@ -38,7 +51,15 @@ export default function ImageGeneratorActionPanel(props: {
   objectType: string;
   regeneratePreviews: () => void;
 }) {
-  const { generator, width, height, preview, options, objectType, regeneratePreviews } = props;
+  const {
+    generator,
+    width,
+    height,
+    preview,
+    options,
+    objectType,
+    regeneratePreviews,
+  } = props;
   return (
     <ActionPanel>
       <Action
@@ -46,18 +67,36 @@ export default function ImageGeneratorActionPanel(props: {
         icon={Icon.Image}
         onAction={async () => {
           const destinations = await getDestinationPaths(
-            [path.join(os.tmpdir(), `${objectType.replaceAll(" ", "_").toLowerCase()}.png`)],
+            [
+              path.join(
+                os.tmpdir(),
+                `${objectType.replaceAll(" ", "_").toLowerCase()}.png`,
+              ),
+            ],
             true,
           );
-          const toast = await showToast({ title: `Creating ${objectType}...`, style: Toast.Style.Animated });
+          const toast = await showToast({
+            title: `Creating ${objectType}...`,
+            style: Toast.Style.Animated,
+          });
           try {
-            await generator.applyMethod(destinations[0], generator.CIFilterName, width, height, options);
+            await generator.applyMethod(
+              destinations[0],
+              generator.CIFilterName,
+              width,
+              height,
+              options,
+            );
             await moveImageResultsToFinalDestination(destinations);
             toast.title = `Created ${objectType}`;
             toast.style = Toast.Style.Success;
             showInFinder(destinations[0]);
           } catch (error) {
-            await showErrorToast(`Failed To Create ${objectType}`, error as Error, toast);
+            await showErrorToast(
+              `Failed To Create ${objectType}`,
+              error as Error,
+              toast,
+            );
           } finally {
             cleanup();
           }

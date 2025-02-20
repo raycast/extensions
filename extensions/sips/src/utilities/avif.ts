@@ -7,8 +7,9 @@
  * Created at     : 2024-06-04 05:46:15
  */
 
-import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { execSync } from "child_process";
+
+import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showErrorToast } from "./utils";
 
 /**
@@ -54,6 +55,7 @@ async function installAVIFEnc(): Promise<boolean> {
       toast.style = Toast.Style.Success;
       return true;
     } catch (error) {
+      console.error(error);
       showErrorToast(
         "Failed to install AVIF Encoder.",
         error as Error,
@@ -87,8 +89,12 @@ export async function getAVIFEncPaths() {
       // If the AVIF encoder is not found, prompt the user to install it
       if (await installAVIFEnc()) {
         try {
-          encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`).toString().trim();
-          decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`).toString().trim();
+          encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`)
+            .toString()
+            .trim();
+          decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`)
+            .toString()
+            .trim();
           await LocalStorage.setItem("avifEncoderPath", encoderPath);
           await LocalStorage.setItem("avifDecoderPath", decoderPath);
         } catch (error) {
@@ -101,7 +107,6 @@ export async function getAVIFEncPaths() {
           );
         }
       } else {
-        console.error(error);
         showErrorToast(
           "AVIF Encoder not found.",
           error as Error,

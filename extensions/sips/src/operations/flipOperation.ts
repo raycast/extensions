@@ -11,6 +11,7 @@
 import { execSync } from "child_process";
 import path from "path";
 
+import { Direction } from "../utilities/enums";
 import {
   execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
@@ -19,7 +20,6 @@ import {
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { Direction } from "../utilities/enums";
 
 /**
  * Flips images vertically or horizontally, storing the results according to the user's preferences.
@@ -28,10 +28,14 @@ import { Direction } from "../utilities/enums";
  * @param direction The direction in which to flip the images.
  * @returns A promise that resolves when the operation is complete.
  */
-export default async function flip(sourcePaths: string[], direction: Direction) {
+export default async function flip(
+  sourcePaths: string[],
+  direction: Direction,
+) {
   const pathStrings = '"' + sourcePaths.join('" "') + '"';
   const newPaths = await getDestinationPaths(sourcePaths);
-  const directionString = direction == Direction.HORIZONTAL ? "horizontal" : "vertical";
+  const directionString =
+    direction == Direction.HORIZONTAL ? "horizontal" : "vertical";
 
   if (
     pathStrings.toLowerCase().includes("webp") ||
@@ -44,16 +48,28 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
     for (const imgPath of sourcePaths) {
       if (imgPath.toLowerCase().endsWith("webp")) {
         // Convert to PNG, flip and restore to WebP
-        resultPaths.push(await execSIPSCommandOnWebP(`sips --flip ${directionString}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnWebP(
+            `sips --flip ${directionString}`,
+            imgPath,
+          ),
+        );
       } else if (imgPath.toLowerCase().endsWith("svg")) {
         // Convert to PNG, flip, and restore to SVG
-        resultPaths.push(await execSIPSCommandOnSVG(`sips --flip ${directionString}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnSVG(`sips --flip ${directionString}`, imgPath),
+        );
       } else if (imgPath.toLowerCase().endsWith("pdf")) {
         // Flip each page of PDF
         resultPaths.push(await flipPDF(imgPath, direction));
       } else if (imgPath.toLowerCase().endsWith("avif")) {
         // Convert to PNG, flip, and restore to AVIF
-        resultPaths.push(await execSIPSCommandOnAVIF(`sips --flip ${directionString}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnAVIF(
+            `sips --flip ${directionString}`,
+            imgPath,
+          ),
+        );
       } else {
         // Image is not a special format, so just flip it using SIPS
         const newPath = newPaths[sourcePaths.indexOf(imgPath)];
@@ -62,13 +78,20 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special types -- Flip all images at once
-    const outputLocation = newPaths.length == 1 ? newPaths[0] : path.join(path.dirname(newPaths[0]), "flipped");
+    const outputLocation =
+      newPaths.length == 1
+        ? newPaths[0]
+        : path.join(path.dirname(newPaths[0]), "flipped");
 
     if (newPaths.length > 1) execSync(`mkdir -p "${outputLocation}"`);
 
-    execSync(`sips --flip ${directionString} -o "${outputLocation}" ${pathStrings}`);
+    execSync(
+      `sips --flip ${directionString} -o "${outputLocation}" ${pathStrings}`,
+    );
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [AI Tools] - TBD
+
+- Add AI tool support for all image operations
+
 ## [Bug Fixes & New Filters] - 2025-01-30
 
 - Improved memory management when previewing filters, reducing the likelihood of out-of-memory errors

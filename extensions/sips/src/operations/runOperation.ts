@@ -22,13 +22,16 @@ import { cleanup, showErrorToast } from "../utilities/utils";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function runOperation(params: {
-  operation: () => Promise<void>;
+  operation: () => Promise<string[]>;
   selectedImages: string[];
   inProgressMessage: string;
   successMessage: string;
   failureMessage: string;
 }) {
-  if (params.selectedImages.length === 0 || (params.selectedImages.length === 1 && params.selectedImages[0] === "")) {
+  if (
+    params.selectedImages.length === 0 ||
+    (params.selectedImages.length === 1 && params.selectedImages[0] === "")
+  ) {
     await showToast({
       title: "No images selected",
       message:
@@ -38,12 +41,16 @@ export default async function runOperation(params: {
     return;
   }
 
-  const toast = await showToast({ title: params.inProgressMessage, style: Toast.Style.Animated });
+  const toast = await showToast({
+    title: params.inProgressMessage,
+    style: Toast.Style.Animated,
+  });
   const pluralized = `image${params.selectedImages.length === 1 ? "" : "s"}`;
   try {
-    await params.operation();
+    const resultPaths = await params.operation();
     toast.title = `${params.successMessage} ${params.selectedImages.length.toString()} ${pluralized}`;
     toast.style = Toast.Style.Success;
+    return resultPaths;
   } catch (error) {
     await showErrorToast(
       `${params.failureMessage} ${params.selectedImages.length.toString()} ${pluralized}`,

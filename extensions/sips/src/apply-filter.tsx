@@ -10,7 +10,14 @@
 import { statSync } from "fs";
 import { useRef, useState } from "react";
 
-import { Action, ActionPanel, getPreferenceValues, Grid, Icon, Image } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Grid,
+  Icon,
+  Image,
+} from "@raycast/api";
 
 import applyFilter from "./operations/filterOperation";
 import runOperation from "./operations/runOperation";
@@ -58,6 +65,7 @@ export default function Command() {
   const [preview, setPreview] = useState<string>("");
   const previewQueue = useRef([] as string[]);
   const preferences = getPreferenceValues<Preferences.ApplyFilter>();
+
   return (
     <Grid
       searchBarPlaceholder="Search filters..."
@@ -68,7 +76,9 @@ export default function Command() {
         previewQueue.current.push(id);
         setTimeout(async () => {
           if (previewQueue.current.at(-1) == id) {
-            const filter = getActiveFilters().find((filter) => filter.CIFilterName === id);
+            const filter = getActiveFilters().find(
+              (filter) => filter.CIFilterName === id,
+            );
             if (filter && filter.name !== selectedFilter?.name) {
               setPreview("");
               setSelectedFilter(filter);
@@ -82,7 +92,9 @@ export default function Command() {
               await cleanup();
             }
           }
-          previewQueue.current = previewQueue.current.filter((item) => item !== id);
+          previewQueue.current = previewQueue.current.filter(
+            (item) => item !== id,
+          );
         }, 500);
       }}
     >

@@ -27,7 +27,6 @@ import { runAppleScript } from "@raycast/utils";
 import { getAVIFEncPaths } from "./avif";
 import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
 import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
-import { ExtensionPreferences } from "./preferences";
 
 /**
  * Gets currently selected images in Finder.
@@ -337,7 +336,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   const selectedImages: string[] = [];
 
   // Get name of preferred file manager
-  const extensionPreferences = getPreferenceValues<ExtensionPreferences>();
+  const extensionPreferences = getPreferenceValues<Preferences>();
   const inputMethod = extensionPreferences.inputMethod;
   let inputMethodError = false;
 
@@ -359,15 +358,20 @@ export const getSelectedImages = async (): Promise<string[]> => {
   // Get name of frontmost application
   let activeApp = inputMethod;
   try {
-    activeApp = (await getFrontmostApplication()).name;
+    activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
   } catch (error) {
     console.error(`Couldn't get frontmost application: ${error}`);
   }
 
   // Attempt to get selected images from Path Finder
   try {
-    if (inputMethod == ImageInputSource.PathFinderSelection || activeApp == "Path Finder") {
-      const pathFinderImages = (await getSelectedPathFinderImages()).split(", ");
+    if (
+      inputMethod == ImageInputSource.PathFinderSelection ||
+      activeApp == "Path Finder"
+    ) {
+      const pathFinderImages = (await getSelectedPathFinderImages()).split(
+        ", ",
+      );
       pathFinderImages.forEach((imgPath) => {
         if (!selectedImages.includes(imgPath)) {
           selectedImages.push(imgPath);
@@ -385,7 +389,10 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from NeoFinder
   try {
-    if (inputMethod == ImageInputSource.NeoFinderSelection || activeApp == "NeoFinder") {
+    if (
+      inputMethod == ImageInputSource.NeoFinderSelection ||
+      activeApp == "NeoFinder"
+    ) {
       const neoFinderImages = (await getSelectedNeoFinderImages()).split(", ");
       neoFinderImages.forEach((imgPath) => {
         if (!selectedImages.includes(imgPath)) {
@@ -404,8 +411,13 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from HoudahSpot
   try {
-    if (inputMethod == ImageInputSource.HoudahSpotSelection || activeApp == "HoudahSpot") {
-      const houdahSpotImages = (await getSelectedHoudahSpotImages()).split(", ");
+    if (
+      inputMethod == ImageInputSource.HoudahSpotSelection ||
+      activeApp == "HoudahSpot"
+    ) {
+      const houdahSpotImages = (await getSelectedHoudahSpotImages()).split(
+        ", ",
+      );
       houdahSpotImages.forEach((imgPath) => {
         if (!selectedImages.includes(imgPath)) {
           selectedImages.push(imgPath);
@@ -428,7 +440,10 @@ export const getSelectedImages = async (): Promise<string[]> => {
   } else {
     // Add desktop selections
     finderImages.forEach((imgPath) => {
-      if (imgPath.split("/").at(-2) == "Desktop" && !selectedImages.includes(imgPath)) {
+      if (
+        imgPath.split("/").at(-2) == "Desktop" &&
+        !selectedImages.includes(imgPath)
+      ) {
         selectedImages.push(imgPath);
       }
     });
@@ -443,25 +458,35 @@ export const getSelectedImages = async (): Promise<string[]> => {
  * @param imagePaths The paths of the produced images.
  * @returns A promise resolving when the operation is complete.
  */
-export const moveImageResultsToFinalDestination = async (imagePaths: string[]) => {
+export const moveImageResultsToFinalDestination = async (
+  imagePaths: string[],
+) => {
   let activeApp = "Finder";
   try {
     activeApp = (await getFrontmostApplication()).name;
   } catch (error) {
-    console.error(`Couldn't get frontmost application: ${error}`);
+    console.error(`Couldn't get frontmost application: : ${error}`);
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   // Handle the result per the user's preference
   if (preferences.imageResultHandling == ImageResultHandling.CopyToClipboard) {
     await copyImagesAtPathsToClipboard(imagePaths);
     deleteFiles(imagePaths);
-  } else if (preferences.imageResultHandling == ImageResultHandling.OpenInPreview) {
+  } else if (
+    preferences.imageResultHandling == ImageResultHandling.OpenInPreview
+  ) {
     await openPathsInPreview(imagePaths);
     deleteFiles(imagePaths);
-  } else if (preferences.inputMethod == ImageInputSource.NeoFinderSelection || activeApp == "NeoFinder") {
+  } else if (
+    preferences.inputMethod == ImageInputSource.NeoFinderSelection ||
+    activeApp == "NeoFinder"
+  ) {
     await showInFinder(imagePaths[0]);
-  } else if (preferences.inputMethod == ImageInputSource.HoudahSpotSelection || activeApp == "HoudahSpot") {
+  } else if (
+    preferences.inputMethod == ImageInputSource.HoudahSpotSelection ||
+    activeApp == "HoudahSpot"
+  ) {
     await showInFinder(imagePaths[0]);
   }
 };
@@ -480,7 +505,10 @@ export const getWebPBinaryPath = async () => {
     if (fs.existsSync(`${environment.assetsPath}/webp/x86/cwebp`)) {
       await fs.promises.rm(`${environment.assetsPath}/webp/x86/cwebp`);
     }
-    return [`${environment.assetsPath}/webp/arm/dwebp`, `${environment.assetsPath}/webp/arm/cwebp`];
+    return [
+      `${environment.assetsPath}/webp/arm/dwebp`,
+      `${environment.assetsPath}/webp/arm/cwebp`,
+    ];
   } else {
     // Make sure the x86 binaries are executable
     execSync(`chmod +x ${environment.assetsPath}/webp/x86/dwebp`);
@@ -493,7 +521,10 @@ export const getWebPBinaryPath = async () => {
     if (fs.existsSync(`${environment.assetsPath}/webp/arm/cwebp`)) {
       await fs.promises.rm(`${environment.assetsPath}/webp/arm/cwebp`);
     }
-    return [`${environment.assetsPath}/webp/x86/dwebp`, `${environment.assetsPath}/webp/x86/cwebp`];
+    return [
+      `${environment.assetsPath}/webp/x86/dwebp`,
+      `${environment.assetsPath}/webp/x86/cwebp`,
+    ];
   }
 };
 
@@ -504,8 +535,11 @@ export const getWebPBinaryPath = async () => {
  * @param webpPath The path of the WebP image.
  * @returns A promise resolving to the path of the resulting image.
  */
-export const execSIPSCommandOnWebP = async (command: string, webpPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export const execSIPSCommandOnWebP = async (
+  command: string,
+  webpPath: string,
+): Promise<string> => {
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([webpPath]))[0];
 
@@ -523,8 +557,11 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
  * @param command The SIPS command to execute.
  * @param avifPath The path of the AVIF image.
  */
-export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export const execSIPSCommandOnAVIF = async (
+  command: string,
+  avifPath: string,
+): Promise<string> => {
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([avifPath]))[0];
 
@@ -541,7 +578,10 @@ export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): 
  * @param command The SIPS command to execute.
  * @param svgPath The path of the SVG image.
  */
-export const execSIPSCommandOnSVG = async (command: string, svgPath: string): Promise<string> => {
+export const execSIPSCommandOnSVG = async (
+  command: string,
+  svgPath: string,
+): Promise<string> => {
   await using tmpFile = await getScopedTempFile("tmp", "bmp");
   const newPath = (await getDestinationPaths([svgPath]))[0];
 
@@ -560,7 +600,11 @@ export const execSIPSCommandOnSVG = async (command: string, svgPath: string): Pr
  * @param svgPath The path of the SVG image.
  * @param newPath The path to save the resulting image in.
  */
-export const convertSVG = async (targetType: string, svgPath: string, newPath: string) => {
+export const convertSVG = async (
+  targetType: string,
+  svgPath: string,
+  newPath: string,
+) => {
   return runAppleScript(`use framework "Foundation"
   use scripting additions
 
@@ -592,8 +636,12 @@ export const convertSVG = async (targetType: string, svgPath: string, newPath: s
  * @param pdfPath The path of the PDF document.
  * @param newPathBase The folder to place the resulting images in.
  */
-export const convertPDF = async (targetType: string, pdfPath: string, newPathBase: string) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export const convertPDF = async (
+  targetType: string,
+  pdfPath: string,
+  newPathBase: string,
+) => {
+  const preferences = getPreferenceValues<Preferences>();
 
   let repType = "NSPNGFileType";
   if (targetType == "JPEG") {
@@ -688,26 +736,43 @@ export const convertPDF = async (targetType: string, pdfPath: string, newPathBas
  * @param pdfPath The path of the PDF to rotate.
  * @param degrees The amount to rotate each page by. Must be a multiple of 90.
  */
-export const rotatePDF = async (pdfPath: string, degrees: number): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export const rotatePDF = async (
+  pdfPath: string,
+  degrees: number,
+): Promise<string> => {
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
-    newPath = path.join(os.homedir(), "Downloads", path.basename(newPath, path.extname(newPath)) + ".pdf");
-  } else if (preferences.imageResultHandling == ImageResultHandling.SaveToDesktop) {
-    newPath = path.join(os.homedir(), "Desktop", path.basename(newPath, path.extname(newPath)) + ".pdf");
+    newPath = path.join(
+      os.homedir(),
+      "Downloads",
+      path.basename(newPath, path.extname(newPath)) + ".pdf",
+    );
+  } else if (
+    preferences.imageResultHandling == ImageResultHandling.SaveToDesktop
+  ) {
+    newPath = path.join(
+      os.homedir(),
+      "Desktop",
+      path.basename(newPath, path.extname(newPath)) + ".pdf",
+    );
   } else if (
     preferences.imageResultHandling == ImageResultHandling.CopyToClipboard ||
     preferences.imageResultHandling == ImageResultHandling.OpenInPreview
   ) {
-    newPath = path.join(os.tmpdir(), path.basename(newPath, path.extname(newPath)) + ".pdf");
+    newPath = path.join(
+      os.tmpdir(),
+      path.basename(newPath, path.extname(newPath)) + ".pdf",
+    );
   }
 
   let iter = 2;
   while (fs.existsSync(newPath) && os.tmpdir() != path.dirname(newPath)) {
     newPath = path.join(
       path.dirname(newPath),
-      path.basename(newPath, path.extname(newPath)) + ` (${iter})${path.extname(newPath)}`,
+      path.basename(newPath, path.extname(newPath)) +
+        ` (${iter})${path.extname(newPath)}`,
     );
     iter++;
   }
@@ -739,12 +804,14 @@ export const rotatePDF = async (pdfPath: string, degrees: number): Promise<strin
  * @param direction The direction to flip. Must be a valid {@link Direction}.
  */
 export const flipPDF = async (pdfPath: string, direction: Direction) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
     newPath = path.join(os.homedir(), "Downloads", path.basename(newPath));
-  } else if (preferences.imageResultHandling == ImageResultHandling.SaveToDesktop) {
+  } else if (
+    preferences.imageResultHandling == ImageResultHandling.SaveToDesktop
+  ) {
     newPath = path.join(os.homedir(), "Desktop", path.basename(newPath));
   } else if (
     preferences.imageResultHandling == ImageResultHandling.CopyToClipboard ||
@@ -757,7 +824,8 @@ export const flipPDF = async (pdfPath: string, direction: Direction) => {
   while (fs.existsSync(newPath) && os.tmpdir() != path.dirname(newPath)) {
     newPath = path.join(
       path.dirname(newPath),
-      path.basename(newPath, path.extname(newPath)) + ` (${iter})${path.extname(newPath)}`,
+      path.basename(newPath, path.extname(newPath)) +
+        ` (${iter})${path.extname(newPath)}`,
     );
     iter++;
   }
@@ -809,8 +877,11 @@ export const flipPDF = async (pdfPath: string, direction: Direction) => {
  * @param targetExtension The desired extension of the image. If not provided, the original extension will be used.
  * @returns The destination path for the image.
  */
-export const getImageDestination = (originalPath: string, targetExtension?: string): string => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export const getImageDestination = (
+  originalPath: string,
+  targetExtension?: string,
+): string => {
+  const preferences = getPreferenceValues<Preferences>();
 
   // Decompose the original path into its components
   const originalExtension = path.extname(originalPath);
@@ -818,13 +889,17 @@ export const getImageDestination = (originalPath: string, targetExtension?: stri
   const originalDir = path.dirname(originalPath);
 
   // Construct & return the new path
-  const newExtension = targetExtension ? `${targetExtension}` : originalExtension;
+  const newExtension = targetExtension
+    ? `${targetExtension}`
+    : originalExtension;
   const newFileName = `${originalName}.${newExtension}`;
 
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
     const desktopPath = path.join(os.homedir(), "Downloads");
     return path.join(desktopPath, newFileName);
-  } else if (preferences.imageResultHandling == ImageResultHandling.SaveToDesktop) {
+  } else if (
+    preferences.imageResultHandling == ImageResultHandling.SaveToDesktop
+  ) {
     const desktopPath = path.join(os.homedir(), "Desktop");
     return path.join(desktopPath, newFileName);
   }
@@ -959,20 +1034,20 @@ export const getCurrentDirectory = async (itemPath: string) => {
   try {
     if (activeApp == "Path Finder") {
       return runAppleScript(`tell application "Path Finder"
-          if 1 ≤ (count finder windows) then
-            try
-            get POSIX path of (target of finder window 1)
-            on error message number -1728
-              -- Folder is nonstandard, use container of selection
-              tell application "System Events"
-                set itemPath to POSIX file "${itemPath}" as alias
-                return POSIX path of container of itemPath
-              end tell
-            end try
-          else
-            get POSIX path of desktop
-          end if
-        end tell`);
+        if 1 ≤ (count finder windows) then
+          try
+          get POSIX path of (target of finder window 1)
+          on error message number -1728
+            -- Folder is nonstandard, use container of selection
+            tell application "System Events"
+              set itemPath to POSIX file "${itemPath}" as alias
+              return POSIX path of container of itemPath
+            end tell
+          end try
+        else
+          get POSIX path of desktop
+        end if
+      end tell`);
     }
   } catch (error) {
     // Error getting directory of Path Finder, fall back to Finder
@@ -981,18 +1056,18 @@ export const getCurrentDirectory = async (itemPath: string) => {
 
   // Fallback to getting current directory from Finder
   return runAppleScript(`tell application "Finder"
-      if 1 ≤ (count Finder windows) then
-        try
-          return POSIX path of (target of window 1 as alias)
-        on error message number -1700
-          -- Folder is nonstandard, use container of selection
-          set itemPath to POSIX file "${itemPath}" as alias
-          return POSIX path of (container of itemPath as alias)
-        end try
-      else
-        return POSIX path of (desktop as alias)
-      end if
-    end tell`);
+    if 1 ≤ (count Finder windows) then
+      try
+        return POSIX path of (target of window 1 as alias)
+      on error message number -1700
+        -- Folder is nonstandard, use container of selection
+        set itemPath to POSIX file "${itemPath}" as alias
+        return POSIX path of (container of itemPath as alias)
+      end try
+    else
+      return POSIX path of (desktop as alias)
+    end if
+  end tell`);
 };
 
 /**
@@ -1008,17 +1083,23 @@ export const getDestinationPaths = async (
   generated = false,
   newExtension: string | undefined = undefined,
 ): Promise<string[]> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const currentDirectory = await getCurrentDirectory(originalPaths[0]);
   return originalPaths.map((imgPath) => {
     let newPath = imgPath;
-    if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
+    if (
+      preferences.imageResultHandling == ImageResultHandling.SaveToDownloads
+    ) {
       newPath = path.join(os.homedir(), "Downloads", path.basename(newPath));
-    } else if (preferences.imageResultHandling == ImageResultHandling.SaveToDesktop) {
+    } else if (
+      preferences.imageResultHandling == ImageResultHandling.SaveToDesktop
+    ) {
       newPath = path.join(os.homedir(), "Desktop", path.basename(newPath));
     } else if (
-      (preferences.imageResultHandling == ImageResultHandling.SaveInContainingFolder ||
-        preferences.imageResultHandling == ImageResultHandling.ReplaceOriginal) &&
+      (preferences.imageResultHandling ==
+        ImageResultHandling.SaveInContainingFolder ||
+        preferences.imageResultHandling ==
+          ImageResultHandling.ReplaceOriginal) &&
       (preferences.inputMethod == ImageInputSource.Clipboard || generated)
     ) {
       newPath = path.join(currentDirectory, path.basename(newPath));
@@ -1029,7 +1110,9 @@ export const getDestinationPaths = async (
       newPath = path.join(os.tmpdir(), path.basename(newPath));
     }
 
-    newPath = newExtension ? newPath.replace(path.extname(newPath), `.${newExtension}`) : newPath;
+    newPath = newExtension
+      ? newPath.replace(path.extname(newPath), `.${newExtension}`)
+      : newPath;
 
     if (
       preferences.imageResultHandling != ImageResultHandling.ReplaceOriginal &&
@@ -1039,7 +1122,8 @@ export const getDestinationPaths = async (
       while (fs.existsSync(newPath)) {
         newPath = path.join(
           path.dirname(newPath),
-          path.basename(newPath, path.extname(newPath)) + ` (${iter})${path.extname(newPath)}`,
+          path.basename(newPath, path.extname(newPath)) +
+            `-${iter}${path.extname(newPath)}`,
         );
         iter++;
       }
@@ -1053,9 +1137,13 @@ export const getDestinationPaths = async (
  * @param title The title of the toast.
  * @param error The error to show.
  * @param toast The toast to update.
- * @param messageText The message to show in the toast. If not provided, the error message will be used.
  */
-export const showErrorToast = async (title: string, error: Error, toast?: Toast, messageText?: string) => {
+export const showErrorToast = async (
+  title: string,
+  error: Error,
+  toast?: Toast,
+  messageText?: string,
+) => {
   console.error(error);
   if (!toast) {
     toast = await showToast({

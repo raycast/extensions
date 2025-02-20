@@ -43,16 +43,22 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
     for (const imgPath of sourcePaths) {
       if (imgPath.toLowerCase().endsWith("webp")) {
         // Convert to PNG, flip and restore to WebP
-        resultPaths.push(await execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnWebP(`sips --rotate ${degrees}`, imgPath),
+        );
       } else if (imgPath.toLowerCase().endsWith("svg")) {
         // Convert to PNG, rotate, and restore to SVG
-        resultPaths.push(await execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnSVG(`sips --rotate ${degrees}`, imgPath),
+        );
       } else if (imgPath.toLowerCase().endsWith("pdf")) {
         // Rotate each page of a PDF
         resultPaths.push(await rotatePDF(imgPath, degrees));
       } else if (imgPath.toLowerCase().endsWith("avif")) {
         // Convert to PNG, rotate, and restore to AVIF
-        resultPaths.push(await execSIPSCommandOnAVIF(`sips --rotate ${degrees}`, imgPath));
+        resultPaths.push(
+          await execSIPSCommandOnAVIF(`sips --rotate ${degrees}`, imgPath),
+        );
       } else {
         // Image is not a special format, so just rotate it using SIPS
         const newPath = newPaths[sourcePaths.indexOf(imgPath)];
@@ -61,6 +67,7 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special formats -- Flip all images at once
     if (newPaths.length == 1) {
@@ -78,11 +85,15 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
       execSync(`sips --rotate ${degrees} -o "${exportDir}" ${pathStrings}`);
 
       sourcePaths.forEach((imgPath, index) => {
-        fs.renameSync(path.join(exportDir, path.basename(imgPath)), newPaths[index]);
+        fs.renameSync(
+          path.join(exportDir, path.basename(imgPath)),
+          newPaths[index],
+        );
       });
 
       await fs.promises.rm(exportDir, { recursive: true, force: true });
     }
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

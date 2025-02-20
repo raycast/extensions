@@ -8,7 +8,13 @@
  * Last modified  : 2024-06-26 21:37:46
  */
 
-import { Action, ActionPanel, Icon, openCommandPreferences, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  openCommandPreferences,
+  openExtensionPreferences,
+} from "@raycast/api";
 
 export default function SettingsActionPanelSection() {
   return (

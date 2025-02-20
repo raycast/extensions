@@ -9,11 +9,11 @@
  */
 
 import { Color, Grid, LaunchProps, useNavigation } from "@raycast/api";
-
-import { standardDimensions } from "./utilities/generators";
-import SizeSelectionActionPanel from "./components/SizeSelectionActionPanel";
-import ImagePatternGrid from "./components/ImagePatternGrid";
 import { useEffect, useRef } from "react";
+
+import ImagePatternGrid from "./components/ImagePatternGrid";
+import SizeSelectionActionPanel from "./components/SizeSelectionActionPanel";
+import { standardDimensions } from "./utilities/generators";
 
 export default function Command(props: LaunchProps) {
   const viewRef = useRef(false);
@@ -23,7 +23,13 @@ export default function Command(props: LaunchProps) {
     if (props.launchContext && !viewRef.current) {
       viewRef.current = true;
       const { imageWidth, imageHeight, imagePattern } = props.launchContext;
-      push(<ImagePatternGrid width={imageWidth} height={imageHeight} pattern={imagePattern} />);
+      push(
+        <ImagePatternGrid
+          width={imageWidth}
+          height={imageHeight}
+          pattern={imagePattern}
+        />,
+      );
     }
   }, [props.launchContext]);
 
@@ -50,7 +56,10 @@ export default function Command(props: LaunchProps) {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Red }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Red,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
@@ -65,7 +74,10 @@ export default function Command(props: LaunchProps) {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Green }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Green,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
@@ -80,7 +92,10 @@ export default function Command(props: LaunchProps) {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Blue }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Blue,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );

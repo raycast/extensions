@@ -11,10 +11,24 @@
 import os from "os";
 import path from "path";
 
-import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 
 import { generatePlaceholder } from "../utilities/generators";
-import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
+import {
+  cleanup,
+  getDestinationPaths,
+  moveImageResultsToFinalDestination,
+  showErrorToast,
+} from "../utilities/utils";
+
 import ImagePatternGrid from "./ImagePatternGrid";
 import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
@@ -25,7 +39,10 @@ import SettingsActionPanelSection from "./SettingsActionPanelSection";
  * @param props.height The height of the generated image.
  * @returns An action panel component.
  */
-export default function SizeSelectionActionPanel(props: { width: number; height: number }) {
+export default function SizeSelectionActionPanel(props: {
+  width: number;
+  height: number;
+}) {
   const { width, height } = props;
   return (
     <ActionPanel>
@@ -38,15 +55,25 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
         title={`Create ${width}x${height} Placeholder`}
         icon={Icon.Image}
         onAction={async () => {
-          const destinations = await getDestinationPaths([path.join(os.tmpdir(), `${width}x${height}.png`)], true);
-          const toast = await showToast({ title: "Creating Placeholder...", style: Toast.Style.Animated });
+          const destinations = await getDestinationPaths(
+            [path.join(os.tmpdir(), `${width}x${height}.png`)],
+            true,
+          );
+          const toast = await showToast({
+            title: "Creating Placeholder...",
+            style: Toast.Style.Animated,
+          });
           try {
             await generatePlaceholder(width, height, destinations[0]);
             await moveImageResultsToFinalDestination(destinations);
             toast.title = `Created Placeholder`;
             toast.style = Toast.Style.Success;
           } catch (error) {
-            await showErrorToast(`Failed To Create Placeholder`, error as Error, toast);
+            await showErrorToast(
+              `Failed To Create Placeholder`,
+              error as Error,
+              toast,
+            );
           } finally {
             cleanup();
           }
