@@ -1,6 +1,6 @@
 # Plausible Analytics Changelog
 
-## [Fix URL not being picked up] - {PR_MERGE_DATE}
+## [Fix URL not being picked up] - 2025-02-20
 
 - Show toast when verifying domain
 - When adding domain, the domain checking is more robust
