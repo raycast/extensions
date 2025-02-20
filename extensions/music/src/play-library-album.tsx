@@ -29,9 +29,9 @@ export default function PlayLibraryAlbum() {
       },
       flow(
         fromEmptyOrNullable,
-        O.matchW(() => setAlbums([]), setAlbums)
-      )
-    )
+        O.matchW(() => setAlbums([]), setAlbums),
+      ),
+    ),
   );
 
   useEffect(() => {
@@ -64,10 +64,10 @@ export default function PlayLibraryAlbum() {
           pipe(
             tracks,
             fromEmptyOrNullable,
-            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>())
-          )
+            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>()),
+          ),
       ),
-      T.map(setAlbums)
+      T.map(setAlbums),
     )();
   };
 
@@ -85,7 +85,7 @@ export default function PlayLibraryAlbum() {
           <List.Item
             key={id}
             title={name ?? "--"}
-            subtitle={`${artist}` ?? "--"}
+            subtitle={artist ?? "--"}
             accessories={[{ text: count ? `${count}` : "" }]}
             icon={{ source: "../assets/icon.png" }}
             actions={<Actions name={name} pop={pop} />}
@@ -110,7 +110,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
       name,
       music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError("Operation failed.")
+      handleTaskEitherError("Operation failed."),
     )();
 
     pop();

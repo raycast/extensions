@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [AI Extensions] - 2025-02-05
+
+- Added AI extensions to the Music extension.
+
 ## [Update Currently Playing] - 2024-12-13
 
 - Fixed a bug where `Currently Playing` command would open the Music app if it was not running.
