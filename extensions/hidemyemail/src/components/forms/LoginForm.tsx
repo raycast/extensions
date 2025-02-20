@@ -41,7 +41,7 @@ export function LoginForm({ submit }: { submit: (credentials: Credentials) => vo
         text="Please enter your iCloud credentials. A session will be established after a successful login. Your password will not be stored."
       />
       <Form.TextField title="Email" {...itemProps.appleID} />
-      <Form.PasswordField title="Password" {...itemProps.password} />
+      <Form.PasswordField title="Password" {...itemProps.password} autoFocus={true} />
     </Form>
   );
 }

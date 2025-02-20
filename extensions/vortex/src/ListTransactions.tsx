@@ -1,24 +1,11 @@
 import "cross-fetch/polyfill";
 import { useEffect, useState } from "react";
 import { fiat } from "@getalby/lightning-tools";
-import { List, showToast, Toast, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
-import { connectWallet } from "./wallet";
-import ConnectionError from "./ConnectionError";
-
-export type Transaction = {
-  type: string;
-  invoice: string;
-  description: string;
-  description_hash: string;
-  preimage: string;
-  payment_hash: string;
-  amount: number;
-  fees_paid: number;
-  settled_at: number;
-  created_at: number;
-  expires_at: number;
-  metadata?: Record<string, unknown>;
-};
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { connectWallet } from "./utils/wallet";
+import ConnectionError from "./components/ConnectionError";
+import getFiatValues from "./utils/getFiatValues";
+import { Transaction } from "./types";
 
 const IncomingIcon = {
   source: Icon.ArrowDown,
@@ -35,6 +22,8 @@ export default function Transactions() {
   const [fiatBalance, setFiatBalance] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionError, setConnectionError] = useState<unknown>(null);
+  const [detailsVisibility, setDetailsVisibility] = useState<boolean>(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -42,7 +31,7 @@ export default function Transactions() {
         // Ensure the wallet is connected
         const nwc = await connectWallet();
 
-        showToast(Toast.Style.Animated, "Loading transactions...");
+        await showToast(Toast.Style.Animated, "Loading transactions...");
         const response = await nwc.listTransactions({});
         const balanceInfo = await nwc.getBalance(); // Fetch the balance from the connected wallet
         const fiatCurrency = getPreferenceValues<{ currency: string }>().currency;
@@ -51,15 +40,22 @@ export default function Transactions() {
           currency: fiatCurrency,
           locale: "en",
         });
+        const fiatBtcRate = await fiat.getFiatBtcRate(fiatCurrency);
+        const transactions = getFiatValues({
+          transactionArray: response.transactions,
+          currency: fiatCurrency,
+          rate: fiatBtcRate,
+        });
+
         setBalance(`${new Intl.NumberFormat().format(balanceInfo.balance)} sats`);
         setFiatBalance(fiatBalance);
-        setTransactions(response.transactions);
+        setTransactions(transactions);
         nwc.close();
-        showToast(Toast.Style.Success, "Loaded");
+        await showToast(Toast.Style.Success, "Loaded");
         setIsLoading(false);
       } catch (error) {
         setConnectionError(error);
-        showToast(Toast.Style.Failure, "Failed to fetch transactions");
+        await showToast(Toast.Style.Failure, "Failed to fetch transactions");
       }
     }
 
@@ -71,7 +67,15 @@ export default function Transactions() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={detailsVisibility}
+      selectedItemId={selectedTransaction?.payment_hash}
+      onSelectionChange={(id) => {
+        const selected = transactions.find((t) => t.payment_hash === id) || null;
+        setSelectedTransaction(selected);
+      }}
+    >
       {!isLoading && (
         <List.Item
           key="balane"
@@ -82,13 +86,52 @@ export default function Transactions() {
       {transactions.map((transaction) => (
         <List.Item
           key={transaction.payment_hash}
-          title={`${new Intl.NumberFormat().format(transaction.amount)} sats`}
+          title={`${new Intl.NumberFormat().format(transaction.amount)} sats (${transaction.fiatAmount ? transaction.fiatAmount : ""})`}
           subtitle={`${transaction.description ? `for ${transaction.description}` : ""} ${
             transaction.settled_at ? new Date(transaction.settled_at * 1000).toLocaleString() : ""
           }`}
           icon={transaction.type === "incoming" ? IncomingIcon : OutgoingIcon}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label
+                    title="Amount"
+                    text={
+                      (transaction.type === "incoming" ? "+" : "-") +
+                      `${new Intl.NumberFormat().format(transaction.amount)} sats`
+                    }
+                  />
+                  {transaction.fiatAmount && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Fiat Amount"
+                      text={(transaction.type === "incoming" ? "+" : "-") + `${transaction.fiatAmount}`}
+                    />
+                  )}
+
+                  <List.Item.Detail.Metadata.Label
+                    title="Description"
+                    text={transaction.description || "No description"}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Settled At"
+                    text={
+                      transaction.settled_at ? new Date(transaction.settled_at * 1000).toLocaleString() : "Not settled"
+                    }
+                  />
+                  <List.Item.Detail.Metadata.Label title="Payment Hash" text={transaction.payment_hash} />
+                  <List.Item.Detail.Metadata.Label title="Payment Preimage" text={transaction.preimage} />
+                  <List.Item.Detail.Metadata.Label title="Fees Paid" text={`${transaction.fees_paid} sats`} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel title={`Payment ${transaction.description}`}>
+              <Action
+                title={detailsVisibility ? "Hide Details" : "See Details"}
+                onAction={() => setDetailsVisibility(!detailsVisibility)}
+              />
               <Action.CopyToClipboard title="Copy Preimage" content={transaction.preimage} />
               <Action.CopyToClipboard title="Copy Payment Hash" content={transaction.payment_hash} />
             </ActionPanel>

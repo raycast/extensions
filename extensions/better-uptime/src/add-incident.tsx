@@ -1,75 +1,59 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
-import axios from "axios";
-import { useRef, useState } from "react";
-import { requiredErrorText } from "./constants";
+import { Form, ActionPanel, Action, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
+import { baseUrl } from "./constants";
 import { Preferences } from "./interface";
+import { FormValidation, useForm } from "@raycast/utils";
+import fetch from "node-fetch";
+
+interface AddIncidentFormValues {
+  summary: string;
+  description: string;
+  requester_email: string;
+}
 
 export default function Command(): JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
-
-  const summaryRef = useRef<Form.TextField>(null);
-  const descriptionRef = useRef<Form.TextField>(null);
-  const requesterEmailRef = useRef<Form.TextField>(null);
-
-  const [summaryError, setSummaryError] = useState<string | undefined>();
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
-  const [requesterEmailError, setRequesterEmailError] = useState<string | undefined>();
-
-  async function handleSubmit(item: any) {
-    if (item.summary === "") {
-      setSummaryError(requiredErrorText);
-      return false;
-    }
-
-    if (item.description === "") {
-      setDescriptionError(requiredErrorText);
-      return false;
-    }
-
-    if (item.requester_email === "") {
-      setRequesterEmailError(requiredErrorText);
-      return false;
-    }
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating incident...",
-    });
-
-    await axios
-      .post("https://betteruptime.com/api/v2/incidents", item, {
-        headers: { Authorization: `Bearer ${preferences.apiKey}` },
-      })
-      .then(() => {
-        toast.style = Toast.Style.Success;
-        toast.title = "Incident created successfully";
-
-        popToRoot();
-      })
-      .catch((error) => {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Unable to create incident";
-        toast.message = error.response.data.errors;
+  const { handleSubmit } = useForm<AddIncidentFormValues>({
+    async onSubmit(values) {
+      await showToast({
+        title: "Creating incident...",
+        style: Toast.Style.Animated,
       });
-  }
 
-  function dropSummaryErrorIfNeeded() {
-    if (summaryError && summaryError.length > 0) {
-      setSummaryError(undefined);
-    }
-  }
+      await fetch(`${baseUrl}/incidents`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${preferences.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw { response: { data: errorData } };
+          }
 
-  function dropDescriptionErrorIfNeeded() {
-    if (descriptionError && descriptionError.length > 0) {
-      setDescriptionError(undefined);
-    }
-  }
+          await showToast({
+            title: "Incident created",
+            style: Toast.Style.Success,
+          });
 
-  function dropRequesterEmailErrorIfNeeded() {
-    if (requesterEmailError && requesterEmailError.length > 0) {
-      setRequesterEmailError(undefined);
-    }
-  }
+          popToRoot();
+        })
+        .catch(async (error) => {
+          await showToast({
+            title: "Incident not created",
+            style: Toast.Style.Failure,
+            message: error.response.data.errors,
+          });
+        });
+    },
+    validation: {
+      summary: FormValidation.Required,
+      description: FormValidation.Required,
+      requester_email: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -79,51 +63,9 @@ export default function Command(): JSX.Element {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="summary"
-        title="Summary"
-        placeholder="New users can't sign up"
-        ref={summaryRef}
-        error={summaryError}
-        onChange={dropSummaryErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setSummaryError(requiredErrorText);
-          } else {
-            dropSummaryErrorIfNeeded();
-          }
-        }}
-      />
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Enter a description"
-        ref={descriptionRef}
-        error={descriptionError}
-        onChange={dropDescriptionErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setDescriptionError(requiredErrorText);
-          } else {
-            dropDescriptionErrorIfNeeded();
-          }
-        }}
-      />
-      <Form.TextField
-        id="requester_email"
-        title="Requester Email"
-        placeholder="john@example.com"
-        ref={requesterEmailRef}
-        error={requesterEmailError}
-        onChange={dropRequesterEmailErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setRequesterEmailError(requiredErrorText);
-          } else {
-            dropRequesterEmailErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextField id="summary" title="Summary" placeholder="New users can't sign up" />
+      <Form.TextField id="description" title="Description" placeholder="Enter a description" />
+      <Form.TextField id="requester_email" title="Requester Email" placeholder="john@example.com" />
     </Form>
   );
 }

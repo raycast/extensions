@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.91.0 - 2025-02-05
+
+### ✨ New
+
+- **AI**: The models added in [Raycast 1.90.0](https://www.raycast.com/changelog/1-90-0) are now also part of the API
+  - DeepSeek R1² reasoning model (powered by Together AI) and its distilled version¹ (powered by Groq)
+  - OpenAI o1-mini² and o1-preview² reasoning models
+  - OpenAI o3-mini¹
+  - Google Gemini 1.5 Flash¹ and Gemini 1.5 Pro², Gemini 2.0 Flash¹ and Gemini 2.0 Flash Thinking¹ models
+  - xAI Grok-2² model
+  - Perplexity Sonar¹, Sonar Pro² and Sonar Reasoning¹ models
+
+¹ available with Raycast Pro
+² available with Raycast Pro + Advanced AI
+
+### 🐞 Fixes
+
+- **Window Management**: Added missing types for `getActiveWindow`.
+
+## 1.89.0 - 2025-01-15
+
+### 💎 Improvements
+
+- **Cache**: Clearing the cache will now delete all the files in the cache folder instead of the entire folder.
+
 ## 1.88.0 - 2024-12-16
 
 ### 🐞 Fixes

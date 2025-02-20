@@ -74,9 +74,9 @@ function ListView() {
               title={timeEntry.description || "No description"}
               subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
               accessories={[
-                { text: formatSeconds(timeEntry.duration) },
                 ...timeEntry.tags.map((tag) => ({ tag })),
                 timeEntry.billable ? { tag: { value: "$" } } : {},
+                { text: formatSeconds(timeEntry.duration) },
               ]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={

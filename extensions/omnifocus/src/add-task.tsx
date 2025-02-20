@@ -1,11 +1,12 @@
-import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { addTask } from "./lib/api/add-task";
-import { Project } from "./lib/types/project";
 import { getProjects } from "./lib/api/list-projects";
 import { listTags } from "./lib/api/list-tags";
+import { Project } from "./lib/types/project";
 import { CreateOmniFocusTaskOptions } from "./lib/types/task";
+import { useValidateRequirements } from "./lib/utils/useValidateRequirements";
 
 interface FormValues extends CreateOmniFocusTaskOptions {
   tagsToCreate?: string;
@@ -14,6 +15,11 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
   const { draftValues } = props;
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { loading, check, error } = useValidateRequirements();
+  const [requirementError, setRequirementError] = useState<string | null>(null);
+
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: draftValues,
     async onSubmit(values) {
@@ -41,13 +47,39 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
   });
 
   useEffect(() => {
-    Promise.all([getProjects(), listTags()]).then(([p, t]) => {
-      setProjects(p);
-      setTags(t);
-    });
-  }, []);
+    if (!loading) {
+      if (check) {
+        setIsLoading(true);
+        Promise.all([getProjects(), listTags()])
+          .then(([p, t]) => {
+            setProjects(p);
+            setTags(t);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setIsLoading(false);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Cannot get projects or tags",
+            });
+          });
+      } else {
+        setRequirementError(error);
+      }
+    }
+  }, [loading, check, error]);
+
+  if (requirementError) {
+    return (
+      <List>
+        <List.EmptyView title={requirementError} icon={Icon.Plug} />
+      </List>
+    );
+  }
+
   return (
     <Form
+      isLoading={loading || isLoading}
       enableDrafts
       actions={
         <ActionPanel>

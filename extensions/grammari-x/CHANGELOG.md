@@ -1,5 +1,9 @@
 # GrammariX Changelog
 
+## [Features] - 2025-01-22
+
+- Add the `Improve Selected Text` command to enhance the selected text.
+
 ## [Improvements] - 2024-02-10
 
 - Add arguments support

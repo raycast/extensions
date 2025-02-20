@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [Chore] - 2025-01-12
+
+- Improve searcher performance with `useMemo`
+
 ## [Maintenance] - 2025-01-07
 
 - Use `getIconSlug()` to keep slugs consistent

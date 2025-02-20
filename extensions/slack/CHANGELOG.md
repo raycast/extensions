@@ -1,5 +1,13 @@
 # Slack Changelog
 
+## [New "Copy Message URL" action] - 2025-02-10
+
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command 
+
+## [New "Copy Huddle Link" action] - 2025-01-13
+
+- Add `Copy Huddle Link` action to copy the huddle link of a chat to the clipboard
+
 ## [Adds Optional Metadata to Open Channel Command] - 2024-07-30
 
 - Now includes job title, timezone, current time, and Slack status in the list returned by the Open Channel command.

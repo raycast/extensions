@@ -5,6 +5,9 @@
   "description": "Your Writing's Best Friend. In this extension, you can fix your grammar and paraphrase your sentences more effectively. If you have a Raycast Pro subscription, you don't need to provide openAI key.",
   "icon": "icon.png",
   "author": "hakob_nersesian",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Communication"
   ],
@@ -44,6 +47,12 @@
           ]
         }
       ]
+    },
+    {
+      "name": "grammariX-selected",
+      "title": "Improve Selected Text",
+      "description": "Experience flawless writing with GrammariX,\nyour AI-powered grammar companion.\nFrom intricate sentence structure to nuanced word choice,\nGrammariX ensures your text is polished and precise.\nLet advanced AI technology enhance your writing effortlessly,\nleaving you with confidence in every word.",
+      "mode": "view"
     },
     {
       "name": "history",

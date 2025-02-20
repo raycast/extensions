@@ -1,6 +1,10 @@
 # Asana Changelog
 
-## [Added Copy Task Formatted URL command] - 2024-03-27
+## [Add option to hide the "Start Date" field] - 2025-02-12
+
+- Add a preference to allow the user to hide the `Start Date` field in the `Create Task` command
+
+## [Add "Copy Task Formatted URL" action] - 2024-03-27
 
 - Added a new task command - "Copy Task Formatted URL"
 
@@ -18,7 +22,7 @@
 
 - Remove Raycast signature preference from the `Create Task` command
 
-## [Bugfix] - 2022-11-24
+## [Fix a bug] - 2022-11-24
 
 Fixed an issue where the Asana extension would timeout when querying for projects in workspaces with a lot of projects.
 

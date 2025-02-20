@@ -1,54 +1,15 @@
-# KeepassXC Extension for Raycast
+<p align="center">
+ <img width=125 src=https://github.com/user-attachments/assets/6f2b44ad-6a93-4e28-ac41-7fa1c8e9b881>
+</p>
 
-This is a Raycast extension to access keepass database.
+<h1 align="center">KeePassXC for Raycast</h1>
+
+<b align="center">Search your passwords, usernames, TOTP codes, and more using KeePassXC directly from Raycast.</b>
 
 ## Requirements
+To use this extension, you will need:
 
-- [KeePassXC.app](https://keepassxc.org) installed.(`keepassxc-cli` in `KeepassXC.app` is required to access keepass database
+- [KeePassXC](https://keepassxc.org).
 
-## Setup
-
-There are 3 parameters required for this extension to work:
-
-- path of `KeePassXC.app` (default `/Applications/KeePassXC.app`)
-- a keepass database file
-- password to access database
-
-![preference](media/preferences.png)
-
-## Usage
-
-![example](media/example.gif)
-
-### Shortcuts
-
-- `Enter` : Paste Password
-- `Shift`+`Enter` : Paste Username
-- `Option`+`Enter` : Paste TOTP
-- `Cmd`+`G` : Copy Password
-- `Cmd`+`B` : Copy Username
-- `Cmd`+`T` : Copy TOTP
-- `Shift` + `Cmd` + `U` : Open URL in Browser
-
-## Password Security Note
-
-This extension works by using `keepassxc-cli`(inside `KeePassXC.app`) in command line to access keepass database:
-
-- Main password is stored by raycast. (encrypted)
-- Main password will be send to `keepassxc-cli` by simulating command line interaction with nodejs api [subprocess.stdin.write](https://nodejs.org/api/child_process.html#subprocessstdin).
-
-### Related commands
-
-```bash
-# List entries for version < 2.7
-keepassxc-cli locate -q /path/to/database.kdbx /
-# List entries for version >= 2.7
-keepassxc-cli find -q /path/to/database.kdbx /
-
-# Get password by entry
-keepassxc-cli show -q -a Password /path/to/database.kdbx entry_name
-
-# Get username by entry
-keepassxc-cli show -q -a Username /path/to/database.kdbx entry_name
-
-```
+## Security Note
+Your credentials required to access your KeePass database, which include a password and an optional key file, are securely stored in [Raycast's local encrypted database](https://developers.raycast.com/information/security#data-storage). This storage prevents other extensions from accessing the storage of that extension.

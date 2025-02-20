@@ -6,12 +6,14 @@
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "contributors": [
-    "marcjulian",
     "GastroGeek",
     "pernielsentikaer",
     "lokot0k",
     "mitchwu",
     "a-laughlin"
+  ],
+  "pastContributors": [
+    "marcjulian"
   ],
   "categories": [
     "Productivity",

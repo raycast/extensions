@@ -208,12 +208,18 @@ export async function deleteProject(id: string, { data, setData }: CachedDataPar
   }
 }
 
-export type DueDate = {
+export type Date = {
   date: string;
   timezone: string | null;
   string: string;
   lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
   is_recurring: boolean;
+};
+
+export type Deadline = {
+  date: string;
+  timezone: string | null;
+  lang: "en" | "da" | "pl" | "zh" | "ko" | "de" | "pt" | "ja" | "it" | "fr" | "sv" | "ru" | "es" | "nl";
 };
 
 export type Task = {
@@ -222,7 +228,8 @@ export type Task = {
   project_id: string;
   content: string;
   description: string;
-  due: DueDate | null;
+  due: Date | null;
+  deadline: Deadline | null;
   priority: number;
   parent_id: string | null;
   child_order: number;
@@ -261,6 +268,7 @@ export type AddTaskArgs = {
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   duration?: {
     unit: "minute" | "day";
     amount: number;
@@ -312,6 +320,7 @@ export type UpdateTaskArgs = {
   content?: string;
   description?: string;
   due?: DateOrString;
+  deadline?: DateOrString;
   priority?: number;
   collapsed?: boolean;
   labels?: string[];
@@ -438,7 +447,7 @@ export type Reminder = {
   notify_uid: string;
   item_id: string;
   type: "relative" | "absolute" | "location";
-  due?: DueDate;
+  due?: Date;
   mm_offset?: number;
   name?: string;
   loc_lat?: string;
@@ -758,6 +767,7 @@ export type User = {
   full_name: string;
   id: string;
   is_premium: boolean;
+  time_format: number;
 };
 
 export type Event = {

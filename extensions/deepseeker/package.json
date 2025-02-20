@@ -5,9 +5,19 @@
   "description": "Performs one-shot actions with DeepSeek and more",
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "degouville"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
+  ],
+  "keywords": [
+    "AI",
+    "DeepSeek",
+    "DeepSeek V3",
+    "DeepSeek R1",
+    "LLM"
   ],
   "license": "MIT",
   "commands": [
@@ -38,8 +48,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -92,8 +106,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -116,6 +134,89 @@
               "value": "gpt-3.5-turbo"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate or Lookup selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Translate Prompt",
+          "description": "The prompt for the translate command",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "model_translate",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "DeepSeek-V3",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        },
+        {
+          "name": "first_language",
+          "title": "First Language",
+          "description": "All languages are firstly translated to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "English"
+        },
+        {
+          "name": "second_language",
+          "title": "Second Language",
+          "description": "If the provided text is in First Language, then translate to this language",
+          "type": "textfield",
+          "required": false,
+          "default": "Chinese"
+        },
+        {
+          "name": "lookup",
+          "label": "Lookup Mode (Beta)",
+          "title": "Lookup Mode (Beta)",
+          "description": "Enable lookup mode to get the meaning of the selected single word like a dictionary",
+          "type": "checkbox",
+          "required": false,
+          "default": false
         }
       ]
     },
@@ -146,8 +247,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -200,8 +305,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -254,8 +363,144 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask LLM",
+      "description": "Ask LLM directly with input argument",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter your question",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt_ask",
+          "title": "Ask Prompt",
+          "description": "The prompt prefix for the ask command",
+          "type": "textfield",
+          "required": false,
+          "default": "Answer the following question concisely: \n\n"
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "DeepSeek-V3",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o mini",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "title": "GPT-4",
+              "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 Turbo",
+              "value": "gpt-4-turbo"
+            },
+            {
+              "title": "GPT-3.5 Turbo",
+              "value": "gpt-3.5-turbo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask_on",
+      "title": "Ask on Selected",
+      "description": "Ask LLM on selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Enter your question",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "prompt_ask_on",
+          "title": "System Prompt",
+          "description": "The prompt prefix for the ASK ON command",
+          "type": "textfield",
+          "required": false,
+          "default": "Answer the following question regarding the provided text concisely: \n\n"
+        },
+        {
+          "name": "model_ask_on",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "title": "DeepSeek-V3",
+              "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -308,8 +553,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -362,8 +611,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -391,8 +644,8 @@
     },
     {
       "name": "execute",
-      "title": "Execute",
-      "description": "Execute the prompt and replace it with its output",
+      "title": "Execute Selected Prompt",
+      "description": "Execute the selected prompt and replace it with its output",
       "mode": "no-view",
       "preferences": [
         {
@@ -408,8 +661,12 @@
               "value": "global"
             },
             {
-              "title": "deepseek-chat",
+              "title": "DeepSeek-V3",
               "value": "deepseek-chat"
+            },
+            {
+              "title": "DeepSeek-R1",
+              "value": "deepseek-reasoner"
             },
             {
               "title": "GPT-4o",
@@ -481,6 +738,14 @@
           "value": "deepseek-chat"
         },
         {
+          "title": "deepseek-reasoner",
+          "value": "deepseek-reasoner"
+        },
+        {
+          "title": "deepseek-r1",
+          "value": "deepseek-r1"
+        },
+        {
           "title": "GPT-4o",
           "value": "gpt-4o"
         },
@@ -499,18 +764,32 @@
         {
           "title": "GPT-3.5 Turbo",
           "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "gemini-2.0-flash-exp",
+          "value": "gemini-2.0-flash-exp"
+        },
+        {
+          "title": "gemini-exp-1206",
+          "value": "gemini-exp-1206"
+        },
+        {
+          "title": "learnlm-1.5-pro-experimental",
+          "value": "learnlm-1.5-pro-experimental"
+        },
+        {
+          "title": "gemini-2.0-flash-thinking-exp-1219",
+          "value": "gemini-2.0-flash-thinking-exp-1219"
         }
       ],
       "required": true,
       "title": "LLM Model"
     },
     {
-      "name": "sidenote",
-      "title": "SideNote Integration",
-      "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
-      "label": "Enabled",
-      "type": "checkbox",
-      "default": false,
+      "name": "custom_model",
+      "title": "Custom Model Name",
+      "description": "Custom model name for your API endpoint if it's not listed in the dropdown, this will override the global model",
+      "type": "textfield",
       "required": false
     }
   ],

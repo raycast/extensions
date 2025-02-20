@@ -26,7 +26,7 @@ export default function Command() {
     revalidateRunningTimeEntry,
     revalidateTimeEntries,
   );
-  const currentTime = useCurrentTime();
+  const { currentTime } = useCurrentTime();
   const runningEntry = runningTimeEntry;
 
   const currentDuration = runningEntry ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start)) : undefined;

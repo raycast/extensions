@@ -17,11 +17,11 @@ export function ResultGridItem({ item, handleSearchOpen }: ResultGridItemProps) 
       actions={
         <ActionPanel>
           <Action.Push
-            title="Show Details"
+            title="Show Listing Details"
             target={<ItemDetail item={item} handleSearchOpen={handleSearchOpen} />}
             icon={Icon.Eye}
           />
-          <Action.OpenInBrowser url={item.permalink} onOpen={handleSearchOpen} />
+          <Action.OpenInBrowser title="Open Listing in Browser" url={item.permalink} onOpen={handleSearchOpen} />
         </ActionPanel>
       }
     />
