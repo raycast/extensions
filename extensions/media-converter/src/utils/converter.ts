@@ -92,6 +92,10 @@ const imageConfig: Record<string, ImageFormatConfig> = {
     nsType: "NSTIFFFileType",
     sipsFormat: "tiff",
   },
+  avif: {
+    fileExtension: ".avif",
+    useFFmpeg: true,
+  },
 };
 
 function getUniqueOutputPath(filePath: string, extension: string): string {
@@ -162,6 +166,13 @@ export async function convertImage(filePath: string, outputFormat: keyof typeof 
         return tempPngPath;
       }
 
+      if (outputFormat === "avif") {
+        const ffmpegPath = await getFFmpegPath();
+        await execPromise(`"${ffmpegPath}" -i "${tempPngPath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
+        fs.unlinkSync(tempPngPath);
+        return finalOutputPath;
+      }
+
       if (formatOptions.sipsFormat) {
         execSync(`sips --setProperty format ${formatOptions.sipsFormat} "${tempPngPath}" --out "${finalOutputPath}"`);
       } else if (formatOptions.nsType) {
@@ -169,6 +180,12 @@ export async function convertImage(filePath: string, outputFormat: keyof typeof 
       }
 
       fs.unlinkSync(tempPngPath);
+      return finalOutputPath;
+    }
+
+    if (outputFormat === "avif") {
+      const ffmpegPath = await getFFmpegPath();
+      await execPromise(`"${ffmpegPath}" -i "${filePath}" -c:v libaom-av1 -crf 30 "${finalOutputPath}"`);
       return finalOutputPath;
     }
 
