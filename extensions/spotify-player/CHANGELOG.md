@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Add Copy Embed Code Command] - 2025-02-20
+
+- Added a new command to copy the iframe embed code for the currently playing song.
+
 ## [Add "Skip 15 Seconds" and "Back 15 Seconds" commands] - 2025-02-18
 
 - Added the ability to skip forward or back 15 seconds in the current episode. This adds two new commands as well as two new menu bar items which only show when an 'episode' is playing.
