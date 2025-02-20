@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fix Default Sorting] - 2025-02-20
+
+Change the default sorting to align with the task order in Todoist. 
+
 ## [Add time format preference from Todoist preferences] - 2025-02-17
 
 - Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
