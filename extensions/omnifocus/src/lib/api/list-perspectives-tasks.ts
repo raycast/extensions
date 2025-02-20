@@ -26,6 +26,7 @@ const leaves = window
         deferDate: task.deferDate() ? task.deferDate().toString() : null,
         dueDate: task.dueDate() ? task.dueDate().toString() : null,
         dropped: task.dropped(),
+        completed: task.completed(),
         tags: task.tags ? task.tags().map((tt) => tt.name()) : [],
       };
     } catch (e) {

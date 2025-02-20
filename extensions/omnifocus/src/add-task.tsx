@@ -20,6 +20,7 @@ export default function Command(props: LaunchProps<{ draftValues: FormValues }>)
       title: "Unable to get your tags or projects",
       style: Toast.Style.Failure,
     });
+    return null;
   }
 
   const { handleSubmit, itemProps } = useForm<FormValues>({

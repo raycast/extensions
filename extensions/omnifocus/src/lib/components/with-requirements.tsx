@@ -10,13 +10,11 @@ export const ValidateRequirements: React.FunctionComponent<PropsWithChildren> = 
   }
 
   if (!check) {
-    if (error) {
-      return (
-        <List>
-          <List.EmptyView title={error} icon={Icon.Plug} />
-        </List>
-      );
-    }
+    return (
+      <List>
+        <List.EmptyView title={error} icon={Icon.Plug} />
+      </List>
+    );
   }
 
   return props.children;

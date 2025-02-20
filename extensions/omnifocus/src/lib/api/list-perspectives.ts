@@ -8,7 +8,6 @@ export async function listPerspectives(): Promise<{
 
 
 const omnifocus = Application("OmniFocus");
-const document = omnifocus.defaultDocument;
 
 const customPerspectives = omnifocus.perspectives().map((p) => {
   try {
