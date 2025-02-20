@@ -3,7 +3,7 @@
   "name": "namecheap",
   "title": "Namecheap",
   "description": "",
-  "icon": "extension-icon.png",
+  "icon": "namecheap.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
@@ -53,7 +53,7 @@
   ],
   "commands": [
     {
-      "name": "list-domains",
+      "name": "domains",
       "title": "List Domains",
       "subtitle": "Namecheap",
       "description": "",
