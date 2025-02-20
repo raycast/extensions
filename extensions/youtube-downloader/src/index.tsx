@@ -22,7 +22,9 @@ import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } fr
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
-
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<string>("");
+  const audioFormats = ["mp3", "wav", "aac", "flac", "ogg"];
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
       url: "",
@@ -32,7 +34,15 @@ export default function DownloadVideo() {
 
       options.push("--ffmpeg-location", preferences.ffmpegPath);
       options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
-
+      if (selectedFormat) {
+        if (audioFormats.includes(selectedFormat)) {
+          options.push("--extract-audio");
+          options.push("--audio-format", selectedFormat);
+        } else {
+          options.push("--recode-video", selectedFormat);
+        }
+        options.push("--no-keep-video");
+      }
       // if (!values.startTime && values.endTime) {
       //   options.push("--download-sections");
       //   options.push(`*0:00-${values.endTime}`);
@@ -258,6 +268,28 @@ export default function DownloadVideo() {
         placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
         {...itemProps.url}
       />
+      <Form.Checkbox id="advanced-options" label="Show advanced options" onChange={setShowAdvancedOptions} />
+      {showAdvancedOptions && (
+        <Form.Dropdown id="format" title="Format" value="{selectedFormat}" onChange={setSelectedFormat}>
+          <Form.Dropdown.Item value="" title="Select Format..." />
+          <Form.Dropdown.Section title="Audio">
+            <Form.Dropdown.Item value="mp3" title="MP3" />
+            <Form.Dropdown.Item value="wav" title="WAV" />
+            <Form.Dropdown.Item value="aac" title="AAC" />
+            <Form.Dropdown.Item value="flac" title="FLAC" />
+            <Form.Dropdown.Item value="ogg" title="OGG" />
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="Video">
+            <Form.Dropdown.Item value="avi" title="AVI" />
+            <Form.Dropdown.Item value="flv" title="FLV" />
+            <Form.Dropdown.Item value="gif" title="GIF" />
+            <Form.Dropdown.Item value="mkv" title="MKV" />
+            <Form.Dropdown.Item value="mov" title="MOV" />
+            <Form.Dropdown.Item value="mp4" title="MP4" />
+            <Form.Dropdown.Item value="webm" title="WebM" />
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      )}
       {/*<Form.Separator />*/}
       {/*<Form.TextField*/}
       {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}

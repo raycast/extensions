@@ -1,5 +1,10 @@
 # YouTube Downloader Changelog
 
+## [Add audio and video format selection] - {PR_MERGE_DATE}
+
+- Add show advanced options checkbox
+- Add audio and video format selection
+
 ## [Improvement] - 2025-02-17
 
 - Add an experimental preference option for forcing IPv4 to solve some network issues
