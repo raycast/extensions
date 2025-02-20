@@ -91,12 +91,8 @@
       "title": "Lastest Download Order",
       "description": "The order of the lastest download",
       "required": false,
-      "default": "birthTime",
+      "default": "modifiedTime",
       "data": [
-        {
-          "title": "Birth Time",
-          "value": "birthTime"
-        },
         {
           "title": "Modified Time",
           "value": "modifiedTime"
@@ -108,6 +104,10 @@
         {
           "title": "Create Time",
           "value": "createTime"
+        },
+        {
+          "title": "Birth Time",
+          "value": "birthTime"
         }
       ]
     }
