@@ -130,9 +130,16 @@
         {
           "name": "hideMenuBarCount",
           "type": "checkbox",
-          "title": "Count",
           "label": "Hide menu bar count",
           "description": "When enabled, the number of tasks in the menu bar won't be shown.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showNextTask",
+          "type": "checkbox",
+          "label": "Show next task as title",
+          "description": "When enabled and no task is focused, displays your next upcoming task in the menu bar title",
           "default": false,
           "required": false
         },
