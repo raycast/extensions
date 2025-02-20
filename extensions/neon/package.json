@@ -35,8 +35,8 @@
   ],
   "dependencies": {
     "@neondatabase/api-client": "^1.11.4",
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

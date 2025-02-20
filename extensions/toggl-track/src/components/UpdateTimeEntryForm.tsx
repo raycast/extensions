@@ -33,6 +33,10 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
   const [billable, setBillable] = useState(timeEntry.billable);
 
   const [taskSearch, setTaskSearch] = useState("");
+  const defaultStartDate = timeEntry.start ? new Date(timeEntry.start) : null;
+  const defaultEndDate = timeEntry.stop ? new Date(timeEntry.stop) : null;
+  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     try {
@@ -43,6 +47,8 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
         billable: values.billable,
         project_id: selectedProject?.id,
         task_id: selectedTask?.id,
+        start: startDate?.toISOString(),
+        stop: endDate?.toISOString(),
         tags: selectedTags,
       });
 
@@ -127,10 +133,16 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
     >
       <Form.TextField id="description" title="Description" autoFocus defaultValue={timeEntry.description} />
 
+      <Form.DatePicker id="start_date" title="Start Date" defaultValue={defaultStartDate} onChange={setStartDate} />
+
+      <Form.DatePicker id="end_date" title="End Date" defaultValue={defaultEndDate} onChange={setEndDate} />
+
+      <Form.Separator />
+
       <Form.Dropdown
         id="client"
         title="Client"
-        defaultValue={selectedClient?.id.toString() || "-1"}
+        value={selectedClient?.id.toString() || "-1"}
         onChange={(clientId) =>
           setSelectedClient(clientId === "-1" ? undefined : clients.find((client) => client.id === parseInt(clientId)))
         }
@@ -148,7 +160,7 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
       <Form.Dropdown
         id="project"
         title="Project"
-        defaultValue={timeEntry.project_id?.toString() || "-1"}
+        value={selectedProject?.id.toString() || "-1"}
         onChange={onProjectChange}
       >
         {!isLoadingProjects && (
@@ -170,9 +182,8 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
         <Form.Dropdown
           id="task"
           title="Task"
-          defaultValue={timeEntry.task_id?.toString() || "-1"}
-          onChange={onTaskChange}
           value={selectedTask?.id.toString() ?? "-1"}
+          onChange={onTaskChange}
           onSearchTextChange={setTaskSearch}
           onBlur={() => setTaskSearch("")}
         >
@@ -188,7 +199,9 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
         </Form.Dropdown>
       )}
 
-      {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
+      {selectedProject?.billable && (
+        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
+      )}
 
       <Form.TagPicker id="tags" title="Tags" onChange={setSelectedTags} value={selectedTags}>
         {tags

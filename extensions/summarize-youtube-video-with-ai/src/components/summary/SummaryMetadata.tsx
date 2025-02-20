@@ -10,7 +10,7 @@ type SummaryMetadataProps = {
 };
 
 enum CommandNames {
-  "summarizeVideoWithRaycast" = "RaycastAI",
+  "summarizeVideoWithRaycast" = "Raycast",
   "summarizeVideoWithAnthropic" = "Anthropic",
   "summarizeVideoWithOpenAI" = "OpenAI",
 }

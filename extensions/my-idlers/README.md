@@ -18,8 +18,10 @@ This is a Raycast extension for [MyIdlers](https://github.com/cp6/my-idlers) - a
 
 ## ⚙️ Configuration
 
-At the moment, MyIdlers does not have a setting for "Unlimited" but some services offer "Unlimited" items e.g. _unlimited domains in hosting_. You can `check` "max_num_as_unlimited" and this will replace the max num of 999999 with the word "Unlimited".
+At the moment, MyIdlers does not have a setting for "Unlimited" but some services offer "Unlimited" items e.g. _unlimited domains in hosting_. You can `check` "max_num_as_unlimited" and this will replace the max num of 999999 with the word "Unlimited" (or "Unmetered" for Bandwidth).
 
 ## 🗒️ NOTE
 
-This extension is tested to work with `Version 2.3.2`.
+This extension is tested to work with the following versions:
+- `2.3.2`
+- `3.0.0`
