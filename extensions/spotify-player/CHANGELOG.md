@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - {PR_MERGE_DATE}
+
+- Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
+
 ## [Add Copy Embed Code Command] - 2025-02-20
 
 - Added a new command to copy the iframe embed code for the currently playing song.
