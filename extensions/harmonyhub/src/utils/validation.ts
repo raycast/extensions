@@ -1,31 +1,44 @@
-import { Logger } from "../services/logger";
-import { ErrorCategory, HarmonyError } from "../types/errors";
-import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand, CommandRequest } from "../types/harmony";
-import { RetryConfig, TimeoutConfig } from "../types/preferences";
+/**
+ * Validation utilities for Harmony Hub types and data
+ * @module
+ */
+
+import { debug } from "../services/logger";
+import { HarmonyError } from "../types/core/errors";
+import { ErrorCategory } from "../types/core/harmony";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity, HarmonyCommand } from "../types/core/harmony";
 
 /**
  * Type guard for checking if a value is a non-empty string
+ * @param value - The value to check
+ * @returns True if the value is a non-empty string, false otherwise
  */
 export function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
 /**
- * Checks if a value is a positive number
+ * Type guard for checking if a value is a positive number
+ * @param value - The value to check
+ * @returns True if the value is a positive number, false otherwise
  */
-function isPositiveNumber(value: number): boolean {
+export function isPositiveNumber(value: unknown): value is number {
   return typeof value === "number" && !isNaN(value) && value > 0;
 }
 
 /**
- * Checks if a value is a valid port number
+ * Type guard for checking if a value is a valid port number
+ * @param value - The value to check
+ * @returns True if the value is a valid port number (1-65535), false otherwise
  */
-function isValidPort(value: number): boolean {
+export function isValidPort(value: unknown): value is number {
   return isPositiveNumber(value) && value <= 65535;
 }
 
 /**
- * Type guard for checking if a value is a valid IP address
+ * Type guard for checking if a value is a valid IPv4 address
+ * @param value - The value to check
+ * @returns True if the value is a valid IPv4 address, false otherwise
  */
 export function isValidIpAddress(value: unknown): value is string {
   if (!isNonEmptyString(value)) return false;
@@ -39,6 +52,8 @@ export function isValidIpAddress(value: unknown): value is string {
 
 /**
  * Type guard for checking if a value is a valid command group
+ * @param value - The value to check
+ * @returns True if the value is a valid command group, false otherwise
  */
 export function isValidCommandGroup(value: unknown): value is string {
   if (!isNonEmptyString(value)) return false;
@@ -48,22 +63,63 @@ export function isValidCommandGroup(value: unknown): value is string {
 
 /**
  * Validate Harmony Hub configuration
+ * Throws an error if the hub configuration is invalid
+ * @param hub - The hub configuration to validate
+ * @throws {HarmonyError} If any required fields are missing or invalid
  */
-export function validateHubConfig(hub: HarmonyHub): void {
-  if (!hub.ip) {
-    throw new HarmonyError("Hub IP address is required", ErrorCategory.CONNECTION);
+export function validateHubConfig(hub: Partial<HarmonyHub>): asserts hub is HarmonyHub {
+  if (!isNonEmptyString(hub.id)) {
+    throw new HarmonyError(
+      "Hub ID is required",
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_HUB_ID",
+    );
   }
 
-  const port = typeof hub.port === "number" ? hub.port : parseInt(hub.port as string, 10);
-  if (hub.port !== undefined && !isValidPort(port)) {
-    throw new HarmonyError(`Invalid port number: ${hub.port}`, ErrorCategory.CONNECTION);
+  if (!isNonEmptyString(hub.name)) {
+    throw new HarmonyError(
+      "Hub name is required",
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_HUB_NAME",
+    );
   }
 
-  Logger.debug("Hub config validation passed", { hub });
+  if (!isValidIpAddress(hub.ip)) {
+    throw new HarmonyError(
+      "Invalid hub IP address",
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_HUB_IP",
+    );
+  }
+
+  if (hub.port !== undefined && !isValidPort(hub.port)) {
+    throw new HarmonyError(
+      "Invalid hub port",
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_HUB_PORT",
+    );
+  }
+
+  debug("Hub config validation passed", { hub });
 }
 
 /**
  * Validate Harmony device configuration
+ * Throws an error if the device configuration is invalid
+ * @param device - The device configuration to validate
+ * @throws {HarmonyError} If any required fields are missing or invalid
  */
 export function validateDevice(device: Partial<HarmonyDevice>): asserts device is HarmonyDevice {
   if (!isNonEmptyString(device.id)) {
@@ -110,7 +166,7 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
     );
   }
 
-  device.commands.forEach((command: HarmonyCommand, index: number) => {
+  device.commands.forEach((command, index) => {
     if (!isNonEmptyString(command.id)) {
       throw new HarmonyError(
         `Invalid command ID at index ${index}`,
@@ -156,11 +212,14 @@ export function validateDevice(device: Partial<HarmonyDevice>): asserts device i
     }
   });
 
-  Logger.debug("Device validation passed", { device });
+  debug("Device validation passed", { device });
 }
 
 /**
  * Validate Harmony activity configuration
+ * Throws an error if the activity configuration is invalid
+ * @param activity - The activity configuration to validate
+ * @throws {HarmonyError} If any required fields are missing or invalid
  */
 export function validateActivity(activity: Partial<HarmonyActivity>): asserts activity is HarmonyActivity {
   if (!isNonEmptyString(activity.id)) {
@@ -207,82 +266,14 @@ export function validateActivity(activity: Partial<HarmonyActivity>): asserts ac
     );
   }
 
-  Logger.debug("Activity validation passed", { activity });
+  debug("Activity validation passed", { activity });
 }
 
 /**
- * Validate command request
- */
-export function validateCommandRequest(request: Partial<CommandRequest>): asserts request is CommandRequest {
-  if (!request) {
-    throw new HarmonyError("Command request is required", ErrorCategory.VALIDATION);
-  }
-
-  if (!request.command || !isNonEmptyString(request.command.deviceId)) {
-    throw new HarmonyError("Command request must include deviceId", ErrorCategory.VALIDATION);
-  }
-
-  if (!isNonEmptyString(request.command.name)) {
-    throw new HarmonyError("Command request must include command name", ErrorCategory.VALIDATION);
-  }
-}
-
-/**
- * Validates a retry configuration object
- */
-export function validateRetryConfig(config: RetryConfig): void {
-  if (!isPositiveNumber(config.maxAttempts)) {
-    throw new HarmonyError("maxAttempts must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.baseDelay)) {
-    throw new HarmonyError("baseDelay must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.maxDelay)) {
-    throw new HarmonyError("maxDelay must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (typeof config.useExponentialBackoff !== "boolean") {
-    throw new HarmonyError("useExponentialBackoff must be a boolean", ErrorCategory.VALIDATION);
-  }
-
-  if (config.maxRetryDuration !== undefined && !isPositiveNumber(config.maxRetryDuration)) {
-    throw new HarmonyError("maxRetryDuration must be a positive number", ErrorCategory.VALIDATION);
-  }
-}
-
-/**
- * Validates a timeout configuration object
- */
-export function validateTimeoutConfig(config: TimeoutConfig): void {
-  if (!isPositiveNumber(config.connection)) {
-    throw new HarmonyError("connection timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.message)) {
-    throw new HarmonyError("message timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.activity)) {
-    throw new HarmonyError("activity timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.command)) {
-    throw new HarmonyError("command timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.discovery)) {
-    throw new HarmonyError("discovery timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-
-  if (!isPositiveNumber(config.cache)) {
-    throw new HarmonyError("cache timeout must be a positive number", ErrorCategory.VALIDATION);
-  }
-}
-
-/**
- * Validate Harmony command
+ * Validate Harmony command configuration
+ * Throws an error if the command configuration is invalid
+ * @param command - The command configuration to validate
+ * @throws {HarmonyError} If any required fields are missing or invalid
  */
 export function validateCommand(command: Partial<HarmonyCommand>): asserts command is HarmonyCommand {
   if (!isNonEmptyString(command.id)) {
@@ -307,9 +298,20 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
     );
   }
 
+  if (!isNonEmptyString(command.label)) {
+    throw new HarmonyError(
+      "Command label is required",
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_COMMAND_LABEL",
+    );
+  }
+
   if (!isNonEmptyString(command.deviceId)) {
     throw new HarmonyError(
-      "Device ID is required",
+      "Command device ID is required",
       ErrorCategory.VALIDATION,
       undefined,
       undefined,
@@ -329,5 +331,179 @@ export function validateCommand(command: Partial<HarmonyCommand>): asserts comma
     );
   }
 
-  Logger.debug("Command validation passed", { command });
+  debug("Command validation passed", { command });
+}
+
+/**
+ * Validates a numeric preference value
+ * @param value - The value to validate
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @param name - Name of the preference for error messages
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateNumericPreference(
+  value: unknown,
+  min: number,
+  max: number,
+  name: string,
+): asserts value is number {
+  if (typeof value !== "number" || isNaN(value)) {
+    throw new HarmonyError(
+      `${name} must be a number`,
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_NUMERIC_PREFERENCE",
+      { type: typeof value },
+    );
+  }
+
+  if (value < min || value > max) {
+    throw new HarmonyError(
+      `${name} must be between ${min} and ${max}`,
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "NUMERIC_PREFERENCE_OUT_OF_RANGE",
+      { min, max },
+    );
+  }
+
+  debug(`Validated ${name}`, { value, min, max });
+}
+
+/**
+ * Validates a string preference value
+ * @param value - The value to validate
+ * @param allowedValues - List of allowed values
+ * @param name - Name of the preference for error messages
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateStringPreference(
+  value: unknown,
+  allowedValues: readonly string[],
+  name: string,
+): asserts value is string {
+  if (typeof value !== "string") {
+    throw new HarmonyError(
+      `${name} must be a string`,
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_STRING_PREFERENCE",
+      { type: typeof value },
+    );
+  }
+
+  if (!allowedValues.includes(value)) {
+    throw new HarmonyError(
+      `${name} must be one of: ${allowedValues.join(", ")}`,
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "STRING_PREFERENCE_NOT_ALLOWED",
+      { allowedValues },
+    );
+  }
+
+  debug(`Validated ${name}`, { value, allowedValues });
+}
+
+/**
+ * Validates a boolean preference value
+ * @param value - The value to validate
+ * @param name - Name of the preference for error messages
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateBooleanPreference(value: unknown, name: string): asserts value is boolean {
+  if (typeof value !== "boolean") {
+    throw new HarmonyError(
+      `${name} must be a boolean`,
+      ErrorCategory.VALIDATION,
+      undefined,
+      undefined,
+      false,
+      "INVALID_BOOLEAN_PREFERENCE",
+      { type: typeof value },
+    );
+  }
+
+  debug(`Validated ${name}`, { value });
+}
+
+/**
+ * Validates the default view preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateDefaultView(value: unknown): asserts value is string {
+  validateStringPreference(value, ["devices", "activities", "commands"], "Default view");
+}
+
+/**
+ * Validates the command display mode preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateCommandDisplayMode(value: unknown): asserts value is string {
+  validateStringPreference(value, ["list", "grid"], "Command display mode");
+}
+
+/**
+ * Validates the command grid columns preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateCommandGridColumns(value: unknown): asserts value is number {
+  validateNumericPreference(value, 2, 6, "Command grid columns");
+}
+
+/**
+ * Validates the auto-connect preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateAutoConnect(value: unknown): asserts value is boolean {
+  validateBooleanPreference(value, "Auto-connect");
+}
+
+/**
+ * Validates the show toast notifications preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateShowToasts(value: unknown): asserts value is boolean {
+  validateBooleanPreference(value, "Show toast notifications");
+}
+
+/**
+ * Validates the discovery timeout preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateDiscoveryTimeout(value: unknown): asserts value is number {
+  validateNumericPreference(value, 1000, 30000, "Discovery timeout");
+}
+
+/**
+ * Validates the command execution timeout preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateCommandTimeout(value: unknown): asserts value is number {
+  validateNumericPreference(value, 100, 5000, "Command execution timeout");
+}
+
+/**
+ * Validates the activity change timeout preference
+ * @param value - The value to validate
+ * @throws {HarmonyError} If the value is invalid
+ */
+export function validateActivityTimeout(value: unknown): asserts value is number {
+  validateNumericPreference(value, 1000, 30000, "Activity change timeout");
 }

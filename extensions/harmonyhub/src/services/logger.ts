@@ -1,163 +1,209 @@
-import { getPreferenceValues } from "@raycast/api";
+/**
+ * Logging service for Harmony Hub integration.
+ * Provides structured logging with levels, history, and formatting.
+ * @module
+ */
 
-import { LogLevel, LogEntry, ILogger, LoggerOptions } from "../types/logging";
-
-interface Preferences {
-  debugLogging: boolean;
-}
+import { LogLevel, LogEntry, LoggerOptions, ILogger } from "../types/core/logging";
 
 /**
- * Logger implementation with static methods for application-wide logging.
- * Follows singleton pattern to ensure consistent logging across the application.
+ * Default logger configuration
  */
-export class Logger implements ILogger {
-  private static instance: Logger | null = null;
-  private readonly options: LoggerOptions;
-  private logHistory: LogEntry[] = [];
+const DEFAULT_OPTIONS: LoggerOptions = {
+  minLevel: LogLevel.INFO,
+  maxEntries: 1000,
+  includeTimestamp: true,
+  includeLevel: true,
+};
 
-  private constructor(options: Partial<LoggerOptions> = {}) {
-    const prefs = getPreferenceValues<Preferences>();
-    this.options = {
-      minLevel: prefs.debugLogging ? LogLevel.DEBUG : LogLevel.INFO,
-      maxEntries: options.maxEntries || 1000,
-    };
-  }
+/**
+ * Service for structured logging in the Harmony extension.
+ * Supports multiple log levels, history tracking, and configurable formatting.
+ */
+class LoggerImpl implements ILogger {
+  /** Current logger configuration */
+  private options: LoggerOptions = DEFAULT_OPTIONS;
+  /** Log history */
+  private history: LogEntry[] = [];
 
-  /**
-   * Get singleton instance of Logger
-   */
-  private static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
+  /** Singleton instance */
+  private static instance: LoggerImpl | null = null;
+
+  /** Get the singleton instance */
+  public static getInstance(): LoggerImpl {
+    if (!LoggerImpl.instance) {
+      LoggerImpl.instance = new LoggerImpl();
     }
-    return Logger.instance;
+    return LoggerImpl.instance;
+  }
+
+  private constructor() {
+    // Bind all methods to this instance
+    this.debug = this.debug.bind(this);
+    this.info = this.info.bind(this);
+    this.warn = this.warn.bind(this);
+    this.error = this.error.bind(this);
+    this.logError = this.logError.bind(this);
+    this.getHistory = this.getHistory.bind(this);
+    this.clearHistory = this.clearHistory.bind(this);
+    this.setMinLevel = this.setMinLevel.bind(this);
+    this.configure = this.configure.bind(this);
   }
 
   /**
-   * Format a log message with timestamp and context
+   * Configure the logger.
+   * Updates logger settings while preserving existing log history.
+   * @param options - New logger options
    */
-  private static formatMessage(level: LogLevel, message: string, ...args: unknown[]): string {
-    const timestamp = new Date().toISOString();
-    const formattedArgs = args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ");
-    return `[${timestamp}] [${LogLevel[level]}] ${message} ${formattedArgs}`;
+  configure(options: Partial<LoggerOptions>): void {
+    this.options = { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
-   * Format a log message with timestamp and context
+   * Log a debug message.
+   * Only logs if minimum level is DEBUG.
+   * @param message - Message to log
+   * @param data - Optional data to include
    */
-  private formatMessage(level: LogLevel, message: string, data?: unknown): LogEntry {
-    const formattedMessage = Logger.formatMessage(level, message, data);
-    return {
-      level,
-      message: formattedMessage,
-      timestamp: new Date().toISOString(),
-    };
+  debug(message: string, data?: unknown): void {
+    this.log(LogLevel.DEBUG, message, data);
   }
 
   /**
-   * Log at DEBUG level
+   * Log an info message.
+   * Only logs if minimum level is INFO or lower.
+   * @param message - Message to log
+   * @param data - Optional data to include
    */
-  public debug(message: string, data?: unknown): void {
-    if (this.options.minLevel! <= LogLevel.DEBUG) {
-      this.formatMessage(LogLevel.DEBUG, message, data);
-    }
+  info(message: string, data?: unknown): void {
+    this.log(LogLevel.INFO, message, data);
   }
 
   /**
-   * Log at INFO level
+   * Log a warning message.
+   * Only logs if minimum level is WARN or lower.
+   * @param message - Message to log
+   * @param data - Optional data to include
    */
-  public info(message: string, data?: unknown): void {
-    if (this.options.minLevel! <= LogLevel.INFO) {
-      const entry = this.formatMessage(LogLevel.INFO, message, data);
-      console.info(entry.message);
-    }
+  warn(message: string, data?: unknown): void {
+    this.log(LogLevel.WARN, message, data);
   }
 
   /**
-   * Log at WARN level
+   * Log an error message.
+   * Only logs if minimum level is ERROR or lower.
+   * @param message - Message to log
+   * @param data - Optional data to include
    */
-  public warn(message: string, data?: unknown): void {
-    if (this.options.minLevel! <= LogLevel.WARN) {
-      const entry = this.formatMessage(LogLevel.WARN, message, data);
-      console.warn(entry.message);
-    }
+  error(message: string, data?: unknown): void {
+    this.log(LogLevel.ERROR, message, data);
   }
 
   /**
-   * Log at ERROR level
+   * Log an error with full stack trace.
+   * Includes error details and optional context.
+   * @param error - Error to log
+   * @param context - Optional context information
    */
-  public error(message: string, data?: unknown): void {
-    if (this.options.minLevel! <= LogLevel.ERROR) {
-      const entry = this.formatMessage(LogLevel.ERROR, message, data);
-      console.error(entry.message);
-    }
-  }
-
-  /**
-   * Log an error with stack trace
-   */
-  public logError(error: Error, context?: string): void {
+  logError(error: Error, context?: string): void {
     const message = context ? `${context}: ${error.message}` : error.message;
-    const data = {
+    this.error(message, {
       name: error.name,
       stack: error.stack,
-      error: error,
-    };
-    this.error(message, data);
+      context,
+    });
   }
 
   /**
-   * Get log history
+   * Get the current log history.
+   * Returns a copy of the log entries.
+   * @returns Array of log entries
    */
-  public getHistory(): LogEntry[] {
-    return this.logHistory;
+  getHistory(): LogEntry[] {
+    return [...this.history];
   }
 
   /**
-   * Clear log history
+   * Clear the log history.
+   * Removes all stored log entries.
    */
-  public clearHistory(): void {
-    this.logHistory = [];
+  clearHistory(): void {
+    this.history = [];
   }
 
   /**
-   * Set minimum log level
+   * Set the minimum log level.
+   * Updates which messages will be logged.
+   * @param level - New minimum log level
    */
-  public setMinLevel(level: LogLevel): void {
+  setMinLevel(level: LogLevel): void {
     this.options.minLevel = level;
   }
 
-  // Static methods that delegate to instance methods
+  /**
+   * Internal method to create a log entry.
+   * Formats and stores the log entry based on configuration.
+   * @param level - Log level
+   * @param message - Log message
+   * @param data - Optional data to include
+   * @private
+   */
+  private log(level: LogLevel, message: string, data?: unknown): void {
+    if (level < (this.options.minLevel ?? LogLevel.INFO)) {
+      return;
+    }
 
-  public static debug(message: string, data?: unknown): void {
-    Logger.getInstance().debug(message, data);
+    const entry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      data,
+    };
+
+    this.history.push(entry);
+
+    // Trim history if it exceeds max entries
+    if (this.options.maxEntries && this.history.length > this.options.maxEntries) {
+      this.history = this.history.slice(-this.options.maxEntries);
+    }
+
+    // Log to console in development
+    if (process.env.NODE_ENV === "development") {
+      const prefix = this.formatPrefix(entry);
+      console.log(prefix, message, data ? data : "");
+    }
   }
 
-  public static info(message: string, data?: unknown): void {
-    Logger.getInstance().info(message, data);
-  }
+  /**
+   * Format the prefix for a log entry.
+   * Includes timestamp and level based on configuration.
+   * @param entry - Log entry to format
+   * @returns Formatted prefix string
+   * @private
+   */
+  private formatPrefix(entry: LogEntry): string {
+    const parts: string[] = [];
 
-  public static warn(message: string, data?: unknown): void {
-    Logger.getInstance().warn(message, data);
-  }
+    if (this.options.includeTimestamp) {
+      parts.push(entry.timestamp);
+    }
 
-  public static error(message: string, data?: unknown): void {
-    Logger.getInstance().error(message, data);
-  }
+    if (this.options.includeLevel) {
+      parts.push(`[${LogLevel[entry.level]}]`);
+    }
 
-  public static logError(error: Error, context?: string): void {
-    Logger.getInstance().logError(error, context);
-  }
-
-  public static getLogHistory(): LogEntry[] {
-    return Logger.getInstance().getHistory();
-  }
-
-  public static clearLogHistory(): void {
-    Logger.getInstance().clearHistory();
-  }
-
-  public static setLogLevel(level: LogLevel): void {
-    Logger.getInstance().setMinLevel(level);
+    return parts.join(" ");
   }
 }
+
+// Create and export the singleton instance
+const logger = LoggerImpl.getInstance();
+
+// Export the logger type for type checking
+export type LoggerType = typeof LoggerImpl;
+
+// Export the logger class for type checking
+export const Logger = LoggerImpl;
+
+// Export the logger instance methods for convenience
+export const { debug, info, warn, error, logError, getHistory, clearHistory, setMinLevel, configure } = logger;
