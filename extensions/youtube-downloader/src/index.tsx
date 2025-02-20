@@ -147,7 +147,10 @@ export default function DownloadVideo() {
       if (!url) return;
       if (!isYouTubeURL(url)) return;
 
-      const result = await nanoSpawn(preferences.ytdlPath, ["-j", url]);
+      const result = await nanoSpawn(
+        preferences.ytdlPath,
+        [preferences.forceIpv4 ? "--force-ipv4" : undefined, "-j", url].filter((x) => Boolean(x)),
+      );
       return JSON.parse(result.stdout) as {
         title: string;
         duration: number;
@@ -185,28 +188,33 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     (async () => {
-      const clipboardText = await Clipboard.readText();
-      if (clipboardText && isYouTubeURL(clipboardText)) {
-        setValue("url", clipboardText);
-        return;
-      }
-
-      try {
-        const selectedText = await getSelectedText();
-        if (selectedText && isYouTubeURL(selectedText)) {
-          setValue("url", selectedText);
+      if (preferences.autoLoadUrlFromClipboard) {
+        const clipboardText = await Clipboard.readText();
+        if (clipboardText && isYouTubeURL(clipboardText)) {
+          setValue("url", clipboardText);
           return;
         }
-      } catch {
-        // Suppress the error if Raycast didn't find any selected text
       }
 
-      try {
-        if (!preferences.enableBrowserExtensionSupport) return;
-        const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-        if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
-      } catch {
-        // Suppress the error if Raycast didn't find browser extension
+      if (preferences.autoLoadUrlFromSelectedText) {
+        try {
+          const selectedText = await getSelectedText();
+          if (selectedText && isYouTubeURL(selectedText)) {
+            setValue("url", selectedText);
+            return;
+          }
+        } catch {
+          // Suppress the error if Raycast didn't find any selected text
+        }
+      }
+
+      if (preferences.enableBrowserExtensionSupport) {
+        try {
+          const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
+          if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+        } catch {
+          // Suppress the error if Raycast didn't find browser extension
+        }
       }
     })();
   }, []);
@@ -277,6 +285,8 @@ This extension depends on a command-line utilty that is not detected on your sys
 
 If you have homebrew installed, simply press **⏎** to have this extension install it for you. Since \`${executable}\` is a heavy library, 
 **it can take up 2 minutes to install**.
+
+**Please do not close Raycast while the installation is in progress.**
 
 To install homebrew, visit [this link](https://brew.sh)
   `}

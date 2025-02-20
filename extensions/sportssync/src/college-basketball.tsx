@@ -83,14 +83,19 @@ export default function scoresAndSchedule() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${mncaaGame.links[0].href}`} />
-            <Action.OpenInBrowser
-              title="View Away Team Details"
-              url={`${mncaaGame.competitions[0].competitors[1].team.links[0].href}`}
-            />
-            <Action.OpenInBrowser
-              title="View Home Team Details"
-              url={`${mncaaGame.competitions[0].competitors[0].team.links[0].href}`}
-            />
+
+            {mncaaGame.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={`${mncaaGame.competitions[0].competitors[1].team.links[0].href}`}
+              />
+            )}
+            {mncaaGame.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={`${mncaaGame.competitions[0].competitors[0].team.links[0].href}`}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -140,14 +145,18 @@ export default function scoresAndSchedule() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${wncaaGame.links[0].href}`} />
-            <Action.OpenInBrowser
-              title="View Away Team Details"
-              url={`${wncaaGame.competitions[0].competitors[1].team.links[0].href}`}
-            />
-            <Action.OpenInBrowser
-              title="View Home Team Details"
-              url={`${wncaaGame.competitions[0].competitors[0].team.links[0].href}`}
-            />
+            {wncaaGame.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={`${wncaaGame.competitions[0].competitors[1].team.links[0].href}`}
+              />
+            )}
+            {wncaaGame.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={`${wncaaGame.competitions[0].competitors[0].team.links[0].href}`}
+              />
+            )}
           </ActionPanel>
         }
       />
