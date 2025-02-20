@@ -1,6 +1,6 @@
 # Raycast Notification Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-20
 
 - Add `check-prebuilds` script for validating prebuilds
 - Bump all dependencies to the latest
