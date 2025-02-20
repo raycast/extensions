@@ -47,22 +47,86 @@
       "description": "Duration to hold a command in milliseconds",
       "default": "100",
       "label": "Command Hold Time (ms)"
+    },
+    {
+      "name": "cacheDuration",
+      "type": "textfield",
+      "required": false,
+      "title": "Cache Duration",
+      "description": "Duration to cache hub data in seconds (default: 3600 = 1 hour)",
+      "default": "3600",
+      "label": "Cache Duration (seconds)"
+    },
+    {
+      "name": "debugLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Logging",
+      "description": "Enable debug level logging",
+      "default": true,
+      "label": "Enable Debug Logging"
+    },
+    {
+      "name": "networkTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Network Timeout",
+      "description": "Network request timeout (in milliseconds)",
+      "default": "5000",
+      "label": "Network Timeout (ms)"
+    },
+    {
+      "name": "debugMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Mode",
+      "description": "Enable debug logging",
+      "default": true,
+      "label": "Enable Debug Mode"
+    },
+    {
+      "name": "autoRetry",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Retry",
+      "description": "Automatically retry failed requests",
+      "default": true,
+      "label": "Enable Auto Retry"
+    },
+    {
+      "name": "maxRetries",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Retries",
+      "description": "Maximum number of retry attempts",
+      "default": "3",
+      "label": "Max Retries"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.17.0"
+    "@harmonyhub/client-ws": "^1.0.9",
+    "@harmonyhub/discover": "^1.0.9",
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.10.1",
+    "node-machine-id": "^1.1.12",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0",
+    "xstate": "^5.19.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.5.14",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.51.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
