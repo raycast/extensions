@@ -40,8 +40,10 @@ const config = {
   },
 };
 
+export type VideoOutputFormats = keyof typeof config.ffmpegOptions;
+
 // Audio configuration
-const audioConfig = {
+export const audioConfig = {
   mp3: {
     audioCodec: "libmp3lame",
     fileExtension: ".mp3",
@@ -59,6 +61,8 @@ const audioConfig = {
     fileExtension: ".flac",
   },
 };
+
+export type AudioOutputFormats = keyof typeof audioConfig;
 
 // Image configuration
 interface ImageFormatConfig {
@@ -98,7 +102,9 @@ const imageConfig: Record<string, ImageFormatConfig> = {
   },
 };
 
-function getUniqueOutputPath(filePath: string, extension: string): string {
+export type ImageOutputFormats = "jpg" | "png" | "webp" | "heic" | "tiff";
+
+export function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
   let finalOutputPath = outputFilePath;
   let counter = 1;
