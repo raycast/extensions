@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise, useCachedPromise, useForm, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, MutatePromise, useCachedPromise, useForm, usePromise } from "@raycast/utils";
 import { neon } from "./neon";
 import { OpenInNeon } from "./components";
-import { formatBytes } from "./utils";
+import { formatBytes, formatDate } from "./utils";
 import {ListComputes} from "./views/computes";
 import { RolesAndDatabases } from "./views/roles-and-databases";
 import { ProjectListItem } from "@neondatabase/api-client";
@@ -38,7 +38,8 @@ export default function ListProjects() {
                 title="View Project Branches"
                 target={<ProjectBranches id={project.id} />}
               />
-              <Action.Push icon={Icon.Pencil} title="Update Project" target={<UpdateProject project={project} mutate={mutate} />} />
+              <Action.Push icon={{ source: "monitoring.svg", tintColor: Color.PrimaryText }} title="Monitoring" target={<ProjectMonitoring project={project} />} />
+              <Action.Push icon={Icon.Pencil} title="Update Project" target={<UpdateProject project={project} mutate={mutate} />} shortcut={Keyboard.Shortcut.Common.Edit} />
               <OpenInNeon route={`projects/${project.id}`} />
             </ActionPanel>
           }
@@ -83,6 +84,19 @@ function ProjectBranches({ id }: { id: string }) {
   );
 }
 
+function ProjectMonitoring({project}: {project: ProjectListItem}) {
+  const { isLoading, data: operations } = usePromise(async () => {
+    const res = await neon.listProjectOperations({ projectId: project.id });
+    return res.data.operations;
+  })
+  return <List isLoading={isLoading}>
+    {operations?.map(operation => <List.Item key={operation.id} title={operation.action} subtitle={operation.endpoint_id} accessories={[
+      { text: `Duration: ${operation.total_duration_ms} ms` },
+      { date: new Date(operation.updated_at), tooltip: `Date: ${formatDate(operation.updated_at)}` },
+    ]} />)}
+  </List>
+}
+
 function UpdateProject({project, mutate}: {project: ProjectListItem, mutate: MutatePromise<ProjectListItem[]>}) {
   const {pop} = useNavigation();
   type FormValues = {
@@ -115,6 +129,9 @@ function UpdateProject({project, mutate}: {project: ProjectListItem, mutate: Mut
     initialValues: {
       name: project.name,
       enable_logical_replication: project.settings?.enable_logical_replication
+    },
+    validation: {
+      name: FormValidation.Required
     }
   })
 
