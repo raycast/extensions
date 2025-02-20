@@ -1,5 +1,10 @@
 # Raycast Notification Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Add `check-prebuilds` script for validating prebuilds
+- Bump all dependencies to the latest
+
 ## [New Features] - 2024-12-16
 
 - Add support for macOS Notification Center notifier (even the Reply-from-Notification feature)
