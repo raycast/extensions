@@ -61,10 +61,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -127,10 +123,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -193,10 +185,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -259,10 +247,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -325,10 +309,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -391,10 +371,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -473,10 +449,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -556,10 +528,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -623,10 +591,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -690,10 +654,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -757,10 +717,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -824,10 +780,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -891,10 +843,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -958,10 +906,6 @@
             {
               "value": "gemma2-9b-it",
               "title": "Gemma2 9B 8k"
-            },
-            {
-              "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -1016,10 +960,6 @@
         {
           "value": "gemma2-9b-it",
           "title": "Gemma2 9B 8k"
-        },
-        {
-          "value": "gemma-7b-it",
-          "title": "Gemma 7B 8k"
         }
       ]
     },

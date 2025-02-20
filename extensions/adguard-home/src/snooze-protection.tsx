@@ -36,10 +36,6 @@ export default function Command() {
         return;
       }
 
-      if (diff % (5 * 1000) === 0) {
-        fetchStatus();
-      }
-
       const seconds = Math.floor(diff / 1000);
       const hours = Math.floor(seconds / 3600);
       const minutes = Math.floor((seconds % 3600) / 60);
@@ -52,9 +48,16 @@ export default function Command() {
           ? `${minutes}m ${remainingSeconds}s`
           : `${remainingSeconds}s`;
       setRemainingTime(newRemainingTime);
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(interval);
+  }, [snoozeEndTime]);
+
+  useEffect(() => {
+    if (!snoozeEndTime) return;
+
+    const statusInterval = setInterval(fetchStatus, 5000);
+    return () => clearInterval(statusInterval);
   }, [snoozeEndTime]);
 
   async function fetchStatus() {
@@ -112,10 +115,10 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       <List.Item
-        title="Current Status"
+        title="Protection Status"
         icon={{
-          source: status?.protection_enabled ? Icon.CheckCircle : Icon.Clock,
-          tintColor: status?.protection_enabled ? Color.Green : Color.Orange,
+          source: status?.protection_enabled ? Icon.CheckCircle : remainingTime ? Icon.Clock : Icon.XMarkCircle,
+          tintColor: status?.protection_enabled ? Color.Green : remainingTime ? Color.Orange : Color.Red,
         }}
         accessories={[
           {
@@ -125,8 +128,8 @@ export default function Command() {
               ? `Disabled (${remainingTime} remaining)`
               : "Protection Disabled",
             icon: {
-              source: status?.protection_enabled ? Icon.CheckCircle : Icon.Clock,
-              tintColor: status?.protection_enabled ? Color.Green : Color.Orange,
+              source: status?.protection_enabled ? Icon.CheckCircle : remainingTime ? Icon.Clock : Icon.XMarkCircle,
+              tintColor: status?.protection_enabled ? Color.Green : remainingTime ? Color.Orange : Color.Red,
             },
           },
         ]}

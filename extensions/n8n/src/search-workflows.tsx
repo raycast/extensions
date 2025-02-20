@@ -1,16 +1,15 @@
 import { Color, getPreferenceValues, List } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 import { getAllWorkflows, getIsShowDetail } from "./hooks/hooks";
 import { ActionOnWorkflow } from "./components/action-on-workflow";
 import { EmptyView } from "./components/empty-view";
-import { Preferences } from "./types/preferences";
 import { AppNotInstallView } from "./components/app-not-install-view";
 import { appInstalled } from "./utils/common-utils";
 import { DetailView } from "./components/detail-view";
 import { filterTag } from "./utils/constants";
 
 export default function SearchAllBunches() {
-  const { rememberFilter } = getPreferenceValues<Preferences>();
+  const { rememberFilter } = getPreferenceValues<Preferences.SearchWorkflows>();
   const [filter, setFilter] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
   const [refreshDetail, setRefreshDetail] = useState<number>(0);

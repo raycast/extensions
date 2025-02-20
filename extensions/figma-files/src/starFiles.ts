@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { File } from "./types";
+import type { File } from "./types";
 const STARRED_FILES_KEY = "starred-files";
 const STARRED_FILES_LIMIT = 10;
 
@@ -8,9 +8,8 @@ export async function loadStarredFiles() {
   if (item) {
     const parsed = JSON.parse(item) as File[];
     return parsed;
-  } else {
-    return [];
   }
+  return [];
 }
 
 export async function saveStarredFile(file: File) {

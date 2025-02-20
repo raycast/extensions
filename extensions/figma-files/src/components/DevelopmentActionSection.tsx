@@ -1,4 +1,4 @@
-import { ActionPanel, showToast, Toast, environment, Icon, Action } from "@raycast/api";
+import { Action, ActionPanel, Icon, Toast, environment, showToast } from "@raycast/api";
 import { clearFiles } from "../cache";
 import { clearVisitedFiles } from "../hooks/useVisitedFiles";
 
