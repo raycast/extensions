@@ -11,14 +11,14 @@ import { promisify } from "util";
 const exec = promisify(Exec);
 interface Preferences {
   layoutSwitchModifier: string;
-  enLayoutName: string;
-  ruLayoutName: string;
+  latLayoutName: string;
+  cyrLayoutName: string;
   showSuccessHUD: boolean;
 }
 
 enum Layout {
-  EN = "EN",
-  RU = "RU",
+  LAT = "LAT",
+  CYR = "CYR",
 }
 
 export default async function main() {
@@ -57,9 +57,9 @@ async function switchKeyboardLayout(
   // console.log("installed layout names are " + languages.join(", "));
   // console.log("target layout is " + targetLayout);
   const targetLayoutName =
-    targetLayout === Layout.EN
-      ? preferences.enLayoutName
-      : preferences.ruLayoutName;
+    targetLayout === Layout.LAT
+      ? preferences.latLayoutName
+      : preferences.cyrLayoutName;
   if (!languages.includes(targetLayoutName)) {
     await showHUD(
       "Layout " +
@@ -108,7 +108,7 @@ function detectLayout(input: string): Layout {
   const array = input.split("");
   const enChars = array.filter((c) => en_ru.has(c)).length;
   const ruChars = array.filter((c) => ru_en.has(c)).length;
-  return enChars > ruChars ? Layout.EN : Layout.RU;
+  return enChars > ruChars ? Layout.LAT : Layout.CYR;
 }
 
 function switchCharacterLayout(char: string): string {

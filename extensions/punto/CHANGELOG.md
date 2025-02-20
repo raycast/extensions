@@ -1,5 +1,9 @@
 # Punto Changelog
 
+## [Ua layout mapping] - 2025-02-04
+
+- Added Ukrainian layout mapping to dropdown
+
 ## [Ru layout mapping] - 2025-02-03
 
 - Replaced ru layout preference with a dropdown to map layout caption with names
