@@ -1,3 +1,3 @@
 # LingoRep Changelog
 
-## [Initial Version] - 2024-05-05
+## [Initial Version] - {PR_MERGE_DATE}

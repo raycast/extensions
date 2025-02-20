@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import axios from "axios";
 import { config } from "./config";
 
 async function get(url: string, jwt?: string): Promise<unknown> {
@@ -6,33 +6,38 @@ async function get(url: string, jwt?: string): Promise<unknown> {
     throw new Error("No JWT provided");
   }
 
-  const response = await fetch(`${config.apiURL}${url}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`GET request failed: ${response.status}`);
+  try {
+    const response = await axios.get(`${config.apiURL}${url}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(`GET request failed: ${error.response.status}`);
+    }
+    throw error;
   }
-  return response.json();
 }
 
-// Define the POST wrapper
-async function post(url: string, body: Record<string, unknown>, jwt: string): Promise<unknown> {
+async function post(url: string, body: unknown, jwt?: string): Promise<unknown> {
   if (!jwt) throw new Error("No JWT provided");
-  const response = await fetch(`${config.apiURL}${url}`, {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`POST request failed: ${response.status}. Response: ${await response.text()}  `);
+
+  try {
+    const response = await axios.post(`${config.apiURL}${url}`, body, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(`POST request failed: ${error.response.status}`);
+    }
+    throw error;
   }
-  return await response.json();
 }
 
 export { get, post };

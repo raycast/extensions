@@ -21,8 +21,15 @@
     }
   ],
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "copy:shared-packages": "./copy-shared-packages.sh",
+    "watch:translate": "chokidar '../../packages/translate/dist/**/*' -c 'npm run copy:shared-packages'",
+    "watch:lang-options": "chokidar '../../packages/lang-options/dist/**/*' -c 'npm run copy:shared-packages'",
+    "watch:shared-packages": "npm-run-all --parallel watch:translate watch:lang-options",
+    "npm:install": "npm install --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast",
+    "npm:uninstall": "npm uninstall --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast",
+    "build": "npm run npm:install && ray build -e dist",
+    "dev:raycast": "ray develop",
+    "dev": "npm run npm:install && npm run copy:shared-packages && npm-run-all --parallel watch:shared-packages dev:raycast",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
@@ -33,7 +40,6 @@
     "axios": "1.7.2",
     "hono": "^4.4.2",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2",
     "zod": "3.23.8"
   },
   "devDependencies": {

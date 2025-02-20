@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
-import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
+import { OAuth, showToast, Toast } from "@raycast/api";
+import axios from "axios";
 import { get, post } from "./fetch";
 import { config } from "./config";
 
@@ -55,14 +55,18 @@ async function refreshGoogleTokens(refreshToken: string): Promise<OAuth.TokenRes
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 
-  const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", body: params });
-  if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+  try {
+    const response = await axios.post("https://oauth2.googleapis.com/token", params);
+    const tokenResponse = response.data as OAuth.TokenResponse;
+    tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
+    return tokenResponse;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.error("refresh tokens error:", error.response.data);
+      throw new Error(error.response.statusText);
+    }
+    throw error;
   }
-  const tokenResponse = (await response.json()) as OAuth.TokenResponse;
-  tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
-  return tokenResponse;
 }
 
 export const useIsAuthenticated = () => {
@@ -74,56 +78,64 @@ export const useIsAuthenticated = () => {
   useEffect(() => {
     void (async () => {
       const getJWTAndUserId = async (token: string) => {
-        const response = await fetch(`${config.apiURL}/auth/${authProvider}/get-jwt`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          console.error("Error getting JWT", await response.text());
-          throw new Error(response.statusText);
-        }
-        const tokenResponse = (await response.json()) as { message: string; jwt: string };
-        if (tokenResponse?.jwt) {
-          setJWT(tokenResponse.jwt);
-          const userProfileRes = await fetch(`${config.apiURL}/auth/profile`, {
+        try {
+          const response = await axios.get(`${config.apiURL}/auth/${authProvider}/get-jwt`, {
             headers: {
-              Authorization: `Bearer ${tokenResponse.jwt}`,
+              Authorization: `Bearer ${token}`,
             },
           });
-          if (!userProfileRes.ok) {
-            console.error("Error getting user profile", await userProfileRes.text());
-            throw new Error(userProfileRes.statusText);
+
+          const tokenResponse = response.data as { message: string; jwt: string };
+          if (tokenResponse?.jwt) {
+            setJWT(tokenResponse.jwt);
+            const userProfileRes = await axios.get(`${config.apiURL}/auth/profile`, {
+              headers: {
+                Authorization: `Bearer ${tokenResponse.jwt}`,
+              },
+            });
+            const userProfile = userProfileRes.data as { message: string; user: { id: string } };
+            setUserId(userProfile.user.id);
           }
-          const userProfile = (await userProfileRes.json()) as { message: string; user: { id: string } };
-          setUserId(userProfile.user.id);
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.response) {
+            console.error("Error getting JWT/profile", error.response.data);
+            throw new Error(error.response.statusText);
+          }
+          throw error;
         }
       };
 
-      if (authProvider === "github") {
-        const tokenSet = await githubService.client.getTokens();
-        if (tokenSet && !tokenSet.isExpired()) {
-          setIsAuthenticated(true);
-          await getJWTAndUserId(tokenSet.accessToken);
-        }
-      } else if (authProvider === "google") {
-        let tokenSet = await googleService.client.getTokens();
-        if (tokenSet?.accessToken) {
-          if (tokenSet.refreshToken && tokenSet.isExpired()) {
-            await googleService.client.setTokens(await refreshGoogleTokens(tokenSet.refreshToken));
-          }
-          tokenSet = await googleService.client.getTokens();
-          if (tokenSet?.accessToken && !tokenSet?.isExpired()) {
-            setIsAuthenticated(true);
-            await getJWTAndUserId(tokenSet.accessToken);
-          }
-        }
-      } else {
+      const resetAuth = () => {
         setIsAuthenticated(false);
         setJWT("");
         setUserId("");
+      };
+      try {
+        if (authProvider === "github") {
+          const tokenSet = await githubService.client.getTokens();
+          if (tokenSet && !tokenSet.isExpired()) {
+            setIsAuthenticated(true);
+            await getJWTAndUserId(tokenSet.accessToken);
+          }
+        } else if (authProvider === "google") {
+          let tokenSet = await googleService.client.getTokens();
+          if (tokenSet?.accessToken) {
+            if (tokenSet.refreshToken && tokenSet.isExpired()) {
+              await googleService.client.setTokens(await refreshGoogleTokens(tokenSet.refreshToken));
+            }
+            tokenSet = await googleService.client.getTokens();
+            if (tokenSet?.accessToken && !tokenSet?.isExpired()) {
+              setIsAuthenticated(true);
+              await getJWTAndUserId(tokenSet.accessToken);
+            }
+          }
+        } else {
+          resetAuth();
+        }
+      } catch (err) {
+        resetAuth();
+
+        showToast({ title: "Auth error", style: Toast.Style.Failure });
       }
     })();
   }, [authProvider]);
