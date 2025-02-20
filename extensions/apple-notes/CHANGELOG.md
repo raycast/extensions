@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2024-02-20
+
+Fix for 'JS heap out of memory error' reported by a user in issue #17137.
+
 ## [Bug Fix Update] - 2024-11-22
 
 Fix "Create note" from empty "Search notes" view, where a new note would be created with random characters instead of value from searchbar.
