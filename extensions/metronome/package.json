@@ -33,6 +33,84 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "play-metronome",
+      "title": "Play Metronome",
+      "description": "Start a metronome"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@metronome play metronome at 120 BPM",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome start metronome at 60 BPM and accent every 4 beats",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 60,
+                "accents": 4
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome start metronome at 120 BPM and 3 beats per bar",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120,
+                "accents": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      },
+      {
+        "input": "@metronome 120 BPM 3 accent",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "play-metronome",
+              "arguments": {
+                "bpm": 120,
+                "accents": 3
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "play-metronome": "ok"
+        }
+      }
+    ]
+  },
   "dependencies": {
     "@gibme/timer": "^1.0.4",
     "@raycast/api": "^1.57.1",
