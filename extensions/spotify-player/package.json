@@ -31,7 +31,9 @@
     "rhesamu",
     "themitpatel",
     "litomore",
-    "enneemme"
+    "enneemme",
+    "lineville",
+    "tsibog"
   ],
   "pastContributors": [
     "bkeys818"
@@ -441,6 +443,30 @@
       "title": "Start DJ",
       "subtitle": "Spotify",
       "description": "Start the DJ.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copyEmbed",
+      "title": "Copy Embed Code",
+      "subtitle": "Spotify",
+      "description": "Copy the iframe embed code for the currently playing song or podcast episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "skip15",
+      "title": "Skip 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Skip 15 seconds forward in an episode.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "back15",
+      "title": "Back 15 Seconds",
+      "subtitle": "Spotify",
+      "description": "Back 15 seconds in an episode.",
       "mode": "no-view",
       "disabledByDefault": true
     }

@@ -14,6 +14,14 @@ It's now possible to adjust a task's deadline from the actions menu and the menu
 
 It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
 
+## [Add Next Task as Title in Menu Bar] - 2025-02-20
+
+Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
+
+## [Fix Default Sorting] - 2025-02-20
+
+Change the default sorting to align with the task order in Todoist. 
+
 ## [Add time format preference from Todoist preferences] - 2025-02-17
 
 - Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
