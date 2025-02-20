@@ -1,22 +1,12 @@
-import { getPreferenceValues } from "@raycast/api";
-import React, { useState } from "react";
+import React from "react";
 
-import { HarmonyCommand, HarmonyStageType } from "./components/HarmonyCommand";
 import { HarmonyProvider } from "./hooks/useHarmony";
-import { HarmonyPreferences } from "./types/preferences";
+import { HarmonyCommand } from "./ui/components/views/HarmonyCommand";
 
-export default function Command(): JSX.Element {
-  const preferences = getPreferenceValues<HarmonyPreferences>();
-  const [stage, setStage] = useState<HarmonyStageType>(preferences.defaultView || "activities");
-
-  const handleStageChange = (newStage: HarmonyStageType) => {
-    console.log("Changing stage to:", newStage);
-    setStage(newStage);
-  };
-
+export default function Command(): React.ReactElement {
   return (
     <HarmonyProvider>
-      <HarmonyCommand stage={stage} onStageChange={handleStageChange} />
+      <HarmonyCommand />
     </HarmonyProvider>
   );
 }

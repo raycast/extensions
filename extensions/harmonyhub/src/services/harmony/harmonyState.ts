@@ -1,4 +1,4 @@
-import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "../../types/harmony";
+import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "../../types/core/harmony";
 
 /**
  * State machine stages for Harmony operations

@@ -1,33 +1,19 @@
 /**
- * Harmony Hub preferences
+ * Preferences for the Harmony extension.
  */
-export interface HarmonyPreferences {
-  hubHost: string;
-  hubPort: number;
-  hubPath: string;
-  hubSecure: boolean;
+export interface Preferences {
+  /** The default view to display */
   defaultView: "activities" | "devices";
-}
-
-/**
- * Harmony Hub retry configuration
- */
-export interface RetryConfig {
-  maxAttempts: number;
-  baseDelay: number;
-  maxDelay: number;
-  useExponentialBackoff: boolean;
-  maxRetryDuration?: number;
-}
-
-/**
- * Harmony Hub timeout configuration
- */
-export interface TimeoutConfig {
-  connection: number;
-  message: number;
-  activity: number;
-  command: number;
-  discovery: number;
-  cache: number;
+  /** The duration to hold a command in milliseconds */
+  commandHoldTime: string;
+  /** Whether to enable debug mode */
+  debugMode: boolean;
+  /** Whether to auto-retry failed commands */
+  autoRetry: boolean;
+  /** The maximum number of retries */
+  maxRetries: string;
+  /** The cache duration in seconds */
+  cacheDuration: string;
+  /** The network timeout in milliseconds */
+  networkTimeout: string;
 }
