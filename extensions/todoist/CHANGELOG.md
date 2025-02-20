@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Add Next Task as Title in Menu Bar] - 2025-02-20
+
+Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
+
 ## [Fix Default Sorting] - 2025-02-20
 
 Change the default sorting to align with the task order in Todoist. 
