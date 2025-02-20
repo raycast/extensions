@@ -1,7 +1,8 @@
 # Todoist Changelog
 
-## [Add Manual Sorting Option] - {PR_MERGE_DATE}
-Added a new Manual sort option to match the order of Todoist default sort option
+## [Add time format preference from Todoist preferences] - 2025-02-17
+
+- Raycast now pulls your preferred time format preference from the Todoist user account's settings and then uses that when displaying time
 
 ## [Add Complete Task Shortcut Preferences] - 2025-01-31
 
