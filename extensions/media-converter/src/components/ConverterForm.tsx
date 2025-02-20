@@ -5,7 +5,7 @@ import { convertImage, convertAudio, convertVideo } from "../utils/converter";
 import { execPromise } from "../utils/exec";
 
 const ALLOWED_VIDEO_EXTENSIONS = [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".webm"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"];
 const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".m4a", ".flac"];
 
 export function ConverterForm() {
@@ -68,7 +68,7 @@ export function ConverterForm() {
     const isInputImage = ALLOWED_IMAGE_EXTENSIONS.includes(fileExtension);
     const isInputAudio = ALLOWED_AUDIO_EXTENSIONS.includes(fileExtension);
     const isOutputVideo = ["mp4", "avi", "mkv", "mov", "mpg", "webm"].includes(values.format);
-    const isOutputImage = ["jpg", "png", "webp", "heic", "tiff"].includes(values.format);
+    const isOutputImage = ["jpg", "png", "webp", "heic", "tiff", "avif"].includes(values.format);
 
     if (!isInputVideo && !isInputImage && !isInputAudio) {
       await showToast({
@@ -97,7 +97,7 @@ export function ConverterForm() {
       try {
         let outputPath = "";
         if (isInputImage) {
-          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic" | "tiff");
+          outputPath = await convertImage(item, values.format as "jpg" | "png" | "webp" | "heic" | "tiff" | "avif");
         } else if (isInputAudio) {
           outputPath = await convertAudio(item, values.format as "mp3" | "aac" | "wav" | "flac");
         } else {
@@ -150,6 +150,7 @@ export function ConverterForm() {
               <Form.Dropdown.Item value="webp" title=".webp" />
               <Form.Dropdown.Item value="heic" title=".heic" />
               <Form.Dropdown.Item value="tiff" title=".tiff" />
+              <Form.Dropdown.Item value="avif" title=".avif" />
             </Form.Dropdown.Section>
           ) : selectedFileType === "audio" ? (
             <Form.Dropdown.Section title="Audio Formats">
