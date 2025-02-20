@@ -1,5 +1,7 @@
 # Wikipedia Changelog
 
+## [AI tools] - {PR_MERGE_DATE}
+
 ## [Add languages] - 2025-01-02
 
 - Add `Finnish`, `Swedish` and `Norwegian` languages
