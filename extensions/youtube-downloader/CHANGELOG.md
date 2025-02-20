@@ -1,4 +1,4 @@
-# YouTube Downloader Changelog
+# Video Downloader Changelog
 
 ## [Improvement] - {PR_MERGE_DATE}
 
