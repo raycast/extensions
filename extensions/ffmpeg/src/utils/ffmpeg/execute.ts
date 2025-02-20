@@ -41,28 +41,28 @@ export function isFFmpegInstalled() {
 export function getFFprobePath() {
   return (
     execSync(`
-    locations=(
-        /usr/local/bin
-        /usr/bin
-        /bin
-        /usr/sbin
-        /sbin
-        /opt/X11/bin
-        /opt/homebrew/bin
-        /usr/local/Cellar
-    )
-    
-    for location in "\${locations[@]}"
-    do
-        if [ -f "$location/ffprobe" ]
-        then
-            echo "$location"
-            exit 0
-        fi
-    done
-    
-    echo ""
-  `)
+  locations=(
+      /usr/local/bin
+      /usr/bin
+      /bin
+      /usr/sbin
+      /sbin
+      /opt/X11/bin
+      /opt/homebrew/bin
+      /usr/local/Cellar
+  )
+  
+  for location in "\${locations[@]}"
+  do
+      if [ -f "$location/ffprobe" ]
+      then
+          echo "$location"
+          exit 0
+      fi
+  done
+  
+  echo ""
+`)
       .toString()
       .trim()
       .replace(/\n/gi, "") + "/ffprobe"
