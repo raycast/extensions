@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Missing Playlists in Add Playing Song to Playlist command] - {PR_MERGE_DATE}
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
 
 - Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
 
