@@ -15,21 +15,21 @@
       "title": "API Key",
       "type": "password",
       "required": true,
-      "description": "Jotform API Key"
+      "description": "Jotform API Key",
+      "placeholder": "xxxx...xxxx"
     }
   ],
   "commands": [
     {
       "name": "forms",
-      "title": "Forms",
-      "description": "",
+      "title": "List Forms",
+      "description": "Get a list of forms for this account. Includes basic details such as title of the form, when it was created, number of new and total submissions.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.17.0",
-    "jotform": "^1.0.1"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
