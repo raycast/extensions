@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Add Copy Embed Code Command] - {PR_MERGE_DATE}
+## [Add Copy Embed Code Command] - 2025-02-20
 
 - Added a new command to copy the iframe embed code for the currently playing song.
 
