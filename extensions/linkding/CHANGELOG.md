@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Fixes & Enhancements] - {PR_MERGE_DATE}
+## [Fixes & Enhancements] - 2025-02-20
 
 ### General
 - fix: API would not be called if saved with trailing slash (we now strip trailing slash before saving) [Issue ref: [#16999](https://github.com/raycast/extensions/issues/16999)]
