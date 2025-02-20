@@ -1,6 +1,6 @@
 // src/api.ts
-const _fetch = typeof fetch !== "undefined" ? fetch : require("node-fetch");
 import { InverterInfoResponse, PowerFlowRealtimeDataResponse } from "./types";
+const _fetch = typeof fetch !== "undefined" ? fetch : require("node-fetch");
 
 export async function fetchInverterInfo(baseUrl: string): Promise<InverterInfoResponse> {
   const url = `${baseUrl}/solar_api/v1/GetInverterInfo.cgi`;

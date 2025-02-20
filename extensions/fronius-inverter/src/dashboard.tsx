@@ -147,7 +147,7 @@ export default function CombinedDashboard() {
 
   const inverterListItems = inverterItems.map((inv) => ({
     title: inv.info.CustomName || `Inverter ${inv.id}`,
-    subtitle: `${"State:"} ${inv.info.InverterState} • ${inv.info.PVPower} W`,
+    subtitle: `State: ${inv.info.InverterState} • ${inv.info.PVPower} W`,
     accessory: inv.info.ErrorCode !== 0 && inv.info.ErrorCode !== -1 ? `⚠️ ${inv.info.ErrorCode}` : "OK",
   }));
 

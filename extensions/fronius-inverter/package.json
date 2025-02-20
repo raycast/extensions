@@ -4,9 +4,11 @@
   "description": "A Raycast extension to monitor your Fronius Gen24 inverter with a realtime dashboard and background error monitoring.",
   "icon": "extension-icon.png",
   "author": "Olli0103",
-  "categories": ["Applications"],
+  "categories": [
+    "Applications"
+  ],
   "license": "MIT",
-"commands": [
+  "commands": [
     {
       "name": "dashboard",
       "title": "Fronius Dashboard",
@@ -30,7 +32,7 @@
       "description": "The base URL of your Fronius inverter (e.g., http://192.168.0.75)",
       "type": "textfield",
       "default": "http://192.168.0.75",
-      "required": true 
+      "required": true
     }
   ],
   "main": "src/dashboard.tsx",
@@ -41,10 +43,10 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0",
+    "@raycast/api": "^1.85.2",
     "@raycast/utils": "^1.17.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -86,7 +86,6 @@ export default function Watch() {
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       await showToast(Toast.Style.Failure, "Error loading data", errMsg);
-      setErrorCount(0);
     }
   }
 
@@ -106,7 +105,7 @@ export default function Watch() {
   // Build a minimal list for the menu bar.
   const inverterListItems = inverterItems.map((inv) => ({
     title: inv.CustomName || `Inverter ${inv.id}`,
-    subtitle: `${"State:"} ${inv.InverterState} • ${inv.PVPower} W`,
+    subtitle: `State: ${inv.InverterState} • ${inv.PVPower} W`,
     accessory: inv.ErrorCode !== 0 && inv.ErrorCode !== -1 ? `⚠️ ${inv.ErrorCode}` : "OK",
   }));
 

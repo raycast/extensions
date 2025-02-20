@@ -16,10 +16,6 @@
   - Included battery charging status (StateOfCharge_Relative) in both the dashboard and watch commands.
   - Displayed as a percentage with localized labeling.
 
-- **Localization:**  
-  - Added support for English, Deutsch, Français, and Español via a dropdown in the preferences.
-  - All user-facing strings are localized.
-
 - **Code Improvements:**  
   - Replaced explicit `any` types with `unknown` in catch blocks.
   - Fixed type mapping issues and ensured proper access to inverter properties.
