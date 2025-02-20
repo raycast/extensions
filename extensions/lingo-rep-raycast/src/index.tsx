@@ -278,11 +278,11 @@ export default function Command() {
         <>
           <Action.Push
             title={`Connect Google Profile to Save`}
-            target={<AuthorizationComponent authProvider="github" />}
+            target={<AuthorizationComponent authProvider="google" />}
           />
           <Action.Push
             title={`Connect GitHub Profile to Save`}
-            target={<AuthorizationComponent authProvider="google" />}
+            target={<AuthorizationComponent authProvider="github" />}
           />
         </>
       )}
