@@ -1,18 +1,8 @@
 # Todoist Changelog
+
 ## [Add Schedule Task Deadline Actions] - {PR_MERGE_DATE}
 
-It's now possible to adjust a task's deadline from the actions menu and the menubar.
-  - Schedule Task Deadline shortcut: `⌥` + `⇧` + `D`
-
-## [Add Complete Task Shortcut Preferences] - 2025-01-31
-
-- Adjusting shortcuts for the following task actions:
-  - Complete Task - Now `⌘` + `Enter` (previously `shift` + `⌘` + `E`)
-  - Open Task in Todoist - Now `⌘` + `O` (previously `⌘` + `Enter`)
-
-## [Add Support for Task Deadlines] - 2025-01-31
-
-It's now possible to specify a deadline when using the `Create Task` command. Deadlines are displayed in the task list and task details views.
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
 

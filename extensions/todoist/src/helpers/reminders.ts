@@ -10,5 +10,6 @@ export function displayReminderName(reminder: Reminder, use12HourFormat: boolean
   if (reminder.due?.date) {
     return displayDateTime(reminder.due.date, use12HourFormat);
   }
+
   return "Unknown reminder";
 }
