@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
+
+- Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
+
+## [Add Copy Embed Code Command] - 2025-02-20
+
+- Added a new command to copy the iframe embed code for the currently playing song.
+
+## [Add "Skip 15 Seconds" and "Back 15 Seconds" commands] - 2025-02-18
+
+- Added the ability to skip forward or back 15 seconds in the current episode. This adds two new commands as well as two new menu bar items which only show when an 'episode' is playing.
+
 ## [Artist Name Visibility Option] - 2025-02-07
 
 - Added the option to hide the artist's name in the Menu Bar Player.
