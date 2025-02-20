@@ -1,8 +1,8 @@
 # Todoist Changelog
 
-## [Add Next First Task as Title in Menu Bar] - {PR_MERGE_DATE}
+## [Add Next Task as Title in Menu Bar] - {PR_MERGE_DATE}
 
-A new feature has been added that allows users to display the next first task as the title in the menu bar. This option can be enabled in preferences and will be shown when no task is currently selected.
+Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
 
 ## [Fix Default Sorting] - 2025-02-20
 

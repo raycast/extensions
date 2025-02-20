@@ -31,7 +31,7 @@ function MenuBar(props: MenuBarProps) {
   // Don't perform a full sync if the command was launched from within another commands
   const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
-  const { view, filter, upcomingDays, hideMenuBarCount, showNextMostPriorityTask, taskWidth } =
+  const { view, filter, upcomingDays, hideMenuBarCount, showNextTask, taskWidth } =
     getPreferenceValues<Preferences.MenuBar>();
   const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
 
@@ -75,14 +75,11 @@ function MenuBar(props: MenuBarProps) {
       return removeMarkdown(focusedTask.content);
     }
 
-    if (showNextMostPriorityTask) {
-      if (tasks && view !== "filter" && tasks.length > 0) {
-        const task = tasks.sort((a, b) => a.child_order - b.child_order)[0];
-        const content = truncateMiddle(task.content, parseInt(taskWidth ?? "40"));
-        return removeMarkdown(content);
-      } else if (filterTasks && filterTasks.length > 0) {
-        const task = filterTasks.sort((a, b) => a.child_order - b.child_order)[0];
-        const content = truncateMiddle(task.content, parseInt(taskWidth ?? "40"));
+    if (showNextTask) {
+      const taskList = view !== "filter" ? tasks : filterTasks;
+      if (taskList && taskList.length > 0) {
+        const nextTask = [...taskList].sort((a, b) => a.child_order - b.child_order)[0];
+        const content = truncateMiddle(nextTask.content, parseInt(taskWidth ?? "40"));
         return removeMarkdown(content);
       }
     }
@@ -96,7 +93,7 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextMostPriorityTask, taskWidth]);
+  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view, showNextTask, taskWidth]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
