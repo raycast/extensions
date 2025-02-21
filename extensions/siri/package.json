@@ -5,7 +5,6 @@
   "description": "Interact with Siri through Raycast",
   "icon": "siri-icon.png",
   "author": "EvanZhouDev",
-  "owner": "EvanZhouDev",
   "categories": [
     "System",
     "Developer Tools",
