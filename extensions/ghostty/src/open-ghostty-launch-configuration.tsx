@@ -64,7 +64,7 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section title="Launch Configuration">
                   <Action title="Run Launch Configuration" onAction={() => RunLaunchConfiguration({ name })} />
-                  <Action.Push title="View Launch Configuration" target={<ViewScript name={name} />} />
+                  <Action.Push title="View Launch Configuration" target={<ViewLaunchConfiguration name={name} />} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Manage Launch Configuration">
                   <Action.Push
@@ -126,6 +126,34 @@ async function RunLaunchConfiguration({ name }: { name: string }) {
   } catch (error) {
     console.error("Failed to parse or execute launch configuration:", error);
   }
+}
+
+function ViewLaunchConfiguration({ name }: { name: string }) {
+  const [yaml, setYaml] = useState<string>("");
+
+  useEffect(() => {
+    async function loadYaml() {
+      const value = await LocalStorage.getItem<string>(name);
+      setYaml(value ?? "");
+    }
+    loadYaml();
+  }, [name]);
+
+  return (
+    <Detail
+      navigationTitle="Launch Configuration Preview"
+      markdown={`\`\`\`yaml\n${yaml}\n\`\`\``}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Edit Launch Configuration"
+            target={<EditItem name={name} yaml={yaml} onEditSuccess={async () => {}} />}
+          />
+          <Action.CopyToClipboard title="Copy Yaml" content={yaml} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function CreateItem({ onCreateSuccess }: { onCreateSuccess: () => Promise<void> }) {
@@ -241,27 +269,4 @@ async function removeItem(name: string) {
       },
     },
   });
-}
-
-function ViewScript({ name }: { name: string }) {
-  const [yaml, setYaml] = useState<string>("");
-
-  useEffect(() => {
-    async function loadYaml() {
-      const value = await LocalStorage.getItem<string>(name);
-      setYaml(value ?? "");
-    }
-    loadYaml();
-  }, [name]);
-
-  return (
-    <Detail
-      markdown={`# ${name}\n\n\`\`\`yaml\n${yaml}\n\`\`\``}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Yaml" content={yaml} />
-        </ActionPanel>
-      }
-    />
-  );
 }
