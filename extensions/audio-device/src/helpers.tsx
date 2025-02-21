@@ -13,7 +13,7 @@ import {
   Action,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   AudioDevice,
   getInputDevices,
@@ -242,7 +242,42 @@ async function getHiddenDevices() {
   return JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
 }
 
+function getDeviceIcon(device: AudioDevice): string | null {
+  // Check for AirPlay devices first
+  if (device.transportType === TransportType.Airplay) {
+    return "airplay.png";
+  }
+
+  // Check if it's a Bluetooth device
+  if (device.transportType === TransportType.Bluetooth || device.transportType === TransportType.BluetoothLowEnergy) {
+    const name = device.name.toLowerCase();
+    if (name.includes("airpods max")) {
+      return "airpods-max.png";
+    } else if (name.includes("airpods pro")) {
+      return "airpods-pro.png";
+    } else if (name.includes("airpods")) {
+      return "airpods.png";
+    }
+    // If it's Bluetooth but not AirPods, use the bluetooth speaker icon
+    return "bluetooth-speaker.png";
+  }
+
+  // Not AirPlay or Bluetooth
+  return null;
+}
+
 function getIcon(device: AudioDevice, isCurrent: boolean) {
+  const deviceIcon = getDeviceIcon(device);
+
+  // If it's a special device (AirPods/AirPlay/Bluetooth), show its specific icon
+  if (deviceIcon) {
+    return {
+      source: deviceIcon,
+      tintColor: isCurrent ? Color.Green : Color.SecondaryText,
+    };
+  }
+
+  // For other devices, use the default mic/speaker icons
   return {
     source: device.isInput ? "mic.png" : "speaker.png",
     tintColor: isCurrent ? Color.Green : Color.SecondaryText,
