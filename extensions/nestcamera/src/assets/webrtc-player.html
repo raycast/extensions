@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nest Camera Stream</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+        #video {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+        }
+        .error {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay playsinline></video>
+    <script>
+        // Parse URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const sdp = atob(params.get('sdp') || '');
+        const mediaSessionId = params.get('session');
+        const expiresAt = params.get('expires');
+        const pipMode = params.get('pip') === 'true';
+        const position = params.get('position') ? JSON.parse(params.get('position')) : null;
+
+        // WebRTC configuration
+        const config = {
+            iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            }]
+        };
+
+        async function setupStream() {
+            try {
+                const video = document.getElementById('video');
+                const pc = new RTCPeerConnection(config);
+
+                // Add video transceiver for receiving only
+                pc.addTransceiver('video', { direction: 'recvonly' });
+                pc.addTransceiver('audio', { direction: 'recvonly' });
+
+                // Set up media handlers
+                pc.ontrack = (event) => {
+                    if (event.track.kind === 'video') {
+                        video.srcObject = event.streams[0];
+                    }
+                };
+
+                // Handle connection state changes
+                pc.onconnectionstatechange = () => {
+                    console.log('Connection state:', pc.connectionState);
+                    if (pc.connectionState === 'failed') {
+                        showError('Connection failed. Please try again.');
+                    }
+                };
+
+                // Set remote description from SDP
+                await pc.setRemoteDescription({
+                    type: 'answer',
+                    sdp
+                });
+
+                // Create and set local description
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+
+                // Enable Picture-in-Picture if requested
+                if (pipMode && document.pictureInPictureEnabled) {
+                    video.addEventListener('loadedmetadata', () => {
+                        video.requestPictureInPicture().catch(console.error);
+                    });
+                }
+
+                // Set window position if provided
+                if (position) {
+                    window.moveTo(position.x, position.y);
+                    window.resizeTo(position.width, position.height);
+                }
+
+                // Set up stream extension
+                const expiryTime = new Date(expiresAt).getTime();
+                const refreshBuffer = 5 * 60 * 1000; // 5 minutes
+                const timeUntilRefresh = expiryTime - Date.now() - refreshBuffer;
+
+                if (timeUntilRefresh > 0) {
+                    setTimeout(() => {
+                        // TODO: Implement stream extension logic
+                        console.log('Stream needs extension');
+                    }, timeUntilRefresh);
+                }
+
+            } catch (error) {
+                console.error('Stream setup failed:', error);
+                showError('Failed to set up stream. Please try again.');
+            }
+        }
+
+        function showError(message) {
+            const error = document.createElement('div');
+            error.className = 'error';
+            error.textContent = message;
+            document.body.appendChild(error);
+        }
+
+        // Start stream setup when page loads
+        window.addEventListener('load', setupStream);
+    </script>
+</body>
+</html> 
