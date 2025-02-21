@@ -89,13 +89,9 @@ type Input = {
 };
 
 export default async function ({ filters, imagePaths }: Input) {
-  let selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  let selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
 
-  const filterObjs = filters.map((filter) =>
-    getActiveFilters().find((f) => f.name === filter),
-  );
+  const filterObjs = filters.map((filter) => getActiveFilters().find((f) => f.name === filter));
 
   let resultPaths = new Array<string>();
   for (const filterObj of filterObjs) {

@@ -14,9 +14,7 @@ import runOperation from "./operations/runOperation";
 import scale from "./operations/scaleOperation";
 import { getSelectedImages } from "./utilities/utils";
 
-export default async function Command(props: {
-  arguments: { scaleFactor: string };
-}) {
+export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
 
   const scaleNumber = parseFloat(scaleFactor);

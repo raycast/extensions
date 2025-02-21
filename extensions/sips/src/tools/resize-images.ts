@@ -24,21 +24,12 @@ export default async function ({ width, height, imagePaths }: Input) {
   if (isNaN(validatedWidth) || (validatedHeight !== -1 && validatedWidth < 1)) {
     throw new Error("Invalid width: must be a positive integer");
   }
-  if (
-    isNaN(validatedHeight) ||
-    (validatedHeight !== -1 && validatedHeight < 1)
-  ) {
+  if (isNaN(validatedHeight) || (validatedHeight !== -1 && validatedHeight < 1)) {
     throw new Error("Invalid height: must be a positive integer");
   }
 
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
-  const resizedImages = await resize(
-    selectedImages,
-    validatedWidth,
-    validatedHeight,
-  );
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
+  const resizedImages = await resize(selectedImages, validatedWidth, validatedHeight);
 
   await cleanup();
 

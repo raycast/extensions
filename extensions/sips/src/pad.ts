@@ -14,9 +14,7 @@ import pad from "./operations/padOperation";
 import runOperation from "./operations/runOperation";
 import { getSelectedImages } from "./utilities/utils";
 
-export default async function Command(props: {
-  arguments: { amount: string; hexcolor: string };
-}) {
+export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
   const selectedImages = await getSelectedImages();
   const preferences = getPreferenceValues<Preferences.Pad>();

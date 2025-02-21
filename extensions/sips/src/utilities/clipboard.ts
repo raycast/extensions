@@ -75,9 +75,7 @@ export const getClipboardImages = async (): Promise<string> => {
  *
  * @param filePaths The paths of the images to copy.
  */
-export const copyImagesAtPathsToClipboard = async (
-  filePaths: string | string[],
-) => {
+export const copyImagesAtPathsToClipboard = async (filePaths: string | string[]) => {
   const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
   await runAppleScript(`use framework "Foundation"
       use framework "PDFKit"

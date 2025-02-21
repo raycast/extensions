@@ -28,9 +28,7 @@ export default async function ({ angle, radians, imagePaths }: Input) {
     validatedAngle = validatedAngle * (180 / Math.PI);
   }
 
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
   const rotatedImages = await rotate(selectedImages, validatedAngle);
 
   await cleanup();

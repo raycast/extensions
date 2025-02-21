@@ -11,19 +11,14 @@ type Input = {
 };
 
 export default async function ({ imagePaths }: Input) {
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
 
   const exifToolLocation = await getExifToolLocation();
   if (!exifToolLocation) {
     throw Error("Failed to find ExifTool");
   }
 
-  const strippedImages = await stripEXIF(
-    selectedImages,
-    exifToolLocation as ExifToolLocation,
-  );
+  const strippedImages = await stripEXIF(selectedImages, exifToolLocation as ExifToolLocation);
 
   await cleanup();
 

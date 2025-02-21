@@ -23,13 +23,7 @@ export default function Command(props: LaunchProps) {
     if (props.launchContext && !viewRef.current) {
       viewRef.current = true;
       const { imageWidth, imageHeight, imagePattern } = props.launchContext;
-      push(
-        <ImagePatternGrid
-          width={imageWidth}
-          height={imageHeight}
-          pattern={imagePattern}
-        />,
-      );
+      push(<ImagePatternGrid width={imageWidth} height={imageHeight} pattern={imagePattern} />);
     }
   }, [props.launchContext]);
 

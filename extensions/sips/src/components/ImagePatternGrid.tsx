@@ -11,13 +11,7 @@
 import os from "os";
 import path from "path";
 
-import {
-  Grid,
-  Toast,
-  getPreferenceValues,
-  showInFinder,
-  showToast,
-} from "@raycast/api";
+import { Grid, Toast, getPreferenceValues, showInFinder, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -33,12 +27,7 @@ import {
   getSunbeamsOptions,
 } from "../utilities/generators";
 import { GeneratorOptions } from "../utilities/types";
-import {
-  cleanup,
-  getDestinationPaths,
-  moveImageResultsToFinalDestination,
-  showErrorToast,
-} from "../utilities/utils";
+import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
 
 import ImageGeneratorActionPanel from "./ImageGeneratorActionPanel";
 
@@ -58,32 +47,17 @@ export default function ImagePatternGrid(props: {
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [checkerboardItems, setCheckerboardItems] = useState<
-    [string, GeneratorOptions][]
-  >(Array(5).fill(["", {}]));
-  const [stripeItems, setStripeItems] = useState<[string, GeneratorOptions][]>(
-    Array(5).fill(["", {}]),
+  const [checkerboardItems, setCheckerboardItems] = useState<[string, GeneratorOptions][]>(Array(5).fill(["", {}]));
+  const [stripeItems, setStripeItems] = useState<[string, GeneratorOptions][]>(Array(5).fill(["", {}]));
+  const [solidColorItems, setSolidColorItems] = useState<[string, string, GeneratorOptions][]>(
+    Array(10).fill(["", "", {}]),
   );
-  const [solidColorItems, setSolidColorItems] = useState<
-    [string, string, GeneratorOptions][]
-  >(Array(10).fill(["", "", {}]));
-  const [linearGradientItems, setLinearGradientItems] = useState<
-    [string, GeneratorOptions][]
-  >(Array(5).fill(["", {}]));
-  const [radialGradientItems, setRadialGradientItems] = useState<
-    [string, GeneratorOptions][]
-  >(Array(5).fill(["", {}]));
+  const [linearGradientItems, setLinearGradientItems] = useState<[string, GeneratorOptions][]>(Array(5).fill(["", {}]));
+  const [radialGradientItems, setRadialGradientItems] = useState<[string, GeneratorOptions][]>(Array(5).fill(["", {}]));
   const [randomItem, setRandomItem] = useState<string>("");
-  const [starShineItem, setStarShineItem] = useState<
-    [string, GeneratorOptions]
-  >(["", {}]);
-  const [lenticularHaloItem, setLenticularHaloItem] = useState<
-    [string, GeneratorOptions]
-  >(["", {}]);
-  const [sunbeamsItem, setSunbeamsItem] = useState<[string, GeneratorOptions]>([
-    "",
-    {},
-  ]);
+  const [starShineItem, setStarShineItem] = useState<[string, GeneratorOptions]>(["", {}]);
+  const [lenticularHaloItem, setLenticularHaloItem] = useState<[string, GeneratorOptions]>(["", {}]);
+  const [sunbeamsItem, setSunbeamsItem] = useState<[string, GeneratorOptions]>(["", {}]);
   const [currentColors, setCurrentColors] = useState<string[]>();
   const preferences = getPreferenceValues<Preferences.CreateImage>();
 
@@ -108,9 +82,7 @@ export default function ImagePatternGrid(props: {
 
     setCurrentColors(
       redValues.map((red, index) => {
-        return `#${red.toString(16).padEnd(2, "0")}${greenValues[index].toString(16).padEnd(2, "0")}${blueValues[
-          index
-        ]
+        return `#${red.toString(16).padEnd(2, "0")}${greenValues[index].toString(16).padEnd(2, "0")}${blueValues[index]
           .toString(16)
           .padEnd(2, "0")}`;
       }),
@@ -124,26 +96,14 @@ export default function ImagePatternGrid(props: {
    */
   const regeneratePreviews = async () => {
     setLoading(true);
-    const { redValues, greenValues, blueValues, alphaValues } =
-      regenerateColors();
+    const { redValues, greenValues, blueValues, alphaValues } = regenerateColors();
     Promise.all([
       Promise.all(
-        getCheckerboardOptions(
-          redValues,
-          greenValues,
-          blueValues,
-          alphaValues,
-        ).map(async (options, index) => {
+        getCheckerboardOptions(redValues, greenValues, blueValues, alphaValues).map(async (options, index) => {
           const baseThumbnail = generators.Checkerboard.thumbnail;
-          const indexThumbnail =
-            index > 0
-              ? baseThumbnail.replace(".", `${index + 1}.`)
-              : baseThumbnail;
+          const indexThumbnail = index > 0 ? baseThumbnail.replace(".", `${index + 1}.`) : baseThumbnail;
           const content = preferences.generatePreviews
-            ? await generatePreview(
-                generators.Checkerboard.CIFilterName,
-                options,
-              )
+            ? await generatePreview(generators.Checkerboard.CIFilterName, options)
             : indexThumbnail;
           setCheckerboardItems((oldItems) => {
             const newItems = [...oldItems];
@@ -154,72 +114,50 @@ export default function ImagePatternGrid(props: {
       ),
 
       Promise.all(
-        getStripeOptions(redValues, greenValues, blueValues, alphaValues).map(
-          async (options, index) => {
-            const content = preferences.generatePreviews
-              ? await generatePreview(generators.Stripes.CIFilterName, options)
-              : generators.Stripes.thumbnail;
-            setStripeItems((oldItems) => {
-              const newItems = [...oldItems];
-              newItems[index] = [content, options];
-              return newItems;
-            });
-          },
-        ),
+        getStripeOptions(redValues, greenValues, blueValues, alphaValues).map(async (options, index) => {
+          const content = preferences.generatePreviews
+            ? await generatePreview(generators.Stripes.CIFilterName, options)
+            : generators.Stripes.thumbnail;
+          setStripeItems((oldItems) => {
+            const newItems = [...oldItems];
+            newItems[index] = [content, options];
+            return newItems;
+          });
+        }),
       ),
 
       Promise.all(
-        getSolidColorOptions(redValues, greenValues, blueValues).map(
-          async (options, index) => {
-            const color = `#${redValues[index].toString(16).padEnd(2, "0")}${greenValues[
-              index
-            ]
-              .toString(16)
-              .padEnd(2, "0")}${blueValues[index].toString(16).padEnd(2, "0")}`;
-            const svg = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+        getSolidColorOptions(redValues, greenValues, blueValues).map(async (options, index) => {
+          const color = `#${redValues[index].toString(16).padEnd(2, "0")}${greenValues[index]
+            .toString(16)
+            .padEnd(2, "0")}${blueValues[index].toString(16).padEnd(2, "0")}`;
+          const svg = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
               <rect x="0" y="0" width="100" height="100" fill="${color}" />
             </svg>`;
-            const svgBase64 = Buffer.from(svg).toString("base64");
-            const svgDataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+          const svgBase64 = Buffer.from(svg).toString("base64");
+          const svgDataUrl = `data:image/svg+xml;base64,${svgBase64}`;
 
-            const content = preferences.generatePreviews
-              ? await generatePreview(
-                  generators.ConstantColor.CIFilterName,
-                  options,
-                )
-              : svgDataUrl;
-            setSolidColorItems((oldItems) => {
-              const newItems = [...oldItems];
-              newItems[index] = [
-                content,
-                `#${redValues[index].toString(16).padEnd(2, "0")}${greenValues[
-                  index
-                ]
-                  .toString(16)
-                  .padEnd(
-                    2,
-                    "0",
-                  )}${blueValues[index].toString(16).padEnd(2, "0")}`,
-                options,
-              ];
-              return newItems;
-            });
-          },
-        ),
+          const content = preferences.generatePreviews
+            ? await generatePreview(generators.ConstantColor.CIFilterName, options)
+            : svgDataUrl;
+          setSolidColorItems((oldItems) => {
+            const newItems = [...oldItems];
+            newItems[index] = [
+              content,
+              `#${redValues[index].toString(16).padEnd(2, "0")}${greenValues[index]
+                .toString(16)
+                .padEnd(2, "0")}${blueValues[index].toString(16).padEnd(2, "0")}`,
+              options,
+            ];
+            return newItems;
+          });
+        }),
       ),
 
       Promise.all(
-        getLinearGradientOptions(
-          redValues,
-          greenValues,
-          blueValues,
-          alphaValues,
-        ).map(async (options, index) => {
+        getLinearGradientOptions(redValues, greenValues, blueValues, alphaValues).map(async (options, index) => {
           const content = preferences.generatePreviews
-            ? await generatePreview(
-                generators.LinearGradient.CIFilterName,
-                options,
-              )
+            ? await generatePreview(generators.LinearGradient.CIFilterName, options)
             : generators.LinearGradient.thumbnail;
           setLinearGradientItems((oldItems) => {
             const newItems = [...oldItems];
@@ -230,17 +168,9 @@ export default function ImagePatternGrid(props: {
       ),
 
       Promise.all(
-        getRadialGradientOptions(
-          redValues,
-          greenValues,
-          blueValues,
-          alphaValues,
-        ).map(async (options, index) => {
+        getRadialGradientOptions(redValues, greenValues, blueValues, alphaValues).map(async (options, index) => {
           const content = preferences.generatePreviews
-            ? await generatePreview(
-                generators.RadialGradient.CIFilterName,
-                options,
-              )
+            ? await generatePreview(generators.RadialGradient.CIFilterName, options)
             : generators.RadialGradient.thumbnail;
           setRadialGradientItems((oldItems) => {
             const newItems = [...oldItems];
@@ -261,12 +191,7 @@ export default function ImagePatternGrid(props: {
 
       Promise.resolve(
         (async () => {
-          const options = getStarShineOptions(
-            redValues,
-            greenValues,
-            blueValues,
-            alphaValues,
-          );
+          const options = getStarShineOptions(redValues, greenValues, blueValues, alphaValues);
           const content = preferences.generatePreviews
             ? await generatePreview(generators.StarShine.CIFilterName, options)
             : generators.StarShine.thumbnail;
@@ -276,17 +201,9 @@ export default function ImagePatternGrid(props: {
 
       Promise.resolve(
         (async () => {
-          const options = getLenticularHaloOptions(
-            redValues,
-            greenValues,
-            blueValues,
-            alphaValues,
-          );
+          const options = getLenticularHaloOptions(redValues, greenValues, blueValues, alphaValues);
           const content = preferences.generatePreviews
-            ? await generatePreview(
-                generators.LenticularHalo.CIFilterName,
-                options,
-              )
+            ? await generatePreview(generators.LenticularHalo.CIFilterName, options)
             : generators.LenticularHalo.thumbnail;
           setLenticularHaloItem([content, options]);
         })(),
@@ -294,12 +211,7 @@ export default function ImagePatternGrid(props: {
 
       Promise.resolve(
         (async () => {
-          const options = getSunbeamsOptions(
-            redValues,
-            greenValues,
-            blueValues,
-            alphaValues,
-          );
+          const options = getSunbeamsOptions(redValues, greenValues, blueValues, alphaValues);
           const content = preferences.generatePreviews
             ? await generatePreview(generators.Sunbeams.CIFilterName, options)
             : generators.Sunbeams.thumbnail;
@@ -309,19 +221,62 @@ export default function ImagePatternGrid(props: {
     ]).then(() => setLoading(false));
   };
 
-  const checkerboardPreviews = checkerboardItems.map(
-    ([preview, options], index: number) => (
+  const checkerboardPreviews = checkerboardItems.map(([preview, options], index: number) => (
+    <Grid.Item
+      title={`Checkerboard ${index + 1}`}
+      key={`Checkerboard ${index + 1}`}
+      content={{
+        source: preview == "" ? generators.Checkerboard.thumbnail : preview,
+        tintColor: currentColors?.[index],
+      }}
+      actions={
+        <ImageGeneratorActionPanel
+          objectType="Checkerboard"
+          generator={generators.Checkerboard}
+          width={width}
+          height={height}
+          preview={preview}
+          options={options}
+          regeneratePreviews={regeneratePreviews}
+        />
+      }
+    />
+  ));
+
+  const stripePreviews = stripeItems.map(([preview, options], index: number) => (
+    <Grid.Item
+      title={`Stripes ${index + 1}`}
+      key={`Stripes ${index + 1}`}
+      content={{
+        source: preview == "" ? generators.Stripes.thumbnail : preview,
+        tintColor: currentColors?.[index],
+      }}
+      actions={
+        <ImageGeneratorActionPanel
+          objectType="Stripes"
+          generator={generators.Stripes}
+          width={width}
+          height={height}
+          preview={preview}
+          options={options}
+          regeneratePreviews={regeneratePreviews}
+        />
+      }
+    />
+  ));
+
+  const solidColorPreviews = solidColorItems.map(([preview, title, options], index: number) => {
+    return (
       <Grid.Item
-        title={`Checkerboard ${index + 1}`}
-        key={`Checkerboard ${index + 1}`}
+        title={title}
+        key={`Solid Color ${index + 1}`}
         content={{
           source: preview == "" ? generators.Checkerboard.thumbnail : preview,
-          tintColor: currentColors?.[index],
         }}
         actions={
           <ImageGeneratorActionPanel
-            objectType="Checkerboard"
-            generator={generators.Checkerboard}
+            objectType={title}
+            generator={generators.ConstantColor}
             width={width}
             height={height}
             preview={preview}
@@ -330,105 +285,52 @@ export default function ImagePatternGrid(props: {
           />
         }
       />
-    ),
-  );
+    );
+  });
 
-  const stripePreviews = stripeItems.map(
-    ([preview, options], index: number) => (
-      <Grid.Item
-        title={`Stripes ${index + 1}`}
-        key={`Stripes ${index + 1}`}
-        content={{
-          source: preview == "" ? generators.Stripes.thumbnail : preview,
-          tintColor: currentColors?.[index],
-        }}
-        actions={
-          <ImageGeneratorActionPanel
-            objectType="Stripes"
-            generator={generators.Stripes}
-            width={width}
-            height={height}
-            preview={preview}
-            options={options}
-            regeneratePreviews={regeneratePreviews}
-          />
-        }
-      />
-    ),
-  );
-
-  const solidColorPreviews = solidColorItems.map(
-    ([preview, title, options], index: number) => {
-      return (
-        <Grid.Item
-          title={title}
-          key={`Solid Color ${index + 1}`}
-          content={{
-            source: preview == "" ? generators.Checkerboard.thumbnail : preview,
-          }}
-          actions={
-            <ImageGeneratorActionPanel
-              objectType={title}
-              generator={generators.ConstantColor}
-              width={width}
-              height={height}
-              preview={preview}
-              options={options}
-              regeneratePreviews={regeneratePreviews}
-            />
-          }
+  const linearGradientPreviews = linearGradientItems.map(([preview, options], index: number) => (
+    <Grid.Item
+      title={`Linear Gradient ${index + 1}`}
+      key={`Linear Gradient ${index + 1}`}
+      content={{
+        source: preview == "" ? generators.LinearGradient.thumbnail : preview,
+        tintColor: currentColors?.[index],
+      }}
+      actions={
+        <ImageGeneratorActionPanel
+          objectType="Linear Gradient"
+          generator={generators.LinearGradient}
+          width={width}
+          height={height}
+          preview={preview}
+          options={options}
+          regeneratePreviews={regeneratePreviews}
         />
-      );
-    },
-  );
+      }
+    />
+  ));
 
-  const linearGradientPreviews = linearGradientItems.map(
-    ([preview, options], index: number) => (
-      <Grid.Item
-        title={`Linear Gradient ${index + 1}`}
-        key={`Linear Gradient ${index + 1}`}
-        content={{
-          source: preview == "" ? generators.LinearGradient.thumbnail : preview,
-          tintColor: currentColors?.[index],
-        }}
-        actions={
-          <ImageGeneratorActionPanel
-            objectType="Linear Gradient"
-            generator={generators.LinearGradient}
-            width={width}
-            height={height}
-            preview={preview}
-            options={options}
-            regeneratePreviews={regeneratePreviews}
-          />
-        }
-      />
-    ),
-  );
-
-  const radialGradientPreviews = radialGradientItems.map(
-    ([preview, options], index: number) => (
-      <Grid.Item
-        title={`Radial Gradient ${index + 1}`}
-        key={`Radial Gradient ${index + 1}`}
-        content={{
-          source: preview == "" ? generators.RadialGradient.thumbnail : preview,
-          tintColor: currentColors?.[index],
-        }}
-        actions={
-          <ImageGeneratorActionPanel
-            objectType="Radial Gradient"
-            generator={generators.RadialGradient}
-            width={width}
-            height={height}
-            preview={preview}
-            options={options}
-            regeneratePreviews={regeneratePreviews}
-          />
-        }
-      />
-    ),
-  );
+  const radialGradientPreviews = radialGradientItems.map(([preview, options], index: number) => (
+    <Grid.Item
+      title={`Radial Gradient ${index + 1}`}
+      key={`Radial Gradient ${index + 1}`}
+      content={{
+        source: preview == "" ? generators.RadialGradient.thumbnail : preview,
+        tintColor: currentColors?.[index],
+      }}
+      actions={
+        <ImageGeneratorActionPanel
+          objectType="Radial Gradient"
+          generator={generators.RadialGradient}
+          width={width}
+          height={height}
+          preview={preview}
+          options={options}
+          regeneratePreviews={regeneratePreviews}
+        />
+      }
+    />
+  ));
 
   const randomPreview = (
     <Grid.Item
@@ -456,10 +358,7 @@ export default function ImagePatternGrid(props: {
       title="Star Shine"
       key="Star Shine"
       content={{
-        source:
-          starShineItem[0] == ""
-            ? generators.StarShine.thumbnail
-            : starShineItem[0],
+        source: starShineItem[0] == "" ? generators.StarShine.thumbnail : starShineItem[0],
       }}
       actions={
         <ImageGeneratorActionPanel
@@ -480,10 +379,7 @@ export default function ImagePatternGrid(props: {
       title="Lenticular Halo"
       key="Lenticular Halo"
       content={{
-        source:
-          lenticularHaloItem[0] == ""
-            ? generators.LenticularHalo.thumbnail
-            : lenticularHaloItem[0],
+        source: lenticularHaloItem[0] == "" ? generators.LenticularHalo.thumbnail : lenticularHaloItem[0],
       }}
       actions={
         <ImageGeneratorActionPanel
@@ -504,10 +400,7 @@ export default function ImagePatternGrid(props: {
       title="Sunbeams"
       key="Sunbeams"
       content={{
-        source:
-          sunbeamsItem[0] == ""
-            ? generators.Sunbeams.thumbnail
-            : sunbeamsItem[0],
+        source: sunbeamsItem[0] == "" ? generators.Sunbeams.thumbnail : sunbeamsItem[0],
       }}
       actions={
         <ImageGeneratorActionPanel
@@ -549,38 +442,20 @@ export default function ImagePatternGrid(props: {
       }
 
       Promise.resolve(
-        getDestinationPaths(
-          [
-            path.join(
-              os.tmpdir(),
-              `${pattern.name.replaceAll(" ", "_").toLowerCase()}.png`,
-            ),
-          ],
-          true,
-        ),
+        getDestinationPaths([path.join(os.tmpdir(), `${pattern.name.replaceAll(" ", "_").toLowerCase()}.png`)], true),
       ).then(async (destinations) => {
         const toast = await showToast({
           title: `Creating ${pattern.name}...`,
           style: Toast.Style.Animated,
         });
         try {
-          await generator.applyMethod(
-            destinations[0],
-            generator.CIFilterName,
-            width,
-            height,
-            options,
-          );
+          await generator.applyMethod(destinations[0], generator.CIFilterName, width, height, options);
           await moveImageResultsToFinalDestination(destinations);
           toast.title = `Created ${pattern.name}`;
           toast.style = Toast.Style.Success;
           showInFinder(destinations[0]);
         } catch (error) {
-          await showErrorToast(
-            `Failed To Create ${pattern.name}`,
-            error as Error,
-            toast,
-          );
+          await showErrorToast(`Failed To Create ${pattern.name}`, error as Error, toast);
         } finally {
           cleanup();
         }
@@ -593,11 +468,7 @@ export default function ImagePatternGrid(props: {
   }, [pattern]);
 
   return (
-    <Grid
-      navigationTitle="Image Pattern Options"
-      isLoading={loading}
-      inset={Grid.Inset.Small}
-    >
+    <Grid navigationTitle="Image Pattern Options" isLoading={loading} inset={Grid.Inset.Small}>
       <Grid.Section title="Patterns">
         {checkerboardPreviews}
         {stripePreviews}

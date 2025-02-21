@@ -36,9 +36,7 @@ type Input = {
 };
 
 export default async function ({ format, imagePaths }: Input) {
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
   const convertedImages = await convert(selectedImages, format);
 
   await cleanup();

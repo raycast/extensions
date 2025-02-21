@@ -26,9 +26,7 @@ import { getSelectedImages } from "./utilities/utils";
 
 export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<Preferences.Convert>();
-  const enabledFormats = imageFormats.filter(
-    (format) => preferences[`show${format}`],
-  );
+  const enabledFormats = imageFormats.filter((format) => preferences[`show${format}`]);
 
   useEffect(() => {
     if (props.launchContext && "convertTo" in props.launchContext) {

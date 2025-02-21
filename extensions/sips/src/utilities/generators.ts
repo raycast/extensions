@@ -25,11 +25,7 @@ export const standardDimensions = [1024, 512, 256, 128, 100, 64, 50, 32];
  * @param destination The destination path for the image.
  * @returns A promise that resolves when the image has been generated and saved. If no destination is specified, the promise resolves with the data URL of the generated image.
  */
-export const generatePlaceholder = async (
-  width: number,
-  height: number,
-  destination?: string,
-) => {
+export const generatePlaceholder = async (width: number, height: number, destination?: string) => {
   return runAppleScript(`use framework "Foundation"
         use framework "Quartz"
         
@@ -67,10 +63,7 @@ export const generatePlaceholder = async (
  * @param inputs The input key/value pairs for the CIFilter.
  * @returns A promise that resolves with the data URL of the generated preview.
  */
-export const generatePreview = async (
-  CIFilterName: string,
-  inputs: { [key: string]: unknown },
-) => {
+export const generatePreview = async (CIFilterName: string, inputs: { [key: string]: unknown }) => {
   return runAppleScript(
     `use framework "Foundation"
       use framework "Quartz"
@@ -85,9 +78,7 @@ export const generatePreview = async (
   
       set theCIImage to current application's CIImage's emptyImage()
       ${Object.entries(inputs)
-        .map(
-          ([key, value]) => `theFilter's setValue:(${value}) forKey:"${key}"`,
-        )
+        .map(([key, value]) => `theFilter's setValue:(${value}) forKey:"${key}"`)
         .join("\n")}
       
       set theBounds to current application's NSMakeRect(0, 0, imgWidth, imgHeight)
@@ -334,11 +325,7 @@ export const getStripeOptions = (
   },
 ];
 
-export const getSolidColorOptions = (
-  redValues: number[],
-  greenValues: number[],
-  blueValues: number[],
-) =>
+export const getSolidColorOptions = (redValues: number[], greenValues: number[], blueValues: number[]) =>
   Array(10)
     .fill(0)
     .map((_, i) => ({

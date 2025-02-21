@@ -29,10 +29,7 @@ import {
  * @param exifToolLocation The location of the ExifTool binary.
  * @returns A promise that resolves when the operation is complete.
  */
-export default async function stripEXIF(
-  sourcePaths: string[],
-  exifToolLocation: ExifToolLocation,
-) {
+export default async function stripEXIF(sourcePaths: string[], exifToolLocation: ExifToolLocation) {
   const preferences = getPreferenceValues<Preferences>();
   const newPaths = await getDestinationPaths(sourcePaths);
   const resultPaths: string[] = [];
@@ -44,44 +41,27 @@ export default async function stripEXIF(
 
   // Make sure ExifTool is executable
   if (exifToolLocation === ExifToolLocation.SUPPORT_DIR) {
-    execSync(
-      `chmod +x "${environment.supportPath}/Image-ExifTool-12.74/exiftool"`,
-    );
+    execSync(`chmod +x "${environment.supportPath}/Image-ExifTool-12.74/exiftool"`);
   }
 
   for (const imagePath of sourcePaths) {
     if (imagePath.toLowerCase().endsWith(".webp")) {
       // Convert to PNG, remove EXIF, then restore to WebP
-      resultPaths.push(
-        await execSIPSCommandOnWebP(
-          `${exifCommand} -all= "${imagePath}"`,
-          imagePath,
-        ),
-      );
+      resultPaths.push(await execSIPSCommandOnWebP(`${exifCommand} -all= "${imagePath}"`, imagePath));
     } else if (imagePath.toLowerCase().endsWith(".svg")) {
       // Convert to PNG, remove EXIF, then restore to SVG
-      resultPaths.push(
-        await execSIPSCommandOnSVG(
-          `${exifCommand} -all= "${imagePath}"`,
-          imagePath,
-        ),
-      );
+      resultPaths.push(await execSIPSCommandOnSVG(`${exifCommand} -all= "${imagePath}"`, imagePath));
     } else if (imagePath.toLowerCase().endsWith(".avif")) {
       // Convert to PNG, remove EXIF, then restore to AVIF
       resultPaths.push(
-        await execSIPSCommandOnAVIF(
-          `${exifCommand} -all= "${imagePath}" -overwrite_original`,
-          imagePath,
-        ),
+        await execSIPSCommandOnAVIF(`${exifCommand} -all= "${imagePath}" -overwrite_original`, imagePath),
       );
     } else {
       // Image is not a special format, so just strip EXIF data
       const newPath = newPaths[sourcePaths.indexOf(imagePath)];
       resultPaths.push(newPath);
 
-      if (
-        preferences.imageResultHandling === ImageResultHandling.ReplaceOriginal
-      ) {
+      if (preferences.imageResultHandling === ImageResultHandling.ReplaceOriginal) {
         // Replace the original image with the stripped version
         execSync(`${exifCommand} -all= "${imagePath}" -overwrite_original`);
       } else {

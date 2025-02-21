@@ -18,14 +18,9 @@ type Input = {
 };
 
 export default async function ({ direction, imagePaths }: Input) {
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
 
-  const flippedImages = await flip(
-    selectedImages,
-    direction == "vertical" ? Direction.VERTICAL : Direction.HORIZONTAL,
-  );
+  const flippedImages = await flip(selectedImages, direction == "vertical" ? Direction.VERTICAL : Direction.HORIZONTAL);
 
   await cleanup();
 

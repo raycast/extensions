@@ -28,9 +28,7 @@ export default async function ({ borderSize, color, imagePaths }: Input) {
     throw new Error("Invalid color: must be a HEX color in the format RRGGBB");
   }
 
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
 
   const paddedImages = await pad(selectedImages, validatedSize, color);
 

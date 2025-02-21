@@ -14,9 +14,7 @@ import optimize from "./operations/optimizeOperation";
 import runOperation from "./operations/runOperation";
 import { getSelectedImages } from "./utilities/utils";
 
-export default async function Command(props: {
-  arguments: { optimizationFactor: string };
-}) {
+export default async function Command(props: { arguments: { optimizationFactor: string } }) {
   const { optimizationFactor } = props.arguments;
 
   let optimizationValue = 50;

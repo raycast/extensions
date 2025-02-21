@@ -89,12 +89,8 @@ export async function getAVIFEncPaths() {
       // If the AVIF encoder is not found, prompt the user to install it
       if (await installAVIFEnc()) {
         try {
-          encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`)
-            .toString()
-            .trim();
-          decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`)
-            .toString()
-            .trim();
+          encoderPath = execSync(`/bin/zsh -ilc "which avifenc"`).toString().trim();
+          decoderPath = execSync(`/bin/zsh -ilc "which avifdec"`).toString().trim();
           await LocalStorage.setItem("avifEncoderPath", encoderPath);
           await LocalStorage.setItem("avifDecoderPath", decoderPath);
         } catch (error) {

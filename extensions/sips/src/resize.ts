@@ -14,9 +14,7 @@ import resize from "./operations/resizeOperation";
 import runOperation from "./operations/runOperation";
 import { getSelectedImages } from "./utilities/utils";
 
-export default async function Command(props: {
-  arguments: { width: string; height: string };
-}) {
+export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width, height } = props.arguments;
 
   if (width == "" && height == "") {

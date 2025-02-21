@@ -28,10 +28,7 @@ export default async function runOperation(params: {
   successMessage: string;
   failureMessage: string;
 }) {
-  if (
-    params.selectedImages.length === 0 ||
-    (params.selectedImages.length === 1 && params.selectedImages[0] === "")
-  ) {
+  if (params.selectedImages.length === 0 || (params.selectedImages.length === 1 && params.selectedImages[0] === "")) {
     await showToast({
       title: "No images selected",
       message:

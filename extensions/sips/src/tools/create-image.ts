@@ -12,11 +12,7 @@ import {
   getStripeOptions,
   getSunbeamsOptions,
 } from "../utilities/generators";
-import {
-  cleanup,
-  getDestinationPaths,
-  moveImageResultsToFinalDestination,
-} from "../utilities/utils";
+import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination } from "../utilities/utils";
 
 type Input = {
   /**
@@ -68,9 +64,7 @@ export default async function ({ style, width, height, colors }: Input) {
 
   const generator = Object.values(generators).find((g) => g.name === style);
   if (!generator) {
-    throw new Error(
-      `Invalid value for style: must be one of ${Object.keys(generators).join(", ")}`,
-    );
+    throw new Error(`Invalid value for style: must be one of ${Object.keys(generators).join(", ")}`);
   }
 
   const validatedWidth = parseInt(width.toString());
@@ -83,18 +77,12 @@ export default async function ({ style, width, height, colors }: Input) {
   }
 
   if (!Array.isArray(colors)) {
-    throw new Error(
-      "Invalid value for colors: must be an array of HEX color strings",
-    );
+    throw new Error("Invalid value for colors: must be an array of HEX color strings");
   }
 
-  const validatedColors = colors.filter((c) =>
-    c.match(/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
-  );
+  const validatedColors = colors.filter((c) => c.match(/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/));
   if (validatedColors.length !== colors.length) {
-    throw new Error(
-      "Invalid value for colors: must be an array of HEX color strings",
-    );
+    throw new Error("Invalid value for colors: must be an array of HEX color strings");
   }
 
   const rgbColors = colors.map((c) => {
@@ -114,13 +102,7 @@ export default async function ({ style, width, height, colors }: Input) {
   const blues = rgbColors.map((c) => c.blue);
   const alphas = rgbColors.map((c) => c.alpha);
 
-  let options: { [key: string]: unknown } = getCheckerboardOptions(
-    reds,
-    greens,
-    blues,
-    alphas,
-    16,
-  )[0];
+  let options: { [key: string]: unknown } = getCheckerboardOptions(reds, greens, blues, alphas, 16)[0];
   switch (generator.name) {
     case "Constant Color":
       options = getSolidColorOptions(reds, greens, blues)[0];
@@ -153,13 +135,7 @@ export default async function ({ style, width, height, colors }: Input) {
     true,
   );
   try {
-    await generator.applyMethod(
-      destinations[0],
-      generator.CIFilterName,
-      validatedWidth,
-      validatedHeight,
-      options,
-    );
+    await generator.applyMethod(destinations[0], generator.CIFilterName, validatedWidth, validatedHeight, options);
     await moveImageResultsToFinalDestination(destinations);
   } catch (error) {
     throw new Error(`Failed To Create ${style}: ${error}`);

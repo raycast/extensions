@@ -14,9 +14,7 @@ type Input = {
 };
 
 export default async function ({ factor, imagePaths }: Input) {
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
   const scaledImages = await scale(selectedImages, factor);
 
   await cleanup();

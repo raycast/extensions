@@ -31,11 +31,7 @@ import {
  * @param newPath The path to save the optimized JPEG image to.
  * @param amount The amount of compression to apply to the JPEG image.
  */
-const optimizeJPEG = async (
-  jpegPath: string,
-  newPath: string,
-  amount: number,
-) => {
+const optimizeJPEG = async (jpegPath: string, newPath: string, amount: number) => {
   return runAppleScript(`use framework "Foundation"
   
     -- Load JPEG image from file
@@ -120,16 +116,10 @@ export default async function optimize(sourcePaths: string[], amount: number) {
     } else if (imgPath.toLowerCase().endsWith("svg")) {
       // Optimize SVG using SVGO
       resultPaths.push(await optimizeSVG(imgPath));
-    } else if (
-      imgPath.toLowerCase().endsWith("jpg") ||
-      imgPath.toLowerCase().endsWith("jpeg")
-    ) {
+    } else if (imgPath.toLowerCase().endsWith("jpg") || imgPath.toLowerCase().endsWith("jpeg")) {
       // Optimize JPEG images using NSBitmapImageRep compression
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(
-        path.dirname(newPath),
-        path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg",
-      );
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg");
       resultPaths.push(newPath);
       await optimizeJPEG(imgPath, newPath, amount);
     } else if (imgPath.toLowerCase().endsWith("avif")) {
@@ -143,10 +133,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
 
       // Convert back to AVIF
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
-      newPath = path.join(
-        path.dirname(newPath),
-        path.basename(newPath, path.extname(newPath)) + "-optimized.avif",
-      );
+      newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
       execSync(
         `${encoderPath} ${preferences.useLosslessConversion ? "-s 0 --min 0 --max 0 --minalpha 0 --maxalpha 0 --qcolor 100 --qalpha 100" : ""} "${jpegFile.path}" "${newPath}"`,
@@ -169,17 +156,13 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       let newPath = newPaths[sourcePaths.indexOf(imgPath)];
       newPath = path.join(
         path.dirname(newPath),
-        path.basename(newPath, path.extname(newPath)) +
-          "-optimized" +
-          path.extname(newPath),
+        path.basename(newPath, path.extname(newPath)) + "-optimized" + path.extname(newPath),
       );
       resultPaths.push(newPath);
 
       await optimizeJPEG(imgPath, jpegFile.path, amount);
       const format = path.extname(newPath).slice(1).toLowerCase();
-      execSync(
-        `sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`,
-      );
+      execSync(`sips --setProperty format ${format} "${jpegFile.path}" --out "${newPath}"`);
     }
   }
   await moveImageResultsToFinalDestination(resultPaths);

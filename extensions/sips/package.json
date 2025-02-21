@@ -531,7 +531,7 @@
     },
     {
       "name": "strip-exif",
-      "title": "Strip EXIF Data",
+      "title": "Strip Exif Data",
       "description": "Remove EXIF data from images",
       "icon": "tool-icon.png",
       "keywords": [
@@ -599,7 +599,7 @@
     },
     {
       "name": "strip-exif",
-      "title": "Strip EXIF Data",
+      "title": "Strip Exif Data",
       "description": "Remove EXIF data from selected images",
       "icon": "tool-icon.png"
     }

@@ -14,9 +14,7 @@ type Input = {
 };
 
 export default async function ({ power, imagePaths }: Input) {
-  const selectedImages = imagePaths?.length
-    ? imagePaths
-    : await getSelectedImages();
+  const selectedImages = imagePaths?.length ? imagePaths : await getSelectedImages();
 
   const optimizedImages = await optimize(selectedImages, power);
 

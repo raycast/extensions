@@ -4,13 +4,7 @@ import * as fs from "fs";
 import * as https from "https";
 import path from "path";
 
-import {
-  confirmAlert,
-  environment,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { confirmAlert, environment, LocalStorage, showToast, Toast } from "@raycast/api";
 import * as tar from "tar";
 
 import runOperation from "./operations/runOperation";
@@ -39,8 +33,7 @@ export async function installExifTool() {
 
     const supportPath = environment.supportPath;
     const tarURL = "https://exiftool.org/Image-ExifTool-12.74.tar.gz";
-    const checksum =
-      "aedb28b1427c53205ab261fa31ff3feda73e7f17a0c181453651680e5666c48a";
+    const checksum = "aedb28b1427c53205ab261fa31ff3feda73e7f17a0c181453651680e5666c48a";
 
     let waiting = true;
     https.get(tarURL, async (response) => {
@@ -72,10 +65,7 @@ export async function installExifTool() {
             file: `${supportPath}/Image-ExifTool-12.74.tar.gz`,
             cwd: supportPath,
           });
-          await LocalStorage.setItem(
-            "exifToolLocation",
-            ExifToolLocation.SUPPORT_DIR,
-          );
+          await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
           waiting = false;
         }
         await fs.promises.unlink(tarPath);
@@ -112,17 +102,9 @@ export async function setExifToolLocation() {
  */
 export async function getExifToolLocation() {
   const initialLocation = await LocalStorage.getItem("exifToolLocation");
-  if (
-    initialLocation !== ExifToolLocation.ON_PATH &&
-    initialLocation !== ExifToolLocation.SUPPORT_DIR
-  ) {
-    if (
-      fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74/exiftool`)
-    ) {
-      await LocalStorage.setItem(
-        "exifToolLocation",
-        ExifToolLocation.SUPPORT_DIR,
-      );
+  if (initialLocation !== ExifToolLocation.ON_PATH && initialLocation !== ExifToolLocation.SUPPORT_DIR) {
+    if (fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74/exiftool`)) {
+      await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
     } else {
       await setExifToolLocation();
     }
@@ -153,8 +135,7 @@ export default async function Command() {
   }
 
   await runOperation({
-    operation: () =>
-      stripEXIF(selectedImages, exifToolLocation as ExifToolLocation),
+    operation: () => stripEXIF(selectedImages, exifToolLocation as ExifToolLocation),
     selectedImages,
     inProgressMessage: "Sanitizing...",
     successMessage: "Sanitized",
