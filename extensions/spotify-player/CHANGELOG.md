@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Select Devcie] - {PR_MERGE_DATE}
+
+- Fixed a possibly undefined issue from Select Devices command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
