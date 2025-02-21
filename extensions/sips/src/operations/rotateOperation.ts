@@ -61,6 +61,7 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special formats -- Flip all images at once
     if (newPaths.length == 1) {
@@ -85,4 +86,5 @@ export default async function rotate(sourcePaths: string[], degrees: number) {
     }
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

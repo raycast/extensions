@@ -81,6 +81,7 @@ export default async function resize(sourcePaths: string[], width: number, heigh
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special formats -- Run commands on all images at once
     const outputLocation = newPaths.length == 1 ? newPaths[0] : path.join(path.dirname(newPaths[0]), "resized");
@@ -96,4 +97,5 @@ export default async function resize(sourcePaths: string[], width: number, heigh
     }
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

@@ -29,4 +29,5 @@ export default async function applyFilter(sourcePaths: string[], filter: Filter)
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }
