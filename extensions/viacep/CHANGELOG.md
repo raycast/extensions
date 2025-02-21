@@ -1,6 +1,10 @@
 # ViaCEP Changelog
 
-## [Fixes] - 2024-08-29
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Changed `State Code` dropdown in the Find CEP command to start with `–` as default and added field validation.
+
+## [Enhancements] - 2024-08-29
 
 - Fixed output formatting when certain address components are missing.
 
