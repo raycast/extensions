@@ -358,7 +358,7 @@ function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
                       openExtensionPreferences();
                     } else {
                       Clipboard.copy(
-                        isCommonError ? error.message : "An unknown error occured while trying to install",
+                        isCommonError ? error.message : "An unknown error occurred while trying to install",
                       );
                     }
                   },
