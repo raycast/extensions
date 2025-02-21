@@ -72,6 +72,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
             id: "_select_null_",
             name: "No Selection",
             color: "default",
+            description: "No selection",
           });
 
         databaseProperties.push(standardize(property, "config"));
