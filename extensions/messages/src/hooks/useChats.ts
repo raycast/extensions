@@ -24,8 +24,9 @@ export type SQLChat = ChatParticipant & {
 };
 
 export type Chat = SQLChat & {
-  avatar: Image.ImageLike;
+  avatar?: Image.ImageLike;
   displayName: string;
+  phoneNumber?: string;
 };
 
 export function useChats(searchText: string = "") {

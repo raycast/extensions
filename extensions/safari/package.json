@@ -17,7 +17,8 @@
     "xilopaint",
     "ChangeHow",
     "ridemountainpig",
-    "1weiho"
+    "1weiho",
+    "xmok"
   ],
   "pastContributors": [
     "marcjulian"
@@ -162,9 +163,169 @@
       "default": false
     }
   ],
+  "tools": [
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search through the Safari Bookmarks"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search through the Safari Browing History"
+    },
+    {
+      "name": "search-reading-list",
+      "title": "Search Reading List",
+      "description": "Search through the Safari Reading List"
+    },
+    {
+      "name": "add-to-reading-list",
+      "title": "Add to Reading List",
+      "description": "Add a URL to the Safari Reading List"
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL",
+      "description": "Open a URL in Safari"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Get the text or HTML source code of the focused tab"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@safari Summarize this tab into 3 bullet points",
+        "mocks": {
+          "get-focused-tab": "Raycast is cool"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-focused-tab",
+              "arguments": {
+                "type": "text"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari open the latest item in my reading list",
+        "mocks": {
+          "open-url": "Successfully called \"open-url\"",
+          "search-reading-list": [
+            {
+              "description": "Fast, light, and frictionless note-taking experience.",
+              "title": "Meet the new Raycast Notes",
+              "url": "https://www.raycast.com/blog/raycast-notes",
+              "domain": "raycast.com",
+              "uuid": "XXXXXXXX-B021-4EAC-83E1-D1059804C2E5"
+            }
+          ],
+          "open": "Successfully called \"open\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-reading-list"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "open-url",
+              "arguments": {
+                "url": "https://www.raycast.com/blog/raycast-notes"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari what is my latest bookmark?",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "title": "Raycast",
+              "folder": "BookmarksBar",
+              "url": "https://raycast.com/",
+              "domain": "raycast.com",
+              "uuid": "XXXXXXXX-XXXX-4BA7-9E78-06E283535F16"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari find raycast in history",
+        "mocks": {
+          "search-history": [
+            {
+              "id": 74,
+              "title": "Meet the new Raycast Notes - Raycast Blog",
+              "lastVisited": "2025-02-06 20:22:18",
+              "url": "https://www.raycast.com/blog/raycast-notes"
+            },
+            {
+              "id": 73,
+              "title": "Raycast - Your shortcut to everything",
+              "lastVisited": "2025-02-05 19:30:25",
+              "url": "https://www.raycast.com/"
+            },
+            {
+              "id": 72,
+              "title": "",
+              "lastVisited": "2025-02-05 19:30:25",
+              "url": "http://raycast.com/"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchText": "raycast"
+              },
+              "name": "search-history"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari show reading list",
+        "mocks": {
+          "search-reading-list": [
+            {
+              "description": "Fast, light, and frictionless note-taking experience.",
+              "title": "Meet the new Raycast Notes",
+              "url": "https://www.raycast.com/blog/raycast-notes",
+              "domain": "raycast.com",
+              "uuid": "964BBF14-XXXX-XXXX-83E1-D1059804C2E5"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-reading-list"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.82.3",
-    "@raycast/utils": "1.17.0",
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.18.1",
     "ahooks": "^3.8.1",
     "bplist-creator": "^0.1.1",
     "fuse.js": "^7.0.0",
