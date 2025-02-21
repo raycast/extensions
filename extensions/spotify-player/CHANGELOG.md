@@ -1,5 +1,7 @@
 # Spotify Player Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
 
 - Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.
