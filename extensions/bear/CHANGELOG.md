@@ -1,6 +1,6 @@
 # Bear Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-02-21
 
 - Add AI Tool to "Create Note"
 - Add AI Tool to "Search Notes"
