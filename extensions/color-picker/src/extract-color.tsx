@@ -2,7 +2,7 @@ import { Action, ActionPanel, getSelectedFinderItems, Grid, Icon, showToast, Toa
 import { useEffect, useState } from "react";
 import { extractColor } from "swift:../swift/extract-color";
 
-export interface FinalColor {
+type FinalColor = {
   hex: string;
   red: number;
   green: number;
@@ -12,7 +12,7 @@ export interface FinalColor {
   saturation: number;
   lightness: number;
   intensity: number;
-}
+};
 
 export default function Command() {
   const [columns, setColumns] = useState(3);
