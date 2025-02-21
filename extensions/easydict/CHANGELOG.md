@@ -1,5 +1,9 @@
 # `Easydict` Changelog
 
+## [v2.10.2] - {PR_MERGE_DATE}
+
+- 🔐 Use `password` for secret tokens instead of `textfield`
+
 ## [v2.10.1] - 2025-01-12
 
 ### 🐞 Fixed
