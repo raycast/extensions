@@ -14,7 +14,7 @@
 
 - **Battery Charge Status:**  
   - Included battery charging status (StateOfCharge_Relative) in both the dashboard and watch commands.
-  - Displayed as a percentage with localized labeling.
+  - Displayed as a percentage.
 
 - **Code Improvements:**  
   - Replaced explicit `any` types with `unknown` in catch blocks.
