@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [AI Extensions] - 2025-02-01
+## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI Extensions support allowing natural language interaction with the extension
 

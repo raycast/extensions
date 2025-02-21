@@ -1,6 +1,6 @@
 # Hacker News Changelog
 
-## [🎉 Added all of the RSS feeds] - (2025-01-30)
+## [✨ AI Enhancements] - 2025-02-21
 
 - Add AI tools
 

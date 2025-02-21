@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - 2025-02-09
+## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI tools.
 
