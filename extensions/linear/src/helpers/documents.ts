@@ -1,5 +1,5 @@
 import { getIcon } from "./icons";
-import { DocumentResult } from "../api/documents";
+import { DocumentResult } from "../tools/get-documents";
 import { Color, Icon } from "@raycast/api";
 
 export function getDocumentIcon(doc: Pick<DocumentResult, "icon" | "color">) {
