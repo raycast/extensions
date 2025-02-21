@@ -16,7 +16,6 @@ import { parse as parseYAML } from "yaml";
 import { openGhosttyWindow } from "./utils/scripts";
 import { LaunchConfig } from "./utils/types";
 import { generateWindowScript } from "./utils/helpers";
-import { LaunchConfigDescription } from "./utils/components";
 
 export default function Command() {
   const [items, setItems] = useState<Record<string, string>>({});
@@ -269,4 +268,8 @@ async function removeItem(name: string) {
       },
     },
   });
+}
+
+function LaunchConfigDescription() {
+  return <Form.Description title="💡" text={`The YAML configuration must start with a 'name' field.`} />;
 }
