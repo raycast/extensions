@@ -1,4 +1,4 @@
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -11,13 +11,14 @@ import {
   getSelectedText,
   Icon,
   open,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import nanoSpawn from "nano-spawn";
+import { execa, ExecaError } from "execa";
 import { DownloadOptions, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
@@ -150,13 +151,13 @@ export default function DownloadVideo() {
   });
 
   const { data: video, isLoading } = usePromise(
-    async (url) => {
+    async (url: string) => {
       if (!url) return;
       if (!isValidUrl(url)) return;
 
-      const result = await nanoSpawn(
+      const result = await execa(
         preferences.ytdlPath,
-        [preferences.forceIpv4 ? "--force-ipv4" : undefined, "-j", url].filter((x) => Boolean(x)),
+        [preferences.forceIpv4 ? "--force-ipv4" : "", "-j", url].filter((x) => Boolean(x)),
       );
       return JSON.parse(result.stdout) as {
         title: string;
@@ -178,8 +179,14 @@ export default function DownloadVideo() {
       onError(error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch video",
+          title: "Video not found with the provided URL",
           message: error.message,
+          primaryAction: {
+            title: "Copy to Clipboard",
+            onAction: () => {
+              Clipboard.copy(error.message);
+            },
+          },
         });
       },
     },
@@ -322,21 +329,48 @@ function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
             if (isLoading) return;
 
             setIsLoading(true);
-
-            const toast = await showToast({ style: Toast.Style.Animated, title: "Installing ffmpeg..." });
-            await toast.show();
+            const installationToast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
+            await installationToast.show();
 
             try {
-              execSync(`zsh -l -c 'brew install ffmpeg'`);
-              await toast.hide();
+              await execa(preferences.homebrewPath, ["install", "yt-dlp", "ffmpeg"]);
+              await installationToast.hide();
               onRefresh();
-            } catch (e) {
-              await toast.hide();
-              console.error(e);
+            } catch (error) {
+              installationToast.hide();
+              console.error(error);
+              const isCommonError = error instanceof Error;
+              const isExecaError = error instanceof ExecaError;
+              const isENOENT = isExecaError && error.code === "ENOENT";
+
               await showToast({
                 style: Toast.Style.Failure,
-                title: "Error installing",
-                message: "An unknown error occured while trying to install",
+                title: isCommonError ? (isENOENT ? "Cannot find Homebrew" : error.name) : "Installation Failed",
+                message: isCommonError
+                  ? isENOENT
+                    ? "Please make sure your `brew` PATH is configured correctly in extension preferences. If you don't have Homebrew installed, you can download it from https://brew.sh."
+                    : error.message
+                  : "An unknown error occured while trying to install",
+                primaryAction: {
+                  title: isENOENT ? "Open Extension Preferences" : "Copy to Clipboard",
+                  onAction: () => {
+                    if (isENOENT) {
+                      openExtensionPreferences();
+                    } else {
+                      Clipboard.copy(
+                        isCommonError ? error.message : "An unknown error occured while trying to install",
+                      );
+                    }
+                  },
+                },
+                secondaryAction: isENOENT
+                  ? {
+                      title: "Open Installation Guide in Browser",
+                      onAction: () => {
+                        open("https://brew.sh");
+                      },
+                    }
+                  : undefined,
               });
             }
             setIsLoading(false);
