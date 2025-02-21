@@ -11,13 +11,7 @@ export type Connection = {
   DatabaseHost: string;
   database: string;
   Driver: string;
-  Environment:
-    | string
-    | "local"
-    | "development"
-    | "testing"
-    | "staging"
-    | "production";
+  Environment: string | "local" | "development" | "testing" | "staging" | "production";
   icon: string;
   subtitle: string;
   version: number;

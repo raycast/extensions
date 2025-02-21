@@ -1,19 +1,10 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  openExtensionPreferences,
-  Icon,
-} from "@raycast/api";
+import { List, ActionPanel, Action, openExtensionPreferences, Icon } from "@raycast/api";
 import { Connection } from "../interfaces";
 import { preferences } from "../constants";
 import { GetAccessories } from "./GetAccessories";
 import { OpenActions } from "./Actions";
 
-export const ConnectionListItem = (props: {
-  connection: Connection;
-  groupName: string;
-}) => {
+export const ConnectionListItem = (props: { connection: Connection; groupName: string }) => {
   const { connection, groupName } = props;
 
   return (

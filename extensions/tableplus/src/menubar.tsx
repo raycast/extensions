@@ -1,10 +1,4 @@
-import {
-  Icon,
-  MenuBarExtra,
-  getPreferenceValues,
-  open,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Icon, MenuBarExtra, getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchDatabases, getShortcut, uppercaseText } from "./utils";
 import { Group } from "./interfaces";
@@ -15,8 +9,7 @@ export default function MenuCommand() {
     isLoading: boolean;
     connections?: Group[];
   }>({ isLoading: true });
-  const { showPathInMenubar, showMonochromeIcon, subtitleMenubar } =
-    getPreferenceValues<ExtensionPreferences>();
+  const { showPathInMenubar, showMonochromeIcon, subtitleMenubar } = getPreferenceValues<ExtensionPreferences>();
 
   useEffect(() => {
     (async () => {
@@ -28,11 +21,7 @@ export default function MenuCommand() {
 
   return (
     <MenuBarExtra
-      icon={
-        showMonochromeIcon
-          ? { source: { light: "monochrome@dark.png", dark: "monochrome.png" } }
-          : "icon.png"
-      }
+      icon={showMonochromeIcon ? { source: { light: "monochrome@dark.png", dark: "monochrome.png" } } : "icon.png"}
       isLoading={state.isLoading}
     >
       {state &&
@@ -44,9 +33,7 @@ export default function MenuCommand() {
                 environment: uppercaseText(connection.Environment),
               };
 
-              const subtitle = showPathInMenubar
-                ? pathMap[subtitleMenubar]
-                : "";
+              const subtitle = showPathInMenubar ? pathMap[subtitleMenubar] : "";
               const optionalSubtitle = showPathInMenubar
                 ? pathMap[subtitleMenubar === "path" ? "environment" : "path"]
                 : "";
@@ -54,14 +41,8 @@ export default function MenuCommand() {
               const handleClick = (event: MenuBarExtra.ActionEvent) => {
                 const baseUri = `tableplus://?id=${connection.id}`;
                 const isLeftClick = event.type === "left-click";
-                const isTabbedMode =
-                  preferences.defaultAction === "tab"
-                    ? isLeftClick
-                    : !isLeftClick;
-                const uri =
-                  isTabbedMode && connection.version >= 492
-                    ? `${baseUri}&windowMode=tabbed`
-                    : baseUri;
+                const isTabbedMode = preferences.defaultAction === "tab" ? isLeftClick : !isLeftClick;
+                const uri = isTabbedMode && connection.version >= 492 ? `${baseUri}&windowMode=tabbed` : baseUri;
                 open(uri);
               };
 

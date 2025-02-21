@@ -3,12 +3,7 @@ import { Connection, Group } from "./interfaces";
 import { Keyboard, Toast, showToast } from "@raycast/api";
 import plist from "plist";
 import path from "node:path";
-import {
-  EmptyGroupID,
-  directoryPath,
-  homeDirectory,
-  plistVersionPath,
-} from "./constants";
+import { EmptyGroupID, directoryPath, homeDirectory, plistVersionPath } from "./constants";
 
 export async function fetchDatabases() {
   const tablePlusLocation = `${directoryPath}/Connections.plist`;
@@ -22,15 +17,9 @@ export async function fetchDatabases() {
     );
     return { isLoading: false };
   } else {
-    const connectionsList = plist.parse(
-      fs.readFileSync(tablePlusLocation, "utf8"),
-    ) as ReadonlyArray<plist.PlistObject>;
-    const groupList = plist.parse(
-      fs.readFileSync(groupLocations, "utf8"),
-    ) as ReadonlyArray<plist.PlistObject>;
-    const plistInformation = plist.parse(
-      fs.readFileSync(plistVersionPath, "utf8"),
-    ) as Readonly<plist.PlistObject>;
+    const connectionsList = plist.parse(fs.readFileSync(tablePlusLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
+    const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
+    const plistInformation = plist.parse(fs.readFileSync(plistVersionPath, "utf8")) as Readonly<plist.PlistObject>;
 
     const groups = new Map<string, Group>();
     const parentGroups = new Map<string, string>();
@@ -68,10 +57,7 @@ export async function fetchDatabases() {
     });
 
     connectionsList.forEach((connection) => {
-      const groupId =
-        connection.GroupID?.toString() !== ""
-          ? connection.GroupID?.toString()
-          : EmptyGroupID;
+      const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID;
       let groupIcon = "icon.png";
       if (groupId) {
         if (fs.existsSync(`${directoryPath}/${groupId}`)) {
@@ -80,11 +66,7 @@ export async function fetchDatabases() {
       }
 
       let subtitle = (
-        connection.isOverSSH
-          ? "SSH"
-          : connection.isSocket
-            ? "SOCKET"
-            : connection.DatabaseHost
+        connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost
       ) as string;
       if (connection.database && connection.Driver !== "SQLite") {
         subtitle += ` : ${connection.database}`;
