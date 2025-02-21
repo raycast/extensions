@@ -1,6 +1,6 @@
 # Zoom Changelog
 
-## [Add tools] - 2025-01-23
+## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI tools for creating and editing meetings.
 

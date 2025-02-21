@@ -1,6 +1,6 @@
 # Wikipedia Changelog
 
-## [AI tools] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add languages] - 2025-01-02
 

@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Add Tools] - 2025-01-20
+## [✨ AI Enhancements] - 2025-02-21
 
 Added tools to get workouts, routes, clubs and leaderboards
 

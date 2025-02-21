@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-# [2.8] - 2025-01-21
+# [2.8] - 2025-02-21
 
 - Added AI tools
 

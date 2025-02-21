@@ -1,6 +1,6 @@
 # Toothpick Changelog
 
-## [AI Tools] - 2025-02-03
+## [AI Tools] - 2025-02-21
 
 - Added AI tools for viewing, connecting and disconnecting Bluetooth devices.
 
