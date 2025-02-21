@@ -1,5 +1,7 @@
 # Media Converter Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [1.2.0] - 2024-12-27
 
 ### Added
