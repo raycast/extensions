@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvements & Fixes] - {PR_MERGE_DATE}
+## [Improvements & Fixes] - 2025-02-21
 
 - Use `execa` instead of `nano-spawn` for advanced usages
 - Fix Homebrew installer & use more friendly toasts with actions for downloader & Homebrew installer
