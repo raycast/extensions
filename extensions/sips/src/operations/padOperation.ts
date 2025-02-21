@@ -75,4 +75,5 @@ export default async function pad(sourcePaths: string[], padding: number, color:
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

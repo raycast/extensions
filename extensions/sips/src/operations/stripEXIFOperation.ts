@@ -10,6 +10,9 @@
 
 import { execSync } from "child_process";
 
+import { environment, getPreferenceValues } from "@raycast/api";
+
+import { ExifToolLocation, ImageResultHandling } from "../utilities/enums";
 import {
   cleanup,
   execSIPSCommandOnAVIF,
@@ -18,9 +21,6 @@ import {
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { ExifToolLocation, ImageResultHandling } from "../utilities/enums";
-import { environment, getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences } from "../utilities/preferences";
 
 /**
  * Strips EXIF data from the given images.
@@ -30,7 +30,7 @@ import { ExtensionPreferences } from "../utilities/preferences";
  * @returns A promise that resolves when the operation is complete.
  */
 export default async function stripEXIF(sourcePaths: string[], exifToolLocation: ExifToolLocation) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const newPaths = await getDestinationPaths(sourcePaths);
   const resultPaths: string[] = [];
 
@@ -72,4 +72,5 @@ export default async function stripEXIF(sourcePaths: string[], exifToolLocation:
 
   await moveImageResultsToFinalDestination(resultPaths);
   await cleanup();
+  return resultPaths;
 }

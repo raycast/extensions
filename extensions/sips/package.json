@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.9.0",
+  "version": "1.10.0",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -113,6 +113,7 @@
       "name": "flip-horizontally",
       "title": "Flip Images Horizontally",
       "description": "Flip the selected images horizontally",
+      "icon": "flip-icon.png",
       "mode": "no-view",
       "keywords": [
         "reverse",
@@ -123,6 +124,7 @@
       "name": "flip-vertically",
       "title": "Flip Images Vertically",
       "description": "Flip the selected images vertically",
+      "icon": "flip-icon.png",
       "mode": "no-view",
       "keywords": [
         "mirror"
@@ -132,6 +134,7 @@
       "name": "rotate",
       "title": "Rotate Images",
       "description": "Rotate the selected images by the specified amount of degrees",
+      "icon": "rotate-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -172,6 +175,7 @@
       "name": "convert",
       "title": "Convert Images",
       "description": "Convert the selected images to the specified format",
+      "icon": "convert-icon.png",
       "mode": "view",
       "preferences": [
         {
@@ -379,6 +383,7 @@
       "name": "resize",
       "title": "Resize Images",
       "description": "Resize the selected images to the specified width and/or height",
+      "icon": "resize-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -399,6 +404,7 @@
       "name": "scale",
       "title": "Scale Images",
       "description": "Scale the selected images by the provided factor",
+      "icon": "scale-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -419,6 +425,7 @@
       "name": "pad",
       "title": "Pad Images",
       "description": "Pad images to the specified size using the provided color",
+      "icon": "pad-icon.png",
       "mode": "no-view",
       "arguments": [
         {
@@ -453,6 +460,7 @@
       "name": "apply-filter",
       "title": "Apply Image Filter",
       "description": "Apply filters to images using Apple's CIFilters",
+      "icon": "filter-icon.png",
       "mode": "view",
       "keywords": [
         "effect",
@@ -482,11 +490,12 @@
       "name": "optimize",
       "title": "Optimize Images",
       "description": "Optimize images by compressing them",
+      "icon": "tool-icon.png",
       "mode": "no-view",
       "arguments": [
         {
           "name": "optimizationFactor",
-          "placeholder": "Amount (0 to 100)",
+          "placeholder": "Power (0 to 100)",
           "required": false,
           "type": "text"
         }
@@ -522,8 +531,9 @@
     },
     {
       "name": "strip-exif",
-      "title": "Strip EXIF Data",
+      "title": "Strip Exif Data",
       "description": "Remove EXIF data from images",
+      "icon": "tool-icon.png",
       "keywords": [
         "exif",
         "metadata",
@@ -532,6 +542,393 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "apply-filters",
+      "title": "Apply Image Filters",
+      "description": "Apply one or more filters to selected images",
+      "icon": "filter-icon.png"
+    },
+    {
+      "name": "convert-images",
+      "title": "Convert Images",
+      "description": "Convert selected images to a specified format",
+      "icon": "convert-icon.png"
+    },
+    {
+      "name": "create-image",
+      "title": "Create Image",
+      "description": "Generate a new image with specified dimensions, color, and pattern",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "flip-images",
+      "title": "Flip Images",
+      "description": "Flip selected images vertically or horizontally",
+      "icon": "flip-icon.png"
+    },
+    {
+      "name": "optimize-images",
+      "title": "Optimize Images",
+      "description": "Optimize selected images by compressing them",
+      "icon": "tool-icon.png"
+    },
+    {
+      "name": "pad-images",
+      "title": "Pad Images",
+      "description": "Add a border to selected images",
+      "icon": "pad-icon.png"
+    },
+    {
+      "name": "resize-images",
+      "title": "Resize Images",
+      "description": "Resize selected images to a specified width and/or height",
+      "icon": "resize-icon.png"
+    },
+    {
+      "name": "rotate-images",
+      "title": "Rotate Images",
+      "description": "Rotate selected images by a specified amount",
+      "icon": "rotate-icon.png"
+    },
+    {
+      "name": "scale-images",
+      "title": "Scale Images",
+      "description": "Scale selected images bv a specified factor",
+      "icon": "scale-icon.png"
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip Exif Data",
+      "description": "Remove EXIF data from selected images",
+      "icon": "tool-icon.png"
+    }
+  ],
+  "ai": {
+    "instructions": "The user's currently selected image will be detected; you just need to coordinate the request. You can present images by using markdown image syntax, i.e. `![Preview](imagePath)`. Images for you to display will be provided in the `imagePath` field of any objects provided. You must always use the full path to the image, otherwise the image will not be displayed. Only show images if they are particularly relevant to the user's query, as they can be quite large and slow to load. Make sure to provide all requested input data. You MUST run image modification tools sequentially. Pass any arguments you have as the previousResults argument.",
+    "evals": [
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "apply-filters",
+              "arguments": {
+                "filters": {
+                  "and": [
+                    {
+                      "includes": "Comic"
+                    },
+                    {
+                      "or": [
+                        {
+                          "includes": "Circular Screen"
+                        },
+                        {
+                          "includes": "Dot Screen"
+                        },
+                        {
+                          "includes": "Edges"
+                        },
+                        {
+                          "includes": "Edge Work"
+                        },
+                        {
+                          "includes": "Hatched Screen"
+                        },
+                        {
+                          "includes": "Line Overlay"
+                        },
+                        {
+                          "includes": "Line Screen"
+                        },
+                        {
+                          "includes": "Maximum Component"
+                        },
+                        {
+                          "includes": "Median"
+                        },
+                        {
+                          "includes": "Minimum Component"
+                        },
+                        {
+                          "includes": "Mono"
+                        },
+                        {
+                          "includes": "Noir"
+                        },
+                        {
+                          "includes": "Tonal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "apply-filters": [
+            "/Users/exampleUser/Desktop/firstItem-2.png",
+            "/Users/exampleUser/Desktop/secondImage-2.png"
+          ]
+        },
+        "input": "@sips Make this look like a black and white comic"
+      },
+      {
+        "input": "@sips Turns these into WebP",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-images",
+              "arguments": {
+                "format": "WEBP"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "convert-images": [
+            "/Users/exampleUser/Downloads/firstImage-1.webp",
+            "/Users/exampleUser/Downloads/secondImage-2.webp"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "create-image": [
+            "/Users/exampleUser/Downloads/stripes.png"
+          ]
+        },
+        "input": "@sips Create a 800x200 blue and cyan stripe pattern",
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 200,
+                "colors": [
+                  {
+                    "includes": "0000FF"
+                  },
+                  {
+                    "includes": "00FFFF"
+                  }
+                ],
+                "style": "Stripes",
+                "width": 800
+              },
+              "name": "create-image"
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "flip-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Mirror the image",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "flip-images",
+              "arguments": {
+                "direction": "horizontal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "power": 80
+              },
+              "name": "optimize-images"
+            }
+          }
+        ],
+        "input": "@sips Compress with a power of 80",
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized-2.png"
+          ]
+        }
+      },
+      {
+        "mocks": {
+          "optimize-images": [
+            "/Users/exampleUser/Desktop/example-optimized.png"
+          ]
+        },
+        "input": "@sips Compress this as much as possible",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "power": 100
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "mocks": {
+          "pad-images": [
+            "/Users/exampleUser/Desktop/example-2.jpeg"
+          ]
+        },
+        "input": "@sips Add a 50px white border",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "pad-images",
+              "arguments": {
+                "borderSize": 50,
+                "color": "FFFFFF"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "input": "@sips Resize with a 500px width",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "resize-images",
+              "arguments": {
+                "width": 500,
+                "height": -1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "resize-images": [
+            "/Users/exampleUser/Desktop/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "height": 1600,
+                "width": 2560
+              },
+              "name": "resize-images"
+            }
+          }
+        ],
+        "input": "@sips Adjust size to 2560x1600"
+      },
+      {
+        "input": "@sips Rotate 90 degrees",
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": 90,
+                "radians": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "mocks": {
+          "rotate-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "rotate-images",
+              "arguments": {
+                "angle": {
+                  "includes": "-1.57"
+                },
+                "radians": true
+              }
+            }
+          }
+        ],
+        "input": "@sips Rotate by -PI/2 rad"
+      },
+      {
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3
+              }
+            }
+          }
+        ],
+        "input": "@sips Scale up 3x"
+      },
+      {
+        "input": "@sips Shrink by 50%",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 0.5
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Downloads/example-2.png"
+          ]
+        }
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "name": "strip-exif",
+              "arguments": {}
+            }
+          }
+        ],
+        "input": "@sips Strip the metadata from these images",
+        "mocks": {
+          "strip-exif": [
+            "/Users/exampleUser/Downloads/firstImage-2.png",
+            "/Users/exampleUser/Downloads/secondImage-2.png"
+          ]
+        }
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",
@@ -541,12 +938,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/lodash": "^4.17.4",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.2",
     "@types/tar": "^6.1.11",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "3.2.5",
+    "react": "^18.3.1",
     "typescript": "^5.4.5"
   },
   "scripts": {
