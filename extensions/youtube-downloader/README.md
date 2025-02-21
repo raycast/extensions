@@ -1,6 +1,6 @@
 # Video Downloader
 
-> Download high-quality YouTube videos with Raycast.
+> Download high-quality videos from YouTube and other platforms with Raycast.
 
 ![youtube-downloader-1.png](metadata%2Fyoutube-downloader-1.png)
 
@@ -35,7 +35,7 @@ See <https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md>.
 
 ### **Is there a YouTube downloader that actually works?**
 
-Yes, Raycast's YouTube Downloader is consistently updated to ensure reliable functionality.
+Yes, Raycast's Video Downloader is consistently updated to ensure reliable functionality.
 
 <!--
 ### **Can I download clips from YouTube?**
