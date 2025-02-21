@@ -5,7 +5,7 @@ import { convertVideo, convertImage, convertAudio } from "./utils/converter";
 import { execPromise } from "./utils/exec";
 
 // Comprehensive list of allowed file extensions
-const FILE_TYPE_EXTENSIONS = {
+export const FILE_TYPE_EXTENSIONS = {
   video: [".mov", ".mp4", ".avi", ".mkv", ".mpg", ".m4v", ".webm"],
   image: [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff", ".heic", ".avif"],
   audio: [".mp3", ".aac", ".wav", ".m4a", ".flac", ".ogg", ".wma"],
