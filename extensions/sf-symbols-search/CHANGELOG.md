@@ -6,7 +6,7 @@
 - Improved action styling with destructive indicators for removal actions.
 - Standardized keyboard shortcuts for pin/unpin actions to ⇧⌘P.
 - Removed success toasts for less notification noise.
-- Removed "Clear All Pinned Symbols" action.
+- Removed `Clear All Pinned Symbols` action.
 
 ## [SF Symbols 5 and 6] - 2025-02-13
 
