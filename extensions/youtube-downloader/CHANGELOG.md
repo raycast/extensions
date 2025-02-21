@@ -1,5 +1,13 @@
 # Video Downloader Changelog
 
+## [Improvements & Fixes] - 2025-02-21
+
+- Use `execa` instead of `nano-spawn` for advanced usages
+- Fix Homebrew installer & use more friendly toasts with actions for downloader & Homebrew installer
+- Add some troubleshooting tips to preference descriptions
+- Update extension description to cover more users
+- Bump all dependencies to the latest
+
 ## [Improvement] - 2025-02-21
 
 - Add an experimental preference option for forcing IPv4 to solve some network issues

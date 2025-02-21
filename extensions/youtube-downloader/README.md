@@ -1,6 +1,6 @@
 # Video Downloader
 
-> Download high-quality videos from YouTube and other platforms with Raycast.
+> Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI
 
 ![youtube-downloader-1.png](metadata%2Fyoutube-downloader-1.png)
 
