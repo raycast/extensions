@@ -4,7 +4,7 @@ import { resolve } from "path";
 import { useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 
-import { getOpenNoteURL } from "./helpers";
+import { getOpenNoteURL } from "../helpers";
 
 type Link = {
   id: string;

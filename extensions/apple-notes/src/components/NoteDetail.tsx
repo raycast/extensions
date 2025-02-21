@@ -3,9 +3,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
-import { getNoteBody } from "../api";
+import { getNoteBody } from "../api/applescript";
 import { truncate } from "../helpers";
-import { NoteItem, useNotes } from "../useNotes";
+import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
 
