@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "code",
-      "title": "Code Session",
-      "description": "Open project in your preferred code editor.",
+      "title": "Start Code Session",
+      "description": "Open one of your projects in your preferred code editor.",
       "mode": "view",
       "preferences": []
     }
