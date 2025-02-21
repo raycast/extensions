@@ -41,7 +41,7 @@
       "name": "useClipboardFallback",
       "type": "checkbox",
       "required": false,
-      "default": true,
+      "default": false,
       "label": "Use Clipboard Fallback",
       "description": "When no text is selected, fall back to using clipboard content for search."
     }
