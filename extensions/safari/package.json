@@ -18,7 +18,8 @@
     "ChangeHow",
     "ridemountainpig",
     "1weiho",
-    "xmok"
+    "xmok",
+    "niksite"
   ],
   "pastContributors": [
     "marcjulian"
@@ -161,6 +162,15 @@
       "label": "Enable Pinyin search for Chinese characters",
       "description": "When enabled, allows searching Chinese characters using pinyin romanization",
       "default": false
+    },
+    {
+      "name": "enableFuzzySearch",
+      "type": "checkbox",
+      "required": false,
+      "title": "Fuzzy Search",
+      "label": "Enable fuzzy search",
+      "description": "When enabled, allows searching items using fuzzy search",
+      "default": true
     }
   ],
   "tools": [
