@@ -204,6 +204,31 @@ export async function searchIssues(query: string, after?: string) {
   return { issues: data?.issueSearch.nodes, pageInfo: data?.issueSearch.pageInfo };
 }
 
+export async function filterIssues(filter: string, after?: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<
+    { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    { filter: string; after?: string }
+  >(
+    `
+      query($filter: IssueFilter!, $after: String) {
+        issues(first: 25, filter: $filter, after: $after${getCompletedIssuesFilter()}) {
+          nodes {
+            ${IssueFragment}
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `,
+    { filter: JSON.parse(filter), after },
+  );
+
+  return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
+}
+
 export async function getLastCreatedIssues() {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
