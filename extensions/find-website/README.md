@@ -13,3 +13,10 @@ Supported browsers:
 - Google Chrome
 - Arc
 - Orion
+- Safari
+- Firefox
+- Zen
+- Brave
+- Vivaldi
+- Opera
+- Edge

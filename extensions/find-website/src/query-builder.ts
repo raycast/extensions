@@ -64,6 +64,10 @@ export class ChromeQueryBuilder extends QueryBuilder {
 }
 
 export class ArcQueryBuilder extends ChromeQueryBuilder {}
+export class BraveQueryBuilder extends ChromeQueryBuilder {}
+export class VivaldiQueryBuilder extends ChromeQueryBuilder {}
+export class OperaQueryBuilder extends ChromeQueryBuilder {}
+export class EdgeQueryBuilder extends ChromeQueryBuilder {}
 
 export class OrionQueryBuilder extends QueryBuilder {
   select(): string {
@@ -78,3 +82,52 @@ export class OrionQueryBuilder extends QueryBuilder {
     return "host";
   }
 }
+
+export class SafariQueryBuilder extends QueryBuilder {
+  queryTopVisited(size: number, text: string) {
+    return `
+      select i.id, v.title as title, i.url as url, i.visit_count as visitCount
+      from history_visits v, history_items i
+      where v.history_item = i.id and (${this.filters(text)})
+      group by i.id, v.title, i.url, i.visit_count
+      order by visit_time desc
+      limit ${size}
+    `;
+  }
+
+  queryRecents(size: number, text: string) {
+    return `
+      select distinct i.id, v.title as title, i.url as url, datetime(v.visit_time + 978307200, 'unixepoch', 'localtime') as visitTime
+      from history_visits v, history_items i
+      where v.history_item = i.id and (${this.filters(text)})
+      order by visit_time desc
+      limit ${size}
+    `;
+  }
+
+  hostColumn() {
+    return "url";
+  }
+}
+
+export class FirefoxQueryBuilder extends QueryBuilder {
+  queryRecents(size: number, text: string) {
+    const order = `order by last_visit_date desc`;
+
+    return this.buildQuery(size, text, order);
+  }
+
+  select(): string {
+    return "select distinct id as id, title as title, url as url, datetime(last_visit_date/1000000, 'unixepoch', 'localtime') as lastVisitDate, visit_count as visitCount";
+  }
+
+  table() {
+    return "moz_places";
+  }
+
+  hostColumn() {
+    return "url";
+  }
+}
+
+export class ZenQueryBuilder extends FirefoxQueryBuilder {}
