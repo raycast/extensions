@@ -71,23 +71,13 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
       {props.recent && (
         <React.Fragment>
           <Action
-            title="Remove Symbol from Recent"
-            icon={Icon.XMarkCircle}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            style={Action.Style.Destructive}
-            onAction={async () => {
-              removeRecentSymbol(props.symbol);
-              props.refresh();
-            }}
-          />
-          <Action
-            title="Clear All Recent Symbols"
+            title="Clear Recently Used Symbols"
             icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             style={Action.Style.Destructive}
             onAction={async () => {
               const confirmed = await confirmAlert({
-                title: "Clear all recent symbols?",
+                title: "Clear recently used symbols?",
                 message: "This action cannot be undone.",
                 primaryAction: {
                   title: "Clear",
