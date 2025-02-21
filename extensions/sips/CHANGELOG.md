@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [AI Tools] - TBD
+## [✨ AI Enhancements] - 2025-02-21
 
 - Add AI tool support for all image operations
 
