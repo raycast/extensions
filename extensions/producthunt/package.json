@@ -7,7 +7,8 @@
   "author": "ragnor",
   "contributors": [
     "pernielsentikaer",
-    "thomasjost"
+    "thomasjost",
+    "marcmagn1"
   ],
   "license": "MIT",
   "commands": [
@@ -19,14 +20,134 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-latest-products",
+      "title": "Get Latest Products",
+      "description": "Get the latest products from Product Hunt with their details, votes, and descriptions"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@producthunt what are the top 3 products today?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products"
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Anton Selikhov",
+              "title": "Talo",
+              "description": "Real-time AI voice translator for video-calls",
+              "publishedAt": "2025-02-10T10:42:50.000Z",
+              "link": "https://www.producthunt.com/posts/talo-ai"
+            },
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "publishedAt": "2025-02-10T10:41:57.000Z",
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Joseph LeBlanc",
+              "title": "Practice Pro ",
+              "description": "Practice widgets for musicians you can customize",
+              "publishedAt": "2025-02-10T10:41:56.000Z",
+              "link": "https://www.producthunt.com/posts/practice-pro-2"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@producthunt show me today's AI products",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Anton Selikhov",
+              "title": "Talo",
+              "description": "Real-time AI voice translator for video-calls",
+              "publishedAt": "2025-02-10T10:42:50.000Z",
+              "link": "https://www.producthunt.com/posts/talo-ai"
+            },
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "publishedAt": "2025-02-10T10:41:57.000Z",
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Joseph LeBlanc",
+              "title": "Practice Pro ",
+              "description": "Practice widgets for musicians you can customize",
+              "publishedAt": "2025-02-10T10:41:56.000Z",
+              "link": "https://www.producthunt.com/posts/practice-pro-2"
+            }
+          ]
+        }
+      },
+      {
+        "input": "@producthunt what's trending on Product Hunt right now?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-latest-products",
+              "arguments": {}
+            }
+          }
+        ],
+        "mocks": {
+          "get-latest-products": [
+            {
+              "author": "Mohamed Ghaith",
+              "title": "Stunning",
+              "description": "Design client websites fast with AI",
+              "publishedAt": "2025-02-10T10:53:52.000Z",
+              "link": "https://www.producthunt.com/posts/stunning-9bbcb88d-5b97-4822-aed6-46f67430eb49"
+            },
+            {
+              "author": "Zac Zuo",
+              "title": "Pikadditions",
+              "description": "Bring your videos to life with images",
+              "publishedAt": "2025-02-10T10:54:01.000Z",
+              "link": "https://www.producthunt.com/posts/pikadditions"
+            },
+            {
+              "author": "Markiian Pukshin",
+              "title": "Moodcare Journal",
+              "description": "Make your thoughts as clear as possible",
+              "publishedAt": "2025-02-10T10:53:53.000Z",
+              "link": "https://www.producthunt.com/posts/moodcare-journal"
+            }
+          ]
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.79.0",
+    "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.9.1",
+    "node-fetch": "^2.7.0",
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
     "react": "^18.2.0",

@@ -170,7 +170,7 @@ export const applyBasicFilter = async (source: string, destination: string, filt
 export const getActiveFilters = (): Filter[] => {
   const preferences = getPreferenceValues<Preferences.ApplyFilter>();
   const activeFilters = [];
-  if (preferences.hiddenFilters.trim().length > 0) {
+  if ((preferences.hiddenFilters || "").trim().length > 0) {
     const hiddenFilters = preferences.hiddenFilters.split(",").map((filter) => filter.trim());
     if (!hiddenFilters.includes("Blur")) {
       activeFilters.push(...blurFilters);

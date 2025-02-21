@@ -35,8 +35,11 @@ async function startTimer({
   timerName = "Untitled",
   launchedFromMenuBar = false,
   selectedSound = "default",
+  skipRingContinuouslyWarning = false,
 }: TimerLaunchConfig) {
-  if (!(await showInitialRingContinuouslyWarning())) return;
+  if (!skipRingContinuouslyWarning) {
+    if (!(await showInitialRingContinuouslyWarning())) return;
+  }
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
 

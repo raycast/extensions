@@ -31,6 +31,7 @@ type CreateIssueParams = {
 type CreateIssueResponse = {
   id: string;
   key: string;
+  self: string;
 };
 
 export async function createIssue(values: IssueFormValues, { customFields }: CreateIssueParams) {

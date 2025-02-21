@@ -136,12 +136,202 @@
     {
       "name": "calculator",
       "title": "Calculate Time or Pace",
-      "subtitle": "Workouts",
       "description": "Calculate the time or pace for a workout",
       "icon": "calculator.png",
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-activities",
+      "title": "Get Workouts",
+      "description": "Get the workouts from Strava for the current user"
+    },
+    {
+      "name": "get-latest-activity",
+      "title": "Get Latest Workout",
+      "description": "Get the latest workout from Strava for the current user"
+    },
+    {
+      "name": "get-clubs",
+      "title": "Get Clubs",
+      "description": "Returns all Strava clubs that the current user is part of"
+    },
+    {
+      "name": "get-club-leaderboard",
+      "title": "Get Club Leaderboard",
+      "description": "Get this weeks leaderboard for a Strava club"
+    },
+    {
+      "name": "get-routes",
+      "title": "Get Routes",
+      "description": "Get the routes from Strava for the current user"
+    },
+    {
+      "name": "get-totals",
+      "title": "Get Totals",
+      "description": "Get a brief summary of your stats from Strava for the current user. Returns the distance & time for the last week, month, year and all time."
+    }
+  ],
+  "ai": {
+    "instructions": "When displaying club leaderboards, don't include the activities in the response and respond with a numbered list of athletes and their stats. Only use get-totals when asked about stats over a long period of time, prefer get-activities for recent stats.",
+    "evals": [
+      {
+        "input": "@workouts analyze my last workout",
+        "mocks": {
+          "get-latest-activity": {
+            "distance": 10000,
+            "type": "Run",
+            "start_date_local": "2025-01-19T10:00:00Z",
+            "elapsed_time": 4000,
+            "moving_time": 3600,
+            "name": "Morning Run"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-latest-activity"
+          }
+        ]
+      },
+      {
+        "input": "@workouts recommend a good 10k route near me",
+        "mocks": {
+          "get-routes": [
+            {
+              "description": "",
+              "id": 3303308444891685400,
+              "id_str": "3303308444891685164",
+              "elevation_gain": 114.49093864974512,
+              "estimated_moving_time": 4208,
+              "map_urls": {
+                "dark_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/2QLZ2P6T4V6VXTMV6OWMJ55BNI7QLNG7F6XEHD5YXWBS6VR3DA2U643FCL3TXPEOYC2ZWMBIF5SITBXHMMOG3TTZIRYDMOJOVHGZWXQ=",
+                "url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/WVFSUXECL2WK3XRRQXSDZPRVPJ33EL5WFYIIR36DGFC2ZG3IYXFXTISA6DLUYPWOGBWVYDEWHCH7RKK7HH2UZ2W5VIGD2V4SHCG5FJQ=",
+                "retina_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/ZW7IJNOURWCVZC4RPPL3WTG6RA2W2YE7DNQQP6UAI7MG7JMMA6MLQLDCGLXUDNQ5D36Z26NP2INEER7JF5BRP2O2ZBI2ZZG3ABFDZ3Q=",
+                "light_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/ZW7IJNOURWCVZC4RPPL3WTG6RA2W2YE7DNQQP6UAI7MG7JMMA6MLQLDCGLXUDNQ5D36Z26NP2INEER7JF5BRP2O2ZBI2ZZG3ABFDZ3Q="
+              },
+              "distance": 11054.677216926659,
+              "name": "My route"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-routes"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how was my training this week?",
+        "mocks": {
+          "get-activities": [
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run"
+            },
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run 2"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@workouts who is leading the club this week?",
+        "mocks": {
+          "get-clubs": [
+            {
+              "id": 123456,
+              "name": "My club"
+            }
+          ],
+          "get-club-leaderboard": {
+            "user 1": {
+              "moving_time": 3600,
+              "name": "user 1.",
+              "distance": 5000,
+              "elapsed_time": 3600,
+              "activities": [
+                {
+                  "moving_time": 3600,
+                  "distance": 5000,
+                  "total_elevation_gain": 0,
+                  "elapsed_time": 3600,
+                  "sport_type": "Ride",
+                  "name": "Workout"
+                }
+              ]
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-clubs"
+          },
+          {
+            "callsTool": "get-club-leaderboard"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how have my workouts changed over the last few weeks?",
+        "mocks": {
+          "get-activities": [
+            {
+              "distance": 10000,
+              "type": "Run",
+              "start_date_local": "2025-01-19T10:00:00Z",
+              "elapsed_time": 4000,
+              "moving_time": 3600,
+              "name": "Morning Run"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@workouts how much have I run in total all time?",
+        "mocks": {
+          "get-totals": {
+            "ytdSwimTotal": "0.0 km",
+            "allRideTotal": "1000 km",
+            "allSwimTotal": "100 km",
+            "allRunTotal": "1000 km",
+            "recentRideTotal": "0.0 km",
+            "ytdRunTotal": "0.0 km",
+            "recentSwimTotal": "10.0 km",
+            "ytdRideTotal": "100.0 km",
+            "recentRunTotal": "100.0 km",
+            "weekSwimTotal": "2.0 km",
+            "weekRunTotal": "3.0 km",
+            "weekRideTotal": "5.0 km"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-totals"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "distance_unit",

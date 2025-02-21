@@ -103,6 +103,7 @@ export interface TimerLaunchConfig {
   launchedFromMenuBar?: boolean;
   timerName?: string;
   selectedSound?: string;
+  skipRingContinuouslyWarning?: boolean;
 }
 
 export interface StopwatchLaunchConfig {

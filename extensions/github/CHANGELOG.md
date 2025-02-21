@@ -1,5 +1,7 @@
 # GitHub Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Fix base clone path] - 2025-01-19
 
 - Move `baseClonePath` to extension root level

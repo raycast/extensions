@@ -1,21 +1,21 @@
 import { execSync } from "child_process";
-import * as https from "https";
-import * as tar from "tar";
-import * as fs from "fs";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as https from "https";
+import path from "path";
 
 import { confirmAlert, environment, LocalStorage, showToast, Toast } from "@raycast/api";
+import * as tar from "tar";
 
 import runOperation from "./operations/runOperation";
 import stripEXIF from "./operations/stripEXIFOperation";
 import { ExifToolLocation } from "./utilities/enums";
 import { getSelectedImages } from "./utilities/utils";
-import path from "path";
 
 /**
  * Prompts the user to install ExifTool. If the user accepts, ExifTool is installed to the support directory.
  */
-async function installExifTool() {
+export async function installExifTool() {
   if (
     await confirmAlert({
       title: "Install ExifTool",
@@ -61,7 +61,10 @@ async function installExifTool() {
         file.close();
         if (valid) {
           // Extract the tarball
-          await tar.x({ file: `${supportPath}/Image-ExifTool-12.74.tar.gz`, cwd: supportPath });
+          await tar.x({
+            file: `${supportPath}/Image-ExifTool-12.74.tar.gz`,
+            cwd: supportPath,
+          });
           await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
           waiting = false;
         }
@@ -82,7 +85,7 @@ async function installExifTool() {
 /**
  * Determines whether ExifTool is on the path. If not, prompts the user to install it.
  */
-async function setExifToolLocation() {
+export async function setExifToolLocation() {
   // See if ExifTool is on the path
   try {
     execSync("exiftool -ver");
@@ -97,14 +100,14 @@ async function setExifToolLocation() {
  * Gets the location of ExifTool, either on the path or in the support directory.
  * @returns The location of ExifTool, either on the path or in the support directory.
  */
-async function getExifToolLocation() {
+export async function getExifToolLocation() {
   const initialLocation = await LocalStorage.getItem("exifToolLocation");
-  if (
-    initialLocation !== ExifToolLocation.ON_PATH &&
-    (initialLocation !== ExifToolLocation.SUPPORT_DIR ||
-      !fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74/exiftool`))
-  ) {
-    await setExifToolLocation();
+  if (initialLocation !== ExifToolLocation.ON_PATH && initialLocation !== ExifToolLocation.SUPPORT_DIR) {
+    if (fs.existsSync(`${environment.supportPath}/Image-ExifTool-12.74/exiftool`)) {
+      await LocalStorage.setItem("exifToolLocation", ExifToolLocation.SUPPORT_DIR);
+    } else {
+      await setExifToolLocation();
+    }
   }
 
   if (initialLocation === ExifToolLocation.ON_PATH) {

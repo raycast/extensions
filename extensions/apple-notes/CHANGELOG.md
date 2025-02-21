@@ -1,5 +1,7 @@
 # Apple Notes Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Bug Fix Update] - 2024-11-22
 
 Fix "Create note" from empty "Search notes" view, where a new note would be created with random characters instead of value from searchbar.

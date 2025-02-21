@@ -1,13 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-
-# Raycast specific files
+node_modules/*
+.eslintcache
+**/.DS_Store
+.vscode/
+.idea/
 raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
-
-# misc
-.DS_Store
+assets/TimersNotifHelper.app/
+*.swp

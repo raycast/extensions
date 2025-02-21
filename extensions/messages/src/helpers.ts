@@ -34,7 +34,7 @@ export async function sendMessage({
   address: string;
   text: string;
   service_name: Message["service"];
-  group_name: string | null;
+  group_name?: string | null;
 }): Promise<string> {
   const wasMessagesRunning = await isMessagesAppRunning();
 
@@ -234,7 +234,7 @@ export function createContactMap(contacts: Contact[]): Map<string, Contact> {
 export function getContactOrGroupInfo(
   info: ChatOrMessageInfo,
   contactMap: Map<string, Contact>,
-): { displayName: string; avatar: Image.ImageLike } {
+): { displayName: string; avatar: Image.ImageLike; phoneNumber?: string } {
   if (info.is_group) {
     const avatar: Image.ImageLike = Icon.AddPerson;
     let displayName = info.display_name || "Group Chat";
@@ -264,7 +264,7 @@ export function getContactOrGroupInfo(
       ? { source: `data:image/png;base64,${contact.imageData}`, mask: Image.Mask.Circle }
       : getAvatarIcon(displayName);
 
-    return { displayName, avatar };
+    return { displayName, avatar, phoneNumber: contact.phoneNumbers[0].number };
   }
 
   return {

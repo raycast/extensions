@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools.
+
 ## [Update] - 2024-12-17
 
 - Fixed grammar in alert message of the `Updates` command.

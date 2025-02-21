@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linak-desk-controller",
+  "title": "Linak Desk Controller",
+  "description": "Control the height of standing desks manufactured by Linak, for example the Ikea Idasen desk.",
+  "icon": "icon.png",
+  "author": "samuelkraft",
+  "categories": [
+    "Other"
+  ],
+  "preferences": [
+    {
+      "name": "uuid",
+      "description": "The UUID of the desk.",
+      "type": "textfield",
+      "required": true,
+      "title": "Desk UUID",
+      "placeholder": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "name": "sitHeight",
+      "description": "The height in cm of your desk when sitting.",
+      "type": "textfield",
+      "required": true,
+      "title": "Sitting height",
+      "placeholder": "80"
+    },
+    {
+      "name": "standHeight",
+      "description": "The height in cm of your desk when standing.",
+      "type": "textfield",
+      "required": true,
+      "title": "Standing height",
+      "placeholder": "120"
+    },
+    {
+      "name": "python",
+      "type": "textfield",
+      "required": false,
+      "title": "Location of python bin",
+      "description": "Run 'which python' in the terminal to find out.",
+      "placeholder": "/usr/bin/python"
+    },
+    {
+      "name": "server",
+      "type": "checkbox",
+      "required": false,
+      "title": "Server mode",
+      "label": "Forward commands to custom server",
+      "description": "The server must be running on 127.0.0.1:9123."
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "move-to-stand",
+      "title": "Stand Up",
+      "subtitle": "Linak Desk Controller",
+      "description": "Move your desk to your standing height",
+      "mode": "no-view",
+      "icon": "stand.png",
+      "keywords": [
+        "stand",
+        "standing",
+        "up"
+      ]
+    },
+    {
+      "name": "move-to-sit",
+      "title": "Sit Down",
+      "subtitle": "Linak Desk Controller",
+      "description": "Move your desk to your sitting height",
+      "mode": "no-view",
+      "icon": "sit.png",
+      "keywords": [
+        "sit",
+        "sitting",
+        "down"
+      ]
+    },
+    {
+      "name": "move-to-custom",
+      "title": "Move Desk to Custom Height",
+      "subtitle": "Linak Desk Controller",
+      "description": "Move your desk to custom height",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "height",
+          "placeholder": "80",
+          "type": "text",
+          "required": true,
+          "description": "The height in cm"
+        }
+      ]
+    },
+    {
+      "name": "menubar-move",
+      "title": "Move Desk",
+      "subtitle": "Linak Desk Controller",
+      "description": "Move your desk",
+      "mode": "menu-bar"
+    }
+  ],
+  "tools": [
+    {
+      "name": "raise-desk",
+      "title": "Raise Desk to Standing Height",
+      "description": "Raise your standing desk to your standing height"
+    },
+    {
+      "name": "lower-desk",
+      "title": "Lower Desk to Sitting Height",
+      "description": "Lower your desk to your sitting height"
+    },
+    {
+      "name": "move-desk",
+      "title": "Move Desk to Custom Height",
+      "description": "Lower your desk to a specific custom height in cm"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@linak-desk-controller move desk to sitting",
+        "mocks": {
+          "lower-desk": "Successfully called \"lower-desk\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "lower-desk"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linak-desk-controller stand up",
+        "mocks": {
+          "raise-desk": "Successfully called \"raise-desk\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "raise-desk"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linak-desk-controller sit down",
+        "mocks": {
+          "lower-desk": "Successfully called \"lower-desk\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "lower-desk"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@linak-desk-controller move desk to 100cm",
+        "mocks": {
+          "move-desk": "Successfully called \"move-desk\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "move-desk",
+              "arguments": {
+                "height": "100"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.69.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -58,6 +58,7 @@ export default function Command() {
   const [preview, setPreview] = useState<string>("");
   const previewQueue = useRef([] as string[]);
   const preferences = getPreferenceValues<Preferences.ApplyFilter>();
+
   return (
     <Grid
       searchBarPlaceholder="Search filters..."

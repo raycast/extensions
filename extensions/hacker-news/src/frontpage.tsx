@@ -27,9 +27,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {data?.map((item, index) => (
-        <StoryListItem key={item.guid} item={item} index={index} topic={topic} />
-      ))}
+      {data?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} topic={topic} />)}
     </List>
   );
 }

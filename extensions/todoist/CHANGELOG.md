@@ -1,5 +1,7 @@
 # Todoist Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
 
 Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
