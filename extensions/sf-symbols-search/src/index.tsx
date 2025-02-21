@@ -127,7 +127,7 @@ export default function Command() {
                 <SFSymbol key={index} symbol={symbol} refresh={refresh} pinned />
               ))}
           </Grid.Section>
-          <Grid.Section title="Recent">
+          <Grid.Section title="Recently Used">
             {recent
               .filter((s) => category === "all" || s.categories.includes(category))
               .map((symbol: sfsymbol, index: number) => (
