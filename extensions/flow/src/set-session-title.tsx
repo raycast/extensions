@@ -1,18 +1,20 @@
 import { showHUD, Form, ActionPanel, Action } from "@raycast/api";
 import { isFlowInstalled, setSessionTitle } from "./utils";
-import { useState } from "react";
 
 export default function SetSessionTitle() {
-  const [title, setTitle] = useState("");
-
   const handleSubmit = async (values: { title: string }) => {
     if (!(await isFlowInstalled())) {
       await showHUD("Flow not installed. Install it from: https://flowapp.info/download");
       return;
     }
 
-    await setSessionTitle(values.title);
-    await showHUD(`Session title set to: ${values.title}`);
+    try {
+      await setSessionTitle(values.title);
+      await showHUD(values.title ? `Session title set to: ${values.title}` : "Session title was reset to default");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await showHUD(`Failed to set title: ${errorMessage}`);
+    }
   };
 
   return (
@@ -26,9 +28,8 @@ export default function SetSessionTitle() {
       <Form.TextField
         id="title"
         title="Session Title"
-        placeholder="Enter the new session title"
-        onChange={setTitle}
-        value={title}
+        placeholder="Enter session title"
+        info="Leave blank to reset to default"
       />
     </Form>
   );
