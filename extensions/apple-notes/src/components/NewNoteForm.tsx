@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, closeMainWindow, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
-import { createNote, getSelectedNote, setNoteBody } from "../api";
+import { createNote, getSelectedNote, setNoteBody } from "../api/applescript";
 import { fixNoteFormatting } from "../helpers";
 
 type AddTextFormProps = {
