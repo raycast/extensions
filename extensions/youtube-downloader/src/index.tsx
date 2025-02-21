@@ -19,7 +19,16 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { execa, ExecaError } from "execa";
-import { DownloadOptions, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
+import {
+  DownloadOptions,
+  isValidHHMM,
+  isValidUrl,
+  parseHHMM,
+  preferences,
+  formatTbr,
+  formatFilesize,
+} from "./utils.js";
+import { Video } from "./types.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
@@ -33,18 +42,7 @@ export default function DownloadVideo() {
       const options = ["-P", preferences.downloadPath];
 
       options.push("--ffmpeg-location", preferences.ffmpegPath);
-      options.push("-f", "bv*[ext=mp4][vcodec^=avc]+ba[ext=m4a]/b[ext=mp4]");
-
-      // if (!values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*0:00-${values.endTime}`);
-      // } else if (values.startTime && !values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-*`);
-      // } else if (values.startTime && values.endTime) {
-      //   options.push("--download-sections");
-      //   options.push(`*${values.startTime}-${values.endTime}`);
-      // }
+      options.push("--format", values.format);
 
       const toast = await showToast({
         title: "Downloading Video",
@@ -159,20 +157,7 @@ export default function DownloadVideo() {
         preferences.ytdlPath,
         [preferences.forceIpv4 ? "--force-ipv4" : "", "-j", url].filter((x) => Boolean(x)),
       );
-      return JSON.parse(result.stdout) as {
-        title: string;
-        duration: number;
-        live_status: string;
-        formats: {
-          format_id: string;
-          vcodec: string;
-          acodec: string;
-          video_ext: string;
-          protocol: string;
-          filesize_approx: number;
-          resolution: string;
-        }[];
-      };
+      return JSON.parse(result.stdout) as Video;
     },
     [values.url],
     {
@@ -274,25 +259,28 @@ export default function DownloadVideo() {
     >
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
       <Form.TextField
+        {...itemProps.url}
         autoFocus
         title="URL"
-        placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
-        {...itemProps.url}
+        placeholder="https://www.youtube.com/watch?v=ykaj0pS4A1A"
       />
       {warning && <Form.Description text={warning} />}
-      {/*<Form.Separator />*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="Start Time"*/}
-      {/*  placeholder="00:00"*/}
-      {/*  {...itemProps.startTime}*/}
-      {/*/>*/}
-      {/*<Form.TextField*/}
-      {/*  info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."*/}
-      {/*  title="End Time"*/}
-      {/*  placeholder={video ? formatHHMM(video.duration) : "00:00"}*/}
-      {/*  {...itemProps.endTime}*/}
-      {/*/>*/}
+      {video && (
+        <Form.Dropdown {...itemProps.format} title="Format">
+          {video.formats
+            .slice()
+            .reverse()
+            .map((format) => (
+              <Form.Dropdown.Item
+                key={format.format_id}
+                value={format.format_id}
+                title={[format.resolution, format.ext, formatTbr(format.tbr), formatFilesize(format.filesize)]
+                  .filter((x) => Boolean(x))
+                  .join(" | ")}
+              />
+            ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }
