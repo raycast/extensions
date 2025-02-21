@@ -1,47 +1,8 @@
-import { promises, existsSync } from "fs";
-import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
-import { getBookmarksFilePath } from "../util";
+import { HistoryEntry, SearchResult } from "../interfaces";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
-
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
-  const bookmarks: HistoryEntry[] = [];
-
-  if (bookmarkDirectory.type === "folder") {
-    bookmarkDirectory.children.forEach((child) => {
-      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child));
-    });
-  } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
-    bookmarks.push({
-      id: bookmarkDirectory.id,
-      url: bookmarkDirectory.url,
-      title: bookmarkDirectory.name,
-      lastVisited: new Date(bookmarkDirectory.date_added),
-    });
-  }
-  return bookmarks;
-}
-
-const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
-  const bookmarks: HistoryEntry[] = [];
-  Object.keys(rawBookmarks.roots).forEach((rootKey) => {
-    const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders);
-    bookmarks.push(...bookmarkEntries);
-  });
-  return bookmarks;
-};
-
-const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
-  const bookmarksFilePath = getBookmarksFilePath(profile);
-  if (!existsSync(bookmarksFilePath)) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
-  }
-
-  const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
-  return extractBookmarks(JSON.parse(fileBuffer));
-};
+import { getBookmarks } from "../util";
 
 export function useBookmarkSearch(
   query?: string
