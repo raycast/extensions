@@ -1,4 +1,4 @@
-import { showHUD, Form, ActionPanel, Action } from "@raycast/api";
+import { showHUD, Form, ActionPanel, Action, popToRoot } from "@raycast/api";
 import { isFlowInstalled, setSessionTitle } from "./utils";
 
 export default function SetSessionTitle() {
@@ -11,6 +11,7 @@ export default function SetSessionTitle() {
     try {
       await setSessionTitle(values.title);
       await showHUD(values.title ? `Session title set to: ${values.title}` : "Session title was reset to default");
+      await popToRoot();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       await showHUD(`Failed to set title: ${errorMessage}`);
