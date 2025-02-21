@@ -27,6 +27,7 @@ export async function search({
       limit,
     });
     return {
+      audiobooks: filterNullItems(response.audiobooks),
       tracks: filterNullItems(response.tracks),
       artists: filterNullItems(response.artists),
       albums: filterNullItems(response.albums),
