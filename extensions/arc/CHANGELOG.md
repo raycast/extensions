@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [✨ AI Enhancements] - {PR_MERGE_DATE}
+## [✨ AI Enhancements] - 2025-02-21
 
 AI Tools to:
 
