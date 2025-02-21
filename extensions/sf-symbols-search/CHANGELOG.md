@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [UI/UX Improvements] - {PR_MERGE_DATE}
+## [UI/UX Improvements] - 2025-02-21
 
 - Added confirmation dialog with destructive style when clearing all recent symbols
 - Improved action styling with destructive indicators for removal actions
