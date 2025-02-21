@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2025-02-21
 
 - Add an experimental preference option for forcing IPv4 to solve some network issues
 - Add a message to remind users not to close the current window while installing homebrew packages
