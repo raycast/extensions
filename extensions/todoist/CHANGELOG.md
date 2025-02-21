@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Add Schedule Task Deadline Actions] - {PR_MERGE_DATE}
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
 
 Added option to display the next upcoming task in the menu bar title when no task is selected. This can be enabled in preferences.
