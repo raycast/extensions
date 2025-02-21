@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [AI Extensions] - 2025-02-05
+## [AI Enhancements] - 2025-02-21
 
 - Added AI extensions to the Music extension.
 
