@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+# [2.8] - 2025-02-21
+
+- Added AI tools
+
 ## [2.7] - 2025-01-14
 
 - Fixed deployment state fetching for team deployments

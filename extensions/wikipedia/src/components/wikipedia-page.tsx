@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import dedent from "dedent";
 import { Fragment, useEffect } from "react";
 
 import {
@@ -32,15 +33,15 @@ export default function WikipediaPage({ title }: { title: string }) {
     addToReadArticles(title);
   }, [title]);
 
-  const body = content ? renderContent(content, 2, links, language) : "";
+  const body = content ? renderContent(content, 2, links, language, openInBrowser) : "";
 
   const markdown = page
-    ? `
+    ? dedent`
   # ${page.title}
 
   ${page.description ? `>${toSentenceCase(page.description)}\n\n` : ""}
 
-  ${replaceLinks(page.extract, language, links)}
+  ${replaceLinks(page.extract, language, links, openInBrowser)}
 
   ${page.thumbnail?.source ? `![](${page.thumbnail?.source})` : ""}
 

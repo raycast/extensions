@@ -79,19 +79,19 @@ export function getStartOfWeekUnix() {
   return Math.floor(weekStart.getTime() / 1000);
 }
 
-export function getSportTypesFromActivityTypes(
-  activityTypes: ActivityType[],
-  localized_sport_type: string,
-): SportType[] {
+export function getSportTypesFromActivityTypes(activityTypes: SportType[], localized_sport_type: string): SportType[] {
   const sportTypes: SportType[] = [];
-  if (activityTypes.includes(ActivityType.Ride)) {
+  if (activityTypes.includes(SportType.Ride)) {
     sportTypes.push(SportType.Ride);
     sportTypes.push(SportType.EBikeRide);
     sportTypes.push(SportType.EMountainBikeRide);
     sportTypes.push(SportType.VirtualRide);
     sportTypes.push(SportType.GravelRide);
+    sportTypes.push(SportType.Handcycle);
+    sportTypes.push(SportType.Wheelchair);
+    sportTypes.push(SportType.Velomobile);
   }
-  if (activityTypes.includes(ActivityType.Run)) {
+  if (activityTypes.includes(SportType.Run)) {
     sportTypes.push(SportType.Run);
     sportTypes.push(SportType.VirtualRun);
     sportTypes.push(SportType.TrailRun);
