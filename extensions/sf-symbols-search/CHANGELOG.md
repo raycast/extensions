@@ -2,17 +2,17 @@
 
 ## [UI/UX Improvements] - {PR_MERGE_DATE}
 
-- Added confirmation dialog with destructive style when clearing all recent symbols.
-- Improved action styling with destructive indicators for removal actions.
-- Standardized keyboard shortcuts for pin/unpin actions to ⇧⌘P.
-- Removed success toasts for less notification noise.
-- Removed `Clear All Pinned Symbols` action.
-- Renamed the `All Symbols` section to `Results` with symbol count.
+- Added confirmation dialog with destructive style when clearing all recent symbols
+- Improved action styling with destructive indicators for removal actions
+- Standardized keyboard shortcuts for pin/unpin actions to ⇧⌘P
+- Removed success toasts for less notification noise
+- Removed `Clear All Pinned Symbols` action
+- Renamed the `All Symbols` section to `Results` with symbol count
 
 ## [SF Symbols 5 and 6] - 2025-02-13
 
 - Added SF Symbols added in SF Symbols 5 and 6
-- Removed the option to pick between beta and release version of SF Symbols. Instead, the minimum OS version for each symbol is now shown. By default this is iOS, you can change this to any OS you want in the extension settings.
+- Removed the option to pick between beta and release version of SF Symbols. Instead, the minimum OS version for each symbol is now shown. By default this is iOS, you can change this to any OS you want in the extension settings
 - Full symbol names are now shown when you hover over a symbol icon
 
 ## [Keyboard Shortcut Improvements] - 2024-10-07
