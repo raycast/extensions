@@ -1,5 +1,13 @@
 # SF Symbols Changelog
 
+## [UI/UX Improvements] - {PR_MERGE_DATE}
+
+- Added confirmation dialog with destructive style when clearing all recent symbols.
+- Improved action styling with destructive indicators for removal actions.
+- Standardized keyboard shortcuts for pin/unpin actions to ⇧⌘P.
+- Removed success toast for less notification noise.
+- Removed "Clear All Pinned Symbols" action.
+
 ## [SF Symbols 5 and 6] - 2025-02-13
 
 - Added SF Symbols added in SF Symbols 5 and 6

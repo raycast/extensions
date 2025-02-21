@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, Icon, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, Icon, confirmAlert, Alert } from "@raycast/api";
 import { sfsymbol, SymbolProps } from "./index";
 import React from "react";
 
@@ -38,10 +38,6 @@ const removeRecentSymbol = (symbol: sfsymbol) => {
   storage.set("recent", JSON.stringify(recentSymbols.filter((s) => s.name !== symbol.name)));
 };
 
-const clearPinnedSymbols = () => {
-  storage.set("pinned", JSON.stringify([]));
-};
-
 const clearRecentSymbols = () => {
   storage.set("recent", JSON.stringify([]));
 };
@@ -52,58 +48,57 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
       {props.pinned ? (
         <React.Fragment>
           <Action
-            title="Remove Pinned sfsymbol"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            title="Unpin Symbol"
+            shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
             icon={Icon.PinDisabled}
             onAction={async () => {
               removePinnedSymbol(props.symbol);
               props.refresh();
-              await showToast(Toast.Style.Success, "Removed Pinned sfsymbol");
-            }}
-          />
-          <Action
-            title="Clear All Pinned Symbols"
-            icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            onAction={async () => {
-              clearPinnedSymbols();
-              props.refresh();
-              await showToast(Toast.Style.Success, "Pinned Symbols Cleared");
             }}
           />
         </React.Fragment>
       ) : (
         <Action
-          title="Pin sfsymbol"
+          title="Pin Symbol"
           icon={Icon.Pin}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
           onAction={async () => {
             addPinnedSymbol(props.symbol);
             props.refresh();
-            await showToast(Toast.Style.Success, "sfsymbol Pinned");
           }}
         />
       )}
       {props.recent && (
         <React.Fragment>
           <Action
-            title="Remove Recent sfsymbol"
+            title="Remove Symbol from Recent"
             icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
+            style={Action.Style.Destructive}
             onAction={async () => {
               removeRecentSymbol(props.symbol);
               props.refresh();
-              await showToast(Toast.Style.Success, "Removed Recent sfsymbol");
             }}
           />
           <Action
             title="Clear All Recent Symbols"
-            icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
+            icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            style={Action.Style.Destructive}
             onAction={async () => {
-              clearRecentSymbols();
-              props.refresh();
-              showToast(Toast.Style.Success, "Recent Symbols Cleared");
+              const confirmed = await confirmAlert({
+                title: "Clear All Recent Symbols",
+                message: "Are you sure you want to clear all recent symbols? This action cannot be undone.",
+                primaryAction: {
+                  title: "Clear",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              });
+
+              if (confirmed) {
+                clearRecentSymbols();
+                props.refresh();
+              }
             }}
           />
         </React.Fragment>
