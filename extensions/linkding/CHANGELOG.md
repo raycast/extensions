@@ -1,5 +1,28 @@
 # Linkding Changelog
 
+## [Fixes & Enhancements] - 2025-02-20
+
+### General
+- fix: API would not be called if saved with trailing slash (we now strip trailing slash before saving) [Issue ref: [#16999](https://github.com/raycast/extensions/issues/16999)]
+- Simplify "types/linkding-shortcuts"
+
+### Create Bookmark
+- `useForm` hook for control
+- Add placeholders and info where relevant
+- fix: would always show Success Toast even on fail
+
+### Search Bookmarks
+- make "Delete" `ActionStyle` _Destructive_
+- fix: after delete, Success Toast was always shown even on fail
+- Show `Toast`s throughout "Delete" in search-bookmarks
+- Show proper "isLoading" in search-bookmarks (`usePromise` hook)
+- Add `Icon` to search-bookmarks items
+
+### Manage Account
+- `Action` to open manage-account when no accounts added
+- `useForm` hook in manage-account for better form control
+- Add `Icon`s in manage-account
+
 ## [Copy Shortcut & Creation and Deletion of Bookmarks] - 2023-11-04
 
 - Adds action and shortcut to copy bookmark to clipboard

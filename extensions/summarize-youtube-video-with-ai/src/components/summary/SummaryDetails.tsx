@@ -1,30 +1,25 @@
 import { Detail } from "@raycast/api";
+import { Question } from "../../hooks/useQuestions";
 import { VideoDataTypes } from "../../utils/getVideoData";
 import SummaryActions from "./SummaryActions";
 import SummaryMetadata from "./SummaryMetadata";
-
-type SummaryDetailsProps = {
-  AskFollowUpQuestion: React.ComponentType<{
-    transcript: string;
-    setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
-    pop: () => void;
-  }>;
-  markdown?: string;
-  setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
+interface SummaryDetailsProps {
+  questions: Question[];
+  summary: string | undefined;
   summaryIsLoading: boolean;
   transcript: string;
   videoData: VideoDataTypes;
-};
+  onQuestionSubmit?: (question: string) => void;
+}
 
 export default function SummaryDetails({
-  AskFollowUpQuestion,
-  markdown,
-  setSummary,
+  summary,
   summaryIsLoading,
   transcript,
   videoData,
+  questions,
 }: SummaryDetailsProps) {
-  if (!markdown) return null;
+  if (!summary) return null;
   const { duration, ownerChannelName, ownerProfileUrl, publishDate, title, video_url, viewCount } = videoData;
 
   return (
@@ -32,15 +27,14 @@ export default function SummaryDetails({
       actions={
         <SummaryActions
           transcript={transcript}
-          setSummary={setSummary}
-          markdown={markdown}
+          summary={summary}
           video_url={video_url}
           ownerProfileUrl={ownerProfileUrl}
-          AskFollowUpQuestion={AskFollowUpQuestion}
+          questions={questions}
         />
       }
       isLoading={summaryIsLoading}
-      markdown={markdown}
+      markdown={summary}
       metadata={
         <SummaryMetadata
           title={title}

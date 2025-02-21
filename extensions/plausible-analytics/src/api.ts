@@ -2,8 +2,8 @@ import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import type { StatsQueryResponse, Stats } from "./types";
 
-const { apiKey } = getPreferenceValues();
-const { hostedDomain } = getPreferenceValues() ?? "https://plausible.io";
+const { apiKey } = getPreferenceValues<Preferences>();
+const hostedDomain = getPreferenceValues<Preferences>().hostedDomain || "https://plausible.io";
 
 export async function verifySite(domain: string): Promise<boolean> {
   const response = await fetch(`${hostedDomain}/api/v1/stats/aggregate?metrics=visits&site_id=${domain}`, {

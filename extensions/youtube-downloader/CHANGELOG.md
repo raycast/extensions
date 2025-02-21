@@ -1,9 +1,21 @@
-# YouTube Downloader Changelog
+# Video Downloader Changelog
 
-## [Improvement] - 2025-02-17
+## [Improvement] - 2025-02-21
 
 - Add an experimental preference option for forcing IPv4 to solve some network issues
 - Add a message to remind users not to close the current window while installing homebrew packages
+
+## [Enhancements] - 2025-02-17
+
+- Unlock its full ability from all sites
+- Move the warning message to the form description
+- Only show download failed message on errors
+- Fix live video condition
+- Add a link accessory to the form view to show the supported sites
+- Mention the `yt-dlp` in readme
+- Mention supported sites in readme
+- Comment `Can I download clips from YouTube` out since we don't support it yet
+- Update screenshots since the format selector is not ready yet
 
 ## [Improvement] - 2025-02-15
 

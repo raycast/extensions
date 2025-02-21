@@ -53,6 +53,10 @@ export function sortByName(a: Task, b: Task): number {
   return a.content.localeCompare(b.content);
 }
 
+export function sortByDefault(a: Task, b: Task): number {
+  return a.child_order - b.child_order;
+}
+
 export function sortByAssignee(collaborators: Collaborator[], a: Task, b: Task): number {
   const aAssignee = a.responsible_uid ? collaborators.find((c) => c.id === a.responsible_uid) : null;
   const bAssignee = b.responsible_uid ? collaborators.find((c) => c.id === b.responsible_uid) : null;

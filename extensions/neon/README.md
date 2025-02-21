@@ -6,8 +6,15 @@
 
 This is a Raycast extension for [Neon](https://neon.tech/) - The database you love, on a serverless platform designed to help you build reliable and scalable applications faster. With this extension you can: 
 
-- View, Revoke, Create API Keys
-- View Projects
+- List, Revoke, Create API Keys
+- List Projects
+    - View Project monitoring (System operations)
+    - Update Project (basic): Edit a few fields of an existing project
+    - List Project Branches
+        - List Roles & Databases in Project Branches: Similar to the Neon UI
+            - Update Database (name, owner_name)
+            - View Database schema
+        - View Compute Endpoints in Project Branches
 
 ## 🚀 Getting Started
 
