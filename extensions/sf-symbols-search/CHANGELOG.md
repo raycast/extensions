@@ -7,6 +7,7 @@
 - Standardized keyboard shortcuts for pin/unpin actions to ⇧⌘P.
 - Removed success toasts for less notification noise.
 - Removed `Clear All Pinned Symbols` action.
+- Renamed the `All Symbols` section to `Results` with symbol count.
 
 ## [SF Symbols 5 and 6] - 2025-02-13
 

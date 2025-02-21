@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Cache, Icon, confirmAlert, Alert } from "@raycast/api";
-import { sfsymbol, SymbolProps } from "./index";
+import { Action, ActionPanel, Alert, Cache, confirmAlert, Icon } from "@raycast/api";
 import React from "react";
+import { sfsymbol, SymbolProps } from "./index";
 
 const storage = new Cache();
 

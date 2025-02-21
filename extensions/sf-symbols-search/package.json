@@ -45,22 +45,22 @@
       "default": "copySymbol"
     },
     {
-      "name": "gridItemSize",
+      "name": "gridColumns",
       "type": "dropdown",
-      "title": "Grid Item Size",
-      "description": "Grid item size for displaying SF Symbols",
+      "title": "Grid Size",
+      "description": "Size of the grid items for displaying SF Symbols",
       "required": false,
       "data": [
         {
           "title": "Small",
-          "value": "small"
+          "value": "8"
         },
         {
           "title": "Medium",
-          "value": "medium"
+          "value": "5"
         }
       ],
-      "default": "small"
+      "default": "8"
     },
     {
       "name": "showName", 
