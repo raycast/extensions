@@ -1,6 +1,6 @@
 # Better Uptime Changelog
 
-## [Update] - 2025-01-30
+## [Update] - 2025-02-21
 
 - Add AI features
 
