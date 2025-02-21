@@ -1,6 +1,6 @@
 # Find Website Changelog
 
-## [Added support for new browsers] - {PR_MERGE_DATE}
+## [Added support for new browsers] - 2025-02-21
 
 - Added support for Safari, Firefox, Zen, Brave, Vivaldi, Opera and Edge.
 
