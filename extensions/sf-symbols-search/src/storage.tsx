@@ -87,8 +87,8 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
             style={Action.Style.Destructive}
             onAction={async () => {
               const confirmed = await confirmAlert({
-                title: "Clear All Recent Symbols",
-                message: "Are you sure you want to clear all recent symbols? This action cannot be undone.",
+                title: "Clear all recent symbols?",
+                message: "This action cannot be undone.",
                 primaryAction: {
                   title: "Clear",
                   style: Alert.ActionStyle.Destructive,
