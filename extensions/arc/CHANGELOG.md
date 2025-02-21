@@ -6,11 +6,6 @@ AI Tools to:
 
 - Search Tabs
 - Search History
-
-## [✨ AI Enhancements] - 2025-02-09
-
-AI Tools to:
-
 - Open New Window
 - Open New Blank Window
 - Open New Little Arc Window
