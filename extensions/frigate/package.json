@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "frigate",
+  "title": "Frigate",
+  "description": "View frigate cameras",
+  "icon": "icon.png",
+  "author": "Chris",
+  "version": "1.0.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "frigate",
+      "title": "Frigate",
+      "description": "Show your frigate frames as well as link to videos streams.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "latest",
+    "title-case": "^4.3.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.21.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
