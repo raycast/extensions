@@ -1,3 +1,6 @@
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import {
   Action,
   ActionPanel,
@@ -12,12 +15,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { execa, ExecaError } from "execa";
-import { spawn } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
-import { useEffect, useMemo, useState } from "react";
 import { DownloadOptions, getActiveBrowserURL, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
