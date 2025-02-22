@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jotform",
   "title": "Jotform",
-  "description": "",
+  "description": "View Forms and their Submissions",
   "icon": "jotform-icon-dark-512x512.png",
   "author": "xmok",
   "categories": [
