@@ -1,6 +1,20 @@
 import { getPreferenceValues } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
+import { GET_ACTIVE_APP_SCRIPT, GET_LINK_FROM_BROWSER_SCRIPT, SUPPORTED_BROWSERS } from "./browser.js";
+
+type ExtensionPreferences = {
+  downloadPath: string;
+  ytdlPath: string;
+  ffmpegPath: string;
+  ffprobePath: string;
+  forceIpv4: boolean;
+  autoLoadUrlFromClipboard: boolean;
+  autoLoadUrlFromSelectedText: boolean;
+  autoLoadUrlFromBrowserActiveTab: boolean;
+  homebrewPath: string;
+};
 
 export const preferences = getPreferenceValues<ExtensionPreferences>();
 
@@ -50,4 +64,19 @@ export function isValidHHMM(input: string) {
 
 export function isValidUrl(url: string) {
   return isUrlSuperb(url, { lenient: true });
+}
+
+export async function getActiveBrowserURL() {
+  try {
+    const activeApp = await runAppleScript(GET_ACTIVE_APP_SCRIPT);
+    if (SUPPORTED_BROWSERS.includes(activeApp)) {
+      const linkInfoStr = await runAppleScript(GET_LINK_FROM_BROWSER_SCRIPT(activeApp));
+      const [url] = linkInfoStr.split("\t"); // [url, title]
+      return url;
+    }
+    return "";
+  } catch (error) {
+    console.log("Failed to get active browser URL");
+    return "";
+  }
 }

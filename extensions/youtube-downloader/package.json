@@ -83,7 +83,7 @@
       "description": "Automatically load the URL from the clipboard when the command is executed",
       "type": "checkbox",
       "label": "Enable",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
@@ -92,16 +92,16 @@
       "description": "Automatically load the URL from the selected text when the command is executed",
       "type": "checkbox",
       "label": "Enable",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
-      "name": "enableBrowserExtensionSupport",
-      "title": "Enable Browser Extension Support",
-      "description": "Enable browser extension support for reading video URLs from the browser",
+      "name": "autoLoadUrlFromBrowserActiveTab",
+      "title": "Auto Load URL from Active Browser Tab",
+      "description": "Automatically load the URL from the active browser tab when the command is executed",
       "type": "checkbox",
       "label": "Enable",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
