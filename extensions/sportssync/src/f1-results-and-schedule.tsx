@@ -1,6 +1,5 @@
 import { Detail, List, Color, Action, ActionPanel, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import getPastAndFutureDays from "./utils/getDateRange";
 
 interface Athlete {
   shortName: string;
@@ -30,6 +29,12 @@ interface Race {
   name: string;
   date: string;
   status: Status;
+  circuit: {
+    address: {
+      city: string;
+      country: string;
+    };
+  };
   competitions: Competition[];
   links: { href: string }[];
 }
@@ -47,10 +52,10 @@ interface Response {
 export default function command() {
   // Fetch F1 Races
 
-  const dateRange = getPastAndFutureDays(new Date());
+  const currentYear = new Date().getFullYear();
 
   const { isLoading, data } = useFetch<Response>(
-    `https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard?dates=${dateRange}`,
+    `https://site.api.espn.com/apis/site/v2/sports/racing/f1/scoreboard?dates=${currentYear}`,
   );
 
   if (isLoading) {
@@ -87,38 +92,41 @@ export default function command() {
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
-    let accessoryIcon;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
 
     if (race.status.type.state === "in") {
       accessoryTitle = `${race.competitions[4].competitors[0].athlete.shortName}     L${race.competitions[4].status.period} ${race.status.displayClock}`;
       accessoryColor = Color.Green;
-      accessoryIcon = { source: Icon.Stars, tintColor: "Green" };
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "Current Leader & Lap";
     }
 
     if (race.status.type.state === "post") {
       accessoryTitle = `${race.competitions[4].competitors[0].athlete.shortName}`;
       accessoryColor = Color.SecondaryText;
-      accessoryIcon = { source: Icon.Trophy, tintColor: "gold" };
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Winner";
     }
 
     if (race.status.type.state === "post" && race.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
     f1Day?.races.push(
       <List.Item
         key={index}
-        title={`${race.shortName}`}
+        title={`${race.name}`}
+        subtitle={`${race.circuit.address.city}, ${race.circuit.address.country}`}
         icon={{ source: data.leagues[0].logos[0].href }}
         accessories={[
+          { tag: { value: (index + 1).toString(), color: Color.Green }, icon: Icon.Flag },
           {
             text: { value: `${accessoryTitle}`, color: accessoryColor },
             tooltip: accessoryToolTip,
-            icon: accessoryIcon,
           },
+          { icon: accessoryIcon },
         ]}
         actions={
           <ActionPanel>

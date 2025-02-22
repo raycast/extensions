@@ -5,6 +5,17 @@
 - Updated the NHL Standings command to use divisions instead of conferences
 - Updated each scores and schedule command to now show the scores for the past 3 days, and the games for the next 5 days
 - Fixed an MLB Standings Bug causing the data to fail to display when there have been 0 GP
+- Changed the MLB Scores and Schedule command to now show a short detail instead of the display clock (for more relevant information)
+- Added checkmark, calendar, and x mark icons to the scores and schedule commands that change based on the game state
+- Added a new open in browser action to open the entire standings in espn for each standings command
+- Added a calendar icon to the news commands
+- Added a new tag to the news commands for the article type
+- Changed the F1 Results and Schedule command to show the schedule for the entire year
+- Added a tag in the F1 Results and Schedule command to show the race number
+- Changed the titles in the F1 Results and Schedule command to include more detail
+- Added a subtitle to the F1 Results and Schedule command to show the city and country for each race
+- Added a new tag in the standings commands to show whether a team is in the playoffs, or their current position in the league (varies based on the league). Includes different colors and icons that update dynamically
+- Fixed a bug in the MLB Standings command causing incorrect data to display
 
 ## [Implemented new feedback] - 2025-02-13
 

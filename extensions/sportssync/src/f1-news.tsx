@@ -1,9 +1,10 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface Article {
   headline: string;
   published: string;
+  type: string;
   images: { url: string }[];
   links: { web: { href: string } };
 }
@@ -29,13 +30,22 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = f1Article.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
         title={`${f1Article.headline}`}
         icon={{ source: f1Article.images[0].url }}
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Article on ESPN" url={`${f1Article.links.web.href}`} />

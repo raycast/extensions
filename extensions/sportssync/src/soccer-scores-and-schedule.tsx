@@ -1,4 +1,4 @@
-import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import getPastAndFutureDays from "./utils/getDateRange";
@@ -78,6 +78,7 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     function getSoccerHalfWithSuffix(half: number): string {
@@ -93,17 +94,20 @@ export default function scoresAndSchedule() {
     if (eplGame.status.type.state === "in") {
       accessoryTitle = `${eplGame.competitions[0].competitors[1].team.abbreviation} ${eplGame.competitions[0].competitors[1].score} - ${eplGame.competitions[0].competitors[0].team.abbreviation} ${eplGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${eplGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (eplGame.status.type.state === "post") {
       accessoryTitle = `${eplGame.competitions[0].competitors[1].team.abbreviation} ${eplGame.competitions[0].competitors[1].score} - ${eplGame.competitions[0].competitors[0].team.abbreviation} ${eplGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (eplGame.status.type.state === "post" && eplGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -112,7 +116,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${eplGame.name}`}
         icon={{ source: eplGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${eplGame.links[0].href}`} />
@@ -126,6 +133,98 @@ export default function scoresAndSchedule() {
               <Action.OpenInBrowser
                 title="View Home Team Details"
                 url={`${eplGame.competitions[0].competitors[0].team.links[0].href}`}
+              />
+            )}
+          </ActionPanel>
+        }
+      />,
+    );
+  });
+
+  // Fetch UEFA Games
+
+  const { isLoading: uefaScheduleStats, data: uefaScoresAndSchedule } = useFetch<Response>(
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard?dates=${dateRange}`,
+  );
+
+  const uefaDayItems: DayItems[] = [];
+  const uefaGames = uefaScoresAndSchedule?.events || [];
+
+  uefaGames.forEach((uefaGame, index) => {
+    const gameDate = new Date(uefaGame.date);
+    const uefaGameDay = gameDate.toLocaleDateString([], {
+      dateStyle: "medium",
+    });
+
+    if (!uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay)) {
+      uefaDayItems.push({
+        title: uefaGameDay,
+        games: [],
+      });
+    }
+
+    const uefaDay = uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay);
+    const gameTime = new Date(uefaGame.date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    let accessoryTitle = gameTime;
+    let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
+    let accessoryToolTip;
+
+    function getSoccerHalfWithSuffix(half: number) {
+      if (half === 1) return `${half}st Half`;
+      if (half === 2) return `${half}nd Half`;
+      return `${half}th Half`;
+    }
+
+    const half = uefaGame.status.period ?? 0;
+    const halfWithSuffix = getSoccerHalfWithSuffix(half);
+
+    if (uefaGame.status.type.state === "in") {
+      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${uefaGame.status.displayClock}`;
+      accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
+      accessoryToolTip = "In Progress";
+    }
+
+    if (uefaGame.status.type.state === "post") {
+      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}`;
+      accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
+      accessoryToolTip = "Final";
+    }
+
+    if (uefaGame.status.type.state === "post" && uefaGame.status.type.completed === false) {
+      accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
+      accessoryColor = Color.Orange;
+    }
+
+    uefaDay?.games.push(
+      <List.Item
+        key={index}
+        title={`${uefaGame.name}`}
+        icon={{ source: uefaGame.competitions[0].competitors[1].team.logo }}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="View Game Details on ESPN" url={`${uefaGame.links[0].href}`} />
+            {uefaGame.competitions[0].competitors[1].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Away Team Details"
+                url={`${uefaGame.competitions[0].competitors[1].team.links[0].href}`}
+              />
+            )}
+            {uefaGame.competitions[0].competitors[0].team.links?.length > 0 && (
+              <Action.OpenInBrowser
+                title="View Home Team Details"
+                url={`${uefaGame.competitions[0].competitors[0].team.links[0].href}`}
               />
             )}
           </ActionPanel>
@@ -164,6 +263,7 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     function getSoccerHalfWithSuffix(half: number) {
@@ -178,17 +278,20 @@ export default function scoresAndSchedule() {
     if (sllGame.status.type.state === "in") {
       accessoryTitle = `${sllGame.competitions[0].competitors[1].team.abbreviation} ${sllGame.competitions[0].competitors[1].score} - ${sllGame.competitions[0].competitors[0].team.abbreviation} ${sllGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${sllGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (sllGame.status.type.state === "post") {
       accessoryTitle = `${sllGame.competitions[0].competitors[1].team.abbreviation} ${sllGame.competitions[0].competitors[1].score} - ${sllGame.competitions[0].competitors[0].team.abbreviation} ${sllGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (sllGame.status.type.state === "post" && sllGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -197,7 +300,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${sllGame.name}`}
         icon={{ source: sllGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${sllGame.links[0].href}`} />
@@ -249,6 +355,7 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     function getSoccerHalfWithSuffix(half: number) {
@@ -263,17 +370,20 @@ export default function scoresAndSchedule() {
     if (gerGame.status.type.state === "in") {
       accessoryTitle = `${gerGame.competitions[0].competitors[1].team.abbreviation} ${gerGame.competitions[0].competitors[1].score} - ${gerGame.competitions[0].competitors[0].team.abbreviation} ${gerGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${gerGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (gerGame.status.type.state === "post") {
       accessoryTitle = `${gerGame.competitions[0].competitors[1].team.abbreviation} ${gerGame.competitions[0].competitors[1].score} - ${gerGame.competitions[0].competitors[0].team.abbreviation} ${gerGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (gerGame.status.type.state === "post" && gerGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -282,7 +392,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${gerGame.name}`}
         icon={{ source: gerGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${gerGame.links[0].href}`} />
@@ -334,6 +447,7 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     function getSoccerHalfWithSuffix(half: number) {
@@ -348,17 +462,20 @@ export default function scoresAndSchedule() {
     if (itaGame.status.type.state === "in") {
       accessoryTitle = `${itaGame.competitions[0].competitors[1].team.abbreviation} ${itaGame.competitions[0].competitors[1].score} - ${itaGame.competitions[0].competitors[0].team.abbreviation} ${itaGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${itaGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (itaGame.status.type.state === "post") {
       accessoryTitle = `${itaGame.competitions[0].competitors[1].team.abbreviation} ${itaGame.competitions[0].competitors[1].score} - ${itaGame.competitions[0].competitors[0].team.abbreviation} ${itaGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (itaGame.status.type.state === "post" && itaGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -367,7 +484,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${itaGame.name}`}
         icon={{ source: itaGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${itaGame.links[0].href}`} />
@@ -389,92 +509,7 @@ export default function scoresAndSchedule() {
     );
   });
 
-  // Fetch UEFA Games
-
-  const { isLoading: uefaScheduleStats, data: uefaScoresAndSchedule } = useFetch<Response>(
-    `https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard?dates=${dateRange}`,
-  );
-
-  const uefaDayItems: DayItems[] = [];
-  const uefaGames = uefaScoresAndSchedule?.events || [];
-
-  uefaGames.forEach((uefaGame, index) => {
-    const gameDate = new Date(uefaGame.date);
-    const uefaGameDay = gameDate.toLocaleDateString([], {
-      dateStyle: "medium",
-    });
-
-    if (!uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay)) {
-      uefaDayItems.push({
-        title: uefaGameDay,
-        games: [],
-      });
-    }
-
-    const uefaDay = uefaDayItems.find((uefaDay) => uefaDay.title === uefaGameDay);
-    const gameTime = new Date(uefaGame.date).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    let accessoryTitle = gameTime;
-    let accessoryColor = Color.SecondaryText;
-    let accessoryToolTip;
-
-    function getSoccerHalfWithSuffix(half: number) {
-      if (half === 1) return `${half}st Half`;
-      if (half === 2) return `${half}nd Half`;
-      return `${half}th Half`;
-    }
-
-    const half = uefaGame.status.period ?? 0;
-    const halfWithSuffix = getSoccerHalfWithSuffix(half);
-
-    if (uefaGame.status.type.state === "in") {
-      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}     ${halfWithSuffix} ${uefaGame.status.displayClock}`;
-      accessoryColor = Color.Green;
-      accessoryToolTip = "In Progress";
-    }
-
-    if (uefaGame.status.type.state === "post") {
-      accessoryTitle = `${uefaGame.competitions[0].competitors[1].team.abbreviation} ${uefaGame.competitions[0].competitors[1].score} - ${uefaGame.competitions[0].competitors[0].team.abbreviation} ${uefaGame.competitions[0].competitors[0].score}`;
-      accessoryColor = Color.SecondaryText;
-      accessoryToolTip = "Final";
-    }
-
-    if (uefaGame.status.type.state === "post" && uefaGame.status.type.completed === false) {
-      accessoryTitle = `Postponed`;
-      accessoryColor = Color.Orange;
-    }
-
-    uefaDay?.games.push(
-      <List.Item
-        key={index}
-        title={`${uefaGame.name}`}
-        icon={{ source: uefaGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="View Game Details on ESPN" url={`${uefaGame.links[0].href}`} />
-            {uefaGame.competitions[0].competitors[1].team.links?.length > 0 && (
-              <Action.OpenInBrowser
-                title="View Away Team Details"
-                url={`${uefaGame.competitions[0].competitors[1].team.links[0].href}`}
-              />
-            )}
-            {uefaGame.competitions[0].competitors[0].team.links?.length > 0 && (
-              <Action.OpenInBrowser
-                title="View Home Team Details"
-                url={`${uefaGame.competitions[0].competitors[0].team.links[0].href}`}
-              />
-            )}
-          </ActionPanel>
-        }
-      />,
-    );
-  });
-
-  if (eplScheduleStats || sllScheduleStats || gerScheduleStats || itaScheduleStats || uefaScheduleStats) {
+  if (eplScheduleStats || uefaScheduleStats || sllScheduleStats || gerScheduleStats || itaScheduleStats) {
     return <Detail isLoading={true} />;
   }
 

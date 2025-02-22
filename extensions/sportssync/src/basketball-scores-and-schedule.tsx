@@ -1,4 +1,4 @@
-import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import getPastAndFutureDays from "./utils/getDateRange";
@@ -80,21 +80,25 @@ export default function scoresAndSchedule() {
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryToolTip;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
 
     if (nbaGame.status.type.state === "in") {
       accessoryTitle = `${nbaGame.competitions[0].competitors[1].team.abbreviation} ${nbaGame.competitions[0].competitors[1].score} - ${nbaGame.competitions[0].competitors[0].team.abbreviation} ${nbaGame.competitions[0].competitors[0].score}     Q${nbaGame.status.period} ${nbaGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (nbaGame.status.type.state === "post") {
       accessoryTitle = `${nbaGame.competitions[0].competitors[1].team.abbreviation} ${nbaGame.competitions[0].competitors[1].score} - ${nbaGame.competitions[0].competitors[0].team.abbreviation} ${nbaGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (nbaGame.status.type.state === "post" && nbaGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -103,7 +107,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${nbaGame.name}`}
         icon={{ source: nbaGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${nbaGame.links[0].href}`} />
@@ -157,22 +164,26 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     if (wnbaGame.status.type.state === "in") {
       accessoryTitle = `${wnbaGame.competitions[0].competitors[1].team.abbreviation} ${wnbaGame.competitions[0].competitors[1].score} - ${wnbaGame.competitions[0].competitors[0].team.abbreviation} ${wnbaGame.competitions[0].competitors[0].score}     Q${wnbaGame.status.period} ${wnbaGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (wnbaGame.status.type.state === "post") {
       accessoryTitle = `${wnbaGame.competitions[0].competitors[1].team.abbreviation} ${wnbaGame.competitions[0].competitors[1].score} - ${wnbaGame.competitions[0].competitors[0].team.abbreviation} ${wnbaGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (wnbaGame.status.type.state === "post" && wnbaGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -181,7 +192,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={`${wnbaGame.name}`}
         icon={{ source: wnbaGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${wnbaGame.links[0].href}`} />

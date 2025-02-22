@@ -1,10 +1,11 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 interface Article {
   headline: string;
   published: string;
+  type: string;
   images: { url: string }[];
   links: { web: { href: string } };
 }
@@ -31,13 +32,22 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = mncaaArticle.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
         title={`${mncaaArticle.headline}`}
         icon={{ source: mncaaArticle.images[0].url }}
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Article on ESPN" url={`${mncaaArticle.links.web.href}`} />
@@ -63,13 +73,22 @@ export default function scoresAndSchedule() {
 
     const accessoryTitle = articleDate;
     const accessoryToolTip = "Date Published";
+    let articleType = wncaaArticle.type;
+
+    if (articleType === "HeadlineNews") {
+      articleType = "Headline";
+    }
 
     return (
       <List.Item
         key={index}
         title={`${wncaaArticle.headline}`}
         icon={{ source: wncaaArticle.images[0].url }}
-        accessories={[{ text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { tag: { value: articleType, color: Color.Green }, icon: Icon.Megaphone },
+          { text: { value: `${accessoryTitle}` }, tooltip: accessoryToolTip },
+          { icon: Icon.Calendar },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Article on ESPN" url={`${wncaaArticle.links.web.href}`} />

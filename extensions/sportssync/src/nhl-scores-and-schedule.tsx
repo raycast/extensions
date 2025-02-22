@@ -1,4 +1,4 @@
-import { Detail, List, Color, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import getPastAndFutureDays from "./utils/getDateRange";
 
@@ -79,22 +79,26 @@ export default function scoresAndSchedule() {
 
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
+    let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip;
 
     if (nhlGame.status.type.state === "in") {
       accessoryTitle = `${nhlGame.competitions[0].competitors[1].team.abbreviation} ${nhlGame.competitions[0].competitors[1].score} - ${nhlGame.competitions[0].competitors[0].team.abbreviation} ${nhlGame.competitions[0].competitors[0].score}     P${nhlGame.status.period} ${nhlGame.status.displayClock}`;
       accessoryColor = Color.Green;
+      accessoryIcon = { source: Icon.Livestream, tintColor: Color.Green };
       accessoryToolTip = "In Progress";
     }
 
     if (nhlGame.status.type.state === "post") {
       accessoryTitle = `${nhlGame.competitions[0].competitors[1].team.abbreviation} ${nhlGame.competitions[0].competitors[1].score} - ${nhlGame.competitions[0].competitors[0].team.abbreviation} ${nhlGame.competitions[0].competitors[0].score}`;
       accessoryColor = Color.SecondaryText;
+      accessoryIcon = { source: Icon.CheckCircle, tintColor: Color.SecondaryText };
       accessoryToolTip = "Final";
     }
 
     if (nhlGame.status.type.state === "post" && nhlGame.status.type.completed === false) {
       accessoryTitle = `Postponed`;
+      accessoryIcon = { source: Icon.XMarkCircle, tintColor: Color.Orange };
       accessoryColor = Color.Orange;
     }
 
@@ -103,7 +107,10 @@ export default function scoresAndSchedule() {
         key={index}
         title={nhlGame.name.replace(" at ", " vs ")}
         icon={{ source: nhlGame.competitions[0].competitors[1].team.logo }}
-        accessories={[{ text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip }]}
+        accessories={[
+          { text: { value: `${accessoryTitle}`, color: accessoryColor }, tooltip: accessoryToolTip },
+          { icon: accessoryIcon },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Game Details on ESPN" url={`${nhlGame.links[0].href}`} />

@@ -1,4 +1,4 @@
-import { Detail, List, Action, ActionPanel } from "@raycast/api";
+import { Detail, List, Action, ActionPanel, Icon, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface Stats {
@@ -18,6 +18,12 @@ interface StandingsEntry {
 }
 
 interface StandingsData {
+  links: [
+    {
+      href: string;
+    },
+  ];
+
   children: [
     {
       name: string;
@@ -47,15 +53,47 @@ export default function scoresAndSchedule() {
   const items2 = mlbStandingsData?.children[1].standings.entries;
 
   const mlbALTeams = items1?.map((team1, index) => {
+    const playoffPosition = Number(team1.stats[10].displayValue);
+
+    let tagColor;
+    let tagIcon;
+    let tagTooltip;
+
+    if (playoffPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+      tagTooltip = "1st in Conference";
+    } else if (playoffPosition >= 2 && playoffPosition <= 6) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+      tagTooltip = "Playoff Contender";
+    } else if (playoffPosition >= 7 && playoffPosition <= 14) {
+      tagColor = Color.Orange;
+      tagIcon = Icon.XMarkCircle;
+      tagTooltip = "Not in Playoffs";
+    } else if (playoffPosition === 15) {
+      tagColor = Color.Red;
+      tagIcon = Icon.Xmark;
+      tagTooltip = "Last in Conference";
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${team1.team.displayName}`}
-        accessoryTitle={`${team1.stats[8].displayValue} GP | ${team1?.stats[33]?.displayValue ?? "0 GP"} | Pct: ${(Number(team1.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team1.stats[15].displayValue} | PA ${team1.stats[14].displayValue} | Dif ${team1.stats[12].displayValue}`}
+        accessories={[
+          {
+            text: `${team1.stats[7].displayValue} GP | ${team1.stats[32]?.displayValue ?? "0-0-0"} | Pct: ${(Number(team1.stats[8].displayValue) * 100).toFixed(1)}% | PF: ${team1.stats[14].displayValue} | PA: ${team1.stats[13].displayValue} | Dif: ${team1.stats[11].displayValue}`,
+          },
+          { tag: { value: team1.stats[10].displayValue, color: tagColor }, icon: tagIcon, tooltip: tagTooltip },
+        ]}
         icon={{ source: team1.team.logos[0].href }}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${team1.team.links[0].href}`} />
+            <Action.OpenInBrowser title="View Standings on ESPN" url={`${mlbStandingsData?.links[0].href}`} />
           </ActionPanel>
         }
       />
@@ -63,15 +101,47 @@ export default function scoresAndSchedule() {
   });
 
   const mlbNLTeams = items2?.map((team2, index) => {
+    const playoffPosition = Number(team2.stats[10].displayValue);
+
+    let tagColor;
+    let tagIcon;
+    let tagTooltip;
+
+    if (playoffPosition === 1) {
+      tagColor = Color.Yellow;
+      tagIcon = Icon.Trophy;
+      tagTooltip = "1st in Conference";
+    } else if (playoffPosition >= 2 && playoffPosition <= 6) {
+      tagColor = Color.Green;
+      tagIcon = Icon.Leaderboard;
+      tagTooltip = "Playoff Contender";
+    } else if (playoffPosition >= 7 && playoffPosition <= 14) {
+      tagColor = Color.Orange;
+      tagIcon = Icon.XMarkCircle;
+      tagTooltip = "Not in Playoffs";
+    } else if (playoffPosition === 15) {
+      tagColor = Color.Red;
+      tagIcon = Icon.Xmark;
+      tagTooltip = "Last in Conference";
+    } else {
+      tagColor = Color.SecondaryText;
+    }
+
     return (
       <List.Item
         key={index}
         title={`${team2.team.displayName}`}
-        accessoryTitle={`${team2.stats[8].displayValue} GP | ${team2?.stats[33]?.displayValue ?? "0 GP"} | Pct: ${(Number(team2.stats[9].displayValue) * 100).toFixed(1)}% | PF ${team2.stats[15].displayValue} | PA ${team2.stats[14].displayValue} | Dif ${team2.stats[12].displayValue}`}
+        accessories={[
+          {
+            text: `${team2.stats[7].displayValue} GP | ${team2.stats[32]?.displayValue ?? "0-0-0"} | Pct: ${(Number(team2.stats[8].displayValue) * 100).toFixed(1)}% | PF: ${team2.stats[14].displayValue} | PA: ${team2.stats[13].displayValue} | Dif: ${team2.stats[11].displayValue}`,
+          },
+          { tag: { value: team2.stats[10].displayValue, color: tagColor }, icon: tagIcon, tooltip: tagTooltip },
+        ]}
         icon={{ source: team2.team.logos[0].href }}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="View Team Details on ESPN" url={`${team2.team.links[0].href}`} />
+            <Action.OpenInBrowser title="View Standings on ESPN" url={`${mlbStandingsData?.links[0].href}`} />
           </ActionPanel>
         }
       />
