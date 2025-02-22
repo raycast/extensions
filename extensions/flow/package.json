@@ -86,9 +86,16 @@
     {
       "name": "set-session-title",
       "title": "Set Session Title",
-      "subtitle": "Flow",
-      "description": "Set the current session title",
-      "mode": "view"
+      "description": "Set the session title for Flow",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Enter session title",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "categories": [
