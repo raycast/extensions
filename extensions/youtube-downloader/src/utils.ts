@@ -4,18 +4,6 @@ import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
 import { GET_ACTIVE_APP_SCRIPT, GET_LINK_FROM_BROWSER_SCRIPT, SUPPORTED_BROWSERS } from "./browser.js";
 
-type ExtensionPreferences = {
-  downloadPath: string;
-  ytdlPath: string;
-  ffmpegPath: string;
-  ffprobePath: string;
-  forceIpv4: boolean;
-  autoLoadUrlFromClipboard: boolean;
-  autoLoadUrlFromSelectedText: boolean;
-  autoLoadUrlFromBrowserActiveTab: boolean;
-  homebrewPath: string;
-};
-
 export const preferences = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
