@@ -1,5 +1,13 @@
 # Video Downloader Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Add support to manage installed Homebrew libraries
+- Add support for checking if libraries outdated
+- Adjust preferences usage code to make used options more intuitive
+- Organize command views to keep entry file clean
+- Update tsconfig lib to `es2022` to match Node.js 18
+
 ## [Features] - 2025-03-04
 
 - Add support for downloading all possible formats
