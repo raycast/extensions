@@ -85,7 +85,7 @@ export function AuthorizationComponent({ authProvider }: { authProvider: "github
         setIsLoading(false);
         await showToast({ title: "Authorization Successful" });
       } catch (error) {
-        console.error("error authorizaing user", error);
+        console.error("error authorizing user", error);
         setIsLoading(false);
         await showFailureToast({ title: "Authorization Failed" });
       } finally {

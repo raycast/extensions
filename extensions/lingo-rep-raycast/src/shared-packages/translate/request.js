@@ -1,12 +1,12 @@
 import axios from "axios";
 export const request = async ({ method, data, url }) => {
-  // what's options type?
+  if (!url) throw new Error("No URL provided");
   const options = {
     method,
     headers: {
       "Content-Type": "application/json",
     },
-    data: data && method === "POST" ? JSON.stringify(data) : undefined,
+    data: data && method.toUpperCase() === "POST" ? JSON.stringify(data) : undefined,
     url: url ? url : "",
   };
   const response = await axios(options);

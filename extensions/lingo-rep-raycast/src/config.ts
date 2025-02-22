@@ -1,7 +1,6 @@
 let nodeEnv = process.env.NODE_ENV as unknown as "development" | "production" | undefined;
 
 if (nodeEnv !== "development") nodeEnv = "production";
-console.log("node env", nodeEnv);
 
 const allConfigs = {
   development: {

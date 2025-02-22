@@ -40,7 +40,7 @@ export const usePost = (url: string, body: Record<string, unknown>) => {
           setResponse(res);
         } else setResponse(null);
       } catch (err) {
-        console.log("error in post", err);
+        console.error("error in post", err);
       } finally {
         setIsLoading(false);
       }

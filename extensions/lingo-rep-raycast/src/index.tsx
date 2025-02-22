@@ -218,12 +218,14 @@ export default function Command() {
   const debouncedTranslate = useCallback(
     _.debounce(async (text: string) => {
       try {
-        if (!selected?.sourceLangKey || !selected?.targetLangKey) return console.log("no lang keys");
+        if (!selected?.sourceLangKey || !selected?.targetLangKey)
+          return showToast({ title: "Please select source and target languages", style: Toast.Style.Failure });
 
         const res = await translate(selected?.sourceLangKey, selected?.targetLangKey, text);
         setTranslatedText(res);
       } catch (err) {
-        console.log("error translating", err);
+        showToast({ title: "Error translating text", style: Toast.Style.Failure });
+        console.error("error translating", err);
       }
     }, 1000),
     [selected?.sourceLangKey, selected?.targetLangKey],
