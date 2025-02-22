@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "olacv",
   "title": "OlaCV",
-  "description": "",
+  "description": "Manage Domains and Contacts in our OlaCV account",
   "icon": "ola.png",
   "author": "xmok",
   "categories": [
