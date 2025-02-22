@@ -99,7 +99,7 @@ func extractColors(from image: NSImage, count: Int, dominantOnly: Bool = false, 
         for y in stride(from: 0, to: height, by: sampleStep) {
             if let color = bitmapRep.colorAt(x: Int(x), y: Int(y)) {
                 // Quantize colors to reduce noise
-                guard let rgb = color.usingColorSpace(NSColorSpace.sRGB) else { continue }
+                let rgb = color.usingColorSpace(.sRGB)!
                 var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
                 rgb.getRed(&r, green: &g, blue: &b, alpha: nil)
                 
@@ -134,7 +134,7 @@ func extractColors(from image: NSImage, count: Int, dominantOnly: Bool = false, 
     return filteredColors
         .prefix(count)
         .map { (color, count) in
-            guard let rgb = color.usingColorSpace(NSColorSpace.sRGB) else { continue }
+            let rgb = color.usingColorSpace(NSColorSpace.sRGB)!
             var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, h: CGFloat = 0, s: CGFloat = 0, l: CGFloat = 0
             rgb.getRed(&r, green: &g, blue: &b, alpha: nil)
             rgb.getHue(&h, saturation: &s, brightness: &l, alpha: nil)
