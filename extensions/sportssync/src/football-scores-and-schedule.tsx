@@ -77,7 +77,17 @@ export default function scoresAndSchedule() {
     let accessoryTitle = nflGameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
-    let accessoryToolTip;
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && nflGame.status.type.state !== "in") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (nflGame.status.type.state === "in") {
       accessoryTitle = `${nflGame.competitions[0].competitors[1].team.abbreviation} ${nflGame.competitions[0].competitors[1].score} - ${nflGame.competitions[0].competitors[0].team.abbreviation} ${nflGame.competitions[0].competitors[0].score}     Q${nflGame.status.period} ${nflGame.status.displayClock}`;
@@ -160,7 +170,17 @@ export default function scoresAndSchedule() {
     let accessoryTitle = ncaaGameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
-    let accessoryToolTip;
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && ncaaGame.status.type.state !== "in") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (ncaaGame.status.type.state === "in") {
       accessoryTitle = `${ncaaGame.competitions[0].competitors[1].team.abbreviation} ${ncaaGame.competitions[0].competitors[1].score} - ${ncaaGame.competitions[0].competitors[0].team.abbreviation} ${ncaaGame.competitions[0].competitors[0].score}     Q${ncaaGame.status.period} ${ncaaGame.status.displayClock}`;

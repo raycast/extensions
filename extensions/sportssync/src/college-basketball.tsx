@@ -80,7 +80,17 @@ export default function scoresAndSchedule() {
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
-    let accessoryToolTip;
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && mncaaGame.status.type.state !== "in") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (mncaaGame.status.type.state === "in") {
       accessoryTitle = `${mncaaGame.competitions[0].competitors[1].team.abbreviation} ${mncaaGame.competitions[0].competitors[1].score} - ${mncaaGame.competitions[0].competitors[0].team.abbreviation} ${mncaaGame.competitions[0].competitors[0].score}     Q${mncaaGame.status.period} ${mncaaGame.status.displayClock}`;
@@ -164,7 +174,17 @@ export default function scoresAndSchedule() {
     let accessoryTitle = gameTime;
     let accessoryColor = Color.SecondaryText;
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
-    let accessoryToolTip;
+    let accessoryToolTip = "Scheduled";
+
+    const startingSoonInterval = 15 * 60 * 1000;
+    const currentDate = new Date();
+    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
+
+    if (timeUntilGameStarts <= startingSoonInterval && wncaaGame.status.type.state !== "in") {
+      accessoryColor = Color.Yellow;
+      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
+      accessoryToolTip = "Starting Soon";
+    }
 
     if (wncaaGame.status.type.state === "in") {
       accessoryTitle = `${wncaaGame.competitions[0].competitors[1].team.abbreviation} ${wncaaGame.competitions[0].competitors[1].score} - ${wncaaGame.competitions[0].competitors[0].team.abbreviation} ${wncaaGame.competitions[0].competitors[0].score}     Q${wncaaGame.status.period} ${wncaaGame.status.displayClock}`;
