@@ -1,6 +1,6 @@
 # Google Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-22
 
 - Add clipboard fallback preference for selected text searches
 
