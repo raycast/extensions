@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "telegram-sender",
+  "title": "Telegram Message Sender",
+  "description": "Send messages to Telegram bots",
+  "icon": "command-icon.png",
+  "author": "robert_vaganyan",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Send Telegram Message",
+      "description": "Send a message to a Telegram bot",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "botToken",
+      "type": "password",
+      "required": true,
+      "title": "Bot Token",
+      "description": "Your Telegram bot token (get it from @BotFather)",
+      "placeholder": "Enter your bot token here"
+    },
+    {
+      "name": "chatId",
+      "type": "textfield",
+      "required": true,
+      "title": "Chat ID",
+      "description": "Forward a message from the chat to @userinfobot to get the chat ID",
+      "placeholder": "Enter your chat ID here"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.5.9",
+    "@types/react": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

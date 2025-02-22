@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+.raycast-swift-build/
+
+# Environment
+.env
+
+# System files
+.DS_Store
+
+# IDE
+.idea/
+.vscode/ 
