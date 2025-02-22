@@ -4,7 +4,7 @@
   "title": "Sessionizer",
   "description": "Quick access to existing project directories in your preferred editor.",
   "icon": "extension-icon.png",
-  "author": "carlos_ballena",
+  "author": "cballenar",
   "categories": [
     "Productivity"
   ],
