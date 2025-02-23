@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-02-23
 
 - Fix: Fixed the error display issue: errors are now always fully readable and rendered correctly in their respective places.
 - Fix: Fixed the issue when some errors may not be displayed in the UI.
