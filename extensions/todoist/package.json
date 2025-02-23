@@ -597,6 +597,15 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
+    },
+    {
+      "name": "preferBackgroundOperation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Prefer Background Operation",
+      "description": "When enabled, time consuming command will run in the background, and the Raycast window will close immediately.",
+      "default": false,
+      "label": "Enable"
     }
   ],
   "dependencies": {
