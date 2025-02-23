@@ -8,6 +8,14 @@
   "categories": [
     "Data"
   ],
+  "tags": [
+    "avalanche",
+    "forecast",
+    "naturvårdsverket",
+    "weather",
+    "snow",
+    "warning"
+  ],
   "license": "MIT",
   "commands": [
     {
