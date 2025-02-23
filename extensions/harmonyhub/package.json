@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "harmony-control",
+  "name": "harmonyhub",
   "version": "1.0.0",
   "title": "Harmony Control",
   "description": "Control your Logitech Harmony Hub devices",
