@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getOverview } from "./api/get-overview";
 import { getRiskLevel, getUrl, riskLevelToColor, riskLevelToIcon } from "./utils";
 import { Area } from "./types";
@@ -76,33 +76,57 @@ export default function Overview() {
     const overview = await getOverview();
     return overview;
   }, []);
+  const [pinnedAreas, setPinnedAreas] = useCachedState<Area["slug"][]>("pinnedAreas", []);
+
+  const renderArea = (area: Area) => {
+    const riskLevel = getRiskLevel(area);
+    if (!riskLevel || !area.riskText) {
+      return null;
+    }
+    return (
+      <List.Item
+        icon={{ source: riskLevelToIcon(riskLevel), tintColor: riskLevelToColor(riskLevel) }}
+        keywords={[area.areaName, area.areas]}
+        key={area.url}
+        title={{
+          value: area.areaName,
+          tooltip: area.areas,
+        }}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={getUrl(area.url)} />
+            <Action
+              title={pinnedAreas.includes(area.slug) ? "Unpin Area" : "Pin Area"}
+              icon={pinnedAreas.includes(area.slug) ? Icon.PinDisabled : Icon.Pin}
+              onAction={() => {
+                if (pinnedAreas.includes(area.slug)) {
+                  setPinnedAreas(pinnedAreas.filter((slug) => slug !== area.slug));
+                } else {
+                  setPinnedAreas([...pinnedAreas, area.slug]);
+                }
+              }}
+            />
+          </ActionPanel>
+        }
+        detail={<AreaDetail area={area} />}
+      />
+    );
+  };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for area…" isShowingDetail>
-      {data?.forecastAreas.map((area) => {
-        const riskLevel = getRiskLevel(area);
-        if (!riskLevel || !area.riskText) {
-          return null;
-        }
-
-        return (
-          <List.Item
-            icon={{ source: riskLevelToIcon(riskLevel), tintColor: riskLevelToColor(riskLevel) }}
-            keywords={[area.areaName, area.areas]}
-            key={area.url}
-            title={{
-              value: area.areaName,
-              tooltip: area.areas,
-            }}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={getUrl(area.url)} />
-              </ActionPanel>
-            }
-            detail={<AreaDetail area={area} />}
-          />
-        );
-      })}
+      {pinnedAreas.length > 0 ? (
+        <>
+          <List.Section title="Pinned Areas">
+            {data?.forecastAreas.filter((area) => pinnedAreas.includes(area.slug)).map(renderArea)}
+          </List.Section>
+          <List.Section title="All Areas">
+            {data?.forecastAreas.filter((area) => !pinnedAreas.includes(area.slug)).map(renderArea)}
+          </List.Section>
+        </>
+      ) : (
+        data?.forecastAreas.map(renderArea)
+      )}
     </List>
   );
 }
