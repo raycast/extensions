@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { ErrorResult, ListProjectsResult, ListServicesResult, State } from "./interfaces";
+import { ErrorResult, ListProjectsResult, ListServiceBackupsResult, ListServicesResult, Project, Service, State } from "./interfaces";
 import { Fragment } from "react/jsx-runtime";
+import { filesize } from "filesize";
 
 function useAiven<T>(endpoint: string) {
   const { token } = getPreferenceValues<Preferences>();
@@ -47,8 +48,9 @@ export default function Projects() {
               <Action.Push
                 icon={Icon.Coin}
                 title="View Services"
-                target={<Services project={project.project_name} />}
+                target={<Services project={project} />}
               />
+              <Action.OpenInBrowser url={`https://console.aiven.io/account/${project.account_id}/project/${project.project_name}/services`} />
             </ActionPanel>
           }
         />
@@ -57,7 +59,7 @@ export default function Projects() {
   );
 }
 
-function Services({ project }: { project: string }) {
+function Services({ project }: { project: Project }) {
   function getServiceIconColor(state: State) {
     switch (state) {
       case State.POWEROFF:
@@ -72,7 +74,7 @@ function Services({ project }: { project: string }) {
 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-project-details", false);
 
-  const { isLoading, data } = useAiven<ListServicesResult>(`project/${project}/service`);
+  const { isLoading, data } = useAiven<ListServicesResult>(`project/${project.project_name}/service`);
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
@@ -89,9 +91,9 @@ ${Object.entries(service.metadata)
         return (
           <List.Item
             key={service.service_name}
-            icon={{ source: Icon.CircleFilled, tintColor: getServiceIconColor(service.state) }}
+            icon={{ value: { source: Icon.CircleFilled, tintColor: getServiceIconColor(service.state) }, tooltip: service.state }}
             title={service.service_name}
-            subtitle={isShowingDetail ? undefined : service.service_type}
+            subtitle={isShowingDetail ? undefined : { value: service.service_type, tooltip: service.service_type_description }}
             accessories={
               isShowingDetail
                 ? undefined
@@ -108,6 +110,10 @@ ${Object.entries(service.metadata)
                 markdown={markdown}
                 metadata={
                   <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.TagList title="Features">
+                      {Object.entries(service.features).map(([feature, active]) => <List.Item.Detail.Metadata.TagList.Item key={feature} text={feature} color={active ? Color.Green : Color.Red} />)}
+                    </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.Separator />
                     {service.components.map((component, index) => (
                       <Fragment key={index}>
                         <List.Item.Detail.Metadata.Label title="Component" text={component.component} />
@@ -129,6 +135,8 @@ ${Object.entries(service.metadata)
                   title="Toggle Details"
                   onAction={() => setIsShowingDetail((show) => !show)}
                 />
+                <Action.Push icon={Icon.SaveDocument} title="View Backups" target={<Backups project={project} service={service} />} />
+                <Action.OpenInBrowser url={`https://console.aiven.io/account/${project.account_id}/project/${project.project_name}/services/${service.service_name}`} shortcut={Keyboard.Shortcut.Common.Open} />
               </ActionPanel>
             }
           />
@@ -136,4 +144,32 @@ ${Object.entries(service.metadata)
       })}
     </List>
   );
+}
+
+function Backups({project, service}: {project: Project; service: Service}) {
+  const { isLoading, data } = useAiven<ListServiceBackupsResult>(`project/${project.project_name}/service/${service.service_name}/backups`);
+
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { 
+      day: "2-digit", 
+      month: "short", 
+      year: "numeric", 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      second: "2-digit", 
+      timeZone: "UTC", 
+      hour12: false 
+  };
+    const formattedDate = date.toLocaleString('en-US', options).replace(',', '');  
+    return formattedDate + " UTC";
+  }
+  
+  return <Detail isLoading={isLoading} markdown={!data ? "" : `
+| Data size | Backup time | Backup location |
+|-----------|-------------|-----------------|
+${data.backups.map(backup => `| ${filesize(backup.data_size, { base: 2 })} | ${formatDate(backup.backup_time)} | ${backup.storage_location} |`).join("\n")}
+`} actions={<ActionPanel>
+  <Action.OpenInBrowser url={`https://console.aiven.io/account/${project.account_id}/project/${project.project_name}/services/${service.service_name}/backups`} />
+</ActionPanel>} />
 }
