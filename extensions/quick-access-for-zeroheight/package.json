@@ -15,7 +15,7 @@
     {
       "name": "show-styleguides",
       "title": "Show Styleguides",
-      "subtitle": "List accessible styleguides",
+      "subtitle": "zeroheight",
       "description": "Show a list of all accessible styleguides in your chosen organization",
       "mode": "view"
     }
