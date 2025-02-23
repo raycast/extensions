@@ -1,0 +1,77 @@
+{
+  "name": "telegram-raycast",
+  "title": "Telegram for Raycast",
+  "description": "Search through Telegram chats, channels, and messages",
+  "icon": "command-icon.png",
+  "author": "percique",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Telegram",
+      "description": "Search through your Telegram chats and messages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiId",
+      "type": "textfield",
+      "required": true,
+      "title": "API ID",
+      "description": "Your Telegram API ID from https://my.telegram.org/apps",
+      "placeholder": "Enter your API ID"
+    },
+    {
+      "name": "apiHash",
+      "type": "textfield",
+      "required": true,
+      "title": "API Hash",
+      "description": "Your Telegram API Hash from https://my.telegram.org/apps",
+      "placeholder": "Enter your API Hash"
+    },
+    {
+      "name": "password2FA",
+      "type": "password",
+      "required": false,
+      "title": "2FA Password",
+      "description": "Your Telegram 2FA password (if enabled)",
+      "placeholder": "Enter your 2FA password (optional)"
+    }
+  ],
+  "dependencies": {
+    "@cryptography/aes": "^0.1.1",
+    "@raycast/api": "^1.85.2",
+    "buffer": "^6.0.3",
+    "input": "^1.0.1",
+    "node-fetch": "^3.3.2",
+    "pako": "^2.1.0",
+    "qrcode": "^1.5.4",
+    "telegram": "^2.19.10",
+    "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~18.16.0",
+    "@types/pako": "^2.0.3",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.2.21",
+    "@types/websocket": "^1.0.7",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^3.5.2",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint . --ext ts,tsx",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'",
+    "publish": "ray publish"
+  }
+}

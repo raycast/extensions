@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Ссылки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result-link {
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>Конвертер Telegram ссылок</h1>
+    
+    <div class="input-group">
+        <label for="webUrl">Введите веб-ссылку Telegram (например, https://t.me/channel_name):</label>
+        <input type="text" id="webUrl" placeholder="https://t.me/channel_name">
+    </div>
+
+    <button onclick="convertLink()">Конвертировать</button>
+
+    <div id="result">
+        <p>Ссылка для открытия в приложении появится здесь</p>
+    </div>
+
+    <script>
+        function convertToTelegramAppLink(webUrl) {
+            try {
+                // Проверяем, что ссылка начинается с http://t.me/ или https://t.me/
+                if (!webUrl.match(/^https?:\/\/t\.me\//)) {
+                    throw new Error('Неверный формат ссылки. Ссылка должна начинаться с https://t.me/');
+                }
+
+                // Извлекаем имя канала из веб-ссылки
+                const channelName = webUrl.split('t.me/')[1];
+                
+                if (!channelName) {
+                    throw new Error('Не удалось извлечь имя канала из ссылки');
+                }
+
+                // Создаем ссылку для открытия в приложении
+                return `tg://resolve?domain=${channelName}`;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function convertLink() {
+            const webUrl = document.getElementById('webUrl').value;
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const appLink = convertToTelegramAppLink(webUrl);
+                resultDiv.innerHTML = `
+                    <p>Исходная ссылка:</p>
+                    <p class="result-link">${webUrl}</p>
+                    <p>Ссылка для открытия в приложении:</p>
+                    <p class="result-link"><a href="${appLink}">${appLink}</a></p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Ошибка: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html> 
