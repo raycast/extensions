@@ -1,28 +1,28 @@
 import { Action } from "@raycast/api";
-import { tDevice } from "unifi-client";
+import { Client } from "unifi-client";
 
-export function CopyDeviceIPAction(props: { device: tDevice }) {
-  const ip = props.device.ip;
+export function CopyClientIPAction(props: { client: Client }) {
+  const ip = props.client.ip;
   if (!ip) {
     return null;
   }
   return (
     <Action.CopyToClipboard
-      title="Copy IP to Clipboard"
+      title="Copy Ip to Clipboard"
       shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
       content={ip}
     />
   );
 }
 
-export function CopyDeviceMacAddressAction(props: { device: tDevice }) {
-  const mac = props.device.mac;
+export function CopyClientMacAddressAction(props: { client: Client }) {
+  const mac = props.client.mac;
   if (!mac) {
     return null;
   }
   return (
     <Action.CopyToClipboard
-      title="Copy MAC Address to Clipboard"
+      title="Copy Mac Address to Clipboard"
       shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       content={mac}
     />

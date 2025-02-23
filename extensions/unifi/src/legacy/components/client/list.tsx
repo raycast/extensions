@@ -5,6 +5,7 @@ import { showErrorToast } from "../../utils";
 import { isClientConnected } from "../../lib/unifi";
 import { RevalidateAction, ToggleDetailsAction } from "../actions";
 import { CopyClientIPAction, CopyClientMacAddressAction } from "./actions";
+import { useEffect } from "react";
 
 function SingleDetailTag(props: { title: string; text: string; color?: Color.ColorLike | null | undefined }) {
   return (
@@ -77,14 +78,14 @@ function ClientListItem(props: {
       }
       accessories={[
         {
-          tag: props.showDetails === true ? (isClientConnected(c) ? undefined : "Offline") : undefined,
+          tag: props.showDetails === true ? (isClientConnected(c) ? "" : "Offline") : "",
         },
         /*{
           date: c.lastSeen ? new Date(c.lastSeen) : undefined,
           tooltip: c.lastSeen ? `Last Seen: ${new Date(c.lastSeen).toLocaleString()}` : undefined,
         },*/
         {
-          tag: props.showDetails === false ? c.ip : undefined,
+          tag: props.showDetails === false ? c.ip : "",
         },
       ]}
     />
@@ -106,9 +107,15 @@ export function SiteClientsList(props: { site: Site }) {
     [props.site],
     { keepPreviousData: true },
   );
-  showErrorToast(error);
   const connected = clients?.filter((c) => isClientConnected(c));
   const disconnected = clients?.filter((c) => !isClientConnected(c));
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
+
   return (
     <List isLoading={isLoading} isShowingDetail={showDetails}>
       <List.Section title="Connected" subtitle={`${connected?.length}`}>
