@@ -5,11 +5,14 @@
   "description": "Turn any song into a Slowed + Reverb version",
   "icon": "extension_icon.png",
   "author": "tomo_myrman",
-  "categories": [
-    "Fun",
-    "Media"
-  ],
-  "license": "MIT",
+  "scripts": {
+    "ray": "ray",
+    "build": "ray build -e dist -o ./dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
   "commands": [
     {
       "name": "generate-slowed",
@@ -54,22 +57,6 @@
       "default": "0.8",
       "required": true,
       "data": [
-        {
-          "title": "0.1",
-          "value": "0.1"
-        },
-        {
-          "title": "0.2",
-          "value": "0.2"
-        },
-        {
-          "title": "0.3",
-          "value": "0.3"
-        },
-        {
-          "title": "0.4",
-          "value": "0.4"
-        },
         {
           "title": "0.5",
           "value": "0.5"
@@ -119,26 +106,15 @@
         {
           "title": "1.5",
           "value": "1.5"
-        },
-        {
-          "title": "1.6",
-          "value": "1.6"
-        },
-        {
-          "title": "1.7",
-          "value": "1.7"
-        },
-        {
-          "title": "1.8",
-          "value": "1.8"
-        },
-        {
-          "title": "1.9",
-          "value": "1.9"
         }
       ]
     }
   ],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.17.0",
@@ -151,13 +127,5 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
-  },
-  "scripts": {
-    "ray": "ray",
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
   }
 }

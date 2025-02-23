@@ -1,11 +1,8 @@
-import { getPreferenceValues } from '@raycast/api'
 import { execSync } from 'child_process'
-
-export function getPreference(key: keyof Preferences): string {
-  return getPreferenceValues<Preferences>()[key]
-}
+import { preferenceUtils } from './preference.utils'
 
 const getSoxPath = () => {
+  const { getPreference } = preferenceUtils
   const defaultSoxPath = getPreference('customSoxPath')
   const commandFolderPath = execSync(`
   locations=(

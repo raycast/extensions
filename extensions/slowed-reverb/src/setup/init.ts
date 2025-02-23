@@ -7,7 +7,7 @@ const Init = async (currentConverter: keyof Converters) => {
   const { converters, converter } = convertersUtils
   const { showToastError, showToastSuccess, throwError, CONSTANTS } = errorUtils
   const { getSelectedFilePaths } = fileUtils
-  const { command, fileNameSuffix, initialToast, successToast } = converters[currentConverter]
+  const { command, fileNameSuffix, initialToast } = converters[currentConverter]
   const { isSoxInstalled } = soxUtils
 
   try {
@@ -16,8 +16,6 @@ const Init = async (currentConverter: keyof Converters) => {
 
     const files = await getSelectedFilePaths()
     files.forEach((inputPath) => converter(inputPath, command, fileNameSuffix))
-
-    await showToastSuccess({ title: successToast.title })
   } catch (error) {
     await showToastError(error)
   }
