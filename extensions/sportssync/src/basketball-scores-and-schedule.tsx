@@ -82,16 +82,6 @@ export default function scoresAndSchedule() {
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip = "Scheduled";
 
-    const startingSoonInterval = 15 * 60 * 1000;
-    const currentDate = new Date();
-    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
-
-    if (timeUntilGameStarts <= startingSoonInterval && nbaGame.status.type.state !== "in") {
-      accessoryColor = Color.Yellow;
-      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
-      accessoryToolTip = "Starting Soon";
-    }
-
     if (nbaGame.status.type.state === "in") {
       accessoryTitle = `${nbaGame.competitions[0].competitors[1].team.abbreviation} ${nbaGame.competitions[0].competitors[1].score} - ${nbaGame.competitions[0].competitors[0].team.abbreviation} ${nbaGame.competitions[0].competitors[0].score}     Q${nbaGame.status.period} ${nbaGame.status.displayClock}`;
       accessoryColor = Color.Green;

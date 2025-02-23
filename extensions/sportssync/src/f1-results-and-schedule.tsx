@@ -94,16 +94,6 @@ export default function command() {
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip = "Scheduled";
 
-    const startingSoonInterval = 15 * 60 * 1000;
-    const currentDate = new Date();
-    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
-
-    if (timeUntilGameStarts <= startingSoonInterval && race.status.type.state !== "in") {
-      accessoryColor = Color.Yellow;
-      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
-      accessoryToolTip = "Starting Soon";
-    }
-
     if (race.status.type.state === "in") {
       accessoryTitle = `${race.competitions[4].competitors[0].athlete.shortName}     L${race.competitions[4].status.period} ${race.status.displayClock}`;
       accessoryColor = Color.Green;

@@ -78,16 +78,6 @@ export default function command() {
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip = "Scheduled";
 
-    const startingSoonInterval = 15 * 60 * 1000;
-    const currentDate = new Date();
-    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
-
-    if (timeUntilGameStarts <= startingSoonInterval && game.status.type.state !== "in") {
-      accessoryColor = Color.Yellow;
-      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
-      accessoryToolTip = "Starting Soon";
-    }
-
     if (game.status.type.state === "in") {
       accessoryTitle = `${game.competitions[0].competitors[1].team.abbreviation} ${game.competitions[0].competitors[1].score} - ${game.competitions[0].competitors[0].team.abbreviation} ${game.competitions[0].competitors[0].score}     ${game.status.type.detail}`;
       accessoryColor = Color.Green;

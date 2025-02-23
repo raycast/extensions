@@ -82,16 +82,6 @@ export default function scoresAndSchedule() {
     let accessoryIcon = { source: Icon.Calendar, tintColor: Color.SecondaryText };
     let accessoryToolTip = "Scheduled";
 
-    const startingSoonInterval = 15 * 60 * 1000;
-    const currentDate = new Date();
-    const timeUntilGameStarts = gameDate.getTime() - currentDate.getTime();
-
-    if (timeUntilGameStarts <= startingSoonInterval && nhlGame.status.type.state !== "in") {
-      accessoryColor = Color.Yellow;
-      accessoryIcon = { source: Icon.Warning, tintColor: Color.Yellow };
-      accessoryToolTip = "Starting Soon";
-    }
-
     if (nhlGame.status.type.state === "in") {
       accessoryTitle = `${nhlGame.competitions[0].competitors[1].team.abbreviation} ${nhlGame.competitions[0].competitors[1].score} - ${nhlGame.competitions[0].competitors[0].team.abbreviation} ${nhlGame.competitions[0].competitors[0].score}     P${nhlGame.status.period} ${nhlGame.status.displayClock}`;
       accessoryColor = Color.Green;
