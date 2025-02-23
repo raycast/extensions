@@ -18,7 +18,7 @@ function generatePaneScript(pane: PaneConfig, isFirst = true): string {
     script += `
     tell application "System Events"
       tell process "Ghostty"
-        keystroke "cd ${pane.cwd.replace(/(["\\$])/g, "\\$1")}" & return
+        keystroke "cd ${pane.cwd.replace(/(["\\$])/g, "\\$1")} & clear" & return
       end tell
     end tell
     `;
