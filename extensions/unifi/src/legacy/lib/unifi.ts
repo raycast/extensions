@@ -19,22 +19,34 @@ export function getUnifiPasswordPreference() {
 }
 
 export async function getAuthenticatedUnifiClient() {
-  if (!controller) {
+  if (!controller?.auth) {
     const username = getUnifiUsernamePreference();
     const password = getUnifiPasswordPreference();
     const controllerURL = getUnifiControllerUrlPreference();
-    const http = controllerURL.startsWith("http:/");
-    const url = http ? controllerURL.replaceAll("http:/", "https:/") : controllerURL; // use https with strictSSL off when a http url was entered to make the unifi library happy
-    const strictSSL = http ? false : true;
+    const url = controllerURL; // use https with strictSSL off when a http url was entered to make the unifi library happy
+    const strictSSL = false;
+    if (!username || !password || !controllerURL) {
+      throw new Error("Please provide a controller URL, username and password in the preferences.");
+    }
+
     controller = new Controller({
       username,
       password,
       url,
       strictSSL,
     });
-    await controller.login();
+
+    try {
+      await controller.login();
+    } catch (error) {
+      console.error("Failed to login to controller", error);
+      throw new Error("Failed to login to controller. Please check your credentials.");
+    }
+
+    return controller;
   }
-  return controller;
+
+  return null;
 }
 
 export function isClientConnected(client: Client) {
