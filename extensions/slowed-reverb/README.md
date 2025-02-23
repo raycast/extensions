@@ -4,9 +4,9 @@ This extension allows you to slow down or speed up songs that you have stored lo
 
 Here are the options available:
 
-- **Slowed + Reverb**: Slows down the song by a factor of 0.8 + reverb.
+- **Slowed + Reverb**: Slows down the song by a factor of `0.8` + `reverb`.
 - **Slowed**: Slows down the song by a factor of `0.8`.
-- **Reverb**: Adds reverb to the song.
+- **Reverb**: Adds `reverb` to the song.
 - **Nightcore**: Speeds up the song by a factor of `1.2`.
 
 ## Installation
