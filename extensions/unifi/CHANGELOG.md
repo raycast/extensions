@@ -1,6 +1,6 @@
 # UniFi Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2025-02-23
 
 - Updated to use new local UniFi API with api key
 - Added Restart device action
