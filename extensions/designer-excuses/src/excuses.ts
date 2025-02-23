@@ -6,7 +6,7 @@ const excuses = [
   "But we're a small team so what do you expect?",
   "Everyone was sick",
   "Everything looks fine on my end",
-  "Have you cleared your cache?",
+  "Have you seen the figma yet?",
   "I thought that was signed off?",
   "I didn't anticipate that I would make any errors",
   "It's a placeholder for now",
@@ -19,6 +19,10 @@ const excuses = [
   "It's a design trend from 2050",
   "The users will figure it out eventually",
   "The stakeholders loved it in the meeting",
+  "I need a two-week break to reflect on my past design decisions",
+  "What can you expect from someone whose artistic range is limited to drawing rectangles?",
+  "No data just vibezz, users love it",
+  "The prototype worked perfectly in my head",
 ];
 
 export default excuses;
