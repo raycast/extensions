@@ -55,8 +55,8 @@ async function fetchPage(keyword: string, page: number): Promise<APISearchRespon
             try {
               const parsedData = JSON.parse(data);
               resolve(parsedData);
-            } catch (e: Error) {
-              reject(new Error(`Invalid JSON response: ${e.message}`));
+            } catch (e: unknown) {
+              reject(new Error(`Invalid JSON response: ${(e as Error).message}`));
             }
           });
         },
@@ -90,7 +90,7 @@ export async function searchAPIs(keyword: string): Promise<APIOperation[]> {
             allResults = allResults.concat(result.data.list);
           }
         });
-      } catch (error: Error) {
+      } catch (error: unknown) {
         console.error("Failed to fetch additional pages:", error);
       }
     }
@@ -108,13 +108,13 @@ export async function searchAPIs(keyword: string): Promise<APIOperation[]> {
 
     console.log(`Total APIs found: ${results.length}`);
     return results;
-  } catch (error: Error) {
+  } catch (error: unknown) {
     console.error("API search failed:", error);
     if (environment.isDevelopment) {
       console.log("Development environment details:", {
         launchType: environment.launchType,
-        error: error.toString(),
-        stack: error.stack,
+        error: error instanceof Error ? error.toString() : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       });
     }
     return [];
