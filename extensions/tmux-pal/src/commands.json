@@ -1,0 +1,309 @@
+[
+  {
+    "key": "New session",
+    "commands": [
+      {
+        "kbd": "tmux",
+        "text": "Start a new session"
+      },
+      {
+        "kbd": "tmux new -s [name]",
+        "text": "Start a new named session"
+      },
+      {
+        "kbd": "tmux ls",
+        "text": "Show all sessions"
+      }
+    ]
+  },
+  {
+    "key": "Attach session",
+    "commands": [
+      {
+        "kbd": "tmux a",
+        "text": "Attach to last session"
+      },
+      {
+        "kbd": "tmux a -t [name]",
+        "text": "Attach to named"
+      }
+    ]
+  },
+  {
+    "key": "Kill session",
+    "commands": [
+      {
+        "kbd": "tmux kill-ses -t [name]",
+        "text": "Kill a session by name"
+      },
+      {
+        "kbd": "tmux kill-ses -a",
+        "text": "Kill sessions but the current"
+      },
+      {
+        "kbd": "tmux kill-ses -a -t [name]",
+        "text": "Kill sessions but 'name'"
+      }
+    ]
+  },
+  {
+    "key": "Tmux help",
+    "commands": [
+      {
+        "kbd": "tmux info",
+        "text": "tmux help"
+      }
+    ]
+  },
+  {
+    "key": "Config",
+    "commands": [
+      {
+        "kbd": "tmux source-file ~/.tmux.conf",
+        "text": "Reload config"
+      },
+      {
+        "kbd": "tmux show-options -g",
+        "text": "Show config"
+      }
+    ]
+  },
+  {
+    "key": "Copy Mode",
+    "commands": [
+      {
+        "kbd": "Ctrl+b [",
+        "text": "Enter copy mode"
+      },
+      {
+        "kbd": "<Space>",
+        "text": "Start selection"
+      },
+      {
+        "kbd": "Enter",
+        "text": "Copy selection"
+      },
+      {
+        "kbd": "q",
+        "text": "Quit copy mode"
+      },
+      {
+        "kbd": "Ctrl+b ]",
+        "text": "Paste contents of buffer_0"
+      }
+    ]
+  },
+  {
+    "key": "Shortcuts",
+    "commands": [
+      {
+        "kbd": "Ctrl+b ?",
+        "text": "List all shortcuts"
+      }
+    ]
+  },
+  {
+    "key": "Panes",
+    "commands": [
+      {
+        "kbd": "Ctrl+b \" / %",
+        "text": "Split Horiz/Vert"
+      },
+      {
+        "kbd": "Ctrl+b !",
+        "text": "Pane -> Window"
+      },
+      {
+        "kbd": "Ctrl+b x",
+        "text": "Kill pane"
+      },
+      {
+        "kbd": "Ctrl+b <Arrow>",
+        "text": "Navigate panes"
+      },
+      {
+        "kbd": "Ctrl+b <Space>",
+        "text": "Toggle layouts"
+      },
+      {
+        "kbd": "Ctrl+b { / }",
+        "text": "Move to Left/Right"
+      },
+      {
+        "kbd": "Ctrl+b o",
+        "text": "Goto next panes"
+      },
+      {
+        "kbd": "Ctrl+b z",
+        "text": "Toggle full-screen"
+      },
+      {
+        "kbd": "Ctrl+b ;",
+        "text": "Toggle Last pane"
+      },
+      {
+        "kbd": "Ctrl+b q",
+        "text": "Show numbers"
+      },
+      {
+        "kbd": "Ctrl+b q [number]",
+        "text": "Goto [number] pane"
+      }
+    ]
+  },
+  {
+    "key": "Window",
+    "commands": [
+      {
+        "kbd": "Ctrl+b c",
+        "text": "Create window"
+      },
+      {
+        "kbd": "Ctrl+b p / n",
+        "text": "Previous/Next window"
+      },
+      {
+        "kbd": "Ctrl+b w",
+        "text": "List window"
+      },
+      {
+        "kbd": "Ctrl+b ,",
+        "text": "Rename window"
+      },
+      {
+        "kbd": "Ctrl+b f",
+        "text": "Find window"
+      },
+      {
+        "kbd": "Ctrl+b l",
+        "text": "Last window"
+      },
+      {
+        "kbd": "Ctrl+b .",
+        "text": "Move window"
+      },
+      {
+        "kbd": "Ctrl+b &",
+        "text": "Close window"
+      },
+      {
+        "kbd": "Ctrl+b [number]",
+        "text": "Goto [number] window"
+      }
+    ]
+  },
+  {
+    "key": "Session",
+    "commands": [
+      {
+        "kbd": "Ctrl+b d",
+        "text": "Detach from session"
+      },
+      {
+        "kbd": "Ctrl+b s",
+        "text": "Show all sessions"
+      },
+      {
+        "kbd": "Ctrl+b $",
+        "text": "Rename session"
+      },
+      {
+        "kbd": "Ctrl+b ( / )",
+        "text": "Previous/Next session"
+      }
+    ]
+  },
+  {
+    "key": "Command Mode",
+    "commands": [
+      {
+        "kbd": "Ctrl+b :",
+        "text": "Enter command mode"
+      },
+      {
+        "kbd": "resize-pane -D 20",
+        "text": "Resize down"
+      },
+      {
+        "kbd": "resize-pane -U 20",
+        "text": "Resize up"
+      },
+      {
+        "kbd": "resize-pane -L 20",
+        "text": "Resize left"
+      },
+      {
+        "kbd": "resize-pane -R 20",
+        "text": "Resize right"
+      },
+      {
+        "kbd": "list-keys",
+        "text": "All commands"
+      },
+      {
+        "kbd": "list-panes",
+        "text": "All panes"
+      },
+      {
+        "kbd": "list-windows",
+        "text": "All Windows"
+      },
+      {
+        "kbd": "list-buffers",
+        "text": "List all buffers"
+      },
+      {
+        "kbd": "show-buffer",
+        "text": "Show #0 contents"
+      },
+      {
+        "kbd": "capture-pane",
+        "text": "Copy of pane"
+      },
+      {
+        "kbd": "choose-buffer",
+        "text": "Show and paste"
+      },
+      {
+        "kbd": "save-buffer [a.txt]",
+        "text": "Save to file"
+      },
+      {
+        "kbd": "delete-buffer -b [number]",
+        "text": "Delete buffer [number]"
+      },
+      {
+        "kbd": "set -g OPTION",
+        "text": "Set for all sessions"
+      },
+      {
+        "kbd": "setw -g OPTION",
+        "text": "Set for all windows"
+      },
+      {
+        "kbd": "setw -g mode-keys vi",
+        "text": "Enable vi-mode"
+      },
+      {
+        "kbd": "set -g prefix [C-a]",
+        "text": "Set prefix [C-a]"
+      },
+      {
+        "kbd": "swap-pane -s 3 -t 1",
+        "text": "Swap pane"
+      },
+      {
+        "kbd": "swap-window -t -1",
+        "text": "Move to left"
+      },
+      {
+        "kbd": "setw synchronize-panes",
+        "text": "Sync Panes"
+      },
+      {
+        "kbd": "join-pane -t :#",
+        "text": "Join pane"
+      }
+    ]
+  }
+]
