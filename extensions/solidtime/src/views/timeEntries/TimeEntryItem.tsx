@@ -1,13 +1,15 @@
-import { Action, Color, Icon, List } from "@raycast/api";
+import { Action, Color, Icon, List, useNavigation } from "@raycast/api";
 import { invalidate, useProjects } from "../../api/hooks.js";
 import { api, type CreateTimeEntryBody, type TimeEntry } from "../../api/index.js";
 import { NO_DATA } from "../../utils/constants.js";
 import { formatDuration, formatTime } from "../../utils/formatters.js";
 import { tagBillable } from "../../utils/list.js";
+import { useMembership, useOrgId } from "../../utils/membership.js";
 import { messageBuilder, tryWithToast } from "../../utils/operations.js";
 import { djs, getTimeStamp } from "../../utils/time.js";
 import { CrudActions } from "../shared/CrudActions.js";
-import { useMembership } from "../../utils/membership.js";
+import { Entry } from "../shared/Entry.js";
+import { TimeEntryForm } from "./TimeEntryForm.js";
 
 function useTimeEntryAccessories(orgId: string | null) {
   const projects = useProjects(orgId);
@@ -37,13 +39,17 @@ function useTimeEntryAccessories(orgId: string | null) {
   };
 }
 
-export type TimeEntryItemProps = { timeEntry: TimeEntry; orgId: string };
+export type TimeEntryItemProps = { timeEntry: TimeEntry };
 
-export function TimeEntryItem({ orgId, timeEntry }: TimeEntryItemProps) {
+export function TimeEntryItem({ timeEntry }: TimeEntryItemProps) {
   const ctx = useMembership();
+  const orgId = useOrgId();
   const accessories = useTimeEntryAccessories(orgId);
+  const navigation = useNavigation();
 
   const isActive = !timeEntry.end;
+
+  if (!orgId || !ctx.membership) return null;
 
   return (
     <List.Item
@@ -54,6 +60,34 @@ export function TimeEntryItem({ orgId, timeEntry }: TimeEntryItemProps) {
       actions={
         <CrudActions
           name="Time Entry"
+          onNew={() =>
+            navigation.push(
+              <Entry>
+                <TimeEntryForm
+                  onSubmit={async (values) => {
+                    await tryWithToast(
+                      () => {
+                        if (!ctx.membership) throw new Error("No membership selected");
+                        return api.createTimeEntry(
+                          {
+                            billable: values.billable,
+                            member_id: ctx.membership.id,
+                            start: getTimeStamp(),
+                            description: values.description || null,
+                            project_id: values.project_id || null,
+                          },
+                          { params: { organization: orgId } },
+                        );
+                      },
+                      messageBuilder("create", "time entry"),
+                    );
+                    navigation.pop();
+                    invalidate("timeEntries");
+                  }}
+                />
+              </Entry>,
+            )
+          }
           onDelete={async () => {
             await tryWithToast(
               () => api.deleteTimeEntry(undefined, { params: { organization: orgId, timeEntry: timeEntry.id } }),

@@ -13,6 +13,7 @@ import { Entry } from "../shared/Entry.js";
 import MembershipAccessory from "../shared/MembershipAccessory.js";
 import { ProjectDetails } from "./ProjectDetails.js";
 import { ProjectForm } from "./ProjectForm.js";
+import { createColorIcon } from "../../utils/color.js";
 
 function useProjectAccessories(orgId: string | null) {
   const formatters = useFormatters();
@@ -92,6 +93,7 @@ export function ProjectCommand() {
             key={project.id}
             title={project.name}
             accessories={isShowingDetail ? undefined : accessories(project)}
+            icon={createColorIcon(project.color)}
             detail={<ProjectDetails project={project} />}
             actions={
               <CrudActions

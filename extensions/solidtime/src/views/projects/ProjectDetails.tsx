@@ -3,6 +3,7 @@ import { type Project } from "../../api/index.js";
 import { NO_DATA } from "../../utils/constants.js";
 import { formatBoolean, formatDuration, useFormatters } from "../../utils/formatters.js";
 import { djs } from "../../utils/time.js";
+import { createColorIcon } from "../../utils/color.js";
 
 export function ProjectDetails({ project }: { project: Project }) {
   const formatters = useFormatters();
@@ -14,7 +15,7 @@ export function ProjectDetails({ project }: { project: Project }) {
           <List.Item.Detail.Metadata.Label title="Name" text={project.name} />
           <List.Item.Detail.Metadata.Label title="Archived" text={formatBoolean(project.is_archived)} />
           <List.Item.Detail.Metadata.Label title="Public" text={formatBoolean(project.is_public)} />
-          <List.Item.Detail.Metadata.Label title="Color" text={project.color} />
+          <List.Item.Detail.Metadata.Label title="Color" icon={createColorIcon(project.color)} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Is Billable" text={formatBoolean(project.is_billable)} />
           <List.Item.Detail.Metadata.Label

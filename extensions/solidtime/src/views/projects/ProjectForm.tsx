@@ -1,18 +1,14 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { useClients } from "../../api/hooks.js";
 import { type CreateProjectBody } from "../../api/index.js";
-import { PROJECT_COLORS } from "../../utils/constants.js";
-import { useOrgId } from "../../utils/membership.js";
+import { ClientDropdown } from "../shared/ClientDropdown.js";
+import { ColorDropdown } from "../shared/ColorDropdown.js";
 
 export function ProjectForm(props: {
   initialValues?: Partial<CreateProjectBody>;
   onSubmit: (values: CreateProjectBody) => void;
 }) {
-  const orgId = useOrgId();
-  const clients = useClients(orgId);
-
   const { handleSubmit, itemProps, setValue } = useForm<CreateProjectBody>({
     onSubmit(values) {
       delete values.billable;
@@ -81,20 +77,12 @@ export function ProjectForm(props: {
           }}
         />
       )}
-      <Form.Dropdown
-        title="Client"
-        isLoading={clients.isLoading}
+      <ClientDropdown
         {...itemProps.client_id}
         value={itemProps.client_id.value ?? undefined}
         defaultValue={itemProps.client_id.defaultValue ?? undefined}
-      >
-        {clients.data?.map((client) => <Form.Dropdown.Item key={client.id} value={client.id} title={client.name} />)}
-      </Form.Dropdown>
-      <Form.Dropdown title="Color" {...itemProps.color}>
-        {PROJECT_COLORS.map((color) => (
-          <Form.Dropdown.Item key={color} value={color} title={color} />
-        ))}
-      </Form.Dropdown>
+      />
+      <ColorDropdown title="Color" {...itemProps.color} />
     </Form>
   );
 }

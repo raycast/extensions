@@ -35,25 +35,25 @@ export function TimeEntryCommand() {
   return (
     <List
       navigationTitle="Search Time Entries"
-      isLoading={clients.isLoading}
+      isLoading={clients.isLoading || !orgId}
       searchBarAccessory={<MembershipAccessory />}
     >
-      {orgId && (
+      {
         <>
           {active && (
             <List.Section title={"Active"}>
-              <TimeEntryItem key={active.id} timeEntry={active} orgId={orgId} />
+              <TimeEntryItem key={active.id} timeEntry={active} />
             </List.Section>
           )}
           {byDate?.map(([date, entries]) => (
             <List.Section key={date} title={formatDate(new Date(date))}>
               {entries.map((timeEntry) => (
-                <TimeEntryItem key={timeEntry.id} timeEntry={timeEntry} orgId={orgId} />
+                <TimeEntryItem key={timeEntry.id} timeEntry={timeEntry} />
               ))}
             </List.Section>
           ))}
         </>
-      )}
+      }
     </List>
   );
 }
