@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
+import { ActionPanel, Form, Icon, useNavigation, closeMainWindow, open, Toast, Action, Color, PopToRootType, popToRoot, getPreferenceValues } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
@@ -38,6 +38,8 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
+  const { preferBackgroundOperation } = getPreferenceValues()
+
   const { push, pop } = useNavigation();
 
   const { data, setData, isLoading } = useSyncData();
@@ -50,6 +52,12 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
     async onSubmit(values) {
+      if (preferBackgroundOperation) {
+        await closeMainWindow({
+          popToRootType: PopToRootType.Suspended,
+        });
+      }
+
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
       if (values.date) {
@@ -150,6 +158,10 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         focus("content");
       } catch (error) {
         handleError({ error, title: "Unable to create task" });
+      } finally {
+        if (preferBackgroundOperation) {
+          await popToRoot();
+        }
       }
     },
     initialValues: {
