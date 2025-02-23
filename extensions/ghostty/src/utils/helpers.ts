@@ -7,13 +7,10 @@ function generatePaneScript(pane: PaneConfig, isFirst = true): string {
     script += `
     tell application "System Events"
       tell process "Ghostty"
-        ${
-          pane.split_direction === "vertical"
-            ? 'keystroke "|" using {shift down, command down}'
-            : 'keystroke "-" using {shift down, command down}'
-        }
+        keystroke "d" using ${pane.split_direction === "vertical" ? "{command down}" : "{shift down, command down}"}
       end tell
     end tell
+    delay 0.5
     `;
   }
 
@@ -21,7 +18,7 @@ function generatePaneScript(pane: PaneConfig, isFirst = true): string {
     script += `
     tell application "System Events"
       tell process "Ghostty"
-        keystroke "cd ${pane.cwd} && clear" & return
+        keystroke "cd ${pane.cwd.replace(/(["\\$])/g, "\\$1")}" & return
       end tell
     end tell
     `;
@@ -39,9 +36,10 @@ function generatePaneScript(pane: PaneConfig, isFirst = true): string {
     }
   }
 
-  if (pane.panes) {
+  if (pane.panes && pane.panes.length > 0) {
     for (const [index, subPane] of pane.panes.entries()) {
-      script += generatePaneScript(subPane, index === 0);
+      const subPaneWithSplit = { ...subPane, split_direction: pane.split_direction };
+      script += generatePaneScript(subPaneWithSplit, index === 0);
     }
   }
 
