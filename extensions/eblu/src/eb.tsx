@@ -99,9 +99,13 @@ export default function Command() {
   const [scanningAnimation, setScanningAnimation] = useState(0);
   const SCANNING_ICONS = [Icon.Dot, Icon.CircleFilled];
 
+  const [isBluetoothEnabled, setIsBluetoothEnabled] = useState(true);
+
   useEffect(() => {
     try {
-      const path = execSync("command -v blueutil", { env: { PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" } })
+      const path = execSync("command -v blueutil", {
+        env: { PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" },
+      })
         .toString()
         .trim();
 
@@ -110,7 +114,14 @@ export default function Command() {
       }
 
       setBlueutilPath(path);
-      refreshDevices();
+
+      // Check initial Bluetooth state
+      const powerState = execSync(`${path} --power`).toString().trim();
+      setIsBluetoothEnabled(powerState === "1");
+
+      if (powerState === "1") {
+        refreshDevices();
+      }
     } catch (error) {
       console.error("Error: blueutil not found. Install with: brew install blueutil");
       return;
@@ -239,7 +250,7 @@ export default function Command() {
       await confirmAlert({
         title: "Forget Device",
         message: `Are you sure you want to forget "${name}"?`,
-        primaryAction: { title: "Forget", style: Action.Style.Destructive },
+        primaryAction: { title: "Forget" },
       })
     ) {
       try {
@@ -253,11 +264,6 @@ export default function Command() {
         // Then unpair
         await execSync(`${blueutilPath} --unpair ${address}`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Finally power cycle Bluetooth
-        await execSync(`${blueutilPath} --power 0`);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await execSync(`${blueutilPath} --power 1`);
 
         showToast(Toast.Style.Success, `Forgot ${name}`);
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -383,6 +389,37 @@ export default function Command() {
     }
   };
 
+  const toggleBluetooth = async () => {
+    try {
+      setActionInProgress("bluetooth");
+      const newState = !isBluetoothEnabled;
+      showToast(Toast.Style.Animated, `${newState ? "Enabling" : "Disabling"} Bluetooth...`);
+
+      await execSync(`${blueutilPath} --power ${newState ? "1" : "0"}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      setIsBluetoothEnabled(newState);
+      showToast(Toast.Style.Success, `Bluetooth ${newState ? "enabled" : "disabled"}`);
+
+      if (newState) {
+        refreshDevices();
+      } else {
+        setAllDevices([]);
+        setDiscoveredDevices([]);
+        if (scanInterval) {
+          clearInterval(scanInterval);
+          setScanInterval(null);
+          setIsScanning(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling Bluetooth:", error);
+      showToast(Toast.Style.Failure, "Failed to toggle Bluetooth");
+    } finally {
+      setActionInProgress("");
+    }
+  };
+
   return (
     <List
       isLoading={false} // We'll handle loading states manually
@@ -390,114 +427,200 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       filtering={false}
       searchBarPlaceholder="Search devices or press ⌃D to scan for new devices"
-    >
-      {discoveredDevices.length > 0 && (
-        <List.Section
-          title={
-            isScanning ? `Discovered Devices (Scanning${".".repeat(scanningAnimation + 1)})` : "Discovered Devices"
-          }
-        >
-          {discoveredDevices.map((device) => (
-            <List.Item
-              key={device.address}
-              title={device.name}
-              subtitle="Available to pair"
-              icon={
-                actionInProgress === device.address
-                  ? Icon.Clock
-                  : isScanning
-                    ? SCANNING_ICONS[scanningAnimation]
-                    : Icon.Bluetooth
-              }
-              accessories={[
-                {
-                  icon: actionInProgress === device.address ? Icon.Clock : undefined,
-                  text: [
-                    actionInProgress === device.address ? "Pairing..." : "Available",
-                    device.rssi ? `Signal: ${device.rssi}dBm` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" • "),
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Pair Device"
-                    onAction={() => (actionInProgress ? null : pairDevice(device.address, device.name))}
-                    icon={Icon.Link}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-
-      <List.Section title="Paired Devices">
-        {filteredDevices.map((device) => (
-          <List.Item
-            key={device.address}
-            title={device.name}
-            subtitle={device.type || "Unknown Device"}
-            icon={getDeviceIcon(device, actionInProgress, isScanning, scanningAnimation)}
-            accessories={[
-              {
-                icon: getAccessoryIcon(device, actionInProgress),
-                text: [
-                  getDeviceStatus(device, actionInProgress),
-                  device.batteryLevel ? `Battery: ${device.batteryLevel}` : null,
-                  device.rssi ? `Signal: ${device.rssi}dBm` : null,
-                  device.firmwareVersion ? `FW: ${device.firmwareVersion}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" • "),
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="General">
-                  <Action
-                    title="Refresh Devices"
-                    onAction={actionInProgress ? () => {} : refreshDevices}
-                    shortcut={{ modifiers: ["ctrl"], key: "r" }}
-                    icon={Icon.RotateClockwise}
-                  />
-                  <Action
-                    title={isScanning ? "Stop Scanning" : "Start Scanning"}
-                    onAction={actionInProgress ? () => {} : startDiscovery}
-                    shortcut={{ modifiers: ["ctrl"], key: "d" }}
-                    icon={isScanning ? Icon.Stop : Icon.MagnifyingGlass}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Device Controls">
-                  <Action
-                    title={device.connected ? "Disconnect" : "Connect"}
-                    onAction={() => toggleConnection(device.address, device.connected, device.name, device)}
-                    shortcut={{ modifiers: ["ctrl"], key: "return" }}
-                    icon={
-                      actionInProgress === device.address
-                        ? Icon.Clock
-                        : device.connected
-                          ? Icon.MinusCircle
-                          : Icon.PlusCircle
-                    }
-                  />
-                  <Action
-                    title="Forget Device"
-                    onAction={() =>
-                      actionInProgress === device.address ? null : forgetDevice(device.address, device.name)
-                    }
-                    shortcut={{ modifiers: ["ctrl"], key: "backspace" }}
-                    style={Action.Style.Destructive}
-                    icon={actionInProgress === device.address ? Icon.Clock : Icon.Trash}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
+      actions={
+        <ActionPanel>
+          <Action
+            title={isBluetoothEnabled ? "Turn Off Bluetooth" : "Turn On Bluetooth"}
+            onAction={() => {
+              if (!isBluetoothEnabled || actionInProgress) return;
+              toggleBluetooth();
+            }}
+            icon={Icon.Power}
+            shortcut={{ modifiers: ["ctrl"], key: "b" }}
+            style={isBluetoothEnabled ? Action.Style.Destructive : Action.Style.Regular}
           />
-        ))}
-      </List.Section>
+        </ActionPanel>
+      }
+    >
+      {!isBluetoothEnabled ? (
+        <List.EmptyView
+          icon={Icon.Power}
+          title="Bluetooth is turned off"
+          description="Turn on Bluetooth to see available devices"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Turn on bluetooth"
+                onAction={!isBluetoothEnabled || actionInProgress ? () => {} : toggleBluetooth}
+                icon={Icon.Power}
+                shortcut={{ modifiers: ["ctrl"], key: "b" }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          {discoveredDevices.length > 0 && (
+            <List.Section
+              title={
+                isScanning ? `Discovered Devices (Scanning${".".repeat(scanningAnimation + 1)})` : "Discovered Devices"
+              }
+            >
+              {discoveredDevices.map((device) => (
+                <List.Item
+                  key={device.address}
+                  title={device.name}
+                  subtitle="Available to pair"
+                  icon={
+                    actionInProgress === device.address
+                      ? Icon.Clock
+                      : isScanning
+                        ? SCANNING_ICONS[scanningAnimation]
+                        : Icon.Bluetooth
+                  }
+                  accessories={[
+                    {
+                      icon: actionInProgress === device.address ? Icon.Clock : undefined,
+                      text: [
+                        actionInProgress === device.address ? "Pairing..." : "Available",
+                        device.rssi ? `Signal: ${device.rssi}dBm` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" • "),
+                    },
+                  ]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Pair Device"
+                        onAction={() => (actionInProgress ? null : pairDevice(device.address, device.name))}
+                        icon={Icon.Link}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+
+          <List.Section title="Paired Devices">
+            {filteredDevices.map((device) => (
+              <List.Item
+                key={device.address}
+                title={device.name}
+                subtitle={device.type || "Unknown Device"}
+                icon={getDeviceIcon(device, actionInProgress, isScanning, scanningAnimation)}
+                accessories={[
+                  {
+                    icon: getAccessoryIcon(device, actionInProgress),
+                    text: [
+                      getDeviceStatus(device, actionInProgress),
+                      device.batteryLevel ? `Battery: ${device.batteryLevel}` : null,
+                      device.rssi ? `Signal: ${device.rssi}dBm` : null,
+                      device.firmwareVersion ? `FW: ${device.firmwareVersion}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" • "),
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Device Controls">
+                      {device.connected ? (
+                        <Action
+                          title="Disconnect"
+                          onAction={
+                            !isBluetoothEnabled || actionInProgress
+                              ? () => {}
+                              : () => toggleConnection(device.address, true, device.name, device)
+                          }
+                          shortcut={{ modifiers: [], key: "return" }}
+                          icon={actionInProgress === device.address ? Icon.Clock : Icon.MinusCircle}
+                        />
+                      ) : (
+                        <ActionPanel.Submenu
+                          title="Connect"
+                          icon={actionInProgress === device.address ? Icon.Clock : Icon.PlusCircle}
+                          shortcut={{ modifiers: [], key: "return" }}
+                        >
+                          <Action
+                            title="Auto (Recommended)"
+                            onAction={
+                              !isBluetoothEnabled || actionInProgress
+                                ? () => {}
+                                : () =>
+                                    connectWithProtocol(
+                                      device,
+                                      "auto",
+                                      blueutilPath,
+                                      setActionInProgress,
+                                      refreshDevices,
+                                    )
+                            }
+                            icon={Icon.Gear}
+                          />
+                          <Action
+                            title="Classic Bluetooth"
+                            onAction={
+                              !isBluetoothEnabled || actionInProgress
+                                ? () => {}
+                                : () =>
+                                    connectWithProtocol(
+                                      device,
+                                      "classic",
+                                      blueutilPath,
+                                      setActionInProgress,
+                                      refreshDevices,
+                                    )
+                            }
+                            icon={Icon.Music}
+                          />
+                          <Action
+                            title="Bluetooth LE"
+                            onAction={
+                              !isBluetoothEnabled || actionInProgress
+                                ? () => {}
+                                : () =>
+                                    connectWithProtocol(device, "le", blueutilPath, setActionInProgress, refreshDevices)
+                            }
+                            icon={Icon.Battery}
+                          />
+                        </ActionPanel.Submenu>
+                      )}
+                      <Action
+                        title="Forget Device"
+                        onAction={
+                          !isBluetoothEnabled || actionInProgress || actionInProgress === device.address
+                            ? () => {}
+                            : () => forgetDevice(device.address, device.name)
+                        }
+                        shortcut={{ modifiers: ["ctrl"], key: "backspace" }}
+                        style={Action.Style.Destructive}
+                        icon={actionInProgress === device.address ? Icon.Clock : Icon.Trash}
+                      />
+                    </ActionPanel.Section>
+
+                    <ActionPanel.Section title="General">
+                      <Action
+                        title="Refresh Devices"
+                        onAction={!isBluetoothEnabled || actionInProgress ? () => {} : refreshDevices}
+                        shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                        icon={Icon.RotateClockwise}
+                      />
+                      <Action
+                        title={isScanning ? "Stop Scanning" : "Start Scanning"}
+                        onAction={!isBluetoothEnabled || actionInProgress ? () => {} : startDiscovery}
+                        shortcut={{ modifiers: ["ctrl"], key: "d" }}
+                        icon={isScanning ? Icon.Stop : Icon.MagnifyingGlass}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }
@@ -529,4 +652,49 @@ const getDeviceStatus = (device: BluetoothDevice, actionInProgress: string) => {
     return "Connected";
   }
   return "Disconnected";
+};
+
+// Add these helper functions at the bottom of the file
+const connectWithProtocol = async (
+  device: BluetoothDevice,
+  protocol: "classic" | "le" | "auto",
+  blueutilPath: string,
+  setActionInProgress: (address: string) => void,
+  refreshDevices: () => void,
+) => {
+  try {
+    setActionInProgress(device.address);
+    showToast(Toast.Style.Animated, `Connecting to ${device.name}...`);
+
+    switch (protocol) {
+      case "classic":
+        await execSync(`${blueutilPath} --connect ${device.address}`);
+        break;
+      case "le":
+        await execSync(`${blueutilPath} --connect-le ${device.address}`);
+        break;
+      case "auto":
+        try {
+          // Try classic first for dual-mode devices
+          if (device.protocol === "classic" || device.protocol === "dual") {
+            await execSync(`${blueutilPath} --connect ${device.address}`);
+          } else {
+            await execSync(`${blueutilPath} --connect-le ${device.address}`);
+          }
+        } catch (error) {
+          // If first attempt fails, try the other method
+          const altCmd = device.protocol === "le" ? "--connect" : "--connect-le";
+          await execSync(`${blueutilPath} ${altCmd} ${device.address}`);
+        }
+        break;
+    }
+
+    await refreshDevices();
+    showToast(Toast.Style.Success, `Connected to ${device.name}`);
+  } catch (error) {
+    showToast(Toast.Style.Failure, `Failed to connect to ${device.name}`);
+    console.error("Connection error:", error);
+  } finally {
+    setActionInProgress("");
+  }
 };
