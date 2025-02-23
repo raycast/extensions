@@ -430,7 +430,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title={isBluetoothEnabled ? "Turn Off Bluetooth" : "Turn On Bluetooth"}
+            title={isBluetoothEnabled ? "Turn off Bluetooth" : "Turn on Bluetooth"}
             onAction={() => {
               if (!isBluetoothEnabled || actionInProgress) return;
               toggleBluetooth();
@@ -450,7 +450,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Turn on bluetooth"
+                title="Turn on Bluetooth"
                 onAction={!isBluetoothEnabled || actionInProgress ? () => {} : toggleBluetooth}
                 icon={Icon.Power}
                 shortcut={{ modifiers: ["ctrl"], key: "b" }}
@@ -544,7 +544,7 @@ export default function Command() {
                           shortcut={{ modifiers: [], key: "return" }}
                         >
                           <Action
-                            title="Auto (Recommended)"
+                            title="Auto (recommended)"
                             onAction={
                               !isBluetoothEnabled || actionInProgress
                                 ? () => {}
@@ -576,7 +576,7 @@ export default function Command() {
                             icon={Icon.Music}
                           />
                           <Action
-                            title="Bluetooth LE"
+                            title="Bluetooth Le"
                             onAction={
                               !isBluetoothEnabled || actionInProgress
                                 ? () => {}
