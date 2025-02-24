@@ -7,10 +7,7 @@
   "description": "Translate, save and repeat translations to increase your vocabulary",
   "icon": "command-icon.png",
   "author": "oleksandr_oliynyk",
-  "categories": [
-    "Web",
-    "Productivity"
-  ],
+  "categories": ["Web", "Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -21,23 +18,16 @@
     }
   ],
   "scripts": {
-    "copy:shared-packages": "./copy-shared-packages.sh",
-    "watch:translate": "chokidar '../../packages/translate/dist/**/*' -c 'npm run copy:shared-packages'",
-    "watch:lang-options": "chokidar '../../packages/lang-options/dist/**/*' -c 'npm run copy:shared-packages'",
-    "watch:shared-packages": "npm-run-all --parallel watch:translate watch:lang-options",
-    "npm:install": "npm install --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast",
-    "npm:uninstall": "npm uninstall --prefix /Users/alex/Work/Projects/alex/lingo-rep-monorepo/apps/lingo-rep-raycast",
-    "build": "npm run npm:install && ray build -e dist",
-    "dev:raycast": "ray develop",
-    "dev": "npm run npm:install && npm run copy:shared-packages && npm-run-all --parallel watch:shared-packages dev:raycast",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.4.8",
-    "axios": "1.7.2",
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "axios": "1.7.9",
     "hono": "^4.4.2",
     "lodash": "^4.17.21",
     "zod": "3.23.8"
