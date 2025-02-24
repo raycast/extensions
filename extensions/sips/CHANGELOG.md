@@ -3,7 +3,6 @@
 ## [Remove Background] - {PR_MERGE_DATE}
 
 - Added 'Remove Background' command to remove the background from selected images
-- Added two new metadata images showcases AI Tools and `Remove Background` command
 - Set 'Strip EXIF Data' command to be disabled by default
 - Fixed ExifTool failing to install or not recognizing current install (Resolve #16884)
 - Fixed crash when trying to generate live preview for filters on PDFs (Resolve #16971)
