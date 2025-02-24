@@ -30,7 +30,7 @@ const TagItem = (props: {
           <Action title={"Select Tag"} onAction={() => handleToggle(tag)} />
           <Action.Push
             title={"Create New Tag"}
-            icon="🏷️"
+            icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={<NewTagForm spaceId={tag.spaceId} />}
             onPop={() => refetch()}
@@ -43,8 +43,8 @@ const TagItem = (props: {
 
 export const Body = (props: {
   spaceIds: string[];
-  toggleTag: string; // filter DropDown UI에서 찍고 들어온 태그.
-  toggleTagType: "subscribe" | "unsubscribe"; // filter DropDown UI에서 찍고 들어온 태그.
+  toggleTag: string; // Tag clicked from DropDown UI.
+  toggleTagType: "subscribe" | "unsubscribe"; // Which action was clicked.
   promise: Promise<void>;
 }) => {
   const { spaceIds, toggleTag, toggleTagType, promise } = props;
@@ -91,12 +91,12 @@ export const Body = (props: {
         <List.EmptyView
           title="No tags"
           description="Create a new tag"
-          icon="🏷️"
+          icon={Icon.Plus}
           actions={
             <ActionPanel>
               <Action.Push
                 title={"Create New Tag"}
-                icon="🏷️"
+                icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<NewTagForm spaceId={spaceIds[0]!} />}
                 onPop={() => refetch()}

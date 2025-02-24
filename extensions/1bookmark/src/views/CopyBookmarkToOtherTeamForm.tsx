@@ -20,26 +20,19 @@ const Body = ({ bookmark }: Props) => {
         id="textArea"
         title="TextArea"
         ref={textAreaRef}
-        placeholder="여기에 북마크 복사할 팀 이름을 적으세요."
+        placeholder="Enter the team name to copy the bookmark to."
         value={[
-          "## 내가 속한 팀",
+          "## My Space",
           "",
           JSON.stringify(userInfo, null, 2),
           "",
-          "## Bookmark 정보",
+          "## Bookmark Info",
           "",
           JSON.stringify(bookmark, null, 2),
           "",
         ].join("\n")}
       />
-      <Form.TagPicker
-        id="tagPicker"
-        title="TagPicker"
-        ref={tagPickerRef}
-        onChange={(t) => {
-          console.log("🔍 t", t);
-        }}
-      >
+      <Form.TagPicker id="tagPicker" title="TagPicker" ref={tagPickerRef}>
         <Form.TagPicker.Item
           key={userInfo?.email}
           value={userInfo?.email || ""}

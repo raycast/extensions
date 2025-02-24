@@ -11,11 +11,11 @@ import { useAtom } from "jotai";
 import { API_URL_TRPC } from "../utils/constants.util.js";
 
 if (!globalThis.fetch) {
-  // @ts-expect-error 잘 동작하는 듯
+  // @ts-expect-error It works well.
   globalThis.fetch = fetch;
 }
 
-// 나중에 Cache 사용할 필요가 있을 때.
+// For later when we need to use Cache
 // const queryClient = new QueryClient({
 //   defaultOptions: {
 //     queries: {
@@ -77,10 +77,10 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
 
   const [, setSessionToken] = useAtom(sessionTokenAtom);
 
-  // sessionToken이 바뀔 때마다 trpcClient를 새로 만들오주고 싶은데,
-  // 잘 안되서 일단은 매번 getSessionToken() 하는 구조로 변경.
-  // TODO: 나중에 위에 기존 코드 기반으로 다시 한번 해보자.
-  // https에서 쿠키 사용하는 문제가 섞여서 헷갈렸음.
+  // Want to recreate trpcClient whenever sessionToken changes,
+  // But it wasn't working well, so changed to getSessionToken() every time.
+  // TODO: Try again later based on the previous code.
+  // Previous try got confused with cookie usage in https.
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -93,8 +93,9 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
             const headers = token
               ? {
                   ...options?.headers,
+
                   // key=value; Path=/; HttpOnly; Secure; SameSite=Lax
-                  // 이런식으로 다 저장하고 있다.
+                  // like above, all cookie information is stored.
                   Cookie: token,
                 }
               : options?.headers;
@@ -114,7 +115,8 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
                 header.includes("authjs.session-token="),
               );
               if (sessionTokenLine) {
-                // 토큰 업데이트. 토큰 만료전에 사용하면 만료가 늘리기위해.
+                // Update session token.
+                // If used before expiration, it will be extended.
                 setSessionToken(sessionTokenLine);
               }
 
@@ -128,15 +130,15 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
               console.log(err);
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               console.log((err as any)?.response?.data?.[0]?.error?.json);
-              // console.log((err as any)?.response.data)
               showToast({
                 style: Toast.Style.Failure,
-                title: msg || "Unknown API Error",
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                title: msg || (err as any)?.response?.status === 401 ? "Login Required" : "Unknown API Error",
               });
 
               return {
                 json: () => {
-                  // 사용하는 쪽에서는 이렇게,
+                  // error can be used in the following way.
                   // console.log((error as TRPCClientError<AppRouter>).message)
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.code)
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.httpStatus)
@@ -157,7 +159,7 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
 
-    // 나중에 Cache 사용할 필요가 있을 때.
+    // For later when we need to use Cache
     // <trpc.Provider client={trpcClient} queryClient={queryClient}>
     //   <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
     //     {children}

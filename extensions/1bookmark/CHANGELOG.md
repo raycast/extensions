@@ -1,5 +1,13 @@
 # 1bookmark Changelog
 
+## [Added My Account UI, Improved Sign In/Out UX] - {PR_MERGE_DATE}
+
+- 0.4.0
+- 💅🏼 Added UI to my account view.
+- 👥 Spaces list is now sorted by type and name.
+- 🇺🇸 Changes all Korean text to English in the extension codes.
+- 📱 Improve UX for sign in and sign out, fix sign out bugs.
+
 ## [Improve Login UX] - {PR_MERGE_DATE}
 
 - 0.3.4

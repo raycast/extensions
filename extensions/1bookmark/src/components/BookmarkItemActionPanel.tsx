@@ -3,7 +3,7 @@ import { EditBookmark } from "@/views/EditBookmarkForm";
 // import { CopyBookmarkToOtherTeam } from '@/views/CopyBookmarkToOtherTeamForm'
 import MyAccount from "@/views/MyAccount";
 import { Spaces } from "@/views/SpacesView";
-import { Action, ActionPanel, Alert, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon } from "@raycast/api";
 import AddBookmark from "../add-bookmark";
 
 export const BookmarkItemActionPanel = (props: {
@@ -18,9 +18,6 @@ export const BookmarkItemActionPanel = (props: {
   const spaceIds = me?.associatedSpaces.map((s) => s.id) || [];
   const deleteBookmark = trpc.bookmark.delete.useMutation();
   const utils = trpc.useUtils();
-
-  // icon은 여기꺼가 더 깔끔한 듯:
-  // https://developers.raycast.com/api-reference/user-interface/icons-and-images
 
   const handleDelete = async () => {
     const confirmed = await confirmAlert({
@@ -69,28 +66,28 @@ export const BookmarkItemActionPanel = (props: {
         }}
       />
 
-      {/* 기능 완성되면 다시 추가할 예정 */}
+      {/* TODO: Add this feature later */}
       {/* <Action.Push
         title="Copy URL to Other Team"
-        icon="🔗"
+        icon={Icon.Link}
         shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
         target={<CopyBookmarkToOtherTeam bookmark={bookmark} />}
       /> */}
 
-      {/* 기능 완성되면 다시 추가할 예정 */}
+      {/* TODO: Add this feature later */}
       {/* <Action title="Show/hide Detail" icon="ℹ️" onAction={toggleBookmarkDetail} /> */}
 
       <Action.Push
         title="Edit Bookmark"
-        icon="📝"
+        icon={Icon.Pencil}
         shortcut={{ modifiers: ["cmd"], key: "e" }}
         target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
 
-      {/* 기능 완성되면 다시 추가할 예정 */}
+      {/* TODO: Add this feature later */}
       {/* <Action
         title={'Pin/unpin Bookmark'}
-        icon={'📌'}
+        icon={Icon.Pin}
         shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
         onAction={() => {
           console.log('pin/unpin')
@@ -99,12 +96,12 @@ export const BookmarkItemActionPanel = (props: {
 
       <Action
         title={"Delete Bookmark"}
-        icon={"❌"}
+        icon={Icon.Trash}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
         onAction={handleDelete}
       />
 
-      {/* 기능 완성되면 다시 추가할 예정 */}
+      {/* TODO: Add this feature later */}
       {/* <Action
         title={'Reset Ranking'}
         icon=""
@@ -116,14 +113,25 @@ export const BookmarkItemActionPanel = (props: {
       <ActionPanel.Section>
         <Action.Push
           title="Add New Bookmark"
-          icon="➕"
+          icon={Icon.Plus}
           target={<AddBookmark onlyPop />}
           onPop={refetch}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
-        <Action.Push title="My Account" icon="👤" target={<MyAccount />} shortcut={{ modifiers: ["cmd"], key: "m" }} />
-        <Action.Push title="Teams" icon="👥" shortcut={{ modifiers: ["cmd"], key: "t" }} target={<Spaces />} />
-        {/* 기능 완성되면 다시 추가할 예정 */}
+        <Action.Push
+          title="My Account"
+          icon={Icon.Person}
+          target={<MyAccount />}
+          onPop={refetch}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+        />
+        <Action.Push
+          title="Teams"
+          icon={Icon.TwoPeople}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          target={<Spaces />}
+        />
+        {/* TODO: Add this feature later */}
         {/* <Action
           title={'Tags'}
           onAction={() => {

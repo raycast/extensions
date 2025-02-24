@@ -1,5 +1,5 @@
 import { trpc } from "@/utils/trpc.util";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { SpaceTagItemActionPanel } from "../components/SpaceTagItemActionPanel";
 import { NewTagForm } from "./NewTagForm";
@@ -14,7 +14,7 @@ export const Body = (props: { spaceId: string }) => {
         <List.EmptyView
           title="No tags"
           description="Create a new tag"
-          icon="🏷️"
+          icon={Icon.Plus}
           actions={
             <ActionPanel>
               <Action.Push

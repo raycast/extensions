@@ -26,7 +26,7 @@ interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
   getTitle: () => Promise<string>;
 
-  // 브라우저 현재 페이지를 url로 설정한다.
+  // Set current page url.
   setUrl: (url: string) => Promise<void>;
 }
 
@@ -195,21 +195,25 @@ function Body(props: { onlyPop?: boolean }) {
   const [after1Sec, setAfter1Sec] = useState(false);
 
   useEffect(() => {
-    // 이게 없으면 아주 잠깐동안 Onboarding이 보이게됨.
+    // If this is not here, will briefly appear.
     setTimeout(() => setAfter1Sec(true), 1000);
   }, []);
 
   useEffect(() => {
     if (!me.error) return;
 
-    // 토큰 만료등으로 로그인에 실패한 것.
-    // sessionToken을 클리어 시키고 Onboarding으로 보낸다.
+    // Login failed maybe due to token expiration.
+    // Clear sessionToken and send to LoginView.
     console.log("🚀 ~ session clear");
     setSessionToken("");
   }, [me.error, setSessionToken]);
 
   if (!sessionToken && after1Sec) {
     return <LoginView />;
+  }
+
+  if (!me.data) {
+    return <Form isLoading={true} />;
   }
 
   return (
@@ -230,7 +234,7 @@ function Body(props: { onlyPop?: boolean }) {
           />
           <Action.Push
             title="Create New Tag"
-            icon="🏷️"
+            icon={Icon.Tag}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={<NewTagForm spaceId={selectedSpace} />}
             onPop={() => {

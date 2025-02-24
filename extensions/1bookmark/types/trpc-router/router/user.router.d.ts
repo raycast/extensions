@@ -106,4 +106,10 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
         };
         output: void;
     }>;
+    updateName: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            name: string;
+        };
+        output: void;
+    }>;
 }>;

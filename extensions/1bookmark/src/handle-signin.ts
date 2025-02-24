@@ -12,7 +12,7 @@ export const handleSignIn = async (form: { email: string; token: string; onSucce
     const sessionTokenLine = setCookieHeaders?.find((header: string) => header.includes("authjs.session-token="));
 
     if (!sessionTokenLine) {
-      throw new Error("session 응답 실패");
+      throw new Error("Failed to get session token");
     }
 
     showToast({

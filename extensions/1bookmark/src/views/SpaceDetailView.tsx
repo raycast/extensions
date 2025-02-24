@@ -14,7 +14,7 @@ function Body() {
   return (
     <List>
       <List.Item
-        title={"Create new Team"}
+        title={"Create new Space"}
         icon={Icon.Plus}
         actions={
           <ActionPanel>

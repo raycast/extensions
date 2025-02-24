@@ -1,8 +1,8 @@
-import { List, Cache, ActionPanel, Action } from "@raycast/api";
+import { List, Cache, ActionPanel, Action, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { sessionTokenAtom } from "@/states/session-token.state";
 import { Spaces } from "./views/SpacesView";
 import AddBookmark from "./add-bookmark";
@@ -25,60 +25,54 @@ export function Body() {
     return me?.data?.associatedSpaces.map((s) => s.id) || [];
   }, [me.data]);
 
-  const { data, isFetching, isFetched, refetch } = useBookmarks({
+  const {
+    data,
+    isFetching,
+    isFetched,
+    refetch: refetchBookmarks,
+  } = useBookmarks({
     sessionToken,
     spaceIds,
     me: me.data,
   });
 
+  const refetch = useCallback(() => {
+    refetchBookmarks();
+    me.refetch();
+    setAfter1Sec(false);
+    setTimeout(() => setAfter1Sec(true), 1000);
+  }, [refetchBookmarks]);
+
   const [after1Sec, setAfter1Sec] = useState(false);
 
   useEffect(() => {
-    if (!data) return;
-
-    cache.set("bookmarks", JSON.stringify(data));
-  }, [data]);
-
-  useEffect(() => {
-    if (!me.data) return;
-
-    cache.set("me", JSON.stringify(me.data));
-  }, [me.data]);
-
-  useEffect(() => {
-    // 이게 없으면 아주 잠깐동안 Onboarding이 보이게됨.
+    // If this is not here, LoginView will briefly appear.
     setTimeout(() => setAfter1Sec(true), 1000);
   }, []);
 
   useEffect(() => {
     if (!me.error) return;
 
-    // 토큰 만료등으로 로그인에 실패한 것.
-    // sessionToken을 클리어 시키고 Onboarding으로 보낸다.
+    // Login failed maybe due to token expiration.
+    // Clear sessionToken and send to LoginView.
     console.log("🚀 ~ session clear");
     setSessionToken("");
   }, [me.error, setSessionToken]);
 
   useEffect(() => {
-    // 로그아웃 시 기존 데이터 제거
-    // if (!after1Sec) return // 이게 없으면 첫 진입시 실행됨.
+    // Clear data when logging out.
     if (sessionToken) return;
     if (!me.data && !data) return;
     if (!after1Sec) return;
 
     console.log("🚀 ~ detect logout");
-    trpcUtils.user.me.reset();
-    trpcUtils.bookmark.listAll.reset({ spaceIds });
-
-    setAfter1Sec(false);
-    setTimeout(() => setAfter1Sec(true), 1000);
 
     cache.remove("me");
     cache.remove("bookmarks");
   }, [sessionToken, trpcUtils, spaceIds, me.data, data, after1Sec]);
 
   useEffect(() => {
-    // 로그아웃 상태에서 다시 로그인 했을 때,
+    // When logging in after logging out,
     if (!sessionToken) return;
     if (me.data && data) return;
 
@@ -130,7 +124,7 @@ export function Body() {
       <List isLoading={isFetching || !me.data}>
         <List.Item
           title="No bookmark. Add a bookmark to get started"
-          icon={"➕"}
+          icon={Icon.Plus}
           actions={
             <ActionPanel>
               <Action.Push title="Add New Bookmark" target={<AddBookmark onlyPop />} onPop={refetch} />
@@ -139,7 +133,7 @@ export function Body() {
         />
         <List.Item
           title="Spaces"
-          icon={"👥"}
+          icon={Icon.TwoPeople}
           actions={
             <ActionPanel>
               <Action.Push title="Spaces" target={<Spaces />} />

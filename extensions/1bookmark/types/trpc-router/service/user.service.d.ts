@@ -63,4 +63,9 @@ export declare class UserService {
         spaceId: string;
         tagName: string;
     }): Promise<void>;
+    update(p: {
+        email: string;
+        name?: string;
+        image?: string;
+    }): Promise<void>;
 }

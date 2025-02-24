@@ -25,9 +25,9 @@ function Body() {
       });
       showToast({
         style: Toast.Style.Success,
-        title: "Team created",
+        title: "Space created",
       });
-      // Teams view로 바로 이동해도 좋을 듯.
+      // TODO: Move to Teams view.
       pop();
     } catch (error) {
       // Handle error
@@ -47,7 +47,7 @@ function Body() {
         id="image"
         title="Image"
         placeholder="https://..."
-        info="Image upload is not supported yet. Please enter the team log image url."
+        info="Image upload is not supported yet. Please enter the space logo image url."
       />
       <Form.TextArea id="description" title="Description" ref={textAreaRef} />
     </Form>

@@ -1,9 +1,6 @@
-import { Action, ActionPanel, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon } from "@raycast/api";
 import { NewTagForm } from "../views/NewTagForm";
 import { trpc } from "../utils/trpc.util";
-
-// icon은 여기꺼가 더 깔끔한 듯:
-// https://developers.raycast.com/api-reference/user-interface/icons-and-images
 
 export const SpaceTagItemActionPanel = (props: { spaceId: string; tagName: string; refetch: () => void }) => {
   const { spaceId, tagName, refetch } = props;
@@ -14,7 +11,7 @@ export const SpaceTagItemActionPanel = (props: { spaceId: string; tagName: strin
     <ActionPanel>
       <Action.Push
         title={"Create New Tag"}
-        icon="🏷️"
+        icon={Icon.Plus}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<NewTagForm spaceId={spaceId} />}
         onPop={() => refetch()}
@@ -22,7 +19,7 @@ export const SpaceTagItemActionPanel = (props: { spaceId: string; tagName: strin
       <Action
         title={"Remove Tag"}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        icon="❌️"
+        icon={Icon.Trash}
         onAction={async () => {
           const confirm = await confirmAlert({
             title: "Remove Tag",

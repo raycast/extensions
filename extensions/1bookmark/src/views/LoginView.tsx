@@ -58,8 +58,6 @@ function Body() {
                     setSessionToken(sessionToken);
                     setTokenSent(false);
                     setEmail("");
-                    // Onboarding 뷰를 거치지 않고 사용할 땐 pop하지 않는다.
-                    // pop()
                   },
                 });
                 setIsLoginPending(false);

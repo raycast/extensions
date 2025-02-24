@@ -177,6 +177,12 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             };
             output: void;
         }>;
+        updateName: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                name: string;
+            };
+            output: void;
+        }>;
     }>;
     bookmark: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
         ctx: {
