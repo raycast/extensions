@@ -15,6 +15,8 @@ function getBundleIdentifier() {
       return "Cursor";
     case VSCodeBuild.Windsurf:
       return "Windsurf";
+    case VSCodeBuild.Trae:
+      return "Trae";
   }
 }
 

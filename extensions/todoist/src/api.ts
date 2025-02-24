@@ -11,7 +11,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
 
-let sync_token = "*";
+export let sync_token = "*";
 
 type HandleErrorArgs = {
   error: unknown;
@@ -261,7 +261,7 @@ export async function quickAddTask(args: QuickAddTaskArgs) {
   return data;
 }
 
-type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
+export type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
 
 export type AddTaskArgs = {
   content: string;
@@ -827,4 +827,20 @@ export async function uploadFile(filePath: string) {
 
   const { data } = await todoistApi.post<File>("/uploads/add", formData);
   return data;
+}
+
+export async function getTask(id: string): Promise<Task> {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<{ item: Task }>("/items/get", {
+    params: { item_id: id },
+  });
+  return data.item;
+}
+
+export async function getProject(id: string): Promise<Project> {
+  const todoistApi = getTodoistApi();
+  const { data } = await todoistApi.get<{ project: Project }>("/projects/get", {
+    params: { project_id: id },
+  });
+  return data.project;
 }

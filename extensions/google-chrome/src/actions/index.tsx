@@ -165,3 +165,34 @@ export async function createNewWindow(): Promise<void> {
     return true
   `);
 }
+
+export async function createNewWindowToWebsie(website: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new window
+      open location "${website}"
+      activate
+    end tell
+    return true
+  `);
+}
+
+export async function createNewTab(): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      make new tab at end of tabs of window 1
+      activate
+    end tell
+    return true
+  `);
+}
+
+export async function createNewTabToWebsite(website: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      open location "${website}"
+    end tell
+    return true
+  `);
+}

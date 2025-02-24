@@ -1,11 +1,11 @@
-import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues, Icon } from "@raycast/api";
-import React, { useState, useEffect } from "react";
-import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from "./storage";
+import { Action, ActionPanel, Color, Grid, Icon, environment, getPreferenceValues } from "@raycast/api";
 import { readFileSync } from "node:fs";
+import React, { useEffect, useState } from "react";
+import { SaveActions, addRecentSymbol, getPinnedSymbols, getRecentSymbols } from "./storage";
 
 export interface Preferences {
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
-  gridItemSize: Grid.ItemSize;
+  gridColumns: string;
   showName: boolean;
   minimumVersionOS: "iOS" | "macOS" | "watchOS" | "tvOS" | "visionOS" | "disabled";
 }
@@ -39,7 +39,7 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { primaryAction, gridItemSize, showName, minimumVersionOS }: Preferences = getPreferenceValues();
+const { primaryAction, gridColumns, showName, minimumVersionOS }: Preferences = getPreferenceValues();
 
 function getDataPath() {
   return `${environment.assetsPath}/symbols/data.json`;
@@ -56,11 +56,10 @@ const data: {
 } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
 export default function Command() {
-  const [pinned, setPinned] = useState(getPinnedSymbols());
-  const [recent, setRecent] = useState(getRecentSymbols());
-
-  const [category, setCategory] = useState<string | undefined>();
-
+  const [category, setCategory] = useState<string>();
+  const [pinned, setPinned] = useState<sfsymbol[]>([]);
+  const [recent, setRecent] = useState<sfsymbol[]>([]);
+  const [searchText, setSearchText] = useState("");
   const [refreshState, setRefreshState] = useState(false);
   const refresh = () => setRefreshState(!refreshState);
 
@@ -69,12 +68,25 @@ export default function Command() {
     setRecent(getRecentSymbols());
   }, [refreshState]);
 
+  const filteredSymbols = category
+    ? data.symbols
+        .filter((s) => category === "all" || s.categories.includes(category))
+        .filter(
+          (s) =>
+            searchText === "" ||
+            s.name.toLowerCase().includes(searchText.toLowerCase()) ||
+            s.searchTerms.some((term) => term.toLowerCase().includes(searchText.toLowerCase())),
+        )
+    : [];
+
   return (
     <Grid
       isLoading={category === undefined}
       searchBarPlaceholder="Search SF Symbols..."
       inset={Grid.Inset.Large}
-      itemSize={gridItemSize}
+      columns={Number(gridColumns)}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select SF sfsymbol category"
@@ -108,26 +120,24 @@ export default function Command() {
     >
       {category && (
         <React.Fragment>
-          <Grid.Section title="Pinned Symbols">
+          <Grid.Section title="Pinned">
             {pinned
               .filter((s) => category === "all" || s.categories.includes(category))
               .map((symbol: sfsymbol, index: number) => (
                 <SFSymbol key={index} symbol={symbol} refresh={refresh} pinned />
               ))}
           </Grid.Section>
-          <Grid.Section title="Recent Symbols">
+          <Grid.Section title="Recently Used">
             {recent
               .filter((s) => category === "all" || s.categories.includes(category))
               .map((symbol: sfsymbol, index: number) => (
                 <SFSymbol key={index} symbol={symbol} refresh={refresh} recent />
               ))}
           </Grid.Section>
-          <Grid.Section title={recent.length + pinned.length > 0 ? "All Symbols" : undefined}>
-            {data.symbols
-              .filter((s) => category === "all" || s.categories.includes(category))
-              .map((symbol: sfsymbol, index: number) => (
-                <SFSymbol key={index} symbol={symbol} refresh={refresh} />
-              ))}
+          <Grid.Section title="Results" subtitle={`${filteredSymbols.length}`}>
+            {filteredSymbols.map((symbol: sfsymbol, index: number) => (
+              <SFSymbol key={index} symbol={symbol} refresh={refresh} />
+            ))}
           </Grid.Section>
         </React.Fragment>
       )}

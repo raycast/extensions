@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manage-clickup-tasks",
-  "title": "ClickUp - Tasks Explorer",
+  "title": "ClickUp - Tasks & Docs Explorer",
   "description": "Browse ClickUp tasks and docs from Raycast",
   "icon": "clickup-icon.png",
   "author": "aparandeh",
@@ -72,9 +72,117 @@
       "placeholder": "123456789"
     }
   ],
+  "tools": [
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "Get ClickUp teams"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Get ClickUp spaces"
+    },
+    {
+      "name": "get-docs",
+      "title": "Get Docs",
+      "description": "Get ClickUp docs"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@manage-clickup-tasks Which teams am I in?",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@manage-clickup-tasks How many spaces are in Raycast team?",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ],
+          "get-spaces": [
+            {
+              "id": "98765432101",
+              "name": "Team Space"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-spaces",
+              "arguments": {
+                "teamId": "1234567890"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@manage-clickup-tasks Show me my docs",
+        "mocks": {
+          "get-teams": [
+            {
+              "avatar": null,
+              "id": "1234567890",
+              "name": "Raycast"
+            }
+          ],
+          "get-docs": [
+            {
+              "public": false,
+              "deleted": false,
+              "id": "raycast-123",
+              "name": "Raycast Docs"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-docs",
+              "arguments": {
+                "teamId": "1234567890"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1",
     "axios": "^0.24.0",
     "prettier": "^2.5.1"
   },

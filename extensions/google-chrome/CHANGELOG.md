@@ -1,5 +1,7 @@
 # Google Chrome Changelog
 
+## [Add AI Tools] - 2025-02-21
+
 ## [Allow to configure profile path] - 2025-01-18
 - The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
