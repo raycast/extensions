@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [New Models and Features] - {PR_MERGE_DATE}
+## [New Models and Features] - 2025-02-24
 
 - 🤖 Update model variants
 - ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
