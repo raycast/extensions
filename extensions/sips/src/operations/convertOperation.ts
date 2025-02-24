@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-dd 00:19:37
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -19,6 +18,7 @@ import {
   addItemToRemove,
   convertPDF,
   convertSVG,
+  expandTilde,
   getDestinationPaths,
   getScopedTempFile,
   getWebPBinaryPath,
@@ -72,7 +72,9 @@ export default async function convert(
   }
 
   const resultPaths = [];
-  for (const [index, item] of sourcePaths.entries()) {
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+
+  for (const [index, item] of expandedPaths.entries()) {
     const originalType = path.extname(item).slice(1);
     const newType = desiredType === "JPEG" ? preferences.jpegExtension : desiredType.toLowerCase();
     const newPath = outputPaths?.[index] || (await getDestinationPaths([item], false, newType))[0];
