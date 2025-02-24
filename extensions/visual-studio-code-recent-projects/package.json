@@ -23,13 +23,15 @@
     "lin",
     "yug2005",
     "vatsalsanjay",
-    "Tarocch1"
+    "Tarocch1",
+    "jonas_list"
   ],
   "keywords": [
     "vscode",
     "cursor",
     "codium",
-    "windsurf"
+    "windsurf",
+    "trae"
   ],
   "license": "MIT",
   "commands": [
@@ -102,6 +104,10 @@
         {
           "value": "Windsurf",
           "title": "Windsurf"
+        },
+        {
+          "value": "Trae",
+          "title": "Trae"
         }
       ]
     },
