@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Site } from "unifi-client";
+import Controller, { Site } from "unifi-client";
 import { getAuthenticatedUnifiClient } from "../../lib/unifi";
 
 export function useSites(): {
@@ -10,41 +10,51 @@ export function useSites(): {
   const [data, setData] = useState<Site[]>();
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [controller, setController] = useState<Controller>();
 
   useEffect(() => {
-    let didUnmount = false;
-
     async function fetchData() {
-      if (didUnmount) {
-        return;
-      }
-
       setIsLoading(true);
       setError(undefined);
 
       try {
         const controller = await getAuthenticatedUnifiClient();
-        const sites = await controller.getSites();
-        if (!didUnmount) {
-          setData(sites);
+
+        if (controller) {
+          if (controller.auth) {
+            setController(controller);
+
+            setIsLoading(false);
+          }
         }
       } catch (error) {
-        if (!didUnmount) {
-          setError(error as Error);
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
+        setError(error as Error);
+        setIsLoading(false);
       }
     }
 
     fetchData();
 
     return () => {
-      didUnmount = true;
+      if (controller) {
+        controller.logout();
+      }
     };
   }, []);
 
+  useEffect(() => {
+    async function fetchSites() {
+      try {
+        const sites = await controller?.getSites();
+        setData(sites);
+      } catch (error) {
+        setError(error as Error);
+      }
+    }
+
+    if (controller && !data) {
+      fetchSites();
+    }
+  }, [controller, data]);
   return { error, isLoading, data };
 }
