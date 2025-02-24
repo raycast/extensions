@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.3] - {PR_MERGE_DATE}
+## [1.1.3] - 2025-02-24
 
 - Stop transferring environment variables to opened applications
 
