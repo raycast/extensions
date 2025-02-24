@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [Remove Background] - {PR_MERGE_DATE}
+## [Remove Background] - 2025-02-24
 
 - Added 'Remove Background' command to remove the background from selected images
 - Added two new metadata images showcases AI Tools and `Remove Background` command
