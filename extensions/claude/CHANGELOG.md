@@ -1,5 +1,9 @@
 # Claude Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Feature: Add [Claude 3.7 Sonnet]((https://www.anthropic.com/news/claude-3-7-sonnet))
+
 ## [Update] - 2025-01-30
 
 - Fix: History now saves as expected
