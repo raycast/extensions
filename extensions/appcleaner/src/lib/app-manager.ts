@@ -3,7 +3,7 @@ import type { AppItem } from "./types";
 import EventEmitter from "events";
 import { Application, Cache, getApplications } from "@raycast/api";
 import { deepEqual, sleep } from "./utils";
-import { filterApps, getIcon } from "./app-utils";
+import { filterApps } from "./app-utils";
 
 export class AppManager {
   cache: Cache;
@@ -43,13 +43,11 @@ export class AppManager {
   enrich(apps: Application[]): AppItem[] {
     const newApps: AppItem[] = [];
     for (const app of apps) {
-      const icon = getIcon(app);
       const location = app.path.split("/").slice(1, -1).join("/");
-
       let brand = app.bundleId?.split(".")[1] || "";
       brand = brand.charAt(0).toUpperCase() + brand.slice(1);
 
-      newApps.push({ ...app, icon, brand, location });
+      newApps.push({ ...app, brand, location });
     }
     return newApps;
   }
