@@ -80,24 +80,6 @@
           ]
         },
         {
-          "name": "shouldSearchUsername",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "title": "Include username when searching",
-          "label": "Search by Username",
-          "description": "By default search uses only title, this will also include username."
-        },
-        {
-          "name": "shouldSearchUrl",
-          "type": "checkbox",
-          "required": false,
-          "default": false,
-          "title": "Include url when searching",
-          "label": "Search by URL",
-          "description": "By default search uses only title, this will also include url."
-        },
-        {
           "name": "shouldCacheVaultItems",
           "type": "checkbox",
           "required": false,
@@ -387,6 +369,7 @@
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
     "execa": "^7.0.0",
+    "fast-fuzzy": "^1.12.0",
     "node-fetch": "^3.3.2",
     "node-stream-zip": "^1.15.0"
   },
