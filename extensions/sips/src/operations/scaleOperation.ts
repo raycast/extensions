@@ -71,4 +71,5 @@ export default async function scale(sourcePaths: string[], scaleFactor: number) 
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

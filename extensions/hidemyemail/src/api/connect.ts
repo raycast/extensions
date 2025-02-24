@@ -73,7 +73,7 @@ export class iCloudSession {
     this.instance = wrapper(
       axios.create({
         jar: this.jar,
-        timeout: 10000,
+        timeout: 30000,
       }),
     );
 
@@ -198,6 +198,8 @@ export class iCloudSession {
       return new iCloudServiceNotActivatedError(reason);
     }
 
+    if (code == "503") reason += ". Are you using a VPN?";
+
     if (code in ERROR_MAPPINGS) {
       reason = ERROR_MAPPINGS[code];
     }
@@ -270,7 +272,12 @@ export class iCloudService {
     }
 
     if (password && !loginSuccessful) {
-      await this.srpAuthenticate(password);
+      try {
+        await this.srpAuthenticate(password);
+      } catch (error) {
+        // Fallback (fix for issues #16451, #16368)
+        await this.authenticateWithPassword(password);
+      }
       await this.authenticateWithToken();
     }
 
@@ -279,6 +286,23 @@ export class iCloudService {
     }
 
     this.webservices = this.data?.webservices;
+  }
+
+  async authenticateWithPassword(password: string) {
+    try {
+      const data: Record<string, unknown> = { accountName: this.appleID, password: password };
+      data["rememberMe"] = true;
+
+      if (this.sessionData?.trust_token) data["trustTokens"] = [this.sessionData.trust_token];
+
+      const headers = this.getAuthHeaders(true);
+      const params = { isRememberMeEnabled: true };
+
+      await this.session.request("post", `${this.authEndpoint}/signin`, { params, headers, data });
+    } catch (error) {
+      if (error instanceof iCloudAPIResponseError) throw new iCloudFailedLoginError(error.message, { cause: error });
+      throw error;
+    }
   }
 
   async srpAuthenticate(password: string) {
@@ -434,6 +458,12 @@ export class iCloudService {
       console.log("Session trust failed.");
       return false;
     }
+  }
+
+  async logOut() {
+    const data = { trustBrowser: true, allBrowsers: false };
+    const headers = this.getAuthHeaders();
+    await this.session.request("post", `${this.setupEndpoint}/logout`, { headers, data });
   }
 
   updateSessionData(key: string, value: string) {

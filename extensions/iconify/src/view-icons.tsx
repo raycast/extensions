@@ -8,6 +8,7 @@ import {
   Icon as RaycastIcon,
   showToast,
   Toast,
+  Clipboard,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { createGlobalState } from 'react-hooks-global-state';
@@ -169,6 +170,19 @@ function Command() {
                 content={svgIcon}
               />
             );
+            const pasteFile = (
+              <Action
+                title="Paste SVG File"
+                icon={RaycastIcon.Clipboard}
+                onAction={async () => {
+                  await copyToClipboard(svgIcon, id);
+                  const { file } = await Clipboard.read();
+                  if (file) {
+                    Clipboard.paste({ file: file.replace('file://', '') });
+                  }
+                }}
+              />
+            );
             const copyFile = (
               <Action
                 title="Copy SVG File"
@@ -189,6 +203,18 @@ function Command() {
                 content={`${activeSetId}:${id}`}
               />
             );
+            const copyName = activeSetId && (
+              <Action.CopyToClipboard
+                title="Copy Name"
+                content={`${activeSetId}:${id}`}
+              />
+            );
+            const copyURL = activeSetId && (
+              <Action.CopyToClipboard
+                title="Copy URL"
+                content={toURL(activeSetId, id)}
+              />
+            );
             return (
               <Grid.Item
                 content={{
@@ -205,16 +231,22 @@ function Command() {
                       <>
                         {paste}
                         {copy}
+                        {pasteFile}
                         {copyFile}
                         {pasteName}
+                        {copyName}
+                        {copyURL}
                       </>
                     )}
                     {primaryAction === primaryActionEnum.copy && (
                       <>
                         {copy}
                         {paste}
+                        {pasteFile}
                         {copyFile}
                         {pasteName}
+                        {copyName}
+                        {copyURL}
                       </>
                     )}
                     {primaryAction === primaryActionEnum.pasteName && (
@@ -222,27 +254,54 @@ function Command() {
                         {pasteName}
                         {paste}
                         {copy}
+                        {pasteFile}
                         {copyFile}
+                        {copyName}
+                        {copyURL}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.pasteFile && (
+                      <>
+                        {pasteFile}
+                        {paste}
+                        {copy}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
+                        {copyURL}
                       </>
                     )}
                     {primaryAction === primaryActionEnum.copyFile && (
                       <>
                         {copyFile}
-                        {copy}
                         {paste}
+                        {copy}
+                        {pasteFile}
                         {pasteName}
+                        {copyName}
+                        {copyURL}
                       </>
                     )}
-                    {activeSetId && (
+                    {primaryAction === primaryActionEnum.copyName && (
                       <>
-                        <Action.CopyToClipboard
-                          title="Copy Name"
-                          content={`${activeSetId}:${id}`}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy URL"
-                          content={toURL(activeSetId, id)}
-                        />
+                        {copyName}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyURL}
+                      </>
+                    )}
+                    {primaryAction === primaryActionEnum.copyURL && (
+                      <>
+                        {copyURL}
+                        {paste}
+                        {copy}
+                        {pasteFile}
+                        {copyFile}
+                        {pasteName}
+                        {copyName}
                       </>
                     )}
                     <NavigationActionSection

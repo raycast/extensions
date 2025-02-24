@@ -26,7 +26,18 @@
       "name": "pick-color",
       "title": "Pick Color",
       "description": "Pick a color on your desktop",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "showColorName",
+          "title": "Show color name after picking",
+          "description": "Show the name of the picked color after picking",
+          "type": "checkbox",
+          "label": "Show",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "menu-bar",

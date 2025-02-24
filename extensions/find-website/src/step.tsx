@@ -63,13 +63,13 @@ class MergePayload<T extends Record> implements Payload<T> {
   }
 
   mergeView(data: T[] | undefined, adapter: Adapter<T>) {
-    this.list = this.list.concat((data || []).map((record) => this.generateView(record, adapter)));
+    this.list = this.list.concat((data || []).map((record, i) => this.generateView(record, i, adapter)));
 
     return this;
   }
 
-  generateView(record: T, adapter: Adapter<T>) {
-    const result = adapter.adapt(record);
+  generateView(record: T, i: number, adapter: Adapter<T>) {
+    const result = adapter.adapt(record, i);
     return (
       <List.Item
         key={result.key}

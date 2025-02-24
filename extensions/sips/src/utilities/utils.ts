@@ -27,7 +27,6 @@ import { runAppleScript } from "@raycast/utils";
 import { getAVIFEncPaths } from "./avif";
 import { copyImagesAtPathsToClipboard, getClipboardImages } from "./clipboard";
 import { Direction, ImageInputSource, ImageResultHandling } from "./enums";
-import { ExtensionPreferences } from "./preferences";
 import { mkdir } from "fs/promises";
 
 /**
@@ -351,7 +350,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   const selectedImages: string[] = [];
 
   // Get name of preferred file manager
-  const extensionPreferences = getPreferenceValues<ExtensionPreferences>();
+  const extensionPreferences = getPreferenceValues<Preferences>();
   const inputMethod = extensionPreferences.inputMethod;
   let inputMethodError = false;
 
@@ -373,7 +372,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   // Get name of frontmost application
   let activeApp = inputMethod;
   try {
-    activeApp = (await getFrontmostApplication()).name;
+    activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
   } catch (error) {
     console.error(`Couldn't get frontmost application: ${error}`);
   }
@@ -462,10 +461,10 @@ export const moveImageResultsToFinalDestination = async (imagePaths: string[]) =
   try {
     activeApp = (await getFrontmostApplication()).name;
   } catch (error) {
-    console.error(`Couldn't get frontmost application: ${error}`);
+    console.error(`Couldn't get frontmost application: : ${error}`);
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   // Handle the result per the user's preference
   if (preferences.imageResultHandling == ImageResultHandling.CopyToClipboard) {
     await copyImagesAtPathsToClipboard(imagePaths);
@@ -519,7 +518,7 @@ export const getWebPBinaryPath = async () => {
  * @returns A promise resolving to the path of the resulting image.
  */
 export const execSIPSCommandOnWebP = async (command: string, webpPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([webpPath]))[0];
 
@@ -538,7 +537,7 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
  * @param avifPath The path of the AVIF image.
  */
 export const execSIPSCommandOnAVIF = async (command: string, avifPath: string): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   await using tmpFile = await getScopedTempFile("tmp", "png");
   const newPath = (await getDestinationPaths([avifPath]))[0];
 
@@ -607,7 +606,7 @@ export const convertSVG = async (targetType: string, svgPath: string, newPath: s
  * @param newPathBase The folder to place the resulting images in.
  */
 export const convertPDF = async (targetType: string, pdfPath: string, newPathBase: string) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let repType = "NSPNGFileType";
   if (targetType == "JPEG") {
@@ -703,7 +702,7 @@ export const convertPDF = async (targetType: string, pdfPath: string, newPathBas
  * @param degrees The amount to rotate each page by. Must be a multiple of 90.
  */
 export const rotatePDF = async (pdfPath: string, degrees: number): Promise<string> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -753,7 +752,7 @@ export const rotatePDF = async (pdfPath: string, degrees: number): Promise<strin
  * @param direction The direction to flip. Must be a valid {@link Direction}.
  */
 export const flipPDF = async (pdfPath: string, direction: Direction) => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   let newPath = pdfPath;
   if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
@@ -824,7 +823,7 @@ export const flipPDF = async (pdfPath: string, direction: Direction) => {
  * @returns The destination path for the image.
  */
 export const getImageDestination = (originalPath: string, targetExtension?: string): string => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Decompose the original path into its components
   const originalExtension = path.extname(originalPath);
@@ -973,20 +972,20 @@ export const getCurrentDirectory = async (itemPath: string) => {
   try {
     if (activeApp == "Path Finder") {
       return runAppleScript(`tell application "Path Finder"
-          if 1 ≤ (count finder windows) then
-            try
-            get POSIX path of (target of finder window 1)
-            on error message number -1728
-              -- Folder is nonstandard, use container of selection
-              tell application "System Events"
-                set itemPath to POSIX file "${itemPath}" as alias
-                return POSIX path of container of itemPath
-              end tell
-            end try
-          else
-            get POSIX path of desktop
-          end if
-        end tell`);
+        if 1 ≤ (count finder windows) then
+          try
+          get POSIX path of (target of finder window 1)
+          on error message number -1728
+            -- Folder is nonstandard, use container of selection
+            tell application "System Events"
+              set itemPath to POSIX file "${itemPath}" as alias
+              return POSIX path of container of itemPath
+            end tell
+          end try
+        else
+          get POSIX path of desktop
+        end if
+      end tell`);
     }
   } catch (error) {
     // Error getting directory of Path Finder, fall back to Finder
@@ -995,18 +994,18 @@ export const getCurrentDirectory = async (itemPath: string) => {
 
   // Fallback to getting current directory from Finder
   return runAppleScript(`tell application "Finder"
-      if 1 ≤ (count Finder windows) then
-        try
-          return POSIX path of (target of window 1 as alias)
-        on error message number -1700
-          -- Folder is nonstandard, use container of selection
-          set itemPath to POSIX file "${itemPath}" as alias
-          return POSIX path of (container of itemPath as alias)
-        end try
-      else
-        return POSIX path of (desktop as alias)
-      end if
-    end tell`);
+    if 1 ≤ (count Finder windows) then
+      try
+        return POSIX path of (target of window 1 as alias)
+      on error message number -1700
+        -- Folder is nonstandard, use container of selection
+        set itemPath to POSIX file "${itemPath}" as alias
+        return POSIX path of (container of itemPath as alias)
+      end try
+    else
+      return POSIX path of (desktop as alias)
+    end if
+  end tell`);
 };
 
 /**
@@ -1022,7 +1021,7 @@ export const getDestinationPaths = async (
   generated = false,
   newExtension: string | undefined = undefined,
 ): Promise<string[]> => {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const currentDirectory = await getCurrentDirectory(originalPaths[0]);
   return originalPaths.map((imgPath) => {
     let newPath = imgPath;
@@ -1053,7 +1052,7 @@ export const getDestinationPaths = async (
       while (fs.existsSync(newPath)) {
         newPath = path.join(
           path.dirname(newPath),
-          path.basename(newPath, path.extname(newPath)) + ` (${iter})${path.extname(newPath)}`,
+          path.basename(newPath, path.extname(newPath)) + `-${iter}${path.extname(newPath)}`,
         );
         iter++;
       }
@@ -1067,7 +1066,6 @@ export const getDestinationPaths = async (
  * @param title The title of the toast.
  * @param error The error to show.
  * @param toast The toast to update.
- * @param messageText The message to show in the toast. If not provided, the error message will be used.
  */
 export const showErrorToast = async (title: string, error: Error, toast?: Toast, messageText?: string) => {
   console.error(error);

@@ -1,6 +1,6 @@
 # DeepSeeker - DeepSeek Quick Actions
 
-DeepSeek LLM is a powerful yet cheap LLM. DeepSeeker is a Raycast extension that allows you to perform one-shot actions with DeepSeek using Raycast.
+DeepSeek is a powerful yet cheap LLM. This extension provides quick actions to interact with DeepSeek API. It allows you to quickly ask questions, summarize text, and more. It's a great tool for students, researchers, and anyone who needs quick answers.
 
 While [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) is built for ChatGPT, DeepSeeker is built for DeepSeek. For now, it tries to obey `Multiple Simple` phylosophy. In the future, it tries to provide `more flexibility` for individual various needs.
 
@@ -25,13 +25,26 @@ Enjoy using DeepSeeker! 🚀
 - [x] 💸 Set token price in settings
 - [x] 🌐 Support Translate and Looking Up Words
 - [x] 🎨 Multiple models support (Deepseek, OpenAI, Gemini)
-- [ ] 🔍 Fix Fallback Feature, e.g., ASK LLM
-- [ ] Fix notes
 - [ ] Interaction with Zoo using deeplinks?
 - [ ] 📦 More flexibility for personal needs
   - [ ] Prompt zoo
   - [ ] Choose proopt when running the command
-- [ ] 💬 Conversation Chat mode
+
+## Bugs / TODOs
+
+- [ ] It seems translate will run two times. Need to fix it.
+![Translation bug demonstration](./assets/translate-bug.gif)
+
+| Command             | Function                                                     | Use Selected Text? |
+| ------------------- | ------------------------------------------------------------ | ------------------ |
+| **Ask on Selected** | Ask questions or instruct on the selected text               | ✅                  |
+| **Ask LLM**         | Ask questions using pure user query input                    | ❌                  |
+| **Summarize**       | Summarize the selected text                                  | ✅                  |
+| **Fix**             | Fix the selected text typo and grammar-wise                  | ✅                  |
+| **Rephrase**        | Rephrase and improve the writing of the selected text        | ✅                  |
+| **Translate**       | Auto translate selected text into target language as setting | ✅                  |
+| **What**            | Give a brief explanation of the selected text                | ✅                  |
+| **Why**             | Give a brief explanation of the selected declaration         | ✅                  |
 
 > This extension is built highly inspired by [ChatGPT Quick Actions](https://www.raycast.com/alanzchen/chatgpt-quick-actions) by [Alan Chen](https://www.raycast.com/alanzchen).
 
@@ -40,7 +53,7 @@ Enjoy using DeepSeeker! 🚀
 <details>
 <summary>Wallpaper & Examples</summary>
 
-The wallpaper for the Screenshots is the https://misc-assets.raycast.com/wallpapers/blue_distortion_2.heic
+The wallpaper for the Screenshots is the <https://misc-assets.raycast.com/wallpapers/blue_distortion_2.heic>
 
 All the examples have been generated on [Elon Musk's Wikipedia page 1st Paragraph](https://en.wikipedia.org/wiki/Elon_Musk)
 

@@ -1,5 +1,9 @@
 # Tower Changelog
 
+## [Fix] - 2025-02-10
+
+  - Update Tower and Warp terminal icons
+
 ## [Fix] - 2025-02-02
 
 - Correctly handle URI encoding of repository paths

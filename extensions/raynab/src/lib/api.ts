@@ -20,9 +20,13 @@ export async function fetchBudgets() {
     return allBudgets;
   } catch (error) {
     captureException(error);
-
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch budgets');
+      const { title, message } = displayError(error, 'Failed to fetch budgets');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -43,7 +47,12 @@ export async function fetchBudget(selectedBudgetId: string) {
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch budget');
+      const { title, message } = displayError(error, 'Failed to fetch budget');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -63,7 +72,12 @@ export async function fetchCategoryGroups(selectedBudgetId: string) {
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch categories');
+      const { title, message } = displayError(error, 'Failed to fetch categories');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -83,7 +97,12 @@ export async function fetchPayees(selectedBudgetId: string) {
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch payees');
+      const { title, message } = displayError(error, 'Failed to fetch payees');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -104,7 +123,12 @@ export async function fetchAccounts(selectedBudgetId: string) {
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch accounts');
+      const { title, message } = displayError(error, 'Failed to fetch accounts');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -133,7 +157,12 @@ export async function fetchTransactions(selectedBudgetId: string, period: Period
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch transactions');
+      const { title, message } = displayError(error, 'Failed to fetch transactions');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -154,7 +183,12 @@ export async function fetchScheduledTransactions(selectedBudgetId: string) {
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to fetch scheduled transactions');
+      const { title, message } = displayError(error, 'Failed to fetch scheduled transactions');
+      await showToast({
+        style: Toast.Style.Failure,
+        title,
+        message,
+      });
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -176,13 +210,10 @@ export async function updateTransaction(selectedBudgetId: string, transactionId:
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to update transaction');
+      const { message } = displayError(error, 'Failed to update transaction');
+      throw new Error(message);
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Something went wrong',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      throw error;
     }
   }
 }
@@ -202,13 +233,10 @@ export async function createTransaction(selectedBudgetId: string, transactionDat
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to create transaction');
+      const { message } = displayError(error, 'Failed to create transaction');
+      throw new Error(message);
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Something went wrong',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      throw error;
     }
   }
 }
@@ -223,13 +251,10 @@ export async function deleteTransaction(selectedBudgetId: string, transactionId:
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to delete transaction');
+      const { message } = displayError(error, 'Failed to delete transaction');
+      throw new Error(message);
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Something went wrong',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      throw error;
     }
   }
 }
@@ -250,13 +275,10 @@ export async function createScheduledTransaction(selectedBudgetId: string, trans
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to create scheduled transaction');
+      const { message } = displayError(error, 'Failed to create scheduled transaction');
+      throw new Error(message);
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Something went wrong',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      throw error;
     }
   }
 }
@@ -277,13 +299,10 @@ export async function updateCategory(selectedBudgetId: string, categoryId: strin
     captureException(error);
 
     if (isYnabError(error)) {
-      displayError(error, 'Failed to update category');
+      const { message } = displayError(error, 'Failed to update category');
+      throw new Error(message);
     } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Something went wrong',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      });
+      throw error;
     }
   }
 }

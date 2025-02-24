@@ -1,5 +1,16 @@
 # Raynab Changelog
 
+## [Improvements & Bug fixes] - 2025-02-14
+
+- Add a dropdown to choose the transaction's payee. Optionally allow manual input
+- Aligned currency formatting support with budget settings
+- Added support for budget setting decimal separator to create and edit transaction amounts
+- Removed hidden categories in transaction forms
+- Fixed relative time of locally created transactions being set at midnight of the same day
+- Fixed error messages of certain API calls being swallowed without a proper error toast
+
+## [Update dependencies] - 2025-02-12
+
 ## [Major Features & Improvements] - 2025-01-19
 
 ### ✨ New Features

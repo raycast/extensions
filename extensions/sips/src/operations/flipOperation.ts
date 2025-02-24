@@ -11,6 +11,7 @@
 import { execSync } from "child_process";
 import path from "path";
 
+import { Direction } from "../utilities/enums";
 import {
   execSIPSCommandOnAVIF,
   execSIPSCommandOnSVG,
@@ -19,7 +20,6 @@ import {
   getDestinationPaths,
   moveImageResultsToFinalDestination,
 } from "../utilities/utils";
-import { Direction } from "../utilities/enums";
 
 /**
  * Flips images vertically or horizontally, storing the results according to the user's preferences.
@@ -62,6 +62,7 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
       }
     }
     await moveImageResultsToFinalDestination(resultPaths);
+    return resultPaths;
   } else {
     // No special types -- Flip all images at once
     const outputLocation = newPaths.length == 1 ? newPaths[0] : path.join(path.dirname(newPaths[0]), "flipped");
@@ -71,4 +72,5 @@ export default async function flip(sourcePaths: string[], direction: Direction) 
     execSync(`sips --flip ${directionString} -o "${outputLocation}" ${pathStrings}`);
     await moveImageResultsToFinalDestination(newPaths);
   }
+  return newPaths;
 }

@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 
-import { createNote } from "./api";
+import { createNote } from "./api/applescript";
 import NoteListItem from "./components/NoteListItem";
-import { useNotes } from "./useNotes";
+import { useNotes } from "./hooks/useNotes";
 
 export type NoteTitle = {
   title: string;

@@ -6,11 +6,11 @@ import { promisify } from "util";
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";
 
-const readPlist = promisify(readFile);
+export const readPlist = promisify(readFile);
 
-const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
+export const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
-function extractReadingListBookmarks(
+export function extractReadingListBookmarks(
   bookmarks: BookmarkPListResult,
   readingListOnly?: boolean,
 ): (ReadingListBookmark | GeneralBookmark)[] {

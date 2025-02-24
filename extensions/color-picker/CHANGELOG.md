@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Accessibility] - 2025-02-13
+
+- Add support for showing color name after picking color
+
 ## [Enhancement] - 2024-11-25
 
 - Update README with FAQs
@@ -12,7 +16,6 @@
 ## [Enhancement] - 2024-09-02
 
 - Improved the `Organize Colors` command to dynamically fetch the frontmost application and display its icon in the paste action.
-
 
 ## [Cross-Extension] - 2024-07-09
 
