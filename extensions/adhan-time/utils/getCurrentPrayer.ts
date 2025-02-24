@@ -1,5 +1,6 @@
 import { Prayers, PrayerPeriod, PrayerProperty } from "../src/prayer-types";
 import { getPrayerProperties } from "./prayersProperties";
+import { getCompareTime } from "./timeUtils";
 
 type OrderedPrayer = {
   name: string;
@@ -7,24 +8,6 @@ type OrderedPrayer = {
   compareTime: string;
   properties: PrayerProperty;
 };
-
-function adjustMidnightTime(time: string, currentTime: string): string {
-  const [currentHours] = currentTime.split(':');
-  const [midnightHours] = time.split(':');
-  const currentHour = parseInt(currentHours);
-  const midnightHour = parseInt(midnightHours);
-
-  // Only adjust to 24+ format if we're before midnight (current hour >= 12)
-  return midnightHour < 12 && currentHour >= 12
-    ? `24:${time.split(':')[1]}`
-    : time;
-}
-
-function getCompareTime(prayerName: string, time: string, currentTime: string): string {
-  return prayerName === 'Midnight'
-    ? adjustMidnightTime(time, currentTime)
-    : time;
-}
 
 function sortPrayers([keyA]: [string, string], [keyB]: [string, string]): number {
   const propA = getPrayerProperties(keyA);
