@@ -1,9 +1,7 @@
 import { List, ActionPanel, Action, openExtensionPreferences, Color } from "@raycast/api";
-import { convertHours } from "../utils/convertHours";
+import { convertHours, parseCountdown, sortPrayers } from "../utils/timeUtils";
 import { usePrayerTimes } from "../utils/usePrayerTimes";
 import { getPrayerProperties } from "../utils/prayersProperties";
-import { parseCountdown } from "../utils/parseCountdown";
-import { sortPrayers } from "../utils/sortPrayers";
 
 export default function Command() {
   const { isLoading, prayers, currentPrayer, countdown, userPreference } = usePrayerTimes();

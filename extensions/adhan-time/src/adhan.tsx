@@ -1,9 +1,8 @@
 import { Color, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { convertHours } from "../utils/convertHours";
+import { convertHours, parseCountdown } from "../utils/timeUtils";
 import { usePrayerTimes } from "../utils/usePrayerTimes";
 import { getPrayerProperties } from "../utils/prayersProperties";
 import { PrayerProperty, Prayers } from "./prayer-types";
-import { parseCountdown } from "../utils/parseCountdown";
 
 type Section = {
   title: string;
