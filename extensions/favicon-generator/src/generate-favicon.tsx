@@ -88,11 +88,12 @@ export default function Command() {
         info="The path where the favicons will be served from"
         storeValue={true}
       />
-      <Form.TextField
+      <Form.FilePicker
         id="outputPath"
         title="Output Path"
-        placeholder="Enter output directory path (e.g., ./public)"
-        defaultValue="./public"
+        allowMultipleSelection={false}
+        canChooseDirectories={true}
+        canChooseFiles={false}
         info="The directory where favicon files will be generated"
         storeValue={true}
       />
