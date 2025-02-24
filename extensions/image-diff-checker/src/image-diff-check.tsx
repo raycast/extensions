@@ -1,23 +1,8 @@
 import { ActionPanel, Form, Action, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Jimp } from "jimp";
 import { useImagesForm } from "./hooks/use-image-form";
 
 export default function Command() {
-  const { handleSubmit, diffImage, fields } = useImagesForm();
-  const [markdown, setMarkdown] = useState<string>("");
-
-  useEffect(() => {
-    if (!diffImage) return;
-    const handleSetDiffImage = async () => {
-      const { width, height, diffBuffer } = await diffImage;
-      const diffJimpImage = await new Jimp({ data: diffBuffer, width, height });
-      const base64Image = await diffJimpImage.getBase64("image/png");
-      setMarkdown(`![](${base64Image})`);
-    };
-
-    handleSetDiffImage();
-  }, [diffImage]);
+  const { handleSubmit, markdown, fields } = useImagesForm();
 
   return (
     <>
