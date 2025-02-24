@@ -1,0 +1,19 @@
+{
+    "name": "gateway-performance-test",
+    "version": "1.0.0",
+    "description": "Test AR.IO gateway performance",
+    "main": "gateways.ts",
+    "type": "module",
+    "scripts": {
+        "start": "bun gateways.ts"
+    },
+    "dependencies": {
+        "@ar.io/sdk": "^3.5.3",
+        "cross-fetch": "^4.1.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.5",
+        "bun-types": "latest",
+        "@types/node": "20.8.10"
+    }
+}
