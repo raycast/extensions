@@ -13,7 +13,7 @@ import {
   Action,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   AudioDevice,
   getInputDevices,
@@ -50,12 +50,11 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
 
     (async function () {
       try {
-        await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
+        await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device, data.current));
         closeMainWindow({ clearRootSearch: true });
         popToRoot({ clearSearchBar: true });
         showHUD(`Active ${type} audio device set to ${device.name}`);
-      } catch (e) {
-        console.log(e);
+      } catch {
         showToast(
           Toast.Style.Failure,
           `Error!`,
@@ -67,7 +66,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
 
   const DeviceActions = ({ device }: { device: AudioDevice }) => (
     <>
-      <SetAudioDeviceAction device={device} type={type} />
+      <SetAudioDeviceAction current={data?.current} device={device} type={type} />
       <Action.CreateQuicklink
         quicklink={{
           name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
@@ -159,21 +158,21 @@ function useAudioDevices(type: "input" | "output") {
 type SetAudioDeviceActionProps = {
   device: AudioDevice;
   type: "input" | "output";
+  current?: AudioDevice;
 };
 
-function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
+function SetAudioDeviceAction({ device, type, current }: SetAudioDeviceActionProps) {
   return (
     <Action
       title={`Set as ${type === "input" ? "Input" : "Output"} Device`}
       icon={{ source: type === "input" ? "mic.png" : "speaker.png", tintColor: Color.PrimaryText }}
       onAction={async () => {
         try {
-          await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
+          await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device, current));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
           showHUD(`Set "${device.name}" as ${type} device`);
-        } catch (e) {
-          console.log(e);
+        } catch {
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} device`);
         }
       }}
@@ -181,11 +180,14 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   );
 }
 
-async function setOutputAndSystemDevice(deviceId: string) {
+async function setOutputAndSystemDevice(device: AudioDevice, current?: AudioDevice) {
   const { systemOutput } = getPreferenceValues();
-  await setDefaultOutputDevice(deviceId);
+  await setDefaultOutputDevice(device.id);
+  if (!current) {
+    await LocalStorage.setItem("lastUsedDevice", JSON.stringify(current));
+  }
   if (systemOutput) {
-    await setDefaultSystemDevice(deviceId);
+    await setDefaultSystemDevice(device.id);
   }
 }
 
