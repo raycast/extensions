@@ -3,6 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 import type { Prayers, Preferences } from "../src/prayer-types";
 import { fetchPrayers } from "./fetchPrayers";
 import { getCurrentPrayer } from "./getCurrentPrayer";
+import { getPrayerProperties } from "./prayersProperties";
 
 export function calculateCountdown(compareTime: string): string {
   const [hours, minutes] = compareTime.split(':');
@@ -34,11 +35,23 @@ export function usePrayerTimes() {
   const { isLoading, data: prayerTimes } = fetchPrayers();
   const prayers: Prayers | undefined = prayerTimes?.data.timings;
   const currentPrayer = prayers ? getCurrentPrayer(prayers) : null;
+
+  // Get prayer properties for current prayer
+  const currentPrayerProperties = currentPrayer?.current ? getPrayerProperties(currentPrayer.current) : null;
+
   const [countdown, setCountdown] = useState(() =>
-    currentPrayer?.compareTime ? calculateCountdown(currentPrayer.compareTime) : ""
+    currentPrayer?.compareTime && currentPrayerProperties?.isPrayer
+      ? calculateCountdown(currentPrayer.compareTime)
+      : ""
   );
 
   useEffect(() => {
+    // Only start timer if it's an actual prayer
+    if (!currentPrayerProperties?.isPrayer) {
+      setCountdown(""); // Clear countdown if not a prayer
+      return;
+    }
+
     const timer = setInterval(() => {
       if (currentPrayer?.compareTime) {
         setCountdown(calculateCountdown(currentPrayer.compareTime));

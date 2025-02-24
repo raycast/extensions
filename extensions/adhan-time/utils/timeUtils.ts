@@ -11,11 +11,26 @@ export function convertHours(time: string) {
 }
 
 export function parseCountdown(countdown: string): number {
-  const match = countdown.match(/\((\d+):(\d+)(?::(\d+))?\)/);
-  if (!match) return 0;
+  let timeLeftInMinutes = 0;
 
-  const [, hours = "0", minutes = "0"] = match;
-  return parseInt(hours) * 60 + parseInt(minutes);
+  if (countdown) {
+    // Handle both HH:MM:SS and MM:SS formats
+    const timeMatch = countdown.match(/\((\d+):(\d+):(\d+)\)|\((\d+):(\d+)\)/);
+    let hours = 0, minutes = 0;
+
+    if (timeMatch) {
+      if (timeMatch[1]) { // HH:MM:SS format
+        hours = parseInt(timeMatch[1]);
+        minutes = parseInt(timeMatch[2]);
+      } else if (timeMatch[4]) { // MM:SS format
+        minutes = parseInt(timeMatch[4]);
+      }
+    }
+
+    timeLeftInMinutes = hours * 60 + minutes;
+  }
+
+  return timeLeftInMinutes;
 }
 
 export function sortPrayers(prayers: Prayers, currentPrayer: PrayerPeriod | null) {
