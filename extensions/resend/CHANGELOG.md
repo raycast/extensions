@@ -1,5 +1,8 @@
 # Resend Changelog
 
+## 2024-02-23
+- Add support for Tokyo region
+
 ## [Maintenance Release] - 2024-10-10
 
 - Dark AND Light mode logo
