@@ -2,7 +2,7 @@
 
 ## [Feature] - 2025-02-19
 
-- Add options to search vault using url or username
+- Add fuzzy search for vault and include url or username in search
 
 ## [Feature] - 2025-01-02
 
