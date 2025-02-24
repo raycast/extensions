@@ -5,6 +5,7 @@ import { showErrorToast } from "../../utils";
 import { RevalidateAction, ToggleDetailsAction } from "../actions";
 import { deviceStateToString } from "./utils";
 import { CopyDeviceIPAction, CopyDeviceMacAddressAction } from "./actions";
+import { useEffect } from "react";
 
 function DeviceListItem(props: {
   device: tDevice;
@@ -38,7 +39,7 @@ function DeviceListItem(props: {
           />
         )
       }
-      accessories={[{ tag: !props.showDetails ? deviceStateToString(d.state) : undefined }]}
+      accessories={[{ tag: !props.showDetails ? deviceStateToString(d.state) : "" }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -72,7 +73,13 @@ export function SiteDevicesList(props: { site: Site }) {
     [props.site],
     { keepPreviousData: true },
   );
-  showErrorToast(error);
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast(error);
+    }
+  }, [error]);
+
   return (
     <List isLoading={isLoading} isShowingDetail={showDetails}>
       <List.Section title="Devices" subtitle={`${clients?.length}`}>
