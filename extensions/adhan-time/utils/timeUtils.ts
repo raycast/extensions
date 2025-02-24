@@ -1,6 +1,16 @@
 import { Prayers, PrayerPeriod } from "../src/prayer-types";
 import { getPrayerProperties } from "./prayersProperties";
 
+export function currentTime24Hours() {
+  const now = new Date();
+  const currentTime = now.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  return currentTime;
+}
+
 export function convertHours(time: string) {
   const hours = time.split(':')[0];
   const minutes = time.split(':')[1];
@@ -10,21 +20,18 @@ export function convertHours(time: string) {
     return `${hours}:${minutes} am`
 }
 
-export function adjustMidnightTime(time: string, currentTime: string): string {
-  const [currentHours] = currentTime.split(':');
-  const [midnightHours] = time.split(':');
-  const currentHour = parseInt(currentHours);
-  const midnightHour = parseInt(midnightHours);
-
-  // Only adjust to 24+ format if we're before midnight (current hour >= 12)
-  return midnightHour < 12 && currentHour >= 12
-    ? `24:${time.split(':')[1]}`
-    : time;
+export function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes; // Direct conversion without 24h adjustment
 }
 
-export function getCompareTime(prayerName: string, time: string, currentTime: string): string {
-  return prayerName === 'Midnight'
-    ? adjustMidnightTime(time, currentTime)
+export function getCompareTime(time: string, currentTime: string): string {
+  const [currentHours] = currentTime.split(':').map(Number);
+  const [prayerHours, prayerMinutes] = time.split(':').map(Number);
+
+  // Adjust prayer time to 24h+ format if needed
+  return currentHours >= 12 && prayerHours < 12
+    ? `${prayerHours + 24}:${prayerMinutes.toString().padStart(2, '0')}`
     : time;
 }
 

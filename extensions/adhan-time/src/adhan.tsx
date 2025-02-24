@@ -3,6 +3,7 @@ import { convertHours, parseCountdown } from "../utils/timeUtils";
 import { usePrayerTimes } from "../utils/usePrayerTimes";
 import { getPrayerProperties } from "../utils/prayersProperties";
 import { PrayerProperty, Prayers } from "./prayer-types";
+import React from "react";
 
 type Section = {
   title: string;
@@ -42,20 +43,32 @@ export default function Command() {
     const icon = isCurrent ? { source: properties.icon, tintColor: color } : properties.icon;
     const prayerTime = userPreference.twelve_hours_system ? convertHours(value) : value;
 
+    // if current, return extra item for countdown
     return (
-      <MenuBarExtra.Item
-        key={key}
-        icon={icon}
-        title={`${properties.name}: ${prayerTime}${isCurrent ? ` ${countdown}` : ""}`}
-        onAction={
-          isCurrent
-            ? // Use this empty function to make the item active (white text)
-              () => {
-                return;
-              }
-            : undefined
-        }
-      />
+      <React.Fragment key={key}>
+        <MenuBarExtra.Item
+          key={`${key}-title`}
+          icon={icon}
+          title={`${properties.name}: ${prayerTime}`}
+          onAction={
+            isCurrent
+              ? // Use this empty function to make the item active (white text)
+                () => {
+                  return;
+                }
+              : undefined
+          }
+        />
+        {isCurrent && (
+          <MenuBarExtra.Item
+            key={`${key}-countdown`}
+            title={`      ${countdown}`}
+            onAction={() => {
+              return;
+            }}
+          />
+        )}
+      </React.Fragment>
     );
   };
 

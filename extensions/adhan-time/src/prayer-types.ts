@@ -39,7 +39,7 @@ export type PrayerProperty = {
   sort: number;
   name: string;
   icon: Icon;
-  nextPrayer: string | null;
+  nextPrayer: string;
   isPrayer: boolean;
   section: "prayers" | "times";
 };

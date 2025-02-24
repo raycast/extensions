@@ -5,6 +5,7 @@ import { fetchPrayers } from "./fetchPrayers";
 import { getCurrentPrayer } from "./getCurrentPrayer";
 import { getPrayerProperties } from "./prayersProperties";
 import { calculateCountdown } from "./timeUtils";
+
 export function usePrayerTimes() {
   const userPreference: Preferences = getPreferenceValues();
   const { isLoading, data: prayerTimes } = fetchPrayers();

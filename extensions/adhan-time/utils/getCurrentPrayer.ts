@@ -1,78 +1,86 @@
-import { Prayers, PrayerPeriod, PrayerProperty } from "../src/prayer-types";
+import { Prayers, PrayerPeriod } from "../src/prayer-types";
 import { getPrayerProperties } from "./prayersProperties";
-import { getCompareTime } from "./timeUtils";
+import { getCompareTime, timeToMinutes, currentTime24Hours } from "./timeUtils";
 
-type OrderedPrayer = {
-  name: string;
-  time: string;
-  compareTime: string;
-  properties: PrayerProperty;
+type PrayerWindow = {
+  current: {
+    name: string;
+    time: string;
+  };
+  next: {
+    name: string;
+    time: string;
+  };
 };
 
-function sortPrayers([keyA]: [string, string], [keyB]: [string, string]): number {
-  const propA = getPrayerProperties(keyA);
-  const propB = getPrayerProperties(keyB);
-  return propA.sort - propB.sort;
-}
+function findCurrentPrayer(currentTime: string, prayers: Prayers): PrayerWindow | null {
+  const currentMinutes = timeToMinutes(currentTime);
 
-function findNextPrayer(currentTime: string, prayer: OrderedPrayer, prayersList: OrderedPrayer[]): [OrderedPrayer, OrderedPrayer] | null {
-  if (currentTime < prayer.compareTime) return null;
+  // loop through prayers object and get current and next prayer
+  for (const [key, value] of Object.entries(prayers)) {
+    const currentPrayerTime = value;
+    const currentPrayer = getPrayerProperties(key);
+    const nextPrayerKey = currentPrayer.nextPrayer;
+    const nextPrayerTime = prayers[nextPrayerKey as keyof Prayers];
 
-  const nextPrayerName = prayer.properties.nextPrayer || 'Fajr';
-  const possibleNext = prayersList.find(p => p.name === nextPrayerName);
+    const currentPrayerMinutes = timeToMinutes(currentPrayerTime);
+    let nextPrayerMinutes = timeToMinutes(nextPrayerTime);
 
-  if (!possibleNext || currentTime >= possibleNext.compareTime) return null;
+    // Handle midnight wrap for next day
+    if (nextPrayerMinutes < currentPrayerMinutes) {
+      nextPrayerMinutes += 1440; // Add 24 hours in minutes
+    }
 
-  return [prayer, possibleNext];
+    // Check if current time is in this prayer's window
+    if (currentMinutes >= currentPrayerMinutes && currentMinutes < nextPrayerMinutes) {
+      return {
+        current: {
+          name: key,
+          time: currentPrayerTime
+        },
+        next: {
+          name: nextPrayerKey,
+          time: nextPrayerTime
+        }
+      };
+    }
+  }
+  return null;
 }
 
 export function getCurrentPrayer(prayers: Prayers): PrayerPeriod {
   // Get current time
-  const now = new Date();
-  const currentTime = now.toLocaleTimeString('en-US', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  // Convert prayers to array with their properties and adjust times for comparison
-  const prayersList = Object.entries(prayers)
-    .sort(sortPrayers)
-    .map(([key, time]) => ({
-      name: key,
-      time: time,
-      compareTime: getCompareTime(key, time, currentTime),
-      properties: getPrayerProperties(key)
-    }));
+  const currentTime = currentTime24Hours();
 
   // Find current and next prayers
-  let current: OrderedPrayer | undefined;
-  let next: OrderedPrayer | undefined;
+  const result = findCurrentPrayer(currentTime, prayers);
 
-  // Try to find the current prayer period
-  for (const prayer of prayersList) {
-    const result = findNextPrayer(currentTime, prayer, prayersList);
-    if (result) {
-      [current, next] = result;
-      break;
-    }
-  }
+  let current: { name: string; time: string };
+  let next: { name: string; time: string };
 
-  // Handle edge cases
-  if (!current) {
-    current = prayersList[prayersList.length - 1]; // Last prayer of previous day
-    next = prayersList.find(p => p.name === 'Fajr')!;
-  }
+  if (result) {
+    current = result.current;
+    next = result.next;
+  } else {
+    // Fallback to last prayer of previous day
+    const lastKey = Object.keys(prayers)[Object.keys(prayers).length - 1] as keyof Prayers;
+    const firstKey = Object.keys(prayers)[0] as keyof Prayers;
 
-  if (!next) {
-    next = prayersList.find(p => p.name === 'Fajr')!;
+    current = {
+      name: lastKey,
+      time: prayers[lastKey]
+    };
+    next = {
+      name: firstKey,
+      time: prayers[firstKey]
+    };
   }
 
   return {
-    current: current.properties.name,
+    current: current.name,
     next: next.name,
     currentTime: current.time,
     nextTime: next.time,
-    compareTime: next.compareTime
+    compareTime: getCompareTime(next.time, currentTime)
   };
 }
