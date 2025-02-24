@@ -82,7 +82,7 @@ export function getContentOrDefault(page: Pick<StyleguidePageData, "tabs" | "con
   if (page.tabs) {
     return page.tabs
       .toSorted((tabA, tabB) => tabB.order - tabA.order)
-      .reduce((acc, curr) => acc + `${curr.name}\n\n---\n\n${curr.content}`, "");
+      .reduce((acc, curr) => acc + `# ${curr.name}\n\n---\n\n${curr.content}\n\n`, "");
   }
 
   return page.content;
