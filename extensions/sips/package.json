@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.10.0",
+  "version": "1.10.1",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -539,7 +539,72 @@
         "metadata",
         "remove"
       ],
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "remove-bg",
+      "title": "Remove Background",
+      "description": "Remove the background from images using on-device processing",
+      "icon": "remove-bg-icon.png",
+      "mode": "no-view",
+      "keywords": [
+        "erase",
+        "delete",
+        "cutout",
+        "mask",
+        "isolate"
+      ],
+      "arguments": [
+        {
+          "name": "bgcolor",
+          "placeholder": "Replacement Color",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "crop",
+          "placeholder": "Crop To Subject",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "defaultBgColor",
+          "title": "Default Replacement Color",
+          "description": "The default color to replace backgrounds with. Specify colors in hex format with (optional) alpha (e.g. #FF0000 or FF0000FF) or by HTML name (e.g. red). Leave blank to remove the background entirely (i.e. make it transparent). This color is only used when the 'Replacement Color' argument is not provided.",
+          "type": "textfield",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "cropByDefault",
+          "label": "Crop By Default",
+          "description": "Whether to crop images to the subject by default. If disabled, the dimensions of the original image will be preserved, and the subject will remain at its original position. Otherwise, the image will be cropped to the smallest possible size that contains the subject. This option is only used when the 'Crop To Subject' argument is not provided.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "preserveFormat",
+          "label": "Preserve Image Format",
+          "description": "Whether to preserve the original image format when saving the result. When disabled, the result will be saved as a PNG image.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     }
   ],
   "tools": [
@@ -580,6 +645,12 @@
       "icon": "pad-icon.png"
     },
     {
+      "name": "remove-bg",
+      "title": "Remove Backgrounds",
+      "description": "Remove the background from selected images",
+      "icon": "remove-bg-icon.png"
+    },
+    {
       "name": "resize-images",
       "title": "Resize Images",
       "description": "Resize selected images to a specified width and/or height",
@@ -605,7 +676,7 @@
     }
   ],
   "ai": {
-    "instructions": "The user's currently selected image will be detected; you just need to coordinate the request. You can present images by using markdown image syntax, i.e. `![Preview](imagePath)`. Images for you to display will be provided in the `imagePath` field of any objects provided. You must always use the full path to the image, otherwise the image will not be displayed. Only show images if they are particularly relevant to the user's query, as they can be quite large and slow to load. Make sure to provide all requested input data. You MUST run image modification tools sequentially. Pass any arguments you have as the previousResults argument.",
+    "instructions": "The user's currently selected image will be detected; you just need to coordinate the request. Image Modification tools can operate on multiple paths at once, so try to fulfill the user's request with as few tool calls as necessary. You can present images by using this markdown image syntax: `![Preview](imagePath)`. Images for you to display will be provided as an array of paths. You must always use full paths to display images. Tildes (~) cannot be used in markdown. Only show images if they are particularly relevant to the user's query, as they can be quite large and slow to load. Make sure to provide all requested input data. You MUST run image modification tools sequentially (when user says 'then', call the second command AFTER the first one finishes, and pass the result of the first tool to the next). Pass any arguments you have as the previousResults argument.",
     "evals": [
       {
         "expected": [
@@ -846,8 +917,7 @@
             "callsTool": {
               "name": "rotate-images",
               "arguments": {
-                "angle": 90,
-                "radians": false
+                "angle": 90
               }
             }
           }
@@ -867,7 +937,7 @@
                 "angle": {
                   "includes": "-1.57"
                 },
-                "radians": true
+                "isRadians": true
               }
             }
           }
@@ -926,26 +996,80 @@
             "/Users/exampleUser/Downloads/secondImage-2.png"
           ]
         }
+      },
+      {
+        "mocks": {
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example.pdf"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "bgReplacementColor": "000000"
+              },
+              "name": "remove-bg"
+            }
+          }
+        ],
+        "input": "@sips remove the background, replace with black"
+      },
+      {
+        "expected": [
+          {
+            "callsTool": {
+              "or": [
+                {
+                  "arguments": {
+                    "shouldCrop": true
+                  }
+                },
+                {
+                  "arguments": {}
+                }
+              ],
+              "name": "remove-bg"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "scale-images",
+              "arguments": {
+                "factor": 3,
+                "imagePaths": [
+                  "/Users/exampleUser/Desktop/example-2.jpg"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "scale-images": [
+            "/Users/exampleUser/Desktop/example-2-2.jpg"
+          ],
+          "remove-bg": [
+            "/Users/exampleUser/Desktop/example-2.jpg"
+          ]
+        },
+        "input": "@sips remove the background, then scale up 3x"
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.89.1",
+    "@raycast/api": "^1.92.1",
     "@raycast/utils": "^1.18.1",
-    "mathjs": "^11.8.2",
-    "svgo": "^3.0.2",
-    "tar": "^6.2.0"
+    "mathjs": "^14.2.1",
+    "svgo": "^3.3.2",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "@types/lodash": "^4.17.4",
     "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
-    "@types/tar": "^6.1.11",
+    "@types/react": "^18.3.3",
+    "@types/tar": "^6.1.13",
     "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
-    "prettier": "3.2.5",
-    "react": "^18.3.1",
+    "prettier": "3.3.3",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -953,6 +1077,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "evals": "ray evals"
   }
 }
