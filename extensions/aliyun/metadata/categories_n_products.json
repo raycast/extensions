@@ -1,0 +1,4206 @@
+{
+    "requestId": "",
+    "code": "200",
+    "message": null,
+    "action": null,
+    "apiName": null,
+    "extendedCode": null,
+    "bizCode": null,
+    "httpStatusCode": null,
+    "accessDeniedDetail": null,
+    "originalMessage": null,
+    "description": null,
+    "customData": null,
+    "customResponseKey": null,
+    "data": {
+        "categories": [
+            {
+                "categoryId": "computing",
+                "name": "计算",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "cloudserver",
+                "name": "云服务器",
+                "parentId": "computing",
+                "products": [
+                    "ecs",
+                    "swas",
+                    "eais",
+                    "ess",
+                    "eci",
+                    "computenest",
+                    "vmwaresrv",
+                    "alinux"
+                ]
+            },
+            {
+                "categoryId": "hpc",
+                "name": "高性能计算",
+                "parentId": "computing",
+                "products": [
+                    "ehpc",
+                    "batchcompute"
+                ]
+            },
+            {
+                "categoryId": "serverlessc",
+                "name": "Serverless",
+                "parentId": "computing",
+                "products": [
+                    "fc",
+                    "fnf",
+                    "sae",
+                    "devs"
+                ]
+            },
+            {
+                "categoryId": "wuying",
+                "name": "无影",
+                "parentId": "computing",
+                "products": [
+                    "eds",
+                    "cloudphone",
+                    "appstreaming",
+                    "edspersonal"
+                ]
+            },
+            {
+                "categoryId": "edgecomputing",
+                "name": "边缘计算",
+                "parentId": "computing",
+                "products": [
+                    "ens",
+                    "snsu",
+                    "vs"
+                ]
+            },
+            {
+                "categoryId": "container",
+                "name": "容器",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "containerservice",
+                "name": "容器服务",
+                "parentId": "container",
+                "products": [
+                    "ask",
+                    "acr",
+                    "csk",
+                    "servicemesh",
+                    "adcp",
+                    "acs"
+                ]
+            },
+            {
+                "categoryId": "storage",
+                "name": "存储",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "ess",
+                "name": "基础存储服务",
+                "parentId": "storage",
+                "products": [
+                    "oss",
+                    "nas",
+                    "ots",
+                    "alidfs",
+                    "dbfs",
+                    "disk"
+                ]
+            },
+            {
+                "categoryId": "sds",
+                "name": "存储数据服务",
+                "parentId": "storage",
+                "products": [
+                    "imm",
+                    "pds",
+                    "sls",
+                    "hbr",
+                    "bdrc"
+                ]
+            },
+            {
+                "categoryId": "dtt",
+                "name": "数据迁移与工具",
+                "parentId": "storage",
+                "products": [
+                    "hcs_sgw",
+                    "hcs_mgw"
+                ]
+            },
+            {
+                "categoryId": "hcs",
+                "name": "混合云存储",
+                "parentId": "storage",
+                "products": [
+                    "hdr",
+                    "hcs_hgw"
+                ]
+            },
+            {
+                "categoryId": "netcdn",
+                "name": "网络与CDN",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "cnet",
+                "name": "云上网络",
+                "parentId": "netcdn",
+                "products": [
+                    "vpc",
+                    "slb",
+                    "nat",
+                    "eip",
+                    "cdt",
+                    "cbwp",
+                    "privatelink",
+                    "pvtz",
+                    "netana"
+                ]
+            },
+            {
+                "categoryId": "crn",
+                "name": "跨地域网络",
+                "parentId": "netcdn",
+                "products": [
+                    "cbn",
+                    "ga"
+                ]
+            },
+            {
+                "categoryId": "hcn",
+                "name": "混合云网络",
+                "parentId": "netcdn",
+                "products": [
+                    "vpn",
+                    "smartag",
+                    "expressconnect",
+                    "uis",
+                    "cciot"
+                ]
+            },
+            {
+                "categoryId": "cdn",
+                "name": "CDN",
+                "parentId": "netcdn",
+                "products": [
+                    "dcdn",
+                    "cdn",
+                    "pcdn"
+                ]
+            },
+            {
+                "categoryId": "security",
+                "name": "安全",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "cs",
+                "name": "云安全",
+                "parentId": "security",
+                "products": [
+                    "yundun",
+                    "ddos",
+                    "ddospro",
+                    "waf",
+                    "sas",
+                    "csas",
+                    "cfw",
+                    "bastionhost"
+                ]
+            },
+            {
+                "categoryId": "ds",
+                "name": "数据安全",
+                "parentId": "security",
+                "products": [
+                    "sddp",
+                    "hsm",
+                    "kms",
+                    "cas",
+                    "antppc"
+                ]
+            },
+            {
+                "categoryId": "is",
+                "name": "身份安全",
+                "parentId": "security",
+                "products": [
+                    "idaas"
+                ]
+            },
+            {
+                "categoryId": "bs",
+                "name": "业务安全",
+                "parentId": "security",
+                "products": [
+                    "lvwang",
+                    "saf",
+                    "cloudauth",
+                    "cloudauthst",
+                    "captcha",
+                    "baas",
+                    "antcloudauth",
+                    "cloudinfo"
+                ]
+            },
+            {
+                "categoryId": "ss",
+                "name": "安全服务",
+                "parentId": "security",
+                "products": [
+                    "sos",
+                    "xianzhi",
+                    "sasti"
+                ]
+            },
+            {
+                "categoryId": "middleware",
+                "name": "中间件",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "mstp",
+                "name": "微服务工具与平台",
+                "parentId": "middleware",
+                "products": [
+                    "mse",
+                    "schedulerx",
+                    "edas",
+                    "ahas",
+                    "sofa"
+                ]
+            },
+            {
+                "categoryId": "mq",
+                "name": "云消息队列",
+                "parentId": "middleware",
+                "products": [
+                    "rocketmq",
+                    "alikafka",
+                    "rabbitmq",
+                    "mqtt",
+                    "mns"
+                ]
+            },
+            {
+                "categoryId": "appinte",
+                "name": "应用集成",
+                "parentId": "middleware",
+                "products": [
+                    "apigateway",
+                    "eventbridge",
+                    "apig"
+                ]
+            },
+            {
+                "categoryId": "cnb",
+                "name": "云原生可观测",
+                "parentId": "middleware",
+                "products": [
+                    "pts",
+                    "arms",
+                    "xtrace",
+                    "prometheus",
+                    "grafana"
+                ]
+            },
+            {
+                "categoryId": "database",
+                "name": "数据库",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "rd",
+                "name": "关系型数据库",
+                "parentId": "database",
+                "products": [
+                    "polardb",
+                    "drds",
+                    "rds",
+                    "oceanbase",
+                    "database"
+                ]
+            },
+            {
+                "categoryId": "nosqldb",
+                "name": "NoSQL 数据库",
+                "parentId": "database",
+                "products": [
+                    "kvstore",
+                    "lindorm",
+                    "mongodb",
+                    "hbase",
+                    "hitsdb",
+                    "gds",
+                    "memcache"
+                ]
+            },
+            {
+                "categoryId": "dps",
+                "name": "数据库平台与服务",
+                "parentId": "database",
+                "products": [
+                    "cddc"
+                ]
+            },
+            {
+                "categoryId": "dw",
+                "name": "数据仓库",
+                "parentId": "database",
+                "products": [
+                    "ads",
+                    "gpdb",
+                    "clickhouse",
+                    "openanalytics",
+                    "selectdb"
+                ]
+            },
+            {
+                "categoryId": "dmt",
+                "name": "数据库管理工具",
+                "parentId": "database",
+                "products": [
+                    "dts",
+                    "adam",
+                    "dms",
+                    "cbs",
+                    "hdm",
+                    "dg"
+                ]
+            },
+            {
+                "categoryId": "analyticscomputing",
+                "name": "大数据计算",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "dca",
+                "name": "数据计算与分析",
+                "parentId": "analyticscomputing",
+                "products": [
+                    "odps",
+                    "hologram",
+                    "elasticsearch",
+                    "sc",
+                    "graphcompute",
+                    "milvus"
+                ]
+            },
+            {
+                "categoryId": "dl",
+                "name": "数据湖",
+                "parentId": "analyticscomputing",
+                "products": [
+                    "emapreduce",
+                    "dlf",
+                    "spark",
+                    "cloudera"
+                ]
+            },
+            {
+                "categoryId": "dav",
+                "name": "数据应用与可视化",
+                "parentId": "analyticscomputing",
+                "products": [
+                    "quickbi",
+                    "datav",
+                    "retailadvqa",
+                    "man"
+                ]
+            },
+            {
+                "categoryId": "dds",
+                "name": "数据开发与服务",
+                "parentId": "analyticscomputing",
+                "products": [
+                    "dide",
+                    "dataphin",
+                    "datahub",
+                    "drp"
+                ]
+            },
+            {
+                "categoryId": "aiml",
+                "name": "人工智能与机器学习",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "mlpai",
+                "name": "人工智能平台",
+                "parentId": "aiml",
+                "products": [
+                    "learn",
+                    "bccluster",
+                    "dashscope"
+                ]
+            },
+            {
+                "categoryId": "mpls",
+                "name": "模型平台与服务",
+                "parentId": "aiml",
+                "products": [
+                    "dashvector",
+                    "sfm"
+                ]
+            },
+            {
+                "categoryId": "aisearch",
+                "name": "智能搜索与推荐",
+                "parentId": "aiml",
+                "products": [
+                    "opensearch",
+                    "airec"
+                ]
+            },
+            {
+                "categoryId": "vision",
+                "name": "视觉智能",
+                "parentId": "aiml",
+                "products": [
+                    "viapi",
+                    "imagesearch",
+                    "imagedetect",
+                    "ocr"
+                ]
+            },
+            {
+                "categoryId": "nlp",
+                "name": "自然语言处理",
+                "parentId": "aiml",
+                "products": [
+                    "nlp",
+                    "addrp",
+                    "alimt",
+                    "docmind"
+                ]
+            },
+            {
+                "categoryId": "nls",
+                "name": "智能语音交互",
+                "parentId": "aiml",
+                "products": [
+                    "nls"
+                ]
+            },
+            {
+                "categoryId": "decint",
+                "name": "决策智能",
+                "parentId": "aiml",
+                "products": [
+                    "opt"
+                ]
+            },
+            {
+                "categoryId": "aiapp",
+                "name": "AI应用",
+                "parentId": "aiml",
+                "products": [
+                    "tdsr",
+                    "avatar"
+                ]
+            },
+            {
+                "categoryId": "indinte",
+                "name": "行业智能",
+                "parentId": "aiml",
+                "products": [
+                    "iovcc",
+                    "genomics"
+                ]
+            },
+            {
+                "categoryId": "icss",
+                "name": "智能客服",
+                "parentId": "aiml",
+                "products": [
+                    "ccc",
+                    "beebot",
+                    "ccs",
+                    "sca",
+                    "outboundbot"
+                ]
+            },
+            {
+                "categoryId": "mediaservices",
+                "name": "媒体服务",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "vids",
+                "name": "视频服务",
+                "parentId": "mediaservices",
+                "products": [
+                    "vod",
+                    "live",
+                    "rtc"
+                ]
+            },
+            {
+                "categoryId": "mpcp",
+                "name": "媒体处理与内容生产",
+                "parentId": "mediaservices",
+                "products": [
+                    "mts",
+                    "ice"
+                ]
+            },
+            {
+                "categoryId": "mds",
+                "name": "媒体开发服务",
+                "parentId": "mediaservices",
+                "products": []
+            },
+            {
+                "categoryId": "video",
+                "name": "媒体服务",
+                "parentId": "mediaservices",
+                "products": [
+                    "imp"
+                ]
+            },
+            {
+                "categoryId": "entcmc",
+                "name": "企业服务与云通信",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "ecs",
+                "name": "企业云服务",
+                "parentId": "entcmc",
+                "products": [
+                    "emas",
+                    "assettech",
+                    "salesforce",
+                    "codestore",
+                    "imarketing"
+                ]
+            },
+            {
+                "categoryId": "efs",
+                "name": "企业基础服务",
+                "parentId": "entcmc",
+                "products": [
+                    "bsn"
+                ]
+            },
+            {
+                "categoryId": "eoc",
+                "name": "企业办公协同",
+                "parentId": "entcmc",
+                "products": [
+                    "teambition",
+                    "alimail",
+                    "directmail",
+                    "yida",
+                    "cvc"
+                ]
+            },
+            {
+                "categoryId": "cloudc",
+                "name": "云通信",
+                "parentId": "entcmc",
+                "products": [
+                    "dyvms",
+                    "dysms",
+                    "dypls",
+                    "dypns",
+                    "aiccs",
+                    "dytns",
+                    "xgip",
+                    "cams"
+                ]
+            },
+            {
+                "categoryId": "doweb",
+                "name": "域名与网站",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "dofiserv",
+                "name": "域名与备案服务",
+                "parentId": "doweb",
+                "products": [
+                    "domain",
+                    "companyreg",
+                    "dns"
+                ]
+            },
+            {
+                "categoryId": "ipserv",
+                "name": "知识产权服务",
+                "parentId": "doweb",
+                "products": [
+                    "trademark",
+                    "swcopyright"
+                ]
+            },
+            {
+                "categoryId": "eads",
+                "name": "企业应用交付",
+                "parentId": "doweb",
+                "products": []
+            },
+            {
+                "categoryId": "dserv",
+                "name": "设计服务",
+                "parentId": "doweb",
+                "products": []
+            },
+            {
+                "categoryId": "iot",
+                "name": "物联网",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "iotcs",
+                "name": "物联网云服务",
+                "parentId": "iot",
+                "products": [
+                    "iot",
+                    "dyiot",
+                    "linkwan",
+                    "iotid",
+                    "isoc"
+                ]
+            },
+            {
+                "categoryId": "dss",
+                "name": "设备端服务",
+                "parentId": "iot",
+                "products": [
+                    "iotedge"
+                ]
+            },
+            {
+                "categoryId": "iniot",
+                "name": "行业物联网",
+                "parentId": "iot",
+                "products": [
+                    "cd"
+                ]
+            },
+            {
+                "categoryId": "developertools",
+                "name": "开发工具",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "apisdk",
+                "name": "API 与工具",
+                "parentId": "developertools",
+                "products": [
+                    "ros",
+                    "nodejs",
+                    "mpaas",
+                    "alibababcp"
+                ]
+            },
+            {
+                "categoryId": "apdevops",
+                "name": "云效DevOps",
+                "parentId": "developertools",
+                "products": [
+                    "rdc"
+                ]
+            },
+            {
+                "categoryId": "dp",
+                "name": "开发与运维",
+                "parentId": "developertools",
+                "products": [
+                    "miniappdev"
+                ]
+            },
+            {
+                "categoryId": "migrationom",
+                "name": "迁移与运维管理",
+                "parentId": "",
+                "products": []
+            },
+            {
+                "categoryId": "omm",
+                "name": "运维与监控",
+                "parentId": "migrationom",
+                "products": [
+                    "cms",
+                    "advisor",
+                    "oos",
+                    "cmn",
+                    "gemp",
+                    "naam"
+                ]
+            },
+            {
+                "categoryId": "cmgt",
+                "name": "云管理",
+                "parentId": "migrationom",
+                "products": [
+                    "ram",
+                    "actiontrail",
+                    "entconsole",
+                    "config",
+                    "composer",
+                    "quotas",
+                    "bpstudio",
+                    "cloudsso",
+                    "governance",
+                    "servicecatalog",
+                    "acmp"
+                ]
+            },
+            {
+                "categoryId": "bm",
+                "name": "备份与迁移",
+                "parentId": "migrationom",
+                "products": [
+                    "smc",
+                    "apds"
+                ]
+            },
+            {
+                "categoryId": "market",
+                "name": "云市场",
+                "parentId": "",
+                "products": [
+                    "market"
+                ]
+            },
+            {
+                "categoryId": "spc",
+                "name": "支持与服务",
+                "parentId": "",
+                "products": [
+                    "health"
+                ]
+            }
+        ],
+        "products": [
+            {
+                "productId": "mts",
+                "name": "媒体处理",
+                "link": "mps.console.aliyun.com",
+                "pinyin": "MEITICHULI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29194",
+                "pipId": "mts",
+                "inNav": true
+            },
+            {
+                "productId": "batchcompute",
+                "name": "批量计算",
+                "link": "batchcompute.console.aliyun.com",
+                "pinyin": "PILIANGJISUAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "27992",
+                "pipId": "batchcompute",
+                "inNav": true
+            },
+            {
+                "productId": "ram",
+                "name": "访问控制",
+                "link": "ram.console.aliyun.com",
+                "pinyin": "FANGWENKONGZHI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28625",
+                "pipId": "ram",
+                "inNav": true
+            },
+            {
+                "productId": "rds",
+                "name": "云数据库 RDS",
+                "link": "rdsnext.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU RDS",
+                "keywords": [
+                    "MySQL",
+                    "PostgreSQL",
+                    "SQL Server",
+                    "MariaDB",
+                    "MSSQL"
+                ],
+                "tag": "",
+                "docId": "26090",
+                "pipId": "rds",
+                "inNav": true
+            },
+            {
+                "productId": "ots",
+                "name": "表格存储",
+                "link": "ots.console.aliyun.com",
+                "pinyin": "BIAOGECUNCHU TABLESTORE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "27278",
+                "pipId": "ots",
+                "inNav": true
+            },
+            {
+                "productId": "ess",
+                "name": "弹性伸缩",
+                "link": "essnew.console.aliyun.com",
+                "pinyin": "DANXINGSHENSUO",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "25855",
+                "pipId": "ess",
+                "inNav": true
+            },
+            {
+                "productId": "ros",
+                "name": "资源编排",
+                "link": "ros.console.aliyun.com",
+                "pinyin": "ZIYUANBIANPAI ROS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28850",
+                "pipId": "ros",
+                "inNav": true
+            },
+            {
+                "productId": "yundun",
+                "name": "云盾",
+                "link": "yundun.console.aliyun.com",
+                "pinyin": "YUNDUN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "yundun",
+                "inNav": true
+            },
+            {
+                "productId": "emapreduce",
+                "name": "开源大数据平台 E-MapReduce",
+                "link": "emr-next.console.aliyun.com",
+                "pinyin": "KAIYUANDASHUJUPINGTAI E-MAPREDUCE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28066",
+                "pipId": "emapreduce",
+                "inNav": true
+            },
+            {
+                "productId": "slb",
+                "name": "负载均衡",
+                "link": "slb.console.aliyun.com",
+                "pinyin": "FUZAIJUNHENG",
+                "keywords": [
+                    "alb",
+                    "nlb",
+                    "clb"
+                ],
+                "tag": "",
+                "docId": "27537",
+                "pipId": "slb",
+                "inNav": true
+            },
+            {
+                "productId": "cdn",
+                "name": "CDN",
+                "link": "cdn.console.aliyun.com",
+                "pinyin": "CDN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "27099",
+                "pipId": "cdn",
+                "inNav": true
+            },
+            {
+                "productId": "mongodb",
+                "name": "云数据库 MongoDB 版",
+                "link": "mongodb.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU MONGODB BAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "26556",
+                "pipId": "mongodb",
+                "inNav": true
+            },
+            {
+                "productId": "vpc",
+                "name": "专有网络VPC",
+                "link": "vpc.console.aliyun.com",
+                "pinyin": "ZHUANYOUWANGLUO VPC",
+                "keywords": [],
+                "tag": "",
+                "docId": "27706",
+                "pipId": "vpc",
+                "inNav": true
+            },
+            {
+                "productId": "eip",
+                "name": "弹性公网IP",
+                "link": "vpc.console.aliyun.com/eip",
+                "pinyin": "DANXINGGONGWANG IP",
+                "keywords": [
+                    "eip"
+                ],
+                "tag": "",
+                "docId": "61789",
+                "pipId": "eip",
+                "inNav": true
+            },
+            {
+                "productId": "oss",
+                "name": "对象存储",
+                "link": "oss.console.aliyun.com",
+                "pinyin": "DUIXIANGCUNCHU OSS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "31815",
+                "pipId": "oss",
+                "inNav": true
+            },
+            {
+                "productId": "drds",
+                "name": "云原生分布式数据库 PolarDB-X",
+                "link": "polardb-x.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGSHUJUKU POLARDB FENBUSHIBAN",
+                "keywords": [
+                    "PolarDB",
+                    "云原生数据库",
+                    "分布式"
+                ],
+                "tag": "",
+                "docId": "29657",
+                "pipId": "drds",
+                "inNav": true
+            },
+            {
+                "productId": "ecs",
+                "name": "云服务器 ECS",
+                "link": "ecs.console.aliyun.com",
+                "pinyin": "YUNFUWUQI ECS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "25365",
+                "pipId": "ecs",
+                "inNav": true
+            },
+            {
+                "productId": "apigateway",
+                "name": "API 网关",
+                "link": "apigateway.console.aliyun.com",
+                "pinyin": "API WANGGUAN",
+                "keywords": [
+                    "api",
+                    "网关",
+                    "API"
+                ],
+                "tag": "",
+                "docId": "29462",
+                "pipId": "apigateway",
+                "inNav": true
+            },
+            {
+                "productId": "kvstore",
+                "name": "云数据库 Tair（兼容 Redis）",
+                "link": "kvstore.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU REDIS BAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "26340",
+                "pipId": "kvstore",
+                "inNav": true
+            },
+            {
+                "productId": "nas",
+                "name": "文件存储 NAS",
+                "link": "nas.console.aliyun.com",
+                "pinyin": "WENJIANCUNCHU NAS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "27516",
+                "pipId": "nas",
+                "inNav": true
+            },
+            {
+                "productId": "directmail",
+                "name": "邮件推送",
+                "link": "dm.console.aliyun.com",
+                "pinyin": "YOUJIANTUISONG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29412",
+                "pipId": "directmail",
+                "inNav": true
+            },
+            {
+                "productId": "kms",
+                "name": "密钥管理服务",
+                "link": "https://yundun.console.aliyun.com/?p=kms",
+                "pinyin": "MIYAOGUANLIFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28933",
+                "pipId": "kms",
+                "inNav": true
+            },
+            {
+                "productId": "sls",
+                "name": "日志服务",
+                "link": "sls.console.aliyun.com",
+                "pinyin": "RIZHIFUWU SLS",
+                "keywords": [
+                    "采集",
+                    "存储",
+                    "doris",
+                    "clickhouse",
+                    "log",
+                    "elastic",
+                    "elk"
+                ],
+                "tag": "",
+                "docId": "28958",
+                "pipId": "sls",
+                "inNav": true
+            },
+            {
+                "productId": "domain",
+                "name": "域名",
+                "link": "dc.console.aliyun.com/next/index",
+                "pinyin": "YUMING",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "35473",
+                "pipId": "domain",
+                "inNav": true
+            },
+            {
+                "productId": "alimail",
+                "name": "阿里邮箱",
+                "link": "alimail.console.aliyun.com",
+                "pinyin": "QIYEYOUXIANG",
+                "keywords": [
+                    "邮箱",
+                    "阿里邮箱",
+                    "阿里企业邮箱",
+                    "云邮箱",
+                    "阿里云邮箱",
+                    "企邮"
+                ],
+                "tag": "",
+                "docId": "35466",
+                "pipId": "alimail",
+                "inNav": true
+            },
+            {
+                "productId": "market",
+                "name": "云市场",
+                "link": "market.console.aliyun.com",
+                "pinyin": "YUNSHICHANG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "30488",
+                "pipId": "",
+                "inNav": true
+            },
+            {
+                "productId": "opensearch",
+                "name": "智能开放搜索 OpenSearch",
+                "link": "opensearch.console.aliyun.com",
+                "pinyin": "ZHINENGKAIFANGSOUSUO OPENSEARCH",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29102",
+                "pipId": "opensearch",
+                "inNav": true
+            },
+            {
+                "productId": "dns",
+                "name": "云解析DNS",
+                "link": "dns.console.aliyun.com",
+                "pinyin": "YUNJIEXI DNS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29697",
+                "pipId": "dns",
+                "inNav": true
+            },
+            {
+                "productId": "pts",
+                "name": "性能测试",
+                "link": "pts.console.aliyun.com",
+                "pinyin": "XINGNENGCESHI",
+                "keywords": [
+                    "云压测",
+                    "压测",
+                    "容量规划",
+                    "压力测试",
+                    "jmeter",
+                    "脚本测试",
+                    "验证"
+                ],
+                "tag": "",
+                "docId": "29260",
+                "pipId": "pts",
+                "inNav": true
+            },
+            {
+                "productId": "mns",
+                "name": "轻量消息队列（原 MNS）",
+                "link": "mns.console.aliyun.com",
+                "pinyin": "XIAOXIFUWU MNS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "27412",
+                "pipId": "mns",
+                "inNav": true
+            },
+            {
+                "productId": "ads",
+                "name": "云原生数据仓库AnalyticDB MySQL版",
+                "link": "ads.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGSHUJUCANGKU ANALYTICDB MYSQL BAN",
+                "keywords": [
+                    "adbmysql",
+                    "ADB",
+                    "AnalyticDB",
+                    "MySQL",
+                    "data warehouse",
+                    "data lake",
+                    "数据湖"
+                ],
+                "tag": "",
+                "docId": "92664",
+                "pipId": "ads",
+                "inNav": true
+            },
+            {
+                "productId": "rocketmq",
+                "name": "云消息队列 RocketMQ 版",
+                "link": "ons.console.aliyun.com",
+                "pinyin": "XIAOXIDUILIE ROCKETMQ BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29530",
+                "pipId": "rocketmq",
+                "inNav": true
+            },
+            {
+                "productId": "dts",
+                "name": "数据传输服务",
+                "link": "dtsnew.console.aliyun.com",
+                "pinyin": "SHUJUCHUANSHUFUWU DTS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "26590",
+                "pipId": "dts",
+                "inNav": true
+            },
+            {
+                "productId": "cms",
+                "name": "云监控",
+                "link": "cloudmonitornext.console.aliyun.com",
+                "pinyin": "YUNJIANKONG",
+                "keywords": [
+                    "测速",
+                    "网络",
+                    "运维",
+                    "告警",
+                    "DNS",
+                    "诊断",
+                    "报警"
+                ],
+                "tag": "",
+                "docId": "28572",
+                "pipId": "cms",
+                "inNav": true
+            },
+            {
+                "productId": "dms",
+                "name": "数据管理",
+                "link": "dms.aliyun.com",
+                "pinyin": "SHUJUGUANLI DMS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "26437",
+                "pipId": "dms",
+                "inNav": true
+            },
+            {
+                "productId": "actiontrail",
+                "name": "操作审计",
+                "link": "actiontrail.console.aliyun.com",
+                "pinyin": "CAOZUOSHENJI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28802",
+                "pipId": "actiontrail",
+                "inNav": true
+            },
+            {
+                "productId": "expressconnect",
+                "name": "高速通道",
+                "link": "expressconnect.console.aliyun.com",
+                "pinyin": "GAOSUTONGDAO",
+                "keywords": [],
+                "tag": "",
+                "docId": "27782",
+                "pipId": "expressconnect",
+                "inNav": true
+            },
+            {
+                "productId": "odps",
+                "name": "云原生大数据计算服务 MaxCompute",
+                "link": "maxcompute.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGDASHUJUJISUANFUWU MAXCOMPUTE",
+                "keywords": [
+                    "大数据",
+                    "数仓",
+                    "bigdata",
+                    "离线实时一体化",
+                    "maxframe",
+                    "mc",
+                    "maxqa"
+                ],
+                "tag": "",
+                "docId": "27797",
+                "pipId": "odps",
+                "inNav": true
+            },
+            {
+                "productId": "edas",
+                "name": "企业级分布式应用服务",
+                "link": "edas.console.aliyun.com",
+                "pinyin": "QIYEJIFENBUSHIYINGYONGFUWU EDAS",
+                "keywords": [
+                    "微服务",
+                    "Dubbo",
+                    "Spring Cloud",
+                    "OAM",
+                    "镜像部署",
+                    "Tomcat",
+                    "应用部署"
+                ],
+                "tag": "",
+                "docId": "29500",
+                "pipId": "edas",
+                "inNav": true
+            },
+            {
+                "productId": "vod",
+                "name": "视频点播",
+                "link": "vod.console.aliyun.com",
+                "pinyin": "SHIPINDIANBO",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "29932",
+                "pipId": "vod",
+                "inNav": true
+            },
+            {
+                "productId": "live",
+                "name": "视频直播",
+                "link": "live.console.aliyun.com",
+                "pinyin": "SHIPINZHIBO",
+                "keywords": [],
+                "tag": "",
+                "docId": "29949",
+                "pipId": "live",
+                "inNav": true
+            },
+            {
+                "productId": "sas",
+                "name": "云安全中心",
+                "link": "yundun.console.aliyun.com/?p=sas",
+                "pinyin": "YUNANQUANZHONGXIN",
+                "keywords": [
+                    "aqs",
+                    "安骑士"
+                ],
+                "tag": "",
+                "docId": "28498",
+                "pipId": "sas",
+                "inNav": true
+            },
+            {
+                "productId": "xianzhi",
+                "name": "安全众测",
+                "link": "yundun.console.aliyun.com/?p=xz",
+                "pinyin": "XIANZHI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28376",
+                "pipId": "xianzhi",
+                "inNav": true
+            },
+            {
+                "productId": "ddos",
+                "name": "DDoS防护",
+                "link": "yundun.console.aliyun.com/?p=ddos",
+                "pinyin": "LIULIANGANQUAN（DDOS JICHUFANGHU）",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28396",
+                "pipId": "ddos",
+                "inNav": true
+            },
+            {
+                "productId": "waf",
+                "name": "Web应用防火墙",
+                "link": "yundun.console.aliyun.com/?p=wafnext",
+                "pinyin": "WEB YINGYONGFANGHUOQIANG WAF",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28515",
+                "pipId": "waf",
+                "inNav": true
+            },
+            {
+                "productId": "captcha",
+                "name": "验证码",
+                "link": "yundun.console.aliyun.com/?p=captcha",
+                "pinyin": "YANZHENGMA",
+                "keywords": [
+                    "人机识别",
+                    "滑块",
+                    "自动化工具",
+                    "脚本"
+                ],
+                "tag": "",
+                "docId": "28308",
+                "pipId": "captcha",
+                "inNav": true
+            },
+            {
+                "productId": "hsm",
+                "name": "加密服务",
+                "link": "yundun.console.aliyun.com/?p=hsm",
+                "pinyin": "JIAMIFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28341",
+                "pipId": "hsm",
+                "inNav": true
+            },
+            {
+                "productId": "cas",
+                "name": "数字证书管理服务（原SSL证书）",
+                "link": "yundun.console.aliyun.com/?p=cas",
+                "pinyin": "SHUZIZHENGSHUGUANLIFUWU（SSL ZHENGSHU）",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28533",
+                "pipId": "cas",
+                "inNav": true
+            },
+            {
+                "productId": "sos",
+                "name": "安全管家",
+                "link": "yundun.console.aliyun.com/?p=mss",
+                "pinyin": "ANQUANGUANJIA",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "42806",
+                "pipId": "sos",
+                "inNav": true
+            },
+            {
+                "productId": "lvwang",
+                "name": "内容安全",
+                "link": "yundun.console.aliyun.com/?p=cts",
+                "pinyin": "NEIRONGANQUAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28415",
+                "pipId": "lvwang",
+                "inNav": true
+            },
+            {
+                "productId": "gpdb",
+                "name": "云原生数据仓库 AnalyticDB PostgreSQL版",
+                "link": "gpdbnext.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGSHUJUCANGKU ANALYTICDB POSTGRESQL BAN",
+                "keywords": [
+                    "ADB",
+                    "AnalyticDB",
+                    "ADBPG",
+                    "PostgreSQL",
+                    "数据湖",
+                    "实时数仓",
+                    "Analytics"
+                ],
+                "tag": "",
+                "docId": "92664",
+                "pipId": "gpdb",
+                "inNav": true
+            },
+            {
+                "productId": "arms",
+                "name": "应用实时监控服务",
+                "link": "arms.console.aliyun.com",
+                "pinyin": "YINGYONGSHISHIJIANKONGFUWU ARMS",
+                "keywords": [
+                    "调用链",
+                    "go应用",
+                    "java应用",
+                    "app监控",
+                    "网站监控",
+                    "链路追踪",
+                    "skywalking"
+                ],
+                "tag": "",
+                "docId": "34364",
+                "pipId": "arms",
+                "inNav": true
+            },
+            {
+                "productId": "iot",
+                "name": "物联网平台",
+                "link": "iot.console.aliyun.com",
+                "pinyin": "WULIANWANGPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "30520",
+                "pipId": "iot",
+                "inNav": true
+            },
+            {
+                "productId": "oceanbase",
+                "name": "云数据库 OceanBase 版",
+                "link": "oceanbasenext.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU OCEANBASE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "26458",
+                "pipId": "oceanbase",
+                "inNav": true
+            },
+            {
+                "productId": "dide",
+                "name": "大数据开发治理平台 DataWorks",
+                "link": "dataworks.console.aliyun.com/overview",
+                "pinyin": "DASHUJUKAIFAZHILIPINGTAI DATAWORKS",
+                "keywords": [
+                    "dataworks控制台",
+                    "DW",
+                    "数据开发",
+                    "数据治理",
+                    "数据集成",
+                    "智能建模",
+                    "数据分析"
+                ],
+                "tag": "",
+                "docId": "72772",
+                "pipId": "dide",
+                "inNav": true
+            },
+            {
+                "productId": "quickbi",
+                "name": "智能商业分析 Quick BI",
+                "link": "bi.aliyun.com",
+                "pinyin": "SHUJUKESHIHUAFENXI QUICKBI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "30343",
+                "pipId": "quickbi",
+                "inNav": true
+            },
+            {
+                "productId": "datav",
+                "name": "DataV数据可视化",
+                "link": "datav.aliyun.com",
+                "pinyin": "SHUJUKESHIHUA DATAV",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "43570",
+                "pipId": "datav",
+                "inNav": true
+            },
+            {
+                "productId": "learn",
+                "name": "人工智能平台 PAI",
+                "link": "pai.console.aliyun.com",
+                "pinyin": "RENGONGZHINENGPINGTAIPAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "30347",
+                "pipId": "learn",
+                "inNav": true
+            },
+            {
+                "productId": "nls",
+                "name": "智能语音交互",
+                "link": "nls-portal.console.aliyun.com",
+                "pinyin": "ZHINENGYUYINJIAOHU",
+                "keywords": [],
+                "tag": "",
+                "docId": "30413",
+                "pipId": "nls",
+                "inNav": true
+            },
+            {
+                "productId": "sc",
+                "name": "实时计算 Flink版",
+                "link": "realtime-compute.console.aliyun.com",
+                "pinyin": "SHISHIJISUAN FLINK BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "45029",
+                "pipId": "sc",
+                "inNav": true
+            },
+            {
+                "productId": "acr",
+                "name": "容器镜像服务",
+                "link": "cr.console.aliyun.com",
+                "pinyin": "RONGQIJINGXIANGFUWU ACR",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "60716",
+                "pipId": "acr",
+                "inNav": true
+            },
+            {
+                "productId": "hbase",
+                "name": "云数据库HBase版",
+                "link": "hbase.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU HBASE BAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "49055",
+                "pipId": "hbase",
+                "inNav": true
+            },
+            {
+                "productId": "sca",
+                "name": "智能对话分析",
+                "link": "sca.console.aliyun.com",
+                "pinyin": "ZHINENGDUIHUAFENXI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "50727",
+                "pipId": "sca",
+                "inNav": true
+            },
+            {
+                "productId": "rdc",
+                "name": "云效",
+                "link": "devops.console.aliyun.com",
+                "pinyin": "YUNXIAO DEVOPS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "150040",
+                "pipId": "rdc",
+                "inNav": true
+            },
+            {
+                "productId": "fc",
+                "name": "函数计算",
+                "link": "fcnext.console.aliyun.com",
+                "pinyin": "HANSHUJISUAN FC",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "2508973",
+                "pipId": "fc",
+                "inNav": true
+            },
+            {
+                "productId": "bastionhost",
+                "name": "运维安全中心（堡垒机）",
+                "link": "yundun.console.aliyun.com/?p=bastion",
+                "pinyin": "BAOLEIJI（ANQUANYUNWEI）",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "52862",
+                "pipId": "bastionhost",
+                "inNav": true
+            },
+            {
+                "productId": "pcdn",
+                "name": "PCDN",
+                "link": "pcdn.console.aliyun.com",
+                "pinyin": "PCDN",
+                "keywords": [
+                    "内容分发网络"
+                ],
+                "tag": "",
+                "docId": "54287",
+                "pipId": "pcdn",
+                "inNav": true
+            },
+            {
+                "productId": "hitsdb",
+                "name": "时序时空数据库TSDB",
+                "link": "tsdb.console.aliyun.com",
+                "pinyin": "SHIXUSHUJUKU TSDB",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "54825",
+                "pipId": "hitsdb",
+                "inNav": true
+            },
+            {
+                "productId": "nat",
+                "name": "NAT网关",
+                "link": "vpc.console.aliyun.com/nat",
+                "pinyin": "NAT WANGGUAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "44413",
+                "pipId": "nat",
+                "inNav": true
+            },
+            {
+                "productId": "memcache",
+                "name": "云数据库 Memcache 版",
+                "link": "kvstore.console.aliyun.com/?instanceType=Memcache",
+                "pinyin": "YUNSHUJUKU MEMCACHE BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "26528",
+                "pipId": "ocs",
+                "inNav": true
+            },
+            {
+                "productId": "vpn",
+                "name": "VPN网关",
+                "link": "vpc.console.aliyun.com/vpn",
+                "pinyin": "VPN WANGGUAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "65234",
+                "pipId": "vpn",
+                "inNav": true
+            },
+            {
+                "productId": "dyvms",
+                "name": "语音服务",
+                "link": "dyvms.console.aliyun.com/dyvms.htm",
+                "pinyin": "YUYINFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "54853",
+                "pipId": "dyvms",
+                "inNav": true
+            },
+            {
+                "productId": "dysms",
+                "name": "短信服务",
+                "link": "dysms.console.aliyun.com/dysms.htm",
+                "pinyin": "DUANXINFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "44282",
+                "pipId": "dysms",
+                "inNav": true
+            },
+            {
+                "productId": "hcs_sgw",
+                "name": "云存储网关",
+                "link": "sgwnew.console.aliyun.com",
+                "pinyin": "YUNCUNCHUWANGGUAN CSG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "53923",
+                "pipId": "hcs_sgw",
+                "inNav": true
+            },
+            {
+                "productId": "cbwp",
+                "name": "共享带宽",
+                "link": "vpc.console.aliyun.com/#/cbwp/cn-hangzhou/list",
+                "pinyin": "GONGXIANGDAIKUAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "55092",
+                "pipId": "cbwp",
+                "inNav": true
+            },
+            {
+                "productId": "ga",
+                "name": "全球加速",
+                "link": "ga.console.aliyun.com",
+                "pinyin": "QUANQIUJIASU",
+                "keywords": [
+                    "ipv6",
+                    "加速",
+                    "网络加速",
+                    "ipv6转换"
+                ],
+                "tag": "",
+                "docId": "55629",
+                "pipId": "ga",
+                "inNav": true
+            },
+            {
+                "productId": "cfw",
+                "name": "云防火墙",
+                "link": "yundun.console.aliyun.com/cfw",
+                "pinyin": "YUNFANGHUOQIANG（WANGLUOANQUAN）",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "90174",
+                "pipId": "cfw",
+                "inNav": true
+            },
+            {
+                "productId": "elasticsearch",
+                "name": "检索分析服务 Elasticsearch版",
+                "link": "elasticsearch.console.aliyun.com",
+                "pinyin": "JIANSUOFENXIFUWU ELASTICSEARCH BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "57736",
+                "pipId": "elasticsearch",
+                "inNav": true
+            },
+            {
+                "productId": "ccs",
+                "name": "客服工作台",
+                "link": "alime.console.aliyun.com",
+                "pinyin": "KEFUGONGZUOTAI",
+                "keywords": [
+                    "客服",
+                    "IM",
+                    "坐席",
+                    "联络中心"
+                ],
+                "tag": "",
+                "docId": "55138",
+                "pipId": "ccs",
+                "inNav": true
+            },
+            {
+                "productId": "ehpc",
+                "name": "弹性高性能计算",
+                "link": "ehpcnext.console.aliyun.com",
+                "pinyin": "DANXINGGAOXINGNENGJISUAN E-HPC",
+                "keywords": [
+                    "hpc",
+                    "高性能计算",
+                    "超算",
+                    "并行计算"
+                ],
+                "tag": "",
+                "docId": "57664",
+                "pipId": "ehpc",
+                "inNav": true
+            },
+            {
+                "productId": "swas",
+                "name": "轻量应用服务器",
+                "link": "swasnext.console.aliyun.com",
+                "pinyin": "QINGLIANGYINGYONGFUWUQI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "58607",
+                "pipId": "swas",
+                "inNav": true
+            },
+            {
+                "productId": "cbs",
+                "name": "数据库备份",
+                "link": "dbs.console.aliyun.com",
+                "pinyin": "SHUJUKUBEIFEN DBS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "58992",
+                "pipId": "cbs",
+                "inNav": true
+            },
+            {
+                "productId": "imm",
+                "name": "智能媒体管理",
+                "link": "imm.console.aliyun.com",
+                "pinyin": "ZHINENGMEITIGUANLI IMM",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "62354",
+                "pipId": "imm",
+                "inNav": true
+            },
+            {
+                "productId": "dyiot",
+                "name": "物联网无线连接服务",
+                "link": "dyiotnext.console.aliyun.com/overview",
+                "pinyin": "WULIANWANGWUXIANLIANJIEFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "57702",
+                "pipId": "dyiot",
+                "inNav": true
+            },
+            {
+                "productId": "beebot",
+                "name": "智能对话机器人",
+                "link": "chatbot.console.aliyun.com",
+                "pinyin": "ZHINENGDUIHUAJIQIREN（YUNXIAOMI）",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "59495",
+                "pipId": "beebot",
+                "inNav": true
+            },
+            {
+                "productId": "ccc",
+                "name": "云联络中心",
+                "link": "ccc.console.aliyun.com",
+                "pinyin": "YUNLIANLUOZHONGXIN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "59499",
+                "pipId": "ccc",
+                "inNav": true
+            },
+            {
+                "productId": "dypls",
+                "name": "号码隐私保护",
+                "link": "dyplsnext.console.aliyun.com",
+                "pinyin": "HAOMAYINSIBAOHU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "59433",
+                "pipId": "dypls",
+                "inNav": true
+            },
+            {
+                "productId": "cloudauth",
+                "name": "实人认证",
+                "link": "yundun.console.aliyun.com/?p=cloudauth",
+                "pinyin": "SHIRENRENZHENG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "57038",
+                "pipId": "cloudauth",
+                "inNav": true
+            },
+            {
+                "productId": "polardb",
+                "name": "云原生数据库 PolarDB",
+                "link": "yaochi.console.aliyun.com/overview?selectMenuProducts=polardb",
+                "pinyin": "YUNYUANSHENGSHUJUKU POLARDB",
+                "keywords": [
+                    "MySQL",
+                    "PostgreSQL",
+                    "GDN",
+                    "全球多活数据库"
+                ],
+                "tag": "",
+                "docId": "58609",
+                "pipId": "polardb",
+                "inNav": true
+            },
+            {
+                "productId": "nlp",
+                "name": "自然语言处理",
+                "link": "alinlp.console.aliyun.com",
+                "pinyin": "ZIRANYUYANCHULI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "60058",
+                "pipId": "nlp",
+                "inNav": true
+            },
+            {
+                "productId": "ens",
+                "name": "边缘节点服务 ENS",
+                "link": "ens.console.aliyun.com",
+                "pinyin": "BIANYUANJIEDIANFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "62684",
+                "pipId": "ens",
+                "inNav": true
+            },
+            {
+                "productId": "cbn",
+                "name": "云企业网",
+                "link": "cen.console.aliyun.com",
+                "pinyin": "YUNQIYEWANG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "59006",
+                "pipId": "cbn",
+                "inNav": true
+            },
+            {
+                "productId": "hbr",
+                "name": "云备份",
+                "link": "hbr.console.aliyun.com",
+                "pinyin": "YUNBEIFEN CLOUD BACKUP",
+                "keywords": [
+                    "备份",
+                    "容灾",
+                    "灾备"
+                ],
+                "tag": "",
+                "docId": "60939",
+                "pipId": "hbr",
+                "inNav": true
+            },
+            {
+                "productId": "hdr",
+                "name": "混合云容灾服务",
+                "link": "hdr.console.aliyun.com",
+                "pinyin": "HUNHEYUNRONGZAI HDR",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "60938",
+                "pipId": "hdr",
+                "inNav": true
+            },
+            {
+                "productId": "advisor",
+                "name": "智能顾问",
+                "link": "advisor.console.aliyun.com",
+                "pinyin": "ZHINENGGUWEN ADVISOR",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "65862",
+                "pipId": "advisor",
+                "inNav": true
+            },
+            {
+                "productId": "nodejs",
+                "name": "Node.js 性能平台",
+                "link": "node.console.aliyun.com",
+                "pinyin": "NODE.JS XINGNENGPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "60298",
+                "pipId": "nodejs",
+                "inNav": true
+            },
+            {
+                "productId": "imagesearch",
+                "name": "图像搜索",
+                "link": "imagesearch.console.aliyun.com",
+                "pinyin": "TUXIANGSOUSUO",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "66413",
+                "pipId": "imagesearch",
+                "inNav": true
+            },
+            {
+                "productId": "hdm",
+                "name": "数据库自治服务",
+                "link": "hdm.console.aliyun.com",
+                "pinyin": "SHUJUKUZIZHIFUWU DAS",
+                "keywords": [
+                    "das"
+                ],
+                "tag": "",
+                "docId": "63907",
+                "pipId": "hdm",
+                "inNav": true
+            },
+            {
+                "productId": "dcdn",
+                "name": "边缘安全加速",
+                "link": "esa.console.aliyun.com",
+                "pinyin": "QUANZHANJIASU",
+                "keywords": [
+                    "ESA",
+                    "esa",
+                    "安全加速",
+                    "边缘加速",
+                    "边缘计算",
+                    "全球加速",
+                    "CDN"
+                ],
+                "tag": "",
+                "docId": "2854695",
+                "pipId": "dcdn",
+                "inNav": true
+            },
+            {
+                "productId": "iovcc",
+                "name": "自动驾驶云开发平台",
+                "link": "iovcc.console.aliyun.com",
+                "pinyin": "ZHILIANCHEGUANLIYUNPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "71329",
+                "pipId": "iovcc",
+                "inNav": true
+            },
+            {
+                "productId": "iotedge",
+                "name": "物联网边缘计算",
+                "link": "iotedge.console.aliyun.com",
+                "pinyin": "WULIANWANGBIANYUANJISUAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "69083",
+                "pipId": "iotedge",
+                "inNav": true
+            },
+            {
+                "productId": "smartag",
+                "name": "智能接入网关",
+                "link": "smartag.console.aliyun.com",
+                "pinyin": "ZHINENGJIERUWANGGUAN",
+                "keywords": [],
+                "tag": "",
+                "docId": "68086",
+                "pipId": "smartag",
+                "inNav": true
+            },
+            {
+                "productId": "saf",
+                "name": "风险识别",
+                "link": "yundun.console.aliyun.com/?p=saf",
+                "pinyin": "FENGXIANSHIBIE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "69981",
+                "pipId": "saf",
+                "inNav": true
+            },
+            {
+                "productId": "rtc",
+                "name": "音视频通信",
+                "link": "rtc.console.aliyun.com",
+                "pinyin": "YINSHIPINTONGXIN RTC",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "61399",
+                "pipId": "rtc",
+                "inNav": true
+            },
+            {
+                "productId": "ddospro",
+                "name": "DDoS 高防",
+                "link": "yundun.console.aliyun.com/?p=ddoscoo",
+                "pinyin": "DDOS GAOFANG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "28396",
+                "pipId": "aliyun_ddos_ddospro",
+                "inNav": true
+            },
+            {
+                "productId": "alikafka",
+                "name": "云消息队列 Kafka 版",
+                "link": "kafka.console.aliyun.com",
+                "pinyin": "XIAOXIDUILIE KAFKA BAN",
+                "keywords": [
+                    "kafka、消息队列、消息队列Kafka"
+                ],
+                "tag": "",
+                "docId": "68138",
+                "pipId": "alikafka",
+                "inNav": true
+            },
+            {
+                "productId": "csk",
+                "name": "容器服务Kubernetes版",
+                "link": "cs.console.aliyun.com/#/k8s",
+                "pinyin": "RONGQIFUWU KUBERNETES BAN",
+                "keywords": [
+                    "ack",
+                    "k8s"
+                ],
+                "tag": "",
+                "docId": "85222",
+                "pipId": "csk",
+                "inNav": true
+            },
+            {
+                "productId": "baas",
+                "name": "区块链服务",
+                "link": "baas.console.aliyun.com",
+                "pinyin": "QUKUAILIANFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "84950",
+                "pipId": "baas",
+                "inNav": true
+            },
+            {
+                "productId": "dypns",
+                "name": "号码认证服务",
+                "link": "dypns.console.aliyun.com",
+                "pinyin": "HAOMARENZHENGFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "75010",
+                "pipId": "dypns",
+                "inNav": true
+            },
+            {
+                "productId": "adam",
+                "name": "数据库和应用迁移",
+                "link": "adam.console.aliyun.com",
+                "pinyin": "SHUJUKUHEYINGYONGQIANYI ADAM",
+                "keywords": [],
+                "tag": "",
+                "docId": "53556",
+                "pipId": "adam",
+                "inNav": true
+            },
+            {
+                "productId": "hcs_mgw",
+                "name": "闪电立方",
+                "link": "https://mgwnext.console.aliyun.com/offline-mg-task",
+                "pinyin": "SHANDIANLIFANG DATATRANSPORT",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "94157",
+                "pipId": "hcs_mgw",
+                "inNav": true
+            },
+            {
+                "productId": "ahas",
+                "name": "应用高可用服务",
+                "link": "ahas.console.aliyun.com",
+                "pinyin": "YINGYONGGAOKEYONGFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "87450",
+                "pipId": "ahas",
+                "inNav": true
+            },
+            {
+                "productId": "openanalytics",
+                "name": "云原生数据湖分析",
+                "link": "datalakeanalytics.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGSHUJUHUFENXI",
+                "keywords": [
+                    "dla"
+                ],
+                "tag": "",
+                "docId": "70174",
+                "pipId": "openanalytics",
+                "inNav": true
+            },
+            {
+                "productId": "snsu",
+                "name": "边缘网络加速",
+                "link": "jssy.console.aliyun.com",
+                "pinyin": "BIANYUANWANGLUOJIASU ENA",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "86106",
+                "pipId": "snsu",
+                "inNav": true
+            },
+            {
+                "productId": "alidfs",
+                "name": "文件存储HDFS版",
+                "link": "dfs.console.aliyun.com",
+                "pinyin": "WENJIANCUNCHU HDFS",
+                "keywords": [],
+                "tag": "",
+                "docId": "87442",
+                "pipId": "alidfs",
+                "inNav": true
+            },
+            {
+                "productId": "trademark",
+                "name": "商标服务",
+                "link": "https://tm.console.aliyun.com/#/overview",
+                "pinyin": "SHANGBIAOFUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "88591",
+                "pipId": "trademark",
+                "inNav": true
+            },
+            {
+                "productId": "dataphin",
+                "name": "智能数据建设与治理 Dataphin",
+                "link": "dataphin.console.aliyun.com",
+                "pinyin": "ZHINENGSHUJUJIANSHEYUZHILI DATAPHIN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "87584",
+                "pipId": "dataphin",
+                "inNav": true
+            },
+            {
+                "productId": "sddp",
+                "name": "数据安全中心",
+                "link": "yundun.console.aliyun.com/?p=sddp",
+                "pinyin": "SHUJUANQUANZHONGXIN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "88674",
+                "pipId": "sddp",
+                "inNav": true
+            },
+            {
+                "productId": "alimt",
+                "name": "机器翻译",
+                "link": "mt.console.aliyun.com",
+                "pinyin": "JIQIFANYI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "30396",
+                "pipId": "alimt",
+                "inNav": true
+            },
+            {
+                "productId": "eci",
+                "name": "弹性容器实例",
+                "link": "eci.console.aliyun.com",
+                "pinyin": "DANXINGRONGQISHILI ECI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "87486",
+                "pipId": "eci",
+                "inNav": true
+            },
+            {
+                "productId": "xtrace",
+                "name": "可观测链路 OpenTelemetry 版",
+                "link": "trace.console.aliyun.com",
+                "pinyin": "KEGUANCELIANLUOPENTELEMETRYBAN",
+                "keywords": [
+                    "链路追踪",
+                    "调用链",
+                    "opentelemetry",
+                    "skywalking",
+                    "php",
+                    "trace",
+                    "span"
+                ],
+                "tag": "",
+                "docId": "90275",
+                "pipId": "xtrace",
+                "inNav": true
+            },
+            {
+                "productId": "entconsole",
+                "name": "资源管理",
+                "link": "resourcemanager.console.aliyun.com",
+                "pinyin": "ZIYUANGUANLI",
+                "keywords": [
+                    "资源目录",
+                    "资源组",
+                    "资源中心",
+                    "资源共享",
+                    "标签"
+                ],
+                "tag": "",
+                "docId": "94362",
+                "pipId": "entconsole",
+                "inNav": true
+            },
+            {
+                "productId": "linkwan",
+                "name": "物联网络管理平台",
+                "link": "linkwan.console.aliyun.com",
+                "pinyin": "WULIANWANGLUOGUANLIPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "96281",
+                "pipId": "linkwan",
+                "inNav": true
+            },
+            {
+                "productId": "gds",
+                "name": "图数据库",
+                "link": "gdb.console.aliyun.com",
+                "pinyin": "TUSHUJUKU GDB",
+                "keywords": [],
+                "tag": "",
+                "docId": "102714",
+                "pipId": "gds",
+                "inNav": true
+            },
+            {
+                "productId": "airec",
+                "name": "智能推荐 AIRec",
+                "link": "airec.console.aliyun.com",
+                "pinyin": "ZHINENGTUIJIAN AIREC",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "95045",
+                "pipId": "airec",
+                "inNav": true
+            },
+            {
+                "productId": "rabbitmq",
+                "name": "云消息队列 RabbitMQ 版",
+                "link": "amqp.console.aliyun.com",
+                "pinyin": "XIAOXIDUILIE RABBITMQ BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "100989",
+                "pipId": "rabbitmq",
+                "inNav": true
+            },
+            {
+                "productId": "iotid",
+                "name": "IoT设备身份认证",
+                "link": "https://iotsec.console.aliyun.com/",
+                "pinyin": "WULIANWANGSHEBEISHENFENRENZHENG",
+                "keywords": [
+                    "IoT设备身份认证、设备安全上云、IoT数据安全、区块链安全、物联网安全、IoT安全、设备安全、IoT安全运营、IoT安全管理、RFID、安全芯片"
+                ],
+                "tag": "",
+                "docId": "100846",
+                "pipId": "iotid",
+                "inNav": true
+            },
+            {
+                "productId": "vs",
+                "name": "视图计算",
+                "link": "vs.console.aliyun.com",
+                "pinyin": "SHITUJISUAN",
+                "keywords": [
+                    "视频监控",
+                    "VEC",
+                    "监控"
+                ],
+                "tag": "",
+                "docId": "108765",
+                "pipId": "vs",
+                "inNav": true
+            },
+            {
+                "productId": "config",
+                "name": "配置审计",
+                "link": "config.console.aliyun.com",
+                "pinyin": "PEIZHISHENJI",
+                "keywords": [
+                    "Compliance as Code",
+                    "cac",
+                    "合规性既代码"
+                ],
+                "tag": "",
+                "docId": "127306",
+                "pipId": "config",
+                "inNav": true
+            },
+            {
+                "productId": "yida",
+                "name": "宜搭",
+                "link": "yida.console.aliyun.com",
+                "pinyin": "YIDA",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "109414",
+                "pipId": "yida",
+                "inNav": true
+            },
+            {
+                "productId": "fnf",
+                "name": "云工作流",
+                "link": "fnf.console.aliyun.com",
+                "pinyin": "YUNGONGZUOLIU CLOUDFLOW",
+                "keywords": [
+                    "云工作流",
+                    "工作流"
+                ],
+                "tag": "",
+                "docId": "113549",
+                "pipId": "fnf",
+                "inNav": true
+            },
+            {
+                "productId": "mqtt",
+                "name": "云消息队列 MQTT 版",
+                "link": "mqtt.console.aliyun.com",
+                "pinyin": "WEIXIAOXIDUILIE MQTT BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "100973",
+                "pipId": "mqtt",
+                "inNav": true
+            },
+            {
+                "productId": "miniappdev",
+                "name": "多端低代码开发平台魔笔",
+                "link": "mobinext.console.aliyun.com/welcome",
+                "pinyin": "XIAOCHENGXUYUN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "2834523",
+                "pipId": "miniappdev",
+                "inNav": true
+            },
+            {
+                "productId": "composer",
+                "name": "逻辑编排",
+                "link": "lc.console.aliyun.com",
+                "pinyin": "LUOJIBIANPAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "113555",
+                "pipId": "composer",
+                "inNav": true
+            },
+            {
+                "productId": "idaas",
+                "name": "应用身份服务 (IDaaS)",
+                "link": "yundun.console.aliyun.com/?p=idaas",
+                "pinyin": "YINGYONGSHENFENFUWU（IDAAS）",
+                "keywords": [],
+                "tag": "",
+                "docId": "111120",
+                "pipId": "idaas",
+                "inNav": true
+            },
+            {
+                "productId": "companyreg",
+                "name": "备案服务",
+                "link": "companyreg.console.aliyun.com",
+                "pinyin": "BEIANFUWU",
+                "keywords": [
+                    "备案"
+                ],
+                "tag": "",
+                "docId": "35468",
+                "pipId": "companyreg",
+                "inNav": true
+            },
+            {
+                "productId": "sae",
+                "name": "Serverless 应用引擎",
+                "link": "saenext.console.aliyun.com",
+                "pinyin": "SERVERLESS YINGYONGYINQING SAE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "118957",
+                "pipId": "sae",
+                "inNav": true
+            },
+            {
+                "productId": "mse",
+                "name": "微服务引擎",
+                "link": "mse.console.aliyun.com",
+                "pinyin": "WEIFUWUYINQING",
+                "keywords": [
+                    "nacos",
+                    "zookeeper",
+                    "ingress",
+                    "云原生网关",
+                    "限流",
+                    "治理"
+                ],
+                "tag": "",
+                "docId": "123350",
+                "pipId": "mse",
+                "inNav": true
+            },
+            {
+                "productId": "dg",
+                "name": "数据库网关",
+                "link": "dg.console.aliyun.com",
+                "pinyin": "SHUJUKUWANGGUAN DG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "117995",
+                "pipId": "dg",
+                "inNav": false
+            },
+            {
+                "productId": "aiccs",
+                "name": "智能联络中心",
+                "link": "aiccs.console.aliyun.com",
+                "pinyin": "ZHINENGLIANLUOZHONGXIN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "126730",
+                "pipId": "aiccs",
+                "inNav": true
+            },
+            {
+                "productId": "oos",
+                "name": "系统运维管理",
+                "link": "oos.console.aliyun.com",
+                "pinyin": "XITONGYUNWEIGUANLI OOS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "119529",
+                "pipId": "oos",
+                "inNav": true
+            },
+            {
+                "productId": "emas",
+                "name": "移动研发平台",
+                "link": "emas.console.aliyun.com",
+                "pinyin": "YIDONGYANFAPINGTAI",
+                "keywords": [
+                    "HTTPDNS",
+                    "Web/H5监控",
+                    "崩溃分析",
+                    "性能分析",
+                    "远程日志",
+                    "移动推送",
+                    "移动热修复"
+                ],
+                "tag": "",
+                "docId": "65109",
+                "pipId": "emas",
+                "inNav": true
+            },
+            {
+                "productId": "swcopyright",
+                "name": "版权与专利服务",
+                "link": "copyright.console.aliyun.com",
+                "pinyin": "BANQUANYUZHUANLIFUWU",
+                "keywords": [
+                    "专利智能管家",
+                    "专利管家",
+                    "专利续费",
+                    "软著",
+                    "软件著作权登记",
+                    "软著在线登记"
+                ],
+                "tag": "",
+                "docId": "128042",
+                "pipId": "swcopyright",
+                "inNav": true
+            },
+            {
+                "productId": "sofa",
+                "name": "金融分布式架构",
+                "link": "sofa.console.aliyun.com",
+                "pinyin": "JINRONGFENBUSHIJIAGOU SOFASTACK",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "130189",
+                "pipId": "sofa",
+                "inNav": true
+            },
+            {
+                "productId": "mpaas",
+                "name": "移动开发平台 mPaaS",
+                "link": "mpaas.console.aliyun.com",
+                "pinyin": "YIDONGKAIFAPINGTAI MPAAS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "49548",
+                "pipId": "mpaas",
+                "inNav": true
+            },
+            {
+                "productId": "retailadvqa",
+                "name": "智能用户增长",
+                "link": "retailadvqa.console.aliyun.com",
+                "pinyin": "ZHINENGYONGHUZENGZHANG QUICKAUDIENCE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "132007",
+                "pipId": "retailadvqa",
+                "inNav": true
+            },
+            {
+                "productId": "datahub",
+                "name": "数据总线 DataHub",
+                "link": "dhsnext.console.aliyun.com",
+                "pinyin": "SHUJUZONGXIAN DATAHUB",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "53345",
+                "pipId": "datahub",
+                "inNav": true
+            },
+            {
+                "productId": "assettech",
+                "name": "云行情",
+                "link": "assetservice.console.aliyun.com",
+                "pinyin": "YUNXINGQING",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "147291",
+                "pipId": "assettech",
+                "inNav": true
+            },
+            {
+                "productId": "antcloudauth",
+                "name": "金融级实人认证",
+                "link": "yundun.console.aliyun.com/?p=cloudauth&commodityCode=cloudauth_fin",
+                "pinyin": "JINRONGJISHIRENRENZHENG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "99161",
+                "pipId": "antcloudauth",
+                "inNav": true
+            },
+            {
+                "productId": "cvc",
+                "name": "云会议",
+                "link": "cvc.console.aliyun.com",
+                "pinyin": "YUNHUIYI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "139635",
+                "pipId": "cvc",
+                "inNav": true
+            },
+            {
+                "productId": "tdsr",
+                "name": "三维空间重建",
+                "link": "tdsr.console.aliyun.com",
+                "pinyin": "SANWEIKONGJIANZHONGJIAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "138704",
+                "pipId": "tdsr",
+                "inNav": true
+            },
+            {
+                "productId": "clickhouse",
+                "name": "云数据库 ClickHouse ",
+                "link": "clickhouse.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU CLICKHOUSE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "144466",
+                "pipId": "clickhouse",
+                "inNav": true
+            },
+            {
+                "productId": "hologram",
+                "name": "实时数仓 Hologres",
+                "link": "hologram.console.aliyun.com",
+                "pinyin": "SHISHISHUCANG HOLOGRES",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "113622",
+                "pipId": "hologram",
+                "inNav": true
+            },
+            {
+                "productId": "dbfs",
+                "name": "数据库文件存储",
+                "link": "dbfs.console.aliyun.com",
+                "pinyin": "SHUJUKUWENJIANCUNCHU DBFS",
+                "keywords": [],
+                "tag": "",
+                "docId": "140631",
+                "pipId": "dbfs",
+                "inNav": true
+            },
+            {
+                "productId": "viapi",
+                "name": "视觉智能开放平台",
+                "link": "vision.console.aliyun.com",
+                "pinyin": "SHIJUEZHINENGKAIFANGPINGTAI",
+                "keywords": [
+                    "人脸识别",
+                    "Face Recognition"
+                ],
+                "tag": "",
+                "docId": "142958",
+                "pipId": "viapi",
+                "inNav": true
+            },
+            {
+                "productId": "teambition",
+                "name": "Teambition",
+                "link": "teambition.console.aliyun.com",
+                "pinyin": "TEAMBITION QIYEXIETONG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "167382",
+                "pipId": "teambition",
+                "inNav": true
+            },
+            {
+                "productId": "servicemesh",
+                "name": "服务网格",
+                "link": "servicemesh.console.aliyun.com",
+                "pinyin": "FUWUWANGGE",
+                "keywords": [
+                    "ASM"
+                ],
+                "tag": "",
+                "docId": "147365",
+                "pipId": "servicemesh",
+                "inNav": true
+            },
+            {
+                "productId": "dytns",
+                "name": "号码百科",
+                "link": "dytns.console.aliyun.com",
+                "pinyin": "HAOMABAIKE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "151883",
+                "pipId": "dytns",
+                "inNav": true
+            },
+            {
+                "productId": "addrp",
+                "name": "地址标准化",
+                "link": "addrp.console.aliyun.com",
+                "pinyin": "DIZHIBIAOZHUNHUA",
+                "keywords": [],
+                "tag": "",
+                "docId": "162570",
+                "pipId": "addrp",
+                "inNav": true
+            },
+            {
+                "productId": "cddc",
+                "name": "云数据库专属集群",
+                "link": "cddc.console.aliyun.com",
+                "pinyin": "YUNSHUJUKUZHUANSHUJIQUN MYBASE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "156215",
+                "pipId": "cddc",
+                "inNav": true
+            },
+            {
+                "productId": "isoc",
+                "name": "IoT安全运营中心",
+                "link": "https://iotsec.console.aliyun.com/",
+                "pinyin": "WULIANWANGANQUANYUNYINGZHONGXIN",
+                "keywords": [
+                    "物联网安全、IoT安全、设备安全、IoT安全运营、IoT安全管理、IoT资产"
+                ],
+                "tag": "",
+                "docId": "123198",
+                "pipId": "isoc",
+                "inNav": true
+            },
+            {
+                "productId": "drp",
+                "name": "数据资源平台",
+                "link": "dataq.console.aliyun.com",
+                "pinyin": "SHUJUZIYUANPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "127040",
+                "pipId": "drp",
+                "inNav": true
+            },
+            {
+                "productId": "eventbridge",
+                "name": "事件总线",
+                "link": "eventbridge.console.aliyun.com",
+                "pinyin": "SHIJIANZONGXIAN EVENTBRIDGE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "161886",
+                "pipId": "eventbridge",
+                "inNav": true
+            },
+            {
+                "productId": "quotas",
+                "name": "配额中心",
+                "link": "quotas.console.aliyun.com",
+                "pinyin": "PEIEZHONGXIN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "171006",
+                "pipId": "quotas",
+                "inNav": true
+            },
+            {
+                "productId": "spark",
+                "name": "Databricks 数据洞察",
+                "link": "databricks.console.aliyun.com",
+                "pinyin": "DATABRICKS SHUJUDONGCHA",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "167610",
+                "pipId": "spark",
+                "inNav": true
+            },
+            {
+                "productId": "ask",
+                "name": "Serverless 容器服务 ASK",
+                "link": "cs.console.aliyun.com",
+                "pinyin": "SERVERLESS RONGQIFUWU ASK",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "85222",
+                "pipId": "aliyun_csk_ask",
+                "inNav": true
+            },
+            {
+                "productId": "lindorm",
+                "name": "云原生多模数据库 Lindorm",
+                "link": "lindorm.console.aliyun.com",
+                "pinyin": "YUNYUANSHENGDUOMOSHUJUKU LINDORM",
+                "keywords": [
+                    "HBase",
+                    "TSDB",
+                    "Influxdb",
+                    "海量数据存储",
+                    "大数据",
+                    "时序数据库",
+                    "Cassandra"
+                ],
+                "tag": "",
+                "docId": "172543",
+                "pipId": "aliyun_hitsdb_lindorm",
+                "inNav": true
+            },
+            {
+                "productId": "pds",
+                "name": "网盘与相册服务",
+                "link": "pds.console.aliyun.com",
+                "pinyin": "WANGPANYUXIANGCEFUWU PDS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "175790",
+                "pipId": "pds",
+                "inNav": true
+            },
+            {
+                "productId": "bpstudio",
+                "name": "云速搭",
+                "link": "bpstudio.console.aliyun.com",
+                "pinyin": "YUNSUDA CADT",
+                "keywords": [
+                    "CADT",
+                    "云速搭",
+                    "架构图",
+                    "架构设计"
+                ],
+                "tag": "",
+                "docId": "182827",
+                "pipId": "bpstudio",
+                "inNav": true
+            },
+            {
+                "productId": "cloudauthst",
+                "name": "智能核身",
+                "link": "yundun.console.aliyun.com/?p=cloudauth&commodityCode=cloudauth_smart",
+                "pinyin": "ZHINENGHESHEN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "177618",
+                "pipId": "cloudauthst",
+                "inNav": true
+            },
+            {
+                "productId": "prometheus",
+                "name": "可观测监控 Prometheus 版",
+                "link": "prometheus.console.aliyun.com",
+                "pinyin": "KEGUANCEJIANKONGPROMETHEUSBAN",
+                "keywords": [
+                    "容器监控",
+                    "flink监控",
+                    "指标",
+                    "指标监控",
+                    "时序",
+                    "时序数据",
+                    "metric"
+                ],
+                "tag": "",
+                "docId": "122122",
+                "pipId": "prometheus",
+                "inNav": true
+            },
+            {
+                "productId": "dlf",
+                "name": "数据湖构建",
+                "link": "dlf-next.console.aliyun.com/",
+                "pinyin": "SHUJUHUGOUJIAN DLF",
+                "keywords": [
+                    "数据湖",
+                    "湖仓一体",
+                    "湖仓分析",
+                    "OpenLake",
+                    "数据糊分析"
+                ],
+                "tag": "",
+                "docId": "182348",
+                "pipId": "dlf",
+                "inNav": true
+            },
+            {
+                "productId": "schedulerx",
+                "name": "分布式任务调度 SchedulerX",
+                "link": "schedulerx2.console.aliyun.com",
+                "pinyin": "FENBUSHIRENWUDIAODU SCHEDULERX",
+                "keywords": [
+                    "任务调度",
+                    "定时任务",
+                    "xxl-job",
+                    "elasticjob",
+                    "xxljob",
+                    "quartz",
+                    "cron"
+                ],
+                "tag": "",
+                "docId": "147760",
+                "pipId": "edas",
+                "inNav": true
+            },
+            {
+                "productId": "eds",
+                "name": "无影云电脑企业版",
+                "link": "eds.console.aliyun.com",
+                "pinyin": "WUYINGYUNDIANNAO",
+                "keywords": [
+                    "云桌面"
+                ],
+                "tag": "",
+                "docId": "68242",
+                "pipId": "gws",
+                "inNav": true
+            },
+            {
+                "productId": "csas",
+                "name": "办公安全平台",
+                "link": "yundun.console.aliyun.com/?p=csas",
+                "pinyin": "BANGONGANQUANPINGTAI SASE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "181210",
+                "pipId": "csas",
+                "inNav": true
+            },
+            {
+                "productId": "eais",
+                "name": "弹性加速计算实例",
+                "link": "eais.console.aliyun.com",
+                "pinyin": "DANXINGJIASUJISUANSHILI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "170490",
+                "pipId": "eais",
+                "inNav": true
+            },
+            {
+                "productId": "privatelink",
+                "name": "私网连接",
+                "link": "vpc.console.aliyun.com/endpoint",
+                "pinyin": "SIWANGLIANJIE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "120462",
+                "pipId": "privatelink",
+                "inNav": true
+            },
+            {
+                "productId": "cmn",
+                "name": "云网管",
+                "link": "cmn.console.aliyun.com",
+                "pinyin": "YUNWANGGUAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "198135",
+                "pipId": "cmn",
+                "inNav": true
+            },
+            {
+                "productId": "ice",
+                "name": "智能媒体服务",
+                "link": "ice.console.aliyun.com",
+                "pinyin": "ZHINENGMEITIFUWU",
+                "keywords": [
+                    "点播转码",
+                    "直播转码",
+                    "媒体服务"
+                ],
+                "tag": "",
+                "docId": "193643",
+                "pipId": "ice",
+                "inNav": true
+            },
+            {
+                "productId": "cloudsso",
+                "name": "云 SSO",
+                "link": "cloudsso.console.aliyun.com",
+                "pinyin": "YUN SSO",
+                "keywords": [
+                    "单点登录",
+                    "多账号身份管理",
+                    "多账号访问控制",
+                    "多账号SSO",
+                    "RAM"
+                ],
+                "tag": "",
+                "docId": "252811",
+                "pipId": "cloudsso",
+                "inNav": true
+            },
+            {
+                "productId": "console",
+                "name": "控制台首页",
+                "link": "home.console.aliyun.com",
+                "pinyin": "KONGZHITAISHOUYE",
+                "keywords": [
+                    "首页",
+                    "home"
+                ],
+                "tag": "",
+                "docId": "144772",
+                "pipId": "",
+                "inNav": false
+            },
+            {
+                "productId": "sasti",
+                "name": "威胁情报",
+                "link": "yundun.console.aliyun.com/?p=sasti",
+                "pinyin": "WEIXIEQINGBAO",
+                "keywords": [
+                    "TIP",
+                    "恶意情报"
+                ],
+                "tag": "",
+                "docId": "170974",
+                "pipId": "",
+                "inNav": true
+            },
+            {
+                "productId": "governance",
+                "name": "云治理中心",
+                "link": "governance.console.aliyun.com",
+                "pinyin": "YUNZHILIZHONGXIN",
+                "keywords": [
+                    "LandingZone",
+                    "企业IT治理"
+                ],
+                "tag": "",
+                "docId": "252812",
+                "pipId": "governance",
+                "inNav": true
+            },
+            {
+                "productId": "genomics",
+                "name": "基因分析平台",
+                "link": "easygene.console.aliyun.com",
+                "pinyin": "JIYINFENXIPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "199382",
+                "pipId": "genomics",
+                "inNav": true
+            },
+            {
+                "productId": "bsn",
+                "name": "ICP 备案",
+                "link": "bsn.console.aliyun.com",
+                "pinyin": "ICP BEIAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "35468",
+                "pipId": "",
+                "inNav": true
+            },
+            {
+                "productId": "hcs_hgw",
+                "name": "混合云存储",
+                "link": "hgw.console.aliyun.com",
+                "pinyin": "HUNHEYUNCUNCHU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "53942",
+                "pipId": "hcs_hgw",
+                "inNav": true
+            },
+            {
+                "productId": "gemp",
+                "name": "运维事件中心",
+                "link": "alert.console.aliyun.com",
+                "pinyin": "YUNWEISHIJIANZHONGXIN",
+                "keywords": [
+                    "报警",
+                    "故障"
+                ],
+                "tag": "",
+                "docId": "265791",
+                "pipId": "gemp",
+                "inNav": true
+            },
+            {
+                "productId": "imp",
+                "name": "音视频终端 SDK",
+                "link": "imp.console.aliyun.com",
+                "pinyin": "DIDAIMAYINSHIPINGONGCHANG",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "261167",
+                "pipId": "imp",
+                "inNav": true
+            },
+            {
+                "productId": "opt",
+                "name": "优化求解器",
+                "link": "opt.console.aliyun.com",
+                "pinyin": "YOUHUAQIUJIEQI",
+                "keywords": [
+                    "数学规划求解",
+                    "本地运行版"
+                ],
+                "tag": "",
+                "docId": "252739",
+                "pipId": "opt",
+                "inNav": true
+            },
+            {
+                "productId": "graphcompute",
+                "name": "图计算服务 GraphCompute",
+                "link": "igraph.console.aliyun.com",
+                "pinyin": "TUJISUANFUWU GRAPH COMPUTE",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "121021",
+                "pipId": "graphcompute",
+                "inNav": true
+            },
+            {
+                "productId": "avatar",
+                "name": "虚拟数字人",
+                "link": "avatar.console.aliyun.com",
+                "pinyin": "XUNISHUZIREN",
+                "keywords": [
+                    "虚拟主播",
+                    "虚拟",
+                    "数字人",
+                    "虚拟人",
+                    "品牌智能直播间",
+                    "人工智能",
+                    "元宇宙"
+                ],
+                "tag": "",
+                "docId": "392353",
+                "pipId": "avatar",
+                "inNav": true
+            },
+            {
+                "productId": "pvtz",
+                "name": "云解析 PrivateZone",
+                "link": "dns.console.aliyun.com/#/privateZone/list",
+                "pinyin": "YUNJIEXI PRIVATEZONE",
+                "keywords": [
+                    "VPC",
+                    "混合云",
+                    "私网DNS",
+                    "内网DNS",
+                    "解析器",
+                    "Resolver"
+                ],
+                "tag": "",
+                "docId": "64583",
+                "pipId": "pvtz",
+                "inNav": true
+            },
+            {
+                "productId": "uis",
+                "name": "云连接器",
+                "link": "cc.console.aliyun.com/",
+                "pinyin": "5G GAOSUSHANGYUNFUWU",
+                "keywords": [
+                    "IoT",
+                    "定向网络",
+                    "专网",
+                    "定向上云",
+                    "APN",
+                    "GRE",
+                    "私网上云"
+                ],
+                "tag": "",
+                "docId": "423097",
+                "pipId": "uis",
+                "inNav": true
+            },
+            {
+                "productId": "smc",
+                "name": "服务器迁移中心",
+                "link": "smcnext.console.aliyun.com",
+                "pinyin": "FUWUQIQIANYIZHONGXIN SMC",
+                "keywords": [
+                    "迁移",
+                    "迁云",
+                    "实例迁移",
+                    "服务器迁移",
+                    "数据迁移"
+                ],
+                "tag": "",
+                "docId": "121538",
+                "pipId": "smc",
+                "inNav": true
+            },
+            {
+                "productId": "disk",
+                "name": "块存储",
+                "link": "ebs.console.aliyun.com",
+                "pinyin": "KUAICUNCHU EBS",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "25428",
+                "pipId": "disk",
+                "inNav": true
+            },
+            {
+                "productId": "cloudinfo",
+                "name": "信息核验",
+                "link": "yundun.console.aliyun.com/?p=cloudinfo",
+                "pinyin": "XINXIHEYAN",
+                "keywords": [
+                    "信息核验",
+                    "N要素",
+                    "身份证二要素"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "",
+                "inNav": true
+            },
+            {
+                "productId": "antppc",
+                "name": "蚂蚁隐私计算服务平台",
+                "link": "antppc.console.aliyun.com",
+                "pinyin": "MAYIYINSIJISUANFUWUPINGTAI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "antppc",
+                "inNav": false
+            },
+            {
+                "productId": "man",
+                "name": "全域采集与增长分析",
+                "link": "quickaplus.console.aliyun.com",
+                "pinyin": "QUANYUCAIJIYUZENGZHANGFENXI QUICKTRACKING",
+                "keywords": [
+                    "流量",
+                    "小程序",
+                    "APP",
+                    "网站",
+                    "用户行为"
+                ],
+                "tag": "",
+                "docId": "194063",
+                "pipId": "man",
+                "inNav": true
+            },
+            {
+                "productId": "grafana",
+                "name": "可观测可视化 Grafana 版",
+                "link": "https://ags.console.aliyun.com/#/grafana/workspace",
+                "pinyin": "KEGUANCEKESHIHUAGRAFANABAN",
+                "keywords": [
+                    "监控",
+                    "看板",
+                    "大屏",
+                    "大盘",
+                    "elasticsearch",
+                    "datav",
+                    "sls"
+                ],
+                "tag": "",
+                "docId": "310085",
+                "pipId": "grafana",
+                "inNav": true
+            },
+            {
+                "productId": "cloudphone",
+                "name": "无影云手机",
+                "link": "cloudphone.console.aliyun.com",
+                "pinyin": "DANXINGYUNSHOUJI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "254658",
+                "pipId": "cloudphone",
+                "inNav": true
+            },
+            {
+                "productId": "computenest",
+                "name": "计算巢服务",
+                "link": "computenest.console.aliyun.com",
+                "pinyin": "JISUANCHAOFUWU",
+                "keywords": [
+                    "ISV",
+                    "自动化部署",
+                    "应用管理",
+                    "代运维"
+                ],
+                "tag": "",
+                "docId": "268599",
+                "pipId": "computenest",
+                "inNav": true
+            },
+            {
+                "productId": "servicecatalog",
+                "name": "服务目录",
+                "link": "servicecatalog.console.aliyun.com",
+                "pinyin": "FUWUMULU",
+                "keywords": [
+                    "landing zone",
+                    "landingzone",
+                    "云治理中心",
+                    "企业IT治理"
+                ],
+                "tag": "",
+                "docId": "358913",
+                "pipId": "aliyun_governance_servicecatalog",
+                "inNav": true
+            },
+            {
+                "productId": "netana",
+                "name": "网络智能服务",
+                "link": "nis.console.aliyun.com",
+                "pinyin": "WANGLUOZHINENGFUWU",
+                "keywords": [
+                    "网络运维",
+                    "网络分析",
+                    "网络诊断",
+                    "智能运维",
+                    "NPM",
+                    "NMS"
+                ],
+                "tag": "",
+                "docId": "107955",
+                "pipId": "netana",
+                "inNav": true
+            },
+            {
+                "productId": "salesforce",
+                "name": "Salesforce on Alibaba Cloud",
+                "link": "salesforce.console.aliyun.com",
+                "pinyin": "SALESFORCE",
+                "keywords": [
+                    "Salesforce、SFoA、sfoa、CRM、crm、salesforce"
+                ],
+                "tag": "",
+                "docId": "380932",
+                "pipId": "salesforce",
+                "inNav": true
+            },
+            {
+                "productId": "vmwaresrv",
+                "name": "VMware服务",
+                "link": "acvs.console.aliyun.com",
+                "pinyin": "VMWARE FUWU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "343356",
+                "pipId": "vmwaresrv",
+                "inNav": true
+            },
+            {
+                "productId": "imagedetect",
+                "name": "图像检测",
+                "link": "image-detect.console.aliyun.com",
+                "pinyin": "TUXIANGJIANCE",
+                "keywords": [
+                    "检测"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "image",
+                "inNav": false
+            },
+            {
+                "productId": "naam",
+                "name": "网络分析与监控",
+                "link": "cloudmonitornext.console.aliyun.com/newSite",
+                "pinyin": "WANGLUOFENXIYUJIANKONG",
+                "keywords": [
+                    "网络拨测",
+                    "定时拨测",
+                    "拨测",
+                    "站点监控",
+                    "拨测工具",
+                    "网络诊断"
+                ],
+                "tag": "",
+                "docId": "311890",
+                "pipId": "aliyun_cms_naam",
+                "inNav": true
+            },
+            {
+                "productId": "alibababcp",
+                "name": "信息查询服务",
+                "link": "ipaas.console.aliyun.com/guide",
+                "pinyin": "DUODUANDIANSHANGSHANGCHENG",
+                "keywords": [
+                    "IQS",
+                    "通用搜索",
+                    "周边查询"
+                ],
+                "tag": "",
+                "docId": "2837261",
+                "pipId": "alibababcp",
+                "inNav": true
+            },
+            {
+                "productId": "adcp",
+                "name": "分布式云容器平台",
+                "link": "cs.console.aliyun.com/one",
+                "pinyin": "FENBUSHIYUNRONGQIPINGTAI",
+                "keywords": [
+                    "分布式云",
+                    "容器服务",
+                    "多集群管理",
+                    "注册集群",
+                    "备份中心",
+                    "One",
+                    "ACK"
+                ],
+                "tag": "",
+                "docId": "85222",
+                "pipId": "adcp",
+                "inNav": true
+            },
+            {
+                "productId": "ocr",
+                "name": "文字识别",
+                "link": "ocr.console.aliyun.com",
+                "pinyin": "WENZISHIBIE OCR",
+                "keywords": [
+                    "读光OCR",
+                    "身份证识别",
+                    "行驶证识别",
+                    "通用识别",
+                    "卡证识别",
+                    "营业执照识别",
+                    "增值税发票识别"
+                ],
+                "tag": "",
+                "docId": "252763",
+                "pipId": "ocr",
+                "inNav": true
+            },
+            {
+                "productId": "appstreaming",
+                "name": "无影云应用",
+                "link": "appstreaming.console.aliyun.com",
+                "pinyin": "WUYINGYUNYINGYONG",
+                "keywords": [
+                    "云应用",
+                    "云渲染",
+                    "应用云化"
+                ],
+                "tag": "",
+                "docId": "345591",
+                "pipId": "appstreaming",
+                "inNav": true
+            },
+            {
+                "productId": "xgip",
+                "name": "5G互联平台",
+                "link": "xgip.console.aliyun.com",
+                "pinyin": "5G HULIANPINGTAI",
+                "keywords": [
+                    "定向流量",
+                    "移动网络加速",
+                    "移动网络质量保障",
+                    "Qos"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "xgip",
+                "inNav": true
+            },
+            {
+                "productId": "bccluster",
+                "name": "智能计算灵骏",
+                "link": "lingjun.console.aliyun.com",
+                "pinyin": "ZHINENGJISUANLINGJUN",
+                "keywords": [
+                    "灵骏",
+                    "EFLOPS",
+                    "EFLO",
+                    "GPU服务器",
+                    "集群",
+                    "GPU集群"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "bccluster",
+                "inNav": true
+            },
+            {
+                "productId": "cdt",
+                "name": "云数据传输",
+                "link": "cdt.console.aliyun.com",
+                "pinyin": "YUNSHUJUCHUANSHU",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "cdt",
+                "inNav": true
+            },
+            {
+                "productId": "cams",
+                "name": "Chat App 消息服务",
+                "link": "cams.console.aliyun.com",
+                "pinyin": "CHATAPP XIAOXIFUWU",
+                "keywords": [
+                    "短信",
+                    "通信",
+                    "chatapp",
+                    "WhatsApp",
+                    "Viber",
+                    "Messenger",
+                    "Instagram"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "cams",
+                "inNav": true
+            },
+            {
+                "productId": "apds",
+                "name": "云迁移中心",
+                "link": "apds.console.aliyun.com",
+                "pinyin": "YUNQIANYIZHONGXIN",
+                "keywords": [
+                    "CMH",
+                    "拓扑图",
+                    "服务发现",
+                    "一站迁云"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "apds",
+                "inNav": true
+            },
+            {
+                "productId": "cciot",
+                "name": "云连接器",
+                "link": "cc.console.aliyun.com",
+                "pinyin": "YUNLIANJIEQI",
+                "keywords": [
+                    "IoT",
+                    "定向网络",
+                    "专网",
+                    "定向上云",
+                    "APN",
+                    "GRE",
+                    "私网上云"
+                ],
+                "tag": "",
+                "docId": "297396",
+                "pipId": "aliyun_uis_cciot",
+                "inNav": false
+            },
+            {
+                "productId": "cloudera",
+                "name": "CDP 企业数据云",
+                "link": "cloudera.console.aliyun.com",
+                "pinyin": "CDP QIYESHUJUYUN",
+                "keywords": [
+                    "CDP",
+                    "cdp"
+                ],
+                "tag": "",
+                "docId": "428836",
+                "pipId": "cloudera",
+                "inNav": true
+            },
+            {
+                "productId": "outboundbot",
+                "name": "智能外呼机器人",
+                "link": "outboundbot.console.aliyun.com",
+                "pinyin": "ZHINENGWAIHUJIQIREN",
+                "keywords": [
+                    "智能外呼；外呼机器人；智能外呼机器人；自动外呼"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "outboundbot",
+                "inNav": false
+            },
+            {
+                "productId": "docmind",
+                "name": "文档智能",
+                "link": "https://docmind.console.aliyun.com/doc-overview",
+                "pinyin": "WENDANGZHINENG",
+                "keywords": [
+                    "智能文档处理",
+                    "文档AI",
+                    "智能文档审阅",
+                    "智能文档分析",
+                    "IDP",
+                    "文档解析",
+                    "文档理解"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "docmind",
+                "inNav": true
+            },
+            {
+                "productId": "codestore",
+                "name": "机器人流程自动化",
+                "link": "https://rpa.console.aliyun.com",
+                "pinyin": "JIQIRENLIUCHENGZIDONGHUA",
+                "keywords": [
+                    "RPA",
+                    "机器人",
+                    "自动化",
+                    "流程自动化",
+                    "数字员工",
+                    "码栈",
+                    "低代码"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "codestore",
+                "inNav": true
+            },
+            {
+                "productId": "acmp",
+                "name": "多云成本运营",
+                "link": "acmp.console.aliyun.com",
+                "pinyin": "DUOYUNCHENGBENYUNYING",
+                "keywords": [
+                    "FinOps",
+                    "多云资源纳管",
+                    "开发与运维",
+                    "CMDB",
+                    "成本分账",
+                    "成本分析",
+                    "CMP"
+                ],
+                "tag": "",
+                "docId": "479704",
+                "pipId": "acmp",
+                "inNav": false
+            },
+            {
+                "productId": "dashscope",
+                "name": "模型服务灵积",
+                "link": "dashscope.console.aliyun.com",
+                "pinyin": "MOXINGFUWULINGJI",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "610100",
+                "pipId": "dashscope",
+                "inNav": true
+            },
+            {
+                "productId": "dashvector",
+                "name": "向量检索服务",
+                "link": "dashvector.console.aliyun.com",
+                "pinyin": "XIANGLIANGJIANSUOFUWU",
+                "keywords": [
+                    "向量",
+                    "向量数据库",
+                    "向量搜索",
+                    "大模型生成式检索",
+                    "向量管理",
+                    "向量检索",
+                    "vector database"
+                ],
+                "tag": "",
+                "docId": "2510217",
+                "pipId": "dashvector",
+                "inNav": true
+            },
+            {
+                "productId": "acs",
+                "name": "容器计算服务",
+                "link": "acs.console.aliyun.com",
+                "pinyin": "RONGQIJISUANFUWU",
+                "keywords": [
+                    "容器计算",
+                    "Serverless容器",
+                    "Serverless K8S"
+                ],
+                "tag": "",
+                "docId": "2584271",
+                "pipId": "acs",
+                "inNav": true
+            },
+            {
+                "productId": "devs",
+                "name": "云原生应用开发平台 CAP",
+                "link": "cap.console.aliyun.com",
+                "pinyin": "SERVERLESSKAIFAPINGTAI",
+                "keywords": [
+                    "Serverless 应用",
+                    "AI 应用",
+                    "Web 应用",
+                    "GPU 应用",
+                    "模型托管",
+                    "应用开发",
+                    "一站式开发"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "devs",
+                "inNav": true
+            },
+            {
+                "productId": "health",
+                "name": "云服务诊断",
+                "link": "health.console.aliyun.com",
+                "pinyin": "YUNFUWUZHENDUAN",
+                "keywords": [
+                    "健康",
+                    "健康状态",
+                    "诊断",
+                    "场景诊断",
+                    "一键诊断",
+                    "跨产品",
+                    "跨产品诊断"
+                ],
+                "tag": "",
+                "docId": "2510098",
+                "pipId": null,
+                "inNav": false
+            },
+            {
+                "productId": "selectdb",
+                "name": "云数据库 SelectDB 版",
+                "link": "https://selectdb.console.aliyun.com",
+                "pinyin": "YUNSHUJUKU SELECTDB BAN",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "2503500",
+                "pipId": "selectdb",
+                "inNav": true
+            },
+            {
+                "productId": "cd",
+                "name": "云投屏",
+                "link": "https://ls.iot.aliyun.com/",
+                "pinyin": "YUNTOUPING",
+                "keywords": [
+                    ""
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "cd",
+                "inNav": true
+            },
+            {
+                "productId": "database",
+                "name": "阿里云数据库（瑶池）",
+                "link": "yaochi.console.aliyun.com/overview",
+                "pinyin": "ALIYUNSHUJUKU（YAOCHI）",
+                "keywords": [
+                    "mysql",
+                    "rds",
+                    "阿里云数据库",
+                    "sql",
+                    "polar",
+                    "redis",
+                    "数据库"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": null,
+                "inNav": true
+            },
+            {
+                "productId": "mpbigdata",
+                "name": "Data Exchange",
+                "link": "dataexchange.console.aliyun.com",
+                "pinyin": "DATAEXCHANGE",
+                "keywords": [
+                    "数据集",
+                    "数据服务"
+                ],
+                "tag": "",
+                "docId": "2655805",
+                "pipId": null,
+                "inNav": false
+            },
+            {
+                "productId": "bdrc",
+                "name": "数据灾备中心",
+                "link": "bdrc.console.aliyun.com",
+                "pinyin": "SHUJUZAIBEIZHONGXIN",
+                "keywords": [
+                    "灾备中心",
+                    "数据保护",
+                    "企业灾备管理服务",
+                    "集中化灾备管理",
+                    "合规",
+                    "防勒索"
+                ],
+                "tag": "beta",
+                "docId": "2797664",
+                "pipId": "bdrc",
+                "inNav": true
+            },
+            {
+                "productId": "imarketing",
+                "name": "营销引擎",
+                "link": "imarketing.console.aliyun.com/",
+                "pinyin": "YINGXIAOYINQINGYUNMA",
+                "keywords": [
+                    "营销引擎",
+                    "云码",
+                    "营销图文",
+                    "数字人",
+                    "智创",
+                    "磐曦",
+                    "AI应用工具"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "imarketing",
+                "inNav": true
+            },
+            {
+                "productId": "milvus",
+                "name": "向量检索服务 Milvus 版",
+                "link": "milvus.console.aliyun.com",
+                "pinyin": "XIANGLIANGJIANSUOFUWU MILVUS BAN",
+                "keywords": [
+                    "向量检索引擎",
+                    "多模态检索",
+                    "向量数据检索",
+                    "检索增强生成",
+                    "大模型生成式检索"
+                ],
+                "tag": "",
+                "docId": "2796430",
+                "pipId": "milvus",
+                "inNav": true
+            },
+            {
+                "productId": "sfm",
+                "name": "大模型服务平台百炼",
+                "link": "bailian.console.aliyun.com",
+                "pinyin": "DAMOXINGFUWUPINGTAIBAILIAN",
+                "keywords": [
+                    "大模型",
+                    "百炼",
+                    "model",
+                    "llm",
+                    "model studio"
+                ],
+                "tag": "",
+                "docId": "2400256",
+                "pipId": "sfm",
+                "inNav": true
+            },
+            {
+                "productId": "alinux",
+                "name": "Alibaba Cloud Linux",
+                "link": "alinux.console.aliyun.com/",
+                "pinyin": "ALIBABA CLOUD LINUX",
+                "keywords": [
+                    "操作系统",
+                    "linux",
+                    "系统管理",
+                    "系统运维",
+                    "系统观测",
+                    "CentOS接管",
+                    "OS Copilot"
+                ],
+                "tag": "",
+                "docId": "",
+                "pipId": "alinux",
+                "inNav": false
+            },
+            {
+                "productId": "sec",
+                "name": "安全管控",
+                "link": "yundun.console.aliyun.com/?p=scnew#/",
+                "pinyin": "ANQUANGUANKONG",
+                "keywords": [
+                    "安全体检",
+                    "处罚",
+                    "解封",
+                    "限制性保护"
+                ],
+                "tag": "",
+                "docId": "2701863",
+                "pipId": null,
+                "inNav": false
+            },
+            {
+                "productId": "apig",
+                "name": "云原生 API 网关",
+                "link": "apig.console.aliyun.com",
+                "pinyin": "YUNYUANSHENG API WANGGUAN",
+                "keywords": [
+                    "API网关",
+                    "API",
+                    "网关",
+                    "云原生"
+                ],
+                "tag": "new",
+                "docId": "2796665",
+                "pipId": null,
+                "inNav": true
+            },
+            {
+                "productId": "edspersonal",
+                "name": "无影云电脑个人版",
+                "link": "eds-personal.console.aliyun.com",
+                "pinyin": "WUYINGYUNDIANNAOGERENBAN",
+                "keywords": [
+                    "无影",
+                    "云电脑",
+                    "个人版",
+                    "无影云电脑",
+                    "无影个人版",
+                    "个人版云电脑",
+                    "云电脑个人版"
+                ],
+                "tag": "",
+                "docId": "2846326",
+                "pipId": "edspersonal",
+                "inNav": true
+            }
+        ]
+    },
+    "successResponse": true
+}
