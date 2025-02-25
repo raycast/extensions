@@ -1,8 +1,8 @@
 # Linear Changelog
 
-## [Fix] - 2025-02-25
+## [Fix Creation Issue] - 2025-02-25
 
-- Fix issue creation with stateId. Missed closing quote in the GraphQL mutation.
+- Fixed issue creation with stateId because of closing quote in the GraphQL mutation.
 - Added npm run publish to publish the extension to the Raycast Store as per [Docs](https://developers.raycast.com/basics/publish-an-extension).
 
 ## [✨ AI Enhancements] - 2025-02-21
