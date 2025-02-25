@@ -3,7 +3,7 @@
   "name": "github-small-prs-checker",
   "title": "GitHub Small PRs Checker",
   "description": "Monitors repositories for small pull requests",
-  "icon": "github-dark.png",
+  "icon": "icon.png",
   "author": "lazar_georgiev",
   "categories": [
     "Developer Tools"
