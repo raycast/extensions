@@ -28,7 +28,7 @@ export interface Service {
   create_time: string;
   features: {
     [feature: string]: boolean;
-  }
+  };
   metadata: { [key: string]: string | boolean };
   node_count: number;
   service_name: string;
@@ -50,6 +50,15 @@ export interface ListServiceBackupsResult {
   backups: Backup[];
 }
 
+interface Log {
+  hostname?: string;
+  msg: string;
+  time: string;
+  unit: string;
+}
+export interface ListServiceLogsResult {
+  logs: Log[];
+}
 
 interface AivenError {
   message: string;
