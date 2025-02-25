@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Remove Deadline if not a Premium User] - {PR_MERGE_DATE}
+
+Removed the deadline field when creating a task if the user is not a premium user.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
