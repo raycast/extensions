@@ -1,5 +1,9 @@
 # Flow Changelog
 
+## [Set Session Title command] - {PR_MERGE_DATE}
+- Implement `Set Session Title` command to allow setting a custom session title.  
+- Add a form for users to input and update the session title.  
+
 ## [Fix broken start commands] - 2023-09-03
 
 ## [Start Commands & Keywords] - 2022-03-16
