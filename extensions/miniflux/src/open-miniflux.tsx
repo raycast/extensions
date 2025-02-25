@@ -1,6 +1,9 @@
-import { getPreferenceValues, open, popToRoot } from "@raycast/api";
+import { getPreferenceValues, open, PreferenceValues } from "@raycast/api";
 
-export default async function OpenMiniflux() {
-  const { baseUrl }: Preferences = getPreferenceValues();
-  baseUrl ? open(baseUrl) : popToRoot();
+export default function OpenMiniflux() {
+  const { baseUrl }: PreferenceValues = getPreferenceValues();
+
+  if (baseUrl) {
+    open(baseUrl);
+  }
 }
