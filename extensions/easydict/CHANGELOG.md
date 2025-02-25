@@ -1,5 +1,7 @@
 # `Easydict` Changelog
 
+## [v2.10.2] - {PR_MERGE_DATE}
+
 ## [v2.10.1] - 2025-01-12
 
 ### 🐞 Fixed
