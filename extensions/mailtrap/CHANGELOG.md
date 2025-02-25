@@ -1,5 +1,9 @@
 # Mailtrap Changelog
 
+## [Fix .map on undefined] - {PR_MERGE_DATE}
+
+- Handle empty `result` coming from mailtrap on load/pagination of emails
+
 ## [View Details of Inbox & Email] - 2024-10-28
 
 - Retitled command from "Copy Subject" to "List Inboxes"
