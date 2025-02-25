@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Extract Color] - {PR_MERGE_DATE}
+## [Extract Color] - 2025-02-25
 
 - Select image from finder
 - Run `Extract Color` command from Raycast
