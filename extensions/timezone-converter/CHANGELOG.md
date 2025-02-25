@@ -1,6 +1,6 @@
 # Timezone converter Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-02-25
 
 Added UTC to the list of time zones.
 
