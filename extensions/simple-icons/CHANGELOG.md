@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Maintenance & Improvements] - {PR_MERGE_DATE}
+## [Maintenance & Improvements] - 2025-02-25
 
 - Add support for viewing release notes
 - Add support for copying SVG path
