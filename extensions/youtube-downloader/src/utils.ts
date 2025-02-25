@@ -51,3 +51,24 @@ export function isValidHHMM(input: string) {
 export function isValidUrl(url: string) {
   return isUrlSuperb(url, { lenient: true });
 }
+
+export function formatTbr(tbr: number | null) {
+  if (!tbr) return "";
+  return `${Math.floor(tbr)} kbps`;
+}
+
+export function formatFilesize(filesize?: number, filesizeApprox?: number) {
+  const size = filesize || filesizeApprox;
+  if (!size) return "";
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 ** 2) {
+    return `${(size / 1024).toFixed(2)} KiB`;
+  }
+  if (size < 1024 ** 3) {
+    return `${(size / 1024 ** 2).toFixed(2)} MiB`;
+  }
+  return `${(size / 1024 ** 3).toFixed(2)} GiB`;
+}
