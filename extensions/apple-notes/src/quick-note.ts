@@ -1,4 +1,4 @@
-import { closeMainWindow, getSelectedText, LaunchProps } from "@raycast/api";
+import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import { createNote } from "./api/applescript";
@@ -6,23 +6,19 @@ import { createNote } from "./api/applescript";
 export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   await closeMainWindow();
 
-  let text = "";
-  try {
-    text = await getSelectedText();
-  } catch {
-    // fails silently
-  }
+  let note = "";
+  let { text } = await Clipboard.read();
 
-  if (props.fallbackText) {
+  if (!text && props.fallbackText) {
     text = props.fallbackText;
   }
 
-  if (props.arguments.text) {
-    text = props.arguments.text;
+  if (props.arguments.note) {
+    note = props.arguments.note;
   }
 
   try {
-    await createNote(text.trim());
+    await createNote(note, text);
   } catch (error) {
     showFailureToast(error, { title: "Could not create a new note." });
   }
