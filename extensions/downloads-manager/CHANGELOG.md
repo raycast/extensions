@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2025-02-25
 
 - Updated the `Show Latest Download` command to display the most recent download file.
 
