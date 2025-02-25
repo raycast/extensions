@@ -29,7 +29,9 @@ export class LocalStorage {
       await RaycastLocalStorage.removeItem(key);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      error(`Failed to remove item from storage: ${key}`, { error: errorMessage });
+      error(`Failed to remove item from storage: ${key}`, {
+        error: errorMessage,
+      });
       throw err;
     }
   }

@@ -55,7 +55,9 @@ const debouncedSave = debounce(async (state: ViewStore) => {
 export const useViewStore = create<ViewStore>()(
   immer((set, get) => {
     const preferences = getPreferenceValues<Preferences>();
-    debug("Initializing view store with preferences", { defaultView: preferences.defaultView });
+    debug("Initializing view store with preferences", {
+      defaultView: preferences.defaultView,
+    });
 
     // Load persisted state
     const loadPersistedState = async (): Promise<void> => {
@@ -166,8 +168,12 @@ export const useViewStore = create<ViewStore>()(
         });
         debouncedSave(get());
       },
+
+      setView: (view: View) => set(() => ({ currentView: view })),
+
+      setSelectedDevice: (device: HarmonyDevice | null) => set(() => ({ selectedDevice: device })),
     };
-  }),
+  })
 );
 
 // Selectors

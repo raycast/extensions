@@ -1,13 +1,22 @@
 import { HarmonyHub, HarmonyDevice, HarmonyActivity } from "../../types/core/harmony";
 
 /**
- * State machine stages for Harmony operations
+ * Enum for Harmony Hub state stages.
+ * Represents different stages of the hub connection lifecycle.
+ * @enum {string}
  */
-export enum HarmonyStage {
+export enum HarmonyStateStage {
+  /** Initial state before any operations */
+  INITIAL = "initial",
+  /** Discovering hubs on the network */
   DISCOVERING = "discovering",
+  /** Connecting to a selected hub */
   CONNECTING = "connecting",
-  LOADING_ACTIVITIES = "loading-activities",
-  LOADING_DEVICES = "loading-devices",
+  /** Loading activities from the hub */
+  LOADING_ACTIVITIES = "loading_activities",
+  /** Loading devices from the hub */
+  LOADING_DEVICES = "loading_devices",
+  /** Setup is complete */
   COMPLETE = "complete",
 }
 
@@ -15,7 +24,7 @@ export enum HarmonyStage {
  * Loading state information
  */
 export interface LoadingState {
-  stage: HarmonyStage;
+  stage: HarmonyStateStage;
   progress: number;
   message: string;
 }
@@ -36,7 +45,7 @@ export interface HarmonyState {
  * Initial loading state
  */
 export const initialLoadingState: LoadingState = {
-  stage: HarmonyStage.DISCOVERING,
+  stage: HarmonyStateStage.DISCOVERING,
   progress: 0,
   message: "Initializing...",
 };

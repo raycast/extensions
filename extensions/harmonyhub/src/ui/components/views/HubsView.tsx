@@ -17,7 +17,7 @@ import { LoadingView } from "../LoadingView";
  */
 interface HubsViewProps {
   /** Callback when a hub is selected */
-  onHubSelect: (hub: HarmonyHub) => void;
+  onHubSelect: (_hub: HarmonyHub) => void;
   /** Optional callback to go back */
   onBack?: () => void;
 }

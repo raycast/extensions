@@ -152,7 +152,7 @@ export function HarmonyCommand(): React.ReactElement {
         viewStore.selectDevice(device);
       }, 0);
     },
-    [viewStore],
+    [viewStore]
   );
 
   // Memoize activity selection handler
@@ -161,7 +161,7 @@ export function HarmonyCommand(): React.ReactElement {
       debug("Activity selected", { activity: activity.name });
       startActivity(activity.id);
     },
-    [startActivity],
+    [startActivity]
   );
 
   // Handle view rendering based on current view state
@@ -180,7 +180,7 @@ export function HarmonyCommand(): React.ReactElement {
         ),
         [View.ACTIVITIES]: <ActivitiesView onActivitySelect={handleActivitySelect} />,
       }) as Record<View, React.ReactElement>,
-    [connect, handleDeviceSelect, handleActivitySelect, selectedDevice, viewStore],
+    [connect, handleDeviceSelect, handleActivitySelect, selectedDevice, viewStore]
   );
 
   // Return the appropriate view component

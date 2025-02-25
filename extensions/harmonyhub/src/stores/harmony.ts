@@ -149,7 +149,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to discover hubs",
                   ErrorCategory.DISCOVERY,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Hub discovery failed");
           set((state) => {
@@ -198,7 +198,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to connect to hub",
                   ErrorCategory.CONNECTION,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Hub connection failed");
           set((state) => {
@@ -248,7 +248,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to disconnect",
                   ErrorCategory.CONNECTION,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Hub disconnection failed");
           set((state) => {
@@ -291,7 +291,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to load devices",
                   ErrorCategory.DATA,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Device loading failed");
           set((state) => {
@@ -317,7 +317,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to execute command",
                   ErrorCategory.COMMAND,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ToastManager.error(`Failed to execute ${command.label}`, harmonyError.message);
           set((state) => {
@@ -360,7 +360,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to load activities",
                   ErrorCategory.DATA,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Activity loading failed");
           set((state) => {
@@ -403,7 +403,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to start activity",
                   ErrorCategory.COMMAND,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Activity start failed");
           set((state) => {
@@ -449,7 +449,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
               : new HarmonyError(
                   "Failed to stop activity",
                   ErrorCategory.COMMAND,
-                  error instanceof Error ? error : undefined,
+                  error instanceof Error ? error : undefined
                 );
           ErrorHandler.handle(harmonyError, "Activity stop failed");
           set((state) => {
@@ -494,7 +494,7 @@ export const useHarmonyStore = create<HarmonyStore>()(
         saveState(get());
       },
     };
-  }),
+  })
 );
 
 // Export selectors for common state derivations

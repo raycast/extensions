@@ -158,15 +158,47 @@ export function isHarmonyHub(obj: unknown): obj is HarmonyHub {
 
   const hub = obj as Partial<HarmonyHub>;
   const validations = [
-    { field: "id", valid: typeof hub.id === "string" && hub.id.length > 0, value: hub.id },
-    { field: "name", valid: typeof hub.name === "string" && hub.name.length > 0, value: hub.name },
-    { field: "ip", valid: typeof hub.ip === "string" && hub.ip.length > 0, value: hub.ip },
-    { field: "hubId", valid: typeof hub.hubId === "string" && hub.hubId.length > 0, value: hub.hubId },
-    { field: "remoteId", valid: typeof hub.remoteId === "string", value: hub.remoteId },
-    { field: "version", valid: typeof hub.version === "string", value: hub.version },
+    {
+      field: "id",
+      valid: typeof hub.id === "string" && hub.id.length > 0,
+      value: hub.id,
+    },
+    {
+      field: "name",
+      valid: typeof hub.name === "string" && hub.name.length > 0,
+      value: hub.name,
+    },
+    {
+      field: "ip",
+      valid: typeof hub.ip === "string" && hub.ip.length > 0,
+      value: hub.ip,
+    },
+    {
+      field: "hubId",
+      valid: typeof hub.hubId === "string" && hub.hubId.length > 0,
+      value: hub.hubId,
+    },
+    {
+      field: "remoteId",
+      valid: typeof hub.remoteId === "string",
+      value: hub.remoteId,
+    },
+    {
+      field: "version",
+      valid: typeof hub.version === "string",
+      value: hub.version,
+    },
     { field: "port", valid: typeof hub.port === "string", value: hub.port },
-    { field: "productId", valid: typeof hub.productId === "string", value: hub.productId },
-    { field: "protocolVersion", valid: typeof hub.protocolVersion === "string", value: hub.protocolVersion },
+    {
+      field: "productId",
+      valid: typeof hub.productId === "string",
+      value: hub.productId,
+    },
+    {
+      field: "protocolVersion",
+      valid: typeof hub.protocolVersion === "string",
+      value: hub.protocolVersion,
+    },
   ];
 
   const failures = validations.filter((v) => !v.valid);
@@ -202,10 +234,26 @@ export function isHarmonyDevice(obj: unknown): obj is HarmonyDevice {
 
   const device = obj as Partial<HarmonyDevice>;
   const validations = [
-    { field: "id", valid: typeof device.id === "string" && device.id.length > 0, value: device.id },
-    { field: "name", valid: typeof device.name === "string" && device.name.length > 0, value: device.name },
-    { field: "type", valid: typeof device.type === "string" && device.type.length > 0, value: device.type },
-    { field: "commands", valid: Array.isArray(device.commands), value: device.commands },
+    {
+      field: "id",
+      valid: typeof device.id === "string" && device.id.length > 0,
+      value: device.id,
+    },
+    {
+      field: "name",
+      valid: typeof device.name === "string" && device.name.length > 0,
+      value: device.name,
+    },
+    {
+      field: "type",
+      valid: typeof device.type === "string" && device.type.length > 0,
+      value: device.type,
+    },
+    {
+      field: "commands",
+      valid: Array.isArray(device.commands),
+      value: device.commands,
+    },
   ];
 
   const failures = validations.filter((v) => !v.valid);
@@ -263,9 +311,21 @@ export function isHarmonyCommand(obj: unknown): obj is HarmonyCommand {
 
   const command = obj as Partial<HarmonyCommand>;
   const validations = [
-    { field: "id", valid: typeof command.id === "string" && command.id.length > 0, value: command.id },
-    { field: "name", valid: typeof command.name === "string" && command.name.length > 0, value: command.name },
-    { field: "label", valid: typeof command.label === "string" && command.label.length > 0, value: command.label },
+    {
+      field: "id",
+      valid: typeof command.id === "string" && command.id.length > 0,
+      value: command.id,
+    },
+    {
+      field: "name",
+      valid: typeof command.name === "string" && command.name.length > 0,
+      value: command.name,
+    },
+    {
+      field: "label",
+      valid: typeof command.label === "string" && command.label.length > 0,
+      value: command.label,
+    },
     {
       field: "deviceId",
       valid: typeof command.deviceId === "string" && command.deviceId.length > 0,
@@ -316,10 +376,26 @@ export function isHarmonyActivity(obj: unknown): obj is HarmonyActivity {
 
   const activity = obj as Partial<HarmonyActivity>;
   const validations = [
-    { field: "id", valid: typeof activity.id === "string" && activity.id.length > 0, value: activity.id },
-    { field: "name", valid: typeof activity.name === "string" && activity.name.length > 0, value: activity.name },
-    { field: "type", valid: typeof activity.type === "string" && activity.type.length > 0, value: activity.type },
-    { field: "isCurrent", valid: typeof activity.isCurrent === "boolean", value: activity.isCurrent },
+    {
+      field: "id",
+      valid: typeof activity.id === "string" && activity.id.length > 0,
+      value: activity.id,
+    },
+    {
+      field: "name",
+      valid: typeof activity.name === "string" && activity.name.length > 0,
+      value: activity.name,
+    },
+    {
+      field: "type",
+      valid: typeof activity.type === "string" && activity.type.length > 0,
+      value: activity.type,
+    },
+    {
+      field: "isCurrent",
+      valid: typeof activity.isCurrent === "boolean",
+      value: activity.isCurrent,
+    },
   ];
 
   const failures = validations.filter((v) => !v.valid);

@@ -17,7 +17,7 @@ import { LoadingView } from "../LoadingView";
  */
 interface DevicesViewProps {
   /** Callback when a device is selected */
-  onDeviceSelect: (device: HarmonyDevice) => void;
+  onDeviceSelect: (_device: HarmonyDevice) => void;
   /** Optional callback to go back */
   onBack?: () => void;
 }
@@ -90,7 +90,7 @@ function DevicesViewImpl({ onDeviceSelect, onBack }: DevicesViewProps): JSX.Elem
         }
       />
     ),
-    [onDeviceSelect, refresh, clearCache, onBack],
+    [onDeviceSelect, refresh, clearCache, onBack]
   );
 
   return (

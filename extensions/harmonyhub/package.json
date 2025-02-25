@@ -93,6 +93,7 @@
     "@types/ws": "^8.5.14",
     "eslint": "^8.51.0",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react": "^7.37.4",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

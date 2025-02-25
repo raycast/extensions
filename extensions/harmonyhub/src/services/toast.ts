@@ -106,7 +106,7 @@ export class ToastManager {
       info(
         `Progress: ${title}${message ? ` - ${message}` : ""}${
           progress !== undefined ? ` (${Math.round(progress * 100)}%)` : ""
-        }`,
+        }`
       );
     }
 

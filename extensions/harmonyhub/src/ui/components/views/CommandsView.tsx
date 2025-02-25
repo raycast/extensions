@@ -55,7 +55,7 @@ function CommandsViewImpl({ commands, onBack }: CommandsViewProps): JSX.Element 
         }
       />
     ),
-    [execute, refresh, clearCache, onBack],
+    [execute, refresh, clearCache, onBack]
   );
 
   return (

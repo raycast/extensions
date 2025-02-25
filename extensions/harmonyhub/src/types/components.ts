@@ -102,7 +102,7 @@ export interface DeviceListProps {
   /**
    * Optional custom render function for device items
    */
-  renderItem?: (device: HarmonyDevice) => React.ReactNode;
+  renderItem?: (_device: HarmonyDevice) => React.ReactNode;
 }
 
 /**
@@ -141,7 +141,7 @@ export interface ActivityListProps {
   /**
    * Optional custom render function for activity items
    */
-  renderItem?: (activity: HarmonyActivity) => React.ReactNode;
+  renderItem?: (_activity: HarmonyActivity) => React.ReactNode;
 }
 
 /**
@@ -180,11 +180,11 @@ export interface HarmonyContextProps {
   /**
    * Function to execute device command
    */
-  executeCommand: (deviceId: string, command: string) => Promise<void>;
+  executeCommand: (_deviceId: string, _command: string) => Promise<void>;
   /**
    * Function to start activity
    */
-  startActivity: (activityId: string) => Promise<void>;
+  startActivity: (_activityId: string) => Promise<void>;
 }
 
 /**
@@ -203,7 +203,7 @@ export interface ErrorBoundaryProps {
   /**
    * Optional error handler callback
    */
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onError?: (_error: Error, _errorInfo: React.ErrorInfo) => void;
 }
 
 /**
@@ -235,7 +235,7 @@ export interface HubSelectorProps {
   /** Currently selected hub */
   selectedHub: HarmonyHub | null;
   /** Callback when a hub is selected */
-  onHubSelect: (hub: HarmonyHub) => void;
+  onHubSelect: (_hub: HarmonyHub) => void;
   /** Whether the component is in a loading state */
   isLoading?: boolean;
   /** Error state if any */

@@ -16,9 +16,10 @@ import { HarmonyActivity } from "../../../types/core/harmony";
  */
 interface ActivitiesViewProps {
   /** Callback when an activity is selected */
-  onActivitySelect: (activity: HarmonyActivity) => void;
+  onActivitySelect: (_activity: HarmonyActivity) => void;
   /** Optional callback to go back */
   onBack?: () => void;
+  renderItem?: (_activity: HarmonyActivity) => React.ReactNode;
 }
 
 /**
@@ -77,7 +78,7 @@ function ActivitiesViewImpl({ onActivitySelect, onBack }: ActivitiesViewProps): 
         }
       />
     ),
-    [onActivitySelect, refresh, clearCache, onBack],
+    [onActivitySelect, refresh, clearCache, onBack]
   );
 
   return (

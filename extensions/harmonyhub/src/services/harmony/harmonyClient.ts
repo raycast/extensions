@@ -219,7 +219,7 @@ export class HarmonyClient {
       const harmonyError = new HarmonyError(
         "Failed to connect to hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
       error("Connection failed", { error: harmonyError.getDetailedMessage() });
       throw harmonyError;
@@ -241,7 +241,10 @@ export class HarmonyClient {
       // Try to get from cache first
       const cached = await this.getCachedConfig();
       if (cached?.devices) {
-        debug("Using cached devices for hub", { hubName: this.hub.name, deviceCount: cached.devices.length });
+        debug("Using cached devices for hub", {
+          hubName: this.hub.name,
+          deviceCount: cached.devices.length,
+        });
         return cached.devices;
       }
 
@@ -256,7 +259,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get devices",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
     }
   }
@@ -295,7 +298,7 @@ export class HarmonyClient {
               label: fn.label || fn.name,
               deviceId: device.id,
               group: fn.action?.command || "IRCommand",
-            })),
+            }))
           ),
         } as HarmonyDevice;
 
@@ -321,7 +324,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get devices from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err)),
+        err instanceof Error ? err : new Error(String(err))
       );
     }
   }
@@ -348,7 +351,9 @@ export class HarmonyClient {
         return cached.activities;
       }
 
-      debug("No cached activities found, fetching from hub", { hubName: this.hub.name });
+      debug("No cached activities found, fetching from hub", {
+        hubName: this.hub.name,
+      });
       const activities = await this.getActivitiesFromHub();
 
       // Cache the new activities along with current devices
@@ -359,7 +364,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get activities",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
     }
   }
@@ -414,7 +419,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to get current activity",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err)),
+        err instanceof Error ? err : new Error(String(err))
       );
     }
   }
@@ -453,7 +458,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         `Failed to start activity ${activityId}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
     }
   }
@@ -497,7 +502,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to stop activity",
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
     }
   }
@@ -561,7 +566,9 @@ export class HarmonyClient {
     try {
       // Validate we have data to cache
       if (!devices.length && !activities.length) {
-        debug("Skipping cache update - no data to cache", { hubName: this.hub.name });
+        debug("Skipping cache update - no data to cache", {
+          hubName: this.hub.name,
+        });
         return;
       }
 
@@ -619,7 +626,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         `Failed to execute command ${command.name}`,
         ErrorCategory.COMMAND_EXECUTION,
-        err instanceof Error ? err : undefined,
+        err instanceof Error ? err : undefined
       );
     }
   }
@@ -643,7 +650,7 @@ export class HarmonyClient {
       throw new HarmonyError(
         "Failed to disconnect from hub",
         ErrorCategory.HUB_COMMUNICATION,
-        err instanceof Error ? err : new Error(String(err)),
+        err instanceof Error ? err : new Error(String(err))
       );
     }
   }
