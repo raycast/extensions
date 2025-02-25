@@ -1,6 +1,6 @@
 # Track time with Tyme 3 Changelog
 
-## [New Features] - {PR_MERGE_DATE}
+## [New Features] - 2025-02-25
 
 - You can now create projects and tasks directly in Raycast
 - Separate views for projects and tasks
