@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dota-2-heroes",
+  "title": "Dota 2 Heroes",
+  "description": "Browse and search Dota 2 heroes",
+  "icon": "dota-logo.png",
+  "author": "bezonmax",
+  "categories": ["Developer Tools"],
+  "keywords": [
+    "dota",
+    "dota2",
+    "heroes",
+    "games",
+    "gaming"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-heroes",
+      "title": "Show Heroes",
+      "description": "Browse and search Dota 2 heroes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.2",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

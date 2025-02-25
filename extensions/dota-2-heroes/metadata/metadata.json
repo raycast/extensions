@@ -1,0 +1,16 @@
+{
+  "description": "Browse and search Dota 2 heroes directly from Raycast. Get quick access to hero information, stats, and details.",
+  "categories": ["Fun", "Games"],
+  "screenshots": [
+    {
+      "file": "preview1.png",
+      "title": "Heroes List",
+      "description": "Browse through all Dota 2 heroes with quick search capability"
+    },
+    {
+      "file": "preview2.png",
+      "title": "Hero Details",
+      "description": "View detailed hero information including stats, attributes, and roles"
+    } 
+  ]
+} 
