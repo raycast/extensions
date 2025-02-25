@@ -15,7 +15,7 @@ More features will be added in the future.
 
 ## API
 
-See [docs/README.md](./docs/README.md).
+See [docs/README.md](https://github.com/raycast/extensions/tree/main/extensions/raycast-port/docs).
 
 ## License
 
