@@ -25,8 +25,7 @@
       "type": "textfield",
       "required": true,
       "title": "API Key",
-      "link": "https://neurooo.com/en/account/api_keys?utm_source=Raycast",
-      "description": "Get your API key from the neurooo website."
+      "description": "Get your API key from https://neurooo.com"
     }
   ],
   "dependencies": {
