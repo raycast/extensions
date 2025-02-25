@@ -1,0 +1,8 @@
+# Ignore HTML files
+*.html
+src/assets/webrtc-player.html
+src/services/rtsp/player.html
+
+# Ignore shell scripts
+*.sh
+src/scripts/install-dependencies.sh

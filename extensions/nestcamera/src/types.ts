@@ -28,7 +28,7 @@ export enum StreamErrorCode {
   STREAM_LIMIT_REACHED = "STREAM_LIMIT_REACHED",
   CAMERA_OFFLINE = "CAMERA_OFFLINE",
   STREAM_TOKEN_EXPIRED = "STREAM_TOKEN_EXPIRED",
-  UNKNOWN = "UNKNOWN"
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface RtspStreamResponse {
@@ -38,7 +38,7 @@ export interface RtspStreamResponse {
 }
 
 export interface FFmpegConfig {
-  rtspTransport: 'tcp';
+  rtspTransport: "tcp";
   reconnectOptions: {
     attempts: number;
     delay: number;
@@ -65,4 +65,38 @@ export interface StreamStatus {
   error?: Error;
   segmentCount?: number;
   lastError?: string;
-} 
+  startTime?: number;
+  startupTime?: number;
+}
+
+// New interfaces for Nest API responses
+export interface NestDeviceListResponse {
+  devices: NestDeviceData[];
+}
+
+export interface NestDeviceData {
+  name: string;
+  type: string;
+  traits: NestDeviceTraits;
+  parentRelations?: NestParentRelation[];
+  assignee?: string;
+}
+
+export interface NestDeviceTraits {
+  [key: string]: unknown;
+  "sdm.devices.traits.Info"?: {
+    customName?: string;
+  };
+  "sdm.devices.traits.Connectivity"?: {
+    status?: string;
+  };
+  "sdm.devices.traits.CameraLiveStream"?: {
+    supportedProtocols?: string[];
+    videoCodecs?: string[];
+  };
+}
+
+export interface NestParentRelation {
+  displayName?: string;
+  parent?: string;
+}

@@ -42,14 +42,12 @@ export function getConfig(): Preferences {
   const projectId = preferences.projectId as string;
 
   if (!clientId || !clientSecret || !projectId) {
-    throw new ConfigurationError(
-      "Please set your Google Nest credentials in the extension preferences"
-    );
+    throw new ConfigurationError("Please set your Google Nest credentials in the extension preferences");
   }
 
-  console.log('Config loaded:', {
-    clientId: clientId.substring(0, 8) + '...',
-    projectId
+  console.log("Config loaded:", {
+    clientId: clientId.substring(0, 8) + "...",
+    projectId,
   });
 
   validateConfig({ projectId, clientId, clientSecret });
@@ -58,4 +56,4 @@ export function getConfig(): Preferences {
     clientId,
     clientSecret,
   };
-} 
+}

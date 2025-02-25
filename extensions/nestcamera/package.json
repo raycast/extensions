@@ -1,14 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "nest-raycast-extension",
-  "title": "Nest Cameras",
+  "name": "nestcamera",
+  "title": "Nest Camera Viewer",
   "version": "1.0.0",
-  "description": "Quick access to Google Nest camera feeds through Raycast",
+  "description": "View your Nest Cam Indoor (1st gen) feeds directly in Raycast with RTSP streaming",
   "icon": "command-icon.png",
-  "author": "Chad Walters",
+  "author": "chad_walters",
   "categories": [
     "Security",
-    "Applications"
+    "Applications"  
   ],
   "license": "MIT",
   "commands": [
@@ -21,13 +21,13 @@
     {
       "name": "quick-access",
       "title": "Quick Access Camera",
-      "description": "Open your favorite camera in Picture-in-Picture mode",
+      "description": "Open your favorite Nest camera instantly",
       "mode": "no-view"
     },
     {
-      "name": "sign-out",
-      "title": "Sign Out",
-      "description": "Clear authentication tokens and sign out",
+      "name": "reset-credentials",
+      "title": "Reset Oauth Credentials",
+      "description": "Clear authentication tokens and re-authenticate",
       "mode": "no-view"
     }
   ],
@@ -62,7 +62,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "publish": "ray publish",
-    "postinstall": "./scripts/install-dependencies.sh"
+    "postinstall": "./scripts/install-dependencies.sh",
+    "prebuild": "./scripts/copy-app.sh || true"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
@@ -82,5 +83,8 @@
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
-  }
+  },
+  "assets": [
+    "assets"
+  ]
 }

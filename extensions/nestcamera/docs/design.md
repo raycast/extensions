@@ -10,10 +10,9 @@ graph TD
     A --> D[Stream Handler]
     B --> E[OAuth Manager]
     C --> F[Device API Client]
-    D --> G[WebRTC Handler]
-    G --> H[Safari Integration]
-    G --> I[Window Manager]
-    G --> J[PiP Controller]
+    D --> G[RTSP Stream Service]
+    G --> H[Process Manager]
+    G --> I[FFplay Integration]
 ```
 
 ## Core Components
@@ -127,102 +126,207 @@ class DeviceAPIClient {
 
 ```typescript
 interface StreamOptions {
-  pipMode?: boolean;
   fullscreen?: boolean;
+  lowLatency?: boolean;
 }
 
-interface WindowPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  display: number;  // Display index for multi-monitor support
+enum StreamStatus {
+  IDLE = 'IDLE',
+  STARTING = 'STARTING',
+  STREAMING = 'STREAMING',
+  ERROR = 'ERROR',
+  STOPPED = 'STOPPED'
 }
 
-enum StreamErrorCode {
-  AUTH_FAILED = 'AUTH_FAILED',
-  FORBIDDEN = 'FORBIDDEN',
-  CAMERA_NOT_FOUND = 'CAMERA_NOT_FOUND',
-  SERVER_ERROR = 'SERVER_ERROR',
-  BROWSER_FAILED = 'BROWSER_FAILED',
-  STREAM_TIMEOUT = 'STREAM_TIMEOUT',
-  WEBRTC_ERROR = 'WEBRTC_ERROR'
-}
+class RtspStreamService {
+  private static instance: RtspStreamService;
+  private processManager: ProcessManager;
+  private deviceService: NestDeviceService;
+  private streamStatuses: Map<string, StreamStatus>;
 
-class StreamError extends Error {
-  constructor(
-    message: string,
-    public readonly code: StreamErrorCode,
-    public readonly recoverable: boolean
-  ) {
-    super(message);
-  }
-}
-
-class StreamHandler {
-  private browserManager: BrowserManager;
-  private windowManager: WindowManager;
-
-  constructor() {
-    this.browserManager = new BrowserManager();
-    this.windowManager = new WindowManager();
+  private constructor() {
+    this.processManager = ProcessManager.getInstance();
+    this.deviceService = NestDeviceService.getInstance();
+    this.streamStatuses = new Map();
   }
 
-  async openCameraStream(camera: NestCamera, options: StreamOptions = {}): Promise<void> {
+  static getInstance(): RtspStreamService {
+    if (!RtspStreamService.instance) {
+      RtspStreamService.instance = new RtspStreamService();
+    }
+    return RtspStreamService.instance;
+  }
+
+  async startStream(deviceId: string, options: StreamOptions = {}): Promise<void> {
     try {
-      // Get WebRTC URL from Google's API
-      const streamUrl = await this.generateStreamUrl(camera.id);
+      this.streamStatuses.set(deviceId, StreamStatus.STARTING);
+      showToast(Toast.Style.Animated, "Starting stream...");
       
-      // Get saved window position
-      const position = await this.windowManager.getSavedPosition(camera.id);
+      const rtspUrl = await this.deviceService.getRtspUrl(deviceId);
+      await this.processManager.startStream(deviceId, rtspUrl, options);
       
-      // Open stream in Safari
-      await this.browserManager.openStream(streamUrl, position, options);
-      
+      this.streamStatuses.set(deviceId, StreamStatus.STREAMING);
+      showToast(Toast.Style.Success, "Stream started successfully");
     } catch (error) {
-      this.handleStreamError(error);
+      this.streamStatuses.set(deviceId, StreamStatus.ERROR);
+      showToast(Toast.Style.Failure, `Failed to start stream: ${error.message}`);
+      throw error;
     }
   }
 
-  private async generateStreamUrl(cameraId: string): Promise<string> {
-    // Implementation for generating Google's WebRTC URL
+  async stopStream(deviceId: string): Promise<void> {
+    try {
+      this.streamStatuses.set(deviceId, StreamStatus.STOPPED);
+      await this.processManager.stopStream(deviceId);
+      showToast(Toast.Style.Success, "Stream stopped successfully");
+    } catch (error) {
+      showToast(Toast.Style.Failure, `Failed to stop stream: ${error.message}`);
+      throw error;
+    }
   }
 
-  private handleStreamError(error: Error): never {
-    // Error handling implementation
+  getStreamStatus(deviceId: string): StreamStatus {
+    return this.streamStatuses.get(deviceId) || StreamStatus.IDLE;
+  }
+
+  async cleanup(): Promise<void> {
+    await this.processManager.cleanup();
+    this.streamStatuses.clear();
   }
 }
 
-class BrowserManager {
-  private readonly SAFARI_PATH = '/Applications/Safari.app';
-  
-  async openStream(url: string, position: WindowPosition, options: StreamOptions): Promise<void> {
-    // Open Safari with appropriate window position
-    // Enable PiP mode if requested
+class ProcessManager {
+  private static instance: ProcessManager;
+  private processes: Map<string, execa.ExecaChildProcess>;
+  private readonly SCRIPT_PATH = path.join(environment.assetsPath, 'scripts', 'play-rtsp.sh');
+
+  private constructor() {
+    this.processes = new Map();
   }
 
-  private generatePiPScript(): string {
-    // Generate AppleScript for PiP mode
+  static getInstance(): ProcessManager {
+    if (!ProcessManager.instance) {
+      ProcessManager.instance = new ProcessManager();
+    }
+    return ProcessManager.instance;
   }
 
-  private async setWindowPosition(position: WindowPosition): Promise<void> {
-    // Set window position using AppleScript
+  async startStream(deviceId: string, rtspUrl: string, options: StreamOptions = {}): Promise<void> {
+    // Stop any existing stream for this device
+    await this.stopStream(deviceId);
+
+    // Make sure script is executable
+    await fs.chmod(this.SCRIPT_PATH, 0o755);
+
+    // Start the FFplay process
+    const process = execa(this.SCRIPT_PATH, [rtspUrl], {
+      detached: true,
+      stdio: 'ignore',
+      env: {
+        ...process.env,
+        DISPLAY: ':0',
+      },
+    });
+
+    // Store the process
+    this.processes.set(deviceId, process);
+
+    // Handle process exit
+    process.on('exit', (code) => {
+      if (code !== 0) {
+        console.error(`Stream process for device ${deviceId} exited with code ${code}`);
+      }
+      this.processes.delete(deviceId);
+    });
+  }
+
+  async stopStream(deviceId: string): Promise<void> {
+    const process = this.processes.get(deviceId);
+    if (process) {
+      try {
+        process.kill('SIGTERM', { forceKillAfterTimeout: 2000 });
+      } catch (error) {
+        console.error(`Error stopping stream for device ${deviceId}:`, error);
+      } finally {
+        this.processes.delete(deviceId);
+      }
+    }
+  }
+
+  async cleanup(): Promise<void> {
+    const deviceIds = Array.from(this.processes.keys());
+    await Promise.all(deviceIds.map(id => this.stopStream(id)));
   }
 }
+```
 
-class WindowManager {
-  async getSavedPosition(cameraId: string): Promise<WindowPosition | null> {
-    // Get saved window position from LocalStorage
-  }
+### 4. RTSP Integration
 
-  async savePosition(cameraId: string, position: WindowPosition): Promise<void> {
-    // Save window position to LocalStorage
-  }
+```bash
+#!/bin/bash
+# play-rtsp.sh - Script to play RTSP streams using FFplay
 
-  private async getDisplays(): Promise<Display[]> {
-    // Get information about connected displays
-  }
-}
+# Check if RTSP URL is provided
+if [ -z "$1" ]; then
+  echo "Error: No RTSP URL provided"
+  echo "Usage: $0 <rtsp_url>"
+  osascript -e 'display notification "No RTSP URL provided" with title "Nest Camera Error"'
+  exit 1
+fi
+
+RTSP_URL="$1"
+
+# Store URL in temporary file to avoid command line length issues
+URL_FILE=$(mktemp)
+echo "$RTSP_URL" > "$URL_FILE"
+
+# Define common paths for FFplay on macOS
+FFPLAY_PATHS=(
+  "/opt/homebrew/bin/ffplay"
+  "/usr/local/bin/ffplay"
+  "/usr/bin/ffplay"
+)
+
+# Find FFplay
+FFPLAY=""
+for path in "${FFPLAY_PATHS[@]}"; do
+  if [ -x "$path" ]; then
+    FFPLAY="$path"
+    break
+  fi
+done
+
+# Check if FFplay was found
+if [ -z "$FFPLAY" ]; then
+  echo "Error: FFplay not found. Please install FFmpeg."
+  osascript -e 'display notification "FFplay not found. Please install FFmpeg with: brew install ffmpeg" with title "Nest Camera Error"'
+  rm "$URL_FILE"
+  exit 1
+fi
+
+# Launch FFplay with optimal parameters
+echo "Starting FFplay with RTSP URL..."
+"$FFPLAY" -hide_banner -loglevel error \
+  -fflags nobuffer \
+  -flags low_delay \
+  -framedrop \
+  -avioflags direct \
+  -rtsp_transport tcp \
+  -i "$(cat "$URL_FILE")" \
+  -probesize 32 \
+  -sync ext \
+  -vf "setpts=0.5*PTS" \
+  -window_title "Nest Camera" \
+  -x 1280 -y 720
+
+# Check if FFplay exited with an error
+if [ $? -ne 0 ]; then
+  osascript -e 'display notification "Failed to play RTSP stream. Please try again." with title "Nest Camera Error"'
+  echo "FFplay exited with an error"
+fi
+
+# Clean up
+rm "$URL_FILE"
 ```
 
 ### 4. UI Components

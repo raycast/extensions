@@ -4,9 +4,7 @@ import { getConfig, ConfigurationError } from "../../utils/config";
 import crypto from "crypto";
 import fetch from "node-fetch";
 
-const OAUTH_SCOPE = [
-  "https://www.googleapis.com/auth/sdm.service"
-];
+const OAUTH_SCOPE = ["https://www.googleapis.com/auth/sdm.service"];
 
 export class OAuthManager {
   private static instance: OAuthManager;
@@ -32,7 +30,7 @@ export class OAuthManager {
         providerName: "Google Nest",
         providerIcon: "command-icon.png",
         providerId: "google-nest",
-        description: "Connect your Google Nest account to view your camera feeds"
+        description: "Connect your Google Nest account to view your camera feeds",
       });
     } catch (error) {
       if (error instanceof ConfigurationError) {
@@ -63,11 +61,7 @@ export class OAuthManager {
     return hash.digest("base64url");
   }
 
-  private createTokenWithExpiry(
-    accessToken: string,
-    refreshToken: string | undefined,
-    expiresIn: number
-  ): OAuth2Token {
+  private createTokenWithExpiry(accessToken: string, refreshToken: string | undefined, expiresIn: number): OAuth2Token {
     const updatedAt = new Date();
     return {
       accessToken,
@@ -75,9 +69,9 @@ export class OAuthManager {
       expiresIn,
       updatedAt,
       isExpired: () => {
-        const expirationTime = updatedAt.getTime() + (expiresIn * 1000);
+        const expirationTime = updatedAt.getTime() + expiresIn * 1000;
         // Consider token expired 5 minutes before actual expiration
-        return Date.now() > (expirationTime - 300000);
+        return Date.now() > expirationTime - 300000;
       },
     };
   }
@@ -85,7 +79,7 @@ export class OAuthManager {
   public async getValidToken(): Promise<OAuth2Token> {
     try {
       const token = await this.client.getTokens();
-      
+
       if (!token?.accessToken) {
         if (this.isAuthorizing) {
           return new Promise((resolve) => {
@@ -100,7 +94,7 @@ export class OAuthManager {
             checkToken();
           });
         }
-        
+
         this.isAuthorizing = true;
         try {
           return await this.authorize();
@@ -135,15 +129,15 @@ export class OAuthManager {
           access_type: "offline",
           prompt: "consent",
           project_id: this.config.projectId,
-          flowName: "GeneralOAuthFlow"
-        }
+          flowName: "GeneralOAuthFlow",
+        },
       });
-      
+
       const { authorizationCode } = await this.client.authorize(authRequest);
       const tokens = await this.fetchTokens(authorizationCode, verifier, authRequest);
       await this.client.setTokens(tokens);
       this.setupRefreshTimer(tokens);
-      
+
       return tokens;
     } catch (error) {
       console.error("Authorization error:", error);
@@ -189,14 +183,10 @@ export class OAuthManager {
       console.log("Received token response:", {
         hasAccessToken: !!data.access_token,
         hasRefreshToken: !!data.refresh_token,
-        expiresIn: data.expires_in
+        expiresIn: data.expires_in,
       });
 
-      const token = this.createTokenWithExpiry(
-        data.access_token,
-        data.refresh_token,
-        data.expires_in
-      );
+      const token = this.createTokenWithExpiry(data.access_token, data.refresh_token, data.expires_in);
 
       // Immediately save the token
       console.log("Saving new tokens to secure storage...");
@@ -232,7 +222,7 @@ export class OAuthManager {
         console.error("Token refresh failed:", {
           status: response.status,
           statusText: response.statusText,
-          error: errorData
+          error: errorData,
         });
         throw new Error("Failed to refresh token");
       }
@@ -243,21 +233,21 @@ export class OAuthManager {
         data.refresh_token || token.refreshToken,
         data.expires_in
       );
-      
+
       await this.client.setTokens(newToken);
       this.setupRefreshTimer(newToken);
-      this.refreshListeners.forEach(listener => listener());
+      this.refreshListeners.forEach((listener) => listener());
 
       return newToken;
     } catch (error) {
       console.error("Token refresh error:", error);
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to refresh token",
         message: "Please try authenticating again",
       });
-      
+
       await this.client.removeTokens();
       return this.authorize();
     }
@@ -283,4 +273,4 @@ export class OAuthManager {
     }
     await this.client.removeTokens();
   }
-} 
+}

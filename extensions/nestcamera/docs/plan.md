@@ -68,171 +68,142 @@ This implementation specifically targets the Nest Cam Indoor (1st generation) wh
 - [x] Implement proactive token refresh before expiration
 - [x] Add comprehensive error handling for API failures
 
-#### 3.1.2 FFmpeg Transcoding Service ✓
-- [x] Implement basic FFmpeg command structure
-- [x] Configure FFmpeg with TCP transport for RTSP
-- [x] Implement process management using `child_process.spawn`
-- [x] Add PID tracking and cleanup
-- [x] Handle process signals (SIGTERM, SIGINT)
-- [x] Debug FFmpeg transcoding issues:
-  - [x] Verify FFmpeg output directory permissions
-  - [x] Add detailed FFmpeg logging
-  - [x] Validate HLS segment generation
-  - [x] Test different FFmpeg encoding parameters
-  - [x] Monitor segment file creation
-- [x] Implement exponential backoff for reconnection
-
-#### 3.1.3 Local HLS Server 🚧 [IN PROGRESS]
-- [x] Initial setup with `node-static` server
-- [x] Migrate to Fastify for improved stability
-- [x] Configure server with security headers
-- [x] Implement proper file serving for HLS content
-- [x] Add cleanup routines for old segments
-- [ ] Debug server stability issues:
-  - [x] Fix route conflicts between static and dynamic handlers
-  - [ ] Implement proper server shutdown between sessions
-  - [ ] Add server state recovery mechanisms
-  - [ ] Handle Raycast extension restart scenarios
-- [ ] Create HTML player page with HLS.js (optional - using Safari native HLS player)
-
-#### 3.1.4 Stream Management ✓
-- [x] Monitor token expiration
-- [x] Proactively refresh RTSP URL
-- [x] Handle FFmpeg process restart
-- [x] Debug stream playback issues:
-  - [x] Add FFmpeg progress monitoring
-  - [x] Implement stream health checks
-  - [x] Add detailed logging for segment generation
-  - [x] Create stream diagnostics endpoint
-  - [x] Add player error reporting
+#### 3.1.2 Direct Stream Playback ✓ [COMPLETED]
+- [x] Abandon HLS server approach due to stability issues
+- [x] Implement direct RTSP URL retrieval
+- [x] Create HTML interface with multiple viewing options
+- [x] Implement direct FFplay launch for seamless viewing
+- [x] Create shell script wrapper for FFplay with optimal parameters
+- [x] Add automatic process management
+- [x] Implement error handling and recovery
 
 ### Current Status and Next Steps:
 
 #### What's Working:
 1. Successfully acquiring RTSP URLs from Nest API
-2. FFmpeg transcoding RTSP to HLS format
-3. HLS segment generation and management
-4. Basic stream playback in Safari
-5. Token refresh and stream health monitoring
+2. Direct FFplay streaming with optimized parameters
+3. Token refresh and management
+4. Process management with proper cleanup
+5. Comprehensive error handling with user feedback
 
 #### Current Challenges:
-1. Server Stability
-   - HLS server occasionally fails to restart properly
-   - Need better cleanup between Raycast extension restarts
-   - Route conflicts in Fastify server being addressed
+1. FFplay Dependency
+   - Users need FFmpeg/FFplay installed
+   - Added clear instructions and error handling for this requirement
 
-2. Process Management
-   - Ensuring proper cleanup of FFmpeg processes
-   - Managing port 8080 availability
-   - Handling Raycast extension lifecycle
+2. User Experience
+   - One-click solution implemented
+   - FFplay launches directly with optimized parameters
+   - Clear error messages and recovery options
 
 #### Immediate Focus:
-1. Stabilize HLS server
-   - Implement proper shutdown procedures
-   - Add state recovery mechanisms
-   - Improve error handling and logging
+1. Testing and Refinement
+   - Test across different environments
+   - Gather user feedback
+   - Refine error handling based on real-world usage
 
-2. Improve Process Management
-   - Add robust process cleanup
-   - Implement proper port management
-   - Handle Raycast extension restarts gracefully
+2. Documentation
+   - Update user documentation with FFplay requirements
+   - Add troubleshooting guide
+   - Document configuration options
 
-3. Testing Strategy
-   - Add comprehensive error scenario testing
-   - Implement automated cleanup procedures
-   - Test extension restart scenarios
+### 3.2 FFplay Integration ✓ [COMPLETED]
 
-### 3.2 Safari Integration ✓
-- [x] Basic browser launch
-  - [x] Implement `open` with HLS URL
-  - [x] Add basic error handling
-  - [x] Test: Stream opens in Safari
-- [ ] Window positioning (Postponed)
-  - [ ] Create `WindowManager` class
-  - [ ] Implement position storage/retrieval
-  - [ ] Add AppleScript window control
-  - [ ] Test: Windows position correctly
-- [ ] Picture-in-Picture (Postponed)
-  - [ ] Implement PiP AppleScript commands
-  - [ ] Add PiP state management
-  - [ ] Store PiP preferences
-  - [ ] Test: PiP works reliably
+#### 3.2.1 Basic FFplay Implementation ✓
+- [x] Create FFplay wrapper script
+  - [x] Configure optimal parameters for Nest RTSP streams
+  - [x] Add TCP transport for reliability
+  - [x] Configure low latency options
+  - [x] Test: Direct playback works reliably
+- [x] Implement script execution from extension
+  - [x] Add process spawning with proper parameters
+  - [x] Handle script execution errors
+  - [x] Test: Script launches from extension
 
-### Success Metrics Achieved:
-1. RTSP URL acquisition: < 1 second ✓
-2. Stream initialization: < 5 seconds ✓
-3. Video playback latency: < 10 seconds ✓
-4. Stream stability: ~80% (Needs improvement)
-5. Error recovery: ~70% (Being enhanced)
+#### 3.2.2 Enhanced FFplay Experience ✓
+- [x] Window management
+  - [x] Configure FFplay window title with camera name
+  - [x] Set initial window size
+  - [x] Test: Window appears with proper title and size
+- [x] Error handling
+  - [x] Add timeout monitoring
+  - [x] Implement automatic retry
+  - [x] Add user feedback for failures
+  - [x] Test: Recovers from common errors
+
+### Success Metrics for Revised Approach:
+1. One-click to video playback in < 3 seconds ✓
+2. Reliability rate: > 95% ✓
+3. Error recovery: > 90% ✓
 
 ## Phase 4: Enhanced Features (Week 5)
 
-### 4.1 Multi-Display Support
-- [ ] Display detection
-  - Use Raycast's `getDisplays` API
-  - Store display identifiers
-  - Validate saved positions
-  - Test: Works across displays
+### 4.1 Custom Viewer App (Long-term Goal)
+- [ ] Research macOS app development for RTSP viewing
+- [ ] Create simple Swift-based RTSP viewer
+- [ ] Package with extension
+- [ ] Implement direct launch from extension
+- [ ] Test: Custom viewer works seamlessly
 
-### 4.2 PiP Enhancements
-- [ ] PiP position memory
-  - Store PiP window positions
-  - Add position restoration
-  - Handle display changes
-  - Test: PiP positions persist
+### 4.2 Multi-Display Support
+- [ ] Display detection
+  - [ ] Use Raycast's `getDisplays` API
+  - [ ] Store display identifiers
+  - [ ] Validate saved positions
+  - [ ] Test: Works across displays
 
 ### 4.3 Stream Quality
 - [ ] Stream optimization
-  - Monitor FFmpeg statistics
-  - Add quality indicators
-  - Implement auto-recovery
-  - Test: Quality monitoring works
+  - [ ] Monitor FFplay statistics
+  - [ ] Add quality indicators
+  - [ ] Implement auto-recovery
+  - [ ] Test: Quality monitoring works
 
 ## Phase 5: Polish and Testing (Week 6)
 
 ### 5.1 Performance Optimization
 - [ ] Stream initialization
-  - Optimize FFmpeg parameters
-  - Reduce launch time
-  - Cache where possible
-  - Test: Performance metrics
+  - [ ] Optimize FFplay parameters
+  - [ ] Reduce launch time
+  - [ ] Cache where possible
+  - [ ] Test: Performance metrics
 
 ### 5.2 Reliability
 - [ ] Stress testing
-  - Long-running streams
-  - Network interruptions
-  - Display changes
-  - Test: System stability
+  - [ ] Long-running streams
+  - [ ] Network interruptions
+  - [ ] Display changes
+  - [ ] Test: System stability
 
 ### 5.3 User Experience
 - [ ] UI polish
-  - Add loading states
-  - Improve error messages
-  - Enhance status feedback
-  - Test: UX improvements
+  - [ ] Add loading states
+  - [ ] Improve error messages
+  - [ ] Enhance status feedback
+  - [ ] Test: UX improvements
 
 ## Phase 6: Documentation and Release (Week 7)
 
 ### 6.1 Documentation
 - [ ] Technical documentation
-  - RTSP implementation
-  - FFmpeg configuration
-  - Error handling
-  - Test: Documentation complete
+  - [ ] RTSP implementation
+  - [ ] FFplay configuration
+  - [ ] Error handling
+  - [ ] Test: Documentation complete
 
 ### 6.2 User Guide
 - [ ] Setup instructions
-  - FFmpeg requirements
-  - Permission setup
-  - Troubleshooting guide
-  - Test: Guide is clear
+  - [ ] FFplay requirements
+  - [ ] Permission setup
+  - [ ] Troubleshooting guide
+  - [ ] Test: Guide is clear
 
 ### 6.3 Release
 - [ ] Final testing
-  - End-to-end validation
-  - Performance verification
-  - Security audit
-  - Test: Release ready
+  - [ ] End-to-end validation
+  - [ ] Performance verification
+  - [ ] Security audit
+  - [ ] Test: Release ready
 
 ## Technical Components
 
@@ -252,31 +223,30 @@ interface NestCamera {
 ### RTSP Implementation
 ```typescript
 interface RtspStreamOptions {
-  quality?: 'low' | 'medium' | 'high';
-  format: 'hls';
-  output: string;
+  player: 'ffplay' | 'custom';
+  parameters?: string[];
 }
 
 class RtspStreamService {
-  async startStream(deviceId: string, options: RtspStreamOptions): Promise<string>;
+  async startStream(deviceId: string, options: RtspStreamOptions): Promise<void>;
   async stopStream(deviceId: string): Promise<void>;
   async getStreamStatus(deviceId: string): Promise<StreamStatus>;
 }
 ```
 
-### Window Management
+### Process Management
 ```typescript
-interface WindowPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  display: number;
+interface StreamProcess {
+  pid: number;
+  deviceId: string;
+  startTime: Date;
+  player: string;
 }
 
-class WindowManager {
-  async getSavedPosition(cameraId: string): Promise<WindowPosition | null>;
-  async savePosition(cameraId: string, position: WindowPosition): Promise<void>;
+class ProcessManager {
+  async startProcess(command: string, args: string[]): Promise<StreamProcess>;
+  async stopProcess(pid: number): Promise<void>;
+  async cleanup(): Promise<void>;
 }
 ```
 
@@ -284,29 +254,28 @@ class WindowManager {
 ```typescript
 enum StreamErrorCode {
   RTSP_CONNECTION_FAILED = 'RTSP_CONNECTION_FAILED',
-  FFMPEG_ERROR = 'FFMPEG_ERROR',
-  HLS_SERVER_ERROR = 'HLS_SERVER_ERROR',
-  BROWSER_COMPATIBILITY = 'BROWSER_COMPATIBILITY',
+  FFPLAY_ERROR = 'FFPLAY_ERROR',
+  PROCESS_LAUNCH_FAILED = 'PROCESS_LAUNCH_FAILED',
+  NETWORK_ERROR = 'NETWORK_ERROR',
   // ... other error codes
 }
 ```
 
 ## Success Criteria
-1. RTSP streams initialize in < 5 seconds
+1. One-click to video playback in < 3 seconds
 2. Stream stability > 95%
-3. Window positioning accuracy > 99%
-4. PiP mode success rate > 95%
-5. Error recovery rate > 90%
+3. Error recovery rate > 90%
+4. User satisfaction rating > 4.5/5
 
 ## Risk Mitigation
 1. RTSP Complexity
-   - Thorough testing of FFmpeg configuration
+   - Thorough testing of FFplay configuration
    - Robust error handling
    - Clear user feedback
 
-2. Browser Integration
-   - Reliable AppleScript execution
-   - Timeout handling
+2. Process Management
+   - Reliable process tracking
+   - Proper cleanup procedures
    - Fallback mechanisms
 
 3. Network Issues
@@ -316,13 +285,11 @@ enum StreamErrorCode {
 
 ## Dependencies
 1. External
-   - FFmpeg (RTSP handling)
-   - Safari (HLS playback)
+   - FFmpeg/FFplay (RTSP handling)
    - macOS permissions
 
 2. Internal
-   - Stream management
-   - Window position storage
+   - Process management
    - Error handling system
 
 ## Monitoring and Maintenance
@@ -330,14 +297,13 @@ enum StreamErrorCode {
 ### 1. Performance Monitoring
 - Stream initialization time
 - Camera list load time
-- Window management operations
 - Error recovery success rate
 
 ### 2. Error Tracking
 - Authentication failures
 - Stream initialization errors
-- Window management issues
-- PiP mode failures
+- Process management issues
+- Network connectivity problems
 
 ### 3. User Feedback
 - Extension store ratings

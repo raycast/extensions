@@ -7,8 +7,8 @@ export const mockCameras: NestCamera[] = [
     roomHint: "Front Door",
     traits: {
       streamingSupport: "WEB_RTC",
-      online: true
-    }
+      online: true,
+    },
   },
   {
     id: "mock-camera-2",
@@ -16,8 +16,8 @@ export const mockCameras: NestCamera[] = [
     roomHint: "Back Yard",
     traits: {
       streamingSupport: "WEB_RTC",
-      online: true
-    }
+      online: true,
+    },
   },
   {
     id: "mock-camera-3",
@@ -25,13 +25,13 @@ export const mockCameras: NestCamera[] = [
     roomHint: "Garage",
     traits: {
       streamingSupport: "WEB_RTC",
-      online: false
-    }
-  }
+      online: false,
+    },
+  },
 ];
 
 export async function getMockCameras(): Promise<NestCamera[]> {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
   return mockCameras;
-} 
+}

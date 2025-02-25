@@ -1,17 +1,17 @@
 # Nest Camera Raycast Extension PRD
 
 ## Overview
-A Raycast extension that provides quick access to Google Nest camera feeds through RTSP streaming with FFmpeg and HLS, enabling users to view their camera feeds with minimal interaction. This extension is specifically designed for the Nest Cam Indoor (1st gen) model, which only supports RTSP streaming.
+A Raycast extension that provides quick access to Google Nest camera feeds through direct RTSP streaming with FFplay, enabling users to view their camera feeds with minimal interaction. This extension is specifically designed for the Nest Cam Indoor (1st gen) model, which only supports RTSP streaming.
 
 ## Problem Statement
 Users want quick access to their Nest camera feeds without opening the Google Home app or website. Current solutions require multiple clicks and app switches, making it inefficient for quick camera checks. The Nest Cam Indoor (1st gen) only supports RTSP streaming, requiring a specialized solution for reliable playback.
 
 ## Goals
-- Provide instant access to Nest camera feeds through RTSP streaming with FFmpeg transcoding to HLS
+- Provide instant access to Nest camera feeds through direct RTSP streaming with FFplay
 - Support authentication with Google Nest/Home using OAuth2 with PKCE
 - Enable quick camera switching with intuitive search and filtering
 - Support hotkey access to favorite cameras
-- Provide reliable stream playback through Safari's native HLS support
+- Provide reliable stream playback through FFplay's optimized parameters
 - Provide clear error feedback and recovery options
 
 ## Non-Goals
@@ -41,23 +41,22 @@ Users want quick access to their Nest camera feeds without opening the Google Ho
    - Last used camera memory
 
 2. Camera Actions:
-   - Open in Safari with HLS stream
-   - Launch with Picture-in-Picture mode
+   - Open direct RTSP stream with FFplay
    - Set as favorite for hotkey access
-   - Remember window positions
+   - One-click stream launch
 
 ### Stream Viewing
 1. Launch Options:
-   - Standard Safari window with HLS stream
-   - Picture-in-Picture mode
+   - Direct FFplay window with optimized parameters
    - Full-screen capability
-   - Position memory per camera
+   - Low-latency viewing
 
 2. Error Handling:
    - Clear error messages with recovery steps
    - Automatic retry for recoverable errors
    - Manual fallback instructions when needed
    - Network status monitoring
+   - FFplay dependency detection and installation guidance
 
 ## Technical Requirements
 
@@ -70,20 +69,21 @@ Users want quick access to their Nest camera feeds without opening the Google Ho
 ### API Integration
 - Google Smart Device Management (SDM) API
 - RTSP stream URL generation
-- FFmpeg transcoding to HLS
-- Safari HLS playback integration
-- Window position management
+- FFplay direct streaming
+- Process management for stream control
+- Robust error handling
 
 ### Performance
-- Stream initialization < 5 seconds
+- Stream initialization < 3 seconds
 - Camera list retrieval < 1 second
 - Reliable stream playback
 - Efficient resource management
+- Proper process cleanup
 
 ## Success Metrics
 1. Time to view (from hotkey to visible stream)
-   - Target: < 5 seconds
-   - Fallback handling < 7 seconds
+   - Target: < 3 seconds
+   - Fallback handling < 5 seconds
 2. Authentication reliability
    - Token refresh success rate > 99%
    - Clear error recovery paths
@@ -92,19 +92,17 @@ Users want quick access to their Nest camera feeds without opening the Google Ho
    - Recovery from network issues < 3 seconds
 4. User interaction time
    - Camera selection to stream < 2 clicks
-   - PiP mode activation < 1 click
+   - Stream start < 1 click
 
 ## Questions & Dependencies
 
 ### Dependencies
 1. Google Device Access registration ($5 fee)
 2. OAuth client setup
-3. FFmpeg installation
-4. Safari (for HLS playback)
-5. macOS permissions for:
+3. FFmpeg/FFplay installation
+4. macOS permissions for:
    - Process execution
    - Network access
-   - Browser automation
 
 ### Technical Constraints
 1. Camera Model Support
@@ -112,7 +110,7 @@ Users want quick access to their Nest camera feeds without opening the Google Ho
    - Only supports RTSP streaming protocol
    - No support for newer streaming protocols (WebRTC)
 2. RTSP stream availability
-3. FFmpeg transcoding performance
+3. FFplay installation requirement
 4. Raycast extension limitations:
    - No embedded video playback
    - No custom UI components
@@ -129,17 +127,18 @@ Phase 2: Camera Management (1 week) ✓
 - UI implementation
 - Settings management
 
-Phase 3: RTSP Streaming (2 weeks) 🚧
+Phase 3: RTSP Streaming (2 weeks) ✓
 - RTSP URL generation
-- FFmpeg transcoding setup
-- HLS server implementation
+- Direct FFplay integration
+- Process management implementation
 
-Phase 4: Error Handling (1 week)
+Phase 4: Error Handling (1 week) ✓
 - Error detection
 - Recovery procedures
 - User feedback
+- FFplay dependency handling
 
-Phase 5: Polish & Testing (1 week)
+Phase 5: Polish & Testing (1 week) 🚧
 - Performance optimization
 - Resource management
 - Documentation
@@ -152,15 +151,15 @@ Phase 6: Distribution (1 week)
 ## Future Considerations
 1. Feature Expansion
    - Support for additional camera brands
-   - Enhanced FFmpeg controls
+   - Enhanced FFplay controls
    - Stream quality presets
    
 2. Performance Improvements
    - Faster stream initialization
    - Better error recovery
-   - Enhanced transcoding reliability
+   - Enhanced streaming reliability
 
 3. Integration Opportunities
    - Additional streaming protocols
    - Advanced automation
-   - Custom video player 
+   - Custom video player options 
