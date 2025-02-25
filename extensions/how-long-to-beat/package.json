@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "howlongtobeat",
-  "title": "How Long To Beat",
+  "title": "HowLongToBeat",
   "description": "Discover how many hours you need to beat a game.",
   "icon": "icon.png",
   "author": "Cronos87",
