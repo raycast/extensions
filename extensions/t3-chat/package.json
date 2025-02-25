@@ -34,6 +34,10 @@
           "required": true,
           "data": [
             {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
               "title": "GPT-4o Mini",
               "value": "gpt-4o-mini"
             },
@@ -50,11 +54,23 @@
               "value": "claude-3.5"
             },
             {
+              "title": "Claude 3.7",
+              "value": "claude-3.7"
+            },
+            {
+              "title": "Claude 3.7 Reasoning",
+              "value": "claude-3.7-reasoning"
+            },
+            {
               "title": "Llama 3.3 70B (Groq)",
               "value": "llama-3.3-70b-groq"
             },
             {
-              "title": "Deepseek v3 (Fireworks)",
+              "title": "Gemini 2.0 Flash Lite Preview",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "DeepSeek v3 (Fireworks)",
               "value": "deepseek-v3-fireworks"
             },
             {
@@ -66,12 +82,12 @@
               "value": "deepseek-r1-groq"
             },
             {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
+              "title": "DeepSeek R1 Distill Qwen 32B (Groq)",
+              "value": "deepseek-r1-distill-qwen-32b-groq"
             },
             {
-              "title": "Gemini 2.0 Flash Lite Preview",
-              "value": "gemini-2.0-flash-lite-preview-02-05"
+              "title": "Qwen 2.5 32B (Groq)",
+              "value": "qwen-2.5-32b-groq"
             }
           ]
         }
