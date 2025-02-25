@@ -92,6 +92,7 @@ export type ModelHook = BaseHook<Record<string, Model>> &
 
 export interface ChatHook {
   data: Chat[];
+  errorMsg: string | null;
   setData: Set<Chat[]>;
   isLoading: boolean;
   isAborted: boolean;

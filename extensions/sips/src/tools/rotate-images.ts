@@ -10,7 +10,7 @@ type Input = {
   /**
    * Indication that the angle is specified in radians.
    */
-  radians: boolean;
+  isRadians?: boolean;
 
   /**
    * Optional array of image paths to process. If not provided, will attempt to get selected images from Finder.
@@ -18,13 +18,13 @@ type Input = {
   imagePaths?: string[];
 };
 
-export default async function ({ angle, radians, imagePaths }: Input) {
+export default async function ({ angle, isRadians, imagePaths }: Input) {
   let validatedAngle = parseFloat(angle.toString());
   if (isNaN(validatedAngle)) {
     throw new Error("Invalid angle: must be a number");
   }
 
-  if (radians === true) {
+  if (isRadians === true) {
     validatedAngle = validatedAngle * (180 / Math.PI);
   }
 
