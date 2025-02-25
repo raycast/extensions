@@ -2,8 +2,8 @@ import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { runYabaiCommand } from "./helpers/scripts";
 import { execaCommand } from "execa";
-import pinyin from "pinyin";
 import { sortWindows, BaseWindow } from "./helpers/window-utils";
+import * as pinyin from "tiny-pinyin";
 
 interface Window extends BaseWindow {
   icon?: string;
@@ -26,13 +26,10 @@ async function findAppPath(pid: number): Promise<string> {
 }
 
 function getPinyin(text: string): string {
-  return pinyin(text, {
-    style: pinyin.STYLE_NORMAL,
-    heteronym: false,
-  })
-    .flat()
-    .join("")
-    .toLowerCase();
+  if (!/[\u4e00-\u9fa5]/.test(text)) {
+    return text.toLowerCase();
+  }
+  return pinyin.convertToPinyin(text, "", true).toLowerCase();
 }
 
 function timeLog(label: string, startTime: number) {
