@@ -170,6 +170,78 @@
       ]
     },
     {
+      "name": "askAboutSelectedScreen",
+      "title": "Ask About Selected Screen Area",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini about your selected screen area",
+      "mode": "no-view",
+      "icon": "screen-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Which model this command uses.",
+          "name": "model",
+          "title": "Model",
+          "type": "dropdown",
+          "required": false,
+          "default": "default",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Gemini 1.5 Flash",
+              "value": "gemini-1.5-flash-latest"
+            },
+            {
+              "title": "Gemini 1.5 Pro",
+              "value": "gemini-1.5-pro-latest"
+            },
+            {
+              "title": "LearnLM 1.5 Pro Experimental",
+              "value": "learnlm-1.5-pro-experimental"
+            },
+            {
+              "title": "Gemini 2.0 Flash-Lite Preview",
+              "value": "gemini-2.0-flash-lite-preview-02-05"
+            },
+            {
+              "title": "Gemini 2.0 Flash",
+              "value": "gemini-2.0-flash"
+            },
+            {
+              "title": "Gemini 2.0 Flash Thinking Experimental",
+              "value": "gemini-2.0-flash-thinking-exp"
+            },
+            {
+              "title": "Gemini Experimental 1206",
+              "value": "gemini-exp-1206"
+            },
+            {
+              "title": "Gemini 2.0 Pro Experimental",
+              "value": "gemini-2.0-pro-exp"
+            }
+          ]
+        },
+        {
+          "name": "prompt",
+          "title": "System Prompt",
+          "description": "The prompt to use for this command.",
+          "type": "textfield",
+          "required": false,
+          "default": "Please analyze this screenshot and describe what you see. Include any relevant details about the content, layout, and any text or important elements visible in the image."
+        }
+      ]
+    },
+    {
       "name": "askAboutSelectedText",
       "title": "Ask About Selected Text",
       "subtitle": "Google Gemini",
