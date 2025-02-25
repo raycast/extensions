@@ -50,7 +50,7 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
   }, []);
 
   useEffect(() => {
-    const _debounce = searchText == "" ? 0 : debounce;
+    const _debounce = searchText === "" ? 0 : debounce;
 
     setIsLoading(true);
     const timeout = setTimeout(async () => {

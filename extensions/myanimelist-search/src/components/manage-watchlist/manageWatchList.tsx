@@ -14,20 +14,30 @@ export function ManageWatchList() {
   const { showingDetails: showingDetail, setShowingDetails: setShowingDetail, setViewType } = useContext(ViewTypeCtx);
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
       try {
         await oauth.authorize();
 
         const fetchedItems = await getWatchlistItems();
 
-        setItems(fetchedItems);
-        setIsLoading(false);
+        if (isMounted) {
+          setItems(fetchedItems);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error(error);
-        setIsLoading(false);
-        showToast({ style: Toast.Style.Failure, title: String(error) });
+        if (isMounted) {
+          setIsLoading(false);
+          showToast({ style: Toast.Style.Failure, title: String(error) });
+        }
       }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -65,12 +75,17 @@ export function ManageWatchList() {
               <Action
                 title={"Remove from Watchlist"}
                 onAction={async () => {
-                  if (!(await api.alertRemoveAnime(item))) return;
-                  await api.removeAnime(item);
-                  api.removeCachedWatchlist();
-                  await showHUD("Removed from Watchlist", {
-                    popToRootType: PopToRootType.Immediate,
-                  });
+                  try {
+                    if (!(await api.alertRemoveAnime(item))) return;
+                    await api.removeAnime(item);
+                    api.removeCachedWatchlist();
+                    await showHUD("Removed from Watchlist", {
+                      popToRootType: PopToRootType.Immediate,
+                    });
+                  } catch (error) {
+                    console.error(error);
+                    await showToast({ style: Toast.Style.Failure, title: String(error) });
+                  }
                 }}
                 icon={Icon.Xmark}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
@@ -79,14 +94,19 @@ export function ManageWatchList() {
                 <Action
                   title="Increment Episodes Watched"
                   onAction={async () => {
-                    const cacheKey = `episodes_${item.id}`;
+                    try {
+                      const cacheKey = `episodes_${item.id}`;
 
-                    const newEps = await api.incrementEpisodes(item);
-                    api.cacheRemove(cacheKey);
-                    api.removeCachedWatchlist();
-                    await showHUD(`${item.title} now has ${newEps} episodes watched.`, {
-                      popToRootType: PopToRootType.Immediate,
-                    });
+                      const newEps = await api.incrementEpisodes(item);
+                      api.cacheRemove(cacheKey);
+                      api.removeCachedWatchlist();
+                      await showHUD(`${item.title} now has ${newEps} episodes watched.`, {
+                        popToRootType: PopToRootType.Immediate,
+                      });
+                    } catch (error) {
+                      console.error(error);
+                      await showToast({ style: Toast.Style.Failure, title: String(error) });
+                    }
                   }}
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}

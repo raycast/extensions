@@ -12,7 +12,7 @@ export default function SearchAnimeList() {
   const showDetailDefault = preferences.view;
   const { setViewType } = useContext(ViewTypeCtx);
   const [searchText, setSearchText] = useState("");
-  const [showingDetail, setShowingDetail] = useState(showDetailDefault == "list-detailed");
+  const [showingDetail, setShowingDetail] = useState(showDetailDefault === "list-detailed");
   const { isLoading, items: data, clearCache: clearSearchCache } = useSearch({ q: searchText });
 
   return (

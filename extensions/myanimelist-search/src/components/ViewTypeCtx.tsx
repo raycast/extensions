@@ -21,17 +21,15 @@ export function ViewTypeCtxProvider({ children }: { children: React.ReactNode })
   const preferences = getPreferenceValues();
   const defaultView = preferences.view as ViewType;
 
-  const [chosenView, setChosenView] = useState<ViewType>(defaultView);
-  const [showingDetails, setShowingDetail] = useState<boolean>(defaultView === "list-detailed");
+  const [viewType, setViewType] = useState<ViewType>(defaultView);
+  const [showingDetails, setShowingDetails] = useState<boolean>(defaultView === "list-detailed");
 
   useEffect(() => {
-    setShowingDetail(defaultView === "list-detailed");
-  }, [chosenView]);
+    setShowingDetails(defaultView === "list-detailed");
+  }, [viewType, defaultView]);
 
   return (
-    <ViewTypeCtx.Provider
-      value={{ setViewType: setChosenView, viewType: chosenView, setShowingDetails: setShowingDetail, showingDetails }}
-    >
+    <ViewTypeCtx.Provider value={{ setViewType, viewType, setShowingDetails, showingDetails }}>
       {children}
     </ViewTypeCtx.Provider>
   );

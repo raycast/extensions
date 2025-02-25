@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, PopToRootType, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
 
 import * as api from "../../api/api";
 import { useForm } from "@raycast/utils";
@@ -38,12 +38,17 @@ export function SetEpisodesWatched({ anime }: { anime: api.ExtendedAnime }) {
     onSubmit: async (values) => {
       const cacheKey = `episodes_${anime.id}`;
 
-      await api.setEpisodes(anime, parseInt(values.episodes));
-      api.cacheRemove(cacheKey);
-      api.removeCachedWatchlist();
-      await showHUD(`${anime.title} now has ${values.episodes} episodes watched.`, {
-        popToRootType: PopToRootType.Immediate,
-      });
+      try {
+        await api.setEpisodes(anime, parseInt(values.episodes));
+        api.cacheRemove(cacheKey);
+        api.removeCachedWatchlist();
+        await showHUD(`${anime.title} now has ${values.episodes} episodes watched.`, {
+          popToRootType: PopToRootType.Immediate,
+        });
+      } catch (error) {
+        console.error(error);
+        await showToast({ style: Toast.Style.Failure, title: String(error) });
+      }
     },
     validation: {
       episodes: (value) => {

@@ -137,7 +137,7 @@ export function cacheRemove(key: string) {
 export function removeCachedWatchlist() {
   // Hardcoding cause now I have to cope with my bad coding decisions ¯\_(ツ)_/¯
   cacheRemove("watchlist");
-  (["watching", "plan_to_watch", "completed", "dropped", "on_hold"] as AnimeStatus[]).map((status) =>
+  (["watching", "plan_to_watch", "completed", "dropped", "on_hold"] as AnimeStatus[]).forEach((status) =>
     cacheRemove(`watchlist_${status}`)
   );
 }
@@ -156,22 +156,33 @@ export async function alertRemoveAnime(anime: Anime): Promise<boolean> {
 export async function request(
   url: string,
   body: string | URLSearchParams | undefined = undefined,
-  method: "GET" | "PUT" | "POST" | "DELETE" = "GET"
+  method: "GET" | "PUT" | "POST" | "DELETE" = "GET",
+  headers: Record<string, string> = {},
+  opts: fetch.RequestInit = {}
 ): Promise<fetch.Response> {
+  const tokens = (await getTokens())?.accessToken;
+  if (!tokens) throw new Error("Not signed in");
+
+  console.log("request", url, body, method);
+
   return fetch(url, {
     body,
     method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${(await getTokens())?.accessToken}`,
+      Authorization: `Bearer ${tokens}`,
+      ...headers,
     },
+    ...opts,
   });
 }
 
 export async function request_anon(
   url: string,
   body: string | URLSearchParams | undefined = undefined,
-  method: "GET" | "PUT" | "POST" | "DELETE" = "GET"
+  method: "GET" | "PUT" | "POST" | "DELETE" = "GET",
+  headers: Record<string, string> = {},
+  opts: fetch.RequestInit = {}
 ): Promise<fetch.Response> {
   return fetch(url, {
     body,
@@ -179,7 +190,9 @@ export async function request_anon(
     headers: {
       "Content-Type": "application/json",
       "X-MAL-CLIENT-ID": clientId,
+      ...headers,
     },
+    ...opts,
   });
 }
 
@@ -310,20 +323,23 @@ export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean 
 }
 
 export async function incrementEpisodes(anime: ExtendedAnime): Promise<number> {
+  console.log("incrementEpisodes", anime.title);
   const episodes = await getAnimeEpisodesWatched(anime);
+  console.log("episodes watched:", episodes);
 
   const params = new URLSearchParams();
   params.append("num_watched_episodes", String(episodes + 1));
   params.append("status", episodes + 1 >= anime.num_episodes ? "completed" : "watching");
 
-  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT");
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT", {
+    "Content-Type": "application/x-www-form-urlencoded",
+  });
 
   if (!res.ok) {
     console.error("increment episodes error:", await res.text());
     throw new Error(res.statusText);
   }
 
-  await res.text();
   return episodes + 1;
 }
 
@@ -332,14 +348,14 @@ export async function setEpisodes(anime: ExtendedAnime, episodes: number) {
   params.append("num_watched_episodes", String(episodes));
   params.append("status", episodes >= anime.num_episodes ? "completed" : "watching");
 
-  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT");
+  const res = await request(`https://api.myanimelist.net/v2/anime/${anime.id}/my_list_status`, params, "PUT", {
+    "Content-Type": "application/x-www-form-urlencoded",
+  });
 
   if (!res.ok) {
     console.error("set episodes error:", await res.text());
     throw new Error(res.statusText);
   }
-
-  await res.text();
 }
 
 export async function getAnimeWatchlist(status?: AnimeStatus): Promise<Anime[]> {

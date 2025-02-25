@@ -3,9 +3,6 @@ import fetch from "node-fetch";
 
 import { generateCodeVerifier } from "./challenge";
 
-// Create an OAuth client ID via https://console.developers.google.com/apis/credentials
-// As application type choose "iOS" (required for PKCE)
-// As Bundle ID enter: com.raycast
 export const clientId = "7ec0f5fdf1df7156754eea431e83acf6";
 
 const client = new OAuth.PKCEClient({

@@ -25,7 +25,7 @@ export default function SearchAnimeGrid() {
           <Grid.Item
             key={anime.id}
             content={anime.main_picture.large}
-            title={anime?.title}
+            title={anime.title}
             subtitle={`${anime.mean ?? "-"}/10`}
             actions={
               <ActionPanel>
