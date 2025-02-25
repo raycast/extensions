@@ -34,12 +34,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -72,12 +80,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -110,12 +126,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -148,12 +172,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -186,12 +218,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -224,12 +264,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -278,12 +326,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -333,12 +389,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -372,12 +436,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -411,12 +483,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -450,12 +530,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -489,12 +577,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -528,12 +624,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -567,12 +671,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -606,12 +718,20 @@
               "title": "Follow global model"
             },
             {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
               "value": "sonar-pro",
               "title": "Sonar Pro 200k"
             },
             {
-              "value": "sonar",
-              "title": "Sonar 128k"
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
             }
           ]
         }
@@ -636,12 +756,20 @@
       "default": "sonar",
       "data": [
         {
+          "value": "sonar",
+          "title": "Sonar 128k"
+        },
+        {
           "value": "sonar-pro",
           "title": "Sonar Pro 200k"
         },
         {
-          "value": "sonar",
-          "title": "Sonar 128k"
+          "value": "sonar-reasoning",
+          "title": "Sonar Reasoning 128k"
+        },
+        {
+          "value": "sonar-reasoning-pro",
+          "title": "Sonar Reasoning Pro 128k"
         }
       ]
     },

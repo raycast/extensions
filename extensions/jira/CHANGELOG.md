@@ -1,5 +1,7 @@
 # Jira Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Avatars now display with a circular mask] - 2025-02-10
 
 - To be consistent with avatars with initials, the profile pictures now show with a circular mask.
