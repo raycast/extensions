@@ -449,19 +449,4 @@ export class HarmonyManager {
     this.isDiscovering = false;
     this.discoveryPromise = null;
   }
-
-  /**
-   * Update the loading state with progress information
-   * @param stage - Current stage of operation
-   * @param _progress - Progress value between 0 and 1
-   * @param _message - User-friendly message about the current state
-   */
-  private updateLoadingState(stage: HarmonyStage, _progress: number, _message: string): void {
-    this.state.loadingState = {
-      stage,
-      progress: _progress,
-      message: _message,
-    };
-    this.notifyListeners();
-  }
 }
