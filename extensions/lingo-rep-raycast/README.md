@@ -10,3 +10,5 @@ using best spaced repetition system (FSRS). Having trouble remembering a word - 
 it with our conversational AI bot, using your voice.
 
 Read more on https://lingorep.com
+
+You can manage (view, repeat and delete) your translations in our [web extension](https://chromewebstore.google.com/detail/lingorep-translate-repeat/gfmbkbpbncjopblehgldppphpkcmehnk).
