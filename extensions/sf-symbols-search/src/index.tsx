@@ -149,7 +149,7 @@ const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
 
   let subtitle;
-  if (minimumVersionOS != "disabled") {
+  if (minimumVersionOS != "disabled" && symbol.availableFrom) {
     subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
   } else {
     subtitle = undefined;
