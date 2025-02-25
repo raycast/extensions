@@ -1,0 +1,276 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyword-roulette",
+  "title": "Keyword Roulette",
+  "description": "Spin the roulette - search your keywords randomly across platforms.",
+  "icon": "extension-icon.png",
+  "author": "silvonli",
+  "version": "1.0.0",
+  "keywords": [
+    "search",
+    "social-media",
+    "random",
+    "multi-platform",
+    "x",
+    "twitter",
+    "reddit",
+    "medium",
+    "youtube",
+    "zhihu",
+    "bilibili"
+  ],
+  "categories": [
+    "Web",
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultPlatform1",
+      "title": "First Default Platform",
+      "description": "First default platform to search",
+      "type": "dropdown",
+      "required": true,
+      "default": "x",
+      "data": [
+        {
+          "title": "X",
+          "value": "x"
+        },
+        {
+          "title": "Reddit",
+          "value": "reddit"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Hacker News",
+          "value": "hackernews"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
+        },
+        {
+          "title": "V2EX",
+          "value": "v2ex"
+        },
+        {
+          "title": "知乎",
+          "value": "zhihu"
+        },
+        {
+          "title": "哔哩哔哩",
+          "value": "bilibili"
+        }
+      ]
+    },
+    {
+      "name": "defaultPlatform2",
+      "title": "Second Default Platform",
+      "description": "Second default platform to search",
+      "type": "dropdown",
+      "required": true,
+      "default": "reddit",
+      "data": [
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "X",
+          "value": "x"
+        },
+        {
+          "title": "Reddit",
+          "value": "reddit"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Hacker News",
+          "value": "hackernews"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
+        },
+        {
+          "title": "V2EX",
+          "value": "v2ex"
+        },
+        {
+          "title": "知乎",
+          "value": "zhihu"
+        },
+        {
+          "title": "哔哩哔哩",
+          "value": "bilibili"
+        }
+      ]
+    },
+    {
+      "name": "randomPlatform",
+      "description": "Random select a platform to search",
+      "type": "checkbox",
+      "required": true,
+      "label": "Random Select a Platform",
+      "default": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language for search",
+      "type": "dropdown",
+      "required": true,
+      "default": "en-US",
+      "data": [
+        {
+          "title": "🇺🇸 English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "🇨🇳 Chinese (Simplified)",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "🇫🇷 French (France)",
+          "value": "fr-FR"
+        },
+        {
+          "title": "🇮🇹 Italian (Italy)",
+          "value": "it-IT"
+        },
+        {
+          "title": "🇩🇪 German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "🇪🇸 Spanish (Spain)",
+          "value": "es-ES"
+        },
+        {
+          "title": "🇧🇷 Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "🇹🇼 Chinese (Traditional)",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "🇨🇳 Cantonese (Simplified)",
+          "value": "yue-Hans"
+        },
+        {
+          "title": "🇭🇰 Cantonese (Traditional)",
+          "value": "yue-Hant"
+        },
+        {
+          "title": "🇰🇷 Korean (South Korea)",
+          "value": "ko-KR"
+        },
+        {
+          "title": "🇯🇵 Japanese (Japan)",
+          "value": "ja-JP"
+        },
+        {
+          "title": "🇷🇺 Russian (Russia)",
+          "value": "ru-RU"
+        },
+        {
+          "title": "🇺🇦 Ukrainian (Ukraine)",
+          "value": "uk-UA"
+        },
+        {
+          "title": "🇹🇭 Thai (Thailand)",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇻🇳 Vietnamese (Vietnam)",
+          "value": "vi-VT"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-specified-keyword",
+      "title": "Search Specified Keyword",
+      "description": "Search a specified keyword on default platforms.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword to search",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-random-keyword",
+      "title": "Spin Keyword Roulette",
+      "description": "Pick a random keyword from the list and search it on default platforms.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-keyword",
+      "title": "Add Keyword",
+      "description": "Add a new keyword to keywords list",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword to add",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "remove-keyword",
+      "title": "Remove Keyword",
+      "description": "Remove a keyword from keyword list",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Keyword to remove",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "edit-keywords",
+      "title": "Edit Keywords",
+      "description": "Edit keyword list",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
