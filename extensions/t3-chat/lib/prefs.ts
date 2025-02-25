@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  model: string;
-}
-
-export function getPrefs(): Preferences {
+export function getPrefs(): Preferences.AskT3Chat {
   return getPreferenceValues();
 }
