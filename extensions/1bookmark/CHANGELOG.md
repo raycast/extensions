@@ -1,5 +1,13 @@
 # 1bookmark Changelog
 
+## [Improve UI and UX] - {PR_MERGE_DATE}
+
+- 0.4.1
+- 💅🏼 Apply Raycast style, shortcut conventions for actions.
+- 💅🏼 All Actions has icon.
+- 📱 All items in Search Bookmarks has go to My Account action.
+- 👥 Add **Remove user from space** action.
+
 ## [Added My Account UI, Improved Sign In/Out UX] - {PR_MERGE_DATE}
 
 - 0.4.0

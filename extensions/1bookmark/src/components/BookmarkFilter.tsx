@@ -10,7 +10,7 @@ const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: strin
     <List.Dropdown.Item
       key={tag.name}
       title={`${tag.name} (${tag.space.name})`}
-      icon={selected ? Icon.CircleFilled : Icon.Circle}
+      icon={selected ? Icon.CheckCircle : Icon.Circle}
       value={`${tag.spaceId}:${tag.name}`}
     />
   );

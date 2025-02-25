@@ -1,10 +1,45 @@
 import { RouterOutputs, trpc } from "@/utils/trpc.util";
 import { EditBookmark } from "@/views/EditBookmarkForm";
-// import { CopyBookmarkToOtherTeam } from '@/views/CopyBookmarkToOtherTeamForm'
 import MyAccount from "@/views/MyAccount";
 import { Spaces } from "@/views/SpacesView";
-import { Action, ActionPanel, Alert, confirmAlert, Icon } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import AddBookmark from "../add-bookmark";
+
+export const RequiredActions = (props: { refetch: () => void }) => {
+  const { refetch } = props;
+
+  return (
+    <>
+      <Action.Push
+        title="Add New Bookmark"
+        icon={Icon.Plus}
+        target={<AddBookmark onlyPop />}
+        onPop={refetch}
+        shortcut={Keyboard.Shortcut.Common.New}
+      />
+      <Action.Push
+        title="My Account"
+        icon={Icon.Person}
+        target={<MyAccount />}
+        onPop={refetch}
+        shortcut={{ modifiers: ["cmd"], key: "m" }}
+      />
+      <Action.Push
+        title="Spaces"
+        icon={Icon.TwoPeople}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        target={<Spaces />}
+      />
+      {/* TODO: Add this feature later */}
+      {/* <Action
+        title={'Tags'}
+        onAction={() => {
+          console.log('Tags management')
+        }}
+      />*/}
+    </>
+  );
+};
 
 export const BookmarkItemActionPanel = (props: {
   bookmark: RouterOutputs["bookmark"]["listAll"][number];
@@ -45,6 +80,7 @@ export const BookmarkItemActionPanel = (props: {
       <Action.OpenInBrowser
         title="Open URL"
         url={url}
+        shortcut={Keyboard.Shortcut.Common.Open}
         onOpen={() => {
           createActivity.mutate({
             type: "BOOKMARK_OPEN",
@@ -56,7 +92,7 @@ export const BookmarkItemActionPanel = (props: {
       <Action.CopyToClipboard
         title="Copy URL to Clipboard"
         content={url}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         onCopy={() => {
           createActivity.mutate({
             type: "BOOKMARK_COPY",
@@ -68,10 +104,10 @@ export const BookmarkItemActionPanel = (props: {
 
       {/* TODO: Add this feature later */}
       {/* <Action.Push
-        title="Copy URL to Other Team"
+        title="Copy URL to Other Space"
         icon={Icon.Link}
         shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
-        target={<CopyBookmarkToOtherTeam bookmark={bookmark} />}
+        target={<CopyBookmarkToOtherSpace bookmark={bookmark} />}
       /> */}
 
       {/* TODO: Add this feature later */}
@@ -80,7 +116,7 @@ export const BookmarkItemActionPanel = (props: {
       <Action.Push
         title="Edit Bookmark"
         icon={Icon.Pencil}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        shortcut={Keyboard.Shortcut.Common.Edit}
         target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
 
@@ -97,7 +133,8 @@ export const BookmarkItemActionPanel = (props: {
       <Action
         title={"Delete Bookmark"}
         icon={Icon.Trash}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
+        style={Action.Style.Destructive}
         onAction={handleDelete}
       />
 
@@ -111,33 +148,7 @@ export const BookmarkItemActionPanel = (props: {
       /> */}
 
       <ActionPanel.Section>
-        <Action.Push
-          title="Add New Bookmark"
-          icon={Icon.Plus}
-          target={<AddBookmark onlyPop />}
-          onPop={refetch}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
-        />
-        <Action.Push
-          title="My Account"
-          icon={Icon.Person}
-          target={<MyAccount />}
-          onPop={refetch}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
-        />
-        <Action.Push
-          title="Teams"
-          icon={Icon.TwoPeople}
-          shortcut={{ modifiers: ["cmd"], key: "t" }}
-          target={<Spaces />}
-        />
-        {/* TODO: Add this feature later */}
-        {/* <Action
-          title={'Tags'}
-          onAction={() => {
-            console.log('label management')
-          }}
-        />*/}
+        <RequiredActions refetch={refetch} />
       </ActionPanel.Section>
     </ActionPanel>
   );

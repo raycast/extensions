@@ -365,6 +365,13 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 image: string | null;
             } | null;
         }>;
+        removeUser: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                targetEmail: string;
+            };
+            output: void;
+        }>;
     }>;
     tag: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
         ctx: {
@@ -484,7 +491,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
     }, {
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "TEAM_CREATED" | "TEAM_UPDATED" | "TEAM_DELETED" | "TEAM_MEMBER_INVITED" | "TEAM_MEMBER_JOINED" | "TEAM_MEMBER_LEFT" | "TEAM_MEMBER_BANNED" | "TEAM_MEMBER_ROLE_CHANGED" | "TEAM_PLAN_CHANGED";
+                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "TEAM_CREATED" | "TEAM_UPDATED" | "TEAM_DELETED" | "TEAM_MEMBER_INVITED" | "TEAM_MEMBER_JOINED" | "TEAM_MEMBER_LEFT" | "TEAM_MEMBER_REMOVED" | "TEAM_MEMBER_ROLE_CHANGED" | "TEAM_PLAN_CHANGED";
                 spaceId: string;
                 data: Record<string, string>;
             };

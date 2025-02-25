@@ -20,7 +20,7 @@ const Body = ({ bookmark }: Props) => {
         id="textArea"
         title="TextArea"
         ref={textAreaRef}
-        placeholder="Enter the team name to copy the bookmark to."
+        placeholder="Enter the Space name to copy the bookmark to."
         value={[
           "## My Space",
           "",
@@ -47,7 +47,7 @@ const Body = ({ bookmark }: Props) => {
   );
 };
 
-export const CopyBookmarkToOtherTeam = ({ bookmark }: Props) => {
+export const CopyBookmarkToOtherSpace = ({ bookmark }: Props) => {
   return (
     <CachedQueryClientProvider>
       <Body bookmark={bookmark} />

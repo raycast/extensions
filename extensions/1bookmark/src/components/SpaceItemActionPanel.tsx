@@ -1,5 +1,5 @@
 import { RouterOutputs } from "@/utils/trpc.util";
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { SpaceMembersView } from "../views/SpaceMembersView";
 import { NewSpaceForm } from "../views/NewSpaceForm";
 import { SpaceTagsView } from "../views/SpaceTagsView";
@@ -8,41 +8,45 @@ export const SpaceItemActionPanel = (props: {
   me: RouterOutputs["user"]["me"] | undefined;
   refetch: () => void;
   spaceId: string;
+  // TODO: Use Prisma Type here
+  type: "PERSONAL" | "TEAM";
 }) => {
-  const { spaceId, refetch } = props;
+  const { spaceId, refetch, type } = props;
 
   return (
     <ActionPanel>
       {/*
       TODO: Additional features planned
       <Action
-        title="Open Team Detail"
+        title="Open Space Detail"
         onAction={() => {
-          console.log("Open Team Detail");
+          console.log("Open Space Detail");
         }}
       /> */}
-      <Action.Push
-        title={"Members"}
-        icon={Icon.TwoPeople}
-        shortcut={{ modifiers: ["cmd"], key: "m" }}
-        target={<SpaceMembersView spaceId={spaceId} />}
-      />
       <Action.Push
         title={"Tags"}
         icon={Icon.Tag}
         shortcut={{ modifiers: ["cmd"], key: "t" }}
         target={<SpaceTagsView spaceId={spaceId} />}
       />
+      {type === "TEAM" && (
+        <Action.Push
+          title={"Members"}
+          icon={Icon.TwoPeople}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          target={<SpaceMembersView spaceId={spaceId} />}
+        />
+      )}
       {/* TODO: Additional features planned */}
       {/* <Action title={"Copy Invitation Link"} onAction={() => console.log("Copy invitation link")} /> */}
-      {/* <Action title={"Leave Team"} onAction={() => console.log("Leave Team")} /> */}
-      {/* <Action title={"Delete Team"} onAction={() => console.log("Delete team")} /> */}
+      {/* <Action title={"Leave Space"} onAction={() => console.log("Leave Space")} /> */}
+      {/* <Action title={"Delete Space"} onAction={() => console.log("Delete Space")} /> */}
       <ActionPanel.Section>
         <Action.Push
-          title={"Add New Team"}
+          title={"Add New Space"}
           icon={Icon.Plus}
           target={<NewSpaceForm />}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           onPop={refetch}
         />
       </ActionPanel.Section>

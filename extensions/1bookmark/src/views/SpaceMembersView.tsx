@@ -2,10 +2,19 @@ import { trpc } from "@/utils/trpc.util";
 import { Icon, List } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { SpaceMemberItemActionPanel } from "../components/SpaceMemberItemActionPanel";
+import { useMemo } from "react";
 
 export const Body = (props: { spaceId: string }) => {
+  const me = trpc.user.me.useQuery();
   const { spaceId } = props;
-  const { data } = trpc.user.listBySpaceId.useQuery(spaceId);
+  const { data, refetch } = trpc.user.listBySpaceId.useQuery(spaceId);
+
+  const myRole = useMemo(() => {
+    if (!me.data) return null;
+    if (!data) return null;
+
+    return data.find((m) => m.email === me.data.email)?.role;
+  }, [me.data, data]);
 
   return (
     <List>
@@ -13,9 +22,15 @@ export const Body = (props: { spaceId: string }) => {
         <List.Item
           key={m.email}
           title={m.user.name}
+          subtitle={`${m.email} / ${m.role.toLowerCase()}`}
           accessories={[{ text: m.status }]}
-          icon={Icon.Plus}
-          actions={<SpaceMemberItemActionPanel spaceId={spaceId} />}
+          icon={m.user.image || Icon.Person}
+          actions={
+            myRole &&
+            me.data && (
+              <SpaceMemberItemActionPanel me={me.data} spaceId={spaceId} member={m} myRole={myRole} refetch={refetch} />
+            )
+          }
         />
       ))}
     </List>

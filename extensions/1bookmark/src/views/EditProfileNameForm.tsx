@@ -1,7 +1,7 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { useState } from "react";
 import { trpc } from "@/utils/trpc.util";
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 
 function Body(props: { name: string }) {
   const { name } = props;
@@ -30,7 +30,7 @@ function Body(props: { name: string }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update Name" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit" icon={Icon.Pencil} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

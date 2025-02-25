@@ -5,7 +5,6 @@ import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sessionTokenAtom } from "@/states/session-token.state";
 import { Spaces } from "./views/SpacesView";
-import AddBookmark from "./add-bookmark";
 import { BookmarkItem } from "./components/BookmarkItem";
 import { BookmarkFilter } from "./components/BookmarkFilter";
 import { LoginView } from "./views/LoginView";
@@ -13,6 +12,7 @@ import { useMe } from "./hooks/use-me.hook";
 import { useBookmarks } from "./hooks/use-bookmarks.hook";
 import { Bookmark } from "./types";
 import { useBookmarkSearchs } from "./hooks/use-bookmark-searchs.hook";
+import { RequiredActions } from "./components/BookmarkItemActionPanel";
 
 const cache = new Cache();
 
@@ -127,16 +127,17 @@ export function Body() {
           icon={Icon.Plus}
           actions={
             <ActionPanel>
-              <Action.Push title="Add New Bookmark" target={<AddBookmark onlyPop />} onPop={refetch} />
+              <RequiredActions refetch={refetch} />
             </ActionPanel>
           }
         />
         <List.Item
           title="Spaces"
-          icon={Icon.TwoPeople}
+          icon={Icon.Folder}
           actions={
             <ActionPanel>
-              <Action.Push title="Spaces" target={<Spaces />} />
+              <Action.Push title="Spaces" icon={Icon.Folder} target={<Spaces />} />
+              <RequiredActions refetch={refetch} />
             </ActionPanel>
           }
         />

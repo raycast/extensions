@@ -1,6 +1,6 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useRef } from "react";
 
 interface FormValues {
@@ -27,7 +27,7 @@ function Body() {
         style: Toast.Style.Success,
         title: "Space created",
       });
-      // TODO: Move to Teams view.
+      // TODO: Move to Spaces view.
       pop();
     } catch (error) {
       // Handle error
@@ -38,7 +38,7 @@ function Body() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Create Space" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

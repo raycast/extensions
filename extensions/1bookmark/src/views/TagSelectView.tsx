@@ -1,5 +1,5 @@
 import { trpc } from "@/utils/trpc.util";
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { NewTagForm } from "./NewTagForm";
 import { useMe } from "../hooks/use-me.hook";
@@ -23,15 +23,15 @@ const TagItem = (props: {
     <List.Item
       key={`${tag.spaceId}:${tag.name}`}
       title={title}
-      icon={selected ? Icon.CircleFilled : Icon.Circle}
+      icon={selected ? Icon.CheckCircle : Icon.Circle}
       subtitle={tag.space.name}
       actions={
         <ActionPanel>
-          <Action title={"Select Tag"} onAction={() => handleToggle(tag)} />
+          <Action title={"Select Tag"} icon={Icon.CheckCircle} onAction={() => handleToggle(tag)} />
           <Action.Push
             title={"Create New Tag"}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             target={<NewTagForm spaceId={tag.spaceId} />}
             onPop={() => refetch()}
           />
@@ -97,7 +97,7 @@ export const Body = (props: {
               <Action.Push
                 title={"Create New Tag"}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<NewTagForm spaceId={spaceIds[0]!} />}
                 onPop={() => refetch()}
               />

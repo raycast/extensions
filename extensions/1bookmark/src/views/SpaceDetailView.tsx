@@ -1,7 +1,6 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
-import { NewSpaceForm } from "./NewSpaceForm";
 
 function Body() {
   const me = trpc.user.me.useQuery();
@@ -13,15 +12,7 @@ function Body() {
 
   return (
     <List>
-      <List.Item
-        title={"Create new Space"}
-        icon={Icon.Plus}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Select" target={<NewSpaceForm />} onPop={() => me.refetch()} />
-          </ActionPanel>
-        }
-      />
+      <List.Item title={"Space Detail View"} icon={Icon.Plus} />
     </List>
   );
 }

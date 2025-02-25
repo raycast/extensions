@@ -41,7 +41,7 @@ function Body() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            icon={Icon.Person}
+            icon={tokenSent && email ? Icon.Key : Icon.Envelope}
             title={tokenSent && email ? "Login" : "Send Login Code to Email"}
             onSubmit={async () => {
               if (!tokenSent && email) {

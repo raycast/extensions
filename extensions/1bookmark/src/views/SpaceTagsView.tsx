@@ -1,5 +1,5 @@
 import { trpc } from "@/utils/trpc.util";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { SpaceTagItemActionPanel } from "../components/SpaceTagItemActionPanel";
 import { NewTagForm } from "./NewTagForm";
@@ -19,7 +19,8 @@ export const Body = (props: { spaceId: string }) => {
             <ActionPanel>
               <Action.Push
                 title={"Create New Tag"}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                icon={Icon.Plus}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<NewTagForm spaceId={spaceId} />}
                 onPop={() => refetch()}
               />

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { CachedQueryClientProvider } from "../components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
 import { NewSpaceForm } from "./NewSpaceForm";
@@ -17,11 +17,17 @@ function Body() {
     <List>
       {spaces.length < 1 && (
         <List.Item
-          title={"Create new Team"}
+          title={"Create new Space"}
           icon={Icon.Plus}
           actions={
             <ActionPanel>
-              <Action.Push title="Select" target={<NewSpaceForm />} onPop={() => refetch()} />
+              <Action.Push
+                title="Select"
+                icon={Icon.Plus}
+                shortcut={Keyboard.Shortcut.Common.New}
+                target={<NewSpaceForm />}
+                onPop={() => refetch()}
+              />
             </ActionPanel>
           }
         />
@@ -31,8 +37,9 @@ function Body() {
         <List.Item
           key={s.id}
           title={s.name}
-          icon={s.image ?? (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
-          actions={<SpaceItemActionPanel me={data} spaceId={s.id} refetch={refetch} />}
+          subtitle={s.type === "PERSONAL" ? "This is private space for you" : undefined}
+          icon={s.image || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
+          actions={<SpaceItemActionPanel me={data} spaceId={s.id} refetch={refetch} type={s.type} />}
         />
       ))}
     </List>

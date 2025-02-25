@@ -1,7 +1,7 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { Bookmark } from "@/types";
 import { trpc } from "@/utils/trpc.util";
-import { Form, ActionPanel, Action, showToast, useNavigation, Toast, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, useNavigation, Toast, Icon, Keyboard } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { NewTagForm } from "./NewTagForm";
@@ -103,11 +103,11 @@ function Body(props: Props) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit" icon={Icon.Pencil} onSubmit={handleSubmit} />
           <Action.Push
             title="Create New Tag"
             icon={Icon.Tag}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             target={<NewTagForm spaceId={bookmark.spaceId} />}
             onPop={() => {
               spaceTagsRefetch();

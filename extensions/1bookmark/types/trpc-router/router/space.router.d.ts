@@ -55,4 +55,11 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             image: string | null;
         } | null;
     }>;
+    removeUser: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            targetEmail: string;
+        };
+        output: void;
+    }>;
 }>;

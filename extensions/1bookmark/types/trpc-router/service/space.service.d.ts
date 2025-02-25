@@ -38,4 +38,9 @@ export declare class SpaceService {
         authEmail: string | null;
         role: import(".prisma/client").$Enums.TeamRole;
     } | null>;
+    removeMember(p: {
+        actorEmail: string;
+        targetEmail: string;
+        spaceId: string;
+    }): Promise<void>;
 }

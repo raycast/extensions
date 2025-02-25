@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Icon } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import { NewTagForm } from "../views/NewTagForm";
 import { trpc } from "../utils/trpc.util";
 
@@ -12,13 +12,14 @@ export const SpaceTagItemActionPanel = (props: { spaceId: string; tagName: strin
       <Action.Push
         title={"Create New Tag"}
         icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={Keyboard.Shortcut.Common.New}
         target={<NewTagForm spaceId={spaceId} />}
         onPop={() => refetch()}
       />
       <Action
         title={"Remove Tag"}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
+        style={Action.Style.Destructive}
         icon={Icon.Trash}
         onAction={async () => {
           const confirm = await confirmAlert({

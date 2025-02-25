@@ -36,7 +36,7 @@ function Body(props: { spaceId: string }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Tag" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Plus} title="Create Tag" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

@@ -1,6 +1,6 @@
 import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvider";
 import { trpc } from "@/utils/trpc.util";
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useRef, useState } from "react";
 
 function Body(props: { spaceId: string }) {
@@ -41,7 +41,7 @@ function Body(props: { spaceId: string }) {
       actions={
         ready && (
           <ActionPanel>
-            <Action.SubmitForm title="Send Invitations" onSubmit={handleSubmit} />
+            <Action.SubmitForm icon={Icon.Envelope} title="Send Invitations" onSubmit={handleSubmit} />
           </ActionPanel>
         )
       }
@@ -50,7 +50,7 @@ function Body(props: { spaceId: string }) {
       <Form.TextArea
         id="emails"
         title="Emails"
-        info="Description of the team"
+        info="Description of the space"
         ref={textAreaRef}
         onChange={(value) => handleChange(value)}
       />

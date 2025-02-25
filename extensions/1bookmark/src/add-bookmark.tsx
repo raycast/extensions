@@ -10,6 +10,7 @@ import {
   Icon,
   showHUD,
   getFrontmostApplication,
+  Keyboard,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useAtom } from "jotai";
@@ -220,7 +221,7 @@ function Body(props: { onlyPop?: boolean }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
           <Action.Push
             title="My Account"
             icon={Icon.Person}
@@ -235,7 +236,7 @@ function Body(props: { onlyPop?: boolean }) {
           <Action.Push
             title="Create New Tag"
             icon={Icon.Tag}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             target={<NewTagForm spaceId={selectedSpace} />}
             onPop={() => {
               tags.refetch();
