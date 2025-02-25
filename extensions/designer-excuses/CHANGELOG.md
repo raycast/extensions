@@ -1,3 +1,3 @@
 # Designer Excuses Changelog
 
-## [Initial Version] - {Jan 28 2025}
+## [Initial Version] - {PR_MERGE_DATE}
