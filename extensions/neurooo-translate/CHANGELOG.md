@@ -1,6 +1,6 @@
 # Neurooo Translate Changelog
 
-## [Initial Version] - 2025-02-10
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Translation of text from a source language (auto-detected) to a targeted locale
