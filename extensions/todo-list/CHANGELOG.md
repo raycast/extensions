@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2025-02-25
 
 - Added an action to set a due date for a todo item.
 - Added optional natural language parsing of items to extract due date and tags automatically.
