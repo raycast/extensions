@@ -1,5 +1,11 @@
 # DeepSeeker - Quick Actions Changelog
 
+
+## [New Features] - 2025-02-25
+
+- 💸 Fix `deepseek-reasoner` prices
+- 🧮 allow to use `input_price` & `output_price` with `deepseek-reasoner`
+
 ## [New Features] - 2025-02-10
 
 - 🖱️ New Command: `Ask on Selected`: ask questions or instruct on the selected text.
