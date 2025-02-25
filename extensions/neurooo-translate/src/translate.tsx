@@ -23,7 +23,7 @@ type Entry = {
 };
 
 export default function Command() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues();
 
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
