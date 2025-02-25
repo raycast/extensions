@@ -1,5 +1,16 @@
 # OmniFocus Changelog
 
+## [1.1.0] - {PR_MERGE_DATE}
+
+### Removed
+
+- The list inbox command has been removed in favor of the list tasks command
+
+### Added
+
+- List tasks command that will allow you to list tasks from your perspectives (built-in and custom)
+  - Please note that this will open OmniFocus in the background and change the view. That is a limitation of OmniFocus AppleScript
+
 ## [1.0.1] - 2025-01-22
 
 ### Fixed

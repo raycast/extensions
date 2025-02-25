@@ -34,15 +34,15 @@
       "mode": "view"
     },
     {
-      "name": "list-inbox",
-      "title": "List the Tasks in Your Inbox",
+      "name": "list-tasks",
+      "title": "List the Tasks of Your Perspectives",
       "subtitle": "OmniFocus",
-      "description": "List the tasks currently in your inbox.",
+      "description": "List the tasks of your perspectives",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.88.3",
+    "@raycast/api": "1.91.2",
     "@raycast/utils": "1.18.1"
   },
   "devDependencies": {
