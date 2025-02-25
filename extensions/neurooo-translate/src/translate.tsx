@@ -98,7 +98,7 @@ export default function Command() {
     }
 
     translateText(searchText, targetLanguage, sourceLanguage, tone);
-  }, [searchText]);
+  }, [searchText, sourceLanguage, targetLanguage]);
 
   return (
     <List
