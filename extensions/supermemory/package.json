@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "supermemory",
+  "title": "Supermemory",
+  "description": "Add items to your Supermemory directly from Raycast!",
+  "icon": "supermemory-rounded.png",
+  "author": "Lermatroid",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-create-memory",
+      "title": "Quick Create Memory",
+      "description": "Quickly create a memory in Supermemory from the current tab.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-memories",
+      "title": "Search Memories",
+      "description": "Search your Supermemory",
+      "mode": "view"
+    },
+    {
+      "name": "ask-supermemory",
+      "title": "Ask Supermemory",
+      "description": "Ask your Supermemory anything",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "type": "text",
+          "required": true,
+          "placeholder": "Question"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "textfield",
+      "required": true,
+      "title": "Supermemory API Key",
+      "description": "Your API key from Supermemory. Can be obtained on supermemory.ai from Add Memory > Integrations > Your API Key.",
+      "placeholder": "your_api_key_here"
+    },
+    {
+      "name": "autospace",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Auto Select A Space For Your Memory",
+      "description": "If enabled, the extension will automatically pick a space (if applicable) in Supermemory using GPT-4o mini when using Quick Add."
+    }
+  ],
+  "dependencies": {
+    "@better-fetch/fetch": "^1.1.12",
+    "@better-fetch/logger": "^1.1.3",
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0",
+    "@types/node-fetch": "^2.6.12",
+    "cross-fetch": "^4.1.0",
+    "node-fetch": "^3.3.2",
+    "undici": "^7.2.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
