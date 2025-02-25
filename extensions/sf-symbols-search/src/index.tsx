@@ -59,7 +59,6 @@ export default function Command() {
   const [category, setCategory] = useState<string>();
   const [pinned, setPinned] = useState<sfsymbol[]>([]);
   const [recent, setRecent] = useState<sfsymbol[]>([]);
-  const [searchText, setSearchText] = useState("");
   const [refreshState, setRefreshState] = useState(false);
   const refresh = () => setRefreshState(!refreshState);
 
@@ -68,16 +67,8 @@ export default function Command() {
     setRecent(getRecentSymbols());
   }, [refreshState]);
 
-  const filteredSymbols = category
-    ? data.symbols
-        .filter((s) => category === "all" || s.categories.includes(category))
-        .filter(
-          (s) =>
-            searchText === "" ||
-            s.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            s.searchTerms.some((term) => term.toLowerCase().includes(searchText.toLowerCase())),
-        )
-    : [];
+  const filteredSymbols =
+    category && category !== "all" ? data.symbols.filter((s) => s.categories.includes(category)) : data.symbols;
 
   return (
     <Grid
@@ -85,8 +76,6 @@ export default function Command() {
       searchBarPlaceholder="Search SF Symbols..."
       inset={Grid.Inset.Large}
       columns={Number(gridColumns)}
-      filtering={false}
-      onSearchTextChange={setSearchText}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select SF sfsymbol category"
@@ -134,7 +123,7 @@ export default function Command() {
                 <SFSymbol key={index} symbol={symbol} refresh={refresh} recent />
               ))}
           </Grid.Section>
-          <Grid.Section title="Results" subtitle={`${filteredSymbols.length}`}>
+          <Grid.Section title={recent.length + pinned.length > 0 ? "All Symbols" : undefined}>
             {filteredSymbols.map((symbol: sfsymbol, index: number) => (
               <SFSymbol key={index} symbol={symbol} refresh={refresh} />
             ))}
@@ -149,7 +138,7 @@ const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
 
   let subtitle;
-  if (minimumVersionOS != "disabled") {
+  if (minimumVersionOS != "disabled" && symbol.availableFrom) {
     subtitle = `${minimumVersionOS} ${data.versions[symbol.availableFrom][minimumVersionOS]}`;
   } else {
     subtitle = undefined;
