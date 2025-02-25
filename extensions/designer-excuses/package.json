@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "designer-excuses",
-      "title": "Designer Excuses",
+      "title": "Paste Random Designer Excuse",
       "description": "Designer Excuses is a playful Raycast extension that generates lighthearted, witty excuses for designers",
       "mode": "no-view"
     }
