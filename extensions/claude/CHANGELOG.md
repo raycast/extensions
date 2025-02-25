@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - 2025-01-30
+## [Update] - 2025-02-25
 
 - Feature: Added new [Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet)
 
