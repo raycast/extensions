@@ -98,7 +98,7 @@ export default function SearchAndCopyCommand() {
                 {addressString && <Action.CopyToClipboard content={addressString} title="Copy Forretningsadresse" />}
                 <Action.OpenInBrowser
                   shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  title="Open in Brønnøysundregistrene"
+                  title="Open in Brønnøysund Register Center"
                   url={`https://virksomhet.brreg.no/nb/oppslag/enheter/${enhet.organisasjonsnummer}`}
                 />
               </ActionPanel>
