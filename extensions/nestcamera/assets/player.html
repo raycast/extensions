@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HLS Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { margin: 0; background: #000; height: 100vh; display: flex; flex-direction: column; }
+        #video { width: 100%; height: 100%; }
+        #error { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                 background: rgba(0,0,0,0.8); color: #fff; padding: 20px; border-radius: 5px;
+                 display: none; }
+        .error-visible { display: block !important; }
+        #play-button { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                      padding: 20px; background: rgba(255,255,255,0.8); border: none;
+                      border-radius: 5px; cursor: pointer; display: none; }
+        .button-visible { display: block !important; }
+    </style>
+</head>
+<body>
+    <video id="video" controls playsinline></video>
+    <button id="play-button">Click to Play</button>
+    <div id="error"></div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('stream');
+        const video = document.getElementById('video');
+        const errorDiv = document.getElementById('error');
+        const playButton = document.getElementById('play-button');
+
+        function showError(message) {
+            console.error(message);
+            errorDiv.textContent = message;
+            errorDiv.classList.add('error-visible');
+        }
+
+        function showPlayButton() {
+            playButton.classList.add('button-visible');
+            playButton.onclick = () => {
+                video.play().catch(e => {
+                    console.error('Play failed:', e);
+                    showError('Playback failed: ' + e.message);
+                });
+                playButton.classList.remove('button-visible');
+            };
+        }
+
+        if (!streamUrl) {
+            showError('No stream URL provided');
+        } else {
+            console.log('Stream URL:', streamUrl);
+            
+            // Check if running in Safari
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            const nativeHLS = video.canPlayType('application/vnd.apple.mpegurl');
+            
+            console.log('Browser detection:', { 
+                isSafari,
+                userAgent: navigator.userAgent,
+                nativeHLS
+            });
+            
+            // Set up common event listeners
+            video.addEventListener('loadstart', () => console.log('Video loadstart'));
+            video.addEventListener('loadedmetadata', () => {
+                console.log('Video loadedmetadata');
+                showPlayButton();
+            });
+            video.addEventListener('loadeddata', () => console.log('Video loadeddata'));
+            video.addEventListener('canplay', () => console.log('Video canplay'));
+            video.addEventListener('playing', () => console.log('Video playing'));
+            video.addEventListener('waiting', () => console.log('Video waiting'));
+            video.addEventListener('stalled', () => console.log('Video stalled'));
+            video.addEventListener('error', (e) => {
+                const error = video.error;
+                console.error('Video error:', error);
+                let errorMessage = 'Video playback error';
+                if (error) {
+                    switch(error.code) {
+                        case 1: errorMessage += ': Media loading aborted'; break;
+                        case 2: errorMessage += ': Network error'; break;
+                        case 3: errorMessage += ': Media decoding failed'; break;
+                        case 4: errorMessage += ': Media source not supported'; break;
+                        default: errorMessage += ': Unknown error';
+                    }
+                    if (error.message) {
+                        errorMessage += ' - ' + error.message;
+                    }
+                }
+                showError(errorMessage);
+            });
+
+            // Prefer native HLS in Safari
+            if (isSafari && nativeHLS) {
+                console.log('Using native Safari HLS support');
+                video.type = 'application/vnd.apple.mpegurl';
+                video.src = streamUrl;
+            } else if (Hls.isSupported()) {
+                console.log('Using HLS.js');
+                const hls = new Hls({
+                    debug: true,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS error:', data);
+                    if (data.fatal) {
+                        showError('Stream playback failed: ' + data.details);
+                    }
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log('HLS manifest parsed');
+                    showPlayButton();
+                });
+            } else {
+                showError('HLS playback not supported in this browser');
+            }
+
+            // Add periodic check for stream health
+            setInterval(() => {
+                const status = {
+                    readyState: video.readyState,
+                    networkState: video.networkState,
+                    paused: video.paused,
+                    currentTime: video.currentTime,
+                    buffered: video.buffered.length ? {
+                        start: video.buffered.start(0),
+                        end: video.buffered.end(0)
+                    } : null
+                };
+                console.log('Stream health check:', status);
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 
