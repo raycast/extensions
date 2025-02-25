@@ -23,6 +23,7 @@
     {
       "name": "forms",
       "title": "List Forms",
+      "subtitle": "Jotform",
       "description": "Get a list of forms for this account. Includes basic details such as title of the form, when it was created, number of new and total submissions.",
       "mode": "view"
     }
