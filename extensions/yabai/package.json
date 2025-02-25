@@ -225,6 +225,7 @@
     {
       "name": "search-windows",
       "title": "Search Windows",
+      "subtitle": "Yabai",
       "description": "Search and focus Yabai managed windows",
       "mode": "view",
       "keywords": [
