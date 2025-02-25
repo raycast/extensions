@@ -15,7 +15,7 @@ export function ListItem({ app }: { app: AppItem }) {
       title={app.name}
       subtitle={"by " + app.brand}
       accessories={[{ text: "in " + app.location }]}
-      icon={{ source: app.icon }}
+      icon={{ fileIcon: app.path }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
