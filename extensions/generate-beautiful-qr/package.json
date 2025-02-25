@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "generate-beautiful-qr",
+  "title": "QR Code Generator with Stylish",
+  "description": "QR code Generator with custom color and shape in SVG format",
+  "icon": "extension-icon.png",
+  "author": "alexander.bedelev",
+  "categories": [
+    "Design Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-beautiful-QR",
+      "title": "Generate QR Code",
+      "description": "Generate QR code with custom color and shape in SVG format. Customize save folder in command settings",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "saveFolder",
+          "title": "Save folder",
+          "description": "Path to folder where QR code will be saved",
+          "default": "~/Downloads",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-QR-from-clipboard",
+      "title": "Generate QR Code from Clipboard",
+      "description": "Generate QR Code from clipboard in one shortcut. Customize QR code color and shape in command settings",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "qrCodeType",
+          "title": "Shape",
+          "description": "Choose QR code shape: 👵 Classic Square or 🦆 Blob and Rounded",
+          "default": "blob",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "👵 Classic Square",
+              "value": "classic"
+            },
+            {
+              "title": "🦆 Blob and Rounded",
+              "value": "blob"
+            }
+          ]
+        },
+        {
+          "name": "qrCodeColor",
+          "title": "Color",
+          "description": "Choose QR code color",
+          "default": "#2c3e50",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "🌑 Midnight Blue",
+              "value": "#2c3e50"
+            },
+            {
+              "title": "🐦‍⬛ Just Black",
+              "value": "#000000"
+            },
+            {
+              "title": "💜 Deep Purple",
+              "value": "#8e44ad"
+            },
+            {
+              "title": "🌿 Emerald",
+              "value": "#2ecc71"
+            },
+            {
+              "title": "🍊 Vibrant Orange",
+              "value": "#e67e22"
+            },
+            {
+              "title": "🦚 Turquoise",
+              "value": "#1abc9c"
+            }
+          ]
+        },
+        {
+          "name": "hexColor",
+          "title": "Custom Color (hex)",
+          "description": "If set, takes priority",
+          "default": "",
+          "placeholder": "#1abc9c",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "saveFolder",
+          "title": "Save folder",
+          "description": "Path to folder where QR code will be saved",
+          "default": "~/Downloads",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.1",
+    "@raycast/utils": "^1.17.0",
+    "@svgdotjs/svg.js": "^3.2.4",
+    "canvas": "^3.0.1",
+    "marchingsquares": "^1.3.3",
+    "qrcode": "^1.5.4",
+    "svg-path-parser": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
