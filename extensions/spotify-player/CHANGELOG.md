@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Select Devcie] - {PR_MERGE_DATE}
+## [Fix Select Device] - {PR_MERGE_DATE}
 
 - Fixed a possibly undefined issue from Select Devices command
 
