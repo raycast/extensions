@@ -68,6 +68,8 @@ export default function Command() {
             title: "Something went wrong",
             message: dataResponse.errors.join(" "),
           });
+
+          return;
         }
 
         const entry: Entry = {
@@ -89,6 +91,11 @@ export default function Command() {
       .catch((error) => {
         console.error(error);
         setIsLoading(false);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Translation failed",
+          message: "An error occurred while translating",
+        });
       });
   };
 
@@ -121,20 +128,18 @@ export default function Command() {
           id={entry.id}
           title={entry.sourceText}
           detail={
-            entry ? (
-              <List.Item.Detail
-                markdown={entry.targetText}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Source Language" text={entry.sourceLanguage} />
-                    <List.Item.Detail.Metadata.Label title="Target Language" text={entry.targetLanguage} />
-                    <List.Item.Detail.Metadata.Label title="Tone" text={entry.tone} />
-                    <List.Item.Detail.Metadata.Label title="ID" text={entry.id} />
-                    <List.Item.Detail.Metadata.Label title="Source Text" text={entry.sourceText} />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            ) : undefined
+            <List.Item.Detail
+              markdown={entry.targetText}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Source Language" text={entry.sourceLanguage} />
+                  <List.Item.Detail.Metadata.Label title="Target Language" text={entry.targetLanguage} />
+                  <List.Item.Detail.Metadata.Label title="Tone" text={entry.tone} />
+                  <List.Item.Detail.Metadata.Label title="ID" text={entry.id} />
+                  <List.Item.Detail.Metadata.Label title="Source Text" text={entry.sourceText} />
+                </List.Item.Detail.Metadata>
+              }
+            />
           }
           accessories={[{ text: entry.sourceLanguage }, { text: entry.tone }]}
           actions={
