@@ -1,7 +1,7 @@
-import { ActionPanel, Form, showHUD, useNavigation, Action } from "@raycast/api";
+import { Action, ActionPanel, Form, showHUD, useNavigation } from "@raycast/api";
 import { nanoid } from "nanoid";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 export default function Main() {
   const { pop } = useNavigation();
@@ -11,7 +11,7 @@ export default function Main() {
     existingConnections.push({ ...connection, id: nanoid() });
 
     await saveConnections(existingConnections);
-    await showHUD("Saved connection ✅");
+    await showHUD(`✅ Connection [${connection.name}] saved!`);
 
     pop();
   }

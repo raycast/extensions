@@ -1,8 +1,8 @@
-import { List, ActionPanel, showHUD, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
+import { ISSHConnection } from "./types";
 
 interface Preferences {
   terminal: string;
@@ -397,7 +397,23 @@ async function runTerminal(item: ISSHConnection) {
     await runAppleScript(scriptTerminal);
   }
 
-  await showHUD("Success ✅");
+  await showHUD(`✅ Connection [${item.name}] opened with [${terminal}].`);
+}
+
+function getConnectionString(item: ISSHConnection) {
+  if (onlyName) {
+    return item.name;
+  }
+
+  const parts = [];
+  if (item.sshKey) parts.push(`-i ${item.sshKey}`);
+  if (item.port) parts.push(`-p ${item.port}`);
+  if (item.command) parts.push(`"${item.command}"`);
+
+  const address = item.user ? `${item.user}@${item.address}` : item.address;
+  parts.unshift("ssh", address);
+
+  return parts.filter(Boolean).join(" ");
 }
 
 export default function Command() {
@@ -421,6 +437,7 @@ export default function Command() {
 
     await saveConnections(items);
     setConnectionsList(items);
+    await showHUD(`🗑 Connection [${item.name}] removed!`);
   }
 
   return (
@@ -428,7 +445,7 @@ export default function Command() {
       {connectionsList.map((item) => {
         return (
           <List.Item
-            actions={<Action item={item} onItemRemove={removeItem} />}
+            actions={<GetAction item={item} onItemRemove={removeItem} />}
             id={item.id}
             key={item.name}
             title={item.name}
@@ -440,30 +457,40 @@ export default function Command() {
   );
 }
 
-function Action({
+function GetAction({
   item,
   onItemRemove,
 }: {
   item: ISSHConnection;
   onItemRemove: (item: ISSHConnection) => Promise<void>;
 }) {
+  const itemString = getConnectionString(item);
   return (
-    <>
-      <ActionPanel>
-        <ActionPanel.Item
-          title="Connect"
-          onAction={async () => {
-            await runTerminal(item);
-          }}
+    <ActionPanel>
+      <ActionPanel.Section title="Operations">
+        <Action icon={Icon.Terminal} title="Open Connection" onAction={() => runTerminal(item)} />
+        <Action.CopyToClipboard
+          title="Copy Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
-        <ActionPanel.Item
-          title="Remove"
-          onAction={async () => {
-            await onItemRemove(item);
-          }}
+        <Action.Paste
+          icon={Icon.Text}
+          title="Paste Connection String"
+          content={itemString}
+          shortcut={{ modifiers: ["cmd"], key: "v" }}
+          onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
         />
-      </ActionPanel>
-    </>
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger zone">
+        <Action
+          title="Remove Connection"
+          icon={Icon.Trash}
+          onAction={() => onItemRemove(item)}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 }
 

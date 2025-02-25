@@ -1,8 +1,14 @@
 # ssh-manager Changelog
 
+## [New Feature and Improvements] - {PR_MERGE_DATE}
+
+- 📋 Add `Copy Connection String`
+- 🧑‍💻 Update action panel with new api
+- 💬 Better HUD prompts
+
 ## [Add Hyper Support] - 2024-09-07
 
-- Added support for Hyper as an option to open ssh connections. 
+- Added support for Hyper as an option to open ssh connections.
 
 ## [Add Alacritty Support] - 2024-04-09
 
