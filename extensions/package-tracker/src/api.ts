@@ -18,11 +18,15 @@ export class PackageTrackAPI {
     ]);
   }
 
-  async _track() {
+  _track() {
     return axios
       .post(this.url + "register", this.packageNumber, { headers: this.headers })
-      .then(() => axios.post(this.url + "gettrackinfo", this.packageNumber, { headers: this.headers }))
+      .then((registerResponse) => {
+        console.debug(JSON.stringify(registerResponse.data));
+        return axios.post(this.url + "gettrackinfo", this.packageNumber, { headers: this.headers });
+      })
       .then((trackValue) => {
+        console.debug(JSON.stringify(trackValue.data));
         axios.post(this.url + "deletetrack", this.packageNumber, { headers: this.headers });
         return trackValue;
       });
