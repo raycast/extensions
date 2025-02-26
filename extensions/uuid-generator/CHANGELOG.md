@@ -1,6 +1,6 @@
 # UUID Generator Changelog
 
-## [Added support for parsing TypeID] - {PR_MERGE_DATE}
+## [Added support for parsing TypeID] - 2025-02-26
 
 - You can now parse TypeID into a UUID
 
