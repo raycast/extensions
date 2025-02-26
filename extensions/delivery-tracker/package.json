@@ -14,7 +14,10 @@
     "package",
     "packages",
     "parcel",
-    "parcels"
+    "parcels",
+    "USPS",
+    "UPS",
+    "FedEx"
   ],
   "license": "MIT",
   "commands": [
