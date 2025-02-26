@@ -1,7 +1,6 @@
 import { Account, BskyRecord, Post, PostReason } from "../types/types";
 import { $Typed, AppBskyActorDefs, AppBskyEmbedImages, AppBskyEmbedRecord, AppBskyFeedDefs, AppBskyFeedPost } from "@atproto/api";
 import {
-  BlueskyPostEmbedType,
   BlueskyProfileUrlBase,
   PostEndHorizontalLine,
 } from "./constants";
@@ -78,7 +77,7 @@ ${getImageMarkdown(imageEmbeds)}
   )})    ↓ [${post.replyCount}](${getPostUrl(post.author.handle, post.uri)})
 
 _[${postTime}](${getPostUrl(post.author.handle, post.uri)})_  ${
-    post.embed?.$type === BlueskyPostEmbedType ? "" : PostEndHorizontalLine
+    AppBskyEmbedRecord.isView(post.embed) ? "" : PostEndHorizontalLine
   }
 `;
 };
