@@ -87,6 +87,11 @@
       "name": "get-personal-workspace-notes",
       "title": "Get Personal Workspace Notes",
       "description": "Get notes from your personal workspace"
+    },
+    {
+      "name": "view-note",
+      "title": "View Note Details",
+      "description": "Get detailed content and metadata for a specific note by ID"
     }
   ],
   "ai": {
@@ -302,6 +307,92 @@
           },
           {
             "meetsCriteria": "Returns notes from specified team workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Show me details of note SomeNoteID",
+        "mocks": {
+          "view-note": {
+            "id": "note_detail_id",
+            "title": "Detailed Note Title",
+            "tags": ["important", "documentation"],
+            "createdAt": 1560349049743,
+            "titleUpdatedAt": 1736666704378,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/SomeNoteID",
+            "shortId": "SomeNoteID",
+            "content": "# Detailed Note Content\n\nThis is the full content of the note with Markdown formatting.\n\n## Section 1\n\nContent of section 1\n\n## Section 2\n\nContent of section 2 with **bold** and *italic* text.",
+            "lastChangedAt": 1560351606067,
+            "lastChangeUser": {
+              "name": "Editor Name",
+              "userPath": "editorpath",
+              "photo": "https://link_to_photo.png",
+              "biography": "Editor's bio"
+            },
+            "userPath": "userpath",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "note_detail_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the detailed content and information for the specified note"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Let me see my note with ID abc123_full_id",
+        "mocks": {
+          "view-note": {
+            "id": "abc123_full_id",
+            "title": "My Important Note",
+            "tags": ["project", "meeting"],
+            "createdAt": 1620349049743,
+            "titleUpdatedAt": 1726666704378,
+            "tagsUpdatedAt": 1726666704378,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/abc123",
+            "shortId": "abc123",
+            "content": "# Project Meeting Notes\n\n## Agenda\n\n1. Project status\n2. Timeline review\n3. Next steps\n\n## Discussion\n\nWe discussed the current status of the project and decided on the next steps.",
+            "lastChangedAt": 1720351606067,
+            "lastChangeUser": {
+              "name": "Me",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": "My bio"
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "owner",
+            "writePermission": "owner"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "abc123_full_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns the note content and metadata for the specified ID"
           }
         ]
       }
