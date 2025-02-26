@@ -1,6 +1,6 @@
 # PDF Tools Changelog
 
-## [Improvements] - 2025-02-25
+## [Improvements] - {PR_MERGE_DATE}
 
 - Improve UX by reducing noise in toast notifications.
 
