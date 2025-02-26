@@ -237,6 +237,7 @@
     {
       "name": "focus-next-same-app",
       "title": "Focus Next Window of Same App",
+      "subtitle": "Yabai",
       "description": "Focus the next window of the current application",
       "mode": "no-view"
     }

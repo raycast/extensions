@@ -7,7 +7,7 @@
   - MacOS has same feature, but it is only available in the current space
 - Adds "Search Windows" command
   - Searches for windows managed by Yabai
-  - Allows to search by window title or application name , it is really useful when windows have the same app name
+  - Allows to search by window title or application name, it is really useful when windows have the same app name
 
 ## [Added window movement commands] - 2024-11-25
 
