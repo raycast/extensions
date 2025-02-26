@@ -53,10 +53,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "send-email",
+      "title": "Send email",
+      "description": "Send emails using Resend"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.1",
+    "resend": "^4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
