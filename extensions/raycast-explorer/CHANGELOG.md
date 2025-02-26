@@ -1,5 +1,10 @@
 # Prompt Explorer Extension Changelog
 
+### [Adjusting for post AI Extension update bugs] - 2025-02-26
+- Use composite keys like (`author_${username}_${name}`) to handle authors with same username but different display names
+- Added proper handling for undefined creativity values in presets and prompts components
+- Implemented fallback values (`preset.creativity || "unspecified"`) and null checks for creativity properties
+
 ## [Add Explore Quicklinks] - 2024-09-20
 
 - Add command for exploring Quicklinks
