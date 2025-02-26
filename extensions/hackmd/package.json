@@ -92,6 +92,11 @@
       "name": "view-note",
       "title": "View Note Details",
       "description": "Get detailed content and metadata for a specific note by ID"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new note in HackMD, optionally in a team workspace"
     }
   ],
   "ai": {
@@ -393,6 +398,123 @@
           },
           {
             "meetsCriteria": "Returns the note content and metadata for the specified ID"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Create a note about project planning with deadline tracking",
+        "mocks": {
+          "create-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": [],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-note",
+              "arguments": {
+                "content": "*matches*Project Planning*deadline*",
+                "readPermission": "*any*",
+                "writePermission": "*any*"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Creates a note in personal workspace with appropriate content about project planning"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Create a meeting agenda for the design team in the hackmd team workspace",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "create-note": {
+            "id": "team_note_id",
+            "title": "Design Team Meeting Agenda",
+            "tags": [],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": null,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "meetsCriteria": "Retrieves user information to check available teams"
+          },
+          {
+            "callsTool": {
+              "name": "create-note",
+              "arguments": {
+                "content": "*matches*Design Team Meeting*",
+                "teamPath": "hackmd",
+                "readPermission": "*any*",
+                "writePermission": "*any*"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Creates a meeting agenda note in the specified team workspace"
           }
         ]
       }
