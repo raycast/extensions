@@ -1,6 +1,6 @@
 # Messages Changelog
 
-## [New Keyword] - 2025-02-26
+## [Added Keyword] - 2025-02-26
 
 Added a "2FA" keyword for improved discovery
 
