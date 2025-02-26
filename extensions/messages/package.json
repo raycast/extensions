@@ -53,7 +53,8 @@
       "name": "paste-latest-otp-code",
       "title": "Paste Latest OTP Code",
       "description": "Paste the most recent OTP code from your messages.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": ["2fa"]
     }
   ],
   "tools": [
