@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.2.0",
+  "name": "dev-ops",
+  "title": "Dev Ops",
+  "description": "myRealPage Dev Ops",
+  "icon": "command-icon.png",
+  "author": "eblanchette",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Typeahead Results",
+      "description": "Template for showing typeahead search with network results.",
+      "mode": "view"
+    },
+    {
+      "name": "update-metadata",
+      "title": "Update Metadata",
+      "description": "Update metadata table.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "databaseSourceConnectionString",
+          "title": "Database Source Connection String",
+          "description": "The connection string of the source database.",
+          "type": "textfield",
+          "required": true
+        },
+        {
+          "name": "databaseTargetConnectionStrings",
+          "title": "Database Target Connection String",
+          "description": "The connection string of the target database.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.1",
+    "mysql2": "^3.12.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
