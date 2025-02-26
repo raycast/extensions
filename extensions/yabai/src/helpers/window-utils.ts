@@ -28,7 +28,7 @@ export function sortWindows<T extends BaseWindow>(windows: T[]): T[] {
     };
 
     // calculate the overlap of the two windows
-    const overlapY = Math.min(aArea.max.y, bArea.max.y) - Math.max(aArea.min.y, bArea.min.y);
+    const overlapY = Math.max(0, Math.min(aArea.max.y, bArea.max.y) - Math.max(aArea.min.y, bArea.min.y));
     const minHeight = Math.min(a.frame.h, b.frame.h);
 
     // if the overlap of the two windows is greater than 50% of the window height, consider them in the same row
