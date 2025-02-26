@@ -19,7 +19,7 @@ async function parseFetchResponse(response: Response) {
 }
 
 export default function Command() {
-  const { data = [] } = useFetch("https://namu.wiki/sidebar.json", { parseResponse: parseFetchResponse });
+  const { data, isLoading } = useFetch("https://namu.wiki/sidebar.json", { parseResponse: parseFetchResponse });
 
   return (
     <List>
