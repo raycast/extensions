@@ -101,7 +101,7 @@ export default function Command() {
     }
 
     if (item.ext) {
-      return `${item.ext} Snippet`;
+      return `${item.ext} Material`;
     }
 
     return item.clipboard.text.slice(0, 30);

@@ -11,9 +11,8 @@ async function loadVisitedFiles() {
   if (item) {
     const parsed = JSON.parse(item) as File[];
     return parsed;
-  } else {
-    return [];
   }
+  return [];
 }
 
 async function saveVisitedFiles(file: File[]) {

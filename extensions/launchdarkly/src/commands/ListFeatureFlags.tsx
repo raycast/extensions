@@ -1,9 +1,10 @@
 import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { useState } from "react";
 import { LDFlag } from "../types";
 import { useShowNamePreference } from "../hooks/useShowNamePreference";
 import { useLDFlags } from "../hooks/useLDFlags";
-import { createInitialsIcon } from "../utils/avatarUtils";
+import { getFullName } from "../utils/avatarUtils";
 import { getLDUrlWithEnvs } from "../utils/ld-urls";
 import FlagDetails from "../components/FlagDetails";
 
@@ -86,7 +87,7 @@ export default function ListFeatureFlags() {
       <List.Section title="Feature Flags" subtitle={`${totalCount} flags found`}>
         {flags.map((flag) => {
           const maintainer = flag._maintainer;
-          const icon = maintainer ? { source: createInitialsIcon(maintainer) } : Icon.Person;
+          const icon = maintainer ? { source: getAvatarIcon(getFullName(maintainer)) } : Icon.Person;
           const displayTitle = showName === undefined ? flag.name : showName ? flag.name : flag.key;
 
           return (
@@ -97,19 +98,18 @@ export default function ListFeatureFlags() {
               title={displayTitle}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.Push icon={Icon.Sidebar} title="Show Details" target={<FlagDetails flag={flag} />} />
-                    <Action.OpenInBrowser
-                      icon={Icon.Globe}
-                      title="Open in Browser"
-                      url={getLDUrlWithEnvs(flag, [], undefined)}
-                    />
-                    <Action
-                      icon={Icon.Switch}
-                      title={`Show ${showName ? "Key" : "Name"}`}
-                      onAction={() => toggleShowName()}
-                    />
-                  </ActionPanel.Section>
+                  <Action.Push icon={Icon.Sidebar} title="Show Details" target={<FlagDetails flag={flag} />} />
+                  <Action.OpenInBrowser
+                    icon={Icon.Globe}
+                    title="Open in Browser"
+                    url={getLDUrlWithEnvs(flag, [], undefined)}
+                  />
+                  <Action.CopyToClipboard title="Copy Feature Flag Key" content={flag.key} />
+                  <Action
+                    icon={Icon.Switch}
+                    title={`Show ${showName ? "Key" : "Name"}`}
+                    onAction={() => toggleShowName()}
+                  />
                 </ActionPanel>
               }
               detail={
