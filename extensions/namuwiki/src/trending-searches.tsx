@@ -12,12 +12,12 @@ async function parseFetchResponse(response: Response) {
 }
 
 export default function Command() {
-  const { data = [], isLoading } = useFetch("https://search.namu.wiki/api/ranking", { parseResponse: parseFetchResponse });
+  const { data = [], isLoading } = useFetch("https://search.namu.wiki/api/ranking", {
+    parseResponse: parseFetchResponse,
+  });
 
   return (
-    <List
-      isLoading={isLoading}
-    >
+    <List isLoading={isLoading}>
       <List.Section title="Current Trending Documents" subtitle={new Date().toLocaleString()}>
         {data.map((item) => (
           <List.Item
