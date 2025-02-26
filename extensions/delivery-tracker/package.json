@@ -21,7 +21,7 @@
     {
       "name": "track-deliveries",
       "title": "Track Deliveries",
-      "subtitle": "Deliveries, packages, and parcels",
+      "subtitle": "Delivery Tracker",
       "description": "View the deliveries you're tracking.",
       "mode": "view"
     },
