@@ -1,6 +1,6 @@
 # Readwise Reader Changelog
 
-## [Add list documents command] - {PR_MERGE_DATE}
+## [Add list documents command] - 2025-02-26
 
 - Add `List documents` command
   - Default list location configurable under preference (defaults to shortlist)
