@@ -129,7 +129,7 @@ A user can use multiple AI Extensions in a conversation. Therefore, you should m
 
 Evals are a way to test your AI extension. Think of them as integrations tests. They are defined in the [`package.json` file](../information/manifest.md) under the `ai` key. They are also used as suggested prompts for the user to learn how to make the most out of your AI Extension.
 
-## Structure
+### Structure
 
 An eval consists of the following parts:
 
@@ -138,7 +138,7 @@ An eval consists of the following parts:
 - `expected` – array of expectations, similar to `expect` statements in unit / integration tests.
 - `usedAsExample` – if true, the eval will be used as an example prompt for the user. True by default.
 
-## Expectations
+### Expectations
 
 Expectations are used to check if the AI response matches the expected behavior. You have different options to choose from:
 
@@ -256,7 +256,7 @@ Expectations are used to check if the AI response matches the expected behavior.
 {% endtab %}
 {% endtabs %}
 
-## AI File
+### AI File
 
 If your instructions or evals start getting too long and clutter your `package.json` file, you can move them to a separate file. It can be either a `ai.json`, `ai.yaml`, or `ai.json5` file in the root of your extension next to the `package.json` file.
 
