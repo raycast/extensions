@@ -38,7 +38,7 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
-  const { preferBackgroundOperation } = getPreferenceValues()
+  const { shouldCloseMainWindow } = getPreferenceValues();
 
   const { push, pop } = useNavigation();
 
@@ -52,7 +52,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
     async onSubmit(values) {
-      if (preferBackgroundOperation) {
+      if (shouldCloseMainWindow) {
         await closeMainWindow({
           popToRootType: PopToRootType.Suspended,
         });
@@ -159,7 +159,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       } catch (error) {
         handleError({ error, title: "Unable to create task" });
       } finally {
-        if (preferBackgroundOperation) {
+        if (shouldCloseMainWindow) {
           await popToRoot();
         }
       }
