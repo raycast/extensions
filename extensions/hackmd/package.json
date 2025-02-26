@@ -97,6 +97,11 @@
       "name": "create-note",
       "title": "Create Note",
       "description": "Create a new note in HackMD, optionally in a team workspace"
+    },
+    {
+      "name": "update-note",
+      "title": "Update Note",
+      "description": "Update an existing note in HackMD, either in personal or team workspace"
     }
   ],
   "ai": {
@@ -515,6 +520,166 @@
           },
           {
             "meetsCriteria": "Creates a meeting agenda note in the specified team workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Update my note with ID personal_note_id to add a section on risk management",
+        "mocks": {
+          "view-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": ["project", "planning"],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "content": "# Project Planning\n\n## Timeline\n- Start: January 1, 2023\n- End: June 30, 2023\n\n## Tasks\n- Task 1\n- Task 2\n- Task 3",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          },
+          "update-note": {
+            "id": "personal_note_id",
+            "title": "Project Planning with Deadline Tracking",
+            "tags": ["project", "planning"],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/personal_note_short_id",
+            "shortId": "personal_note_short_id",
+            "lastChangedAt": 1720352049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "guest",
+            "writePermission": "signed_in"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "personal_note_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "First retrieves the current content of the note"
+          },
+          {
+            "callsTool": {
+              "name": "update-note",
+              "arguments": {
+                "noteId": "personal_note_id",
+                "content": "*matches*Risk Management*"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Updates the note with a new section on risk management while preserving existing content"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Update the note in team hackmd with ID team_note_id to make it public",
+        "mocks": {
+          "view-note": {
+            "id": "team_note_id",
+            "title": "Team Meeting Minutes",
+            "tags": ["meeting", "minutes"],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "content": "# Team Meeting Minutes\n\n## Attendees\n- Person A\n- Person B\n- Person C\n\n## Agenda\n1. Project updates\n2. Timeline review\n3. Action items",
+            "lastChangedAt": 1720349049743,
+            "lastChangeUser": {
+              "name": "Team Member",
+              "userPath": "teammember",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "teammember",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          },
+          "update-note": {
+            "id": "team_note_id",
+            "title": "Team Meeting Minutes",
+            "tags": ["meeting", "minutes"],
+            "createdAt": 1720349049743,
+            "titleUpdatedAt": 1720349049743,
+            "tagsUpdatedAt": 1720349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_note_short_id",
+            "shortId": "team_note_short_id",
+            "lastChangedAt": 1720352049743,
+            "lastChangeUser": {
+              "name": "Current User",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "teammember",
+            "teamPath": "hackmd",
+            "readPermission": "guest",
+            "writePermission": "team"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "team_note_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "First retrieves the current note information"
+          },
+          {
+            "callsTool": {
+              "name": "update-note",
+              "arguments": {
+                "noteId": "team_note_id",
+                "teamPath": "hackmd",
+                "readPermission": "guest",
+                "content": "*any*"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Updates the note permissions to make it readable by guests (public) while preserving content"
           }
         ]
       }
