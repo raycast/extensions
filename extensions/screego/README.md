@@ -12,6 +12,6 @@ https://github.com/user-attachments/assets/42f0d1cb-ae20-4c75-9fdb-0f7477238a14
 
 
 ## Installation steps
-To do this, you have to set the server URL in the extension preferences.
-To do that click on configuration extension and then add the server URL.
+1. To do this, you have to set the server URL in the extension preferences.
+2. Click on _configuration extension_ and then add the _server URL_ with your server URL. 
 
