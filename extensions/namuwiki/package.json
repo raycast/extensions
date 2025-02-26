@@ -13,18 +13,21 @@
     {
       "name": "search-documents",
       "title": "Search Documents",
+      "subtitle": "Namuwiki",
       "description": "Search documents in namu.wiki",
       "mode": "view"
     },
     {
       "name": "recently-changed-documents",
       "title": "View Recently Changed Documents",
+      "subtitle": "Namuwiki",
       "description": "View documents that have recently changed in namu.wiki",
       "mode": "view"
     },
     {
       "name": "trending-searches",
       "title": "View Trending Searches",
+      "subtitle": "Namuwiki",
       "description": "View current real-time trending searches in namu.wiki",
       "mode": "view"
     }
