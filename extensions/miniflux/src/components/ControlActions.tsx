@@ -41,7 +41,7 @@ const ControlActions = ({
         handleError(error as MinifluxApiError);
       }
     },
-    [entry]
+    [entry, onRefresh]
   );
 
   const handleMarkPageAsRead = useCallback(
@@ -57,7 +57,7 @@ const ControlActions = ({
         handleError(error as MinifluxApiError);
       }
     },
-    [entry]
+    [entries, onRefresh]
   );
 
   const handleRefresh = useCallback(async () => {
