@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Update] - 2025-01-30
+## [Update] - 2025-02-26
 
 - Fix: Don't append default model when local models exist
 
