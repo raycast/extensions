@@ -1,5 +1,11 @@
 # Google Gemini Changelog
 
+## [New Models and Features] - 2025-02-24
+
+- 🤖 Update model variants
+- ⚙️ Set default model to Gemini 2.0 Flash which is already production ready
+- 🙋 Support custom model names as a supplement for listed common models.
+
 ## [Append Selected Text to Chat] - 2025-02-04
 
 - Ability to append selected text to the chat command with the `Append to Chat` command. Shortcut: `Ctrl + Shift + V`

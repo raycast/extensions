@@ -10,11 +10,12 @@ The first one is for creating a deeplink to a command inside the current extensi
 
 ```ts
 function createDeeplink(options: {
-  type?: DeeplinkType.Extension,
-  command: string,
-  launchType?: LaunchType,
-  arguments?: LaunchProps["arguments"],
-  fallbackText?: string,
+  type?: DeeplinkType.Extension;
+  command: string;
+  launchType?: LaunchType;
+  arguments?: LaunchProps["arguments"];
+  context?: LaunchProps["launchContext"];
+  fallbackText?: string;
 }): string;
 ```
 
@@ -22,24 +23,21 @@ The second one is for creating a deeplink to an extension that is not the curren
 
 ```ts
 function createDeeplink(options: {
-  type?: DeeplinkType.Extension,
-  ownerOrAuthorName: string,
-  extensionName: string,
-  command: string,
-  launchType?: LaunchType,
-  arguments?: LaunchProps["arguments"],
-  fallbackText?: string,
+  type?: DeeplinkType.Extension;
+  ownerOrAuthorName: string;
+  extensionName: string;
+  command: string;
+  launchType?: LaunchType;
+  arguments?: LaunchProps["arguments"];
+  context?: LaunchProps["launchContext"];
+  fallbackText?: string;
 }): string;
 ```
 
 The third one is for creating a deeplink to a script command:
 
 ```ts
-function createDeeplink(options: {
-  type: DeeplinkType.ScriptCommand,
-  command: string,
-  arguments?: string[],
-}): string;
+function createDeeplink(options: { type: DeeplinkType.ScriptCommand; command: string; arguments?: string[] }): string;
 ```
 
 ### Arguments
@@ -50,6 +48,7 @@ function createDeeplink(options: {
 - `command` is the name of the command to deeplink to.
 - `launchType` is the type of the launch.
 - `arguments` is an object that contains the arguments to pass to the command.
+- `context` is an object that contains the launch context to pass to the command.
 - `fallbackText` is the text to show if the command is not available.
 - For intra-extension deeplinks:
   - `ownerOrAuthorName` is the name of the owner or author of the extension.

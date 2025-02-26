@@ -21,7 +21,7 @@ import { getIntervalValidationError, getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 import useLocations, { Location } from "./hooks/useLocations";
 
-type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
+export type Frequency = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
   title: string;
   listId?: string;
