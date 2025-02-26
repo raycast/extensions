@@ -1,5 +1,6 @@
 import { List, getPreferenceValues, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { nanoid } from "nanoid";
 import fetch from "node-fetch";
 import { LanguageDropdown } from "./components/LanguageDropdown";
 import { languages } from "./constants/languages";
@@ -73,7 +74,7 @@ export default function Command() {
         }
 
         const entry: Entry = {
-          id: `entry-${String(entries.length)}`,
+          id: `entry-${nanoid()}`,
           date: new Date(),
           sourceLanguage: dataResponse.source_language_code,
           sourceText: searchText,
