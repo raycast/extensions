@@ -6,7 +6,8 @@
   "icon": "perplexity.png",
   "author": "ilian",
   "contributors": [
-    "xilopaint"
+    "xilopaint",
+    "thomas"
   ],
   "categories": [
     "Productivity",
@@ -48,6 +49,10 @@
             {
               "value": "sonar-reasoning-pro",
               "title": "Sonar Reasoning Pro 128k"
+            },
+            {
+              "value": "sonar-deep-research",
+              "title": "Sonar Deep Research"
             }
           ]
         }
@@ -738,6 +743,13 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "deep-research",
+      "title": "Deep Research",
+      "description": "Performs a deep research on a specific topic"
+    }
+  ],
   "preferences": [
     {
       "description": "Perplexity API Key",
@@ -783,6 +795,9 @@
       "required": false
     }
   ],
+  "ai": {
+    "instructions": "Always include citations when writing the summary. Each parapgraph and list item must end with the list of citations using this markdown syntax: ([<host of the source, e.g. wikipedia.org>](<full url of the source, e.g. https://en.wikipedia.org/wiki/Thomas_Mann>))"
+  },
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "gpt-tokenizer": "^2.8.1",
