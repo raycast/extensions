@@ -4,7 +4,7 @@
 
 - Add "Mark as Read" action for an individual entry.
 - Add "Mark Page as Read" action for marking all visible entries as read.
-- Updated typos in copy and toast styles were being used correctly.
+- Fixed typos in copy and ensured toast styles were being used correctly.
 - Fixed bug where on first load, the entries would not be visible.
 - Fixed bug when "Open Miniflux" action could open multiple tabs.
 
