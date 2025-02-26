@@ -1,4 +1,17 @@
-import { ActionPanel, Form, Icon, useNavigation, closeMainWindow, open, Toast, Action, Color, PopToRootType, popToRoot, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  useNavigation,
+  closeMainWindow,
+  open,
+  Toast,
+  Action,
+  Color,
+  PopToRootType,
+  popToRoot,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
