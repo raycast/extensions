@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Select Device] - {PR_MERGE_DATE}
+## [Fix Select Device] - 2025-02-26
 
 - Fixed a possibly undefined issue from Select Devices command
 
