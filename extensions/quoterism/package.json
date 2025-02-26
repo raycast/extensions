@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Quoterism",
-      "subtitle": "Collection of the most inspiring expressions of mankind",
+      "title": "Get Quote",
+      "subtitle": "Quoterism",
       "description": "Get access to the Web's largest collection of human inspiration",
       "mode": "view"
     }
