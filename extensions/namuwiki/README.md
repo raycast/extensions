@@ -1,6 +1,6 @@
 <div align="center"><img src="https://i.namu.wiki/i/ot-GazBfOPU_RhL0ABs2O0HQxq58JLtpmsCcZMTcuQUyYZpz--Dy5FQS2lBVkqopwbYTR7Ee3UOh9VRGwJmmtBYJx_yeMYEVRRedIeTUreimkS0iKRJwmc7tqxjUaPwmV2WdkFCVbTcMGLENiKJHnQ.webp" height=100/></div>
 <h1 align="center">Namuwiki for Raycast</h1>
-<p align="center">An raycast extension that allows you to search for documents, etc. in a namuwiki.</p>
+<p align="center">A raycast extension that allows you to search for documents, etc. in a namuwiki.</p>
 
 ![Conversation View](metadata/1.png)
 
