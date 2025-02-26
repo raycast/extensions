@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, Image, List, Toast, showToast } from "@raycast/api";
-import { exec, spawn } from "child_process";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { exec } from "child_process";
 import DiskSection from "./DiskSection";
 
 export default function ListDisks(): JSX.Element {
@@ -73,7 +73,7 @@ export default function ListDisks(): JSX.Element {
    *
    * @param update "DiskUpdate", "Refresh", "Init"
    */
-  function fetchDisks(update: string | "Init" | "DiskUpdate" | "DiskUpdate" | "Refresh") {
+  function fetchDisks(update: string | "Init" | "DiskUpdate" | "Refresh") {
     try {
       if (update === "Init") {
         initialInitDiskSections();

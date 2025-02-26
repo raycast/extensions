@@ -131,7 +131,15 @@ export default class Disk {
       style: Toast.Style.Success,
       title: `Opened new terminal`,
     });
-    Disk.execCommand(fullCommand);
+    try {
+      await Disk.execCommand(fullCommand);
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open terminal",
+        message: String(error)
+      });
+    }
   }
 
   async revealInFinder() {
@@ -244,12 +252,7 @@ export default class Disk {
   }
 
   async fetchDetails(): Promise<string> {
-    let details = "";
-
-    const output = await Disk.execCommand("diskutil info " + this.identifier);
-    details = output;
-
-    return details;
+    return Disk.execCommand("diskutil info " + this.identifier);
   }
 
   initMountStatus() {
