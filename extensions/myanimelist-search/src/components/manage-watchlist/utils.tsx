@@ -28,6 +28,12 @@ export function statusToText(status: string) {
       return "Watching";
     case "plan_to_watch":
       return "Plan to Watch";
+    case "finished_airing":
+      return "Finished Airing";
+    case "currently_airing":
+      return "Currently Airing";
+    case "not_yet_aired":
+      return "Not Yet Aired";
     default:
       return status;
   }

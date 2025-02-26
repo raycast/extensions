@@ -211,7 +211,7 @@ export async function fetchAnimes(
   params.append("nsfw", nsfw ? "true" : "false");
   params.append("fields", fields.join(","));
 
-  const response = await (anon ? request_anon : request)("https://api.myanimelist.net/v2/anime?" + params);
+  const response = await (anon ? request_anon : request)(`https://api.myanimelist.net/v2/anime?${params}`);
 
   const json = await response.json();
   const parsed = animeSearchBody.safeParse(json);
@@ -236,7 +236,7 @@ export async function fetchSuggestions({ nsfw, anon }: SearchAnimeOptions): Prom
   const response = await (anon ? request_anon : request)(
     anon
       ? `https://api.myanimelist.net/v2/anime/season/${year}/${season}?${params}` // If the user is not signed in, get the current seasonal animes
-      : "https://api.myanimelist.net/v2/anime/suggestions?" + params // If the user is signed in, get their usual suggestions
+      : `https://api.myanimelist.net/v2/anime/suggestions?${params}` // If the user is signed in, get their usual suggestions
   );
 
   const json = await response.json();
@@ -359,7 +359,7 @@ export async function setEpisodes(anime: ExtendedAnime, episodes: number) {
 }
 
 export async function getAnimeWatchlist(status?: AnimeStatus): Promise<Anime[]> {
-  const cacheKey = status === undefined ? "watchlist" : "watchlist_" + status;
+  const cacheKey = status === undefined ? "watchlist" : `watchlist_${status}`;
   const _cache = cacheGet<Anime[]>(cacheKey);
   if (_cache) return _cache;
 
@@ -367,7 +367,7 @@ export async function getAnimeWatchlist(status?: AnimeStatus): Promise<Anime[]> 
   params.append("limit", "1000");
   if (status) params.append("status", status);
 
-  const res = await request("https://api.myanimelist.net/v2/users/@me/animelist?" + params, undefined, "GET");
+  const res = await request(`https://api.myanimelist.net/v2/users/@me/animelist?${params}`, undefined, "GET");
 
   if (!res.ok) {
     console.error("get watchlist error:", await res.text());

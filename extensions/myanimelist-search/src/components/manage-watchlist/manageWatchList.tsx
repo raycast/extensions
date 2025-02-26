@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Icon, Image, List, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { useContext, useEffect, useState } from "react";
 
 import * as api from "../../api/api";
 import * as oauth from "../../api/oauth";
-import AnimeDetails from "../listDetail";
-import { getWatchlistItems, SetEpisodesWatched, statusToText } from "./utils";
 import { ViewTypeCtx } from "../ViewTypeCtx";
+import AnimeDetails from "../listDetail";
+import { SetEpisodesWatched, getWatchlistItems, statusToText } from "./utils";
 
 export function ManageWatchList() {
   const [isLoading, setIsLoading] = useState<boolean>(true);

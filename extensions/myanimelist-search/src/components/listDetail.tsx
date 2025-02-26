@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { ExtendedAnime } from "../api/api";
+import { statusToText } from "./manage-watchlist/utils";
 
 const capitalizeFirstLetter = (val: string) => val.charAt(0).toUpperCase() + val.slice(1);
 
@@ -39,6 +40,7 @@ export default function AnimeDetails({ anime }: { anime: ExtendedAnime }) {
           <List.Item.Detail.Metadata.Label title="Score" text={anime.mean?.toString() || "-"} />
           <List.Item.Detail.Metadata.Label title="Ranked" text={anime.rank ? `#${anime.rank?.toString()}` : "-"} />
           <List.Item.Detail.Metadata.Label title="Year" text={startYear} />
+          <List.Item.Detail.Metadata.Label title="Status" text={statusToText(anime.status)} />
           <List.Item.Detail.Metadata.TagList title="Genres">
             {(anime?.genres || []).map((genre) => (
               <List.Item.Detail.Metadata.TagList.Item text={genre.name} color={"#E2E7F4"} key={genre.name} />

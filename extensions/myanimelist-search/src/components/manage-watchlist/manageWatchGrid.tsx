@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 
 import * as api from "../../api/api";
 import * as oauth from "../../api/oauth";
-import { getWatchlistItems, SetEpisodesWatched } from "./utils";
+import { getWatchlistItems, SetEpisodesWatched, statusToText } from "./utils";
 import { ViewTypeCtx } from "../ViewTypeCtx";
 
 export function ManageWatchGrid() {
@@ -36,15 +36,13 @@ export function ManageWatchGrid() {
           key={anime.id}
           content={anime.main_picture.large}
           title={anime.title}
-          subtitle={`${anime.episodesWatched}/${anime.num_episodes}`}
+          subtitle={`${statusToText(anime.status)} - ${anime.episodesWatched}/${anime.num_episodes}`}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://myanimelist.net/anime/${anime.id}`} />
               <Action
                 title="Switch to List View"
-                onAction={() => {
-                  setViewType("list");
-                }}
+                onAction={() => setViewType("list")}
                 icon={Icon.List}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               />
