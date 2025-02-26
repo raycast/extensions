@@ -72,6 +72,11 @@
       "name": "get-current-user",
       "title": "Get Current User",
       "description": "Get Current Logged-in HackMD User, including teams"
+    },
+    {
+      "name": "get-recent-notes",
+      "title": "Get recent accessed notes",
+      "description": "Get recently accessed notes from HackMD"
     }
   ],
   "ai": {
@@ -119,6 +124,48 @@
           },
           {
             "meetsCriteria": "Return user profile and joined teams"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd What are my recent notes?",
+        "mocks": {
+          "get-recent-notes": [
+            {
+              "id": "note_id",
+              "title": "note_title",
+              "tags": ["list", "of", "tags"],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@username/shortId",
+              "shortId": "shortId",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": null,
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-recent-notes"
+            }
+          },
+          {
+            "meetsCriteria": "Return history note list"
           }
         ]
       }
