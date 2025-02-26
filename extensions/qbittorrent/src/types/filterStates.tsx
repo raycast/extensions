@@ -1,8 +1,8 @@
 import { TorrentFilters } from "@ctrl/qbittorrent";
 
 export const filterStates: TorrentFilters[] = [
-  "active",
   "all",
+  "active",
   "completed",
   "downloading",
   "inactive",
