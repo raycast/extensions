@@ -49,3 +49,4 @@ anytype
 dub
 e2b
 firecrawl
+exa-search
