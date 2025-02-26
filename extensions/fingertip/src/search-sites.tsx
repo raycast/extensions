@@ -55,7 +55,7 @@ export default function Command() {
         setAllSites(response.items);
       }
 
-      setHasNextPage(response.hasNextPage);
+      setHasNextPage(response?.pageInfo?.hasNextPage || false);
       setEndCursor(response.pageInfo.endCursor);
     } catch (error) {
       console.error("Error fetching sites:", error);
