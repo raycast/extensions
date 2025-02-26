@@ -27,7 +27,7 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "Your Fingertip API key for authentication",
+      "description": "Your Fingertip API key for authentication. Get it at https://fingertip.com/account/api",
       "type": "password",
       "required": true
     }
