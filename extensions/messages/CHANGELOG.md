@@ -1,8 +1,8 @@
 # Messages Changelog
 
-## [Keyword for OTP] - 2025-02-26
+## [New Keyword] - 2025-02-26
 
-Added a "2FA" keyword for the `Paste Latest OTP Code` command.
+Added a "2FA" keyword for improved discovery
 
 ## [✨ AI Enhancements] - 2025-02-21
 
