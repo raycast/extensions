@@ -7,6 +7,7 @@ Generate a meeting room link for Screego directly from Raycast 🔥
 
 ## Video
 A small video to show all the features currently. 
+
 https://github.com/user-attachments/assets/42f0d1cb-ae20-4c75-9fdb-0f7477238a14
 
 
