@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2025-02-22
+
+- Adds support for Trae as an option in the extension settings.
+
 ## [Fix] - 2025-01-02
 
 - Fix the issue where users cannot open a new window when using a language pack.

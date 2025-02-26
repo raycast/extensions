@@ -1,6 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
+import { withAccessToken, WithAccessTokenComponentOrFn } from "@raycast/utils";
 import { slack } from "./client/WebClient";
 
-export function withSlackClient<T>(Component: React.ComponentType<T>) {
-  return withAccessToken<T>(slack)(Component);
+export function withSlackClient(Component: WithAccessTokenComponentOrFn) {
+  return withAccessToken(slack)(Component);
 }

@@ -1,5 +1,7 @@
 # Wikipedia Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Add languages] - 2025-01-02
 
 - Add `Finnish`, `Swedish` and `Norwegian` languages
