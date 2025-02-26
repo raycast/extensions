@@ -1,6 +1,6 @@
 # Miniflux Changelog
 
-## [Add New Actions] - {PR_MERGE_DATE}
+## [Add New Actions] - 2025-02-26
 
 - Add "Mark as Read" action for an individual entry.
 - Add "Mark Page as Read" action for marking all visible entries as read.
