@@ -3,7 +3,7 @@ import { useLocalStorage } from '@raycast/utils';
 
 import { OpenInYnabAction } from '@components/actions';
 import { CurrencyFormat, TransactionDetail } from '@srcTypes';
-import { easyGetColorFromId, formatToReadablePrice, getFlagColor, time } from '@lib/utils';
+import { easyGetColorFromId, formatToReadableAmount, getFlagColor, time } from '@lib/utils';
 
 export function TransactionDetails({ transaction }: { transaction: TransactionDetail }) {
   const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
@@ -26,7 +26,7 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
           <Detail.Metadata.Label title="Account" text={transaction.account_name} />
           <Detail.Metadata.Label
             title="Amount"
-            text={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
+            text={formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency })}
           />
           <Detail.Metadata.Label title="Date" text={time(transaction.date).format('LL')} />
           <Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
@@ -77,7 +77,7 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
         <ActionPanel>
           <Action.CopyToClipboard
             title="Copy Transaction Amount"
-            content={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
+            content={formatToReadableAmount({ amount: transaction.amount, currency: activeBudgetCurrency })}
           />
           <OpenInYnabAction />
         </ActionPanel>

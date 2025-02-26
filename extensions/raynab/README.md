@@ -86,7 +86,7 @@ Pressing Enter (`↵`) will show the transaction detail view which provides more
 - Edit Transaction (`⌘` + `↵`): Edit any of the provided transaction information:
 
   - Date
-  - Amount
+  - Amount (Positive or Negative)
   - Payee Name
   - Memo
   - Flag
@@ -185,7 +185,7 @@ File a new transaction into your budget by entering its related information.
 The following fields are required:
 
 - Date
-- Amount (Must be a non-zero floating point number)
+- Amount (Positive or negative)
 - Payee Name
 - Category
 
@@ -196,7 +196,7 @@ Create a new scheduled transaction which will be applied at the specified future
 The following fields are required:
 
 - Date
-- Amount (Must be a non-zero floating point number)
+- Amount (Positive or negative)
 - Repeats (defaults to "Never")
 - Payee Name
 - Category
@@ -281,6 +281,10 @@ Categories are grouped in their original category group. Each category is presen
   - Account: The account of the transaction
 
 ### More about transaction forms
+
+#### Amounts
+
+Transaction amounts in Raynab accept amounts as inflows if they're positive (e.g. 12.34) and outflows if negative (-12.34). The amount supports the currency settings of your currently selected budget. For instance, if your decimal separator is a comma (,) instead of a period (.) you can enter "-12,34".
 
 #### Transfers
 

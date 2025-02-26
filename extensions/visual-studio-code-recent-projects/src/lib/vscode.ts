@@ -71,6 +71,7 @@ const cliPaths: Record<string, string> = {
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
   VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+  Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
 };
 
 export function getVSCodeCLIFilename(): string {
@@ -182,6 +183,7 @@ const buildSchemes: Record<string, string> = {
   Cursor: "cursor",
   VSCodium: "vscode-oss",
   Windsurf: "windsurf",
+  Trae: "trae",
 };
 
 export function getBuildScheme(): string {

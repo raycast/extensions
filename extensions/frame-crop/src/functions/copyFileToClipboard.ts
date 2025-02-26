@@ -1,30 +1,17 @@
-import { showToast, Toast, environment } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { getSavedDirectory, formatIdForFilename, getFileExtension } from "./utils";
 
 interface CopyFileToClipboardProps {
   url: string;
   id: string;
 }
 
-// Function to format the ID for a valid filename
-const formatIdForFilename = (id: string) => {
-  return id
-    .replace(/[<>:"/\\|?*]+/g, "-") // Replace invalid characters with a dash
-    .replace(/\s+/g, "-") // Replace spaces with dashes
-    .replace(/\.\.+/g, ".") // Replace multiple dots with a single dot
-    .replace(/^-+|-+$/g, "") // Trim dashes from the start and end
-    .replace(/\.+$/, "") // Remove trailing dots
-    .toLowerCase(); // Convert to lowercase
-};
-
 export const copyFileToClipboard = async ({ url, id }: CopyFileToClipboardProps) => {
   const toast = await showToast(Toast.Style.Animated, "Downloading and copying image...");
 
-  const selectedPath = environment.supportPath;
-  const fileExtension = url
-    .split(/\/+|\.+/)
-    .pop()
-    ?.split("?")[0];
+  const downloadDirectory = getSavedDirectory();
+  const fileExtension = getFileExtension(url) || "jpg";
   const validExtensions = ["jpg", "jpeg", "png"];
   const finalExtension = validExtensions.includes(fileExtension || "") ? fileExtension : "jpg";
 
@@ -34,9 +21,9 @@ export const copyFileToClipboard = async ({ url, id }: CopyFileToClipboardProps)
 
   // Format the ID for the filename
   const formattedId = formatIdForFilename(id);
-  const fixedPathName = selectedPath.endsWith("/")
-    ? `${selectedPath}${formattedId}.${finalExtension}`
-    : `${selectedPath}/${formattedId}.${finalExtension}`;
+  const fixedPathName = downloadDirectory.endsWith("/")
+    ? `${downloadDirectory}${formattedId}.${finalExtension}`
+    : `${downloadDirectory}/${formattedId}.${finalExtension}`;
 
   try {
     const actualPath = fixedPathName;
