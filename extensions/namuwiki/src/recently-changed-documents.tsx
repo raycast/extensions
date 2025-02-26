@@ -22,7 +22,9 @@ export default function Command() {
   const { data, isLoading } = useFetch("https://namu.wiki/sidebar.json", { parseResponse: parseFetchResponse });
 
   return (
-    <List>
+    <List
+      isLoading={isLoading}
+    >
       <List.Section title="Recently Changed Documents" subtitle={"on " + new Date().toLocaleDateString()}>
         {data.map((item) => (
           <List.Item
