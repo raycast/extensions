@@ -1,6 +1,10 @@
 # raycast-ollama Changelog
 
-## [Fix] - 2025-02-26
+## [Fix] - 2025-02-24
+
+- Improved Ollama streaming processing leading to better performance when using remote Ollama server.
+
+## [Fix] - 2025-01-26
 
 - Corrected typos
 

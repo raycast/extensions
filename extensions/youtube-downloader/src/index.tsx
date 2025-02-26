@@ -1,4 +1,4 @@
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -11,17 +11,19 @@ import {
   getSelectedText,
   Icon,
   open,
+  openExtensionPreferences,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
-import nanoSpawn from "nano-spawn";
-import { DownloadOptions, isValidHHMM, isYouTubeURL, parseHHMM, preferences } from "./utils.js";
+import { execa, ExecaError } from "execa";
+import { DownloadOptions, isValidHHMM, isValidUrl, parseHHMM, preferences } from "./utils.js";
 
 export default function DownloadVideo() {
   const [error, setError] = useState(0);
+  const [warning, setWarning] = useState("");
 
   const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     initialValues: {
@@ -80,8 +82,14 @@ export default function DownloadVideo() {
         const line = data.toString();
         console.error(line);
 
-        toast.title = "Download Failed";
-        toast.style = Toast.Style.Failure;
+        if (line.startsWith("WARNING:")) {
+          setWarning(line);
+        }
+
+        if (line.startsWith("ERROR:")) {
+          toast.title = "Download Failed";
+          toast.style = Toast.Style.Failure;
+        }
         toast.message = line;
       });
 
@@ -118,7 +126,7 @@ export default function DownloadVideo() {
         if (!value) {
           return "URL is required";
         }
-        if (!isYouTubeURL(value)) {
+        if (!isValidUrl(value)) {
           return "Invalid URL";
         }
       },
@@ -143,13 +151,13 @@ export default function DownloadVideo() {
   });
 
   const { data: video, isLoading } = usePromise(
-    async (url) => {
+    async (url: string) => {
       if (!url) return;
-      if (!isYouTubeURL(url)) return;
+      if (!isValidUrl(url)) return;
 
-      const result = await nanoSpawn(
+      const result = await execa(
         preferences.ytdlPath,
-        [preferences.forceIpv4 ? "--force-ipv4" : undefined, "-j", url].filter((x) => Boolean(x)),
+        [preferences.forceIpv4 ? "--force-ipv4" : "", "-j", url].filter((x) => Boolean(x)),
       );
       return JSON.parse(result.stdout) as {
         title: string;
@@ -171,8 +179,14 @@ export default function DownloadVideo() {
       onError(error) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch video",
+          title: "Video not found with the provided URL",
           message: error.message,
+          primaryAction: {
+            title: "Copy to Clipboard",
+            onAction: () => {
+              Clipboard.copy(error.message);
+            },
+          },
         });
       },
     },
@@ -180,7 +194,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live") {
+      if (video.live_status !== "not_live" && video.live_status !== undefined) {
         setValidationError("url", "Live streams are not supported");
       }
     }
@@ -190,7 +204,7 @@ export default function DownloadVideo() {
     (async () => {
       if (preferences.autoLoadUrlFromClipboard) {
         const clipboardText = await Clipboard.readText();
-        if (clipboardText && isYouTubeURL(clipboardText)) {
+        if (clipboardText && isValidUrl(clipboardText)) {
           setValue("url", clipboardText);
           return;
         }
@@ -199,7 +213,7 @@ export default function DownloadVideo() {
       if (preferences.autoLoadUrlFromSelectedText) {
         try {
           const selectedText = await getSelectedText();
-          if (selectedText && isYouTubeURL(selectedText)) {
+          if (selectedText && isValidUrl(selectedText)) {
             setValue("url", selectedText);
             return;
           }
@@ -211,7 +225,7 @@ export default function DownloadVideo() {
       if (preferences.enableBrowserExtensionSupport) {
         try {
           const tabUrl = (await BrowserExtension.getTabs()).find((tab) => tab.active)?.url;
-          if (tabUrl && isYouTubeURL(tabUrl)) setValue("url", tabUrl);
+          if (tabUrl && isValidUrl(tabUrl)) setValue("url", tabUrl);
         } catch {
           // Suppress the error if Raycast didn't find browser extension
         }
@@ -245,10 +259,17 @@ export default function DownloadVideo() {
             icon={Icon.Download}
             title="Download Video"
             onSubmit={(values) => {
+              setWarning("");
               handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
             }}
           />
         </ActionPanel>
+      }
+      searchBarAccessory={
+        <Form.LinkAccessory
+          text="Supported Sites"
+          target="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md"
+        />
       }
     >
       <Form.Description title="Title" text={video?.title ?? "Video not found"} />
@@ -258,6 +279,7 @@ export default function DownloadVideo() {
         placeholder="https://www.youtube.com/watch?v=xRMPKQweySE"
         {...itemProps.url}
       />
+      {warning && <Form.Description text={warning} />}
       {/*<Form.Separator />*/}
       {/*<Form.TextField*/}
       {/*  info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."*/}
@@ -307,21 +329,48 @@ function AutoInstall({ onRefresh }: { onRefresh: () => void }) {
             if (isLoading) return;
 
             setIsLoading(true);
-
-            const toast = await showToast({ style: Toast.Style.Animated, title: "Installing ffmpeg..." });
-            await toast.show();
+            const installationToast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
+            await installationToast.show();
 
             try {
-              execSync(`zsh -l -c 'brew install ffmpeg'`);
-              await toast.hide();
+              await execa(preferences.homebrewPath, ["install", "yt-dlp", "ffmpeg"]);
+              await installationToast.hide();
               onRefresh();
-            } catch (e) {
-              await toast.hide();
-              console.error(e);
+            } catch (error) {
+              installationToast.hide();
+              console.error(error);
+              const isCommonError = error instanceof Error;
+              const isExecaError = error instanceof ExecaError;
+              const isENOENT = isExecaError && error.code === "ENOENT";
+
               await showToast({
                 style: Toast.Style.Failure,
-                title: "Error installing",
-                message: "An unknown error occured while trying to install",
+                title: isCommonError ? (isENOENT ? "Cannot find Homebrew" : error.name) : "Installation Failed",
+                message: isCommonError
+                  ? isENOENT
+                    ? "Please make sure your `brew` PATH is configured correctly in extension preferences. If you don't have Homebrew installed, you can download it from https://brew.sh."
+                    : error.message
+                  : "An unknown error occured while trying to install",
+                primaryAction: {
+                  title: isENOENT ? "Open Extension Preferences" : "Copy to Clipboard",
+                  onAction: () => {
+                    if (isENOENT) {
+                      openExtensionPreferences();
+                    } else {
+                      Clipboard.copy(
+                        isCommonError ? error.message : "An unknown error occurred while trying to install",
+                      );
+                    }
+                  },
+                },
+                secondaryAction: isENOENT
+                  ? {
+                      title: "Open Installation Guide in Browser",
+                      onAction: () => {
+                        open("https://brew.sh");
+                      },
+                    }
+                  : undefined,
               });
             }
             setIsLoading(false);

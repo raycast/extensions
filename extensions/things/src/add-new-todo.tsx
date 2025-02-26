@@ -13,9 +13,8 @@ import {
   AI,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { CommandListName, getLists, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addTodo, CommandListName, getLists, getTags, thingsNotRunningError } from './api';
 import TodoList from './components/TodoList';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
@@ -54,7 +53,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
         'checklist-items': values['checklist-items'],
       };
 
-      await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+      await addTodo(json);
 
       await showToast({
         style: Toast.Style.Success,
