@@ -102,6 +102,11 @@
       "name": "update-note",
       "title": "Update Note",
       "description": "Update an existing note in HackMD, either in personal or team workspace"
+    },
+    {
+      "name": "delete-note",
+      "title": "Delete Note",
+      "description": "Delete an existing note from HackMD, either from personal or team workspace"
     }
   ],
   "ai": {
@@ -680,6 +685,123 @@
           },
           {
             "meetsCriteria": "Updates the note permissions to make it readable by guests (public) while preserving content"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Delete my note with ID obsolete_note_id",
+        "mocks": {
+          "view-note": {
+            "id": "obsolete_note_id",
+            "title": "Obsolete Note",
+            "tags": ["archive"],
+            "createdAt": 1600349049743,
+            "titleUpdatedAt": 1600349049743,
+            "tagsUpdatedAt": 1600349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@username/obsolete_note_short_id",
+            "shortId": "obsolete_note_short_id",
+            "content": "# Obsolete Content\n\nThis note is no longer needed.",
+            "lastChangedAt": 1600352049743,
+            "lastChangeUser": {
+              "name": "Me",
+              "userPath": "username",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "username",
+            "teamPath": null,
+            "readPermission": "owner",
+            "writePermission": "owner"
+          },
+          "delete-note": {
+            "success": true,
+            "message": "Successfully deleted note (ID: obsolete_note_id)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "obsolete_note_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "First retrieves the note to confirm details before deletion"
+          },
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "obsolete_note_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Successfully deletes the note from personal workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Delete the outdated team documentation with ID team_doc_id from the hackmd team",
+        "mocks": {
+          "view-note": {
+            "id": "team_doc_id",
+            "title": "Outdated Team Documentation",
+            "tags": ["docs", "outdated"],
+            "createdAt": 1700349049743,
+            "titleUpdatedAt": 1700349049743,
+            "tagsUpdatedAt": 1700349049743,
+            "publishType": "view",
+            "publishedAt": null,
+            "permalink": null,
+            "publishLink": "https://hackmd.io/@teampath/team_doc_short_id",
+            "shortId": "team_doc_short_id",
+            "content": "# Old Team Documentation\n\nThis documentation is outdated and should be removed.",
+            "lastChangedAt": 1700352049743,
+            "lastChangeUser": {
+              "name": "Team Admin",
+              "userPath": "admin",
+              "photo": "https://link_to_photo.png",
+              "biography": ""
+            },
+            "userPath": "admin",
+            "teamPath": "hackmd",
+            "readPermission": "team",
+            "writePermission": "team"
+          },
+          "delete-note": {
+            "success": true,
+            "message": "Successfully deleted note (ID: team_doc_id) from team hackmd"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "view-note",
+              "arguments": {
+                "noteId": "team_doc_id"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "First retrieves the note to confirm it's a team note"
+          },
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "team_doc_id",
+                "teamPath": "hackmd"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Deletes the note from the specified team workspace"
           }
         ]
       }
