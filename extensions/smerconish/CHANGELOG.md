@@ -1,5 +1,9 @@
 # Smerconish Changelog
 
+## [9314a16] - 2025-02-26
+
+Updated caching to use CachedPromise instead of my bespoke
+
 ## [b332d0b] - 2025-02-10
 
 Added caching. 
