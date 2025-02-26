@@ -67,6 +67,63 @@
       "required": false
     }
   ],
+  "tools": [
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Get Current Logged-in HackMD User, including teams"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@hackmd Who am I or what are the teams I've joined?",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "meetsCriteria": "Return user profile and joined teams"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@hackmd/api": "2.1.0",
     "@raycast/api": "^1.93.0",
