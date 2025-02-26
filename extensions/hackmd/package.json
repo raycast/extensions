@@ -77,6 +77,16 @@
       "name": "get-recent-notes",
       "title": "Get recent accessed notes",
       "description": "Get recently accessed notes from HackMD"
+    },
+    {
+      "name": "get-team-workspace-notes",
+      "title": "Get Team Workspace Notes",
+      "description": "Get notes from a team workspace by team path"
+    },
+    {
+      "name": "get-personal-workspace-notes",
+      "title": "Get Personal Workspace Notes",
+      "description": "Get notes from your personal workspace"
     }
   ],
   "ai": {
@@ -166,6 +176,132 @@
           },
           {
             "meetsCriteria": "Return history note list"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Show me the notes in my personal workspace",
+        "mocks": {
+          "get-personal-workspace-notes": [
+            {
+              "id": "note_id_1",
+              "title": "Personal Note Title",
+              "tags": ["personal", "notes"],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@username/shortId1",
+              "shortId": "shortId1",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": null,
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-personal-workspace-notes"
+            }
+          },
+          {
+            "meetsCriteria": "Returns notes from personal workspace"
+          }
+        ]
+      },
+      {
+        "input": "@hackmd Show me notes from my joined team",
+        "mocks": {
+          "get-current-user": {
+            "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
+            "name": "My name",
+            "email": "user@email",
+            "userPath": "username",
+            "photo": "https://src_to_image.png",
+            "teams": [
+              {
+                "id": "08a5c75a-4d82-4dee-8b89-cba6f3dce369",
+                "ownerId": null,
+                "path": "hackmd",
+                "name": "HackMD Dev",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Team description",
+                "visibility": "private",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              },
+              {
+                "id": "ba6e4c56-0c04-4b3a-be11-9249a7316554",
+                "ownerId": null,
+                "path": "team-path",
+                "name": "Team Name",
+                "logo": "https://uploads-public.hackmd.io/ZmEEvep.png",
+                "description": "Public Team description",
+                "visibility": "public",
+                "createdAt": 1740586346009,
+                "upgraded": true
+              }
+            ]
+          },
+          "get-team-workspace-notes": [
+            {
+              "id": "team_note_id",
+              "title": "Team Note Title",
+              "tags": ["team", "notes"],
+              "createdAt": 1560349049743,
+              "titleUpdatedAt": 1736666704378,
+              "tagsUpdatedAt": null,
+              "publishType": "view",
+              "publishedAt": null,
+              "permalink": null,
+              "publishLink": "https://hackmd.io/@teampath/shortId2",
+              "shortId": "shortId2",
+              "content": "CONTENT_OMITTED_IN_LIST_API",
+              "lastChangedAt": 1560351606067,
+              "lastChangeUser": {
+                "name": "",
+                "userPath": "userpath",
+                "photo": "https://link_to_photo.png",
+                "biography": "bio"
+              },
+              "userPath": "userpath",
+              "teamPath": "hackmd",
+              "readPermission": "guest",
+              "writePermission": "signed_in"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-current-user"
+            }
+          },
+          {
+            "meetsCriteria": "Return user profile and joined teams to identify the team path"
+          },
+          {
+            "callsTool": {
+              "name": "get-team-workspace-notes",
+              "arguments": {
+                "teamPath": "hackmd"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns notes from specified team workspace"
           }
         ]
       }
