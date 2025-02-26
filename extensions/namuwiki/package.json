@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "namuwiki",
   "title": "Namuwiki",
-  "description": "Search korean documents in Namuwiki",
+  "description": "Search Korean documents in Namuwiki",
   "icon": "namuwiki-icon.png",
   "author": "123period",
   "categories": [
