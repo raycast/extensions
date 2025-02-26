@@ -4,6 +4,10 @@
 
 Removed the deadline field when creating a task if the user is not a premium user.
 
+## [Add Schedule Task Deadline Actions] - 2025-02-26
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
@@ -12,7 +16,7 @@ Added option to display the next upcoming task in the menu bar title when no tas
 
 ## [Fix Default Sorting] - 2025-02-20
 
-Change the default sorting to align with the task order in Todoist. 
+Change the default sorting to align with the task order in Todoist.
 
 ## [Add time format preference from Todoist preferences] - 2025-02-17
 
