@@ -12,28 +12,28 @@
   "commands": [
     {
       "name": "login",
-      "title": "Login",
-      "subtitle": "Expo login",
+      "title": "Expo Login",
       "description": "Login to your expo account",
       "mode": "view"
     },
     {
       "name": "manage-projects",
       "title": "Manage Projects",
-      "subtitle": "Expo projects",
+      "subtitle": "Expo",
       "description": "Manage project builds,submissions and updates",
       "mode": "view"
     },
     {
       "name": "apple-devices",
-      "title": "Apple Devices",
-      "subtitle": "Expo apple devices",
+      "title": "Manage Apple Devices",
+      "subtitle": "Expo",
       "description": "View, Create and Edit apple devices",
       "mode": "view"
     },
     {
       "name": "manage-envs",
       "title": "Environment Variables",
+      "subtitle": "Expo",
       "description": "View, Create, Edit and Delete environment variables",
       "mode": "view"
     }
