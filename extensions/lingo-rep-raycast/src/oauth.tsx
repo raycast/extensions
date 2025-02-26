@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { Detail, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, popToRoot, Icon } from "@raycast/api";
 import { OAuthService, withAccessToken, useCachedState, showFailureToast } from "@raycast/utils";
 
 import { useGet } from "./hooks";
@@ -52,11 +52,11 @@ function UserProfileDetails() {
       actions={
         shouldUpgrade ? (
           <ActionPanel title="Upgrade Subscription">
-            <Action.OpenInBrowser url={`${config.lpURL}/#pricing`} title="Upgrade Subscription" />
+            <Action.OpenInBrowser icon={Icon.Star} url={`${config.lpURL}/#pricing`} title="Upgrade Subscription" />
           </ActionPanel>
         ) : (
           <ActionPanel title="Learn & Repeat Words">
-            <Action.OpenInBrowser url={`${config.lpURL}/learn`} title="Learn & Repeat Words" />
+            <Action.OpenInBrowser icon={Icon.Globe} url={`${config.lpURL}/learn`} title="Learn & Repeat Words" />
           </ActionPanel>
         )
       }

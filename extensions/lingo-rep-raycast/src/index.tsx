@@ -10,6 +10,7 @@ import {
   Toast,
   PopToRootType,
   open,
+  Icon,
 } from "@raycast/api";
 import { useLocalStorage, useCachedState } from "@raycast/utils";
 
@@ -79,6 +80,7 @@ function AddLangSet() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.SaveDocument}
             title="Save Set"
             onSubmit={(values) => {
               const newLangSet = {
@@ -148,11 +150,12 @@ function ManageLangSets() {
           actions={
             lS.label === manageLangSetsLabel ? (
               <ActionPanel>
-                <Action.Push title="Add New Language Set" target={<AddLangSet />} />
+                <Action.Push icon={Icon.Plus} title="Add New Language Set" target={<AddLangSet />} />
               </ActionPanel>
             ) : (
               <ActionPanel>
                 <Action
+                  icon={Icon.Checkmark}
                   title="Select"
                   onAction={() => {
                     changeSelectedLangSet(lS);
@@ -160,6 +163,7 @@ function ManageLangSets() {
                 />
                 {languageSets.length > 2 && (
                   <Action
+                    icon={Icon.Xmark}
                     title="Delete"
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                     onAction={() => handleDeleteLanguageSet(lS)}
@@ -275,14 +279,16 @@ export default function Command() {
   const itemActions = (
     <ActionPanel>
       {isAuthenticated ? (
-        <Action title="Enter (↵) to Save and Repeat" onAction={saveTranslation} />
+        <Action icon={Icon.SaveDocument} title="Enter (↵) to Save and Repeat" onAction={saveTranslation} />
       ) : (
         <>
           <Action.Push
+            icon={Icon.ArrowRightCircleFilled}
             title={`Connect Google Profile to Save`}
             target={<AuthorizationComponent authProvider="google" />}
           />
           <Action.Push
+            icon={Icon.ArrowRightCircle}
             title={`Connect GitHub Profile to Save`}
             target={<AuthorizationComponent authProvider="github" />}
           />
@@ -301,15 +307,23 @@ export default function Command() {
         <ActionPanel>
           {!isAuthenticated ? (
             <>
-              <Action.Push title={`Connect Google Profile`} target={<AuthorizationComponent authProvider="google" />} />
-              <Action.Push title={`Connect GitHub Profile`} target={<AuthorizationComponent authProvider="github" />} />
+              <Action.Push
+                icon={Icon.ArrowRightCircleFilled}
+                title={`Connect Google Profile`}
+                target={<AuthorizationComponent authProvider="google" />}
+              />
+              <Action.Push
+                icon={Icon.ArrowRightCircle}
+                title={`Connect GitHub Profile`}
+                target={<AuthorizationComponent authProvider="github" />}
+              />
             </>
           ) : authProvider === "github" ? (
-            <Action.Push title={`View GitHub Profile`} target={<UserProfilePageGithub />} />
+            <Action.Push icon={Icon.Person} title={`View GitHub Profile`} target={<UserProfilePageGithub />} />
           ) : authProvider === "google" ? (
             <>
-              <Action.Push title={`View Google Profile`} target={<UserProfilePageGoogle />} />
-              <Action.OpenInBrowser url={`${config.lpURL}/learn`} title="Learn & Repeat" />
+              <Action.Push icon={Icon.Person} title={`View Google Profile`} target={<UserProfilePageGoogle />} />
+              <Action.OpenInBrowser icon={Icon.Globe} url={`${config.lpURL}/learn`} title="Learn & Repeat" />
             </>
           ) : null}
         </ActionPanel>
