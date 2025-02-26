@@ -27,7 +27,7 @@ async function parseFetchResponse(response: { text: () => Promise<string> }) {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data = [], isLoading } = useFetch(
-    `https://namu.wiki/Search?target=title_content&q=${encodeURIComponent(searchText)}&namespace=문서`,
+    `https://namu.wiki/Search?target=title_content&q=${encodeURIComponent(searchText)}&namespace=${encodeURIComponent('문서')}`,
     { parseResponse: parseFetchResponse },
   );
 
