@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Added "View my deliveries" command to display active and recent deliveries
+- Added "My Deliveries" command to display active and recent deliveries
 - Implemented detailed delivery view with package information
 - Added tracking history display with chronological event listing
 - Added action to copy tracking numbers

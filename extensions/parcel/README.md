@@ -17,7 +17,7 @@ This Raycast extension allows Parcel app users to view their upcoming and active
 
 ## Usage
 
-- Run the "View my deliveries" command to see all your active deliveries
+- Run the "My Deliveries" command to see all your active deliveries
 - Search for specific deliveries by typing in the search bar
 - Select a delivery to see detailed information
 - Use the action menu to copy tracking numbers or open the Parcel web app

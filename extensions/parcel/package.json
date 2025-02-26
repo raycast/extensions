@@ -12,8 +12,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-my-deliveries",
-      "title": "View My Deliveries",
+      "name": "my-deliveries",
+      "title": "My Deliveries",
       "description": "Display active deliveries",
       "mode": "view"
     }
