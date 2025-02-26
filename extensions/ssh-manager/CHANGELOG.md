@@ -3,7 +3,7 @@
 ## [New Feature and Improvements] - {PR_MERGE_DATE}
 
 - 📋 Add `Copy Connection String`
-- 🧑‍💻 Update action panel with new api
+- 🧑‍💻 Update action panel with new API
 - 💬 Better HUD prompts
 
 ## [Add Hyper Support] - 2024-09-07
