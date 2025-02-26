@@ -24,18 +24,19 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Recently Changed Documents" subtitle={"on " + new Date().toLocaleDateString()}>
-        {data.map((item) => (
-          <List.Item
-            key={item.document}
-            title={item.document}
-            accessories={[{ text: item.date }]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={item.url} />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {data &&
+          data.map((item) => (
+            <List.Item
+              key={item.document}
+              title={item.document}
+              accessories={[{ text: item.date }]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={item.url} />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );
