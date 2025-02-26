@@ -1,4 +1,8 @@
 # GitHub Changelog
+## [Add repository filtering] - 2025-02-25
+
+- Add the ability to include or exclude specific repositories from results for My Pull Requests Menu Bar commands
+- Repository filtering can be enabled in the preferences for My Pull Requests Menu Bar commands
 
 ## [✨ AI Enhancements] - 2025-02-21
 
