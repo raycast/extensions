@@ -5,17 +5,19 @@ async function parseFetchResponse(response: Response) {
   const json = (await response.json()) as string[];
 
   return json.map((result) => ({
-    rank: json.indexOf(result) + 1,
+    rank: json.findIndex((x) => x === result) + 1,
     document: result,
     url: `https://namu.wiki/w/${encodeURIComponent(result)}`,
   })) as SearchResult[];
 }
 
 export default function Command() {
-  const { data = [] } = useFetch("https://search.namu.wiki/api/ranking", { parseResponse: parseFetchResponse });
+  const { data = [], isLoading } = useFetch("https://search.namu.wiki/api/ranking", { parseResponse: parseFetchResponse });
 
   return (
-    <List>
+    <List
+      isLoading={isLoading}
+    >
       <List.Section title="Current Trending Documents" subtitle={new Date().toLocaleString()}>
         {data.map((item) => (
           <List.Item
