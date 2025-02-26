@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Add Schedule Task Deadline Actions] - {PR_MERGE_DATE}
+## [Add Schedule Task Deadline Actions] - 2025-02-26
 
 It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
 
