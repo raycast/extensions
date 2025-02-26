@@ -279,7 +279,7 @@
 /extensions/colorslurp                                              @Jordan-Ellis
 /extensions/commercequest                                           @skrollme
 /extensions/commit-message-formatter                                @zrr1999
-/extensions/commit-message-generator                                @rokartur
+/extensions/commit-message-generator                                @rokartur @dphelan
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
 /extensions/comodoro                                                @jesse-c
