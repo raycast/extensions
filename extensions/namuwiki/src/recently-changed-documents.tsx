@@ -13,7 +13,7 @@ async function parseFetchResponse(response: Response) {
 
   return json.map((result) => ({
     document: result.document,
-    date: result.date ? new Date(result.date * 1000).toLocaleTimeString() : "N/A", // UNIX timestamp 변환
+    date: result.date ? new Date(result.date * 1000).toLocaleTimeString() : "N/A", // UNIX timestamp conversion
     url: `https://namu.wiki/w/${encodeURIComponent(result.document)}`,
   })) as SearchResult[];
 }
