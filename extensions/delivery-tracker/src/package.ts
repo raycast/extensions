@@ -110,10 +110,10 @@ export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package
   });
 }
 
-export function calculateDayDifference(deliverDate: Date): number {
+export function calculateDayDifference(deliveryDate: Date): number {
   const millisecondsInDay = 1000 * 60 * 60 * 24;
 
-  const millisecondsDifference = deliverDate.getTime() - new Date().getTime();
+  const millisecondsDifference = deliveryDate.getTime() - new Date().getTime();
   let dayDifference = Math.ceil(millisecondsDifference / millisecondsInDay);
 
   if (dayDifference < 0) {
