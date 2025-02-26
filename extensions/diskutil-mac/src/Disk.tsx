@@ -137,7 +137,7 @@ export default class Disk {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to open terminal",
-        message: String(error)
+        message: String(error),
       });
     }
   }
