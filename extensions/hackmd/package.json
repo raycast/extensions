@@ -112,7 +112,7 @@
   "ai": {
     "evals": [
       {
-        "input": "@hackmd Who am I or what are the teams I've joined?",
+        "input": "@hackmd Who am I and what teams have I joined?",
         "mocks": {
           "get-current-user": {
             "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
@@ -158,7 +158,7 @@
         ]
       },
       {
-        "input": "@hackmd What are my recent notes?",
+        "input": "@hackmd Can you show me my recent notes?",
         "mocks": {
           "get-recent-notes": [
             {
@@ -200,7 +200,7 @@
         ]
       },
       {
-        "input": "@hackmd Show me the notes in my personal workspace",
+        "input": "@hackmd Show me all notes in my personal workspace",
         "mocks": {
           "get-personal-workspace-notes": [
             {
@@ -242,7 +242,7 @@
         ]
       },
       {
-        "input": "@hackmd Show me notes from my joined team",
+        "input": "@hackmd Can you pull up the notes from my HackMD team?",
         "mocks": {
           "get-current-user": {
             "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
@@ -326,7 +326,7 @@
         ]
       },
       {
-        "input": "@hackmd Show me details of note SomeNoteID",
+        "input": "@hackmd Open the note with ID SomeNoteID",
         "mocks": {
           "view-note": {
             "id": "note_detail_id",
@@ -369,7 +369,7 @@
         ]
       },
       {
-        "input": "@hackmd Let me see my note with ID abc123_full_id",
+        "input": "@hackmd I need to check my note with ID abc123_full_id",
         "mocks": {
           "view-note": {
             "id": "abc123_full_id",
@@ -412,7 +412,7 @@
         ]
       },
       {
-        "input": "@hackmd Create a note about project planning with deadline tracking",
+        "input": "@hackmd Create a new note about project planning that includes deadline tracking",
         "mocks": {
           "create-note": {
             "id": "personal_note_id",
@@ -456,7 +456,7 @@
         ]
       },
       {
-        "input": "@hackmd Create a meeting agenda for the design team in the hackmd team workspace",
+        "input": "@hackmd I need to create a meeting agenda for the design team in our hackmd workspace",
         "mocks": {
           "get-current-user": {
             "id": "1b46ed75-04ac-4d9b-bfbb-9344ef6bd1b6",
@@ -529,7 +529,7 @@
         ]
       },
       {
-        "input": "@hackmd Update my note with ID personal_note_id to add a section on risk management",
+        "input": "@hackmd Could you update my note personal_note_id to include a section on risk management?",
         "mocks": {
           "view-note": {
             "id": "personal_note_id",
@@ -608,7 +608,7 @@
         ]
       },
       {
-        "input": "@hackmd Update the note in team hackmd with ID team_note_id to make it public",
+        "input": "@hackmd I'd like to make the team_note_id note public in the hackmd team",
         "mocks": {
           "view-note": {
             "id": "team_note_id",
@@ -689,7 +689,7 @@
         ]
       },
       {
-        "input": "@hackmd Delete my note with ID obsolete_note_id",
+        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id",
         "mocks": {
           "view-note": {
             "id": "obsolete_note_id",
@@ -747,7 +747,7 @@
         ]
       },
       {
-        "input": "@hackmd Delete the outdated team documentation with ID team_doc_id from the hackmd team",
+        "input": "@hackmd Please remove that outdated documentation with ID team_doc_id from our hackmd team workspace",
         "mocks": {
           "view-note": {
             "id": "team_doc_id",
