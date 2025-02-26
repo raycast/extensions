@@ -36,9 +36,9 @@ export async function updateFedexTracking(delivery: Delivery): Promise<Package[]
   const loginResponse = await loginWithCachedData(apiKey, secretKey);
 
   console.log("Calling FedEx tracking");
-  const upsTrackingInfo = await track(trackingNumber, loginResponse.access_token);
+  const fedexTrackingInfo = await track(trackingNumber, loginResponse.access_token);
 
-  const packages = convertUpsTrackingToPackages(upsTrackingInfo);
+  const packages = convertFedexTrackingToPackages(fedexTrackingInfo);
 
   console.log(`Updated tracking for ${trackingNumber}`);
 
@@ -165,7 +165,7 @@ async function track(trackingNumber: string, accessToken: string): Promise<Fedex
   return trackingResponse;
 }
 
-function convertUpsTrackingToPackages(fedexTrackingInfo: FedexTrackingInfo): Package[] {
+function convertFedexTrackingToPackages(fedexTrackingInfo: FedexTrackingInfo): Package[] {
   return fedexTrackingInfo.output.completeTrackResults
     .flatMap((results) => results.trackResults)
     .map((aPackage) => {
