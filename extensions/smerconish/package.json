@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "smerconish",
-      "title": "Smerconish",
-      "subtitle": "Headlines from Smerconish.com",
+      "title": "Read Latest Headlines",
+      "subtitle": "Smerconish",
       "description": "Gets the latest headlines from Smerconish.com/headlines",
       "mode": "view"
     }
