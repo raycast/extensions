@@ -1,4 +1,4 @@
-import { Color, Keyboard, List, Toast, showToast } from "@raycast/api";
+import { Color, Icon, Image, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { exec } from "child_process";
 import * as sudo from "sudo-prompt";
 
@@ -11,7 +11,7 @@ export default class Disk {
   mountStatus: string;
   type: string;
   isWhole: boolean;
-  mointPoint: string | null;
+  mountPoint: string | null;
 
   constructor(number: number, type: string, identifier: string, name: string, size: string) {
     this.number = number;
@@ -19,29 +19,39 @@ export default class Disk {
     this.name = name;
     this.size = size;
     this.type = type;
-    this.mointPoint = null;
+    this.mountPoint = null;
     this.details = "Initializing...";
     this.mountStatus = "Initializing...";
     this.isWhole = false;
   }
 
-  getActions(
-    postFunction: (string: string) => void
-  ): { title: string; shortcut?: Keyboard.Shortcut; onAction: () => void }[] {
+  getActions(postFunction: (type: string) => void): {
+    title: string;
+    shortcut?: Keyboard.Shortcut;
+    icon: Image.ImageLike;
+    onAction: () => void;
+  }[] {
     const action = (
       title: string,
       shortcut: Keyboard.Shortcut,
-      method: "mount" | "unmount" | "revealInFinder" | "showDetailCustomTerminal"
+      icon: Image.ImageLike,
+      method: "mount" | "unmount" | "eject" | "revealInFinder" | "showDetailCustomTerminal"
     ) => ({
       title,
       shortcut,
+      icon,
       onAction: () => {
-        this[method]().finally(() => (method === "mount" || method === "unmount") && postFunction("DiskUpdate")); // PostFunction only with mount/unmount
+        this[method]().finally(
+          () =>
+            (method === "mount" || method === "unmount" || method === "eject") &&
+            postFunction(method === "eject" ? "DiskRefresh" : "DiskUpdate")
+        );
       },
     });
 
-    const failureAction = (title: string, message?: string) => ({
+    const failureAction = (title: string, icon?: Image.ImageLike, message?: string) => ({
       title,
+      icon: Icon.Warning,
       onAction: () =>
         showToast({
           style: Toast.Style.Failure,
@@ -53,32 +63,48 @@ export default class Disk {
     switch (this.mountStatus) {
       case "Mounted":
         return [
-          action("Unmount Disk", { modifiers: ["cmd"], key: "e" }, "unmount"),
-          action("Reval in Finder", { modifiers: ["cmd"], key: "f" }, "revealInFinder"),
+          action("Unmount Volume", { modifiers: ["cmd"], key: "e" }, Icon.Eject, "unmount"),
+          action("Eject Full Drive", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Reveal in Finder", { modifiers: ["cmd"], key: "f" }, Icon.Eye, "revealInFinder"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
         ];
       case "Unmounted":
-        return [action("Mount Disk", { modifiers: ["cmd"], key: "e" }, "mount")];
+        return [
+          action("Mount Volume", { modifiers: ["cmd"], key: "e" }, Icon.ArrowDown, "mount"),
+          action("Eject Full Drive", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
+        ];
       case "Whole":
         return [
-          action("Eject All Disks", { modifiers: ["cmd"], key: "e" }, "unmount"),
-          action("Mount All Disks", { modifiers: ["cmd", "shift"], key: "e" }, "mount"),
+          action("Unmount All Volumes", { modifiers: ["cmd"], key: "e" }, Icon.Eject, "unmount"),
+          action("Mount All Volumes", { modifiers: ["cmd", "shift"], key: "e" }, Icon.ArrowDown, "mount"),
+          action("Eject Drive", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
         ];
       case "Unmountable":
-        return [failureAction("Unmountable")];
+        return [
+          action("Eject", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
+          failureAction("Unmountable"),
+        ];
       case "Container":
-        return [failureAction("Container cannot be mounted")];
+        return [
+          action("Eject All Volumes", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
+        ];
       case "Timed Out":
         return [
-          // Execute diskutil detail in new terminal
-          action("Try in custom terminal", { modifiers: ["cmd"], key: "t" }, "showDetailCustomTerminal"),
-          action("Eject Disk", { modifiers: ["cmd"], key: "e" }, "unmount"),
-          action("Mount Disk", { modifiers: ["cmd", "shift"], key: "e" }, "mount"),
+          action("Unmount Disk", { modifiers: ["cmd"], key: "e" }, Icon.Eject, "unmount"),
+          action("Mount Disk", { modifiers: ["cmd", "shift"], key: "e" }, Icon.ArrowDown, "mount"),
+          action("Eject Disk", { modifiers: ["opt"], key: "e" }, Icon.Eject, "eject"),
+          action("Info in Custom Terminal", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
         ];
       default:
         return [
           failureAction("Mountability Unknown", "Shouldn't happen. Try reloading or so"),
-          action("Eject Disk", { modifiers: ["cmd"], key: "e" }, "unmount"),
-          action("Mount Disk", { modifiers: ["cmd", "shift"], key: "e" }, "mount"),
+          action("Unmount Disk", { modifiers: ["cmd"], key: "e" }, Icon.Eject, "unmount"),
+          action("Mount Disk", { modifiers: ["cmd", "shift"], key: "e" }, Icon.ArrowDown, "mount"),
+          action("Terminal Info", { modifiers: ["cmd"], key: "t" }, Icon.Info, "showDetailCustomTerminal"),
         ];
     }
   }
@@ -110,7 +136,7 @@ export default class Disk {
 
   async revealInFinder() {
     try {
-      await Disk.execCommand(`open "${this.mointPoint}"`);
+      await Disk.execCommand(`open "${this.mountPoint}"`);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -120,36 +146,59 @@ export default class Disk {
     }
   }
 
-  async handleMountAction(isMount: boolean) {
-    const action = isMount ? "mount" : "unmount";
-    const diskAction = this.isWhole ? `${action}Disk` : action;
-    const command = `diskutil ${diskAction} ${this.identifier}`;
-    this.showToast(action + "ing", "", Toast.Style.Animated);
-
-    try {
-      const output = await this.tryCommandWithoutSudo(command);
-      this.showToast(action + "ed", output, Toast.Style.Success);
-    } catch (error) {
-      this.showToast(action + "ed", error as string, Toast.Style.Failure);
-    }
+  async eject() {
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Ejecting " + this.identifier,
+    });
+    Disk.execCommand(`diskutil eject "${this.identifier}"`)
+      .then(() => {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Ejected " + this.identifier,
+        });
+      })
+      .catch((error) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Ejection Error",
+          message: (error as string) + "Only external drives or disk images can be ejected",
+        });
+      });
   }
 
   isDetailsTimedOut(): boolean {
     return this.details.includes("ERROR: Initialization Timed Out");
   }
 
+  async handleMountAction(isMount: boolean) {
+    const action = isMount ? "mount" : "unmount";
+    const diskAction = this.isWhole ? `${action}Disk` : action; //Try with mountDisk instead
+    const command = `diskutil ${diskAction} ${this.identifier}`;
+    this.showToast(action + "ing", "", Toast.Style.Animated);
+
+    try {
+      const output = await this.tryCommandWithSudoFallback(command);
+      this.showToast(action + "ed", output, Toast.Style.Success);
+    } catch (error) {
+      this.showToast(action + "ed", error as string, Toast.Style.Failure);
+    }
+  }
+
   private async tryCommandWithSudo(command: string): Promise<string> {
-    showToast({ style: Toast.Style.Animated, title: `Trying with sudo...` });
-    await new Promise((resolve) => setTimeout(resolve, 300)); // delay
+    showToast({ style: Toast.Style.Animated, title: `Trying with sudo...`, message: "" });
     return Disk.execCommandWithSudo(command);
   }
 
-  private async tryCommandWithoutSudo(command: string): Promise<string> {
+  private async tryCommandWithSudoFallback(command: string): Promise<string> {
     try {
       return await Disk.execCommand(command);
     } catch (error) {
-      if (String(error).includes("kDAReturnNotPermitted")) {
-        // All EFI paritions
+      // Try with sudo
+      if (
+        (String(error).includes("kDAReturnNotPermitted") || String(error).includes("supported")) &&
+        (await confirmAlert({ title: "Try with sudo?" }))
+      ) {
         return this.tryCommandWithSudo(command);
       } else {
         throw error;
@@ -243,13 +292,13 @@ export default class Disk {
   }
 
   initDetails() {
-    const mountPointRegex = /Mount Point:(.*?(\/.+))/;
+    const mountPointRegex = /Mount Point:(.*?(\/.*))/;
     const match = this.details.match(mountPointRegex);
 
     if (match && match[2]) {
-      this.mointPoint = `${match[2].trim()}`;
+      this.mountPoint = `${match[2].trim()}`;
     } else {
-      this.mointPoint = null;
+      this.mountPoint = null;
     }
   }
 
@@ -306,13 +355,11 @@ export default class Disk {
     for (const match of text.matchAll(regex)) {
       if (match[1] && match[2]) {
         // this is a key-value pair
-        //console.log(match[2])
         const key = match[1].trim();
         const value = match[2].trim();
         results.push([key, value]);
       } else if (match[3]) {
         // this is a heading
-        //console.log(match)
         results.push([match[3].trim(), null]);
       }
     }
@@ -335,7 +382,7 @@ export default class Disk {
   private static async execCommandWithSudo(command: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const options = {
-        name: "Raycast Disk",
+        name: "Raycast Diskutil",
       };
 
       sudo.exec(command, options, (error, stdout, stderr) => {
