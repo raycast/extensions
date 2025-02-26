@@ -3,6 +3,11 @@ import { fromString, toUUID } from "typeid-js";
 
 export default async (props: LaunchProps<{ arguments: { typeID: string } }>) => {
   const { typeID } = props.arguments;
+  if (!typeID) {
+    await showToast({ style: Toast.Style.Failure, title: "No TypeID(s) provided" });
+    return;
+  }
+
   const { defaultAction } = getPreferenceValues<{ defaultAction: "copy" | "paste" }>();
 
   try {
