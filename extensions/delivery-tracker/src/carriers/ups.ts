@@ -153,7 +153,7 @@ async function track(trackingNumber: string, accessToken: string): Promise<UpsTr
 
   const trackingResponse = (await response.json()) as UpsTrackingInfo;
   if (!trackingResponse) {
-    console.log("Failed to parse UPS login response");
+    console.log("Failed to parse UPS tracking response");
     throw new Error("Failed to parse UPS track response.  Please file a bug report.");
   }
 

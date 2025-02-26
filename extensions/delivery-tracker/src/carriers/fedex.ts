@@ -158,7 +158,7 @@ async function track(trackingNumber: string, accessToken: string): Promise<Fedex
 
   const trackingResponse = (await response.json()) as FedexTrackingInfo;
   if (!trackingResponse) {
-    console.log("Failed to parse FedEx login response");
+    console.log("Failed to parse FedEx tracking response");
     throw new Error("Failed to parse FedEx track response.  Please file a bug report.");
   }
 
