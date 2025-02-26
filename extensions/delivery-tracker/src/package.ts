@@ -20,7 +20,7 @@ export interface PackageMap {
 }
 
 export function deliveryIcon(packages?: Package[]): Icon {
-  if (!packages || packages.length == 0) {
+  if (!packages || packages.length === 0) {
     // there are no packages for this tracking, possible before data has been gotten from API
     return Icon.QuestionMarkCircle;
   }
@@ -43,7 +43,7 @@ export function deliveryIcon(packages?: Package[]): Icon {
 export function deliveryStatus(packages?: Package[]): { value: string; color?: Color } {
   // check whether all, some, or no packages in a track are delivered
 
-  if (!packages || packages.length == 0) {
+  if (!packages || packages.length === 0) {
     return {
       value: "No packages",
       color: Color.Orange,
