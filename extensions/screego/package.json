@@ -39,5 +39,15 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Screego Server URL",
+      "description": "The URL of your Screego server",
+      "placeholder": "https://https://screego.mevsec.com/?room=discreet-cyan-dog.server.com"
+    }
+  ]
 }

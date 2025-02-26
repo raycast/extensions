@@ -1,10 +1,23 @@
-import { open, Detail, popToRoot } from "@raycast/api";
-import { useEffect, useRef } from "react";
+import { open, Detail, popToRoot, getPreferenceValues } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 import * as crypto from "crypto";
+
+// Define the preferences interface
+interface Preferences {
+  serverUrl?: string;
+}
 
 export default function Command() {
   // Use a ref to track if we've already opened the URL
   const hasOpenedRef = useRef(false);
+  // Get preferences
+  const preferences = getPreferenceValues<Preferences>();
+  // Default server URL or use the one from preferences
+  console.log("preferences", preferences);
+  const serverUrl = preferences.serverUrl;
+
+  // State to show in the UI
+  const [markdown] = useState("Opening Screego...");
 
   // Generate a random password-like string for the room ID
   const generateRandomString = (length: number) => {
@@ -24,7 +37,7 @@ export default function Command() {
 
   // Generate a 16-character random string
   const roomId = generateRandomString(16);
-  const url = `https://screego.mevsec.com/?room=${roomId}&create=true`;
+  const url = `${serverUrl}/?room=${roomId}&create=true`;
 
   // Open the URL and then return to Raycast menu
   useEffect(() => {
@@ -40,5 +53,5 @@ export default function Command() {
     openAndReturn();
   }, []);
 
-  return <Detail markdown="Opening Screego..." />;
+  return <Detail markdown={markdown} />;
 }

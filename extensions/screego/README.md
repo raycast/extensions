@@ -1,9 +1,5 @@
 # Screego
 
-Generate a screego link faster and copy it to the buffer
-
-## Installation
-
-1. Open Raycast
-2. Search for "Screego"
-3. Click on "Install"
+Generate a meeting room link for Screego directly from Raycast.
+To do this, you have to set the server URL in the extension preferences.
+To do that click on configuration extension and then add the server URL.
