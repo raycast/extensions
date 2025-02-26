@@ -133,10 +133,9 @@ export default function Command() {
               markdown={entry.targetText}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Source Language" text={entry.sourceLanguage} />
+                  <List.Item.Detail.Metadata.Label title="Source Language" text={entry.sourceLanguage !== "" ? entry.sourceLanguage : "Auto"} />
                   <List.Item.Detail.Metadata.Label title="Target Language" text={entry.targetLanguage} />
                   <List.Item.Detail.Metadata.Label title="Tone" text={entry.tone} />
-                  <List.Item.Detail.Metadata.Label title="ID" text={entry.id} />
                   <List.Item.Detail.Metadata.Label title="Source Text" text={entry.sourceText} />
                 </List.Item.Detail.Metadata>
               }
