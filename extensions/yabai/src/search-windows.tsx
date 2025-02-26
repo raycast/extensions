@@ -11,7 +11,7 @@ interface Window extends BaseWindow {
 
 async function findAppPath(pid: number): Promise<string> {
   if (!Number.isInteger(pid) || pid <= 0) {
-    throw new Error('Invalid process ID');
+    throw new Error("Invalid process ID");
   }
   const { stdout, stderr } = await execaCommand(`/usr/sbin/lsof -p ${pid} | grep txt | grep -v DEL | head -n 1 `, {
     shell: true,
