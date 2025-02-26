@@ -1,6 +1,6 @@
 # SF Symbols Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2025-02-26
 
 - Fixes an issue that caused the extension not to load with pinned and recently used symbols from a previous version
 
