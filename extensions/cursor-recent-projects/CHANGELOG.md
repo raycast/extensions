@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Updated README] - {PR_MERGE_DATE}
+## [Updated README] - 2025-02-26
 
 ## [Git Branch] - 2025-02-14
 
