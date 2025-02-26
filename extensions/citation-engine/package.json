@@ -1,0 +1,61 @@
+{
+  "name": "citation-engine",
+  "title": "Citation Engine",
+  "description": "Generate properly formatted citations for academic papers in various styles (APA, MLA, Chicago, etc.)",
+  "icon": "extension_icon.png",
+  "author": "carterm",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-citation",
+      "title": "Create Citation",
+      "description": "Generate a new citation from a URL or manual entry",
+      "mode": "view"
+    },
+    {
+      "name": "past-citations",
+      "title": "Past Citations",
+      "description": "View and manage your saved citations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCitationStyle",
+      "title": "Default Citation Style",
+      "description": "Choose your preferred citation style",
+      "type": "dropdown",
+      "required": false,
+      "default": "apa",
+      "data": [
+        { "title": "APA (7th Ed.)", "value": "apa" },
+        { "title": "MLA (9th Ed.)", "value": "mla" },
+        { "title": "Chicago (17th Ed.)", "value": "chicago" },
+        { "title": "Harvard", "value": "harvard" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.0",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^3.3.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "^18.2.25",
+    "@types/uuid": "^9.0.1",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
