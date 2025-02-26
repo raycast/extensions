@@ -2,7 +2,7 @@
 
 Browse and search Dota 2 heroes directly from Raycast. Get quick access to hero information, stats, and details.
 
-![Dota 2 Heroes Extension](./metadata/dota2-heroes-1.png)
+![Dota 2 Heroes Extension](./metadata/preview1.png)
 
 ## Features
 
