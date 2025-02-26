@@ -28,7 +28,7 @@
     {
       "name": "track-new-delivery",
       "title": "Track New Delivery",
-      "subtitle": "Deliveries, packages, and parcels",
+      "subtitle": "Delivery Tracker",
       "description": "Starts tracking a new delivery.",
       "mode": "view"
     }
