@@ -184,13 +184,13 @@
     },
     {
       "name": "convert-unix-timestamp-to-date",
-      "title": "Convert Unix Timestamp To Date",
+      "title": "Convert Unix Timestamp to Date",
       "description": "Convert Unix timestamp to date",
       "mode": "no-view"
     },
     {
       "name": "convert-date-to-unix-timestamp",
-      "title": "Convert Date To Unix Timestamp",
+      "title": "Convert Date to Unix Timestamp",
       "description": "Convert date to Unix timestamp",
       "mode": "no-view"
     },
@@ -412,7 +412,7 @@
     },
     {
       "name": "days-from-today",
-      "title": "Days From Today",
+      "title": "Days from Today",
       "description": "Calculate a date by adding or subtracting days from today",
       "mode": "no-view",
       "arguments": [
