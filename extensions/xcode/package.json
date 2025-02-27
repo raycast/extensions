@@ -287,8 +287,15 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-recent-projects",
+      "title": "Search Recent Projects",
+      "description": "Search and open your recent Xcode Projects."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.18.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
