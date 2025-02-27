@@ -220,7 +220,7 @@ export default function ExplorePrompts(props: Props) {
               <List.Item
                 key={prompt.id}
                 title={prompt.title}
-                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon[icon] ?? Icon.List}
+                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : (Icon[icon] ?? Icon.List)}
                 keywords={[category.name, prompt.creativity || "unspecified"]}
                 accessories={[
                   { icon: Icon.ArrowUp, text: `${prompt.upvoteCount}`, tooltip: `Upvotes: ${prompt.upvoteCount}` },
@@ -328,10 +328,10 @@ function getPromptMarkdown(prompt: Prompt) {
         prompt.example.argument ? `### Argument\n\n${prompt.example.argument}\n\n` : ""
       }### Selection\n\n${wrapInCodeBlock(
         prompt.example.selection,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
+        prompt.type === "code" ? (prompt.language ?? "sh") : "sh",
       )}\n\n### Output\n\n${wrapInCodeBlock(
         prompt.example.output,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
+        prompt.type === "code" ? (prompt.language ?? "sh") : "sh",
       )}`
     : "";
 
