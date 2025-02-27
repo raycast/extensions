@@ -1,6 +1,6 @@
 # ssh-manager Changelog
 
-## [New Feature and Improvements] - {PR_MERGE_DATE}
+## [New Feature and Improvements] - 2025-02-27
 
 - 📋 Add `Copy Connection String`
 - 🧑‍💻 Update action panel with new API
