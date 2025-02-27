@@ -10,7 +10,7 @@ import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
-import { useVaultSearch } from "./utils/hooks/useVaultSearch";
+import { useVaultSearch } from "./utils/search";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
