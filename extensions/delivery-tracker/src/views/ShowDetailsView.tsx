@@ -6,7 +6,7 @@ import carriers from "../carriers";
 export default function ShowDetailsView({ delivery, packages }: { delivery: Delivery; packages: Package[] }) {
   const markdown = `# ${delivery.name}
   
-${packages.map((aPackage, index) => markdownForPackage(aPackage, index)).reduce((firstValue, secondValue) => `${firstValue}\n${secondValue}`)}`;
+${packages.length > 0 ? packages.map((aPackage, index) => markdownForPackage(aPackage, index)).reduce((firstValue, secondValue) => `${firstValue}\n${secondValue}`) : 'No packages found.'}`;
 
   return (
     <Detail
