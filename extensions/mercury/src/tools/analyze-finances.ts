@@ -126,7 +126,7 @@ export default async function (input: Input = {}) {
     // Find top expenses and income sources
     const counterparties = allTransactions.reduce(
       (acc, tx) => {
-        const name = tx.counterpartyName;
+        const name = tx.counterpartyName || 'Unknown';
         if (!acc[name]) {
           acc[name] = { count: 0, total: 0 };
         }
