@@ -29,8 +29,8 @@
   ],
   "commands": [
     {
-      "name": "index",
-      "title": "Index",
+      "name": "designs",
+      "title": "View Designs",
       "description": "",
       "mode": "view"
     }

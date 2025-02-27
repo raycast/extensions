@@ -2,7 +2,7 @@ import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
   input: "../openapi/spec.yml",
-  client: "@hey-api/client-axios",
+  client: "@hey-api/client-fetch",
   experimentalParser: true,
   output: {
     path: "./ts",
@@ -17,6 +17,6 @@ export default defineConfig({
     {
       name: "@hey-api/typescript",
       enums: "javascript",
-    },
+    }
   ],
 });

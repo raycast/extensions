@@ -6,7 +6,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 const clientId = preferences.oauthClientId;
 const clientSecret = preferences.oauthClientSecret;
-const scopes = ["profile:read"];
+const scopes = ["design:meta:read"];
 const authorizeUrl = "https://www.canva.com/api/oauth/authorize";
 const redirectUri = "https://raycast.com/redirect/extension";
 const tokenUrl = "https://api.canva.com/rest/v1/oauth/token";
@@ -53,7 +53,7 @@ export async function fetchTokens(
   bodyParams.append("code_verifier", authRequest.codeVerifier);
   bodyParams.append("grant_type", "authorization_code");
   bodyParams.append("code_challenge_method", "S256");
-    bodyParams.append("redirect_uri", redirectUri);
+  bodyParams.append("redirect_uri", redirectUri);
 
   const response = await fetch(tokenUrl, {
     method: "POST",
