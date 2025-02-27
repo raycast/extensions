@@ -9,6 +9,24 @@
     "Design Tools"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "oauthClientId",
+      "title": "OAuth Client ID",
+      "type": "textfield",
+      "required": true,
+      "description": "",
+      "placeholder": "OC-AZRfvFkTEJIn"
+    },
+    {
+      "name": "oauthClientSecret",
+      "title": "OAuth Client Secret",
+      "type": "password",
+      "required": true,
+      "description": "",
+      "placeholder": "cnvcaXX...XXX"
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -18,9 +36,11 @@
     }
   ],
   "dependencies": {
+    "@hey-api/client-axios": "^0.6.1",
     "@hey-api/client-fetch": "^0.6.0",
     "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.1.0"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.57.1",
