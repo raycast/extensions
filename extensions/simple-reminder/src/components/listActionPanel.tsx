@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Clipboard, open } from "@raycast/api";
 import { Frequency } from "../types/frequency";
 import { Reminder } from "../types/reminder";
 
@@ -7,6 +7,7 @@ type ActionPanelProps = {
   reminder: Reminder;
   onSetReminderAction: () => void;
   onSetRecurrenceForReminderAction: (reminderId: string, frequency: Frequency) => void;
+  onSetURLForReminderAction: (reminderId: string, url: string) => void;
   onCopyReminderTopicAction: (reminderTopic: string) => void;
   onDeleteReminderAction: (reminderId: string) => void;
 };
@@ -16,6 +17,7 @@ export function ListActionPanel({
   reminder,
   onSetReminderAction,
   onSetRecurrenceForReminderAction,
+  onSetURLForReminderAction,
   onCopyReminderTopicAction,
   onDeleteReminderAction,
 }: ActionPanelProps) {
@@ -45,6 +47,20 @@ export function ListActionPanel({
             onAction={() => onSetRecurrenceForReminderAction(reminder.id, Frequency.MONTHLY)}
           />
         </ActionPanel.Submenu>
+      )}
+      <Action
+        title="Set URL From Clipboard"
+        icon={Icon.Link}
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        onAction={async () => onSetURLForReminderAction(reminder.id, (await Clipboard.readText()) || "")}
+      />
+      {reminder.url && (
+        <Action
+          title="Open Reminder URL"
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          onAction={() => open(reminder.url!.toString())}
+        />
       )}
       <Action
         title="Copy to Clipboard"

@@ -1,4 +1,4 @@
-import { MenuBarExtra, Clipboard, open, Cache, captureException } from "@raycast/api";
+import { MenuBarExtra, open, captureException, showHUD } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { formatDistance } from "date-fns/formatDistance";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
@@ -22,7 +22,7 @@ function getDateTimeStringForMenuBarTitle(date: Date): string {
   } catch (error) {
     captureException(
       buildException(error as Error, "Error getting date time string for menu bar title", {
-        date,
+        date: date.toISOString(),
         type: typeof date,
         localizedDate: date.toLocaleString(),
       }),
@@ -50,8 +50,16 @@ export default function Command() {
     return `${truncatedTopic} ${getDateTimeStringForMenuBarTitle(nextReminder.date)}`;
   };
 
-  const onCopyReminderTopicAction = (reminderTopic: string) => {
-    return async () => await Clipboard.copy(reminderTopic);
+  const onOpenReminderUrl = async (reminderUrl?: URL) => {
+    if (reminderUrl) {
+      try {
+        await open(reminderUrl.toString());
+      } catch (error) {
+        captureException(buildException(error as Error, "Error opening reminder URL", { url: reminderUrl.toString() }));
+      }
+      return;
+    }
+    await showHUD("No URL set for this reminder");
   };
 
   const onOpenAddReminderAction = () => {
@@ -75,7 +83,7 @@ export default function Command() {
               key={reminder.id}
               title={reminder.topic}
               subtitle={`set to ${reminder.date.toLocaleString()} ${reminder.frequency ? `(happening ${reminder.frequency})` : ""}`}
-              onAction={onCopyReminderTopicAction(reminder.topic)}
+              onAction={() => onOpenReminderUrl(reminder.url)}
               icon="repeat.png"
             />
           ))}
@@ -88,7 +96,7 @@ export default function Command() {
               key={reminder.id}
               title={reminder.topic}
               subtitle={`set to ${reminder.date.toLocaleString()}`}
-              onAction={onCopyReminderTopicAction(reminder.topic)}
+              onAction={() => onOpenReminderUrl(reminder.url)}
               icon="bell.png"
             />
           ))}

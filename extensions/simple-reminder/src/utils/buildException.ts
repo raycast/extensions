@@ -1,4 +1,4 @@
-export function buildException(error: Error, message: string, meta?: Record<string, any>) {
+export function buildException(error: Error, message: string, meta?: Record<string, string>) {
   return {
     error,
     message,

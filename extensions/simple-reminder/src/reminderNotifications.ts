@@ -1,4 +1,4 @@
-import { captureException, getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { captureException, environment, getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { addDays } from "date-fns/addDays";
 import { addWeeks } from "date-fns/addWeeks";
@@ -19,12 +19,12 @@ export default async function Command() {
     if (isReminderInThePast(reminder)) {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
-      await sendPushNotificationToMacOS(cleanTopic);
-      await sendMobileNotification(cleanTopic);
+      await sendPushNotificationToMacOS(cleanTopic, reminder.url);
+      sendMobileNotification(cleanTopic, reminder.url);
 
       if (reminder.frequency) {
         const newDate = updateReminderDateForRecurrence(reminder);
-        reminder.date = newDate!;
+        reminder.date = newDate;
         return await LocalStorage.setItem(reminder.id, JSON.stringify(reminder));
       }
       await LocalStorage.removeItem(reminder.id);
@@ -40,9 +40,24 @@ function isReminderInThePast(reminder: Reminder) {
   return new Date().getTime() >= new Date(reminder.date).getTime();
 }
 
-function sendPushNotificationToMacOS(cleanTopic: string) {
+async function sendPushNotificationToMacOS(cleanTopic: string, url?: URL): Promise<void> {
   try {
-    return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+    await runAppleScript(`
+on run
+  set theTitle to "Simple Reminder"
+  set theMessage to "${cleanTopic}"
+  set theURL to "${url?.toString() ?? ""}"
+  set terminalNotifierPath to "${environment.assetsPath}/prebuilds/simple-reminder.app/Contents/MacOS/simple-reminder"
+  set appIconPath to "${environment.assetsPath}/logo.png"
+  
+  if theURL is equal to "" then
+    set notifierCommand to quoted form of terminalNotifierPath & " -title " & quoted form of theTitle & " -message " & quoted form of theMessage & " -appIcon " & quoted form of appIconPath & " -sound default"
+  else
+    set notifierCommand to quoted form of terminalNotifierPath & " -title " & quoted form of theTitle & " -message " & quoted form of theMessage & " -open " & quoted form of theURL & " -appIcon " & quoted form of appIconPath & " -sound default"
+  end if
+  
+  do shell script notifierCommand
+end run`);
   } catch (error) {
     captureException(buildException(error as Error, "Error sending push notification to macOS"));
   }
@@ -59,9 +74,10 @@ function updateReminderDateForRecurrence(reminder: Reminder) {
     case Frequency.MONTHLY:
       return addMonths(reminder.date, 1);
   }
+  return reminder.date;
 }
 
-function sendMobileNotification(cleanTopic: string) {
+function sendMobileNotification(cleanTopic: string, url?: URL) {
   const {
     mobileNotificationNtfy,
     mobileNotificationNtfyTopic,
@@ -80,6 +96,7 @@ function sendMobileNotification(cleanTopic: string) {
             serverAccessToken: mobileNotificationNtfyServerAccessToken,
           }
         : {},
+      url,
     );
   }
 }

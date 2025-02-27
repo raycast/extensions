@@ -9,7 +9,8 @@ const ntfyCurlCommand = (
     serverUrl?: string;
     serverAccessToken?: string;
   },
-) => `curl -H "Click: https://www.raycast.com/comoser/simple-reminder" \
+  url?: URL,
+) => `curl -H "Click: ${url?.toString() ?? "https://www.raycast.com/comoser/simple-reminder"}" \
     -H "Tags: bell" \
     -H "Priority: urgent" \
     -H "Title: Simple Reminder" \
@@ -17,16 +18,17 @@ const ntfyCurlCommand = (
     -d "${reminderTopic}" \
     ${selfHostedOptions.serverUrl ?? "ntfy.sh"}/${ntfyTopic}`;
 
-export async function sendPushNotificationWithNtfy(
+export function sendPushNotificationWithNtfy(
   ntfyTopic: string,
   reminderTopic: string,
   selfHostedOptions: {
     serverUrl?: string;
     serverAccessToken?: string;
   },
+  url?: URL,
 ) {
   try {
-    exec(ntfyCurlCommand(reminderTopic, ntfyTopic, selfHostedOptions), (err) => {
+    exec(ntfyCurlCommand(reminderTopic, ntfyTopic, selfHostedOptions, url), (err) => {
       if (err) {
         console.error("NTFY connection failed", err);
         return;

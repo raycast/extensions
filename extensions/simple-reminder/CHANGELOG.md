@@ -1,5 +1,12 @@
 # Simple Reminder Changelog
 
+## [URLs in reminders] - 2025-02-27
+
+- Add support for URLs in reminders and to open them from the list and menu bar
+- Add click behaviour in the desktop notification to open the defined URL of the reminder 
+- Change the notification logo to the extension logo
+- Change the notification permission name to "simple-reminder" with the correct logo in the system settings
+
 ## [Mobile notifications] - 2024-11-29
 
 - Add new configuration for self-hosted ntfy servers
