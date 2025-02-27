@@ -184,7 +184,7 @@ export default function ExploreThemes() {
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    title="Copy JSON Configuration"
+                    title="Copy Json Configuration"
                     content={JSON.stringify(theme, null, 2)}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
