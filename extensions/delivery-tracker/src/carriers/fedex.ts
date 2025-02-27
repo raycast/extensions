@@ -59,16 +59,24 @@ async function loginWithCachedData(apiKey: string, secretKey: string): Promise<L
     console.log("Logging into FedEx");
     loginResponse = await login(apiKey, secretKey);
 
+    // expires_in is in seconds and not a timestamp, e.g. `3599`.
+    // turn it into a timestamp for later validation.
+    loginResponse.expires_in = new Date().getTime() + loginResponse.expires_in * 1000;
+
     cache.set(cacheKey, JSON.stringify(loginResponse));
   } else {
     loginResponse = JSON.parse(cache.get(cacheKey) ?? "{}");
 
     const now = new Date().getTime();
 
-    if (now + loginResponse.expires_in * 1000 < now + 30 * 1000) {
-      // we are less than 30 seconds form the access token expiring
+    if (loginResponse.expires_in < now + 30 * 1000) {
+      // we are less than 30 seconds from the access token expiring
       console.log("Access key expired; logging into FedEx");
       loginResponse = await login(apiKey, secretKey);
+
+      // expires_in is in seconds and not a timestamp, e.g. `3599`.
+      // turn it into a timestamp for later validation.
+      loginResponse.expires_in = new Date().getTime() + loginResponse.expires_in * 1000;
 
       cache.set(cacheKey, JSON.stringify(loginResponse));
     }
