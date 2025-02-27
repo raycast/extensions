@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  /** Readwise API token from https://readwise.io/access_token */
-  readwiseToken: string;
-}
-
 /**
  * Checks if a Readwise API token is configured in preferences.
  *
@@ -12,7 +7,7 @@ interface Preferences {
  */
 export function hasReadwiseToken(): boolean {
   try {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
     return !!preferences.readwiseToken;
   } catch {
     return false;
@@ -26,7 +21,7 @@ export function hasReadwiseToken(): boolean {
  * @throws Error if the token is not configured
  */
 export function getReadwiseToken(): string {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   if (!preferences.readwiseToken) {
     throw new Error("Readwise API token not configured");
   }
