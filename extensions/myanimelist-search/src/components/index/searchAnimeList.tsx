@@ -23,7 +23,9 @@ export default function SearchAnimeList() {
       throttle
       isShowingDetail={showingDetail}
     >
-      {data.map((anime) => {
+      {data.length === 0 ? (
+        <List.EmptyView title="No results found" description="Try a different search term" />
+      ) : data.map((anime) => {
         const startYear = anime.start_date ? new Date(anime.start_date).getFullYear().toString() : "-";
 
         const props = showingDetail

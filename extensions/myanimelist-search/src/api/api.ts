@@ -184,8 +184,8 @@ export async function request(
   headers: Record<string, string> = {},
   opts: fetch.RequestInit = {}
 ): Promise<fetch.Response> {
-	const tokens = (await getTokens())?.accessToken;
-	if (!tokens) throw new Error("Not signed in");
+	const accessToken = (await getTokens())?.accessToken;
+	if (!accessToken) throw new Error("Not signed in");
 
 	console.log("request", url, body, method);
 
@@ -194,7 +194,7 @@ export async function request(
 		method,
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${tokens}`,
+			Authorization: `Bearer ${accessToken}`,
 			...headers,
 		},
 		...opts,
@@ -341,7 +341,7 @@ export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean 
 	const episodes = json.num_episodes_watched ?? 0;
 
 	// Cache for 5 minutes
-	if (allowCache) cacheSet(cacheKey, episodes, 1000 * 60 * 60 * 1);
+	if (allowCache) cacheSet(cacheKey, episodes, 1000 * 60 * 5);
 
 	return episodes;
 }

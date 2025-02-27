@@ -109,13 +109,18 @@ export function ManageWatchGrid() {
 							<Action
 								title={"Remove from Watchlist"}
 								onAction={async () => {
-									if (!(await api.alertRemoveAnime(anime))) return;
-									await api.removeAnime(anime);
-									api.removeCachedWatchlist();
-									await showHUD("Removed from Watchlist", {
+									try {
+									  if (!(await api.alertRemoveAnime(anime))) return;
+									  await api.removeAnime(anime);
+									  api.removeCachedWatchlist();
+									  await showHUD("Removed from Watchlist", {
 										popToRootType: PopToRootType.Immediate,
-									});
-								}}
+									  });
+									} catch (error) {
+									  console.error(error);
+									  showToast({ style: Toast.Style.Failure, title: String(error) });
+									}
+								  }}
 								icon={Icon.Xmark}
 								shortcut={{ modifiers: ["cmd"], key: "f" }}
 							/>
