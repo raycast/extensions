@@ -1,9 +1,9 @@
-import { fileExists } from "../utils";
+import { getPreferenceValues } from "@raycast/api";
+import * as child_process from "child_process";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
-import * as child_process from "child_process";
-import { getPreferenceValues } from "@raycast/api";
+import { fileExists } from "../utils";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
