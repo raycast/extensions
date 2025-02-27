@@ -1,4 +1,3 @@
-// Update your `get-transactions.ts` tool to support fetching more transactions:
 
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
