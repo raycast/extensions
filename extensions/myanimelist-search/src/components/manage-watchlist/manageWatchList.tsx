@@ -44,22 +44,27 @@ export function ManageWatchList() {
   useEffect(() => {
     let isMounted = true;
 
-    (async () => {
+    const fetchWatchlist = async () => {
+      if (!isMounted) return;
+
       try {
         await oauth.authorize();
-        const fetchedItems = await loadItems(0);
-
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        await loadItems(0);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to load watchlist:", error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load watchlist",
+          message: String(error),
+        });
+      } finally {
         if (isMounted) {
           setIsLoading(false);
-          showToast({ style: Toast.Style.Failure, title: String(error) });
         }
       }
-    })();
+    };
+
+    fetchWatchlist();
 
     return () => {
       isMounted = false;
@@ -77,15 +82,15 @@ export function ManageWatchList() {
   };
 
   return (
-    <List 
-      isLoading={isLoading} 
+    <List
+      isLoading={isLoading}
       isShowingDetail={showingDetail}
       searchBarPlaceholder="Search your watchlist..."
       onSearchTextChange={() => {}}
       pagination={{
         onLoadMore: handleLoadMore,
         hasMore: hasMore,
-        pageSize: ITEMS_PER_PAGE
+        pageSize: ITEMS_PER_PAGE,
       }}
     >
       {items.map((item) => (
