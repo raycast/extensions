@@ -1,3 +1,3 @@
 # Evaluate Math Expression Changelog
 
-## [Initial Version] - 2025-02-15
+## [Initial Version] - {PR_MERGE_DATE}
