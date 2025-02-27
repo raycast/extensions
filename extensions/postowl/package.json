@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postowl",
+  "title": "PostOwl",
+  "description": "PostOwl helps you post & schedule X/Twitter content",
+  "icon": "extension-icon.png",
+  "author": "andero_avastu",
+  "owner": "andero_avastu",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "Create/Schedule Post",
+      "subtitle": "PostOwl",
+      "icon": "extension-icon.png",
+      "description": "Create a new X/Twitter post with PostOwl.",
+      "mode": "view",
+      "keywords": [
+        "post",
+        "schedule",
+        "twitter",
+        "tweet"
+      ]
+    },
+    {
+      "name": "generate-post",
+      "title": "Generate Post",
+      "subtitle": "PostOwl",
+      "icon": "extension-icon.png",
+      "description": "Generate a new X/Twitter post with PostOwl.",
+      "mode": "view",
+      "keywords": [
+        "post",
+        "generate",
+        "twitter",
+        "tweet"
+      ]
+    },
+    {
+      "name": "view-scheduled",
+      "title": "View Scheduled Posts",
+      "subtitle": "PostOwl",
+      "icon": "extension-icon.png",
+      "description": "View posts that have been recently scheduled.",
+      "mode": "view",
+      "keywords": [
+        "scheduled",
+        "post",
+        "recently",
+        "tweet",
+        "twitter"
+      ]
+    },
+    {
+      "name": "view-posted",
+      "title": "View Posted Content",
+      "subtitle": "PostOwl",
+      "icon": "extension-icon.png",
+      "description": "View posted content.",
+      "mode": "view",
+      "keywords": [
+        "view",
+        "recently",
+        "scheduled",
+        "twitter",
+        "tweets"
+      ]
+    }
+  ],
+  "keywords": [
+    "PostOwl",
+    "LinkedIn",
+    "Twitter",
+    "Social Media"
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "description": "Your personal API token.",
+      "type": "password",
+      "required": true,
+      "title": "PostOwl API Token",
+      "placeholder": "Your token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.10",
+    "dayjs": "^1.11.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
