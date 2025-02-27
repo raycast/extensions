@@ -84,7 +84,7 @@ export default function useSearch({ q: searchText, debounce = 500 }: SearchProps
       setIsLoading(false);
     }, _debounce);
     return () => clearTimeout(timeout);
-  }, [searchText, preferences.hide_nsfw]);
+  }, [searchText, preferences.hide_nsfw, debounce]);
 
   return { items, isLoading, clearCache };
 }

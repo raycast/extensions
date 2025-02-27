@@ -19,8 +19,15 @@ export default function SearchAnimeGrid() {
       onSearchTextChange={setSearchText}
       aspectRatio="2/3"
       fit={Grid.Fit.Fill}
+      throttle
     >
-      {!isLoading &&
+      {data.length === 0 ? (
+        <Grid.EmptyView
+          title="No results found"
+          description="Try a different search term"
+          icon={{ source: Icon.MagnifyingGlass }}
+        />
+      ) : (
         data.map((anime) => (
           <Grid.Item
             key={anime.id}
@@ -87,7 +94,8 @@ export default function SearchAnimeGrid() {
               </ActionPanel>
             }
           />
-        ))}
+        ))
+      )}
     </Grid>
   );
 }

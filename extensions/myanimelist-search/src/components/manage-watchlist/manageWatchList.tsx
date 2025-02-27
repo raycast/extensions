@@ -86,7 +86,6 @@ export function ManageWatchList() {
       isLoading={isLoading}
       isShowingDetail={showingDetail}
       searchBarPlaceholder="Search your watchlist..."
-      onSearchTextChange={() => {}}
       pagination={{
         onLoadMore: handleLoadMore,
         hasMore: hasMore,

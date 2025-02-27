@@ -71,7 +71,6 @@ export function ManageWatchGrid() {
       aspectRatio="2/3"
       fit={Grid.Fit.Fill}
       searchBarPlaceholder="Search your watchlist..."
-      onSearchTextChange={() => {}}
       pagination={{
         onLoadMore: handleLoadMore,
         hasMore: hasMore,

@@ -176,8 +176,6 @@ export async function request(
   const accessToken = (await getTokens())?.accessToken;
   if (!accessToken) throw new Error("Not signed in");
 
-  console.log("request", url, body, method);
-
   return fetch(url, {
     body,
     method,
@@ -336,10 +334,7 @@ export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean 
 }
 
 export async function incrementEpisodes(anime: ExtendedAnime): Promise<number> {
-  console.log("incrementEpisodes", anime.title);
   const episodes = await getAnimeEpisodesWatched(anime);
-  console.log("episodes watched:", episodes);
-
   const params = new URLSearchParams();
   params.append("num_watched_episodes", String(episodes + 1));
   params.append("status", episodes + 1 >= anime.num_episodes ? "completed" : "watching");
