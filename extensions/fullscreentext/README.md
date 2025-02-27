@@ -1,9 +1,14 @@
 # Fullscreen Text
 
-Display any text fullscreen. Works with multiple display: the text will show where the mouse is. Close with a mouse click or press the ESC key.
+Display any text in a fullscreen overlay. This works with multiple displays: the text will on the display where the mouse is.
 
-## Key Features
+The overlay can be closed with a mouse click or when you press the ESC key.
 
-* Display any text fullscreen
-* Display selected text fullscreen
-* Display clipboard text fullscreen
+## Commands
+
+* Fullscreen Text [text]
+  * Display any text fullscreen
+* Fullscreen Selection
+  * Display selected text fullscreen
+* Fullscreen Clipboard
+  * Display clipboard text fullscreen
