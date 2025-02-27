@@ -1,4 +1,6 @@
-import { showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { useCallback } from "react";
+import { usePreferences } from "./preferences.js";
 
 export async function tryWithToast<T>(
   fn: () => Promise<T>,
@@ -36,4 +38,13 @@ export function messageBuilder(action: keyof typeof MESSAGES, type: string, name
     success: `${success} ${type} ${name}`.trim(),
     failure: `Failed to ${failure} ${type} ${name}`.trim(),
   };
+}
+
+export function usePreferredExit() {
+  const preferences = usePreferences();
+
+  return useCallback(() => {
+    if (preferences.onTimeEntryAction === "stay") return;
+    closeMainWindow();
+  }, [preferences.onTimeEntryAction]);
 }

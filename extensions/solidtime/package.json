@@ -37,6 +37,24 @@
       "description": "Your Solidtime API Key",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "onTimeEntryAction",
+      "description": "What should happen after a time entry is started or stopped",
+      "type": "dropdown",
+      "title": "Window behaviour on Time Entry action",
+      "default": "close",
+      "required": false,
+      "data": [
+        {
+          "title": "Close",
+          "value": "close"
+        },
+        {
+          "title": "Stay",
+          "value": "stay"
+        }
+      ]
     }
   ],
   "dependencies": {

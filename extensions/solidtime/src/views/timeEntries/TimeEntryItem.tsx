@@ -5,7 +5,7 @@ import { NO_DATA } from "../../utils/constants.js";
 import { formatDuration, formatTime } from "../../utils/formatters.js";
 import { tagBillable } from "../../utils/list.js";
 import { useMembership, useOrgId } from "../../utils/membership.js";
-import { messageBuilder, tryWithToast } from "../../utils/operations.js";
+import { messageBuilder, tryWithToast, usePreferredExit } from "../../utils/operations.js";
 import { djs, getTimeStamp } from "../../utils/time.js";
 import { CrudActions } from "../shared/CrudActions.js";
 import { Entry } from "../shared/Entry.js";
@@ -46,6 +46,7 @@ export function TimeEntryItem({ timeEntry }: TimeEntryItemProps) {
   const orgId = useOrgId();
   const accessories = useTimeEntryAccessories(orgId);
   const navigation = useNavigation();
+  const preferredExit = usePreferredExit();
 
   const isActive = !timeEntry.end;
 
@@ -81,6 +82,7 @@ export function TimeEntryItem({ timeEntry }: TimeEntryItemProps) {
                       },
                       messageBuilder("create", "time entry"),
                     );
+                    preferredExit();
                     navigation.pop();
                     invalidate("timeEntries");
                   }}
@@ -109,6 +111,7 @@ export function TimeEntryItem({ timeEntry }: TimeEntryItemProps) {
                       ),
                     messageBuilder("stop", "time entry"),
                   );
+                  preferredExit();
                   invalidate("timeEntries");
                 }}
               />
@@ -133,6 +136,7 @@ export function TimeEntryItem({ timeEntry }: TimeEntryItemProps) {
                     },
                     messageBuilder("start", "time entry"),
                   );
+                  preferredExit();
                   invalidate("timeEntries");
                 }}
               />

@@ -6,7 +6,7 @@ import { api } from "../../api/index.js";
 import { formatDuration, useFormatters } from "../../utils/formatters.js";
 import { tagArchived } from "../../utils/list.js";
 import { useMembership, useOrgId } from "../../utils/membership.js";
-import { messageBuilder, tryWithToast } from "../../utils/operations.js";
+import { messageBuilder, tryWithToast, usePreferredExit } from "../../utils/operations.js";
 import { djs, getTimeStamp } from "../../utils/time.js";
 import { CrudActions } from "../shared/CrudActions.js";
 import { Entry } from "../shared/Entry.js";
@@ -49,6 +49,7 @@ export function ProjectCommand() {
   const navigation = useNavigation();
   const ctx = useMembership();
   const orgId = useOrgId();
+  const preferredExit = usePreferredExit();
 
   const projects = useProjects(orgId);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -140,6 +141,7 @@ export function ProjectCommand() {
                           },
                           messageBuilder("start", "time entry"),
                         );
+                        preferredExit();
                         projects.refetch();
                       }}
                     />
