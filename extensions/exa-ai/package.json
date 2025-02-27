@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exa",
+  "title": "Exa AI",
+  "description": "Use the Exa AI API to search the web and get AI-powered answers",
+  "icon": "command-icon.png",
+  "author": "abizer",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "answers",
+      "title": "Exa Answers",
+      "description": "Ask a question using the Exa Answers API",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Exa Search",
+      "description": "Search the web using Exa's semantic search engine",
+      "mode": "view"
+    },
+    {
+      "name": "similar",
+      "title": "Exa Similar",
+      "description": "Find web pages similar to a given URL",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Exa API Key",
+      "description": "Your Exa API key from exa.ai",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Exa Model",
+      "description": "The Exa model to use for answers",
+      "type": "dropdown",
+      "required": false,
+      "default": "Exa",
+      "data": [
+        {
+          "title": "Exa",
+          "value": "exa"
+        },
+        {
+          "title": "Exa Pro",
+          "value": "exa-pro"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.13.4",
+    "exa-js": "^1.4.10",
+    "fuse.js": "^7.1.0",
+    "typeid-js": "^1.2.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
