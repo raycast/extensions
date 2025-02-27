@@ -110,6 +110,7 @@
     }
   ],
   "ai": {
+    "instructions": "Use either full length ID or shortId when requesting note operations. Both formats are supported.\n\nWhen you're not sure what a team path is, ask for it or use the get-current-user tool to retrieve the team list.\n\nTeam paths are required for team operations like creating, updating, or deleting team notes.\n\nWhen retrieving notes, verify if it's a personal note or team note before performing operations.",
     "evals": [
       {
         "input": "@hackmd Who am I and what teams have I joined?",
