@@ -6,7 +6,7 @@ A [Raycast](https://www.raycast.com/) extension that reads current selection, ev
 
 | Title             | Description                                         | Default |
 | ----------------- | --------------------------------------------------- | ------- |
-| Max Decimals      | Maximum number of decimals to include in the result | `4`     |
+| Max Decimals      | Maximum number of decimals to include in the result | `3`     |
 | Output Options    | Replace the current selection with the result       | `true`  |
 | Copy To Clipboard | Copy the result to clipboard                        | `false` |
 | Display Result    | Display the result in a notification                | `false` |

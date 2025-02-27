@@ -23,8 +23,8 @@
           "type": "textfield",
           "description": "Maximum number of decimals to include in the result",
           "required": true,
-          "default": "4",
-          "placeholder": "4"
+          "default": "3",
+          "placeholder": "3"
         },
         {
           "name": "replaceSelection",

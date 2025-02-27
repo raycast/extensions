@@ -12,7 +12,6 @@ export function loadPreferences() {
 
   return {
     ...preferences,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    maxDecimals: parseInt(preferences.maxDecimals as any) || undefined,
+    maxDecimals: Number(preferences.maxDecimals) || undefined,
   };
 }
