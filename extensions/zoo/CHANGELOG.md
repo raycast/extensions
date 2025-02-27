@@ -1,5 +1,9 @@
 # Zoo Changelog
 
+## [New Feature] - {PR_MERGE_DATE}
+
+- 🍮 Support custom models
+
 ## [Add Google Gemini Support] - 2025-01-19
 
 - ✨ **Google Gemini** support added.
