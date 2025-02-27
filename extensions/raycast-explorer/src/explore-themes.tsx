@@ -184,7 +184,7 @@ export default function ExploreThemes() {
 
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    // eslint-disable-next-line
+                    /* eslint-disable-next-line @raycast/prefer-title-case */
                     title="Copy JSON Configuration"
                     content={JSON.stringify(theme, null, 2)}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
