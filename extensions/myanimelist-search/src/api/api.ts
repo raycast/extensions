@@ -216,49 +216,59 @@ export async function fetchAnimes(
   search: string,
   { nsfw, anon }: SearchAnimeOptions
 ): Promise<ExtendedAnime[] | undefined> {
-  const params = new URLSearchParams();
-  params.append("q", search);
-  params.append("limit", "30");
-  params.append("nsfw", nsfw ? "true" : "false");
-  params.append("fields", fields.join(","));
+  try {
+    const params = new URLSearchParams();
+    params.append("q", search);
+    params.append("limit", "30");
+    params.append("nsfw", nsfw ? "true" : "false");
+    params.append("fields", fields.join(","));
 
-  const response = await (anon ? request_anon : request)(`https://api.myanimelist.net/v2/anime?${params}`);
+    const response = await (anon ? request_anon : request)(`https://api.myanimelist.net/v2/anime?${params}`);
 
-  const json = await response.json();
-  const parsed = animeSearchBody.safeParse(json);
+    const json = await response.json();
+    const parsed = animeSearchBody.safeParse(json);
 
-  if (!parsed.success) {
-    console.error("fetch items error:", parsed.error);
-    throw new Error("Failed to parse response");
+    if (!parsed.success) {
+      console.error("fetch items error:", parsed.error);
+      return undefined;
+    }
+
+    return parsed.data.data?.map((item) => item.node) || [];
+  } catch (error) {
+    console.error("Error fetching anime search results:", error);
+    return [];
   }
-
-  return parsed.data.data?.map((item) => item.node);
 }
 
 export async function fetchSuggestions({ nsfw, anon }: SearchAnimeOptions): Promise<ExtendedAnime[]> {
-  const params = new URLSearchParams();
-  params.append("limit", "30");
-  params.append("nsfw", nsfw ? "true" : "false");
-  params.append("fields", fields.join(","));
+  try {
+    const params = new URLSearchParams();
+    params.append("limit", "30");
+    params.append("nsfw", nsfw ? "true" : "false");
+    params.append("fields", fields.join(","));
 
-  const year = new Date().getFullYear();
-  const season = ["winter", "spring", "summer", "fall"][Math.floor(new Date().getMonth() / 3)];
+    const year = new Date().getFullYear();
+    const season = ["winter", "spring", "summer", "fall"][Math.floor(new Date().getMonth() / 3)];
 
-  const response = await (anon ? request_anon : request)(
-    anon
-      ? `https://api.myanimelist.net/v2/anime/season/${year}/${season}?${params}` // If the user is not signed in, get the current seasonal animes
-      : `https://api.myanimelist.net/v2/anime/suggestions?${params}` // If the user is signed in, get their usual suggestions
-  );
+    const response = await (anon ? request_anon : request)(
+      anon
+        ? `https://api.myanimelist.net/v2/anime/season/${year}/${season}?${params}` // If the user is not signed in, get the current seasonal animes
+        : `https://api.myanimelist.net/v2/anime/suggestions?${params}` // If the user is signed in, get their usual suggestions
+    );
 
-  const json = await response.json();
-  const parsed = animeSearchBody.safeParse(json);
+    const json = await response.json();
+    const parsed = animeSearchBody.safeParse(json);
 
-  if (!parsed.success) {
-    console.error("fetch items error:", parsed.error);
-    throw new Error("Failed to parse response");
+    if (!parsed.success) {
+      console.error("fetch suggestions error:", parsed.error);
+      return [];
+    }
+
+    return parsed.data.data?.map((item) => item.node) ?? [];
+  } catch (error) {
+    console.error("Error fetching anime suggestions:", error);
+    return [];
   }
-
-  return parsed.data.data?.map((item) => item.node) ?? [];
 }
 
 export async function addAnime(anime: Anime) {
