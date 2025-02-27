@@ -27,22 +27,30 @@ export default function TrackNewDeliveryView({
 
   const { handleSubmit, itemProps } = useForm<AddDeliveryForm>({
     onSubmit: async (deliveryForm) => {
-      const delivery: Delivery = {
-        id: randomUUID().toString(),
-        name: deliveryForm.name,
-        trackingNumber: deliveryForm.trackingNumber,
-        carrier: deliveryForm.carrier,
-        manualDeliveryDate: deliveryForm.manualDeliveryDate ?? undefined,
-      };
-      await setDeliveries((deliveries || []).concat(delivery));
+      try {
+        const delivery: Delivery = {
+          id: randomUUID().toString(),
+          name: deliveryForm.name,
+          trackingNumber: deliveryForm.trackingNumber,
+          carrier: deliveryForm.carrier,
+          manualDeliveryDate: deliveryForm.manualDeliveryDate ?? undefined,
+        };
+        await setDeliveries((deliveries || []).concat(delivery));
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "New Delivery Added",
-        message: deliveryForm.name,
-      });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "New Delivery Added",
+          message: deliveryForm.name,
+        });
 
-      pop();
+        pop();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Add Delivery",
+          message: String(error),
+        });
+      }
     },
     validation: {
       name: FormValidation.Required,

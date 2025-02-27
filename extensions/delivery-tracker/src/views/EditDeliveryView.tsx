@@ -61,8 +61,8 @@ export default function EditDeliveryView({
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to modify delivery",
-          message: String(error)
+          title: "Failed to Modify Delivery",
+          message: String(error),
         });
       }
     },
