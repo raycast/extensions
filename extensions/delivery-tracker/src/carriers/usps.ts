@@ -19,7 +19,9 @@ export async function updateUspsTracking(delivery: Delivery): Promise<Package[]>
 
   return [
     {
-      delivered: new Date() === delivery.manualDeliveryDate,
+      delivered: delivery.manualDeliveryDate
+        ? new Date().setHours(0, 0, 0, 0) > delivery.manualDeliveryDate.setHours(0, 0, 0, 0)
+        : false, // truncate the time from both now and the manual delivery date
       deliveryDate: delivery.manualDeliveryDate,
       activity: [],
     },
