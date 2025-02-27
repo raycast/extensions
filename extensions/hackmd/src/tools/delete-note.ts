@@ -4,6 +4,7 @@ import api from "../lib/api";
 type DeleteNoteArgs = {
   /**
    * ID of the note to delete
+   * Can be either the full note ID (e.g., "note_id_1") or the shorthand format with username/path (e.g., "@username/shortId")
    */
   noteId: string;
   /**
@@ -23,6 +24,7 @@ export const confirmation: Tool.Confirmation<DeleteNoteArgs> = (input) => {
 
 /**
  * Delete an existing note from HackMD, either from personal workspace or team workspace
+ * Accepts note IDs in both full ID and @username/shortId format
  */
 export default async function tool(args: DeleteNoteArgs): Promise<{ success: boolean, message: string }> {
   const { noteId, teamPath } = args;
