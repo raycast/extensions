@@ -1,10 +1,5 @@
-
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-
-interface Preferences {
-  apiKey: string;
-}
 
 interface Transaction {
   id: string;
