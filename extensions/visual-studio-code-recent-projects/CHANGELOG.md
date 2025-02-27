@@ -1,4 +1,4 @@
-# Visual Studio Code Search Recent Projects Changelog
+# Visual Studio Code Changelog
 
 ## [Improvement] - {PR_MERGE_DATE}
 
