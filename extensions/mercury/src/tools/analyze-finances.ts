@@ -96,6 +96,8 @@ export default async function (input: Input = {}) {
           transactions: Transaction[];
         };
         allTransactions.push(...txData.transactions);
+      } else {
+        throw new Error(`Failed to fetch transactions for account ${account.id}: ${txResponse.statusText}`);
       }
     }
 
