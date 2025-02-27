@@ -13,7 +13,9 @@ export default async (input: Input) => {
   }
   if (input.query) {
     const query = input.query;
-    xcodeProjects = xcodeProjects.filter((xcodeProject) => xcodeProject.name.includes(query));
+    xcodeProjects = xcodeProjects.filter((xcodeProject) =>
+      xcodeProject.name.toLowerCase().includes(query.toLowerCase())
+    );
   }
   return xcodeProjects;
 };
