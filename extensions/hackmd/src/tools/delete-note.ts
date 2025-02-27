@@ -13,16 +13,11 @@ type DeleteNoteArgs = {
   teamPath?: string;
 };
 
-export const confirmation: Tool.Confirmation<DeleteNoteArgs> = (input) => {
+export const confirmation: Tool.Confirmation<DeleteNoteArgs> = async (input) => {
   const location = input.teamPath ? `team "${input.teamPath}" workspace` : "personal workspace";
 
   return {
-    message: `Delete note (ID: ${input.noteId}) from ${location}?`,
-    detail: "This action cannot be undone. The note will be permanently removed.",
-    primaryAction: {
-      title: "Delete",
-      style: Tool.ConfirmationStyle.Destructive,
-    },
+    message: `Delete note (ID: ${input.noteId}) from ${location}? This action cannot be undone. The note will be permanently removed.`,
   };
 };
 

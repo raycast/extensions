@@ -1,4 +1,5 @@
 import { SingleNote } from "@hackmd/api/dist/type";
+import { AxiosResponse } from "axios";
 import { Tool } from "@raycast/api";
 import api from "../lib/api";
 
@@ -26,7 +27,7 @@ type UpdateNoteArgs = {
   writePermission?: SingleNote["writePermission"];
 };
 
-export const confirmation: Tool.Confirmation<UpdateNoteArgs> = (input) => {
+export const confirmation: Tool.Confirmation<UpdateNoteArgs> = async (input) => {
   const notePreview = input.content.split("\n")[0].substring(0, 40);
   const location = input.teamPath ? `team "${input.teamPath}" workspace` : "personal workspace";
 
@@ -40,13 +41,14 @@ export const confirmation: Tool.Confirmation<UpdateNoteArgs> = (input) => {
  * Update an existing note in HackMD, either in personal workspace or team workspace
  * Accepts note IDs in both full ID and shortId format
  */
-export default async function tool(args: UpdateNoteArgs): Promise<SingleNote> {
+export default async function tool(args: UpdateNoteArgs): Promise<AxiosResponse> {
   const { noteId, teamPath, ...updateData } = args;
 
   // If teamPath is provided, update a team note, otherwise update a personal note
   if (teamPath) {
     return api.updateTeamNote(teamPath, noteId, updateData);
   } else {
-    return api.updateNote(noteId, updateData);
+    // workaround for type mismatch
+    return api.updateNote(noteId, updateData) as unknown as AxiosResponse;
   }
 }

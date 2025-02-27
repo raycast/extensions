@@ -1,4 +1,4 @@
-import { Note } from "@hackmd/api";
+import { Note } from "@hackmd/api/dist/type";
 
 /**
  * Sort notes by last changed date in descending order (newest first)
