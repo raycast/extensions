@@ -221,10 +221,13 @@ export default function ExplorePrompts(props: Props) {
                 key={prompt.id}
                 title={prompt.title}
                 icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon[icon] ?? Icon.List}
-                keywords={[category.name, prompt.creativity]}
+                keywords={[category.name, prompt.creativity || "unspecified"]}
                 accessories={[
                   { icon: Icon.ArrowUp, text: `${prompt.upvoteCount}`, tooltip: `Upvotes: ${prompt.upvoteCount}` },
-                  { icon: getCreativityIcon(prompt.creativity), tooltip: `Creativity: ${prompt.creativity}` },
+                  {
+                    icon: getCreativityIcon(prompt.creativity),
+                    tooltip: `Creativity: ${prompt.creativity || "Not specified"}`,
+                  },
                 ]}
                 detail={<List.Item.Detail markdown={getPromptMarkdown(prompt)} />}
                 actions={
@@ -343,7 +346,7 @@ function getPromptMarkdown(prompt: Prompt) {
 }
 
 function getCreativityIcon(creativity: Prompt["creativity"]) {
-  if (creativity === "none") {
+  if (!creativity || creativity === "none") {
     return Icon.CircleDisabled;
   }
 
