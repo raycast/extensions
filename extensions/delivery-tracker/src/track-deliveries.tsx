@@ -260,6 +260,9 @@ function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery[] {
     const aEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(aPackages).deliveryDate;
     const bEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(bPackages).deliveryDate;
 
+    const aSomePackagesDelivered = aPackages.some((aPackage) => aPackage.delivered);
+    const bSomePackagesDelivered = bPackages.some((bPackage) => bPackage.delivered);
+
     if (aEarliestDeliveryDate && !bEarliestDeliveryDate) {
       // a has a delivery date, and b doesn't
       return -1;
@@ -268,9 +271,6 @@ function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery[] {
       return 1;
     } else if (!aEarliestDeliveryDate && !bEarliestDeliveryDate) {
       // a doesn't have a delivery date, and b doesn't either
-
-      const aSomePackagesDelivered = aPackages.some((aPackage) => aPackage.delivered);
-      const bSomePackagesDelivered = bPackages.some((bPackage) => bPackage.delivered);
 
       if (aSomePackagesDelivered && !bSomePackagesDelivered) {
         // a has some packages delivered, and b doesn't
@@ -288,9 +288,6 @@ function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery[] {
       calculateDayDifference(aEarliestDeliveryDate!) - calculateDayDifference(bEarliestDeliveryDate!);
     if (dayDifferenceDifference === 0) {
       // both tracks tie for earliest delivery
-
-      const aSomePackagesDelivered = aPackages.some((aPackage) => aPackage.delivered);
-      const bSomePackagesDelivered = bPackages.some((bPackage) => bPackage.delivered);
 
       if (aSomePackagesDelivered && !bSomePackagesDelivered) {
         // a has some packages delivered, and b doesn't
