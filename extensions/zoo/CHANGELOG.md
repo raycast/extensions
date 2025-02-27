@@ -1,6 +1,6 @@
 # Zoo Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2025-02-27
 
 - 🍮 Support custom models
 
