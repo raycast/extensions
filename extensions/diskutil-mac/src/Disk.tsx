@@ -25,7 +25,7 @@ export default class Disk {
     this.isWhole = false;
   }
 
-  getActions(postFunction: (type: string) => void): {
+  getActions(postFunction: (type: "DiskRefresh" | "DiskUpdate") => void): {
     title: string;
     shortcut?: Keyboard.Shortcut;
     icon: Image.ImageLike;

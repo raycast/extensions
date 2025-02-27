@@ -6,6 +6,7 @@ import DiskSection from "./DiskSection";
 export default function ListDisks(): JSX.Element {
   const [disks, setDisks] = useState<DiskSection[]>([]);
   const [showingDetail, setShowingDetail] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     process.env.PATH = `${process.env.PATH}:/usr/sbin:/usr/bin/`;
@@ -13,32 +14,29 @@ export default function ListDisks(): JSX.Element {
     fetchDisks("Init");
   }, []);
 
-  /**
-   * Initial initialization for all disks
-   * Using a stream testwise (did not really work unfortunately)
-   */
-  async function initialInitDiskSections() {
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Initializing...",
-    });
-
-    updateDiskSections("Init");
-  }
-
   // DiskUpdate (Dont show Toast) or Refresh
-  async function updateDiskSections(update: string | "DiskUpdate" | "DiskRefresh" | "Init" | "Refresh") {
-    // If DiskUpdate, re'initDisks all diskSections without initially fetching them
+  /**
+   * Update the DiskSections. Only do q quick refresh on DiskUpdate
+   * @param One of the annotated types to choose the style of update
+   */
+  async function updateDiskSections(update: "DiskUpdate" | "DiskRefresh" | "Init" | "Refresh") {
+    setIsLoading(true);
 
+    if (update === "Init") {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Initializing...",
+      });
+    }
+    // First do a quick update on existing disks
     const initDisksPromises = disks.map((disk) =>
       disk.initDisks().then(() => {
         setDisks((prevDisks) => [...prevDisks]);
       })
     );
-    //Update a second time in case for changes
     await Promise.all(initDisksPromises);
 
-    // Now fetch new disks
+    // Then fetch all new disks
     const diskOutput = await execDiskCommand("diskutil list");
     const sectionRegex = /(\/.*?:.*?)(?=(?:\/|$))/gs;
     const sectionStrings = diskOutput.match(sectionRegex) ?? [];
@@ -49,7 +47,7 @@ export default function ListDisks(): JSX.Element {
     // You might need to implement a deeper comparison depending on the structure of DiskSection.
     const areDisksTheSame = disks.length === newDiskSections.length;
 
-    if (!areDisksTheSame || update === "Refresh" || update === "DiskRefresh" || update === "Init") {
+    if (!areDisksTheSame || update === "Refresh" || update === "DiskRefresh") {
       if (update !== "DiskRefresh" && update !== "Init") {
         showToast({
           style: Toast.Style.Animated,
@@ -67,24 +65,22 @@ export default function ListDisks(): JSX.Element {
         });
       }
     }
+    setIsLoading(false);
   }
 
   /**
    *
    * @param update "DiskUpdate", "Refresh", "Init"
    */
-  function fetchDisks(update: string | "Init" | "DiskUpdate" | "Refresh") {
+  function fetchDisks(update: "Init" | "DiskUpdate" | "DiskRefresh" | "Refresh") {
     try {
-      if (update === "Init") {
-        initialInitDiskSections();
-      } else {
-        updateDiskSections(update);
-      }
+      updateDiskSections(update);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "ERROR: Failed to fetch disks",
       });
+      setIsLoading(false);
     }
   }
 
@@ -106,12 +102,12 @@ export default function ListDisks(): JSX.Element {
   }
 
   return (
-    <List isShowingDetail={showingDetail}>
+    <List isShowingDetail={showingDetail} isLoading={isLoading}>
       {/* Iterating over each DiskSection object in the disks array */}
       {disks.map((diskSection, index) => {
         return (
           <List.Section key={index} title={diskSection.sectionName}>
-            {/* Iterating over each disk in each*/}
+            {/* Iterating over each disk in each section*/}
             {diskSection.disks.map((disk, diskIndex) => {
               return (
                 <List.Item
