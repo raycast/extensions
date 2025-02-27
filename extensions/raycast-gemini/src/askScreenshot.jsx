@@ -15,7 +15,7 @@ export default async function askScreenshot(props, prompt, isSelecting) {
   let fileBuffer;
   try {
     await execPromise(screencaptureCmd);
-    fileBuffer = fs.readFileSync(screenshotPath);
+    fileBuffer = await fs.promises.readFile(screenshotPath);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -27,13 +27,21 @@ export default async function askScreenshot(props, prompt, isSelecting) {
 
   console.log(`Screenshot captured at ${screenshotPath}`);
 
-  await launchCommand({
-    name: "askAI",
-    type: LaunchType.UserInitiated,
-    context: {
-      buffer: [fileBuffer],
-      args: props.arguments,
-      context: prompt,
-    },
-  });
+  try {
+    await launchCommand({
+      name: "askAI",
+      type: LaunchType.UserInitiated,
+      context: {
+        buffer: [fileBuffer],
+        args: props.arguments,
+        context: prompt,
+      },
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to launch askAI command",
+      message: error.message,
+    });
+  }
 }
