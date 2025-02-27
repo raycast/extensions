@@ -87,6 +87,7 @@
       "name": "set-session-title",
       "title": "Set Session Title",
       "description": "Set the session title for Flow",
+      "subtitle": "Flow",
       "mode": "no-view",
       "arguments": [
         {
