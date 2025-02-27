@@ -14,8 +14,7 @@
   "commands": [
     {
       "name": "evaluate-math-expression",
-      "title": "Evaluate Math Expression",
-      "subtitle": "From Current Selection",
+      "title": "Evaluate Math Expression from Selection",
       "description": "Reads current selection, evaluates the math expression, and shows it in a desired way",
       "preferences": [
         {
