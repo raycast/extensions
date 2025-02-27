@@ -47,15 +47,17 @@ function Body(props: { spaceId: string }) {
       }
     >
       <Form.Description text="Input the email addresses of the users you want to invite, separated by commas or newlines." />
-      <Form.TextArea
-        id="emails"
-        title="Emails"
-        info="Description of the space"
-        ref={textAreaRef}
-        onChange={(value) => handleChange(value)}
-      />
+      <Form.TextArea id="emails" title="Emails" ref={textAreaRef} onChange={(value) => handleChange(value)} />
 
-      <Form.Description text={`Send an invitation to ${emails.length} email addresses`} />
+      {emails.length > 0 && (
+        <Form.Description
+          text={
+            emails.length === 1
+              ? "Send an invitation to 1 email address"
+              : `Send invitations to ${emails.length} email addresses`
+          }
+        />
+      )}
 
       {emails.length > 20 && <Form.Description text="⚠️ Email addresses are limited to 20" />}
     </Form>

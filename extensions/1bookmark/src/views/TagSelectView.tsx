@@ -59,7 +59,6 @@ export const Body = (props: {
   const subscribeTag = trpc.user.subscribeTag.useMutation();
   const unsubscribeTag = trpc.user.unsubscribeTag.useMutation();
   const loading = subscribeTag.isPending || unsubscribeTag.isPending || isFetching || me.isRefetching;
-  console.log("loading", subscribeTag.isPending, unsubscribeTag.isPending, isFetching, me.isRefetching);
 
   const handleToggle = async (tag: Tag) => {
     if (!selectedTags) return;
@@ -76,13 +75,21 @@ export const Body = (props: {
 
   const refetchMe = me.refetch;
   useEffect(() => {
-    promise.then(() => {
-      refetchMe();
-      showToast({
-        style: Toast.Style.Success,
-        title: `${toggleTagType === "subscribe" ? "Subscribed" : "Unsubscribed"} Tag: ${toggleTag.split(":")[1]}`,
+    promise
+      .then(() => {
+        refetchMe();
+        showToast({
+          style: Toast.Style.Success,
+          title: `${toggleTagType === "subscribe" ? "Subscribed" : "Unsubscribed"} Tag: ${toggleTag.split(":")[1]}`,
+        });
+      })
+      .catch((error) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to toggle tag",
+          message: error.message,
+        });
       });
-    });
   }, [promise, refetchMe, toggleTag, toggleTagType]);
 
   if (tags && tags.length === 0) {
@@ -112,7 +119,7 @@ export const Body = (props: {
     <List isLoading={loading}>
       {tags?.map((tag) => (
         <TagItem
-          key={tag.name}
+          key={`${tag.spaceId}:${tag.name}`}
           tag={tag}
           selectedTags={selectedTags || []}
           handleToggle={handleToggle}

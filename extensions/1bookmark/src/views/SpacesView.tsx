@@ -6,15 +6,15 @@ import { SpaceItemActionPanel } from "../components/SpaceItemActionPanel";
 import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 
 function Body() {
-  const { data, isFetched, refetch } = trpc.user.me.useQuery();
+  const { data, isFetching, refetch, isLoading } = trpc.user.me.useQuery();
   const spaces = useSortedSpaces(data?.associatedSpaces);
 
-  if (!isFetched || !spaces) {
+  if (isLoading || !spaces) {
     return <List isLoading />;
   }
 
   return (
-    <List>
+    <List isLoading={isFetching}>
       {spaces.length < 1 && (
         <List.Item
           title={"Create new Space"}
@@ -37,9 +37,9 @@ function Body() {
         <List.Item
           key={s.id}
           title={s.name}
-          subtitle={s.type === "PERSONAL" ? "This is private space for you" : undefined}
+          subtitle={s.type === "PERSONAL" ? "This is a private space for you" : undefined}
           icon={s.image || (s.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
-          actions={<SpaceItemActionPanel me={data} spaceId={s.id} refetch={refetch} type={s.type} />}
+          actions={<SpaceItemActionPanel spaceId={s.id} refetch={refetch} type={s.type} />}
         />
       ))}
     </List>

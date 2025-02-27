@@ -1,11 +1,9 @@
-import { RouterOutputs } from "@/utils/trpc.util";
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { SpaceMembersView } from "../views/SpaceMembersView";
 import { NewSpaceForm } from "../views/NewSpaceForm";
 import { SpaceTagsView } from "../views/SpaceTagsView";
 
 export const SpaceItemActionPanel = (props: {
-  me: RouterOutputs["user"]["me"] | undefined;
   refetch: () => void;
   spaceId: string;
   // TODO: Use Prisma Type here
@@ -24,14 +22,14 @@ export const SpaceItemActionPanel = (props: {
         }}
       /> */}
       <Action.Push
-        title={"Tags"}
+        title="Tags"
         icon={Icon.Tag}
         shortcut={{ modifiers: ["cmd"], key: "t" }}
         target={<SpaceTagsView spaceId={spaceId} />}
       />
       {type === "TEAM" && (
         <Action.Push
-          title={"Members"}
+          title="Members"
           icon={Icon.TwoPeople}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
           target={<SpaceMembersView spaceId={spaceId} />}
@@ -43,7 +41,7 @@ export const SpaceItemActionPanel = (props: {
       {/* <Action title={"Delete Space"} onAction={() => console.log("Delete Space")} /> */}
       <ActionPanel.Section>
         <Action.Push
-          title={"Add New Space"}
+          title="Add New Space"
           icon={Icon.Plus}
           target={<NewSpaceForm />}
           shortcut={Keyboard.Shortcut.Common.New}

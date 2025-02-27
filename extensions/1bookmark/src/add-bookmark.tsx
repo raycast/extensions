@@ -149,6 +149,11 @@ function Body(props: { onlyPop?: boolean }) {
   const [selectedSpace, setSelectedSpace] = useAtom(recentSelectedSpaceAtom);
   const [selectedTags, setSelectedTags] = useAtom(recentSelectedTagsAtom);
 
+  const isSlackHuddleUrl = useMemo(() => {
+    // ex: https://app.slack.com/huddle/T07LSULVCQY/C07L45LKYHY
+    return !!url.match(/^https:\/\/app\.slack\.com\/huddle\/.*\/C.*$/);
+  }, [url]);
+
   useEffect(() => {
     getCurrentBrowserPageInfo().then((info) => {
       setTitle(info ? info.title : "");
@@ -205,7 +210,6 @@ function Body(props: { onlyPop?: boolean }) {
 
     // Login failed maybe due to token expiration.
     // Clear sessionToken and send to LoginView.
-    console.log("🚀 ~ session clear");
     setSessionToken("");
   }, [me.error, setSessionToken]);
 
@@ -247,6 +251,17 @@ function Body(props: { onlyPop?: boolean }) {
     >
       <Form.TextField id="title" title="Title" value={title} onChange={setTitle} />
       <Form.TextField id="url" title="URL" value={url} onChange={setUrl} />
+      {isSlackHuddleUrl && (
+        <Form.Checkbox
+          id="answer"
+          label="Check to convert slack:// schema to open with Slack app."
+          onChange={() => {
+            // https://api.slack.com/reference/deep-linking#slack_apps
+            // slack://channel?team={TEAM_ID}&id={CHANNEL_ID}
+            setUrl(`slack://channel?team=${url.split("/")[4]}&id=${url.split("/")[5]}`);
+          }}
+        />
+      )}
 
       <Form.Dropdown
         id="space"
@@ -267,7 +282,6 @@ function Body(props: { onlyPop?: boolean }) {
         title="Tags"
         value={selectedTags.map((tag) => tag.name)}
         onChange={(values) => {
-          console.log("change");
           if (!tags) return;
 
           const selected = values.map((v) => ({ name: v, spaceId: selectedSpace }));

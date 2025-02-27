@@ -6,7 +6,11 @@ export const useSortedSpaces = (spaces?: RouterOutputs["user"]["me"]["associated
     if (!spaces) return undefined;
 
     // Sort PERSONAL type to the front. Sort by name otherwise.
-    return spaces.sort((a, b) => a.name.localeCompare(b.name)).sort((a) => (a.type === "PERSONAL" ? -1 : 1));
+    return [...spaces].sort((a, b) => {
+      if (a.type === "PERSONAL" && b.type !== "PERSONAL") return -1;
+      if (a.type !== "PERSONAL" && b.type === "PERSONAL") return 1;
+      return a.name.localeCompare(b.name);
+    });
   }, [spaces]);
 
   return sorted;

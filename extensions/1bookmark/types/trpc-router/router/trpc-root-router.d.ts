@@ -280,7 +280,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             input: string;
             output: void;
         }>;
-        exists: import("@trpc/server").TRPCMutationProcedure<{
+        exists: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 spaceId: string;
                 url: string;

@@ -4,10 +4,10 @@ import { useState } from "react";
 import SuperJSON from "superjson";
 import fetch from "node-fetch";
 import { httpBatchLink } from "@trpc/client";
-import { trpc } from "../utils/trpc.util.js";
-import { getSessionToken, sessionTokenAtom } from "@/states/session-token.state.js";
 import axios from "axios";
 import { useAtom } from "jotai";
+import { trpc } from "../utils/trpc.util.js";
+import { getSessionToken, sessionTokenAtom } from "../states/session-token.state";
 import { API_URL_TRPC } from "../utils/constants.util.js";
 
 if (!globalThis.fetch) {
@@ -133,7 +133,7 @@ export function CachedQueryClientProvider({ children }: { children: React.ReactN
               showToast({
                 style: Toast.Style.Failure,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                title: msg || (err as any)?.response?.status === 401 ? "Login Required" : "Unknown API Error",
+                title: msg ? msg : (err as any)?.response?.status === 401 ? "Login Required" : "Unknown API Error",
               });
 
               return {

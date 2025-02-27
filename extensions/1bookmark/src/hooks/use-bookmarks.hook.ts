@@ -12,7 +12,7 @@ export const useBookmarks = (p: { sessionToken: string; spaceIds: string[]; me?:
       spaceIds,
     },
     {
-      enabled: !!sessionToken && !!me, // && me.isFetched,
+      enabled: !!sessionToken && !!me,
       initialData: () => {
         const cachedBookmarks = cache.get("bookmarks");
         if (!cachedBookmarks) {

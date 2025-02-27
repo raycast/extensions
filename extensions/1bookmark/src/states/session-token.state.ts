@@ -8,7 +8,7 @@ export const setSessionToken = async (sessionToken: string) => {
   await sessionTokenStorage.setItem("session-token", sessionToken);
 };
 
-export const getSessionToken = async () => {
+export const getSessionToken = async (): Promise<string> => {
   return await sessionTokenStorage.getItem("session-token", "");
 };
 

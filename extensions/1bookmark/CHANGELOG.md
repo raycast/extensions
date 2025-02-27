@@ -1,10 +1,15 @@
 # 1bookmark Changelog
 
+## [Improve Code Quality and Fixed Some Bugs] - {PR_MERGE_DATE}
+
+- 0.4.2
+- 💻 Improved code quality and fixed some minor bugs.
+
 ## [Improve UI and UX] - {PR_MERGE_DATE}
 
 - 0.4.1
 - 💅🏼 Apply Raycast style, shortcut conventions for actions.
-- 💅🏼 All Actions has icon.
+- 💅🏼 All Actions have icon.
 - 📱 All items in Search Bookmarks has go to My Account action.
 - 👥 Add **Remove user from space** action.
 

@@ -6,11 +6,15 @@ import { NewTagForm } from "./NewTagForm";
 
 export const Body = (props: { spaceId: string }) => {
   const { spaceId } = props;
-  const { data, refetch } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
+  const { data, refetch, isLoading, isFetching } = trpc.tag.list.useQuery({ spaceIds: [spaceId] });
 
-  if (data && data.length === 0) {
+  if (isLoading || !data) {
+    return <List isLoading />;
+  }
+
+  if (data.length === 0) {
     return (
-      <List>
+      <List isLoading={isFetching}>
         <List.EmptyView
           title="No tags"
           description="Create a new tag"
@@ -32,7 +36,7 @@ export const Body = (props: { spaceId: string }) => {
   }
 
   return (
-    <List>
+    <List isLoading={isFetching}>
       {data?.map((tag) => (
         <List.Item
           key={tag.name}

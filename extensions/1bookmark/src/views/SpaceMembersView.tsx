@@ -7,7 +7,7 @@ import { useMemo } from "react";
 export const Body = (props: { spaceId: string }) => {
   const me = trpc.user.me.useQuery();
   const { spaceId } = props;
-  const { data, refetch } = trpc.user.listBySpaceId.useQuery(spaceId);
+  const { data, refetch, isFetching } = trpc.user.listBySpaceId.useQuery(spaceId);
 
   const myRole = useMemo(() => {
     if (!me.data) return null;
@@ -17,7 +17,7 @@ export const Body = (props: { spaceId: string }) => {
   }, [me.data, data]);
 
   return (
-    <List>
+    <List isLoading={isFetching || !data}>
       {data?.map((m) => (
         <List.Item
           key={m.email}

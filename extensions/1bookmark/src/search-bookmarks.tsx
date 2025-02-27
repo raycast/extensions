@@ -11,7 +11,7 @@ import { LoginView } from "./views/LoginView";
 import { useMe } from "./hooks/use-me.hook";
 import { useBookmarks } from "./hooks/use-bookmarks.hook";
 import { Bookmark } from "./types";
-import { useBookmarkSearchs } from "./hooks/use-bookmark-searchs.hook";
+import { useBookmarkSearches } from "./hooks/use-bookmark-searchs.hook";
 import { RequiredActions } from "./components/BookmarkItemActionPanel";
 
 const cache = new Cache();
@@ -55,7 +55,6 @@ export function Body() {
 
     // Login failed maybe due to token expiration.
     // Clear sessionToken and send to LoginView.
-    console.log("🚀 ~ session clear");
     setSessionToken("");
   }, [me.error, setSessionToken]);
 
@@ -65,19 +64,9 @@ export function Body() {
     if (!me.data && !data) return;
     if (!after1Sec) return;
 
-    console.log("🚀 ~ detect logout");
-
     cache.remove("me");
     cache.remove("bookmarks");
   }, [sessionToken, trpcUtils, spaceIds, me.data, data, after1Sec]);
-
-  useEffect(() => {
-    // When logging in after logging out,
-    if (!sessionToken) return;
-    if (me.data && data) return;
-
-    // refetch()
-  }, [sessionToken, me.data, data, refetch]);
 
   const [keyword, setKeyword] = useState("");
 
@@ -89,7 +78,7 @@ export function Body() {
     });
   }, [me.data]);
 
-  const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = useBookmarkSearchs({
+  const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = useBookmarkSearches({
     data,
     selectedTags,
   });
@@ -99,6 +88,19 @@ export function Body() {
       return {
         filteredTaggedList: taggedBookmarks,
         filteredUntaggedList: untaggedBookmarks,
+      };
+    }
+
+    if (keyword.startsWith("#")) {
+      return {
+        filteredTaggedList: searchInTags.search(`slack ${keyword}`, {
+          prefix: true,
+          combineWith: "AND",
+        }) as unknown as Bookmark[],
+        filteredUntaggedList: searchInUntagged.search(`slack ${keyword}`, {
+          prefix: true,
+          combineWith: "AND",
+        }) as unknown as Bookmark[],
       };
     }
 

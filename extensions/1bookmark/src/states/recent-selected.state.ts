@@ -16,8 +16,9 @@ interface SelectedTag {
 
 const tagsStorage = new JotaiCacheStorage<SelectedTag[]>();
 
+const cached = cache.get("recent-selected-tags");
 export const recentSelectedTagsAtom = atomWithStorage<SelectedTag[]>(
   "recent-selected-tags",
-  cache.get("recent-selected-tags") ? (JSON.parse(cache.get("recent-selected-tags")!) as SelectedTag[]) : [],
+  cached ? (JSON.parse(cached) as SelectedTag[]) : [],
   tagsStorage,
 );

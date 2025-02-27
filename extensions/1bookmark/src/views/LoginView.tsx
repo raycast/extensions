@@ -99,7 +99,7 @@ function Body() {
 
       {tokenSent && (
         <>
-          <Form.Description text={`Login code sent to ${email} email.`} />
+          <Form.Description text={`Login code sent to ${email}.`} />
           <Form.Description text={`Enter the 6-digit login code sent to your email.`} />
           <Form.TextField
             ref={verificationTokenRef}

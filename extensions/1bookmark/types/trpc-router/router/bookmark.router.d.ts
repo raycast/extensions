@@ -95,7 +95,7 @@ export declare const bookmarkRouter: import("@trpc/server/unstable-core-do-not-i
         input: string;
         output: void;
     }>;
-    exists: import("@trpc/server").TRPCMutationProcedure<{
+    exists: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             spaceId: string;
             url: string;

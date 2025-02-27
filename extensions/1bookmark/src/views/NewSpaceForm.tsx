@@ -17,21 +17,17 @@ function Body() {
   const create = trpc.team.create.useMutation();
 
   async function handleSubmit(form: FormValues) {
-    try {
-      await create.mutateAsync({
-        name: form.name,
-        image: form.image,
-        description: form.description,
-      });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Space created",
-      });
-      // TODO: Move to Spaces view.
-      pop();
-    } catch (error) {
-      // Handle error
-    }
+    await create.mutateAsync({
+      name: form.name,
+      image: form.image,
+      description: form.description,
+    });
+    showToast({
+      style: Toast.Style.Success,
+      title: "Space created",
+    });
+    // TODO: Move to Spaces view.
+    pop();
   }
 
   return (

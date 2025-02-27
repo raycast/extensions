@@ -5,7 +5,7 @@ import { Tag } from "../types";
 
 const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: string[] }) => {
   const { tag, selectedTags } = props;
-  const selected = selectedTags.find((t) => t.includes(`${tag.spaceId}:${tag.name}`));
+  const selected = selectedTags.find((t) => t === `${tag.spaceId}:${tag.name}`);
   return (
     <List.Dropdown.Item
       key={tag.name}
@@ -18,7 +18,7 @@ const DropdownItem = (props: { tag: Tag; spaceIds: string[]; selectedTags: strin
 
 export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceIds: string[] }) {
   const { me, spaceIds } = props;
-  const { data: tags, refetch } = trpc.tag.list.useQuery({ spaceIds });
+  const { data: tags, refetch, isFetching } = trpc.tag.list.useQuery({ spaceIds });
   const { push } = useNavigation();
   const trpcUtils = trpc.useUtils();
   const selectedTags = me.associatedSpaces.flatMap((space) => {
@@ -44,8 +44,6 @@ export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceId
   const unsubscribeTag = trpc.user.unsubscribeTag.useMutation();
 
   const toggle = async (tag: Tag) => {
-    if (!selectedTags) return;
-
     if (selectedTags.includes(`${tag.spaceId}:${tag.name}`)) {
       await unsubscribeTag.mutateAsync({ spaceId: tag.spaceId, tagName: tag.name });
     } else {
@@ -58,8 +56,7 @@ export function BookmarkFilter(props: { me: RouterOutputs["user"]["me"]; spaceId
   return (
     <List.Dropdown
       tooltip="Subscribed Tags"
-      // storeValue={true}
-      isLoading={!tags}
+      isLoading={isFetching}
       value={"SUMMARY"}
       onChange={(newValue) => {
         const tag = tags?.find((t) => `${t.spaceId}:${t.name}` === newValue);

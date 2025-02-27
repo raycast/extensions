@@ -9,7 +9,7 @@ export type BookmarkSearch = {
   untaggedBookmarks: Bookmark[];
 };
 
-export const useBookmarkSearchs = (params: { selectedTags: string[]; data?: Bookmark[] }) => {
+export const useBookmarkSearches = (params: { selectedTags: string[]; data?: Bookmark[] }) => {
   const { data, selectedTags } = params;
 
   const { searchInTags, searchInUntagged, taggedBookmarks, untaggedBookmarks } = useMemo(() => {
@@ -36,14 +36,13 @@ export const useBookmarkSearchs = (params: { selectedTags: string[]; data?: Book
       deletedAt: "deletedAt",
     };
 
-    const forTagged = new MiniSearch<Bookmark>({
+    const options = {
       fields: ["name", "url"],
       storeFields: Object.values(storeFields),
-    });
-    const forUntagged = new MiniSearch<Bookmark>({
-      fields: ["name", "url"],
-      storeFields: Object.values(storeFields),
-    });
+    };
+
+    const forTagged = new MiniSearch<Bookmark>(options);
+    const forUntagged = new MiniSearch<Bookmark>(options);
 
     const { taggedBookmarks, untaggedBookmarks } = data.reduce(
       (acc, item) => {

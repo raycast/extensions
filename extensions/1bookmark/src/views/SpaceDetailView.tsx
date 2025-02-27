@@ -6,7 +6,7 @@ function Body() {
   const me = trpc.user.me.useQuery();
   const associatedSpaces = me.data?.associatedSpaces;
 
-  if (!me.isFetched || !associatedSpaces) {
+  if (me.isLoading || !associatedSpaces) {
     return <List isLoading />;
   }
 
