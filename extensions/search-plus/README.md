@@ -30,7 +30,7 @@ View and manage all available search engines and set your default search engine.
 For the most seamless experience:
 
 1. In Raycast, search for "Manage Fallback Commands"
-2. Add "Search the web" from the Search Plus extension to your enabled fallback commands
+2. Add "Search the Web" from the Search Plus extension to your enabled fallback commands
 3. Now you can use bangs directly from Raycast's main search when no other results match!
 
 ## Contributing
