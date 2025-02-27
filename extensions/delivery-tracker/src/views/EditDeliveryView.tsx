@@ -31,32 +31,40 @@ export default function EditDeliveryView({
 
   const { handleSubmit, itemProps } = useForm<EditDeliveryForm>({
     onSubmit: async (deliveryForm) => {
-      if (
-        delivery.trackingNumber !== deliveryForm.trackingNumber ||
-        delivery.carrier !== deliveryForm.carrier ||
-        delivery.manualDeliveryDate !== deliveryForm.manualDeliveryDate
-      ) {
-        // clear packages for this delivery so it will refresh
-        setPackages((packages) => {
-          delete packages[delivery.id];
-          return packages;
+      try {
+        if (
+          delivery.trackingNumber !== deliveryForm.trackingNumber ||
+          delivery.carrier !== deliveryForm.carrier ||
+          delivery.manualDeliveryDate !== deliveryForm.manualDeliveryDate
+        ) {
+          // clear packages for this delivery so it will refresh
+          setPackages((packages) => {
+            delete packages[delivery.id];
+            return packages;
+          });
+        }
+
+        delivery.name = deliveryForm.name;
+        delivery.trackingNumber = deliveryForm.trackingNumber;
+        delivery.carrier = deliveryForm.carrier;
+        delivery.manualDeliveryDate = deliveryForm.manualDeliveryDate ?? undefined;
+
+        await setDeliveries(deliveries);
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Delivery Modified",
+          message: deliveryForm.name,
+        });
+
+        pop();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to modify delivery",
+          message: String(error)
         });
       }
-
-      delivery.name = deliveryForm.name;
-      delivery.trackingNumber = deliveryForm.trackingNumber;
-      delivery.carrier = deliveryForm.carrier;
-      delivery.manualDeliveryDate = deliveryForm.manualDeliveryDate ?? undefined;
-
-      await setDeliveries(deliveries);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Delivery Modified",
-        message: deliveryForm.name,
-      });
-
-      pop();
     },
     initialValues: {
       name: delivery.name,
