@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [AI Extension Improvements] - {PR_MERGE_DATE}
+## [AI Extension Improvements] - 2025-02-27
 
 Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
 
