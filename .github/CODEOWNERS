@@ -1575,7 +1575,7 @@
 /extensions/spring-initializr                                       @danvega
 /extensions/spryker-docs                                            @DinisEsteves
 /extensions/sql-format                                              @tonngw @jfkisafk
-/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara
+/extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara @ViGeng
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
 /extensions/st-andrews-main-library-occupancy                       @Alleluia23
 /extensions/stablecog                                               @yekta
