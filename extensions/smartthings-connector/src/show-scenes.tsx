@@ -1,10 +1,4 @@
-import {
-  List,
-  showToast,
-  ToastStyle,
-  ActionPanel,
-  getPreferenceValues,
-} from "@raycast/api";
+import { List, showToast, ToastStyle, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -32,7 +26,7 @@ export default function ShowScenes() {
             headers: {
               Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
             },
-          },
+          }
         );
 
         console.log("Fetched Scenes Payload:", response.data); // Log the payload
@@ -40,11 +34,7 @@ export default function ShowScenes() {
         setScenes(scenes);
         setIsLoading(false);
       } catch (error) {
-        showToast(
-          ToastStyle.Failure,
-          "Failed to fetch scenes",
-          (error as Error).message,
-        );
+        showToast(ToastStyle.Failure, "Failed to fetch scenes", (error as Error).message);
         setIsLoading(false);
       }
     }
@@ -54,22 +44,14 @@ export default function ShowScenes() {
 
   const executeScene = async (sceneId: string) => {
     try {
-      await axios.post(
-        `https://api.smartthings.com/v1/scenes/${sceneId}/execute`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
-          },
+      await axios.post(`https://api.smartthings.com/v1/scenes/${sceneId}/execute`, null, {
+        headers: {
+          Authorization: `Bearer ${SMARTTHINGS_API_TOKEN}`,
         },
-      );
+      });
       showToast(ToastStyle.Success, "Szene erfolgreich ausgeführt");
     } catch (error) {
-      showToast(
-        ToastStyle.Failure,
-        "Fehler beim Ausführen der Szene",
-        (error as Error).message,
-      );
+      showToast(ToastStyle.Failure, "Fehler beim Ausführen der Szene", (error as Error).message);
     }
   };
 

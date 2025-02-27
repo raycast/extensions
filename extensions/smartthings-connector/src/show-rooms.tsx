@@ -1,10 +1,4 @@
-import {
-  List,
-  showToast,
-  ToastStyle,
-  ActionPanel,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { List, showToast, ToastStyle, ActionPanel, CopyToClipboardAction } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchRooms, fetchDevicesInRoom } from "./fetchRooms";
 
@@ -35,18 +29,12 @@ export default function ShowRooms() {
         setRooms(roomsData);
 
         // Fetch devices for all rooms
-        const devicePromises = roomsData.map((room: Room) =>
-          fetchDevicesInRoom(room.roomId),
-        );
+        const devicePromises = roomsData.map((room: Room) => fetchDevicesInRoom(room.roomId));
         const devicesData = await Promise.all(devicePromises);
         setDevices(devicesData.flat() as Device[]);
         setIsLoading(false);
       } catch (error) {
-        showToast(
-          ToastStyle.Failure,
-          "Failed to fetch data",
-          (error as Error).message,
-        );
+        showToast(ToastStyle.Failure, "Failed to fetch data", (error as Error).message);
         setIsLoading(false);
       }
     }
@@ -61,9 +49,7 @@ export default function ShowRooms() {
       isShowingDetail
     >
       {rooms
-        .filter((room: Room) =>
-          room.name.toLowerCase().includes(searchText.toLowerCase()),
-        )
+        .filter((room: Room) => room.name.toLowerCase().includes(searchText.toLowerCase()))
         .map((room: Room) => (
           <List.Item
             key={room.roomId}
@@ -82,9 +68,7 @@ export default function ShowRooms() {
                 markdown={
                   devices.length > 0
                     ? `### Devices in ${room.name}\n${devices
-                        .filter(
-                          (device: Device) => device.roomId === room.roomId,
-                        )
+                        .filter((device: Device) => device.roomId === room.roomId)
                         .map((device: Device) => `- ${device.label}`)
                         .join("\n")}`
                     : "No devices found"
