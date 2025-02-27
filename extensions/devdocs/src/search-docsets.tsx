@@ -35,8 +35,8 @@ export default function SearchDocsets(): JSX.Element {
   useEffect(() => {
     filterDocs([
       // return exact match if alias is used
-      documentations[0].filter((item) => item.alias && item.alias === searchText),
-      documentations[1].filter((item) => item.alias && item.alias === searchText),
+      documentations[0].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
+      documentations[1].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
     ]);
   }, [searchText]);
 
