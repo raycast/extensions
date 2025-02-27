@@ -32,11 +32,11 @@ export default function Prices() {
       searchBarPlaceholder="Search price"
       searchBarAccessory={
         <List.Dropdown tooltip="Sort" onChange={setSort}>
-          <List.Dropdown.Item title="NameSilo Sort" value="" />
+          <List.Dropdown.Item title="NameSilo Sort (default)" value="" />
           <List.Dropdown.Section>
-            <List.Dropdown.Item title="Lowest Registration" value="lowest_registration" />
-            <List.Dropdown.Item title="Lowest Renewal" value="lowest_renewal" />
-            <List.Dropdown.Item title="Lowest Transfer" value="lowest_transfer" />
+            <List.Dropdown.Item title="Lowest Registration (ASC)" value="lowest_registration" />
+            <List.Dropdown.Item title="Lowest Renewal (ASC)" value="lowest_renewal" />
+            <List.Dropdown.Item title="Lowest Transfer (ASC)" value="lowest_transfer" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }

@@ -95,7 +95,7 @@ If your command returns a `MenuBarExtra`, it _must_ either not set `isLoading` -
 If your `menu-bar` command also makes use of [background refresh](../information/lifecycle/background-refresh.md) _and_ it has background refresh activated, Raycast will run the command at set intervals. In your command, you can use `environment.launchType` to check whether it is launched in the background or by the user.
 
 {% hint style="info" %}
-To ease testing, commands configured to run in the background have an extra action in development mode:
+To ease testing, commands configured to run in the background have an extra action in development mode:\
 ![Menu Bar Command - Run in Background](../.gitbook/assets/menu-bar-run-in-background.webp)
 {% endhint %}
 

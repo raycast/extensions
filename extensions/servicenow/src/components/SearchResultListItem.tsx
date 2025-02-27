@@ -1,43 +1,50 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { keys } from "lodash";
 
 import ResultDetail from "./ResultDetail";
 import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
-import { Data, Field, Instance, Record } from "../types";
+import { Data, Field, Record } from "../types";
+import useFavorites from "../hooks/useFavorites";
+import useInstances from "../hooks/useInstances";
+import FavoriteForm from "./FavoriteForm";
 
 export default function SearchResultListItem({
   result,
   icon,
   label,
   fields,
-  mutateSearchResults,
+  revalidateSearchResults,
 }: {
   result: Record;
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
-  mutateSearchResults: () => Promise<void>;
+  revalidateSearchResults: () => void;
 }) {
-  const [selectedInstance] = useCachedState<Instance>("instance");
+  const { selectedInstance } = useInstances();
+  const { isUrlInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
   const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
 
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];
+  const title = result.metadata.title?.split(/\s|\n/);
   const description = result.metadata.description?.split(/\s|\n/);
-  let keywords = [label, ...(description ?? [])];
+  let keywords = [label, ...(title ?? []), ...(description ?? [])];
 
   let name;
   if (result.table == "u_documate_page" || result.table == "u_documate_workspace") {
+    result.record_url = `documate.do?w=${result.data.u_workspace?.value}&p=${result.sys_id}`;
     name = result.metadata.title || "Untitled page";
     const dataIcon = result.data.u_icon?.display;
     icon = {
       source: dataIcon || Icon.Document,
       tintColor: dataIcon ? null : Color.SecondaryText,
     };
+
+    keywords = keywords.concat((result.data.u_workspace?.display ?? "").split(/\s|\n/));
     accessories.push({
       tag: {
         value: result.data.u_workspace?.display,
@@ -96,6 +103,14 @@ export default function SearchResultListItem({
     result.record_url = "/" + result.record_url;
   }
 
+  const favoriteId = isUrlInFavorites(`${instanceUrl}${result.record_url}`);
+  if (favoriteId) {
+    accessories.unshift({
+      icon: { source: Icon.Star, tintColor: Color.Yellow },
+      tooltip: "Favorite",
+    });
+  }
+
   return (
     <List.Item
       key={result.sys_id}
@@ -112,7 +127,37 @@ export default function SearchResultListItem({
               target={<ResultDetail result={result} fields={fields} />}
             />
           </ResultActions>
-          <Actions mutate={mutateSearchResults} />
+          {!favoriteId && (
+            <Action
+              title="Add Favorite"
+              icon={Icon.Star}
+              onAction={() => addUrlToFavorites(name, result.record_url)}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+            />
+          )}
+          {favoriteId && (
+            <>
+              <Action.Push
+                title="Edit Favorite"
+                icon={Icon.Pencil}
+                target={<FavoriteForm favoriteId={favoriteId} />}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Remove Favorite"
+                icon={Icon.StarDisabled}
+                style={Action.Style.Destructive}
+                onAction={() => removeFromFavorites(favoriteId, name, false)}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
+              />
+            </>
+          )}
+          <Actions
+            revalidate={() => {
+              revalidateFavorites();
+              revalidateSearchResults();
+            }}
+          />
         </ActionPanel>
       }
       accessories={accessories}

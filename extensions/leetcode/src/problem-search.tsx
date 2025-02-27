@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
 import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
 import { formatProblemMarkdown } from './utils';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
 
 function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
   switch (difficulty) {
@@ -19,7 +20,7 @@ function formatDifficultyColor(difficulty: ProblemDifficulty): Color {
 }
 
 function ProblemDetail(props: { titleSlug: string }): JSX.Element {
-  const { isLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
+  const { isLoading: isProblemLoading, data: problem } = useFetch<GetProblemResponse, undefined, Problem>(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: getProblemQuery,
@@ -37,21 +38,16 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     },
   });
 
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={formatProblemMarkdown(problem)}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com/problems/${props.titleSlug}`} />
-          <Action.CopyToClipboard
-            title="Copy Link to Clipboard"
-            content={`https://leetcode.com/problems/${props.titleSlug}`}
-          />
-        </ActionPanel>
-      }
-    ></Detail>
-  );
+  const problemMarkdown = useMemo(() => formatProblemMarkdown(problem), [problem]);
+
+  const actions = useProblemTemplateActions({
+    codeSnippets: problem?.codeSnippets,
+    problemMarkdown,
+    isPaidOnly: problem?.isPaidOnly,
+    linkUrl: `https://leetcode.com/problems/${props.titleSlug}`,
+  });
+
+  return <Detail isLoading={isProblemLoading} markdown={problemMarkdown} actions={actions} />;
 }
 
 export default function Command(): JSX.Element {
@@ -77,7 +73,7 @@ export default function Command(): JSX.Element {
     },
     mapResult(result) {
       return {
-        data: result.data.problemsetQuestionList?.problems || [],
+        data: result.data.problemsetQuestionList?.data || [],
       };
     },
     onData: (data) => {

@@ -6,6 +6,7 @@ import { Project, Issue } from "./types";
 
 type UserPreferences = {
   isJiraCloud: string; // "cloud" or "server"
+  defaultProject?: string;
 };
 
 export default function Command() {
@@ -14,7 +15,7 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue>();
   const [description, setDescription] = useState("");
-  const [selectedProject, setSelectedProject] = useState<string>();
+  const [selectedProject, setSelectedProject] = useState<string | undefined>(userPrefs.defaultProject);
   const [startedAt, setStartedAt] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [issueCache, setIssueCache] = useState(new Map());
@@ -239,7 +240,7 @@ Please check your permissions, jira account, or credentials and try again.
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject}>
+      <Form.Dropdown id="projectId" title="Project Id" value={selectedProject} onChange={setSelectedProject}>
         {projects?.map((item) => <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />)}
       </Form.Dropdown>
       <Form.Dropdown id="issueId" title="Issue Key" defaultValue={selectedIssue?.key} onChange={handleSelectIssue}>

@@ -44,11 +44,22 @@ Sometimes we're simply not near our mac when a reminder is up. Being able to rec
 Simple Reminder offers this feature through a mobile application called [ntfy](https://docs.ntfy.sh/). This is a mobile application that lets you subscribe to topics and receive notifications of messages that are sent to those topics.
 With the app installed, you simply need to go to the preferences panel of the Simple Reminder extension, check the `Mobile notifications with ntfy` and set the ntfy `topic` to send the notifications to.
 
+#### Self-hosted ntfy server
+
+If you value your privacy and want to use a self-hosted ntfy server, it's also possible (by default it uses the `ntfy.sh` one).
+You simply have to set the URL for your self-hosted ntfy server and set an access token to authorize against that server.
+
+The rest works exactly the same!
+
+For information on how to configure a self-hosted ntfy server you can [check their documentation](https://docs.ntfy.sh/config/#access-tokens) or [this helpful blog post](https://medium.com/@williamdonze/ntfy-self-hosted-notification-service-0f3eada6e657).
+
 ![ntfy-1.png](media/ntfy-1.png)
 
 This handles the extension side of things. The next step involves your mobile device.
 
 Simply download ntfy from [Google Play](https://play.google.com/store/apps/details?id=io.heckel.ntfy) or from the [App Store](https://apps.apple.com/us/app/ntfy/id1625396347) and subscribe to the topic that you just defined in the extension. As simple as that.
+
+If you are using a self-hosted version, then you'll need to enter your user and password, besides specifying the server url in the mobile application.
 
 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODQxOTU2ODk1ZDNkZGIxMDliNDUxMDI5MjBlZWVlYWMyZjgwZWFmNyZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/upd24i7KoatmzLw34v/giphy.gif" width="400">
 

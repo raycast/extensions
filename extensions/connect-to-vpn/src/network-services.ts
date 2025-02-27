@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { exec } from "child_process";
 import { Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { execSync } from "node:child_process";
 
 type Preferences = {
   hideInvalidDevices: boolean;
@@ -58,6 +59,7 @@ export function useNetworkServices() {
         [service.id]: { ...service, status: updatedStatus },
       }));
     } catch (err) {
+      console.error(`Error updating service status for ${service.name}:`, err);
       setError(err as Error);
     }
   };
@@ -69,7 +71,10 @@ export function useNetworkServices() {
         ...currentServices,
         [service.id]: { ...service, status },
       }));
+
+      return status;
     } catch (err) {
+      console.error(`Error fetching service status for ${service.name}:`, err);
       setError(err as Error);
     }
   };
@@ -86,7 +91,7 @@ export function useNetworkServices() {
             setTimeout(checkStatus, 500);
           }
         } catch (err) {
-          // If there's an error, we'll continue polling
+          console.error(`Error checking final status for ${service.name}:`, err);
           setTimeout(checkStatus, 500);
         }
       };
@@ -197,6 +202,7 @@ export function useNetworkServices() {
 
       setNetworkServices(servicesMap);
     } catch (err) {
+      console.error("Error fetching data with favorites:", err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -335,13 +341,15 @@ const saveFavoriteOrder = async (order: Record<string, number>) => {
 
 const execPromise = (command: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    exec(command, (err, stdout) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stdout.trim());
-      }
-    });
+    try {
+      const child = execSync(command);
+      const result = child.toString();
+
+      resolve(result.trim());
+    } catch (e) {
+      console.error(`Command ${command} thrown an error`, e);
+      reject(e);
+    }
   });
 
 const listNetworkServiceOrder = (): Promise<string> => execPromise("/usr/sbin/networksetup -listnetworkserviceorder");

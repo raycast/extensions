@@ -7,6 +7,10 @@ export interface Hue {
   colors: string[];
   tailwind_colors_name: string;
   tailwind_colors: TailwindColors;
-  background: string;
-  text: string;
+}
+
+export interface HueGenerateRecord {
+  hue: Hue;
+  star: boolean;
+  createAt: string;
 }

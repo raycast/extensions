@@ -1,5 +1,10 @@
 # Raycast PM2
 
+## ## [Chore & Fixes] - 2024-11-21
+
+- Hide example button while loading
+- Bump all dependencies to the latest
+
 ## [Chore & Fixes] - 2024-10-11
 
 - Use `nano-spawn` instead of `execa`

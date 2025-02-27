@@ -64,13 +64,34 @@ export const BaseSelect = ({
   </Detail.Metadata.TagList>
 );
 
-export const Label = (props: ParameterProps) => <BaseInput fieldName="label" {...props} />;
+export const Label = ({ badge, onChange }: ParameterProps) => {
+  return (
+    <Detail.Metadata.TagList title="label">
+      <Detail.Metadata.TagList.Item
+        text="none"
+        color={getTagColor(!badge.label)}
+        onAction={() => onChange({ ...badge, label: undefined })}
+      />
+      {badge.$icon && badge.label !== badge.$icon.title && (
+        <Detail.Metadata.TagList.Item
+          text={ellipsis(badge.$icon.title)}
+          color={getTagColor(badge.$icon.title === badge.label)}
+          onAction={() => {
+            onChange({ ...badge, label: badge.$icon?.title });
+          }}
+        />
+      )}
+      <Detail.Metadata.TagList.Item text={ellipsis(badge.label) || ""} color={getTagColor(Boolean(badge.label))} />
+      <EditButton fieldName="label" badge={badge} onChange={onChange} />
+    </Detail.Metadata.TagList>
+  );
+};
 
 export const Message = ({ badge, onChange }: ParameterProps) => {
   return (
     <Detail.Metadata.TagList title="message">
       <Detail.Metadata.TagList.Item
-        text={"none"}
+        text="none"
         color={getTagColor(!badge.message)}
         onAction={() => onChange({ ...badge, message: undefined })}
       />

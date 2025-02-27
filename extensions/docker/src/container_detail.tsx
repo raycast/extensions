@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, useNavigation } from '@raycast/api';
 import { DockerState } from './docker';
 import { containerName, formatContainerDetailMarkdown } from './docker/container';
 import { formatContainerError } from './docker/error';
@@ -91,8 +91,9 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
           {containerInfo !== undefined && (
             <Action
               title="Remove Container"
-              icon={{ source: Icon.Trash, tintColor: Color.Red }}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={withToast({
                 action: async () => {
                   await removeContainer(containerInfo);

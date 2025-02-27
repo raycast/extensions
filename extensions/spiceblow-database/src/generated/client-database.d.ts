@@ -19,7 +19,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             [x: number]: any;
             200: any;
           }>
@@ -36,7 +36,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             200: {
               hasLicense: boolean;
             };
@@ -51,7 +51,16 @@ export declare function createClient({
             databaseType: "postgres" | "mysql";
             tableInfo: import("spiceblow-database/src/types").TableInfo;
             schema?: string | undefined;
-            exampleRow?: any;
+            previousOutputs?:
+              | {
+                  error: string;
+                  output: {
+                    whereClause: string;
+                    orderByClause: string | null;
+                    groupBy: string | null;
+                  };
+                }[]
+              | undefined;
             namespace?: string | undefined;
           },
           options?:
@@ -62,7 +71,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             200: {
               sqlClause: string;
             };
@@ -76,6 +85,12 @@ export declare function createClient({
             databaseType: "postgres" | "mysql";
             schema: string;
             prompt: string;
+            previousOutputs?:
+              | {
+                  error: string;
+                  output: string;
+                }[]
+              | undefined;
             previousQuery?: string | undefined;
           },
           options?:
@@ -86,7 +101,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             200: AsyncGenerator<
               {
                 sqlCode: string;
@@ -107,8 +122,28 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             200: Response;
+          }>
+        >;
+      };
+      generateGraphUrl: {
+        post: (
+          body: {
+            rowsData: import("spiceblow-database/src/types").GraphData;
+          },
+          options?:
+            | {
+                headers?: Record<string, unknown> | undefined;
+                query?: Record<string, unknown> | undefined;
+                fetch?: RequestInit | undefined;
+              }
+            | undefined,
+        ) => Promise<
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
+            200: {
+              url: string;
+            };
           }>
         >;
       };
@@ -122,7 +157,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             readonly 200: {
               ok: boolean;
             };
@@ -139,7 +174,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             200: AsyncGenerator<
               | "hello"
               | {
@@ -161,7 +196,7 @@ export declare function createClient({
               }
             | undefined,
         ) => Promise<
-          import("spiceflow/client").SpiceflowClient.TreatyResponse<{
+          import("spiceflow/client").SpiceflowClient.ClientResponse<{
             readonly 200: {
               ok: boolean;
             };

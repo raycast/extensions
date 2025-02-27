@@ -6,7 +6,8 @@
   "icon": "mullvad-icon.png",
   "author": "0x46616c6b",
   "contributors": [
-    "sebastiankranz"
+    "sebastiankranz",
+    "svenhofman"
   ],
   "license": "MIT",
   "commands": [
@@ -37,6 +38,13 @@
       "subtitle": "Mullvad",
       "description": "Deactivates the VPN connection.",
       "mode": "no-view"
+    },
+    {
+      "name": "reconnect",
+      "title": "Reconnect",
+      "subtitle": "Mullvad",
+      "description": "Reactivates the VPN connection.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -48,7 +56,7 @@
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "8.40.0",
-    "prettier": "2.5.1",
+    "prettier": "^2.5.1",
     "react": "^18.2.0",
     "typescript": "^5.3.3"
   },

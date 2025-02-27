@@ -1,28 +1,38 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube-downloader",
-  "title": "YouTube Downloader",
-  "description": "Download YouTube video from Raycast",
+  "title": "Video Downloader",
+  "description": "Download videos from YouTube, Twitter, Twitch, Instagram, Bilibili and more using yt-dlp CLI",
+  "type": "module",
   "icon": "youtube.png",
   "author": "vimtor",
   "contributors": [
     "pernielsentikaer",
     "d2a",
     "ridemountainpig",
-    "xmorse"
+    "xmorse",
+    "litomore",
+    "anwarulislam"
   ],
   "categories": [
     "Applications",
     "Data",
     "Productivity"
   ],
+  "keywords": [
+    "video",
+    "downloader",
+    "youtube",
+    "bilibili",
+    "yt-dlp"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Download Video",
-      "subtitle": "YouTube",
-      "description": "Download YouTube video with parameters",
+      "subtitle": "Video Downloader",
+      "description": "Download video with parameters",
       "mode": "view"
     }
   ],
@@ -36,47 +46,96 @@
       "required": true
     },
     {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/yt-dlp",
+      "required": false
+    },
+    {
       "name": "ffmpegPath",
       "title": "ffmpeg Path",
-      "description": "Path to the ffmpeg executable",
+      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffmpeg",
-      "required": true
+      "required": false
     },
     {
       "name": "ffprobePath",
       "title": "ffprobe Path",
-      "description": "Path to the ffprobe executable. Usually installed alog with ffmpeg.",
+      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffprobe",
-      "required": true
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Enable Browser Extension Support",
+      "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@distube/ytdl-core": "^4.14.4",
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
-    "date-fns": "^2.30.0",
-    "fluent-ffmpeg": "2.1.3",
-    "pretty-bytes": "^6.1.0",
-    "sanitize-filename": "^1.6.3",
-    "tempfile": "^4.0.0",
-    "unused-filename": "^4.0.1"
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1",
+    "date-fns": "^4.1.0",
+    "execa": "^9.5.2",
+    "is-url-superb": "^6.1.0",
+    "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/fluent-ffmpeg": "^2.1.21",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "^18.3.18",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "pull": "ray pull-contributions",
     "publish": "ray publish"
   }
 }

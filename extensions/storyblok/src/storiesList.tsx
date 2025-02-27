@@ -40,10 +40,7 @@ type Story = {
 };
 
 type storiesData = {
-  isLoading: boolean;
-  data: {
-    stories: Story[];
-  };
+  stories: Story[];
 };
 
 const storyMarkdown = (story: Story) => {
@@ -55,7 +52,7 @@ const storyMarkdown = (story: Story) => {
 };
 
 export default function StoriesList(props: { spaceId: number }) {
-  const data = sbData(`spaces/${props.spaceId}/stories/`) as storiesData;
+  const data = sbData<storiesData>(`spaces/${props.spaceId}/stories/`);
   if (data.isLoading) {
     return <Detail markdown={`Loading stories for space ${props.spaceId}...`} />;
   } else if (data.isLoading === false && !data.data) {
@@ -116,7 +113,7 @@ export default function StoriesList(props: { spaceId: number }) {
                   title="Open in Storyblok"
                   url={`https://app.storyblok.com/#!/me/spaces/${props.spaceId}/stories/${story.id}/edit`}
                 />
-                <Action.CopyToClipboard title={`Copy Story ID: ${story.id.toString}`} content={story.id.toString()} />
+                <Action.CopyToClipboard title={`Copy Story ID: ${story.id}`} content={story.id.toString()} />
               </ActionPanel>
             }
           />

@@ -4,8 +4,16 @@
   "title": "Anki",
   "description": "Anki extension for Raycast",
   "icon": "extension-icon.png",
-  "categories": ["Productivity", "Applications", "Other"],
-  "keywords": ["memory", "flashcards", "study"],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Other"
+  ],
+  "keywords": [
+    "memory",
+    "flashcards",
+    "study"
+  ],
   "author": "anton-suprun",
   "preferences": [
     {
@@ -16,20 +24,29 @@
       "description": "Port that anki-connect uses. (Default: 8765)"
     },
     {
-        "name": "allow_dup_cards",
-        "type": "checkbox",
-        "label": "Allow Duplicate Cards",
-        "required": false,
-        "description": "If selected, duplicate cards can be created"
+      "name": "allow_dup_cards",
+      "type": "checkbox",
+      "label": "Allow Duplicate Cards",
+      "required": false,
+      "description": "If selected, duplicate cards can be created"
     },
     {
-        "name": "dup_scope",
-        "type": "dropdown",
-        "title": "Duplicate Scope",
-        "data": [{"title": "Deck" , "value": "deck"}, { "title": "Entire Collection", "value": "collection" }],
-        "default": "deck",
-        "required": false,
-        "description": "Can be used to specify the scope for which duplicates are checked"
+      "name": "dup_scope",
+      "type": "dropdown",
+      "title": "Duplicate Scope",
+      "data": [
+        {
+          "title": "Deck",
+          "value": "deck"
+        },
+        {
+          "title": "Entire Collection",
+          "value": "collection"
+        }
+      ],
+      "default": "deck",
+      "required": false,
+      "description": "Can be used to specify the scope for which duplicates are checked"
     }
   ],
   "license": "MIT",
@@ -73,19 +90,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
+    "@eslint/config-array": "latest",
+    "@eslint/object-schema": "latest",
+    "@raycast/api": "^1.87.4",
     "@raycast/utils": "^1.17.0",
     "@types/showdown": "^2.0.6",
     "@types/turndown": "^5.0.4",
     "axios": "^1.7.2",
+    "glob": "^10.0.0",
     "npm-check-updates": "^16.14.20",
+    "rimraf": "^5.0.0",
     "rss-parser": "^3.13.0",
     "showdown": "^2.1.0",
-    "turndown": "^7.2.0",
-    "@eslint/config-array": "latest",
-    "@eslint/object-schema": "latest",
-    "rimraf": "^5.0.0",
-    "glob": "^10.0.0"
+    "turndown": "^7.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",

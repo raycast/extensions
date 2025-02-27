@@ -12,7 +12,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { deleteTimer, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
+import { deleteTimer, exportTimers, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
 
 export default function Command() {
   const [timers, setTimers] = useState<Timer[]>();
@@ -118,6 +118,12 @@ export default function Command() {
                   }
                 }}
                 style={Action.Style.Destructive}
+              />
+              <Action
+                icon={Icon.Download}
+                title="Export Timers as CSV"
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                onAction={exportTimers}
               />
             </ActionPanel>
           }

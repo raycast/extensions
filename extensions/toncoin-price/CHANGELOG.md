@@ -1,5 +1,9 @@
 # Toncoin Price Changelog
 
+## [Small Improvements] - 2024-12-01
+
+- Updated Bybit API URL
+
 ## [Small Improvements] - 2024-07-29
 
 - Added MEXC Spot link to the menu bar

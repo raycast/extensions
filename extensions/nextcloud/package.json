@@ -7,7 +7,8 @@
   "icon": "nextcloud.png",
   "author": "uetchy",
   "contributors": [
-    "xmok"
+    "xmok",
+    "jamespurnama1"
   ],
   "scripts": {
     "build": "ray build -e dist",

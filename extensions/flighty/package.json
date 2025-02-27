@@ -15,8 +15,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.18.0",
     "dayjs": "^1.11.13",
     "zod": "^3.23.8"
   },

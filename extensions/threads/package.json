@@ -5,6 +5,9 @@
   "description": "Quickly post to Threads and see recent updates.",
   "icon": "threads-icon.png",
   "author": "chrismessina",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Media"
   ],
@@ -172,10 +175,37 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "download-thread-media",
+      "title": "Download Threads Media",
+      "description": "Download threads media with URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "threadsUrl",
+          "description": "Threads URL",
+          "type": "text",
+          "placeholder": "Threads URL",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "mediaDownloadPath",
+          "title": "Video Download Path",
+          "description": "Path to save downloaded media",
+          "type": "directory",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@raycast/api": "^1.80.0",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

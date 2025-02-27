@@ -62,10 +62,11 @@ export const StudyDeck = ({ deckName }: Props) => {
     (fields: Array<CardField>, showAnswer: boolean) => {
       if (!turndown) return;
       const { value: questionValue } = fields[0];
-      const question = `${turndown.turndown(questionValue)}\n`;
+
+      const question = turndown.turndown(`${questionValue}\n`.replace(/\n/g, '<br>'));
 
       const answers = fields.slice(1).map(answer => {
-        return `\n---\n${turndown.turndown(answer.value)}\n`;
+        return turndown.turndown(`\n\n---\n\n${answer.value}\n`.replace(/\n/g, '<br>'));
       });
 
       return showAnswer ? question + answers.join('\n') : question;

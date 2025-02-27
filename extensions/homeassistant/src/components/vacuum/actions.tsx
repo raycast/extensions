@@ -35,7 +35,6 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
     <Action
       title="Start"
       onAction={() => callVacuumStartService(s)}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
       icon={{ source: "play.svg", tintColor: Color.PrimaryText }}
     />
   );
@@ -66,7 +65,7 @@ export function VacuumStopAction(props: { state: State }): JSX.Element | null {
       title="Stop"
       onAction={() => callVacuumStopService(s)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+      icon={{ source: "stop.svg", tintColor: Color.PrimaryText }}
     />
   );
 }
@@ -111,7 +110,7 @@ export function VacuumReturnToBaseAction(props: { state: State }): JSX.Element |
       title="Return to Base"
       onAction={() => callVacuumReturnToBaseService(s)}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
-      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+      icon={{ source: "home.svg", tintColor: Color.PrimaryText }}
     />
   );
 }

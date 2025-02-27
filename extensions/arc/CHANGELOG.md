@@ -1,5 +1,23 @@
 # Arc Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
+AI Tools to:
+
+- Search Tabs
+- Search History
+- Open New Window
+- Open New Blank Window
+- Open New Little Arc Window
+- Open New Incognito Window
+- Open New Tab
+- Search Spaces
+
+## [Improvements] - 2024-10-25
+
+- `Search Tabs` now can search with url and search title with chinese pinyin.
+- `Search Tabs` now can do fuzzy matching.
+
 ## [Improvements] - 2024-09-10
 
 - `Search History` now searches across all Arc profiles. Results from the search display which profile they are from.

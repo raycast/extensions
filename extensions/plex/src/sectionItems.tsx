@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { SectionItemsApiResponse } from "../types/types";
@@ -8,8 +8,9 @@ import { MediaItem } from "./mediaItem";
 
 export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
   const [searchText, setSearchText] = useState<string>("");
+  const [sort, setSort] = useState("title:asc");
 
-  const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
+  const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all?sort=${sort}`;
 
   const { data, isLoading } = useFetch(endpoint, {
     headers: { "X-Plex-Token": plex_token, Accept: "application/json" },
@@ -35,6 +36,18 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
       onSearchTextChange={setSearchText}
       navigationTitle={sectionName}
       searchBarPlaceholder={"Search " + sectionName}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Sort" onChange={setSort}>
+          <Grid.Dropdown.Item icon={Icon.Text} title="By Title (↑)" value="title:asc" />
+          <Grid.Dropdown.Item icon={Icon.Text} title="By Title (↓)" value="title:desc" />
+          <Grid.Dropdown.Item icon={Icon.Calendar} title="By Year (↑)" value="year:asc" />
+          <Grid.Dropdown.Item icon={Icon.Calendar} title="By Year (↓)" value="year:desc" />
+          <Grid.Dropdown.Item icon={Icon.Plus} title="By Date Added (↑)" value="addedAt:asc" />
+          <Grid.Dropdown.Item icon={Icon.Plus} title="By Date Added (↓)" value="addedAt:desc" />
+          <Grid.Dropdown.Item icon={Icon.CircleProgress} title="By Progress" value="viewOffset" />
+          <Grid.Dropdown.Item icon={Icon.QuestionMark} title="By Randomly" value="random" />
+        </Grid.Dropdown>
+      }
     >
       {Array.isArray(filteredItems) &&
         filteredItems.map((item: SectionItemsApiResponse["MediaContainer"]["Metadata"]) => (
@@ -46,7 +59,7 @@ export function GetSectionItems({ sectionId, sectionName }: { sectionId: string;
             title={item.title}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<MediaItem item={item} />} />
+                <Action.Push icon={Icon.Eye} title="Show Details" target={<MediaItem item={item} />} />
               </ActionPanel>
             }
           />

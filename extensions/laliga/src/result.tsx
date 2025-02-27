@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { format } from "date-fns";
+import { formatDate } from "date-fns";
 import groupBy from "lodash.groupby";
 import { useState } from "react";
 import { getCurrentGameWeek, getMatches } from "./api";
 import CompetitionDropdown from "./components/competition_dropdown";
 import Matchday from "./components/matchday";
-import { CurrentGameweek } from "./types";
+import { Gameweek } from "./types";
 
 export default function Fixture() {
   const [competition, setCompetition] = useState<string>("");
@@ -18,7 +18,7 @@ export default function Fixture() {
     },
     [competition],
     {
-      onData: (gameweek: CurrentGameweek | undefined) => {
+      onData: (gameweek: Gameweek | undefined) => {
         setMatchday(gameweek?.week ?? 0);
       },
     },
@@ -27,7 +27,7 @@ export default function Fixture() {
   const { data: fixtures, isLoading } = usePromise((week) => getMatches(competition, week), [matchday]);
 
   const days = groupBy(fixtures, (m) => {
-    return format(new Date(m.date), "eee dd.MM.yyyy");
+    return m.date ? formatDate(m.date, "eee dd.MM.yyyy") : "Postponed";
   });
 
   const action = (

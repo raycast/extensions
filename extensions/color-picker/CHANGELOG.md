@@ -1,5 +1,19 @@
 # Color Picker Changelog
 
+## [Extract Color] - 2025-02-25
+
+- Select image from finder
+- Run `Extract Color` command from Raycast
+- Get color palette from the image
+
+## [Accessibility] - 2025-02-13
+
+- Add support for showing color name after picking color
+
+## [Enhancement] - 2024-11-25
+
+- Update README with FAQs
+
 ## [Enhancement] - 2024-10-04
 
 - Add Color Names command

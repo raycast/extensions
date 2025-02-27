@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Form, Clipboard, showHUD, showToast, Toast, popToRoot } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Form, Clipboard, showHUD, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { isValidUrl } from "./helper";
 import { createShortUrl } from "./api";
 import { sanitizeUrl } from "@braintree/sanitize-url";
+import { useForm } from "@raycast/utils";
 
 type TValues = {
   url: string;
@@ -11,125 +11,65 @@ type TValues = {
 };
 
 export default function ShortLink() {
-  const [urlError, setUrlError] = useState("");
-  const [keywordError, setKeywordError] = useState("");
-  const [titleError, setTitleError] = useState("");
-  const [keywordValue, setKeywordValue] = useState("");
-
-  const handleSubmit = async (values: TValues) => {
-    const toast = await showToast({
-      title: "Creating short URL...",
-      style: Toast.Style.Animated,
-    });
-
-    try {
-      const res = await createShortUrl({
-        url: sanitizeUrl(values.url),
-        title: values.title,
-        keyword: values.keyword,
+  const { itemProps, handleSubmit } = useForm<TValues>({
+    async onSubmit(values) {
+      const toast = await showToast({
+        title: "Creating short URL...",
+        style: Toast.Style.Animated,
       });
 
-      const shortUrl = res.shorturl;
+      try {
+        const res = await createShortUrl({
+          url: sanitizeUrl(values.url),
+          title: values.title,
+          keyword: values.keyword.toLowerCase(),
+        });
 
-      await Clipboard.copy(shortUrl);
+        const shortUrl = res.shorturl;
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Short URL created";
+        await Clipboard.copy(shortUrl);
 
-      await showHUD(`Copied to clipboard: ${shortUrl}`);
+        toast.style = Toast.Style.Success;
+        toast.title = "Short URL created";
 
-      popToRoot();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create short URL";
+        await showHUD(`Copied to clipboard: ${shortUrl}`);
 
-      if (error instanceof Error) {
-        toast.message = error.message;
+        popToRoot();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create short URL";
+
+        if (error instanceof Error) {
+          toast.message = error.message;
+        }
       }
-    }
-  };
+    },
+    validation: {
+      url(value) {
+        if (!value) return "URL is required";
+        if (!isValidUrl(value)) return "Invalid URL";
+      },
+      keyword(value) {
+        if (value?.includes(" ")) return "Should not contain space";
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Shorten"
-            onSubmit={async (values: TValues) => {
-              await handleSubmit(values);
-            }}
-          />
+          <Action.SubmitForm icon={Icon.Check} title="Shorten" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      <Form.TextField title="URL" placeholder="https://example.com" {...itemProps.url} />
+      <Form.TextField title="Title" placeholder="Example" {...itemProps.title} />
       <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="https://example.com"
-        error={urlError}
-        onChange={() => {
-          if (urlError && urlError.length > 0) {
-            setUrlError("");
-          }
-        }}
-        onBlur={(ev) => {
-          const value = ev.target.value;
-
-          if (value && value.length > 0) {
-            if (!isValidUrl(value)) {
-              setUrlError("Invalid URL");
-            } else {
-              setUrlError("");
-            }
-          } else {
-            setUrlError("URL is required");
-          }
-        }}
-      />
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Example"
-        error={titleError}
-        onChange={() => {
-          if (titleError && titleError.length > 0) {
-            setTitleError("");
-          }
-        }}
-        onBlur={(ev) => {
-          const value = ev.target.value;
-
-          if (!value) {
-            setTitleError("Title is required");
-          }
-        }}
-      />
-      <Form.TextField
-        id="keyword"
         title="Keyword"
         placeholder="example-keyword"
-        error={keywordError}
-        value={keywordValue}
-        onChange={(val) => {
-          if (keywordError && keywordError.length > 0) {
-            setKeywordError("");
-          }
-          setKeywordValue(val.toLowerCase());
-        }}
         info="Keyword for custom short URL"
-        onBlur={(ev) => {
-          const value = ev.target.value;
-
-          if (!value) {
-            setKeywordError("Keyword is required");
-          }
-
-          const isContainsSpace = value?.includes(" ");
-
-          if (isContainsSpace) {
-            setKeywordError("Should not contain space");
-          }
-        }}
+        {...itemProps.keyword}
       />
     </Form>
   );

@@ -70,6 +70,15 @@ launchCommand({
 });
 ```
 
+### Use Deeplinks
+
+```shell
+arguments=$(jq -rR @uri <<< '{"content":"Hello from Deeplinks!"}')
+launchContext=$(jq -rR @uri <<< '{"sayOptions":{"voice":"Cello"}}')
+deeplink="raycast://extensions/litomore/say/typeToSay?launchType=background&arguments=$arguments&launchContext=$launchContext"
+open $deeplink
+```
+
 ### Use `mac-say`
 
 Get it from https://github.com/LitoMore/mac-say.

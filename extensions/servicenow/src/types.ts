@@ -103,6 +103,7 @@ export interface Instance {
   color: string;
   username: string;
   password: string;
+  full: string;
 }
 
 export interface DBObjectsResponse {
@@ -113,4 +114,69 @@ export interface DBObject {
   name: string;
   label: string;
   super_class: string;
+}
+
+export interface FullNavigationHistoryResponse {
+  result: NavigationHistoryEntry[];
+}
+
+export interface NavigationHistoryResponse {
+  result: { list: NavigationHistoryEntry[] };
+}
+
+export interface NavigationHistoryEntry {
+  sys_id?: string;
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  sys_created_on?: string;
+  createdString?: string;
+}
+
+export interface FavoritesResponse {
+  list: Favorite[];
+}
+
+export interface Favorite {
+  id: string;
+  title: string;
+  group: boolean;
+  groupId?: string;
+  module?: string;
+  favorites?: Favorite[];
+  applicationId?: string;
+  type?: string;
+  separator?: boolean;
+  url?: string;
+  query?: string;
+  table?: string;
+  group_title?: string;
+  section_title?: string;
+  keywords?: string[];
+}
+
+export interface FavoriteRecord {
+  sys_id: string;
+  title: string;
+  user: string;
+  url?: string;
+  icon?: string;
+  module?: string;
+  application?: string;
+  group?: string;
+}
+
+export interface NavigationMenuResponse {
+  result: Module[];
+}
+
+export interface Module {
+  uri?: string;
+  title: string;
+  type?: string;
+  tableName?: string;
+  id: string;
+  modules?: Module[];
+  count?: number;
 }

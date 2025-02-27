@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "asportnoy",
   "contributors": [
-    "vineus"
+    "vineus",
+    "danyal",
+    "alex925"
   ],
   "categories": [
     "Developer Tools",
@@ -85,30 +87,39 @@
           ]
         },
         {
-          "name": "hour24",
+          "name": "displayFormat",
+          "title": "Default Display Time Format",
+          "description": "Default time format for displaying time. By default, 'dddd, MMMM D, YYYY hh:mm:ss' will be used. Available formats can be found in the day.js library documentation.",
+          "type": "textfield",
+          "default": "dddd, MMMM D, YYYY hh:mm:ss",
+          "required": false
+        },
+        {
+          "name": "humanFormat",
           "title": "Human-readable Time Format",
-          "description": "Use 24-hour time format",
-          "type": "checkbox",
-          "label": "24-hour Time",
-          "default": false,
+          "description": "Time format for human-readable time. By default, 'dddd, MMMM D, YYYY hh:mm:ss' will be used. Available formats can be found in the day.js library documentation.",
+          "type": "textfield",
+          "default": "dddd, MMMM D, YYYY hh:mm:ss",
           "required": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "chrono-node": "^2.6.3",
-    "javascript-time-ago": "^2.5.10"
+    "@raycast/api": "^1.88.4",
+    "chrono-node": "^2.7.7",
+    "dayjs": "^1.11.13",
+    "javascript-time-ago": "^2.5.11",
+    "timezone-support": "^3.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@total-typescript/ts-reset": "^0.4.2",
-    "@types/node": "20.3.1",
-    "@types/react": "18.2.12",
-    "eslint": "^8.42.0",
-    "prettier": "^2.8.8",
-    "typescript": "^5.1.3"
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

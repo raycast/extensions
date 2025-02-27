@@ -6,7 +6,6 @@ import { Item } from "../types";
 import {
   getCategoryIcon,
   actionsForItem,
-  usePasswords,
   useAccount,
   CommandLineMissingError,
   ConnectionError,

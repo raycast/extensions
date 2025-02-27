@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pcloud",
+  "title": "pCloud",
+  "description": "Search your pCloud through API and use pCloud Drive to open files and folders in Finder",
+  "icon": "command-icon.png",
+  "author": "xela92",
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "token",
+      "title": "pCloud Token Override",
+      "type": "password",
+      "default": "",
+      "description": "pCloud auth token to use in alternative to OAuth flow",
+      "key": "token",
+      "placeholder": "pCloud auth token",
+      "required": false
+    },
+    {
+      "name": "excludedFilePatterns",
+      "title": "Excluded File Patterns (comma-separated)",
+      "type": "textfield",
+      "default": ".DS_Store",
+      "description": "File patterns to exclude from search results (will be excluded client-side)",
+      "key": "excludedFilePatterns",
+      "placeholder": "e.g. .DS_Store, .gitignore",
+      "required": false
+    },
+    {
+      "name": "pCloudDriveDirectory",
+      "title": "pCloud Drive Directory",
+      "type": "directory",
+      "default": "~/pCloud Drive",
+      "description": "pCloud Drive folder to manage file open",
+      "key": "pCloudDriveDirectory",
+      "placeholder": "path to pCloud Drive directory...",
+      "required": true
+    },
+    {
+      "name": "isEuropeRegion",
+      "title": "pCloud Data Region",
+      "type": "checkbox",
+      "default": false,
+      "description": "Whether to use the Europe region for pCloud API (needed if you did the migration to European servers)",
+      "key": "isEuropeRegion",
+      "required": true,
+      "label": "Use Europe region"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search pCloud",
+      "description": "Search and open pCloud files and folders",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/ini": "^1.3.31",
+    "@types/lodash": "^4.14.195",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.79",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

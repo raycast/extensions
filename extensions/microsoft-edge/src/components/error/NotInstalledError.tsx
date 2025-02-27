@@ -46,12 +46,14 @@ export function NotInstalledError() {
               title="Install with Homebrew"
               onAction={async () => {
                 if (!showAction) return;
+                setShowAction(false);
                 const toast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
                 await toast.show();
                 try {
                   execBrew("microsoft-edge"); // No cask versions available for Edge Insider builds yet
                   await toast.hide();
                 } catch (e) {
+                  setShowAction(true);
                   await toast.hide();
                   await showToast(
                     Toast.Style.Failure,
@@ -62,7 +64,6 @@ export function NotInstalledError() {
                 toast.title = "Installed! Please go back and try again.";
                 toast.style = Toast.Style.Success;
                 await toast.show();
-                setShowAction(false);
               }}
             />
           )}

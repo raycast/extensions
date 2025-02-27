@@ -52,7 +52,7 @@ export default function Resources() {
             subtitle={resource.type}
             accessories={[
               { icon: Icon.HardDrive },
-              { text: resource.type === "application" ? resource.destination.server.name : resource.server.name },
+              { text: "server" in resource ? resource.server.name : resource.destination.server.name },
             ]}
             actions={
               <ActionPanel>

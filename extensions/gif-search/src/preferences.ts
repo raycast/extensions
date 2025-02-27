@@ -55,3 +55,7 @@ export function getGridItemSize() {
 export function getGridTrendingItemSize() {
   return preferences.gridTrendingItemSize;
 }
+
+export function getHideFilename(): boolean {
+  return preferences.hideFilename;
+}

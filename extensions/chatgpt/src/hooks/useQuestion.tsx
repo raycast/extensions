@@ -46,7 +46,7 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
     async (question: string) => {
       setData(question);
     },
-    [setData, data]
+    [setData, data],
   );
 
   return useMemo(() => ({ data, isLoading, update }), [data, isLoading, update]);

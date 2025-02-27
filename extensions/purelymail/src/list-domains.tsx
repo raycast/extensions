@@ -10,40 +10,20 @@ import {
   confirmAlert,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
-import { getFavicon, useCachedState } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { getFavicon } from "@raycast/utils";
+import { useState } from "react";
 
-import { deleteDomain, getDomains } from "./utils/api";
-import { Domain, Response } from "./utils/types";
+import { Domain } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
+import { callApi, useDomains } from "./utils/hooks";
 
 export default function ListDomains() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  const { isLoading, data: domains, error, mutate } = useDomains({ includeShared: true });
+
   const [isShowingDetails, setIsShowingDetails] = useState(false);
   const [filter, setFilter] = useState("");
-  const [searchText, setSearchText] = useState("");
-
-  async function getFromApi() {
-    setIsLoading(true);
-    const response: Response = await getDomains(true);
-
-    if (response.type === "error") {
-      setError(response.message);
-    } else {
-      setDomains(response.result.domains);
-      await showToast({
-        title: "SUCCESS",
-        message: `Fetched ${response.result.domains?.length} domains`,
-      });
-    }
-    setIsLoading(false);
-  }
-  useEffect(() => {
-    getFromApi();
-  }, []);
 
   const toggleShowDetails = () => {
     setIsShowingDetails(!isShowingDetails);
@@ -52,25 +32,39 @@ export default function ListDomains() {
   const handleDelete = async (domain: string) => {
     if (
       await confirmAlert({
-        title: `Delete ${domain}?`,
+        title: `Delete '${domain}'?`,
         icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         message: "You will not be able to recover it",
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      setIsLoading(true);
-
-      const response = await deleteDomain(domain);
-      if (response.type === "error") {
-        await showToast(Toast.Style.Success, "Domain Deleted", "DOMAIN: " + domain);
-        getFromApi();
+      const toast = await showToast(Toast.Style.Animated, "Deleting Domain");
+      try {
+        await mutate(
+          callApi("deleteDomain", {
+            body: {
+              name: domain,
+            },
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((d) => d.name !== domain);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Domain Deleted";
+        toast.message = "DOMAIN: " + domain;
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = (error as Error).cause as string;
+        toast.message = (error as Error).message;
       }
-      setIsLoading(false);
     }
   };
 
   const updateDomainSettings = async (domain: Domain) => {
-    setIsLoading(true);
     if (domain.isShared) {
       await showToast(Toast.Style.Failure, "Purelymail Error", "Can't Edit Shared Domains.");
     } else {
@@ -82,29 +76,25 @@ export default function ListDomains() {
         },
       });
     }
-    setIsLoading(false);
   };
 
-  const filteredDomains = !domains
-    ? []
-    : domains
-        .filter((domain) => domain.name.includes(searchText))
-        .filter((domain) => {
-          if (filter === "domains_shared") return domain.isShared;
-          if (filter === "domains_custom") return !domain.isShared;
-          if (filter.includes("tld_")) return domain.name.split(".").pop() === filter.slice(4);
-          return domain;
-        });
+  const filteredDomains = !filter
+    ? domains
+    : domains.filter((domain) => {
+        if (filter === "domains_shared") return domain.isShared;
+        if (filter === "domains_custom") return !domain.isShared;
+        if (filter.includes("tld_")) return domain.name.split(".").pop() === filter.slice(4);
+        return domain;
+      });
 
   const domainsTitle = `${filteredDomains.length} of ${domains?.length || 0} domains`;
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search for domain..."
-      onSearchTextChange={setSearchText}
       isShowingDetail={isShowingDetails}
       searchBarAccessory={
         <List.Dropdown tooltip="Select Domain Type" onChange={(newValue) => setFilter(newValue)}>
@@ -168,7 +158,7 @@ export default function ListDomains() {
                   title="Delete Domain"
                   onAction={() => handleDelete(domain.name)}
                   icon={Icon.DeleteDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
                 />
               </ActionPanel>

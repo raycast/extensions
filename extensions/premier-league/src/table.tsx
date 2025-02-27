@@ -19,6 +19,12 @@ const qualificationColor: Record<string, string> = {
   EN_CH: Color.Red,
 };
 
+const annotationMap: Record<string, string> = {
+  Q: "Qualification",
+  R: "Relegation",
+  PD: "Points Deduction",
+};
+
 export default function EPLTables() {
   const [seasonId, setSeasonId] = useState<string>();
 
@@ -109,7 +115,7 @@ export default function EPLTables() {
                 <List.Item
                   key={position}
                   title={position.toString()}
-                  subtitle={team.name}
+                  subtitle={team.shortName}
                   keywords={[team.name, team.shortName, team.club.abbr]}
                   icon={{
                     source: getClubLogo(team.altIds.opta),
@@ -120,29 +126,6 @@ export default function EPLTables() {
                     <List.Item.Detail
                       metadata={
                         <List.Item.Detail.Metadata>
-                          {Array.isArray(annotations) && annotations.length && (
-                            <List.Item.Detail.Metadata.TagList
-                              title={
-                                annotations[0].type === "Q"
-                                  ? "Qualification"
-                                  : "Relegation"
-                              }
-                            >
-                              {annotations.map((annotation, idx) => {
-                                return (
-                                  <List.Item.Detail.Metadata.TagList.Item
-                                    key={idx}
-                                    text={
-                                      qualificationMap[annotation.destination]
-                                    }
-                                    color={
-                                      qualificationColor[annotation.destination]
-                                    }
-                                  />
-                                );
-                              })}
-                            </List.Item.Detail.Metadata.TagList>
-                          )}
                           <List.Item.Detail.Metadata.Label
                             title="Played"
                             text={overall.played.toString()}
@@ -205,6 +188,31 @@ export default function EPLTables() {
                               );
                             })}
                           </List.Item.Detail.Metadata.TagList>
+                          {Array.isArray(annotations) &&
+                            annotations.length &&
+                            annotations.map((annotation) => {
+                              return annotation.type === "Q" ? (
+                                <List.Item.Detail.Metadata.TagList
+                                  key={annotation.type}
+                                  title={annotationMap[annotation.type]}
+                                >
+                                  <List.Item.Detail.Metadata.TagList.Item
+                                    text={
+                                      qualificationMap[annotation.description]
+                                    }
+                                    color={
+                                      qualificationColor[annotation.description]
+                                    }
+                                  />
+                                </List.Item.Detail.Metadata.TagList>
+                              ) : (
+                                <List.Item.Detail.Metadata.Label
+                                  key={annotation.type}
+                                  title={annotationMap[annotation.type]}
+                                  text={annotation.description}
+                                />
+                              );
+                            })}
                           {next && (
                             <>
                               <List.Item.Detail.Metadata.Separator />

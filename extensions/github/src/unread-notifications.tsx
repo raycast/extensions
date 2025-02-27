@@ -1,16 +1,16 @@
 import {
   Color,
+  getPreferenceValues,
   Icon,
   Image,
+  launchCommand,
   LaunchType,
   MenuBarExtra,
-  Toast,
-  getPreferenceValues,
-  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
   showToast,
+  Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -37,7 +37,12 @@ function UnreadNotifications() {
     const response = await octokit.activity.listNotificationsForAuthenticatedUser();
     return Promise.all(
       response.data.map(async (notification: Notification) => {
-        const icon = await getNotificationIcon(notification);
+        let icon: { value: Image; tooltip: string };
+        try {
+          icon = await getNotificationIcon(notification);
+        } catch (error) {
+          icon = { value: { source: Icon.Warning, tintColor: Color.Red }, tooltip: "Could not load icon" };
+        }
         return { ...notification, icon };
       }),
     );

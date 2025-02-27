@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "vimtor",
     "contributors": [
-      "charlie_deets"
+      "charlie_deets",
+    "PaperCloud"
     ],
   "license": "MIT",
   "commands": [
@@ -15,6 +16,21 @@
       "icon": "copy.png",
       "title": "Copy Favicon",
       "description": "Copy favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "copy-url",
+      "icon": "copy.png",
+      "title": "Copy Favicon URL",
+      "description": "Copy URL of Favicon",
       "mode": "no-view",
       "arguments": [
         {

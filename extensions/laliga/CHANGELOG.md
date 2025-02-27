@@ -1,5 +1,9 @@
 # LaLiga Changelog
 
+## [Enhanced Match Information] - 2024-11-06
+- Added match lineups to provide detailed information about the starting players and substitutes for each team.
+- Included upcoming and previous matches directly in the standings view for easier navigation.
+
 ## [Enhanced Standings & Performance] - 2024-09-24
 - Updated standings to always show detailed statistics, including points, goal difference, and head-to-head records.
 - Enhanced code maintainability and efficiency by utilizing the `usePromise` hook for asynchronous operations.
@@ -27,7 +31,4 @@
 - Implemented new list item detail metadata for enhanced information display.
 
 ## [Initial Release] - 2022-03-24
-- Introduced the core functionalities of the extension:
-    - Standings: View the current league table.
-    - Results: Access match results and statistics.
-    - Clubs: Explore information about individual teams.
+- View current standings, access match results and statistics, and explore information about individual teams.

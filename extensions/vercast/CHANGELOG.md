@@ -1,5 +1,14 @@
 # Vercast Changelog
 
+# [2.8] - 2025-02-21
+
+- Added AI tools
+
+## [2.7] - 2025-01-14
+
+- Fixed deployment state fetching for team deployments
+- Fixed screenshot fetching for team deployments
+
 ## [2.6] - 2024-08-12
 
 - Add `Search Domains` command for quickly viewing your Domains

@@ -19,9 +19,12 @@ export default function Command() {
     return null;
   }
 
-  const untilNextDate = `${nextDate.name.length > 15 ? nextDate.name.substring(0, 15) + "..." : nextDate.name} ${moment(
-    nextDate.date,
-  ).fromNow()}`;
+  const difference = showCountdownByDay
+    ? "in " + moment(nextDate.date).diff(new Date(), "days") + " days"
+    : moment(nextDate.date).fromNow();
+  const untilNextDate = `${
+    nextDate.name.length > 15 ? nextDate.name.substring(0, 15) + "..." : nextDate.name
+  } ${difference}`;
 
   return (
     <MenuBarExtra icon={nextDate.icon} title={untilNextDate}>

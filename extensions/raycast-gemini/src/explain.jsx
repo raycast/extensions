@@ -1,5 +1,7 @@
 import useGemini from "./api/gemini";
+import { getPreferenceValues } from "@raycast/api";
 
 export default function Explain(props) {
-  return useGemini(props, { context: "Explain the following text as best as you can." });
+  const { prompt } = getPreferenceValues();
+  return useGemini(props, { context: prompt, useSelected: true });
 }

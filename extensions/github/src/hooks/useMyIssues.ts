@@ -9,12 +9,14 @@ import { pluralize } from "../helpers";
 export function useMyIssues({
   sortQuery,
   repository,
+  showCreated,
   showAssigned,
   showMentioned,
   showRecentlyClosed,
 }: {
   repository: string | null;
   sortQuery: string;
+  showCreated: boolean;
   showAssigned: boolean;
   showMentioned: boolean;
   showRecentlyClosed: boolean;
@@ -22,7 +24,7 @@ export function useMyIssues({
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
-    async (repo, sortTxt, enableAssigned, enableMentioned, enableClosed) => {
+    async (repo, sortTxt, enableCreated, enableAssigned, enableMentioned, enableClosed) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
       const updatedFilter = `updated:>${twoWeeksAgo}`;
@@ -31,7 +33,7 @@ export function useMyIssues({
 
       const results = await Promise.all(
         [
-          `is:issue author:@me archived:false is:open`,
+          ...(enableCreated ? [`is:issue author:@me archived:false is:open`] : []),
           ...(enableClosed ? [`is:issue author:@me archived:false is:closed`] : []),
           ...(enableAssigned ? [`is:issue assignee:@me archived:false is:open`] : []),
           ...(enableAssigned && enableClosed ? [`is:issue assignee:@me archived:false is:closed`] : []),
@@ -44,13 +46,13 @@ export function useMyIssues({
 
       return results.map((result) => result.search.nodes as IssueFieldsFragment[]);
     },
-    [repository, sortQuery, showAssigned, showMentioned, showRecentlyClosed],
+    [repository, sortQuery, showCreated, showAssigned, showMentioned, showRecentlyClosed],
   );
 
   let created, createdClosed, assigned, assignedClosed, mentioned, mentionedClosed;
   if (data) {
     let count = 0;
-    created = data[count++];
+    if (showCreated) created = data[count++];
     if (showRecentlyClosed) createdClosed = data[count++];
     if (showAssigned) {
       assigned = data[count++];

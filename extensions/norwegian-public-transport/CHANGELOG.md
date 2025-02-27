@@ -1,5 +1,9 @@
 # Raycast Norwegian Public Transport Changelog
 
+## [Added configurable web planner] - 2024-10-30
+
+- Added the option to configure web travel planners from four different counties in the extension preferences: Reis Nordland, FRAM (Møre og Romsdal), Svipper (Troms) and AtB (Trøndelag)
+
 ## [Tweaks for Store readyness] - 2024-05-04
 
 - Changed the keyboard shortcut to add and remove favorites to ⌘⇧P, to match other Raycast extensions

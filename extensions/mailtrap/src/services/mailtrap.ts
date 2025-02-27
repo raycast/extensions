@@ -8,6 +8,18 @@ export type Inbox = {
   status: string;
   emails_count: number;
   emails_unread_count: number;
+  domain: string;
+  pop3_domain: string;
+  email_domain: string;
+  smtp_ports: number[];
+  pop3_ports: number[];
+  api_domain: string;
+  permissions: {
+    can_read: boolean;
+    can_update: boolean;
+    can_destroy: boolean;
+    can_leave: boolean;
+  };
 };
 
 export type Email = {
@@ -21,6 +33,21 @@ export type Email = {
   txt_path: string;
   raw_path: string;
   to_email: string;
+  blacklists_report_info:
+    | {
+        result: "success";
+        domain: string;
+        ip: string;
+        report: Array<{
+          name: string;
+          url: string;
+          in_black_list: boolean;
+        }>;
+      }
+    | {
+        result: "error";
+      };
+  human_size: string;
 };
 
 const { apiKey, accountId } = getPreferenceValues<Preferences>();

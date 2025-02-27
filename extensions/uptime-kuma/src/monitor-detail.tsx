@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { useAppStore } from "./utils/store";
+import { getFavicon } from "@raycast/utils";
 
 dayjs.extend(utc);
 dayjs.extend(localizedFormat);
@@ -199,7 +200,7 @@ export function MonitorDetail(props: Props) {
               accessories={[
                 {
                   text: `${monitor.url}`,
-                  icon: Icon.Globe,
+                  icon: getFavicon(monitor.url, { fallback: Icon.Globe }),
                 },
               ]}
               actions={

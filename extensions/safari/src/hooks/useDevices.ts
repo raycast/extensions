@@ -5,6 +5,7 @@ import { homedir } from "os";
 import { resolve } from "path";
 import { Device, LocalTab, RemoteTab } from "../types";
 import { executeJxa, safariAppIdentifier } from "../utils";
+import { useLayoutEffect, useMemo, useRef } from "react";
 
 const DATABASE_PATH = `${resolve(homedir(), `Library/Containers/com.apple.Safari/Data/Library/Safari`)}/CloudTabs.db`;
 
@@ -53,34 +54,40 @@ function useLocalTabs() {
 }
 
 export default function useDevices() {
-  const preferences = getPreferenceValues();
   const { data: deviceName } = useDeviceName();
   const localTabs = useLocalTabs();
-  const localDevice: Device = {
-    uuid: "local",
-    name: `${deviceName} ★`,
-    tabs: localTabs.data || [],
-  };
-  const devices: Device[] = [localDevice];
-  let permissionView;
+  const remoteTabs = useRemoteTabs();
+  const devices = useRef<Device[]>([]);
+  const permissionView = useRef<JSX.Element | null>(null);
 
-  if (preferences.areRemoteTabsUsed) {
-    const remoteTabs = useRemoteTabs();
-    const remoteDevices = _.chain(remoteTabs.data)
-      .groupBy("device_uuid")
-      .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
-        accumulator.push({
-          uuid: device_uuid,
-          name: tabs[0].device_name,
-          tabs,
-        });
-      }, [])
-      .reject(["name", deviceName])
-      .value();
+  const localDevice: Device = useMemo(
+    () => ({
+      uuid: "local",
+      name: `${deviceName} ★`,
+      tabs: localTabs.data || [],
+    }),
+    [deviceName, localTabs.data],
+  );
 
-    devices.push(...remoteDevices);
-    permissionView = remoteTabs.permissionView;
-  }
+  useLayoutEffect(() => {
+    const preferences = getPreferenceValues();
+    if (preferences.areRemoteTabsUsed) {
+      const remoteDevices = _.chain(remoteTabs.data)
+        .groupBy("device_uuid")
+        .transform((accumulator: Device[], tabs: RemoteTab[], device_uuid: string) => {
+          accumulator.push({
+            uuid: device_uuid,
+            name: tabs[0].device_name,
+            tabs,
+          });
+        }, [])
+        .reject(["name", deviceName])
+        .value();
+
+      devices.current = [localDevice, ...remoteDevices];
+      permissionView.current = remoteTabs.permissionView || null;
+    }
+  }, [localTabs, remoteTabs, deviceName]);
 
   return { devices, permissionView, refreshDevices: localTabs.revalidate };
 }

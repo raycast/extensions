@@ -1,5 +1,9 @@
 # Menubar Calendar Changelog
 
+## [Fix Bug] - 2025-01-19
+
+- Fix bug: Open the Calendar List in the menubar calendar
+
 ## [Configure Calendar List] - 2024-09-30
 
 - New command Configure Calendar List: configure calendar and reminders list displayed in the menu bar

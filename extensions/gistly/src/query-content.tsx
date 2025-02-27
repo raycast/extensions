@@ -6,7 +6,7 @@ import { formatTime } from "./utils/format-time";
 import ytdl from "ytdl-core";
 import getVideoData, { VideoDataTypes } from "./utils/get-video-data";
 
-const BACKEND_API_URL = "https://api.gist.ly/v1";
+const BACKEND_API_URL = "https://gist.ly/api/v1";
 
 export function QueryContent({
   video,

@@ -1,5 +1,14 @@
 # Tower Changelog
 
+## [Fix] - 2025-02-10
+
+  - Update Tower and Warp terminal icons
+
+## [Fix] - 2025-02-02
+
+- Correctly handle URI encoding of repository paths
+- Correctly escape repository path in shell command
+
 ## [New Features] - 2024-09-18
 
 - Add support for selecting a default editor and teminal app for opening repositories

@@ -11,7 +11,8 @@
     "rcruzper",
     "thomas",
     "arthur_fontaine",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "taschaub"
   ],
   "keywords": [
     "sound",
@@ -110,6 +111,7 @@
     "build": "npm run copy-binary && ray build -e dist",
     "dev": "npm run copy-binary && ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

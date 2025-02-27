@@ -46,6 +46,7 @@ function matchesSongUrlLink(potentialSongUrl: string | undefined): boolean {
     potentialSongUrl.startsWith("https://www.deezer.com/") ||
     potentialSongUrl.startsWith("https://www.soundcloud.com/") ||
     potentialSongUrl.startsWith("https://listen.tidal.com/") ||
+    potentialSongUrl.startsWith("https://tidal.com/") ||
     potentialSongUrl.startsWith("https://play.anghami.com/")
   );
 }
@@ -106,6 +107,8 @@ export default function MusicLinkConverter(props: LaunchProps<{ arguments: { tex
         setSongUrlToConvert(clipboardText);
       } else if (hasArgumentMatchingSongLink) {
         setSongUrlToConvert(props.arguments.text as string);
+      } else if (!hasArgumentMatchingSongLink) {
+        await showToast(Toast.Style.Failure, "No valid music URL found to convert.");
       } else {
         setLoading(false);
         await showToast(Toast.Style.Failure, "No music url found in clipboard or as argument.");

@@ -13,6 +13,17 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
 
   const prefs: Preferences = getPreferenceValues();
 
+  if (hasArgs && prefs.customTimerFormBypass) {
+    const [hours, minutes, seconds] = (["hours", "minutes", "seconds"] as const)
+      .map((k) => props.arguments[k])
+      .map(Number)
+      .map((n) => (Number.isNaN(n) ? 0 : n));
+
+    startTimer({ timeInSeconds: 3600 * hours + 60 * minutes + seconds });
+
+    return null;
+  }
+
   const handleSubmit = (values: Values) => {
     ensureCTFileExists();
     if (values.hours === "" && values.minutes === "" && values.seconds === "") {

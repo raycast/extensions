@@ -35,8 +35,8 @@ export const ChatView = ({
               isAutoSaveConversation
                 ? undefined
                 : use.conversations.data.find((x) => x.id === conversation.id)
-                ? undefined
-                : () => use.conversations.add(conversation)
+                  ? undefined
+                  : () => use.conversations.add(conversation)
             }
           />
           <ActionPanel.Section title="Output">

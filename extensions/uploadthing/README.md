@@ -1,7 +1,8 @@
 # UploadThing
 
-Simple Raycast extension with 2 commands:
+Simple Raycast extension with 3 commands:
 
+- **List Files**: A view that shows a paginated list of files a user can then open in browser
 - **Upload Files**: An interactive upload form where the user first selects the files they wanna upload, then uploads in batch
 - **Upload from Clipboard**: Reads the users clipboard and uploads the latest files from it
 

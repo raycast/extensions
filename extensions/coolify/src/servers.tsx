@@ -3,7 +3,7 @@ import { type CreateServer, PrivateKey, Resource, Server, type ServerDetails } f
 import useCoolify from "./lib/use-coolify";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { getResourceColor, isValidCoolifyUrl } from "./lib/utils";
+import { capitalizeFirstLetter, getResourceColor, isValidCoolifyUrl } from "./lib/utils";
 import InvalidUrl from "./lib/components/invalid-url";
 import OpenInCoolify from "./lib/components/open-in-coolify";
 
@@ -150,23 +150,31 @@ function ViewResources({ server }: { server: Server }) {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search resource">
       <List.Section title={`Servers / ${server.name} / Resources`} subtitle={`${resources.length} resources`}>
-        {resources.map((resource) => (
-          <List.Item
-            key={resource.uuid}
-            icon={{ source: Icon.CircleFilled, tintColor: getResourceColor(resource) }}
-            title={resource.name}
-            subtitle={resource.type}
-            accessories={[
-              {
-                icon: resource.status.includes("unhealthy")
-                  ? { source: Icon.Warning, tintColor: Color.Yellow }
-                  : undefined,
-              },
-              { text: resource.status },
-              { date: new Date(resource.created_at) },
-            ]}
-          />
-        ))}
+        {resources.map((resource) => {
+          const split = resource.status.split(":");
+          const status = split[0];
+          const healthy = split[1] === "healthy";
+
+          const accessories: List.Item.Accessory[] = [
+            { tag: { value: capitalizeFirstLetter(status), color: getResourceColor(resource) } },
+            { date: new Date(resource.created_at), tooltip: `Created: ${resource.created_at}` },
+          ];
+          if (status !== "exited" && !healthy)
+            accessories.unshift({
+              icon: { source: Icon.Warning, tintColor: Color.Yellow },
+              tooltip: "Unhealthy state. This doesn't mean that the resource is malfunctioning.",
+            });
+
+          return (
+            <List.Item
+              key={resource.uuid}
+              icon={{ source: Icon.CircleFilled, tintColor: getResourceColor(resource) }}
+              title={resource.name}
+              subtitle={resource.type}
+              accessories={accessories}
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

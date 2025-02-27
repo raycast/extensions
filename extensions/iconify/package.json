@@ -9,7 +9,8 @@
     "sxn",
     "robert",
     "kuddl",
-    "kevinxo328"
+    "kevinxo328",
+    "ridemountainpig"
   ],
   "categories": [
     "Design Tools",
@@ -55,12 +56,24 @@
           "value": "copy"
         },
         {
+          "title": "Paste Svg File to Active App",
+          "value": "pasteFile"
+        },
+        {
           "title": "Copy Svg File to Clipboard",
           "value": "copyFile"
         },
         {
           "title": "Paste <name> to Active App",
           "value": "pasteName"
+        },
+        {
+          "title": "Copy <name> to Clipboard",
+          "value": "copyName"
+        },
+        {
+          "title": "Copy Svg URL to Clipboard",
+          "value": "copyURL"
         }
       ]
     },

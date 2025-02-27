@@ -28,10 +28,10 @@ export const ChatView = ({
     <ActionPanel>
       {question.length > 0 ? (
         <PrimaryAction title="Get Answer" onAction={() => use.chats.ask(question, model)} />
-      ) : selectedChat.answer && use.chats.selectedChatId === selectedChat.id ? (
+      ) : (selectedChat.question || selectedChat.answer) && use.chats.selectedChatId === selectedChat.id ? (
         <>
           <CopyActionSection answer={selectedChat.answer} question={selectedChat.question} />
-          <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} />
+          {selectedChat.answer ? <SaveActionSection onSaveAnswerAction={() => savedChat.add(selectedChat)} /> : null}
           <ActionPanel.Section title="Output"></ActionPanel.Section>
         </>
       ) : null}

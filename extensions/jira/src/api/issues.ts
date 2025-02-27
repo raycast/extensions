@@ -31,6 +31,7 @@ type CreateIssueParams = {
 type CreateIssueResponse = {
   id: string;
   key: string;
+  self: string;
 };
 
 export async function createIssue(values: IssueFormValues, { customFields }: CreateIssueParams) {
@@ -139,6 +140,8 @@ export type Issue = {
     updated: string;
     status: IssueStatus;
     watches: IssueWatches;
+    subtasks?: Issue[];
+    parent?: Issue;
   };
 };
 
@@ -155,7 +158,7 @@ type GetIssuesResponse = {
 
 export async function getIssues({ jql } = { jql: "" }) {
   const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project,watches",
+    fields: "summary,updated,issuetype,status,priority,assignee,project,watches,subtasks,parent",
     startAt: "0",
     maxResults: "200",
     validateQuery: "warn",

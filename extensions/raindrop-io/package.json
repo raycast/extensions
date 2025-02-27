@@ -12,7 +12,9 @@
     "sh-cho",
     "tdkn",
     "j3lte",
-    "rien7"
+    "rien7",
+    "teziovsky",
+    "peteroltmann"
   ],
   "license": "MIT",
   "commands": [
@@ -54,6 +56,61 @@
       "description": "Your Raindrop.io Test Access Token.",
       "link": "https://developer.raindrop.io/v1/authentication/token",
       "placeholder": "Enter your Raindrop.io Test Access token."
+    },
+    {
+      "name": "titleOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Search",
+      "description": "Search on title only.",
+      "default": false,
+      "label": "Search on title only"
+    },
+    {
+      "name": "sortBy",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "",
+          "title": "Default"
+        },
+        {
+          "value": "-sort",
+          "title": "Manual"
+        },
+        {
+          "value": "created",
+          "title": "Date \u2191"
+        },
+        {
+          "value": "-created",
+          "title": "Date \u2193"
+        },
+        {
+          "value": "title",
+          "title": "Name \u2191"
+        },
+        {
+          "value": "-title",
+          "title": "Name \u2193"
+        },
+        {
+          "value": "domain",
+          "title": "Sites \u2191"
+        },
+        {
+          "value": "-domain",
+          "title": "Sites \u2193"
+        },
+        {
+          "value": "score",
+          "title": "Relevance"
+        }
+      ],
+      "title": "Sort by",
+      "description": "Select the sort order for the search results.",
+      "default": "link"
     },
     {
       "name": "useLastCollection",
@@ -115,6 +172,36 @@
       "title": "Display Date",
       "description": "Select date to display in list.",
       "default": "lastUpdated"
+    },
+    {
+      "name": "tagsDisplay",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "none",
+          "title": "None"
+        },
+        {
+          "value": "0",
+          "title": "0"
+        },
+        {
+          "value": "1",
+          "title": "1"
+        },
+        {
+          "value": "2",
+          "title": "2"
+        },
+        {
+          "value": "all",
+          "title": "All"
+        }
+      ],
+      "title": "Tags Display",
+      "description": "Select number of tags to display in list.",
+      "default": "1"
     }
   ],
   "dependencies": {
