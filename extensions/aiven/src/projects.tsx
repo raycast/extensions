@@ -227,13 +227,13 @@ function Logs({ project, service }: { project: Project; service: Service }) {
   const { isLoading, data } = useAiven<ListServiceLogsResult>(
     `project/${project.project_name}/service/${service.service_name}/logs`,
     {
-      sort_order: "desc"
+      sort_order: "desc",
     },
   );
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {data?.logs.map(log => (
+      {data?.logs.map((log) => (
         <List.Item
           key={log.time}
           icon={Icon.BulletPoints}
