@@ -7,7 +7,7 @@ import { getPreferenceValues } from "@raycast/api";
  */
 export function hasReadwiseToken(): boolean {
   try {
-    const preferences = getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences>();
     return !!preferences.readwiseToken;
   } catch {
     return false;
@@ -21,7 +21,7 @@ export function hasReadwiseToken(): boolean {
  * @throws Error if the token is not configured
  */
 export function getReadwiseToken(): string {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   if (!preferences.readwiseToken) {
     throw new Error("Readwise API token not configured");
   }
