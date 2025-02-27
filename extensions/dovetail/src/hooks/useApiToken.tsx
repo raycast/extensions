@@ -8,11 +8,7 @@ export default function useApiToken() {
   // Warn if we don't have an API token
   useEffect(() => {
     if (!apiToken) {
-      showToast(
-        ToastStyle.Failure,
-        "API token missing",
-        "Please enter your Dovetail API token in the extension preferences.",
-      );
+      showFailureToast("API token missing", "Please enter your Dovetail API token in the extension preferences.");
       openExtensionPreferences();
     }
   }, [apiToken]);
