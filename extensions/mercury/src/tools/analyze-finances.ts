@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface Account {
   id: string;
   name: string;
@@ -126,7 +122,7 @@ export default async function (input: Input = {}) {
     // Find top expenses and income sources
     const counterparties = allTransactions.reduce(
       (acc, tx) => {
-        const name = tx.counterpartyName || 'Unknown';
+        const name = tx.counterpartyName || "Unknown";
         if (!acc[name]) {
           acc[name] = { count: 0, total: 0 };
         }
