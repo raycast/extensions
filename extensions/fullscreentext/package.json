@@ -23,6 +23,18 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "fullscreen-selection",
+      "title": "Fullscreen Selection",
+      "description": "Display the selected text fullscreen",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullscreen-clipboard",
+      "title": "Fullscreen Clipboard",
+      "description": "Display the clipboard text fullscreen",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
