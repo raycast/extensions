@@ -1,6 +1,6 @@
 # Aiven Changelog
 
-## [Open in Browser + View Backups & Logs] - {PR_MERGE_DATE}
+## [Open in Browser + View Backups & Logs] - 2025-02-27
 
 - Add "Open in Browser" `Action`s
 - Add `tooltip`s to service items
