@@ -1,17 +1,5 @@
 import _ from "lodash";
-import {
-  ActionPanel,
-  Action,
-  List,
-  Form,
-  useNavigation,
-  showToast,
-  showHUD,
-  Toast,
-  PopToRootType,
-  open,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Form, useNavigation, showToast, Toast, open, Icon } from "@raycast/api";
 import { useLocalStorage, useCachedState } from "@raycast/utils";
 
 import { useEffect, useState, useCallback } from "react";
@@ -257,8 +245,6 @@ export default function Command() {
         jwt,
       );
       showToast({ title: "Translation saved" });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      showHUD("Translation saved", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
     } catch (err) {
       console.error("error saving translation", err);
       if (err instanceof Error && _.includes(err?.message, "free usage limit")) {

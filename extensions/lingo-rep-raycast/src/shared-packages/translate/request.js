@@ -7,7 +7,7 @@ export const request = async ({ method, data, url }) => {
       "Content-Type": "application/json",
     },
     data: data && method.toUpperCase() === "POST" ? JSON.stringify(data) : undefined,
-    url: url ? url : "",
+    url,
   };
   const response = await axios(options);
   return response.data;
