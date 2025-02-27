@@ -1,25 +1,7 @@
-import { closeMainWindow, environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
-import { exec } from "child_process";
-import fs from "fs";
-import util from "util";
+import { getPreferenceValues } from "@raycast/api";
+import askScreenshot from "./askScreenshot";
 
-export default async function AskAboutScreenContent(props) {
+export default async function AskAboutSelectedScreenContent(props) {
   const { prompt } = getPreferenceValues();
-  await closeMainWindow();
-
-  const execPromise = util.promisify(exec);
-
-  await execPromise(`/usr/sbin/screencapture -s ${environment.assetsPath}/selectedScreenshot.png`);
-
-  console.log(`${environment.assetsPath}/selectedScreenshot.png`);
-
-  await launchCommand({
-    name: "askAI",
-    type: LaunchType.UserInitiated,
-    context: {
-      buffer: [fs.readFileSync(`${environment.assetsPath}/selectedScreenshot.png`)],
-      args: props.arguments,
-      context: prompt,
-    },
-  });
+  await askScreenshot(props, prompt, true);
 }
