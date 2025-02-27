@@ -1,6 +1,6 @@
 # Prompt Explorer Extension Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-02-27
 
 - Updated dependencies
 - Fixed linting issues
