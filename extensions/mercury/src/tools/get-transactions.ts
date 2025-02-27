@@ -40,7 +40,6 @@ export default async function getTransactions(input: Input = {}) {
       let fetched = 0;
       let offset = 0;
 
-      // Adjust logic to fetch more transactions
       while (fetched < limit) {
         const response = await fetch(
           `${API_BASE_URL}/account/${accountId}/transactions?limit=${Math.min(
