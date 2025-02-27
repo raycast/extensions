@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { exec } from "child_process";
 import DiskSection from "./DiskSection";
+import { showFailureToast } from "@raycast/utils";
 
 export default function ListDisks(): JSX.Element {
   const [disks, setDisks] = useState<DiskSection[]>([]);
@@ -10,13 +11,13 @@ export default function ListDisks(): JSX.Element {
 
   useEffect(() => {
     process.env.PATH = `${process.env.PATH}:/usr/sbin:/usr/bin/`;
-    process.env.USER = `$USER`;
+    process.env.USER = process.env.USER || "";
     fetchDisks("Init");
   }, []);
 
   // DiskUpdate (Dont show Toast) or Refresh
   /**
-   * Update the DiskSections. Only do q quick refresh on DiskUpdate
+   * Update the DiskSections. Only do a quick refresh on DiskUpdate
    * @param One of the annotated types to choose the style of update
    */
   async function updateDiskSections(update: "DiskUpdate" | "DiskRefresh" | "Init" | "Refresh") {
@@ -76,10 +77,7 @@ export default function ListDisks(): JSX.Element {
     try {
       updateDiskSections(update);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "ERROR: Failed to fetch disks",
-      });
+      showFailureToast(error, { title: "ERROR: Failed to fetch disks" });
       setIsLoading(false);
     }
   }

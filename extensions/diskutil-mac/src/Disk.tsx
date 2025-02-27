@@ -1,4 +1,5 @@
 import { Color, Icon, Image, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
 import * as sudo from "sudo-prompt";
 
@@ -52,12 +53,7 @@ export default class Disk {
     const failureAction = (title: string, icon?: Image.ImageLike, message?: string) => ({
       title,
       icon: Icon.Warning,
-      onAction: () =>
-        showToast({
-          style: Toast.Style.Failure,
-          title: `${this.identifier} ${title}`,
-          message,
-        }),
+      onAction: () => showFailureToast(message, { title: `${this.identifier} ${title}` }),
     });
 
     switch (this.mountStatus) {
@@ -117,7 +113,7 @@ export default class Disk {
       osascript -e 'tell application "Terminal"
         activate
         do script "${command}"
-        delay 1000
+        delay 1
         set frontmost of the first window to true
       end tell'
     `;
@@ -134,23 +130,20 @@ export default class Disk {
     try {
       await Disk.execCommand(fullCommand);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to open terminal",
-        message: String(error),
-      });
+      showFailureToast(error, { title: "Failed to open terminal" });
     }
+
+    showFailureToast;
   }
 
   async revealInFinder() {
     try {
+      if (!this.mountPoint) {
+        throw new Error("No mount point available");
+      }
       await Disk.execCommand(`open "${this.mountPoint}"`);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Reveal in Finder Error",
-        message: error as string,
-      });
+      showFailureToast(error, { title: "Reveal in Finder Error" });
     }
   }
 
@@ -166,11 +159,7 @@ export default class Disk {
         title: `Ejected ${this.identifier}`,
       });
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Ejection Error",
-        message: `${error} Only external drives or disk images can be ejected`,
-      });
+      showFailureToast(`${error} Only external drives or disk images can be ejected`, { title: "Ejection Error" });
     }
   }
 
@@ -188,7 +177,7 @@ export default class Disk {
       const output = await this.tryCommandWithSudoFallback(command);
       this.showToast(action + "ed", output, Toast.Style.Success);
     } catch (error) {
-      this.showToast(action + "ed", error as string, Toast.Style.Failure);
+      showFailureToast(error, { title: `Error ${action}ing` });
     }
   }
 
@@ -339,12 +328,11 @@ export default class Disk {
 
   getDetails(): JSX.Element {
     const data = this.parseTextToDict(this.details);
-    //console.log(data.toString())
     return (
       <List.Item.Detail.Metadata>
         {data.flatMap(([key, value], index) => [
           <List.Item.Detail.Metadata.Label key={`${key}-${index}`} title={key} text={value || undefined} />,
-          value === null && <List.Item.Detail.Metadata.Separator key={`separator-${index}`} />,
+          value === null ? <List.Item.Detail.Metadata.Separator key={`separator-${index}`} /> : null,
         ])}
       </List.Item.Detail.Metadata>
     );
