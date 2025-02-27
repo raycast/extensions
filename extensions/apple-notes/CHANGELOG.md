@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Bug Fix Update] - {PR_MERGE_DATE}
+## [Bug Fix Update] - 2025-02-27
 
 Fix for 'JS heap out of memory error' reported by a user in issue #17137.
 
