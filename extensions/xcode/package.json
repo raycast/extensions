@@ -184,13 +184,6 @@
       "mode": "view"
     },
     {
-      "name": "search-developer-documentation.command",
-      "title": "Search Developer Documentation",
-      "subtitle": "Xcode",
-      "description": "Search Apple Developer Documentation.",
-      "mode": "view"
-    },
-    {
       "name": "open-developer-documentation.command",
       "title": "Open Developer Documentation",
       "subtitle": "Xcode",
