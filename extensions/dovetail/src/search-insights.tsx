@@ -1,16 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Icon,
-  ToastStyle,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Icon, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
 import { format } from "date-fns";
+import useApiToken from "./hooks/useApiToken";
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -22,27 +14,13 @@ interface Insight {
 }
 
 export default function SearchInsights() {
-  // Retrieve preferences, including the Dovetail API token
-  const preferences = getPreferenceValues<{ dovetailApiToken: string }>();
-  const apiToken = preferences.dovetailApiToken;
+  const { apiToken } = useApiToken();
 
   const [query, setQuery] = useState("");
   const [data, setData] = useState<Insight[]>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | null>(null);
   const cancelRef = useRef<AbortController | null>(null);
-
-  // Warn if we don't have an API token
-  useEffect(() => {
-    if (!apiToken) {
-      showToast(
-        ToastStyle.Failure,
-        "API token missing",
-        "Please enter your Dovetail API token in the extension preferences.",
-      );
-      openExtensionPreferences();
-    }
-  }, [apiToken]);
 
   function getShortDate(createdAt: Date) {
     const now = new Date();

@@ -1,16 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Icon,
-  ToastStyle,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Icon, ToastStyle, openExtensionPreferences } from "@raycast/api";
 import fetch from "node-fetch";
 import { format } from "date-fns";
+import useApiToken from "./hooks/useApiToken";
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -22,9 +14,7 @@ interface Note {
 }
 
 export default function SearchDovetail() {
-  // Retrieve preferences, including the Dovetail API token
-  const preferences = getPreferenceValues<{ dovetailApiToken: string }>();
-  const apiToken = preferences.dovetailApiToken;
+  const { apiToken } = useApiToken();
 
   const [query, setQuery] = useState("");
   const [data, setData] = useState<Note[]>([]);
