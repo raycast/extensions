@@ -38,7 +38,7 @@ export default function SearchDocsets(): JSX.Element {
       documentations[0].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
       documentations[1].filter((item) => item.alias && item.alias === searchText.toLowerCase()),
     ]);
-  }, [searchText]);
+  }, [searchText, documentations]);
 
   return (
     <List isLoading={isLoading} filtering={true} onSearchTextChange={setSearchText}>
