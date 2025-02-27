@@ -3,7 +3,7 @@
   "name": "quoterism-raycast",
   "title": "Quoterism",
   "description": "Get access to the Web's largest collection of human inspiration",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "dmitry_fisenko",
   "categories": [
     "Fun",
@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.1",
+    "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
@@ -28,7 +28,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.5.2",
     "typescript": "^5.4.5"
   },
   "scripts": {
