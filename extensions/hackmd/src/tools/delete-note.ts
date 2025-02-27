@@ -4,7 +4,7 @@ import api from "../lib/api";
 type DeleteNoteArgs = {
   /**
    * ID of the note to delete
-   * Can be either the full note ID (e.g., "note_id_1") or the shorthand format with username/path (e.g., "@username/shortId")
+   * Can be either the full note ID or the shortId
    */
   noteId: string;
   /**
@@ -19,12 +19,16 @@ export const confirmation: Tool.Confirmation<DeleteNoteArgs> = (input) => {
   return {
     message: `Delete note (ID: ${input.noteId}) from ${location}?`,
     detail: "This action cannot be undone. The note will be permanently removed.",
+    primaryAction: {
+      title: "Delete",
+      style: Tool.ConfirmationStyle.Destructive,
+    }
   };
 };
 
 /**
  * Delete an existing note from HackMD, either from personal workspace or team workspace
- * Accepts note IDs in both full ID and @username/shortId format
+ * Accepts note IDs in both full ID and shortId format
  */
 export default async function tool(args: DeleteNoteArgs): Promise<{ success: boolean, message: string }> {
   const { noteId, teamPath } = args;

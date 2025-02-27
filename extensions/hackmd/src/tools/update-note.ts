@@ -5,7 +5,7 @@ import api from "../lib/api";
 type UpdateNoteArgs = {
   /**
    * ID of the note to update
-   * Can be either the full note ID (e.g., "note_id_1") or the shorthand format with username/path (e.g., "@username/shortId")
+   * Can be either the full note ID or the shortId
    */
   noteId: string;
   /**
@@ -38,7 +38,7 @@ export const confirmation: Tool.Confirmation<UpdateNoteArgs> = (input) => {
 
 /**
  * Update an existing note in HackMD, either in personal workspace or team workspace
- * Accepts note IDs in both full ID and @username/shortId format
+ * Accepts note IDs in both full ID and shortId format
  */
 export default async function tool(args: UpdateNoteArgs): Promise<SingleNote> {
   const { noteId, teamPath, ...updateData } = args;

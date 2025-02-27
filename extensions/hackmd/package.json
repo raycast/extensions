@@ -91,7 +91,7 @@
     {
       "name": "view-note",
       "title": "View Note Details",
-      "description": "Get detailed content and metadata for a specific note by ID or @username/shortId format"
+      "description": "Get detailed content and metadata for a specific note by ID or shortId"
     },
     {
       "name": "create-note",
@@ -101,12 +101,12 @@
     {
       "name": "update-note",
       "title": "Update Note",
-      "description": "Update an existing note in HackMD using note ID or @username/shortId format"
+      "description": "Update an existing note in HackMD using note ID or shortId"
     },
     {
       "name": "delete-note",
       "title": "Delete Note",
-      "description": "Delete an existing note from HackMD using note ID or @username/shortId format"
+      "description": "Delete an existing note from HackMD using note ID or shortId"
     }
   ],
   "ai": {
@@ -326,7 +326,7 @@
         ]
       },
       {
-        "input": "@hackmd Open the note with ID note_detail_id or @username/SomeNoteID",
+        "input": "@hackmd Open the note with ID note_detail_id or shortId SomeNoteID",
         "mocks": {
           "view-note": {
             "id": "note_detail_id",
@@ -359,7 +359,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "*matches*note_detail_id|@username/SomeNoteID*"
+                "noteId": "*matches*note_detail_id|SomeNoteID*"
               }
             }
           },
@@ -369,7 +369,7 @@
         ]
       },
       {
-        "input": "@hackmd I need to check my note @username/abc123",
+        "input": "@hackmd I need to check my note with shortId abc123",
         "mocks": {
           "view-note": {
             "id": "abc123_full_id",
@@ -402,12 +402,12 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "@username/abc123"
+                "noteId": "abc123"
               }
             }
           },
           {
-            "meetsCriteria": "Returns the note content and metadata for the specified ID"
+            "meetsCriteria": "Returns the note content and metadata for the specified shortId"
           }
         ]
       },
@@ -529,7 +529,7 @@
         ]
       },
       {
-        "input": "@hackmd Could you update my note personal_note_id or @username/personal_note_short_id to include a section on risk management?",
+        "input": "@hackmd Could you update my note with ID personal_note_id or shortId personal_note_short_id to include a section on risk management?",
         "mocks": {
           "view-note": {
             "id": "personal_note_id",
@@ -586,7 +586,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "*matches*personal_note_id|@username/personal_note_short_id*"
+                "noteId": "*matches*personal_note_id|personal_note_short_id*"
               }
             }
           },
@@ -597,7 +597,7 @@
             "callsTool": {
               "name": "update-note",
               "arguments": {
-                "noteId": "*matches*personal_note_id|@username/personal_note_short_id*",
+                "noteId": "*matches*personal_note_id|personal_note_short_id*",
                 "content": "*matches*Risk Management*"
               }
             }
@@ -608,7 +608,7 @@
         ]
       },
       {
-        "input": "@hackmd I'd like to make the @teampath/team_note_short_id note public in the hackmd team",
+        "input": "@hackmd I'd like to make the team note with shortId team_note_short_id public in the hackmd team",
         "mocks": {
           "view-note": {
             "id": "team_note_id",
@@ -665,7 +665,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "@teampath/team_note_short_id"
+                "noteId": "team_note_short_id"
               }
             }
           },
@@ -676,7 +676,7 @@
             "callsTool": {
               "name": "update-note",
               "arguments": {
-                "noteId": "@teampath/team_note_short_id",
+                "noteId": "team_note_short_id",
                 "teamPath": "hackmd",
                 "readPermission": "guest",
                 "content": "*any*"
@@ -689,7 +689,7 @@
         ]
       },
       {
-        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id or @username/obsolete_note_short_id",
+        "input": "@hackmd I need to delete the obsolete note with ID obsolete_note_id or shortId obsolete_note_short_id",
         "mocks": {
           "view-note": {
             "id": "obsolete_note_id",
@@ -726,7 +726,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "*matches*obsolete_note_id|@username/obsolete_note_short_id*"
+                "noteId": "*matches*obsolete_note_id|obsolete_note_short_id*"
               }
             }
           },
@@ -737,7 +737,7 @@
             "callsTool": {
               "name": "delete-note",
               "arguments": {
-                "noteId": "*matches*obsolete_note_id|@username/obsolete_note_short_id*"
+                "noteId": "*matches*obsolete_note_id|obsolete_note_short_id*"
               }
             }
           },
@@ -747,7 +747,7 @@
         ]
       },
       {
-        "input": "@hackmd Please remove that outdated documentation @teampath/team_doc_short_id from our hackmd team workspace",
+        "input": "@hackmd Please remove that outdated documentation with shortId team_doc_short_id from our hackmd team workspace",
         "mocks": {
           "view-note": {
             "id": "team_doc_id",
@@ -784,7 +784,7 @@
             "callsTool": {
               "name": "view-note",
               "arguments": {
-                "noteId": "@teampath/team_doc_short_id"
+                "noteId": "team_doc_short_id"
               }
             }
           },
@@ -795,7 +795,7 @@
             "callsTool": {
               "name": "delete-note",
               "arguments": {
-                "noteId": "@teampath/team_doc_short_id",
+                "noteId": "team_doc_short_id",
                 "teamPath": "hackmd"
               }
             }
