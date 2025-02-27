@@ -26,14 +26,14 @@
       "description": "Search for insights across your workspace.",
       "mode": "view"
     }
-  ,
+  },
     {
       "name": "create-data",
       "title": "Create Data",
       "description": "Create data in a Dovetail project",
       "mode": "view"
     }
-      ],
+  ],
   "preferences": [
     {
       "name": "dovetailApiToken",
