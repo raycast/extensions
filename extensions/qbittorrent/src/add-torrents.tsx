@@ -3,7 +3,6 @@ import { AddTorrentOptions, QBittorrent, Preferences as QbittorrentPreferences }
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Preferences } from "./types/preferences";
 import { readFile } from "node:fs/promises";
-import { fetch } from "cross-fetch";
 
 interface Values extends AddTorrentOptions {
   torrentPaths: string[];
@@ -63,18 +62,8 @@ export default function AddTorrents() {
       .map((url) => url.trim())
       .filter(Boolean);
     const localTorrents = await Promise.all(torrentPaths.map((path) => readFile(path)));
-    const magnets = urls.filter((torrent) => torrent.startsWith("magnet:"));
-    const torrentUrls = urls.filter((torrent) => !magnets.includes(torrent));
-    const downloadedTorrents = await Promise.all(
-      torrentUrls.map(async (url) => {
-        const response = await fetch(url);
-        return Buffer.from(await response.text());
-      }),
-    );
 
-    const torrents = [...downloadedTorrents, ...localTorrents];
-
-    if (!torrents.length) {
+    if (!localTorrents.length && !urls.length) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to submit torrents",
@@ -83,16 +72,16 @@ export default function AddTorrents() {
       return;
     }
     setLoading(true);
-    const options = Object.fromEntries(Object.entries(opts).filter(([_, value]) => value !== ""));
+    const options = Object.fromEntries(Object.entries(opts).filter(([, value]) => value !== ""));
     await qbit.login();
 
     await Promise.all(
-      torrents.map((torrent) => {
+      localTorrents.map((torrent) => {
         return qbit.addTorrent(torrent, options);
       }),
     );
     await Promise.all(
-      magnets.map((magnet) => {
+      urls.map((magnet) => {
         return qbit.addMagnet(magnet, options);
       }),
     );
