@@ -1,9 +1,13 @@
 # Hacker News Changelog
 
-## [🚀 Add Readwise Reader integration] - (2025-01-31)
+## [🚀 Add Readwise Reader integration] - (2025-02-27)
 
 - Add ability to save articles to Readwise Reader
 - Show visual indicator for previously saved articles
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Add AI tools
 
 ## [🐛 Fixes] - (2022-08-16)
 

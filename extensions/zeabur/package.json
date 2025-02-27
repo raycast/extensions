@@ -24,16 +24,7 @@
       "title": "Deploy Project",
       "subtitle": "Zeabur",
       "description": "Deploy a project to Zeabur",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "zeaburApiKey",
-          "title": "Zeabur API Key",
-          "description": "Zeabur API Key",
-          "type": "password",
-          "required": false
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

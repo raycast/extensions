@@ -301,6 +301,15 @@
           "description": "If no heading is set, text will be appended to the end of the daily note"
         },
         {
+          "name": "prepend",
+          "type": "checkbox",
+          "label": "Prepend",
+          "title": "Prepend",
+          "required": false,
+          "description": "Prepend the text instead of appending",
+          "default": false
+        },
+        {
           "name": "silent",
           "type": "checkbox",
           "label": "Silent Mode",

@@ -6,5 +6,5 @@ const model_override = getPreferenceValues().model_what;
 const toast_title = "Introducing...";
 
 export default function what() {
-  return ResultView(prompt, model_override, toast_title);
+  return ResultView(prompt, model_override, toast_title, true);
 }

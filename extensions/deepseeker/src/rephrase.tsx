@@ -6,5 +6,5 @@ const model_override = getPreferenceValues().model_rephrase;
 const toast_title = "Rephrasing...";
 
 export default function Rephrase() {
-  return ResultView(prompt, model_override, toast_title);
+  return ResultView(prompt, model_override, toast_title, true);
 }

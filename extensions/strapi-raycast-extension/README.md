@@ -2,6 +2,9 @@
 
 Strapi extension for Raycast. Explore your Strapi content & media all from within Raycast.
 
+## Compatibility
+This extension currently only supports Strapi v5 instances.
+
 ## Required settings
 |Setting|Description|
 |-------|-----------|

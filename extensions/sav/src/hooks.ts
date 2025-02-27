@@ -2,13 +2,14 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { ActiveDomain, Result } from "./types";
 import { generateApiUrl } from "./utils";
+import { Response as NodeFetchResponse } from "node-fetch";
 
 const { api_key } = getPreferenceValues<Preferences>();
 export const headers = {
   Host: "api.sav.com",
   APIKEY: api_key,
 };
-export const parseResponse = async <T>(response: Response) => {
+export const parseResponse = async <T>(response: Response | NodeFetchResponse) => {
   const text = await response.text();
   if (!text.startsWith("{")) throw new Error(response.statusText);
   const result: Result<T> = JSON.parse(text);

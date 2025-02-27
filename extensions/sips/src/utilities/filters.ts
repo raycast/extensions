@@ -38,14 +38,14 @@ const initializeFilterScript = (source: string, destination: string, CIFilterNam
     on applyFilter(sourcePath, destinationPath)
         global thePDF
         set repeatCount to 1
-        if "${source}" ends with ".pdf" and "${destination}" is not "" then
+        if "${source}" ends with ".pdf" then
             set thePDF to current application's PDFDocument's alloc()'s initWithURL:(current application's |NSURL|'s fileURLWithPath:sourcePath)
             set pageCount to thePDF's pageCount()
             set repeatCount to pageCount
         end if
 
         repeat with i from 1 to repeatCount
-          if repeatCount > 1 then
+          if thePDF is not missing value then
             set thePage to thePDF's pageAtIndex:(i - 1)
             set theData to thePage's dataRepresentation()
             set theImage to current application's NSImage's alloc()'s initWithData:theData
@@ -103,7 +103,12 @@ end saveImage`;
 export const getFilterThumbnail = async (filter: Filter, source: string) => {
   return runAppleScript(`${initializeFilterScript(source, "", filter.CIFilterName)}
     set newWidth to 300
-    set scaleFactor to newWidth / (imgSize's width)
+
+    try
+      set scaleFactor to newWidth / (imgSize's width)
+    on error
+      set scaleFactor to 1
+    end try
 
     set imgSize to current application's NSMakeSize(newWidth, (imgSize's height) * scaleFactor)
 
@@ -170,7 +175,7 @@ export const applyBasicFilter = async (source: string, destination: string, filt
 export const getActiveFilters = (): Filter[] => {
   const preferences = getPreferenceValues<Preferences.ApplyFilter>();
   const activeFilters = [];
-  if (preferences.hiddenFilters.trim().length > 0) {
+  if ((preferences.hiddenFilters || "").trim().length > 0) {
     const hiddenFilters = preferences.hiddenFilters.split(",").map((filter) => filter.trim());
     if (!hiddenFilters.includes("Blur")) {
       activeFilters.push(...blurFilters);
