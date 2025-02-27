@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [AI Extension Improvements] - 2025-02-27
+
+Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
+
 ## [Add Schedule Task Deadline Actions] - 2025-02-26
 
 It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
