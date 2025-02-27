@@ -117,7 +117,7 @@ export function Body() {
     return <LoginView />;
   }
 
-  if (!data || !filteredTaggedList || !filteredUntaggedList) {
+  if (!data) {
     return <List isLoading={true} />;
   }
 

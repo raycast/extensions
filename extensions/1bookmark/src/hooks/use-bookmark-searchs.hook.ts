@@ -17,8 +17,8 @@ export const useBookmarkSearches = (params: { selectedTags: string[]; data?: Boo
       return {
         searchInTags: null,
         searchInUntagged: null,
-        taggedBookmarks: data,
-        untaggedBookmarks: data,
+        taggedBookmarks: [] as Bookmark[],
+        untaggedBookmarks: [] as Bookmark[],
       };
     }
 
