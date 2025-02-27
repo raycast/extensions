@@ -157,22 +157,21 @@ export default class Disk {
   async eject() {
     showToast({
       style: Toast.Style.Animated,
-      title: "Ejecting " + this.identifier,
+      title: `Ejecting ${this.identifier}`,
     });
-    Disk.execCommand(`diskutil eject "${this.identifier}"`)
-      .then(() => {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Ejected " + this.identifier,
-        });
-      })
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Ejection Error",
-          message: (error as string) + "Only external drives or disk images can be ejected",
-        });
+    try {
+      await Disk.execCommand(`diskutil eject "${this.identifier}"`);
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Ejected ${this.identifier}`,
       });
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Ejection Error",
+        message: `${error} Only external drives or disk images can be ejected`,
+      });
+    }
   }
 
   isDetailsTimedOut(): boolean {
