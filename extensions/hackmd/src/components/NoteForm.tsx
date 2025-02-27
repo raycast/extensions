@@ -14,11 +14,11 @@ const PermissionItems = () => (
 );
 
 type FormValues = {
-  teamPath: string,
-  content: string
-  readPermission: SingleNote['readPermission']
-  writePermission: SingleNote['writePermission']
-}
+  teamPath: string;
+  content: string;
+  readPermission: SingleNote["readPermission"];
+  writePermission: SingleNote["writePermission"];
+};
 
 export default function NoteForm({
   note,

@@ -32,7 +32,7 @@ export const confirmation: Tool.Confirmation<UpdateNoteArgs> = (input) => {
 
   return {
     message: `Update note (ID: ${input.noteId}) in ${location}?`,
-    detail: `Updated content preview: ${notePreview}${notePreview.length >= 40 ? "..." : ""}`
+    detail: `Updated content preview: ${notePreview}${notePreview.length >= 40 ? "..." : ""}`,
   };
 };
 

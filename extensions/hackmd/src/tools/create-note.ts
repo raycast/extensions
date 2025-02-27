@@ -27,7 +27,7 @@ export const confirmation: Tool.Confirmation<CreateNoteArgs> = (input) => {
 
   return {
     message: `Create a new note in ${location}?`,
-    detail: `Note preview: ${notePreview}${notePreview.length >= 40 ? "..." : ""}`
+    detail: `Note preview: ${notePreview}${notePreview.length >= 40 ? "..." : ""}`,
   };
 };
 

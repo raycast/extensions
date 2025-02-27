@@ -22,7 +22,7 @@ export const confirmation: Tool.Confirmation<DeleteNoteArgs> = (input) => {
     primaryAction: {
       title: "Delete",
       style: Tool.ConfirmationStyle.Destructive,
-    }
+    },
   };
 };
 
@@ -30,7 +30,7 @@ export const confirmation: Tool.Confirmation<DeleteNoteArgs> = (input) => {
  * Delete an existing note from HackMD, either from personal workspace or team workspace
  * Accepts note IDs in both full ID and shortId format
  */
-export default async function tool(args: DeleteNoteArgs): Promise<{ success: boolean, message: string }> {
+export default async function tool(args: DeleteNoteArgs): Promise<{ success: boolean; message: string }> {
   const { noteId, teamPath } = args;
 
   try {
@@ -43,12 +43,12 @@ export default async function tool(args: DeleteNoteArgs): Promise<{ success: boo
 
     return {
       success: true,
-      message: `Successfully deleted note (ID: ${noteId})${teamPath ? ` from team ${teamPath}` : ""}`
+      message: `Successfully deleted note (ID: ${noteId})${teamPath ? ` from team ${teamPath}` : ""}`,
     };
   } catch (error) {
     return {
       success: false,
-      message: `Failed to delete note: ${error instanceof Error ? error.message : String(error)}`
+      message: `Failed to delete note: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
