@@ -2,7 +2,7 @@ import { getSelectedText, closeMainWindow, showToast, Toast, Clipboard } from "@
 import { Parser } from "expr-eval";
 import { loadPreferences, Preferences } from "./preferences";
 
-async function evaluate(text: string, preferences: Preferences) {
+function evaluate(text: string, preferences: Preferences) {
   let result = new Parser().evaluate(text);
 
   if (typeof result !== "number") {
