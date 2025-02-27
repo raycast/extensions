@@ -31,6 +31,15 @@
       "description": "Get the latest stories from Hacker News."
     }
   ],
+  "preferences": [
+    {
+      "name": "readwiseToken",
+      "type": "password",
+      "title": "Readwise API Token",
+      "description": "Your Readwise API token (found in https://readwise.io/access_token)",
+      "required": false
+    }
+  ],
   "ai": {
     "evals": [
       {
