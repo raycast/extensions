@@ -42,37 +42,103 @@
     },
     {
       "name": "generate-v1-uuid",
-      "title": "Generate V1 UUID",
-      "description": "Generate a random V1 UUID",
-      "mode": "no-view"
-    },
-    {
-      "name": "generate-v4-uuid",
-      "title": "Generate V4 UUID",
-      "description": "Generate a random V4 UUID",
-      "mode": "no-view"
-    },
-    {
-      "name": "generate-v6-uuid",
-      "title": "Generate V6 UUID",
-      "description": "Generate a random V6 UUID",
-      "mode": "no-view"
-    },
-    {
-      "name": "generate-v7-uuid",
-      "title": "Generate V7 UUID",
-      "description": "Generate a random V7 UUID",
-      "mode": "no-view"
-    },
-    {
-      "name": "generate-nanoid",
-      "title": "Generate Nanoid",
-      "description": "Generate a compact, URL-friendly unique ID",
+      "title": "Generate V1 UUIDs",
+      "description": "Copy generated V1 UUID to the clipboard",
       "mode": "no-view",
       "arguments": [
         {
-          "name": "length",
-          "placeholder": "ID length (default: 21)",
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v4-uuid",
+      "title": "Generate V4 UUIDs",
+      "description": "Copy generated V4 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v6-uuid",
+      "title": "Generate V6 UUIDs",
+      "description": "Copy generated V6 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-v7-uuid",
+      "title": "Generate V7 UUIDs",
+      "description": "Copy generated V7 UUID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-nanoid",
+      "title": "Generate Nanoids",
+      "description": "Copy generated nanoid to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfNanoidsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-ulid",
+      "title": "Generate ULIDs",
+      "description": "Copy generated ULID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfULIDsToGenerate",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generate-typeid",
+      "title": "Generate TypeIDs",
+      "description": "Copy generated TypeID to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "typePrefix",
+          "placeholder": "Prefix",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "numberOfTypeIDsToGenerate",
+          "placeholder": "1",
           "type": "text",
           "required": false
         }
@@ -85,10 +151,10 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "numberOfCharacters",
+          "name": "length",
+          "placeholder": "8",
           "type": "text",
-          "required": false,
-          "placeholder": "No. of characters"
+          "required": false
         }
       ]
     },
@@ -204,7 +270,7 @@
           "name": "numberOfWords",
           "type": "text",
           "required": false,
-          "placeholder": "No. of words"
+          "placeholder": "5"
         }
       ]
     },
@@ -218,7 +284,7 @@
           "name": "numberOfSentences",
           "type": "text",
           "required": false,
-          "placeholder": "No. of sentences"
+          "placeholder": "5"
         }
       ]
     },
@@ -232,7 +298,7 @@
           "name": "numberOfParagraphs",
           "type": "text",
           "required": false,
-          "placeholder": "No. of paragraphs"
+          "placeholder": "5"
         }
       ]
     },
@@ -372,7 +438,7 @@
       "arguments": [
         {
           "name": "date",
-          "placeholder": "Date string (defaults to today)",
+          "placeholder": "Date string",
           "type": "text",
           "required": false
         },
@@ -383,7 +449,7 @@
           "required": false,
           "data": [
             {
-              "title": "Medium (Default)",
+              "title": "Medium",
               "value": "medium"
             },
             {
@@ -453,6 +519,8 @@
     "lorem-ipsum": "^2.0.8",
     "nanoid": "^5.1.2",
     "node-fetch": "^3.3.2",
+    "typeid-js": "^1.2.0",
+    "ulid": "^2.3.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
