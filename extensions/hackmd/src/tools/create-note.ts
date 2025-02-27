@@ -21,7 +21,7 @@ type CreateNoteArgs = {
   writePermission?: SingleNote["writePermission"];
 };
 
-export const confirmation: Tool.Confirmation<CreateNoteArgs> = (input) => {
+export const confirmation: Tool.Confirmation<CreateNoteArgs> = async (input) => {
   const notePreview = input.content.split("\n")[0].substring(0, 40);
   const location = input.teamPath ? `team "${input.teamPath}" workspace` : "personal workspace";
 

@@ -1,4 +1,4 @@
-import { Tool } from "@raycast/api";
+import { Action, Tool } from "@raycast/api";
 import api from "../lib/api";
 
 type DeleteNoteArgs = {
@@ -17,6 +17,7 @@ export const confirmation: Tool.Confirmation<DeleteNoteArgs> = async (input) => 
   const location = input.teamPath ? `team "${input.teamPath}" workspace` : "personal workspace";
 
   return {
+    style: Action.Style.Destructive,
     message: `Delete note (ID: ${input.noteId}) from ${location}? This action cannot be undone. The note will be permanently removed.`,
   };
 };

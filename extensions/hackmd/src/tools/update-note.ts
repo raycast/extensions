@@ -1,6 +1,6 @@
 import { SingleNote } from "@hackmd/api/dist/type";
 import { AxiosResponse } from "axios";
-import { Tool } from "@raycast/api";
+import { Action, Tool } from "@raycast/api";
 import api from "../lib/api";
 
 type UpdateNoteArgs = {
@@ -33,7 +33,13 @@ export const confirmation: Tool.Confirmation<UpdateNoteArgs> = async (input) => 
 
   return {
     message: `Update note (ID: ${input.noteId}) in ${location}?`,
-    detail: `Updated content preview: ${notePreview}${notePreview.length >= 40 ? "..." : ""}`,
+    style: Action.Style.Regular,
+    info: [
+      {
+        name: "Content Preview",
+        value: `${notePreview}${notePreview.length >= 40 ? "..." : ""}`,
+      },
+    ],
   };
 };
 
