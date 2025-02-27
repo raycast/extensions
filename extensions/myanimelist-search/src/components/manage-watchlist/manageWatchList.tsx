@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import * as api from "../../api/api";
 import * as oauth from "../../api/oauth";
@@ -10,8 +10,36 @@ import { SetEpisodesWatched, getWatchlistItems, statusToText } from "./utils";
 export function ManageWatchList() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [items, setItems] = useState<(api.ExtendedAnime & { status: string; episodesWatched: number })[]>([]);
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+
+  const ITEMS_PER_PAGE = 30;
 
   const { showingDetails: showingDetail, setShowingDetails: setShowingDetail, setViewType } = useContext(ViewTypeCtx);
+
+  const loadItems = useCallback(async (currentPage: number, append = false) => {
+    try {
+      const offset = currentPage * ITEMS_PER_PAGE;
+      const fetchedItems = await getWatchlistItems(ITEMS_PER_PAGE, offset);
+
+      if (fetchedItems.length < ITEMS_PER_PAGE) {
+        setHasMore(false);
+      }
+
+      if (append) {
+        setItems((prevItems) => [...prevItems, ...fetchedItems]);
+      } else {
+        setItems(fetchedItems);
+      }
+
+      return fetchedItems;
+    } catch (error) {
+      console.error(error);
+      showToast({ style: Toast.Style.Failure, title: String(error) });
+      return [];
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -19,11 +47,9 @@ export function ManageWatchList() {
     (async () => {
       try {
         await oauth.authorize();
-
-        const fetchedItems = await getWatchlistItems();
+        const fetchedItems = await loadItems(0);
 
         if (isMounted) {
-          setItems(fetchedItems);
           setIsLoading(false);
         }
       } catch (error) {
@@ -38,10 +64,30 @@ export function ManageWatchList() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadItems]);
+
+  const handleLoadMore = async () => {
+    if (!hasMore || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    const nextPage = page + 1;
+    await loadItems(nextPage, true);
+    setPage(nextPage);
+    setIsLoadingMore(false);
+  };
 
   return (
-    <List isLoading={isLoading} isShowingDetail={showingDetail}>
+    <List 
+      isLoading={isLoading} 
+      isShowingDetail={showingDetail}
+      searchBarPlaceholder="Search your watchlist..."
+      onSearchTextChange={() => {}}
+      pagination={{
+        onLoadMore: handleLoadMore,
+        hasMore: hasMore,
+        pageSize: ITEMS_PER_PAGE
+      }}
+    >
       {items.map((item) => (
         <List.Item
           key={item.id}

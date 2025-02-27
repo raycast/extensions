@@ -4,13 +4,20 @@ import * as api from "../../api/api";
 import { useForm } from "@raycast/utils";
 
 interface SetEpisodesWatchedValues {
-  episodes: string;
+	episodes: string;
 }
 
-export async function getWatchlistItems(): Promise<
-  (api.ExtendedAnime & { status: string; episodesWatched: number })[]
+export async function getWatchlistItems(
+	limit = 30,
+	offset = 0,
+): Promise<
+	(api.ExtendedAnime & { status: string; episodesWatched: number })[]
 > {
-  const watchlist = await api.getDetailedWatchlist(["watching", "plan_to_watch"]);
+	const watchlist = await api.getDetailedWatchlist(
+		["watching", "plan_to_watch"],
+		limit,
+		offset,
+	);
 
   const fetchedItems = await Promise.all(
     watchlist.map(async (item) => ({
@@ -19,30 +26,30 @@ export async function getWatchlistItems(): Promise<
     }))
   );
 
-  return fetchedItems;
+	return fetchedItems;
 }
 
 export function statusToText(status: string) {
-  switch (status) {
-    case "watching":
-      return "Watching";
-    case "plan_to_watch":
-      return "Plan to Watch";
-    case "finished_airing":
-      return "Finished Airing";
-    case "currently_airing":
-      return "Currently Airing";
-    case "not_yet_aired":
-      return "Not Yet Aired";
-    default:
-      return status;
-  }
+	switch (status) {
+		case "watching":
+			return "Watching";
+		case "plan_to_watch":
+			return "Plan to Watch";
+		case "finished_airing":
+			return "Finished Airing";
+		case "currently_airing":
+			return "Currently Airing";
+		case "not_yet_aired":
+			return "Not Yet Aired";
+		default:
+			return status;
+	}
 }
 
 export function SetEpisodesWatched({ anime }: { anime: api.ExtendedAnime }) {
-  const { handleSubmit, itemProps } = useForm<SetEpisodesWatchedValues>({
-    onSubmit: async (values) => {
-      const cacheKey = `episodes_${anime.id}`;
+	const { handleSubmit, itemProps } = useForm<SetEpisodesWatchedValues>({
+		onSubmit: async (values) => {
+			const cacheKey = `episodes_${anime.id}`;
 
       try {
         await api.setEpisodes(anime, parseInt(values.episodes));
