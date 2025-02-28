@@ -35,7 +35,6 @@ type Input = {
 
 const preferences: ExtensionPreferences = getPreferenceValues();
 
-// @ts-expect-error: Tool.Confirmation is typed internally to allow returning `undefined` values
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (!input.attendees) {
     return;
