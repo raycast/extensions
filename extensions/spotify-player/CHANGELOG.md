@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [Fix Select Device] - 2025-02-26
+
+- Fixed a possibly undefined issue from Select Devices command
+
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Fix Missing Playlists in Add Playing Song to Playlist command] - 2025-02-20
 
 - Fixed an issue where some playlists were not appearing when users attempted to add a currently playing song to a playlist.

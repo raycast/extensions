@@ -5,7 +5,6 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-05 23:49:16
- * Last modified  : 2024-06-26 21:37:46
  */
 
 import { execSync } from "child_process";
@@ -18,6 +17,7 @@ import { optimize as svgoOptimize } from "svgo";
 
 import { getAVIFEncPaths } from "../utilities/avif";
 import {
+  expandTilde,
   getDestinationPaths,
   getScopedTempFile,
   getWebPBinaryPath,
@@ -106,10 +106,11 @@ const optimizePNG = async (pngPath: string, optimizationAmount: number) => {
  * @returns A promise that resolves when optimization is complete.
  */
 export default async function optimize(sourcePaths: string[], amount: number) {
-  const newPaths = await getDestinationPaths(sourcePaths);
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  const newPaths = await getDestinationPaths(expandedPaths);
 
   const resultPaths = [];
-  for (const imgPath of sourcePaths) {
+  for (const imgPath of expandedPaths) {
     if (imgPath.toLowerCase().endsWith("webp")) {
       // Convert to JPEG, optimize, and restore to WebP
       resultPaths.push(await optimizeWEBP(imgPath, amount));
@@ -118,7 +119,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       resultPaths.push(await optimizeSVG(imgPath));
     } else if (imgPath.toLowerCase().endsWith("jpg") || imgPath.toLowerCase().endsWith("jpeg")) {
       // Optimize JPEG images using NSBitmapImageRep compression
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.jpeg");
       resultPaths.push(newPath);
       await optimizeJPEG(imgPath, newPath, amount);
@@ -132,7 +133,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
       execSync(`${decoderPath} -q ${amount} "${imgPath}" "${jpegFile.path}"`);
 
       // Convert back to AVIF
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(path.dirname(newPath), path.basename(newPath, path.extname(newPath)) + "-optimized.avif");
       resultPaths.push(newPath);
       execSync(
@@ -153,7 +154,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
     } else {
       // Optimize any other SIPS-compatible image type
       await using jpegFile = await getScopedTempFile("tmp", "jpeg");
-      let newPath = newPaths[sourcePaths.indexOf(imgPath)];
+      let newPath = newPaths[expandedPaths.indexOf(imgPath)];
       newPath = path.join(
         path.dirname(newPath),
         path.basename(newPath, path.extname(newPath)) + "-optimized" + path.extname(newPath),

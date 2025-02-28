@@ -1,19 +1,31 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences, Color } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
+import { useEffect, useState } from "react";
+import { runAppleScriptSync } from "run-applescript";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { RemoveMethods, useRecentEntries } from "./db";
-import { getBuildScheme } from "./lib/vscode";
 import {
-  bundleIdentifier,
+  ListOrGrid,
+  ListOrGridDropdown,
+  ListOrGridDropdownItem,
+  ListOrGridDropdownSection,
+  ListOrGridEmptyView,
+  ListOrGridItem,
+  ListOrGridSection,
+} from "./grid-or-list";
+import { getBuildScheme } from "./lib/vscode";
+import { usePinnedEntries } from "./pinned";
+import {
   build,
-  keepSectionOrder,
+  bundleIdentifier,
   closeOtherWindows,
-  terminalApp,
-  showGitBranch,
   gitBranchColor,
+  keepSectionOrder,
   layout,
+  showGitBranch,
+  terminalApp,
 } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
 import {
@@ -23,20 +35,10 @@ import {
   isFolderEntry,
   isRemoteEntry,
   isRemoteWorkspaceEntry,
-  isWorkspaceEntry,
   isValidHexColor,
+  isWorkspaceEntry,
 } from "./utils";
-import {
-  ListOrGrid,
-  ListOrGridDropdown,
-  ListOrGridDropdownSection,
-  ListOrGridDropdownItem,
-  ListOrGridSection,
-  ListOrGridItem,
-  ListOrGridEmptyView,
-} from "./grid-or-list";
-import { usePinnedEntries } from "./pinned";
-import { runAppleScriptSync } from "run-applescript";
+import { getEditorApplication } from "./utils/editor";
 import { getGitBranch } from "./utils/git";
 
 export default function Command() {
@@ -151,6 +153,10 @@ function LocalItem(
   const keywords = path.split("/");
   const [gitBranch, setGitBranch] = useState<string | null>(null);
 
+  const { data: editorApp } = usePromise(async () => {
+    return getEditorApplication(build);
+  });
+
   useEffect(() => {
     let mounted = true;
 
@@ -221,18 +227,22 @@ function LocalItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={getTitle()} icon="action-icon.png" onAction={getAction()} />
+            <Action
+              title={getTitle()}
+              icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
+              onAction={getAction()}
+            />
             <Action.ShowInFinder path={path} />
             <Action
               title={getTitle(true)}
-              icon="action-icon.png"
+              icon={editorApp ? { fileIcon: editorApp.path } : "action-icon.png"}
               onAction={getAction(true)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             {isFolderEntry(props.entry) && terminalApp && (
               <Action
-                title={`Open With ${terminalApp.name}`}
+                title={`Open with ${terminalApp.name}`}
                 icon={{ fileIcon: terminalApp.path }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() =>

@@ -1,12 +1,16 @@
 # Apple Notes Changelog
 
-## [Fix for Text Formatting on New Note Creation] - 2025-2-21
+## [Fix for Text Formatting on New Note Creation] - {PR_MERGE_DATE}
 
 This update adds a workaround for text not being formatted when being pasted in. Prior to this, the text pasted in the search bar would be displayed as one single line therefore resulting in lack of correct formatting when being written to a new note.
 
 - **Improved 'New Note' Functionality**: 'New Note' command has been updated to take in a title in the search bar which then goes on to a 'NewNoteForm' view that allows the user to paste in text with a view of the text in its intended format rather than one line of text. Since apple notes only offers dashed, bulleted, and numbered lists, this will only format those types of lists.
 
 - **Added New 'Quick Note from Clipboard' Command**: The 'Quick Note from Clipboard' command will now ask for a title in the search bar and will then create a note with the data from the clipboard while maintaining format.
+
+## [Bug Fix Update] - 2025-02-27
+
+Fix for 'JS heap out of memory error' reported by a user in issue #17137.
 
 ## [✨ AI Enhancements] - 2025-02-21
 
