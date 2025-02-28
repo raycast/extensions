@@ -37,7 +37,7 @@ export default function Command() {
   const totalValue = initiatives.reduce((sum, init) => sum + init.value, 0);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search initiatives..." navigationTitle="DOGE Initiatives Tracker">
+    <List isLoading={isLoading} searchBarPlaceholder="Search initiatives...">
       <List.Section title={`Total Savings: ${formatCompactCurrency(totalValue)}`}>
         {initiatives.map((initiative) => (
           <List.Item
