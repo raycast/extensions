@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [AI Extension Fix] - {PR_MERGE_DATE}
+
+Reduced the numbers of issues being passed to the AI during search to avoid bloating it.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Avatars now display with a circular mask] - 2025-02-10

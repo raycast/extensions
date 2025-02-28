@@ -128,15 +128,13 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
           }
           icon={Icon.RaycastLogoNeg}
         />
-
         <MenuBarExtra.Item
           title="Open in Todoist"
           onAction={() => {
-            isTodoistInstalled ? open(getTaskAppUrl(task.id)) : getTaskUrl(task.id);
+            isTodoistInstalled ? open(getTaskAppUrl(task.id)) : open(getTaskUrl(task.id));
           }}
           icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
         />
-
         {focusedTask.id !== task.id ? (
           <MenuBarExtra.Item title="Focus Task" onAction={() => focusTask(task)} icon={Icon.Center} />
         ) : (
@@ -152,9 +150,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
             ))}
           </MenuBarExtra.Submenu>
         ) : null}
-
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
-
         <MenuBarExtra.Submenu title="Change Date" icon={Icon.Clock}>
           <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDate(task, "today", "due")} />
           <MenuBarExtra.Item
@@ -178,33 +174,35 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
             onAction={() => changeDate(task, "no date", "due")}
           />
         </MenuBarExtra.Submenu>
-        <MenuBarExtra.Submenu title="Change Deadline" icon={Icon.BullsEye}>
-          <MenuBarExtra.Item
-            title="Today"
-            icon={Icon.Calendar}
-            onAction={() => changeDate(task, "today", "deadline")}
-          />
-          <MenuBarExtra.Item
-            title="Tomorrow"
-            icon={Icon.Sunrise}
-            onAction={() => changeDate(task, "tomorrow", "deadline")}
-          />
-          <MenuBarExtra.Item
-            title="Next Week"
-            icon={Icon.ArrowClockwise}
-            onAction={() => changeDate(task, "next week", "deadline")}
-          />
-          <MenuBarExtra.Item
-            title="Next Weekend"
-            icon={"🌴"}
-            onAction={() => changeDate(task, "next weekend", "deadline")}
-          />
-          <MenuBarExtra.Item
-            title="No Date"
-            icon={Icon.XMarkCircle}
-            onAction={() => changeDate(task, "no date", "deadline")}
-          />
-        </MenuBarExtra.Submenu>
+        {data?.user?.premium_status !== "not_premium" ? (
+          <MenuBarExtra.Submenu title="Change Deadline" icon={Icon.BullsEye}>
+            <MenuBarExtra.Item
+              title="Today"
+              icon={Icon.Calendar}
+              onAction={() => changeDate(task, "today", "deadline")}
+            />
+            <MenuBarExtra.Item
+              title="Tomorrow"
+              icon={Icon.Sunrise}
+              onAction={() => changeDate(task, "tomorrow", "deadline")}
+            />
+            <MenuBarExtra.Item
+              title="Next Week"
+              icon={Icon.ArrowClockwise}
+              onAction={() => changeDate(task, "next week", "deadline")}
+            />
+            <MenuBarExtra.Item
+              title="Next Weekend"
+              icon={"🌴"}
+              onAction={() => changeDate(task, "next weekend", "deadline")}
+            />
+            <MenuBarExtra.Item
+              title="No Date"
+              icon={Icon.XMarkCircle}
+              onAction={() => changeDate(task, "no date", "deadline")}
+            />
+          </MenuBarExtra.Submenu>
+        ) : null}
         <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
           {priorities.map((priority, index) => (
             <MenuBarExtra.Item
@@ -215,7 +213,6 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
             />
           ))}
         </MenuBarExtra.Submenu>
-
         {collaborators && collaborators.length > 0 ? (
           <MenuBarExtra.Submenu icon={Icon.AddPerson} title="Assign To">
             {collaborators.map((collaborator) => {
@@ -230,7 +227,6 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
             })}
           </MenuBarExtra.Submenu>
         ) : null}
-
         {remainingLabels && remainingLabels.length > 0 ? (
           <MenuBarExtra.Submenu title="Add Label" icon={Icon.Tag}>
             {remainingLabels.map((label) => (
@@ -243,7 +239,6 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
             ))}
           </MenuBarExtra.Submenu>
         ) : null}
-
         <MenuBarExtra.Item title="Delete Task" onAction={() => deleteTask(task)} icon={Icon.Trash} />
       </MenuBarExtra.Submenu>
     </View>
