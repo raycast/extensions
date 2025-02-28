@@ -131,7 +131,7 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
         <MenuBarExtra.Item
           title="Open in Todoist"
           onAction={() => {
-            isTodoistInstalled ? open(getTaskAppUrl(task.id)) : getTaskUrl(task.id);
+            isTodoistInstalled ? open(getTaskAppUrl(task.id)) : open(getTaskUrl(task.id));
           }}
           icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
         />
