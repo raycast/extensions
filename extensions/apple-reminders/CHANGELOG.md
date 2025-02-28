@@ -1,5 +1,7 @@
 # Apple Reminders Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Add new "Upcoming" grouping option] - 2025-02-10
 
 - Add a new mode which allows group reminders by when they are upcoming in the `My Reminders` view.

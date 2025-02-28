@@ -1,5 +1,11 @@
 # svgl Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Updated the SVG logo request form.  
+- Added the action `Visit SVG Brand Website` to open the SVG brand website in the browser.
+- Added the action `Copy SVG File` to copy the SVG as a file to the clipboard.
+
 ## [Add Angular Component Feature] - 2025-01-10
 
 - Add the action `Copy Angular Component` to copy the Angular component code to the clipboard.

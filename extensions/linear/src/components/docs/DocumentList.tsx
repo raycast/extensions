@@ -6,7 +6,7 @@ import { getProjectIcon } from "../../helpers/projects";
 import { Document } from "./Document";
 import { ProjectResult } from "../../api/getProjects";
 import { useInitiatives } from "../../hooks/useInitiatives";
-import { DocumentEntity } from "../../api/documents";
+import { DocumentEntity } from "../../tools/get-documents";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 
 type DocumentListProps = {

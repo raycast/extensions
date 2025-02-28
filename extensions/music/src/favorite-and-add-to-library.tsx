@@ -7,5 +7,5 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.currentTrack.favorite,
   TE.chainW(() => pipe(music.currentTrack.addToLibrary)),
-  handleTaskEitherError("Failed to save/favorite the track", "Favorited & added to library")
+  handleTaskEitherError("Failed to save/favorite the track", "Favorited & added to library"),
 );

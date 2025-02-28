@@ -16,7 +16,8 @@ function SearchGoogleDriveFiles() {
   const email = getUserEmail();
 
   const { data, isLoading } = useCachedPromise(
-    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) => await getFiles(queryType, scopeType, query),
+    async (queryType: QueryTypes, scopeType: ScopeTypes, query: string) =>
+      await getFiles({ queryType, queryText: query, scope: scopeType }),
     [queryType, scopeType, query],
     { failureToastOptions: { title: "Failed to retrieve files" } },
   );
