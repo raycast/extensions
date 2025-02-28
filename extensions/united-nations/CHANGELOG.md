@@ -1,5 +1,10 @@
 # United Nations Extension
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Bump `fast-xml-parser` to v5 for named-exports
+- Bump all other dependencies to the latest
+
 ## [Enhancement] - 2024-12-19
 
 - Add Pinyin search support for Chinese
