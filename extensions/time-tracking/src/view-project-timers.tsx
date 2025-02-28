@@ -171,7 +171,7 @@ export default function Command() {
                   icon={Icon.EditShape}
                   title={"Edit Timer"}
                   shortcut={Keyboard.Shortcut.Common.Edit}
-                  onAction={ () => setEditingTimer(timer)}
+                  onAction={() => setEditingTimer(timer)}
                 />
               )}
               <Action

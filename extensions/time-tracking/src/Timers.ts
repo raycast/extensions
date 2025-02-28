@@ -62,14 +62,21 @@ export async function stopTimer(): Promise<Timer | null> {
 }
 
 export async function editTimer(timer: Timer): Promise<Timer | null> {
-  const timers = await getTimers();
-  if (!timers[timer.id]) {
+  // Disallow setting end time before start time.
+  if (timer.end != null && timer.end <= timer.start) {
     return null;
   }
 
-  timers[timer.id].name = timer.name
-  timers[timer.id].start = timer.start
-  timers[timer.id].end = timer.end
+  const timers = await getTimers();
+  // Don't allow editing a running timer.
+  const currentTimerId = await runningTimerId();
+  if (!timers[timer.id] || currentTimerId === timer.id) {
+    return null;
+  }
+
+  timers[timer.id].name = timer.name;
+  timers[timer.id].start = timer.start;
+  timers[timer.id].end = timer.end;
 
   await LocalStorage.setItem("projecttimer.timers", JSON.stringify(timers));
 
