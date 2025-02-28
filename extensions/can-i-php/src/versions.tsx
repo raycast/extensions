@@ -60,7 +60,7 @@ export default function Command() {
       {Array.isArray(phpVersions) &&
         phpVersions.map((phpVersion, index) => (
           <List.Item
-            key={index}
+            key={phpVersion.cycle}
             title={"PHP  " + phpVersion.cycle}
             accessories={getAccessories(phpVersion)}
             detail={
