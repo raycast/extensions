@@ -22,6 +22,22 @@
       "placeholder": "re_123456789",
       "description": "API Key From Resend Dashboard",
       "required": true
+    },
+    {
+      "name": "sender_name",
+      "title": "Sender Name",
+      "type": "textfield",
+      "placeholder": "John Doe",
+      "description": "Your name to use as the default sender",
+      "required": true
+    },
+    {
+      "name": "sender_email",
+      "title": "Sender Email",
+      "type": "textfield",
+      "placeholder": "john@example.com",
+      "description": "Your email address to use as the default sender",
+      "required": true
     }
   ],
   "commands": [
@@ -111,6 +127,19 @@
       "description": "Delete an API key from your Resend account"
     }
   ],
+  "ai": {
+    "evals": [
+      {
+        "input": "Remind laura@acme.app to check us in at the hotel"
+      },
+      {
+        "input": "Add bruno@acme.app to my General audience"
+      },
+      {
+        "input": "Email Bruno with the selected file in @finder"
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.18.0",

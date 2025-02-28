@@ -1,20 +1,27 @@
 import { Resend } from "resend";
 import { API_KEY } from "../utils/constants";
-import { Tool } from "@raycast/api";
+import { Tool, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
 const resend = new Resend(API_KEY);
 
+// Get preferences
+const preferences = getPreferenceValues<{
+  sender_name: string;
+  sender_email: string;
+}>();
+
+// Create default sender string from preferences
+const defaultSender = `${preferences.sender_name} <${preferences.sender_email}>`;
+
 type Input = {
   /**
    * The sender of the email.
-   * This is a required field. Users may have provided this in their extension's Custom Instructions field,
-   * if so, infer it from there. If not, ask the user to provide it. This field must follow the format:
-   * "Name <email@example.com>"
-   * So if you dont have enough information, ask the user for it.
+   * This field will use the default sender from preferences if not provided.
+   * Default: "{sender_name} <{sender_email}>" from preferences
    */
-  from: string;
+  from?: string;
   /**
    * The recipients of the email.
    * If the user has only provided recipients by name, you must search for contacts using the `search-contacts` tool.
@@ -70,6 +77,9 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  // Use default sender from preferences if input.from is not provided
+  const sender = input.from || defaultSender;
+
   // Parse attachments if provided
   const attachments = [];
   if (input.attachments) {
@@ -105,7 +115,7 @@ const tool = async (input: Input) => {
     : undefined;
 
   const { data, error } = await resend.emails.send({
-    from: input.from,
+    from: sender,
     to: input.to,
     subject: input.subject,
     html: input.content,
@@ -125,9 +135,12 @@ const tool = async (input: Input) => {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
+  // Use default sender from preferences if input.from is not provided
+  const sender = input.from || defaultSender;
+
   // Create info items for the confirmation dialog
   const infoItems = [
-    { name: "From", value: input.from },
+    { name: "From", value: sender },
     { name: "To", value: input.to.join(", ") },
     { name: "Subject", value: input.subject },
     {
