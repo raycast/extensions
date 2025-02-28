@@ -1,9 +1,10 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
-import { withGoogleAPIs, getCalendarClient } from "../google";
+import { withGoogleAPIs, getCalendarClient, getAutoAddHangouts } from "../google";
 import { addSignature, toISO8601WithTimezoneOffset } from "../utils";
 import { parseISO, addMinutes } from "date-fns";
-
+import { calendar_v3 } from "@googleapis/calendar";
+import { nanoid } from "nanoid";
 type Input = {
   /**
    * The title/summary of the calendar event
@@ -33,6 +34,11 @@ type Input = {
    * @example "Monthly review of project progress and key metrics discussion"
    */
   description?: string;
+  /**
+   * Whether to add a Hangouts/Google Meet link to the event
+   * @example uses the user's default setting from Google Calendar
+   */
+  addHangoutsLink?: boolean;
 };
 
 const preferences: ExtensionPreferences = getPreferenceValues();
@@ -61,10 +67,11 @@ const tool = async (input: Input) => {
   const calendar = getCalendarClient();
 
   const startDate = parseISO(input.startDate);
-  console.log(startDate);
   const endDate = addMinutes(startDate, input.duration ?? parseInt(preferences.defaultEventDuration));
+  const autoAddHangouts = await getAutoAddHangouts();
+  const addHangoutsLink = input.addHangoutsLink ?? autoAddHangouts;
 
-  const requestBody = {
+  const requestBody: calendar_v3.Schema$Event = {
     summary: input.title,
     description: addSignature(input.description),
     start: {
@@ -74,10 +81,24 @@ const tool = async (input: Input) => {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
     attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
+    conferenceData: addHangoutsLink
+      ? {
+          createRequest: {
+            conferenceSolutionKey: {
+              type: "hangoutsMeet",
+            },
+            requestId: nanoid(),
+          },
+        }
+      : undefined,
   };
 
   try {
-    const event = await calendar.events.insert({ calendarId: "primary", requestBody });
+    const event = await calendar.events.insert({
+      calendarId: "primary",
+      requestBody,
+      conferenceDataVersion: addHangoutsLink ? 1 : undefined,
+    });
     return {
       id: event.data.id,
       link: event.data.htmlLink,
