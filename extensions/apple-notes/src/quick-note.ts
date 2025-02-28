@@ -7,7 +7,13 @@ export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   await closeMainWindow();
 
   let note = "";
-  let { text } = await Clipboard.read();
+  let text = "";
+
+  try {
+    text = (await Clipboard.read()).text;
+  } catch {
+    // fail silently
+  }
 
   if (!text && props.fallbackText) {
     text = props.fallbackText;
