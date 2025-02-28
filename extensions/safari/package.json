@@ -190,9 +190,19 @@
       "description": "Open a URL in Safari"
     },
     {
-      "name": "get-focused-tab",
-      "title": "Get Focused Tab",
-      "description": "Get the text or HTML source code of the focused tab"
+      "name": "get-all-tabs",
+      "title": "Get All Tabs",
+      "description": "Get all open tabs from Safari"
+    },
+    {
+      "name": "get-tab-contents",
+      "title": "Get Tab Contents",
+      "description": "Get the text or HTML source code of a specific tab by window ID and tab index"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close a specific tab by window ID and tab index, or close the current active tab"
     }
   ],
   "ai": {
@@ -317,6 +327,132 @@
           {
             "callsTool": {
               "name": "search-reading-list"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari show me all my open tabs",
+        "mocks": {
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari get the content of the second tab in my first window",
+        "mocks": {
+          "get-tab-contents": "This is the content of the Raycast Extensions tab",
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-tab-contents",
+              "arguments": {
+                "window_id": 1,
+                "tab_index": 2,
+                "type": "text"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari close the second tab in my first window",
+        "mocks": {
+          "close-tab": "Tab closed successfully",
+          "get-all-tabs": [
+            {
+              "uuid": "1-1",
+              "title": "Raycast - Supercharged productivity",
+              "url": "https://www.raycast.com/",
+              "window_id": 1,
+              "index": 1,
+              "is_local": true
+            },
+            {
+              "uuid": "1-2",
+              "title": "Raycast Extensions",
+              "url": "https://www.raycast.com/extensions",
+              "window_id": 1,
+              "index": 2,
+              "is_local": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-all-tabs"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "close-tab",
+              "arguments": {
+                "tab": {
+                  "windowId": 1,
+                  "index": 2
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari close the current tab",
+        "mocks": {
+          "close-tab": "Current tab closed successfully"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "close-tab"
             }
           }
         ]
