@@ -1,42 +1,51 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import ImFillingLycky from "./i-m-feeling-lucky";
-import QuoteOfTheDay from "./quote-of-the-day";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+import { Quote, QuoteMode } from "./types";
+import { BASE_URL, getAuthorLink, getQuoteLink } from "./utils";
 
 export default function Command() {
-  const { push } = useNavigation();
+  const [mode, setMode] = useState(QuoteMode.RANDOM);
+  const { isLoading, data, revalidate } = useFetch<Quote>(`${BASE_URL}/api/quotes/${mode}`);
+
+  const getQuoteMarkdown = (quote?: Quote) => {
+    if (isLoading) {
+      return `
+# Loading...
+`;
+    } else {
+      return quote
+        ? `
+# ${quote.author.name}
+_${quote.text}_
+[Read more](${getAuthorLink(quote)})`
+        : "";
+    }
+  };
+
+  const getRandomQuote = () => {
+    setMode(QuoteMode.RANDOM);
+    revalidate();
+  };
+
+  const getQuoteOfTheDay = () => {
+    setMode(QuoteMode.QUOTE_OF_THE_DAY);
+    revalidate();
+  };
 
   return (
-    <List>
-      <List.Item
-        title="Quote Of The Day"
-        subtitle="Get the quote of the day"
-        icon={Icon.Calendar}
-        actions={
-          <ActionPanel>
-            <Action title="Get Quote" onAction={() => push(<QuoteOfTheDay />)} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        title="I'm Feeling Lucky"
-        subtitle="Get a random quote"
-        icon={Icon.Emoji}
-        actions={
-          <ActionPanel>
-            <Action title="Get Quote" onAction={() => push(<ImFillingLycky />)} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        title="Read More Quotes"
-        icon={Icon.Link}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url="https://www.quoterism.com/" />
-          </ActionPanel>
-        }
-      />
-    </List>
+    <Detail
+      isLoading={isLoading}
+      markdown={getQuoteMarkdown(data!)}
+      actions={
+        <ActionPanel>
+          <Action title="I Feel Lucky" icon={Icon.Repeat} onAction={getRandomQuote} />
+          <Action title="Daily Quote" icon={Icon.Calendar} onAction={getQuoteOfTheDay} />
+          <Action.OpenInBrowser url={getQuoteLink(data)} />
+          <Action.CopyToClipboard title="Copy Quote Link" content={getQuoteLink(data)} />
+          <Action.CopyToClipboard title="Copy Author Link" content={getAuthorLink(data)} />
+        </ActionPanel>
+      }
+    />
   );
 }
