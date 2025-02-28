@@ -50,7 +50,7 @@ function WalletList({ wallets }: { wallets: string[] }) {
         title="Copy All as CSV"
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy All as Csv" content={csvContent} />
+            <Action.CopyToClipboard title="Copy All as CSV" content={csvContent} />
           </ActionPanel>
         }
       />
