@@ -6,7 +6,8 @@
   "icon": "resend.png",
   "author": "xmok",
   "contributors": [
-    "alexs"
+    "alexs",
+    "peduarte"
   ],
   "categories": [
     "Communication",
@@ -56,8 +57,58 @@
   "tools": [
     {
       "name": "send-email",
-      "title": "Send email",
-      "description": "Send emails using Resend"
+      "title": "Send Email",
+      "description": "Send an email using natural language"
+    },
+    {
+      "name": "retrieve-email",
+      "title": "Retrieve Email",
+      "description": "Get details about a specific email by ID"
+    },
+    {
+      "name": "cancel-email",
+      "title": "Cancel Email",
+      "description": "Cancel a scheduled email that hasn't been sent yet"
+    },
+    {
+      "name": "list-audiences",
+      "title": "List Audiences",
+      "description": "List all audiences"
+    },
+    {
+      "name": "create-contact",
+      "title": "Create Contact",
+      "description": "Create a contact in an audience"
+    },
+    {
+      "name": "list-contacts",
+      "title": "List Contacts",
+      "description": "List all contacts in an audience"
+    },
+    {
+      "name": "update-contact",
+      "title": "Update Contact",
+      "description": "Update an existing contact in an audience"
+    },
+    {
+      "name": "remove-contact",
+      "title": "Remove Contact",
+      "description": "Delete a contact from an audience"
+    },
+    {
+      "name": "list-api-keys",
+      "title": "List API Keys",
+      "description": "List all API keys in your Resend account"
+    },
+    {
+      "name": "create-api-key",
+      "title": "Create API Key",
+      "description": "Create a new API key with specified permissions"
+    },
+    {
+      "name": "remove-api-key",
+      "title": "Remove API Key",
+      "description": "Delete an API key from your Resend account"
     }
   ],
   "dependencies": {

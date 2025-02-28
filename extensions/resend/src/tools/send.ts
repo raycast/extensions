@@ -74,19 +74,19 @@ const tool = async (input: Input) => {
   const attachments = [];
   if (input.attachments) {
     const attachmentLines = input.attachments.split("\n");
-
+    
     for (const line of attachmentLines) {
       // Check if it's a hosted attachment (URL)
       if (line.startsWith("url:")) {
         const url = line.substring(4).trim();
         const filename = path.basename(url);
         attachments.push({ filename, path: url });
-      }
+      } 
       // Otherwise treat as a file path
       else {
         const filePath = line.trim();
         if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
-          const content = fs.readFileSync(filePath).toString("base64");
+          const content = fs.readFileSync(filePath).toString('base64');
           const filename = path.basename(filePath);
           attachments.push({ filename, content });
         } else {
@@ -130,10 +130,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
     { name: "From", value: input.from },
     { name: "To", value: input.to.join(", ") },
     { name: "Subject", value: input.subject },
-    {
-      name: "Content",
-      value: input.content.replace(/<[^>]*>/g, " ").substring(0, 100) + (input.content.length > 100 ? "..." : ""),
-    },
+    { name: "Content", value: input.content.replace(/<[^>]*>/g, " ").substring(0, 100) + (input.content.length > 100 ? "..." : "") },
   ];
 
   // Add optional fields to the info items if they are provided
