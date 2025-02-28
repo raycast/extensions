@@ -89,7 +89,7 @@ export default function ListDisks(): JSX.Element {
    */
   async function execDiskCommand(command: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
+      exec(command, (error, stdout) => {
         if (error) {
           reject(error);
         } else {
