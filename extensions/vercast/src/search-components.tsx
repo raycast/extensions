@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 type Item = {
   title: string;
-  path?: string;
+  path: string;
   subtitle: string;
   icon?: string;
 };
@@ -37,28 +37,19 @@ const ITEMS: Item[] = [
     subtitle: "Styleguide",
   },
   {
-    title: "Grid",
-    path: "grid",
-    subtitle: "Styleguide",
-  },
-  {
-    title: "Typeface",
-    subtitle: "Styleguide",
-  },
-  {
     title: "Icons",
     path: "icons",
     subtitle: "Styleguide",
   },
   {
-    title: "Playground",
-    path: "playground",
+    title: "Typography",
+    path: "typography",
     subtitle: "Styleguide",
   },
   {
-    title: "Autocomplete",
-    path: "autocomplete",
-    subtitle: "Components",
+    title: "Materials",
+    path: "materials",
+    subtitle: "Styleguide",
   },
   {
     title: "Avatar",
@@ -72,6 +63,7 @@ const ITEMS: Item[] = [
   },
   {
     title: "Book",
+    path: "book",
     subtitle: "Components",
   },
   {
@@ -81,6 +73,7 @@ const ITEMS: Item[] = [
   },
   {
     title: "Calendar",
+    path: "calendar",
     subtitle: "Components",
   },
   {
@@ -90,50 +83,72 @@ const ITEMS: Item[] = [
   },
   {
     title: "Choicebox",
+    path: "choicebox",
     subtitle: "Components",
   },
   {
     title: "Code Block",
+    path: "code-block",
     subtitle: "Components",
   },
   {
     title: "Collapse",
+    path: "collapse",
     subtitle: "Components",
   },
   {
     title: "Combobox",
+    path: "combobox",
     subtitle: "Components",
   },
   {
     title: "Command Menu",
+    path: "command-menu",
+    subtitle: "Components",
+  },
+  {
+    title: "Context Card",
+    path: "context-card",
     subtitle: "Components",
   },
   {
     title: "Context Menu",
+    path: "context-menu",
     subtitle: "Components",
   },
   {
     title: "Description",
+    path: "description",
     subtitle: "Components",
   },
   {
     title: "Drawer",
+    path: "drawer",
     subtitle: "Components",
   },
   {
     title: "Empty State",
+    path: "empty-state",
     subtitle: "Components",
   },
   {
     title: "Error",
+    path: "error",
+    subtitle: "Components",
+  },
+  {
+    title: "Feedback",
+    path: "feedback",
     subtitle: "Components",
   },
   {
     title: "Gauge",
+    path: "gauge",
     subtitle: "Components",
   },
   {
     title: "Grid",
+    path: "grid",
     subtitle: "Components",
   },
   {
@@ -148,10 +163,12 @@ const ITEMS: Item[] = [
   },
   {
     title: "Loading dots",
+    path: "loading-dots",
     subtitle: "Components",
   },
   {
     title: "Material",
+    path: "material",
     subtitle: "Components",
   },
   {
@@ -171,14 +188,17 @@ const ITEMS: Item[] = [
   },
   {
     title: "Pagination",
+    path: "pagination",
     subtitle: "Components",
   },
   {
     title: "Progress",
+    path: "progress",
     subtitle: "Components",
   },
   {
     title: "Project Banner",
+    path: "project-banner",
     subtitle: "Components",
   },
   {
@@ -188,6 +208,7 @@ const ITEMS: Item[] = [
   },
   {
     title: "Relative Time Card",
+    path: "relative-time-card",
     subtitle: "Components",
   },
   {
@@ -207,10 +228,12 @@ const ITEMS: Item[] = [
   },
   {
     title: "Skeleton",
+    path: "skeleton",
     subtitle: "Components",
   },
   {
     title: "Slider",
+    path: "slider",
     subtitle: "Components",
   },
   {
@@ -220,10 +243,12 @@ const ITEMS: Item[] = [
   },
   {
     title: "Spinner",
+    path: "spinner",
     subtitle: "Components",
   },
   {
     title: "Split Button",
+    path: "split-button",
     subtitle: "Components",
   },
   {
@@ -263,6 +288,7 @@ const ITEMS: Item[] = [
   },
   {
     title: "Theme Switcher",
+    path: "theme-switcher",
     subtitle: "Components",
   },
   {
@@ -280,26 +306,21 @@ const ITEMS: Item[] = [
     path: "tooltip",
     subtitle: "Components",
   },
-  {
-    title: "Window",
-    path: "window",
-    subtitle: "Components",
-  },
 ];
 
 export default function Command() {
   return (
     <List>
-      {ITEMS.map((item, idx) => (
+      {ITEMS.map((item) => (
         <List.Item
-          key={idx}
+          key={item.path}
           icon={item.icon ? item.icon : item.subtitle === "Styleguide" ? Icon.Book : Icon.Box}
           title={item.title}
           subtitle={item.subtitle}
           accessories={[{ icon: Icon.ArrowRight }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/geist/${item.path ?? item.title.replaceAll(" ", "-")}`} />
+              <Action.OpenInBrowser url={`https://vercel.com/geist/${item.path}`} />
             </ActionPanel>
           }
         />

@@ -1,16 +1,12 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { fetchUser } from "../vercel";
 
-const isValidToken = () => {
+const isValidToken = async () => {
   const token = getPreferenceValues<Preferences>().accessToken;
-  if (token.length !== 24) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Invalid token detected. Please set one in the settings.",
-    });
-    throw new Error("Invalid token length detected");
-  } else {
-    return true;
-  }
+  if (token.length !== 24) throw new Error();
+  const user = await fetchUser();
+  if (!user) throw new Error();
+  return true;
 };
 
 export default isValidToken;
