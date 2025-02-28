@@ -1,6 +1,6 @@
 # Time Tracking Changelog
 
-## [Editing Timers] - {PR_MERGE_DATE}
+## [Editing Timers] - 2025-02-28
 
 Edit stopped timers to correct any issues with the start/end times.
 
