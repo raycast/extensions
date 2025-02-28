@@ -6,7 +6,7 @@
 - Fix extension stuck loading when Token Length is invalid
 - Fix extension would crash when Token invalid
 
-# [2.8] - 2025-02-21
+## [2.8] - 2025-02-21
 
 - Added AI tools
 
