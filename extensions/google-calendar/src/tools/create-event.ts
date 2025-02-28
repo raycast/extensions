@@ -66,7 +66,8 @@ const tool = async (input: Input) => {
     },
     end: {
       dateTime: new Date(
-        new Date(input.startDate).getTime() + (input.duration ?? parseInt(preferences.defaultEventDuration)),
+        new Date(input.startDate).getTime() +
+          (input.duration ?? parseInt(preferences.defaultEventDuration)) * 60 * 1000,
       ).toISOString(),
     },
     attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
