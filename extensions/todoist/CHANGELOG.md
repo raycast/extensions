@@ -4,6 +4,14 @@
 
 Added an option to close the window immediately after creating a task with the `Create Task` command.
 
+## [AI Extension Improvements] - 2025-02-27
+
+Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
+
+## [Add Schedule Task Deadline Actions] - 2025-02-26
+
+It's now possible to adjust a task's deadline from the actions menu and the menubar. You can use the following shortcut from a task list item: `⌥` + `⇧` + `D`.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
@@ -12,7 +20,7 @@ Added option to display the next upcoming task in the menu bar title when no tas
 
 ## [Fix Default Sorting] - 2025-02-20
 
-Change the default sorting to align with the task order in Todoist. 
+Change the default sorting to align with the task order in Todoist.
 
 ## [Add time format preference from Todoist preferences] - 2025-02-17
 

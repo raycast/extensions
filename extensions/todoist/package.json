@@ -249,9 +249,14 @@
   ],
   "tools": [
     {
-      "name": "get-relevant-data",
-      "title": "Get Relevant Data",
-      "description": "Retrieves relevant data from Todoist"
+      "name": "get-other-data",
+      "title": "Get Other Data",
+      "description": "Retrieves other data from Todoist (e.g. filter, labels, reminders, locations, user, etc.)"
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Retrieves tasks from Todoist"
     },
     {
       "name": "get-completed-tasks",
@@ -287,6 +292,11 @@
       "name": "delete-task",
       "title": "Delete Task",
       "description": "Deletes an existing task in Todoist"
+    },
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Retrieves all projects from Todoist using REST API"
     },
     {
       "name": "create-project",
@@ -364,6 +374,11 @@
       "description": "Delete a Todoist filter"
     },
     {
+      "name": "get-comments",
+      "title": "Get Comments",
+      "description": "Retrieves comments for a task or project from Todoist"
+    },
+    {
       "name": "add-comment",
       "title": "Add Comment",
       "description": "Adds a comment to a Todoist task"
@@ -380,37 +395,28 @@
     }
   ],
   "ai": {
-    "instructions": "- If you need to get data (projects, sections, labels, tasks, etc.), use the get-data tool.\\n- When asked about the tasks scheduled for a specific day, only return the tasks scheduled for that day.\\n- Users can use shortcuts to create a task, they can include in the text: a project name starting with the # character (without spaces), a label starting with the @ character, an assignee starting with the + character, a priority (e.g., p1), or a description starting from // until the end of the text.\\n- Make sure the title doesn't contain the date.\\n- Before creating something, check if it already exists first.",
+    "instructions": "\\n- When getting tasks, use filters only if you can't find the tasks with the project_id, section_id, or label first.\\n- When asked about the tasks scheduled for a specific day, only return the tasks scheduled for that day.\\n- Users can use shortcuts to create a task, they can include in the text: a project name starting with the # character (without spaces), a label starting with the @ character, an assignee starting with the + character, a priority (e.g., p1), or a description starting from // until the end of the text.\\n- Make sure the title doesn't contain the date.\\n- Before creating something, check if it already exists first.",
     "evals": [
       {
         "input": "@todoist Buy groceries today at 10 in home project",
         "mocks": {
-          "get-relevant-data": {
-            "projects": [
-              {
-                "id": "fitness",
-                "color": "red",
-                "name": "Fitness"
-              },
-              {
-                "id": "home",
-                "name": "Home",
-                "color": "green"
-              }
-            ]
-          },
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
           "create-task": "Successfully called \"create-task\""
         },
         "expected": [
           {
-            "callsTool": {
-              "arguments": {
-                "resource_types": {
-                  "includes": "projects"
-                }
-              },
-              "name": "get-relevant-data"
-            }
+            "callsTool": "get-projects"
           },
           {
             "callsTool": {
@@ -426,42 +432,33 @@
       {
         "input": "@todoist what's scheduled for today",
         "mocks": {
-          "get-relevant-data": {
-            "items": [
-              {
-                "id": "1",
-                "content": "Buy groceries",
-                "due": {
-                  "date": "2025-01-22"
-                }
-              },
-              {
-                "id": "2",
-                "content": "Finish the report",
-                "due": {
-                  "date": "2025-01-23"
-                }
-              },
-              {
-                "id": "3",
-                "content": "Schedule a meeting with the team",
-                "due": {
-                  "date": "2025-01-24"
-                }
+          "get-tasks": [
+            {
+              "id": "1",
+              "content": "Buy groceries",
+              "due": {
+                "date": "2025-01-22"
               }
-            ]
-          }
+            },
+            {
+              "id": "2",
+              "content": "Finish the report",
+              "due": {
+                "date": "2025-01-23"
+              }
+            },
+            {
+              "id": "3",
+              "content": "Schedule a meeting with the team",
+              "due": {
+                "date": "2025-01-24"
+              }
+            }
+          ]
         },
         "expected": [
           {
-            "callsTool": {
-              "arguments": {
-                "resource_types": [
-                  "items"
-                ]
-              },
-              "name": "get-relevant-data"
-            }
+            "callsTool": "get-tasks"
           },
           {
             "meetsCriteria": "The answer includes the tasks scheduled for today."
@@ -472,7 +469,7 @@
         "input": "@todoist Create a filter for my high-priority tasks in work",
         "mocks": {
           "create-filter": "Successfully called \"create-filter\"",
-          "get-relevant-data": {
+          "get-other-data": {
             "filters": []
           }
         },
@@ -531,21 +528,19 @@
       {
         "input": "@todoist Add urgent label to my website bugs tasks",
         "mocks": {
-          "get-relevant-data": {
-            "items": [
-              {
-                "id": "1",
-                "content": "Write a blog post"
-              },
-              {
-                "id": "2",
-                "content": "Strange Safari bug on website"
-              },
-              {
-                "id": "3",
-                "content": "Eat vitamins"
-              }
-            ],
+          "get-projects": [
+            {
+              "id": "fitness",
+              "color": "red",
+              "name": "Fitness"
+            },
+            {
+              "id": "home",
+              "name": "Home",
+              "color": "green"
+            }
+          ],
+          "get-other-data": {
             "labels": [
               {
                 "name": "urgent",
@@ -554,6 +549,12 @@
               }
             ]
           },
+          "get-tasks": [
+            {
+              "id": "2",
+              "content": "Strange Safari bug on website"
+            }
+          ],
           "update-task": "Successfully called \"update-task\""
         },
         "expected": [
@@ -561,17 +562,10 @@
             "callsTool": {
               "arguments": {
                 "resource_types": {
-                  "and": [
-                    {
-                      "includes": "items"
-                    },
-                    {
-                      "includes": "labels"
-                    }
-                  ]
+                  "includes": "labels"
                 }
               },
-              "name": "get-relevant-data"
+              "name": "get-other-data"
             }
           },
           {
