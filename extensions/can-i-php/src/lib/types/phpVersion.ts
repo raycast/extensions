@@ -9,7 +9,7 @@ export interface PhpVersion {
   latest: string;
   latestReleaseDate: string;
   latestReleaseDateHuman?: string | null;
-  lts: false;
+  lts: boolean;
   support: string;
   supportHuman?: string | null;
   status?: PhpVersionStatusEnum | null;

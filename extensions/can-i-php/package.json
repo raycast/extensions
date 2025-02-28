@@ -49,7 +49,7 @@
     {
       "name": "php_74",
       "title": "PHP 7.4",
-      "description": "Show PHP 8.2 relevant items in Functions and Features command",
+      "description": "Show PHP 7.4 relevant items in Functions and Features command",
       "type": "checkbox",
       "default": false,
       "required": false,
@@ -58,7 +58,7 @@
     {
       "name": "php_80",
       "title": "PHP 8.0",
-      "description": "Show PHP 8.2 relevant items in Functions and Features command",
+      "description": "Show PHP 8.0 relevant items in Functions and Features command",
       "type": "checkbox",
       "default": true,
       "required": false,

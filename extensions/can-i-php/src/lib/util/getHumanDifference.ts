@@ -12,9 +12,9 @@ export function getHumanDifference(dateString: string): string {
   if (diffInDaysAbs <= 30.4) {
     return formatter.format(Math.ceil(diffInDays), "days").replace("in", "for");
   } else if (diffInDaysAbs > 30.4 && diffInDaysAbs <= 365) {
-    return formatter.format(Math.ceil(diffInDays / 30.4), "month").replace("in", "for");
+    return formatter.format(Math.ceil(diffInDays / 30.4), "months").replace("in", "for");
   } else if (diffInDaysAbs > 365) {
-    return formatter.format(Math.ceil(diffInDays / 30.4 / 12), "year").replace("in", "for");
+    return formatter.format(Math.ceil(diffInDays / 30.4 / 12), "years").replace("in", "for");
   }
 
   return "";
