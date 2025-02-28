@@ -27,11 +27,11 @@ export default async function () {
     };
 
     if (result.result) {
-      return "Charging Started";
+      return "Charging stopped";
     } else {
-      return "Failed to start charging";
+      return "Failed to stop charging";
     }
   } catch (err) {
-    return "Failed to start charging";
+    return "Failed to stop charging";
   }
 }
