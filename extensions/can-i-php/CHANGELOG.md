@@ -1,6 +1,6 @@
 # Can I PHP? Changelog
 
-## [Added support for PHP 8.4 & more] - {PR_MERGE_DATE}
+## [Added support for PHP 8.4 & more] - 2025-02-28
 
 This release introduces support for PHP 8.4 in the function list and adds a new preference allowing you to customize **the PHP versions most relevant to your workflow.**
 Next, this update introduces a new command »Version overview« to list all PHP versions starting with 5.0, along with their current status (Active support, security updates or EOL) as well as key dates and references to php.net.
