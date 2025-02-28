@@ -167,47 +167,47 @@
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
-      "description": "Search through the Safari Bookmarks"
+      "description": "Search through Safari Bookmarks and return matching entries"
     },
     {
       "name": "search-history",
       "title": "Search History",
-      "description": "Search through the Safari Browing History"
+      "description": "Search through Safari browsing history and return matching entries"
     },
     {
       "name": "search-reading-list",
       "title": "Search Reading List",
-      "description": "Search through the Safari Reading List"
+      "description": "Search through Safari Reading List and return matching items"
     },
     {
       "name": "add-to-reading-list",
       "title": "Add to Reading List",
-      "description": "Add a URL to the Safari Reading List"
+      "description": "Add a specified URL to the Safari Reading List for later reading"
     },
     {
       "name": "open-url",
       "title": "Open URL",
-      "description": "Open a URL in Safari"
+      "description": "Open a specified URL in Safari"
     },
     {
       "name": "get-all-tabs",
       "title": "Get All Tabs",
-      "description": "Get all open tabs from Safari"
+      "description": "Return information about all open Safari tabs across all windows"
     },
     {
       "name": "get-tab-contents",
       "title": "Get Tab Contents",
-      "description": "Get the text or HTML source code of a specific tab by window ID and tab index"
+      "description": "Retrieve the text or HTML source code of a specific Safari tab"
     },
     {
       "name": "close-tab",
       "title": "Close Tab",
-      "description": "Close a specific tab by window ID and tab index, or close the current active tab"
+      "description": "Close either a specific Safari tab or the currently active tab"
     },
     {
       "name": "get-focused-tab",
       "title": "Get Focused Tab",
-      "description": "Get information about the currently focused tab in Safari"
+      "description": "Return information about the currently focused Safari tab"
     }
   ],
   "ai": {
@@ -215,7 +215,7 @@
       {
         "input": "@safari Summarize this tab into 3 bullet points",
         "mocks": {
-          "get-focused-tab": "Raycast is cool"
+          "get-focused-tab": "Raycast is very cool let's goooooo"
         },
         "expected": [
           {
@@ -399,8 +399,10 @@
             "callsTool": {
               "name": "get-tab-contents",
               "arguments": {
-                "window_id": 1,
-                "tab_index": 2,
+                "tab": {
+                  "windowId": 1,
+                  "index": 2
+                },
                 "type": "text"
               }
             }
@@ -440,10 +442,8 @@
             "callsTool": {
               "name": "close-tab",
               "arguments": {
-                "tab": {
-                  "windowId": 1,
-                  "index": 2
-                }
+                "tab.windowId": 1,
+                "tab.index": 2
               }
             }
           }
@@ -465,7 +465,7 @@
       {
         "input": "@safari what tab am I currently on?",
         "mocks": {
-          "get-focused-tab-info": {
+          "get-focused-tab": {
             "uuid": "1-1",
             "title": "Raycast - Supercharged productivity",
             "url": "https://www.raycast.com/",
@@ -477,7 +477,23 @@
         "expected": [
           {
             "callsTool": {
-              "name": "get-focused-tab-info"
+              "name": "get-focused-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari show me the HTML source of the tab I'm currently viewing",
+        "mocks": {
+          "get-tab-contents": "<!DOCTYPE html><html><head><title>Raycast</title></head><body>...</body></html>"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tab-contents",
+              "arguments": {
+                "type": "source"
+              }
             }
           }
         ]
