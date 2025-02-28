@@ -136,7 +136,6 @@ async function refreshTracking(
   setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
   setTrackingIsLoading: (value: ((prevState: boolean) => boolean) | boolean) => void,
 ) {
-
   if (!deliveries || !packages) {
     // don't do anything until both deliveries and packages are initialized
     return;
