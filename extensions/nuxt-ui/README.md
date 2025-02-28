@@ -21,6 +21,12 @@ Jump directly to any component's theme documentation in milliseconds:
 
 No more context switching, no more manual searching. Just smooth, uninterrupted development.
 
+### Ask Nuxt UI
+Ask Nuxt UI for information, tips, create components, etc... with natural language, here's some examples:
+- Create a welcoming button for my users
+- How many components are there in Nuxt UI?
+- Make a faq component
+
 ### Smart Configuration
 Customize the component prefix to match your style:
 - Default: "U" (UButton, UInput...)

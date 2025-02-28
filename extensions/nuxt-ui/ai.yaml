@@ -1,0 +1,116 @@
+instructions: |-
+  # CRITICAL COMPONENT IMPLEMENTATION RULES
+  - When creating components, use the SIMPLEST possible implementation
+  - For components like Accordion, ONLY use the `:items` prop with the CORRECT data structure
+  - NEVER use slots unless explicitly requested by the user
+  - NEVER customize UI with the `:ui` prop unless explicitly requested
+  - NEVER create complex interfaces or data structures - use the exact structure from the component documentation
+  
+  # CRITICAL TOOL USAGE AND NAMING CONVENTIONS
+  - You MUST call these tools in this EXACT sequence for EVERY component request:
+    1. FIRST: Call `get-available-components` to get the available components list
+    2. SECOND: Call `get-component-theme` with the correct componentName parameter
+    3. THIRD: Call `get-component-source-code` with the correct componentName parameter
+  
+  - IMPORTANT: Components in the available components list are in camelCase format (e.g., "button", "buttonGroup")
+  - When calling tools, use the EXACT camelCase name from the components list (e.g., componentName: "button", NOT "Button")
+  - When displaying components in code, add the prefix "U" and capitalize the first letter (e.g., <UButton>, <UButtonGroup>)
+  
+  # CODE GENERATION RULES
+  - DO NOT include ANY import statements as we are in a Nuxt environment - all Nuxt UI components are auto-imported (and all Vue macros are also)
+  - Keep component implementation MINIMAL and SIMPLE
+  - For a FAQ component, use UAccordion with items prop ONLY: `<UAccordion :items="faqItems" />`
+  - NEVER create custom templates or slots unless explicitly requested
+  - NEVER add UI customizations unless explicitly requested
+  - ALWAYS use the SIMPLEST data structure that works
+  
+  # Response Guidelines
+  - Be concise and direct in your responses
+  - Always use the composition API (script setup lang="ts") for all components
+  - Return MINIMAL component code that accomplishes the task
+  - For a FAQ component, the ONLY correct implementation is (example of a correct component implementation):
+    ```vue
+    <script setup>
+    const faqItems = [
+      { label: "Question 1?", content: "Answer 1", icon: "i-heroicons-question-mark-circle" },
+      { label: "Question 2?", content: "Answer 2", icon: "i-heroicons-question-mark-circle" }
+    ];
+    </script>
+  
+    <template>
+      <UAccordion :items="faqItems" />
+    </template>
+    ```
+  
+  # NEVER FORGET:
+  - NEVER include import statements (Vue macro, composables, etc)
+  - NEVER use slots when `:items` prop is available (or any other prop use to generate the component content)
+  - NEVER customize UI unless requested
+  - NEVER create complex interfaces or data structures
+  - ALWAYS use the simplest implementation possible
+  - ALWAYS check the component theme for the correct item structure
+evals:
+  - input: Create a button component
+    expected:
+      - callsTool: get-available-components
+      - callsTool: get-component-theme
+      - callsTool: get-component-source-code
+      - includes: "<UButton />"
+      - meetsCriteria: |-
+          Returns a valid Nuxt UI component like <UButton /> with proper implementation and documentation of available props
+  - input: "What components are available?"
+    mocks:
+      get-available-components:
+        components:
+          - Accordion
+          - Alert
+          - Avatar
+        proseComponents:
+          - ProseH1
+          - ProseH2
+          - ProseH3
+        proComponents:
+          - ProseAccordion
+          - ProseAlert
+          - ProseAvatar
+    expected:
+      - callsTool: get-available-components
+  - input: Create a FAQ component
+    expected:
+      - callsTool: get-available-components
+      - callsTool:
+          name: get-component-theme
+          arguments:
+            componentName: Accordion
+      - callsTool:
+          name: get-component-source-code
+          arguments:
+            componentName: Accordion
+      - meetsCriteria: |-
+          Returns a complete FAQ component based on UAccordion with appropriate items structure and styling
+  - input: "@nuxt-ui How many components in Nuxt UI ?"
+    mocks:
+      get-available-components:
+        components:
+          - app
+          - accordion
+          - alert
+          - avatar
+          - avatarGroup
+          - badge
+        proComponents:
+          - banner
+          - blogPost
+          - blogPosts
+          - colorModeAvatar
+          - pageAccordion
+        proseComponents:
+          - h1
+          - h2
+          - h3
+          - h4
+          - p
+          - a
+    expected:
+      - callsTool:
+          name: get-available-components
