@@ -1,11 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
+export type Preferences = Omit<Preferences.EvaluateMathExpression, "maxDecimals"> & {
   maxDecimals?: number;
-  replaceSelection: boolean;
-  copyToClipboard: boolean;
-  displayResult: boolean;
-}
+};
 
 export function loadPreferences() {
   const preferences = getPreferenceValues<Preferences>();
