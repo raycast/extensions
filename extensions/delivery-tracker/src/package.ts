@@ -63,7 +63,7 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
     };
   }
 
-  //find closest estimated delivered package
+  // find closest estimated delivered package
   const closestPackage = getPackageWithEarliestDeliveryDate(packages);
 
   let accessoryText = "En route";
