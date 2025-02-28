@@ -61,8 +61,16 @@ export function fixNoteFormatting(title: string, body?: string) {
       return;
     }
 
+    // Try to match list items or regular text with our pattern
     const match = line.match(/^(\s*)([-•*]|\d+\.)?\s*(.+)/);
-    if (!match) return;
+
+    // If no match (which should be rare), treat the whole line as plain text
+    if (!match) {
+      closeOpenLists(0);
+      formattedText += `<p>${trimmedLine}</p>`;
+      previousLineWasList = false;
+      return;
+    }
 
     const [, spaces, listMarker, text] = match;
     const indentLevel = Math.floor(spaces.length / 4);
