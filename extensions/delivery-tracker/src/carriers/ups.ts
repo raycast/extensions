@@ -67,7 +67,7 @@ async function loginWithCachedData(clientId: string, clientSecret: string): Prom
     loginResponse = JSON.parse(cache.get(cacheKey) ?? "{}");
 
     if (Number(loginResponse.issued_at) + Number(loginResponse.expires_in) * 1000 < new Date().getTime() + 30 * 1000) {
-      // we are less than 30 seconds form the access token expiring
+      // we are less than 30 seconds from the access token expiring
       console.log("Access key expired; logging into UPS");
       loginResponse = await login(clientId, clientSecret);
 
