@@ -1,7 +1,8 @@
 import { getPreferenceValues, Tool } from "@raycast/api";
 import humanizeDuration from "humanize-duration";
 import { withGoogleAPIs, getCalendarClient } from "../google";
-import { addSignature } from "../utils";
+import { addSignature, toISO8601WithTimezoneOffset } from "../utils";
+import { parseISO, addMinutes } from "date-fns";
 
 type Input = {
   /**
@@ -10,8 +11,9 @@ type Input = {
    */
   title: string;
   /**
-   * The start date and time of the event in ISO 8601 format
-   * @example "2024-03-20T15:30:00Z" or "2024-03-20T15:30:00-07:00"
+   * The start date and time of the event in ISO 8601 format with timezone offset
+   * @example "2024-03-20T15:30:00-07:00" or "2024-03-20T15:30:00+02:00"
+   * @remarks For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC)
    */
   startDate: string;
   /**
@@ -58,27 +60,32 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
 
+  const startDate = parseISO(input.startDate);
+  console.log(startDate);
+  const endDate = addMinutes(startDate, input.duration ?? parseInt(preferences.defaultEventDuration));
+
   const requestBody = {
     summary: input.title,
     description: addSignature(input.description),
     start: {
-      dateTime: input.startDate,
+      dateTime: toISO8601WithTimezoneOffset(startDate),
     },
     end: {
-      dateTime: new Date(
-        new Date(input.startDate).getTime() +
-          (input.duration ?? parseInt(preferences.defaultEventDuration)) * 60 * 1000,
-      ).toISOString(),
+      dateTime: toISO8601WithTimezoneOffset(endDate),
     },
     attendees: input.attendees ? input.attendees.map((email) => ({ email })) : undefined,
   };
 
-  const event = await calendar.events.insert({ calendarId: "primary", requestBody });
-
-  return {
-    id: event.data.id,
-    link: event.data.htmlLink,
-  };
+  try {
+    const event = await calendar.events.insert({ calendarId: "primary", requestBody });
+    return {
+      id: event.data.id,
+      link: event.data.htmlLink,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to create event");
+  }
 };
 
 export default withGoogleAPIs(tool);

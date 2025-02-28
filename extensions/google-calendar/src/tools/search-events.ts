@@ -19,22 +19,25 @@ type Input = {
   /**
    * The start date to search from
    *
-   * @example "2024-03-20T00:00:00Z" or "2024-03-20"
+   * @example "2024-03-20T00:00:00-07:00" or "2024-03-20T00:00:00+02:00"
    *
    * @remarks
-   * Accepts ISO 8601 format dates. If not provided, defaults to current time.
-   * Can be a date (YYYY-MM-DD) or datetime (YYYY-MM-DDTHH:mm:ssZ).
+   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
+   * If not provided, defaults to current time.
+   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    */
   timeMin?: string;
 
   /**
    * The end date to search until
    *
-   * @example "2024-03-27T23:59:59Z" or "2024-03-27"
+   * @example "2024-03-27T23:59:59-07:00" or "2024-03-27T23:59:59+02:00"
    *
    * @remarks
-   * Accepts ISO 8601 format dates.
-   * Can be a date (YYYY-MM-DD) or datetime (YYYY-MM-DDTHH:mm:ssZ).
+   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
+   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    */
   timeMax?: string;
 
