@@ -67,7 +67,7 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
   const closestPackage = getPackageWithEarliestDeliveryDate(packages);
 
   let accessoryText = "En route";
-  if (closestPackage.deliveryDate) {
+  if (closestPackage?.deliveryDate) {
     accessoryText = calculateDayDifference(closestPackage.deliveryDate).toString() + " days until delivery";
   }
 
@@ -83,7 +83,11 @@ export function deliveryStatus(packages?: Package[]): { value: string; color?: C
   };
 }
 
-export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package {
+export function getPackageWithEarliestDeliveryDate(packages: Package[]): Package | null {
+  if (packages.length === 0) {
+    return null;
+  }
+
   const now = new Date();
 
   return packages.reduce((closest, current) => {

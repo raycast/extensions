@@ -25,7 +25,7 @@ ${packages.length > 0 ? packages.map((aPackage, index) => markdownForPackage(aPa
           <Detail.Metadata.Label title="Status" text={deliveryStatus(packages)} icon={deliveryIcon(packages)} />
           <Detail.Metadata.Label
             title="Delivery Date"
-            text={getPackageWithEarliestDeliveryDate(packages).deliveryDate?.toDateString() ?? "Unknown"}
+            text={getPackageWithEarliestDeliveryDate(packages)?.deliveryDate?.toDateString() ?? "Unknown"}
           />
           <Detail.Metadata.Label title="Number of Packages" text={packages.length.toString()} />
         </Detail.Metadata>

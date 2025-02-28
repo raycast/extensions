@@ -257,8 +257,8 @@ function sortTracking(tracks: Delivery[], packages: PackageMap): Delivery[] {
       return 1;
     }
 
-    const aEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(aPackages).deliveryDate;
-    const bEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(bPackages).deliveryDate;
+    const aEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(aPackages)?.deliveryDate;
+    const bEarliestDeliveryDate = getPackageWithEarliestDeliveryDate(bPackages)?.deliveryDate;
 
     const aSomePackagesDelivered = aPackages.some((aPackage) => aPackage.delivered);
     const bSomePackagesDelivered = bPackages.some((bPackage) => bPackage.delivered);
