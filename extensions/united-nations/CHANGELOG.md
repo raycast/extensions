@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2025-02-28
 
 - Bump `fast-xml-parser` to v5 for named-exports
 - Bump all other dependencies to the latest
