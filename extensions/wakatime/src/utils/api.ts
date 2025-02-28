@@ -13,7 +13,9 @@ async function routeHandler<T extends object>(endpoint: string): Promise<Types.R
   const baseURL = apiBaseUrl || "https://wakatime.com/api/v1";
 
   try {
-    const res = await fetch(`${baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL}${endpoint}`, { headers: getAuthToken() });
+    const res = await fetch(`${baseURL.endsWith("/") ? baseURL.slice(0, -1) : baseURL}${endpoint}`, {
+      headers: getAuthToken(),
+    });
     const result = (await res.json()) as T | { error: string };
 
     if ("error" in result) throw new Error(result.error);
