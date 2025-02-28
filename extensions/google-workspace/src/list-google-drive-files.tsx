@@ -6,7 +6,7 @@ import { getUserEmail } from "./api/googleAuth";
 import { FileGridItem } from "./components/FileGridItem";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 
-function SearchGoogleDriveFiles() {
+function ListGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const email = getUserEmail();
 
@@ -64,4 +64,4 @@ function SearchGoogleDriveFiles() {
   );
 }
 
-export default withGoogleAuth(SearchGoogleDriveFiles);
+export default withGoogleAuth(ListGoogleDriveFiles);

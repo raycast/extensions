@@ -4,6 +4,7 @@
 
 - 🏠 Add `List Google Drive Files` command to browse all your files and folders in Raycast
 - 🔗 Quickly open the Google drive home page in browser
+- 🔧 Minor fix action conflicts
 
 ## [Add file path info to the file list] - 2024-10-21
 
