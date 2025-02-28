@@ -1,5 +1,4 @@
-import { environment, getPreferenceValues, Cache } from "@raycast/api";
-import { formatISO } from "date-fns";
+import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 

@@ -16,7 +16,6 @@ import { ConferenceProviderActions, useConferenceProviders } from "./conferencin
 import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./google";
 import { addSignature, roundUpTime } from "./utils";
 import { calendar_v3 } from "@googleapis/calendar";
-import { nanoid } from "nanoid";
 
 type FormValues = {
   title: string;
