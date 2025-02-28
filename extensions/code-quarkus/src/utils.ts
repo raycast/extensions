@@ -18,7 +18,7 @@ export function openInIDE(directoryPath: string, ide: Application) {
         return;
       }
       if (stderr) {
-        console.error(` ${ide.name} stderr: ${stderr}`);
+        console.error(`${ide.name} stderr: ${stderr}`);
       }
       resolve(stdout);
     });
@@ -33,7 +33,7 @@ export function unzipFile(zipFilePath: string, destinationDir: string) {
     return true;
   } catch (error) {
     console.error(`Error extracting zip (${zipFilePath}):`, error);
-    throw error;
+    return false;
   }
 }
 

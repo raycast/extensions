@@ -119,7 +119,15 @@ export function Dependencies({ version, configuration }: { version: QuarkusVersi
     const directoryPath = path.join(dir, configuration.artifact);
     const downloadsPath = `${directoryPath}.zip`;
     if (!preferences.unzip) return;
-    unzipFile(downloadsPath, dir);
+    const success = unzipFile(downloadsPath, dir);
+    if (!success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to unzip project",
+      });
+      return;
+    }
 
     if (preferences.showInFinder) {
       console.debug("opening finder", directoryPath);

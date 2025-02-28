@@ -5,7 +5,7 @@
   "description": "Create new Quarkus project",
   "icon": "quarkus.png",
   "author": "loic_magnette",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "categories": [
     "Developer Tools"
   ],
@@ -34,7 +34,7 @@
         },
         {
           "name": "showInFinder",
-          "description": "Do you want that the finder opens once the download is done",
+          "description": "Do you want the finder to open once the download is done",
           "type": "checkbox",
           "required": false,
           "default": false,
@@ -42,7 +42,7 @@
         },
         {
           "name": "openInIDE",
-          "description": "Do you want for the extension to automatically open your ide with the project. To use it you need to configure the IDE the extension needs to use",
+          "description": "Do you want the extension to automatically open your project in your IDE. To use it you need to configure the IDE the extension needs to use",
           "type": "checkbox",
           "required": false,
           "default": false,

@@ -40,7 +40,7 @@ You can configure the following things:
 - The download directory: Where the downloaded file will be located
 - Unzip automatically the archive: If you want for the downloaded file to be automatically unzipped
 - Show downloaded file in the finder: Automatically open the finder where the file has been downloaded
-- Open the project in my IDE: If you want to automatically open the project in your favortie IDE. To do so you need to enable auto unzip and select your IDE
+- Open the project in my IDE: If you want to automatically open the project in your favorite IDE. To do so you need to enable auto unzip and select your IDE
 - Selected IDE: the IDE to use to open the project
 
 ### Find a Quarkus Extension
