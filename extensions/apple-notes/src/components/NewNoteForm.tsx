@@ -22,7 +22,7 @@ export default function NewNoteForm({ draftValues }: AddTextFormProps) {
 
       try {
         let noteId = "";
-        const text = `${values.text}`;
+        const text = values.text;
         const { noteInHtmlFormat } = fixNoteFormatting(noteTitle, text);
 
         if (noteTitle) {
