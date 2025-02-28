@@ -19,7 +19,7 @@ type Input = {
    */
   startDate?: string;
   /**
-   * The duration of the edvent in minutes
+   * The duration of the event in minutes
    */
   duration?: number;
   /**
