@@ -1,0 +1,367 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zipic",
+  "title": "Zipic",
+  "description": "Compress the selected images in Finder with Zipic.",
+  "icon": "zipic-icon.png",
+  "author": "okooo5km",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compressImages",
+      "title": "Compress Images",
+      "subtitle": "Zipic",
+      "description": "Compress the selected images in Finder with Zipic using app settings.",
+      "mode": "no-view",
+      "icon": "zipic-icon.png"
+    },
+    {
+      "name": "compressImagesWithOptions",
+      "title": "Compress Images with Options",
+      "subtitle": "Zipic",
+      "description": "Configure compression options before compressing selected images with Zipic.",
+      "mode": "view",
+      "icon": "zipic-icon.png",
+      "options": [
+        {
+          "name": "directory",
+          "title": "Custom Directory",
+          "description": "Path to save the compressed files (only used when Location is set to Custom and Use Default Save Directory is disabled)",
+          "type": "directory",
+          "required": false,
+          "dependsOn": [
+            "location",
+            "specified"
+          ],
+          "dependsOnValue": [
+            "custom",
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "name": "compressImagesWithPreset",
+      "title": "Compress Images with Preset",
+      "subtitle": "Zipic",
+      "description": "Choose a preset to compress selected images with Zipic.",
+      "mode": "view",
+      "icon": "zipic-icon.png"
+    },
+    {
+      "name": "managePresets",
+      "title": "Manage Compression Presets",
+      "subtitle": "Zipic",
+      "description": "Create, edit, and manage compression presets for Zipic.",
+      "mode": "view",
+      "icon": "zipic-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "optimize-images",
+      "title": "Optimize Images",
+      "description": "Optimize your selected images through compression, resizing, and format conversion"
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful assistant that helps users compress images using the Zipic app. When users ask about image compression, suggest using the optimize-images tool. Before compressing images, check if the user has selected images in Finder or provided image paths. If the user asks about compression options, explain them clearly.",
+    "evals": [
+      {
+        "input": "@zipic Compress the images",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s)",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "optimize-images"
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress my images with high quality",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) with high quality",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "power": {
+                  "or": [
+                    1,
+                    2
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress my images with maximum compression",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) with maximum compression",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "power": {
+                  "or": [
+                    5,
+                    6
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Convert my images to WebP format",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) and converting to WebP",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.webp",
+              "/Users/5km/Downloads/Demo/dir/demo3.webp"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "format": "webp"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress the selected images and save them to Desktop",
+        "mocks": {
+          "optimize-images": {
+            "expectedOutputPaths": [
+              "~/Desktop/demo1.png",
+              "~/Desktop/dir/"
+            ],
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/demo1.png",
+              "/Users/5km/Downloads/Demo/dir/"
+            ],
+            "message": "Started compressing 2 item(s)",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "saveDirectory": "~/Desktop",
+                "saveLocation": "custom"
+              },
+              "name": "optimize-images"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Resize my images to 800px width",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) and resizing to 800px width",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "width": 800
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress my images and add a suffix to the filenames",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) with suffix",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2-compressed.png",
+              "/Users/5km/Downloads/Demo/dir/demo3-compressed.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "addSuffix": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress my images and save them in a subfolder",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) to subfolder",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/compressed/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/compressed/demo3.png"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "addSubfolder": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic Compress these images to HEIC format with quality level 2 and resize to 1200x800",
+        "mocks": {
+          "optimize-images": {
+            "success": true,
+            "message": "Started compressing 2 item(s) to HEIC format with quality level 2 and resizing to 1200x800",
+            "imagePaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.png",
+              "/Users/5km/Downloads/Demo/dir/demo3.png"
+            ],
+            "expectedOutputPaths": [
+              "/Users/5km/Downloads/Demo/dir/demo2.heic",
+              "/Users/5km/Downloads/Demo/dir/demo3.heic"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "optimize-images",
+              "arguments": {
+                "format": "heic",
+                "power": 2,
+                "width": 1200,
+                "height": 800
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zipic what can you do?",
+        "mocks": {
+          "optimize-images": {
+            "expectedOutputPaths": [],
+            "imagePaths": [],
+            "message": "No images selected. Please select images in Finder or provide image paths.",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "optimize-images"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "open": "^10.1.0",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/tar": "^6.1.13",
+    "eslint": "^8.57.0",
+    "prettier": "3.3.3",
+    "typescript": "^5.4.5"
+  }
+}
