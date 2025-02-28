@@ -2,6 +2,10 @@
 
 Quick access to existing project directories in your preferred editor.
 
+## Usage
+- Search for a project and open it in your preferred editor.
+- If the directory doesn't exist, create it and open it on the fly.
+
 ## Configure Extension
 
 Sessionizer allows you to customize:
