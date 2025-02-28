@@ -146,13 +146,19 @@ export async function listAllFiles(pageSize = 200, pageToken?: string) {
     params.append("pageToken", pageToken);
   }
 
+  let response;
   const url = `https://www.googleapis.com/drive/v3/files?${params.toString()}`;
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
-  });
+  try {
+    response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getOAuthToken()}`,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch files", error);
+    return { files: [] };
+  }
 
   const data = (await response.json()) as {
     files: File[];
