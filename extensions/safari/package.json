@@ -203,6 +203,11 @@
       "name": "close-tab",
       "title": "Close Tab",
       "description": "Close a specific tab by window ID and tab index, or close the current active tab"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "Get information about the currently focused tab in Safari"
     }
   ],
   "ai": {
@@ -453,6 +458,26 @@
           {
             "callsTool": {
               "name": "close-tab"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@safari what tab am I currently on?",
+        "mocks": {
+          "get-focused-tab-info": {
+            "uuid": "1-1",
+            "title": "Raycast - Supercharged productivity",
+            "url": "https://www.raycast.com/",
+            "window_id": 1,
+            "index": 1,
+            "is_local": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-focused-tab-info"
             }
           }
         ]
