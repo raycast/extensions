@@ -154,3 +154,24 @@ export async function withCache<T>(
   );
   return result;
 }
+
+export function toISO8601WithTimezoneOffset(date = new Date()) {
+  const offsetMinutes = date.getTimezoneOffset();
+  const offsetHours = Math.abs(Math.floor(offsetMinutes / 60));
+  const offsetMins = Math.abs(offsetMinutes % 60);
+  const sign = offsetMinutes <= 0 ? "+" : "-"; // Note: getTimezoneOffset returns inverse of standard notation
+  const timezoneOffset = `${sign}${offsetHours.toString().padStart(2, "0")}:${offsetMins.toString().padStart(2, "0")}`;
+  return date.toISOString().replace("Z", timezoneOffset);
+}
+
+export function toHumanReadableTime(date = new Date()) {
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
+}
