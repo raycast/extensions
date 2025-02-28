@@ -71,7 +71,7 @@ export default function ListDisks(): JSX.Element {
 
   /**
    *
-   * @param update "DiskUpdate", "Refresh", "Init"
+   * @param update "DiskUpdate", "DiskRefresh", "Refresh", "Init"
    */
   function fetchDisks(update: "Init" | "DiskUpdate" | "DiskRefresh" | "Refresh") {
     try {
