@@ -13,7 +13,7 @@ The command has two configuration options:
 - Sort list by creation date: If enabled, the email list is sorted on most recently created.
 - Exit command after copying address: If enabled, the command will close upon copying an address from the list.
 
-### Create New Mail
+### Create New Email
 
 A quick way to generate a new iCloud Hide My Email address.
 
