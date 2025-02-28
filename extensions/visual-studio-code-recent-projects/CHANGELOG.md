@@ -1,4 +1,14 @@
-# Visual Studio Code Search Recent Projects Changelog
+# Visual Studio Code Changelog
+
+## [Improvement] - 2025-02-27
+
+- Improved UI by showing the actual editor name and icon (Windsurf, VSCodium, Cursor, etc.) in both `Search Recent Projects` and `Show Installed Extensions` commands.
+- Improved the `Uninstall Extension` action by adopting a destructive style, adding a shortcut, and enhancing the user experience by displaying the extension name in the confirmation dialog.
+- Added support for VSCodium - Insiders.
+
+## [Update] - 2025-02-22
+
+- Adds support for Trae as an option in the extension settings.
 
 ## [Fix] - 2025-01-02
 

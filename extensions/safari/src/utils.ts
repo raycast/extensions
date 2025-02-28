@@ -135,3 +135,9 @@ export async function getCurrentTabName() {
 export async function getCurrentTabURL() {
   return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of front document`);
 }
+
+export type ContentType = "text" | "source";
+
+export async function getCurrentTabContents(type: ContentType) {
+  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of front document`);
+}

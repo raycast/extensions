@@ -20,7 +20,7 @@ import {
   updateTodo,
   handleError,
   List as TList,
-  UpdateTodoParams,
+  TodoParams,
 } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
@@ -49,7 +49,7 @@ export default function TodoListItemActions({
 
   const area = todo.area || todo.project?.area;
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
     try {
       await updateTodo(todo.id, args);
       await showToast({

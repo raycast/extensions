@@ -1,5 +1,9 @@
 # Better Uptime Changelog
 
+## [Update] - 2025-02-21
+
+- Add AI features
+
 ## [Update] - 2025-01-29
 
 - Update the Raycast API and general small improvements

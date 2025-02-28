@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2025-02-05
+
+- Add ability to update time entry start and stop date
+- Add ability to change the start time for a running time entry
+
 ## [New Feature] - 2025-12-12
 
 - Add shortcut to "Create Similar Time Entry"
