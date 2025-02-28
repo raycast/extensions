@@ -1,5 +1,9 @@
 # Summarize YouTube Video Changelog
 
+## [New Features] - 2025-02-19
+
+- ⁉ Reworked the follow up questions to be a list of questions and answers
+
 ## [New Features] - 2025-01-18
 
 - 🔎 Added support for clipboard and browser extension detection

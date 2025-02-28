@@ -1,5 +1,7 @@
 # Google Workspace Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Add file path info to the file list] - 2024-10-21
 
 - Adds the file path information to the list of accessories.

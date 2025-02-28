@@ -121,7 +121,10 @@ export function getShortcut(index: number) {
 
   let shortcut: Keyboard.Shortcut | undefined;
   if (key >= 1 && key <= 9) {
-    shortcut = { modifiers: ["cmd"], key: String(key) as Keyboard.KeyEquivalent };
+    shortcut = {
+      modifiers: ["cmd"],
+      key: String(key) as Keyboard.KeyEquivalent,
+    };
   }
 
   return shortcut;

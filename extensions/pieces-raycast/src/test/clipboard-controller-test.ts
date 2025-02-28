@@ -31,8 +31,8 @@ export default async function testClipboardController() {
     "Items is not the same as event items",
   );
 
-  const snippet = `const id = ${randomUUID()};`;
-  await Clipboard.copy(snippet); // copy to update history
+  const material = `const id = ${randomUUID()};`;
+  await Clipboard.copy(material); // copy to update history
   await sleep(50);
   await ClipboardController.getInstance().updateHistory(); // call update history to update the clipboard controller values
   await sleep(50);
@@ -44,7 +44,7 @@ export default async function testClipboardController() {
     ); // should have one extra item
   expect(items.length <= 30).to.eq(true);
   expect(eventItems[0].clipboard.text).to.eq(
-    snippet,
+    material,
     "Recently copied is not first item",
   ); // the recently copied item should be at the 0 index
   expect(events).to.be.gt(

@@ -12,34 +12,25 @@ function createAxiosAgentConfig(linkdingAccount: LinkdingAccount): AxiosRequestC
   };
 }
 
-export function searchBookmarks(
-  linkdingAccount: LinkdingAccount,
-  searchText: string,
-  abortControllerRef: React.MutableRefObject<AbortController | null>
-) {
+export function searchBookmarks(linkdingAccount: LinkdingAccount, searchText: string) {
   return axios<GetLinkdingBookmarkResponse>(
     `${linkdingAccount.serverUrl}/api/bookmarks?` + new URLSearchParams({ q: searchText }),
     {
-      signal: abortControllerRef.current?.signal,
       ...createAxiosAgentConfig(linkdingAccount),
     }
   );
 }
 
 export function deleteBookmark(linkdingAccount: LinkdingAccount, bookmarkId: number) {
-  return axios
-    .delete(`${linkdingAccount.serverUrl}/api/bookmarks/${bookmarkId}`, {
-      ...createAxiosAgentConfig(linkdingAccount),
-    })
-    .catch(showErrorToast);
+  return axios.delete(`${linkdingAccount.serverUrl}/api/bookmarks/${bookmarkId}`, {
+    ...createAxiosAgentConfig(linkdingAccount),
+  });
 }
 
 export function createBookmark(linkdingAccount: LinkdingAccount, bookmark: PostLinkdingBookmarkPayload) {
-  return axios
-    .post(`${linkdingAccount.serverUrl}/api/bookmarks/`, bookmark, {
-      ...createAxiosAgentConfig(linkdingAccount),
-    })
-    .catch(showErrorToast);
+  return axios.post(`${linkdingAccount.serverUrl}/api/bookmarks/`, bookmark, {
+    ...createAxiosAgentConfig(linkdingAccount),
+  });
 }
 
 export function getWebsiteMetadata(url: string) {

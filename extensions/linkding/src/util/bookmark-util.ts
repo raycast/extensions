@@ -20,7 +20,12 @@ export function showSuccessToast(message: string) {
 }
 
 export function validateUrl(url: string) {
-  return url.startsWith("http://") || url.startsWith("https://");
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 function isCancel(value: AxiosError | CanceledError<never>): boolean {

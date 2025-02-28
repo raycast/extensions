@@ -29,7 +29,7 @@
     },
     {
       "name": "customInstance",
-      "title": "Sourcegraph: URL",
+      "title": "Sourcegraph connection: URL",
       "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
       "placeholder": "https://example.sourcegraph.app",
       "required": false,
@@ -37,14 +37,14 @@
     },
     {
       "name": "customInstanceToken",
-      "title": "Sourcegraph: Access token",
+      "title": "Sourcegraph connection: Access token",
       "description": "Required to use 'Sourcegraph' commands - available under 'Profile' -> 'Access token' in Sourcegraph.",
       "required": false,
       "type": "password"
     },
     {
       "name": "customInstanceProxy",
-      "title": "Sourcegraph: Proxy",
+      "title": "Sourcegraph connection: Proxy",
       "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
       "required": false,
       "type": "textfield"
@@ -97,7 +97,7 @@
       "name": "searchInstance",
       "title": "Search Code",
       "subtitle": "Sourcegraph",
-      "description": "Search code on Sourcegraph.",
+      "description": "Search code on a Sourcegraph instance or workspace.",
       "mode": "view",
       "keywords": [
         "sourcegraph",

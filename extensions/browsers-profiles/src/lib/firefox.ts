@@ -4,6 +4,7 @@ import ini from "ini";
 import { join } from "path";
 
 import browsers from "./supported-browsers.json";
+import { sortProfiles } from "./utils";
 
 type FirefoxProfiles = {
   name: string;
@@ -51,6 +52,8 @@ export const getFirefoxProfiles = () => {
           icon: browser.icon,
         });
       });
+
+      sortProfiles(browserProfiles);
 
       profiles.push({
         name: browser.title,
