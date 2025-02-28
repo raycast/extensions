@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2025-02-28
 
 - Added "My Deliveries" command to display active and recent deliveries
 - Implemented detailed delivery view with package information
