@@ -52,7 +52,7 @@
     },
     {
       "name": "apiBaseUrl",
-      "description": "Config custom API base URL",
+      "description": "Configure custom API base URL",
       "type": "textfield",
       "required": false,
       "title": "WakaTime API Base URL",
