@@ -31,7 +31,7 @@ function findComponent(sanitizedName: string): { exists: boolean; isPro: boolean
 
   const proComponentExists = proComponents.includes(camelCaseName);
 
-  const proseComponentExists = proseComponents.includes(sanitizedName);
+  const proseComponentExists = proseComponents.includes(camelCaseName);
 
   return {
     exists: componentExists || proComponentExists || proseComponentExists,
@@ -67,6 +67,6 @@ export default async function SearchComponentTheme(props: LaunchProps<{ argument
   if (!isProse) {
     await open(`${versionUrl}/components/${sanitizedName}#theme`);
   } else {
-    await open(`https://ui3.nuxt.dev/getting-started/typography#${sanitizedName}`);
+    await open(`https://ui3.nuxt.dev/getting-started/typography#${sanitizedName.replace("-", "")}`);
   }
 }

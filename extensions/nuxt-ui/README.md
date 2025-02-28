@@ -51,9 +51,14 @@ This is just the beginning. Here's what's cooking:
 
 Got ideas to make this even better? Issues and PRs are welcome!
 
-<!-- automd:contributors license=Apache author=HugoRCD/nuxt-ui-raycast-extension" -->
+<!-- automd:contributors license=Apache github=HugoRCD/nuxt-ui-raycast-extension" -->
 
-<!-- ⚠️  (contributors) `github` is required! -->
+Published under the [APACHE](https://github.com/HugoRCD/nuxt-ui-raycast-extension"/blob/main/LICENSE) license.
+Made by [community](https://github.com/HugoRCD/nuxt-ui-raycast-extension"/graphs/contributors) 💛
+<br><br>
+<a href="https://github.com/HugoRCD/nuxt-ui-raycast-extension"/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=HugoRCD/nuxt-ui-raycast-extension"" />
+</a>
 
 <!-- /automd -->
 
@@ -61,6 +66,6 @@ Got ideas to make this even better? Issues and PRs are welcome!
 
 ---
 
-_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Wed Feb 12 2025)_
+_🤖 auto updated with [automd](https://automd.unjs.io) (last updated: Fri Feb 28 2025)_
 
 <!-- /automd -->
