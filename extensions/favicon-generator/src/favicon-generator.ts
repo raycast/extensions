@@ -161,8 +161,7 @@ export async function generateFavicon(
     await Promise.all([
       fs.promises.unlink(configPath).catch(() => {}),
       fs.promises.unlink(outputIndexPath).catch(() => {}),
-      ...fs
-        .readdirSync(outputDir)
+      ...(await fs.promises.readdir(outputDir))
         .filter(
           (file) =>
             file.startsWith("index-") && file.endsWith(".html") && path.join(outputDir, file) !== outputIndexPath,
