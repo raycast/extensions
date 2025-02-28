@@ -51,7 +51,7 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
-  const { shouldCloseMainWindow } = getPreferenceValues();
+  const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
 
   const { push, pop } = useNavigation();
 
@@ -66,9 +66,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
     async onSubmit(values) {
       if (shouldCloseMainWindow) {
-        await closeMainWindow({
-          popToRootType: PopToRootType.Suspended,
-        });
+        await closeMainWindow({ popToRootType: PopToRootType.Suspended });
       }
 
       const body: AddTaskArgs = { content: values.content, description: values.description };
