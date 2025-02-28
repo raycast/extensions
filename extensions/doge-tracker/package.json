@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Dept. of Gov. Efficiency",
+      "title": "DOGE Initiatives Tracker",
       "description": "Search all DOGE cost-saving initiatives",
       "icon": "DOGE.png",
       "mode": "view"
