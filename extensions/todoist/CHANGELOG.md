@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Close Window When Creating a Task] - 2025-02-28
+
+Added an option to close the window immediately after creating a task with the `Create Task` command.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Add Next Task as Title in Menu Bar] - 2025-02-20
