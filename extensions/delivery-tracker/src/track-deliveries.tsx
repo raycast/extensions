@@ -41,12 +41,6 @@ export default function TrackDeliveriesCommand() {
   const [trackingIsLoading, setTrackingIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!deliveries || !packages) {
-      // don't do anything until both deliveries and packages are initialized
-      return;
-    }
-
-    setTrackingIsLoading(true);
     refreshTracking(false, deliveries, packages, setPackages, setTrackingIsLoading);
   }, [deliveries]);
 
@@ -123,12 +117,6 @@ export default function TrackDeliveriesCommand() {
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   style={Action.Style.Regular}
                   onAction={() => {
-                    if (!deliveries || !packages) {
-                      // don't do anything until both deliveries and packages are initialized
-                      return;
-                    }
-
-                    setTrackingIsLoading(true);
                     refreshTracking(true, deliveries, packages, setPackages, setTrackingIsLoading);
                   }}
                 />
@@ -143,11 +131,19 @@ export default function TrackDeliveriesCommand() {
 
 async function refreshTracking(
   forceRefresh: boolean,
-  deliveries: Delivery[],
+  deliveries: Delivery[] | undefined,
   packages: PackageMap,
   setPackages: (value: ((prevState: PackageMap) => PackageMap) | PackageMap) => void,
   setTrackingIsLoading: (value: ((prevState: boolean) => boolean) | boolean) => void,
 ) {
+
+  if (!deliveries || !packages) {
+    // don't do anything until both deliveries and packages are initialized
+    return;
+  }
+
+  setTrackingIsLoading(true);
+
   const now = new Date();
 
   for (const delivery of deliveries.filter((delivery) => !delivery.debug)) {
