@@ -112,50 +112,6 @@ export function isInternal() {
   return environment.supportPath.includes("com.raycast.macos.internal");
 }
 
-/**
- * Wraps a function with caching functionality using LocalStorage
- *
- * @param fn - The async function to cache results from
- * @param options - Optional configuration for the cache behavior
- * @param options.key - Custom cache key (defaults to stringified function)
- * @param options.validate - Optional validation function for cached data
- * @param options.maxAge - Maximum age of cached data in milliseconds
- * @returns The result of the function, either from cache or fresh execution
- *
- * @example
- * ```ts
- * const data = await withCache(
- *   async () => fetchExpensiveData(),
- *   { maxAge: 5 * 60 * 1000 } // Cache for 5 minutes
- * );
- * ```
- */
-export async function withCache<T>(
-  fn: () => Promise<T>,
-  options?: { key?: string; validate?: (data: T) => boolean; maxAge?: number },
-): Promise<T> {
-  const cache = new Cache();
-  const key = options?.key ?? fn.toString();
-  const cached = cache.get(key);
-  if (cached) {
-    const { data, timestamp } = JSON.parse(cached);
-    const isExpired = options?.maxAge && Date.now() - timestamp > options.maxAge;
-    if (!isExpired && (!options?.validate || options.validate(data))) {
-      return data;
-    }
-  }
-
-  const result = await fn();
-  cache.set(
-    key,
-    JSON.stringify({
-      data: result,
-      timestamp: Date.now(),
-    }),
-  );
-  return result;
-}
-
 export function toISO8601WithTimezoneOffset(date = new Date()) {
   const offsetMinutes = date.getTimezoneOffset();
   const offsetHours = Math.abs(Math.floor(offsetMinutes / 60));
