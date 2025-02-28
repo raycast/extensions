@@ -1,11 +1,11 @@
 # 1bookmark Changelog
 
-## [Improve Code Quality and Fixed Some Bugs] - {PR_MERGE_DATE}
+## [Improve Code Quality and Fixed Some Bugs] - 2025-02-28
 
 - 0.4.2
 - 💻 Improved code quality and fixed some minor bugs.
 
-## [Improve UI and UX] - {PR_MERGE_DATE}
+## [Improve UI and UX] - 2025-02-28
 
 - 0.4.1
 - 💅🏼 Apply Raycast style, shortcut conventions for actions.
@@ -13,7 +13,7 @@
 - 📱 All items in Search Bookmarks has go to My Account action.
 - 👥 Add **Remove user from space** action.
 
-## [Added My Account UI, Improved Sign In/Out UX] - {PR_MERGE_DATE}
+## [Added My Account UI, Improved Sign In/Out UX] - 2025-02-28
 
 - 0.4.0
 - 💅🏼 Added UI to my account view.
@@ -21,17 +21,17 @@
 - 🇺🇸 Changes all Korean text to English in the extension codes.
 - 📱 Improve UX for sign in and sign out, fix sign out bugs.
 
-## [Improve Login UX] - {PR_MERGE_DATE}
+## [Improve Login UX] - 2025-02-28
 
 - 0.3.4
 - 💅🏼 The issue of having to re-enter email after seeing the login code has been resolved.
 
-## [Prepare for Production] - {PR_MERGE_DATE}
+## [Prepare for Production] - 2025-02-28
 
 - 0.3.3
 - 💻 Prepare for production build using Raycast Extension default settings.
 
-## [Fix Preferences Issue and Improve README Guide] - {PR_MERGE_DATE}
+## [Fix Preferences Issue and Improve README Guide] - 2025-02-28
 
 - 0.3.2
 - 🐛 Fix about raycast preferences bug in production build.
