@@ -26,7 +26,7 @@ export default function NewNoteForm({ draftValues }: AddTextFormProps) {
         const { noteInHtmlFormat } = fixNoteFormatting(noteTitle, text);
 
         if (noteTitle) {
-          await showToast({ style: Toast.Style.Animated, title: `Creating new note"${noteTitle}"` });
+          await showToast({ style: Toast.Style.Animated, title: `Creating new note "${noteTitle}"` });
           await createNote(noteTitle);
           noteId = await getSelectedNote();
         } else {
