@@ -11,6 +11,11 @@ Supported tools:
 - Create, update, list, and delete audiences
 - Create, update, list, and delete API keys
 
+New preferences:
+
+- `Sender Name`: Your default name for sending emails
+- `Sender Email`: Your default email address for sending emails
+
 ## [User Experience Improvements] - 2024-10-20
 
 - Added new required preferences for default sender:
@@ -18,6 +23,7 @@ Supported tools:
   - `Sender Email`: Your default email address for sending emails
 - The `send-email` tool now automatically uses these preferences to format the sender as "Name <email@example.com>"
 - Made the `from` field optional in the `send-email` tool as it will always use the preferences if not specified
+- The email form in the UI now pre-fills the "From" field with the default sender information from preferences
 
 ## [Maintenance Release] - 2024-10-10
 
