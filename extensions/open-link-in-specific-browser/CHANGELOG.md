@@ -1,5 +1,9 @@
 # Open Link in Specific Browser Changelog
 
+## [New Command] - {PR_MERGE_DATE}
+
+- Add new command: Open selected text in default browser
+
 ## [Update Icon] - 2024-07-25
 
 - Update menu bar icon
