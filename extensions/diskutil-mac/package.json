@@ -15,7 +15,6 @@
     {
       "name": "index",
       "title": "Run Diskutil",
-      "subtitle": "View your Disks in Raycast",
       "description": "View, mount and eject your disks and volumes like with diskutil. Just with a nice UI. \n(Note: Due to limitation with the diskutil command implementation the execution takes some time with HDDs)",
       "mode": "view"
     }
