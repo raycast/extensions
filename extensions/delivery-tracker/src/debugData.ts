@@ -44,6 +44,13 @@ export const debugDeliveries: Delivery[] = [
     carrier: "fedex",
     debug: true,
   },
+  {
+    id: "DD17AC8D-9048-43ED-AF35-4195A2F97243",
+    name: "no packages",
+    trackingNumber: "198451726304587",
+    carrier: "fedex",
+    debug: true,
+  },
 ];
 
 export const debugPackages: PackageMap = {};
@@ -120,4 +127,7 @@ debugPackages[debugDeliveries[5].id] = {
       activity: [],
     },
   ],
+};
+debugPackages[debugDeliveries[6].id] = {
+  packages: [],
 };
