@@ -30,7 +30,14 @@
           "type": "text",
           "placeholder": "3000",
           "default": "3000",
-          "required": true
+          "required": false
+        },
+        {
+          "name": "hostname",
+          "type": "text",
+          "placeholder": "localhost",
+          "default": "localhost",
+          "required": false
         }
       ]
     }

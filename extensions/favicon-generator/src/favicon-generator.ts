@@ -179,11 +179,37 @@ export async function generateFavicon(
   }
 }
 
-export async function checkFavicon(port: string): Promise<string> {
+export async function checkFavicon(port?: string, hostname: string = "localhost"): Promise<string> {
   const tempInstallDir = path.join(os.tmpdir(), "favicon-generator-temp");
   const env = await getShellEnv();
   const npxPath = env.NPX_PATH || "npx";
 
   await ensureRealFaviconInstalled();
-  return execCommand(npxPath, ["realfavicon", "check", port], tempInstallDir);
+
+  let url: string;
+
+  // Check if hostname already includes http:// or https://
+  const hasProtocol = hostname.startsWith("http://") || hostname.startsWith("https://");
+
+  if (hasProtocol) {
+    try {
+      // Parse the URL to handle it properly
+      const parsedUrl = new URL(hostname);
+
+      // If port is specified in the function call and not in the URL, add it
+      if (port && !parsedUrl.port) {
+        parsedUrl.port = port;
+      }
+
+      url = parsedUrl.toString();
+    } catch (e) {
+      // If URL parsing fails, fall back to simple string concatenation
+      url = port ? `${hostname}:${port}` : hostname;
+    }
+  } else {
+    // For hostnames without protocol, add http:// and port if specified
+    url = port ? `http://${hostname}:${port}` : `http://${hostname}`;
+  }
+
+  return execCommand(npxPath, ["realfavicon", "check", url], tempInstallDir);
 }
