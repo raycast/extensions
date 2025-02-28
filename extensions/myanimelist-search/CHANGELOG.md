@@ -1,6 +1,6 @@
 # Myanimelist search Changelog
 
-## [New Commands and API overhaul] - {PR_MERGE_DATE}
+## [New Commands and API overhaul] - 2025-02-28
 
 - Added 1 new command: Manage Watchlist
 - Added 1 action: Add to Watchlist
