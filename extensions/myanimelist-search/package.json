@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myanimelist-search",
   "title": "Myanimelist Search",
-  "description": "Easily search and open animes on Myanimelist.",
-  "icon": "mal.png",
+  "description": "Easily search, open and manage your animes on Myanimelist.",
+  "icon": "MAL_macOS.png",
   "author": "luknl",
   "categories": [
     "Web"
@@ -15,6 +15,13 @@
       "title": "Search Animes",
       "subtitle": "Myanimelist",
       "description": "Search for animes by name",
+      "mode": "view"
+    },
+    {
+      "name": "manage-watchlist",
+      "title": "Manage Watchlist",
+      "subtitle": "Myanimelist",
+      "description": "Manage your watchlist",
       "mode": "view"
     }
   ],
@@ -52,17 +59,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^1.4.8",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.0.1",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
