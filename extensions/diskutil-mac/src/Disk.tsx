@@ -133,7 +133,6 @@ export default class Disk {
       showFailureToast(error, { title: "Failed to open terminal" });
     }
 
-    showFailureToast;
   }
 
   async revealInFinder() {
