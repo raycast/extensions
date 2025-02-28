@@ -84,19 +84,20 @@ export default function Command() {
         };
 
         setEntries((entries) => [entry, ...entries]);
-        setIsLoading(false);
         setTimeout(() => {
           setSelectedItemId(entry.id);
         }, 100);
       })
       .catch((error) => {
         console.error(error);
-        setIsLoading(false);
         showToast({
           style: Toast.Style.Failure,
           title: "Translation failed",
           message: "An error occurred while translating",
         });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -133,7 +134,10 @@ export default function Command() {
               markdown={entry.targetText}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Source Language" text={entry.sourceLanguage !== "" ? entry.sourceLanguage : "Auto"} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Source Language"
+                    text={entry.sourceLanguage !== "" ? entry.sourceLanguage : "Auto"}
+                  />
                   <List.Item.Detail.Metadata.Label title="Target Language" text={entry.targetLanguage} />
                   <List.Item.Detail.Metadata.Label title="Tone" text={entry.tone} />
                   <List.Item.Detail.Metadata.Label title="Source Text" text={entry.sourceText} />
