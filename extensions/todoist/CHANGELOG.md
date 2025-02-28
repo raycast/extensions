@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Close Window When Creating a Task] - 2025-02-28
+
+Added an option to close the window immediately after creating a task with the `Create Task` command.
+
 ## [AI Extension Improvements] - 2025-02-27
 
 Improve the AI Extension to only retrieve relevant tasks, comments, projects, and sections from the REST API to avoid bloating the AI with too much data.
