@@ -32,11 +32,12 @@ type Input = {
   /**
    * Detailed description or agenda for the event
    * @example "Monthly review of project progress and key metrics discussion"
+   * @remarks Only use for additional information, don't duplicate the even title. Useful to add external conference links like Zoom.
    */
   description?: string;
   /**
    * Whether to add a Hangouts/Google Meet link to the event
-   * @example uses the user's default setting from Google Calendar
+   * @defaults The user's default setting from Google Calendar
    */
   addHangoutsLink?: boolean;
 };
