@@ -194,7 +194,7 @@ function getConferenceSolutionTitle(type: string) {
   }
 }
 
-function getConferceSolutionIcon(type: string) {
+function getConferenceSolutionIcon(type: string) {
   switch (type) {
     case "hangoutsMeet":
       return "meet.png";
