@@ -1,5 +1,10 @@
 # Vercast Changelog
 
+## [2.9] - {PR_MERGE_DATE}
+
+- Update items in `Search Components`
+<!-- - Fix extension stuck loading when Token Length is invalid -->
+
 # [2.8] - 2025-02-21
 
 - Added AI tools

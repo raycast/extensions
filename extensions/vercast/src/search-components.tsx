@@ -1,29 +1,48 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 type Item = {
   title: string;
-  path: string;
+  path?: string;
   subtitle: string;
+  icon?: string;
 };
 
 const ITEMS: Item[] = [
   {
-    title: "Next.js",
-    path: "brands#next-js",
-    subtitle: "Assets",
-  },
-  {
     title: "Vercel",
     path: "brands#vercel",
     subtitle: "Assets",
+    icon: "icon.png",
   },
   {
-    title: "Color",
-    path: "color",
+    title: "Next.js",
+    path: "brands#next-js",
+    subtitle: "Assets",
+    icon: "next-js.svg",
+  },
+  {
+    title: "Turbo",
+    path: "brands#turbo",
+    subtitle: "Assets",
+    icon: "turbo.svg",
+  },
+  {
+    title: "v0",
+    path: "brands#v0",
+    subtitle: "Assets",
+    icon: "v0.png",
+  },
+  {
+    title: "Colors",
+    path: "colors",
     subtitle: "Styleguide",
   },
   {
     title: "Grid",
     path: "grid",
+    subtitle: "Styleguide",
+  },
+  {
+    title: "Typeface",
     subtitle: "Styleguide",
   },
   {
@@ -52,13 +71,16 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Book",
+    subtitle: "Components",
+  },
+  {
     title: "Button",
     path: "button",
     subtitle: "Components",
   },
   {
-    title: "Capacity",
-    path: "capacity",
+    title: "Calendar",
     subtitle: "Components",
   },
   {
@@ -67,63 +89,51 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
+    title: "Choicebox",
+    subtitle: "Components",
+  },
+  {
+    title: "Code Block",
+    subtitle: "Components",
+  },
+  {
     title: "Collapse",
-    path: "collapse",
     subtitle: "Components",
   },
   {
     title: "Combobox",
-    path: "combobox",
+    subtitle: "Components",
+  },
+  {
+    title: "Command Menu",
+    subtitle: "Components",
+  },
+  {
+    title: "Context Menu",
     subtitle: "Components",
   },
   {
     title: "Description",
-    path: "description",
     subtitle: "Components",
   },
   {
     title: "Drawer",
-    path: "drawer",
     subtitle: "Components",
   },
   {
-    title: "Entity",
-    path: "entity",
+    title: "Empty State",
     subtitle: "Components",
   },
   {
     title: "Error",
-    path: "error",
     subtitle: "Components",
   },
   {
-    title: "Feedback",
-    path: "feedback",
+    title: "Gauge",
     subtitle: "Components",
   },
   {
-    title: "fieldset",
-    path: "fieldset",
-    subtitle: "Components",
-  },
-  {
-    title: "File Tree",
-    path: "file-tree",
-    subtitle: "Components",
-  },
-  {
-    title: "Footer",
-    path: "footer",
-    subtitle: "Components",
-  },
-  {
-    title: "Icon",
-    path: "icon",
-    subtitle: "Components",
-  },
-  {
-    title: "Image",
-    path: "image",
+    title: "Grid",
     subtitle: "Components",
   },
   {
@@ -137,13 +147,11 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Link",
-    path: "link",
+    title: "Loading dots",
     subtitle: "Components",
   },
   {
-    title: "Loading dots",
-    path: "loading-dots",
+    title: "Material",
     subtitle: "Components",
   },
   {
@@ -162,23 +170,24 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Popover",
-    path: "popover",
-    subtitle: "Components",
-  },
-  {
-    title: "Popover Menu",
-    path: "popover-menu",
+    title: "Pagination",
     subtitle: "Components",
   },
   {
     title: "Progress",
-    path: "progress",
+    subtitle: "Components",
+  },
+  {
+    title: "Project Banner",
     subtitle: "Components",
   },
   {
     title: "Radio",
     path: "radio",
+    subtitle: "Components",
+  },
+  {
+    title: "Relative Time Card",
     subtitle: "Components",
   },
   {
@@ -198,7 +207,10 @@ const ITEMS: Item[] = [
   },
   {
     title: "Skeleton",
-    path: "skeleton",
+    subtitle: "Components",
+  },
+  {
+    title: "Slider",
     subtitle: "Components",
   },
   {
@@ -207,13 +219,11 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Spacer",
-    path: "spacer",
+    title: "Spinner",
     subtitle: "Components",
   },
   {
-    title: "Spinner",
-    path: "spinner",
+    title: "Split Button",
     subtitle: "Components",
   },
   {
@@ -242,11 +252,6 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Tag",
-    path: "tag",
-    subtitle: "Components",
-  },
-  {
     title: "Text",
     path: "text",
     subtitle: "Components",
@@ -254,6 +259,10 @@ const ITEMS: Item[] = [
   {
     title: "Textarea",
     path: "textarea",
+    subtitle: "Components",
+  },
+  {
+    title: "Theme Switcher",
     subtitle: "Components",
   },
   {
@@ -272,11 +281,6 @@ const ITEMS: Item[] = [
     subtitle: "Components",
   },
   {
-    title: "Video",
-    path: "video",
-    subtitle: "Components",
-  },
-  {
     title: "Window",
     path: "window",
     subtitle: "Components",
@@ -286,18 +290,16 @@ const ITEMS: Item[] = [
 export default function Command() {
   return (
     <List>
-      {ITEMS.map((item) => (
+      {ITEMS.map((item, idx) => (
         <List.Item
-          key={item.path}
-          icon={
-            item.subtitle === "Styleguide" ? Icon.Book : item.subtitle === "Components" ? Icon.Box : "icon@dark.png"
-          }
+          key={idx}
+          icon={item.icon ? item.icon : item.subtitle === "Styleguide" ? Icon.Book : Icon.Box}
           title={item.title}
           subtitle={item.subtitle}
           accessories={[{ icon: Icon.ArrowRight }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`https://vercel.com/design/${item.path}`} />
+              <Action.OpenInBrowser url={`https://vercel.com/geist/${item.path ?? item.title.replaceAll(" ", "-")}`} />
             </ActionPanel>
           }
         />
