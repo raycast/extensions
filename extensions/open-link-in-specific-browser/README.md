@@ -1,4 +1,4 @@
-## Description
+# Open Link in Browser Raycast Extension
 
 Open link or search text in specific browsers.
 This extension is for users who switch frequently between browsers.
