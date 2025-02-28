@@ -10,7 +10,8 @@
     "6farer",
     "patricklenz",
     "yuanming",
-    "j3lte"
+    "j3lte",
+    "dort"
   ],
   "license": "MIT",
   "categories": [
@@ -30,6 +31,22 @@
       "description": "Hubspot AccessToken",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "customCompanyProperties",
+      "title": "Custom Company Properties",
+      "description": "Comma-separated list of additional HubSpot company properties to display (e.g. annual_revenue,number_of_employees)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "propertyFormatting",
+      "title": "Property Formatting Rules",
+      "description": "JSON object defining how to format specific properties. Example: {\"monthly_tpv\": \"currency\", \"createdate\": \"date\"}",
+      "type": "textfield",
+      "required": false,
+      "default": "{\"monthly_tpv\": \"currency\"}"
     }
   ],
   "commands": [
