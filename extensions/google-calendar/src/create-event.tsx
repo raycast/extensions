@@ -185,7 +185,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
   );
 }
 
-function getConferceSolutionTitle(type: string) {
+function getConferenceSolutionTitle(type: string) {
   switch (type) {
     case "hangoutsMeet":
       return "Google Meet";
