@@ -1,5 +1,11 @@
 # Brand Icons Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix a long prompt issue
+- Remove the unused function `aiSearch`
+- Bump all dependencies to the latest
+
 ## [Maintenance & Improvements] - 2025-02-25
 
 - Add support for viewing release notes
