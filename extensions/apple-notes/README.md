@@ -12,7 +12,7 @@ There are various ways to search for a note in Apple Notes. You can search a not
 
 ## Create notes
 
-There are two commands that allows you to create new notes:
+There are three commands that allow you to create new notes:
 
 - `New Note` is the manual way of creating a note. You can do it through various ways: selecting a text, filling the `Text` argument, or using `New Note` as a fallback command.
 - `AI Note` allows you to use the AI to write a note. There are two arguments to this: `Text` which is essentially the note's topic and `Additional instructions` allowing you to provide instructions to the AI.
