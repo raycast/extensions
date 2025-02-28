@@ -1,4 +1,5 @@
-import { getSelectedText, showToast, Toast } from "@raycast/api";
+import { getSelectedText } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { fullScreen } from "./utils";
 
 export default async function Command() {
@@ -7,11 +8,7 @@ export default async function Command() {
   try {
     text = await getSelectedText();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No selected text found",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "No selected text found" });
   }
 
   await fullScreen(text);

@@ -47,33 +47,33 @@
   "ai": {
     "evals": [
       {
-        "input" : "Write the words 'Raycast Rocks' fullscreen with @fullscreentext ",
-        "mocks" : {
-          "fullscreen-text" : "Successfully called \"fullscreen-text\""
+        "input": "Write the words 'Raycast Rocks' fullscreen with @fullscreentext ",
+        "mocks": {
+          "fullscreen-text": "Successfully called \"fullscreen-text\""
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "text" : "Raycast Rocks"
+            "callsTool": {
+              "arguments": {
+                "text": "Raycast Rocks"
               },
-              "name" : "fullscreen-text"
+              "name": "fullscreen-text"
             }
           }
         ]
       },
       {
-        "input" : "What is the result of this operation: 5*9+3. Write only the answer @fullscreentext ",
-        "mocks" : {
-          "fullscreen-text" : "Successfully called \"fullscreen-text\""
+        "input": "What is the result of this operation: 5*9+3. Write only the answer @fullscreentext ",
+        "mocks": {
+          "fullscreen-text": "Successfully called \"fullscreen-text\""
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "text" : "48"
+            "callsTool": {
+              "arguments": {
+                "text": "48"
               },
-              "name" : "fullscreen-text"
+              "name": "fullscreen-text"
             }
           }
         ]
@@ -81,8 +81,8 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

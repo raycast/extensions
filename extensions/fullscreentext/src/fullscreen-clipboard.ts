@@ -1,4 +1,5 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { fullScreen } from "./utils";
 
 export default async function Command() {
@@ -7,14 +8,10 @@ export default async function Command() {
   try {
     text = await Clipboard.readText();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No text found in clipboard",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "No text found in clipboard" });
   }
 
-  if (!text) {
+  if (!text || text.includes("Image")) {
     await showToast({
       style: Toast.Style.Failure,
       title: "No text found in clipboard",

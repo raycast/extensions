@@ -2,7 +2,8 @@ import { join } from "path";
 import { chmodSync } from "fs";
 import { promisify } from "util";
 import { execFile } from "child_process";
-import { environment, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { environment, closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export async function fullScreen(text: string) {
   const execFileAsync = promisify(execFile);
@@ -16,6 +17,6 @@ export async function fullScreen(text: string) {
     await execFileAsync(swiftScriptPath, [text]);
   } catch (error) {
     console.error("Execution error:", error);
-    await showToast({ style: Toast.Style.Failure, title: "Error executing script", message: String(error) });
+    await showFailureToast(error, { title: "Error executing script", message: String(error) });
   }
 }
