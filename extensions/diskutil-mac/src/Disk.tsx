@@ -132,7 +132,6 @@ export default class Disk {
     } catch (error) {
       showFailureToast(error, { title: "Failed to open terminal" });
     }
-
   }
 
   async revealInFinder() {
@@ -222,7 +221,7 @@ export default class Disk {
   async init(): Promise<void> {
     try {
       const detailsPromise = this.fetchDetails();
-      const timeoutPromise = new Promise((resolve, _reject) => {
+      const timeoutPromise = new Promise((resolve) => {
         setTimeout(() => {
           //accept
           resolve("ERROR: Initialization Timed Out " + this.identifier);
@@ -358,7 +357,7 @@ export default class Disk {
 
   static execCommand(command: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
+      exec(command, (error, stdout) => {
         if (error) {
           reject(error);
         } else {
@@ -374,7 +373,7 @@ export default class Disk {
         name: "Raycast Diskutil",
       };
 
-      sudo.exec(command, options, (error, stdout, stderr) => {
+      sudo.exec(command, options, (error, stdout) => {
         if (error) {
           reject(error);
         } else {
