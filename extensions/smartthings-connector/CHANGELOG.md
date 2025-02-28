@@ -1,3 +1,20 @@
-# Smartthings Connector Changelog
+# SmartThings Connector Changelog
 
-## [Initial Version] - 2024-09-19
+## [Initial Version] - 2024-03-19
+
+- Add menu bar monitoring of SmartThings home mode
+- Support for viewing and controlling lights
+- Support for executing scenes
+- Support for changing home modes
+- Add background refresh capability
+- Add device status monitoring
+- Add support for dimming controls
+
+## [Next Version] - 2024-03-19
+- Updated ESLint configuration to be compatible with Raycast's publishing checks
+- Improved error handling in API calls
+- Added better type safety throughout the application
+- Fixed formatting issues across all source files
+
+## [Previous Version] - yyyy-mm-dd
+...

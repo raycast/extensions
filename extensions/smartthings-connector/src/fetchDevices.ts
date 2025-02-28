@@ -1,7 +1,6 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
-// Stellen Sie sicher, dass der Pfad korrekt ist
-import type { Device as ImportedDevice, DeviceStatus } from "./types.ts";
+import type { Device, DeviceStatus } from "./types";
 
 const preferences = getPreferenceValues();
 const SMARTTHINGS_API_URL = "https://api.smartthings.com/v1";
@@ -32,19 +31,13 @@ async function fetchDeviceStatuses(deviceIds: string[]): Promise<{
         [key: string]: { components: { main: DeviceStatus }; roomName: string };
       },
       res,
-      index,
+      index
     ) => {
       acc[deviceIds[index]] = res.data;
       return acc;
     },
-    {},
+    {}
   );
-}
-
-interface Device extends ImportedDevice {
-  deviceId: string;
-  deviceTypeName: string;
-  // andere Eigenschaften...
 }
 
 export async function fetchDevices(): Promise<Device[]> {
@@ -62,35 +55,32 @@ export async function fetchDevices(): Promise<Device[]> {
 
 export async function fetchLocationModes() {
   try {
-    const response = await api.get(
-      `/locations/${SMARTTHINGS_LOCATION_ID}/modes`,
-    );
+    const response = await api.get(`/locations/${SMARTTHINGS_LOCATION_ID}/modes`);
+    console.log("Location modes API response:", response.data);
     return response.data.items;
   } catch (error) {
-    throw new Error(
-      `Failed to fetch location modes: ${(error as Error).message}`,
-    ); // Typ 'Error' explizit angeben
+    console.error("Error fetching location modes:", error);
+    throw error;
   }
 }
 
 export async function fetchCurrentLocationMode() {
   try {
-    const response = await api.get(
-      `/locations/${SMARTTHINGS_LOCATION_ID}/modes/current`,
-    );
-    return response.data.mode;
+    const response = await api.get(`/locations/${SMARTTHINGS_LOCATION_ID}/modes/current`);
+    console.log("Current mode API response:", response.data);
+    return response.data;
   } catch (error) {
-    throw new Error(
-      `Failed to fetch current location mode: ${(error as Error).message}`,
-    );
+    console.error("Error fetching current mode:", error);
+    throw error;
   }
 }
 
 export async function switchLocationMode(modeId: string) {
   try {
-    await api.put(`/locations/${SMARTTHINGS_LOCATION_ID}/modes/current`, {
+    const response = await api.put(`/locations/${SMARTTHINGS_LOCATION_ID}/modes/current`, {
       modeId,
     });
+    return response.data;
   } catch (error: unknown) {
     if (error instanceof Error) {
       throw new Error(`Failed to switch location mode: ${error.message}`);
