@@ -96,6 +96,15 @@ export function useContacts(query?: string) {
   });
 }
 
+export function useCalendar(calendarId: string) {
+  return useCachedPromise(
+    async (calendarId: string) => {
+      const calendar = getCalendarClient();
+      return await calendar.calendars.get({ calendarId });
+    },
+    [calendarId],
+  );
+}
 export function useEvents() {
   return useCachedPromise(
     () =>
