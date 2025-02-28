@@ -230,7 +230,9 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         <Form.TextField {...itemProps.duration} title="Duration (minutes)" />
       ) : null}
 
-      <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} />
+      {data?.user?.premium_status !== "not_premium" ? (
+        <Form.DatePicker {...itemProps.deadline} title="Deadline" type={Form.DatePicker.Type.Date} />
+      ) : null}
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (
