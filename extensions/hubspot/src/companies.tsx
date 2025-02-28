@@ -166,7 +166,6 @@ export default function Command() {
                 />
                 {domain && <Action.OpenInBrowser title="Open Website" url={domain} />}
                 <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
