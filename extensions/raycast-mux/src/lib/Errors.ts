@@ -3,7 +3,6 @@ import { Asset } from "@mux/mux-node/resources/video/assets";
 import { showFailureToast } from "@raycast/utils";
 import { Effect } from "effect";
 import Raycast from "raycast-effect";
-import { ClipboardError } from "raycast-effect/Clipboard";
 import { Toast } from "@raycast/api";
 
 export class MuxAssetError {
@@ -35,9 +34,8 @@ export const HandleToastableError = (e: ToastableError) =>
     await showFailureToast(e.message);
   });
 
-export const HandleClipboardError = (e: ClipboardError) =>
+export const HandleClipboardError = () =>
   Raycast.Feedback.showToast({
     title: "Unable to copy to clipboard",
-    message: e.message,
     style: Toast.Style.Failure,
   });
