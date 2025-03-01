@@ -133,5 +133,5 @@ interface Match {
 }
 
 interface Schedule {
-  [key: string]: Matche[];
+  [key: string]: Match[];
 }
