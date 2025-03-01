@@ -4,6 +4,8 @@ import fetch from "node-fetch";
 // Constants
 const YAMLI_API_URL = (word: string) =>
   `https://api.yamli.com/transliterate.ashx?word=${encodeURIComponent(word)}&tool=api&account_id=000006&prot=https%3A&hostname=www.yamli.com&path=%2F&build=5515&sxhr_id=4`;
+// We use the dummy URL to avoid making a request to the Yamli API when the input is already in Arabic.
+// This is to avoid the issue around inconsistent hooks order in re-renders if we skip the useFetch hook conditionally.
 const DUMMY_URL = "http://localhost:3000";
 
 // Types
@@ -23,8 +25,8 @@ function createErrorResult(message: string, englishText: string): Transliteratio
 }
 
 function parseYamliResponseSync(data: string, englishText: string): TransliterationResult {
-  const match = data.match(/Yamli\.I\.SXHRData\.dataCallback\((\{.*\})\)/);
-  if (!match) return createErrorResult("Failed to parse API response ❌", englishText);
+  const match = data.match(/Yamli\.I\.SXHRData\.dataCallback\((\{.*?\})\)/);
+  if (!match) return createErrorResult("Failed to parse API response", englishText);
 
   try {
     const jsonData = JSON.parse(match[1]);
@@ -38,7 +40,7 @@ function parseYamliResponseSync(data: string, englishText: string): Transliterat
 
     return { state: "success", originalText: englishText, options };
   } catch (error) {
-    return createErrorResult("Failed to parse API response ❌", englishText);
+    return createErrorResult("Failed to parse API response", englishText);
   }
 }
 
@@ -58,7 +60,7 @@ export function useFetchTransliteration(englishText: string): TransliterationRes
   const arabicOrEmpty = createEmptyResult(englishText);
   if (arabicOrEmpty) return arabicOrEmpty;
   if (isLoading) return { state: "loading", originalText: englishText };
-  if (!data) return createErrorResult("Error fetching data ��", englishText);
+  if (!data) return createErrorResult("Error fetching data!", englishText);
 
   return parseYamliResponseSync(data, englishText);
 }
@@ -72,6 +74,6 @@ export async function fetchTransliteration(englishText: string): Promise<Transli
     const data = await response.text();
     return parseYamliResponseSync(data, englishText);
   } catch (error) {
-    return createErrorResult("Error fetching data 😞", englishText);
+    return createErrorResult("Error fetching data!", englishText);
   }
 }

@@ -1,4 +1,5 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { useFetchTransliteration, TransliterationResult, fetchTransliteration } from "./fetchdata";
 
@@ -22,6 +23,7 @@ const transliterateWord = async (word: string): Promise<TransliterationResult> =
 export default function Command() {
   const [text, setText] = useState("");
   const [currentWord, setCurrentWord] = useState("");
+  const { display_number_shortcuts } = getPreferenceValues();
 
   type PendingWord = {
     word: string;
@@ -90,9 +92,7 @@ export default function Command() {
     const words = text.split(" ");
     words.pop(); // Remove the last word (current input)
 
-    // Add zero-width non-joiner after Arabic text and between words
-    const processedWords = words.map((w) => w);
-    const newText = [...processedWords, option, ""].join(" ");
+    const newText = [...words, option, ""].join(" ");
 
     setText(newText);
     setCurrentWord(""); // Reset current word
@@ -112,7 +112,7 @@ export default function Command() {
         return replaceWordAtPosition(prevText, currentPosition, pendingData.word, transliteration);
       });
     } catch (error) {
-      console.error("Translation error:", error);
+      showFailureToast("Translation error!", { message: String(error) });
     } finally {
       setPendingWords((prev) => prev.filter((p) => p.position !== pendingData.position));
     }
@@ -183,15 +183,19 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Full Transliteration"
-              content={text.trim()}
-              shortcut={{ modifiers: [], key: "return" }}
-            />
+            <Action.CopyToClipboard title="Copy Full Transliteration" content={text.trim()} />
             <Action.Paste
               title="Paste Full Transliteration"
               content={text.trim()}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
+              onPaste={(content) => {
+                // First handle the current selection if there's a current word
+                if (currentWord && transliterationOptions.length > 0) {
+                  handleOptionSelect(transliterationOptions[0]);
+                }
+                // Then handle the pasted content
+                handleOptionSelect(String(content));
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -202,7 +206,7 @@ export default function Command() {
         <List.Item
           id="english-input"
           title={currentWord}
-          subtitle="Keep Input"
+          subtitle={display_number_shortcuts ? `⌘ 1` : ""}
           actions={
             <TransliterationActions
               selectTitle="Use Input Text"
@@ -218,6 +222,7 @@ export default function Command() {
           key={index}
           id={index === 0 ? "first-arabic-option" : `option-${index}`}
           title={option}
+          subtitle={display_number_shortcuts ? `⌘ ${index + 2}` : ""}
           actions={
             <TransliterationActions
               selectTitle="Use This Transliteration"
