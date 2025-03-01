@@ -1,4 +1,5 @@
 import { $fetch } from "ofetch";
+import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
   /**
@@ -17,10 +18,14 @@ type Input = {
  * @returns The component's theme configuration as a string
  */
 export default async function tool(input: Input) {
-  return await $fetch(`https://raw.githubusercontent.com/nuxt/ui/refs/heads/v3/src/theme/${input.componentName}.ts`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "text/plain",
+  const { version } = getPreferenceValues<Preferences>();
+  return await $fetch(
+    `https://raw.githubusercontent.com/nuxt/ui/refs/heads/${version}/src/theme/${input.componentName}.ts`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "text/plain",
+      },
     },
-  });
+  );
 }

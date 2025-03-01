@@ -1,4 +1,5 @@
 import { $fetch } from "ofetch";
+import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
   /**
@@ -18,10 +19,11 @@ type Input = {
  */
 export default async function tool(input: Input) {
   // Convert first letter to uppercase for the API call
+  const { version } = getPreferenceValues<Preferences>();
   const componentName = input.componentName.charAt(0).toUpperCase() + input.componentName.slice(1);
 
   return await $fetch(
-    `https://raw.githubusercontent.com/nuxt/ui/refs/heads/v3/src/runtime/components/${componentName}.vue`,
+    `https://raw.githubusercontent.com/nuxt/ui/refs/heads/${version}/src/runtime/components/${componentName}.vue`,
     {
       method: "GET",
       headers: {

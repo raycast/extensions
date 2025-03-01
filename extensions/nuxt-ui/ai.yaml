@@ -62,17 +62,16 @@ evals:
     mocks:
       get-available-components:
         components:
-          - Accordion
-          - Alert
-          - Avatar
+          - accordion
+          - alert
+          - avatar
         proseComponents:
           - ProseH1
           - ProseH2
           - ProseH3
         proComponents:
-          - ProseAccordion
-          - ProseAlert
-          - ProseAvatar
+          - pageAccordion
+          - pageCard
     expected:
       - callsTool: get-available-components
   - input: Create a FAQ component
