@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add repository blacklist for my-issues] - {PR_MERGE_DATE}
+
+- Add preference to my-issues command to remove issues from specific repositories.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Fix base clone path] - 2025-01-19
