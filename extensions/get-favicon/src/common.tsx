@@ -3,6 +3,6 @@ export interface Arguments {
 }
 
 export interface Preferences {
-  default_icon_size: number;
+  defaultIconSize: number;
   downloadDirectory: string;
 }

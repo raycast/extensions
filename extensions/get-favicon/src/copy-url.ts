@@ -26,7 +26,7 @@ export default async function copyFavicon(props: { arguments: Arguments }) {
   }
 
   try {
-    const favicon = await getFavicon(url, { size: preferences.default_icon_size });
+    const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
 
     if (!favicon || !(favicon as any).source) {
       throw new Error("Favicon not found");

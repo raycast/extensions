@@ -68,7 +68,7 @@
       "description": "Directory to download favicon"
     },
     {
-      "name": "default_icon_size",
+      "name": "defaultIconSize",
       "title": "Default Icon Size",
       "type": "dropdown",
       "description": "Default size of favicon",

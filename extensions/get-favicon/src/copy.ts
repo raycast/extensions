@@ -27,7 +27,7 @@ export default async function copyFavicon(props: { arguments: Arguments }) {
   }
 
   const destination = tempfile(".png");
-  const favicon = await getFavicon(url, { size: preferences.default_icon_size });
+  const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
 
   await download.image({
     url: (favicon as any).source,

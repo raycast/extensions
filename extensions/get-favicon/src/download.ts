@@ -28,7 +28,7 @@ export default async function downloadFavicon(props: { arguments: Arguments }) {
   }
 
   const destination = path.join(preferences.downloadDirectory, `${nanoid()}.png`);
-  const favicon = await getFavicon(url);
+  const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
 
   await download.image({
     url: (favicon as any).source,
