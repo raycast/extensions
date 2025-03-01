@@ -8,7 +8,6 @@ import { Arguments, Preferences } from "./common";
 
 export default async function downloadFavicon(props: { arguments: Arguments }) {
   const preferences = await getPreferenceValues<Preferences>();
-  console.log(preferences.default_icon_size);
 
   let url = props.arguments.url;
   if (!url.includes("https://")) {
