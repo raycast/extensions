@@ -99,7 +99,7 @@ async function parseFetchResponseMatches(response: Response) {
       teamBscore: result.teamBscore,
     });
     return acc;
-  }, {} as Shedule);
+  }, {} as Schedule);
 
   return Object.entries(groupedByDay).map(([day, items]) => ({
     day,
@@ -131,6 +131,6 @@ interface Match {
   };
 }
 
-interface Shedule {
+interface Schedule {
   [key: string]: Match[];
 }
