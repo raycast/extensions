@@ -65,7 +65,16 @@ export async function saveToReadwise(url: string): Promise<SaveResult> {
       }
     }
 
-    addSavedUrl(url);
+    // Article was successfully saved to Readwise, now update local cache
+    const cacheUpdateSuccessful = addUrlToLocalCache(url);
+    if (!cacheUpdateSuccessful) {
+      return {
+        success: true,
+        message: "Saved to Readwise Reader",
+        error: "Note: Failed to update local cache. The article was saved but may not appear in your saved list."
+      };
+    }
+
     return {
       success: true,
       message: "Saved to Readwise Reader"
@@ -81,35 +90,57 @@ export async function saveToReadwise(url: string): Promise<SaveResult> {
 }
 
 /**
- * Checks if a URL has been saved to Readwise Reader
+ * Checks if a URL has been saved to Readwise Reader based on local cache
  *
  * @param url - The URL to check
- * @returns true if the URL has been saved, false otherwise
+ * @returns true if the URL has been saved according to local cache, false otherwise
  */
 export function isUrlSaved(url: string): boolean {
-  const savedUrls = getSavedUrls();
+  const savedUrls = getUrlsFromLocalCache();
   return savedUrls.includes(url);
 }
 
 /**
- * Gets the list of saved URLs from the cache
+ * Gets the list of saved URLs from the local cache
  *
- * @returns An array of saved URLs
+ * @returns An array of saved URLs from local cache
  */
 export function getSavedUrls(): string[] {
-  const cached = cache.get(CACHE_KEY);
-  return cached ? JSON.parse(cached) : [];
+  return getUrlsFromLocalCache();
 }
 
 /**
- * Adds a URL to the list of saved URLs in the cache
+ * Gets the list of saved URLs from the local cache
  *
- * @param url - The URL to add
+ * @returns An array of saved URLs from local cache
  */
-function addSavedUrl(url: string) {
-  const urls = getSavedUrls();
-  if (!urls.includes(url)) {
-    urls.push(url);
-    cache.set(CACHE_KEY, JSON.stringify(urls));
+function getUrlsFromLocalCache(): string[] {
+  try {
+    const cached = cache.get(CACHE_KEY);
+    return cached ? JSON.parse(cached) : [];
+  } catch (error) {
+    console.error("Error retrieving saved URLs from local cache:", error);
+    return [];
+  }
+}
+
+/**
+ * Adds a URL to the list of saved URLs in the local cache
+ *
+ * @param url - The URL to add to local cache
+ * @returns true if the URL was successfully added to local cache or already exists, false if there was an error
+ */
+function addUrlToLocalCache(url: string): boolean {
+  try {
+    const urls = getUrlsFromLocalCache();
+    if (!urls.includes(url)) {
+      urls.push(url);
+      const serializedUrls = JSON.stringify(urls);
+      cache.set(CACHE_KEY, serializedUrls);
+    }
+    return true;
+  } catch (error) {
+    console.error("Error adding URL to local cache:", error);
+    return false;
   }
 }
