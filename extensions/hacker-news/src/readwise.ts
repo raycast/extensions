@@ -5,6 +5,8 @@ export { hasReadwiseToken } from "./preferences";
 
 const cache = new Cache();
 const CACHE_KEY = "readwise-saved-urls";
+// Maximum number of URLs to store in the cache
+const MAX_CACHE_SIZE = 100;
 
 export type SaveResult = {
   success: boolean;
@@ -126,6 +128,7 @@ function getUrlsFromLocalCache(): string[] {
 
 /**
  * Adds a URL to the list of saved URLs in the local cache
+ * Maintains a maximum cache size by removing oldest entries when needed (FIFO)
  *
  * @param url - The URL to add to local cache
  * @returns true if the URL was successfully added to local cache or already exists, false if there was an error
@@ -133,8 +136,14 @@ function getUrlsFromLocalCache(): string[] {
 function addUrlToLocalCache(url: string): boolean {
   try {
     const urls = getUrlsFromLocalCache();
+    // Only add if not already in the cache
     if (!urls.includes(url)) {
+      // Append new URL
       urls.push(url);
+      // If we exceed the maximum cache size, remove the oldest entries (from the beginning)
+      if (urls.length > MAX_CACHE_SIZE) {
+        urls.splice(0, urls.length - MAX_CACHE_SIZE);
+      }
       const serializedUrls = JSON.stringify(urls);
       cache.set(CACHE_KEY, serializedUrls);
     }

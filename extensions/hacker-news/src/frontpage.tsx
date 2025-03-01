@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
-import { saveToReadwise, hasReadwiseToken, isUrlSaved, getSavedUrls, SaveResult } from "./readwise";
+import { saveToReadwise, hasReadwiseToken, getSavedUrls } from "./readwise";
 
 export default function Command() {
   const [topic, setTopic] = useState<Topic | null>(null);
