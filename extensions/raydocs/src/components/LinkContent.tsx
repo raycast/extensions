@@ -8,16 +8,18 @@ type Props = {
 };
 
 export default function LinkContent({ link }: Props) {
-  const { data, isLoading } = usePromise(() => getLinkMarkdown(link.url.markdown));
+  const { data, isLoading, error } = usePromise(() => getLinkMarkdown(link.url.markdown));
+
+  const markdown = error ? `# Error\n\nFailed to load content: ${error.message}` : data || "**Loading...**";
 
   return (
     <Detail
       isLoading={isLoading}
       navigationTitle={link.title}
-      markdown={data || "**Loading...**"}
+      markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={link.url.path} />
+          <Action.OpenInBrowser title={error ? "Try Open in Browser" : "Open in Browser"} url={link.url.path} />
           <Action.CopyToClipboard title="Copy URL to Clipboard" content={link.url.path} />
         </ActionPanel>
       }

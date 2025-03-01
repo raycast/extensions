@@ -7,11 +7,12 @@ import { docsUrl, linksUrl, markdownUrl } from "@/utils/constants";
 
 const converter = new showdown.Converter();
 
-export async function getLinks() {
+export async function getLinks(): Promise<Link[]> {
   try {
-    const res = await fetch(linksUrl).then((res) => res.text());
+    const res = await fetch(linksUrl);
+    const resText = await res.text();
 
-    const html = converter.makeHtml(res);
+    const html = converter.makeHtml(resText);
 
     const $ = load(html);
 
@@ -50,11 +51,18 @@ export async function getLinks() {
     return menuItems;
   } catch (err) {
     console.error(err);
+    return [];
   }
 }
 
 function parseUrl(url: string | undefined): Link["url"] {
-  if (!url || url === "README.md") {
+  if (!url) {
+    return {
+      path: docsUrl,
+      markdown: markdownUrl,
+      external: false,
+    };
+  } else if (url === "README.md") {
     return {
       path: docsUrl,
       markdown: `${markdownUrl}/${url}`,

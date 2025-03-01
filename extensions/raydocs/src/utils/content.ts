@@ -1,34 +1,40 @@
 import { docsUrl, markdownUrl } from "@/utils/constants";
 import { resolveRelativePath } from "@/utils/url";
-import console from "console";
 import fetch from "node-fetch";
 
 export async function getLinkMarkdown(url: string) {
   try {
-    let res = await fetch(url).then((res) => res.text());
-    res = replaceRelativeImageLinks(res, url);
-    res = replaceRelativeMarkdownLinks(res, url);
-    res = replaceMarkedText(res);
-    res = replaceHints(res);
-    res = replaceTabs(res);
-    res = replaceCodeTags(res);
-    res = frontmatterToMarkdownTable(res);
-    res = replaceTableFromJSDocComponent(res);
-    return res;
-  } catch (err) {
+    const res = await fetch(url);
+    let resText = await res.text();
+
+    resText = replaceRelativeImageLinks(resText, url);
+    resText = replaceRelativeMarkdownLinks(resText, url);
+    resText = replaceDetailsSummary(resText);
+    resText = replaceLinks(resText);
+    resText = replaceMarkedText(resText);
+    resText = replaceHints(resText);
+    resText = replaceTabs(resText);
+    resText = replaceCodeTags(resText);
+    resText = frontmatterToMarkdownTable(resText);
+    resText = replaceTableFromJSDocComponent(resText);
+    return resText;
+  } catch (err: unknown) {
     console.error(err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return `Error fetching content: ${errorMessage}`;
   }
 }
 
 function replaceRelativeImageLinks(content: string, currentDocUrl: string): string {
-  return content.replace(/!\[(.*?)\]\((\.\.\/)*([^)]+)\)/g, (match, altText, dots, path) => {
+  return content.replace(/!\[(.*?)\]\(((\.\.\/)*)([^)]+)\)/g, (match, altText, dots, _, path) => {
     if (path.startsWith("http")) return match;
-    return `![${altText}](${resolveRelativePath(path, currentDocUrl, dots)})`;
+    const fullPath = dots ? dots + path : path;
+    return `![${altText}](${resolveRelativePath(fullPath, currentDocUrl)})`;
   });
 }
 
 function replaceRelativeMarkdownLinks(content: string, currentDocUrl: string): string {
-  return content.replace(/\[(.*?)\]\((\.\.\/)*([^)]+)\)/g, (match, altText, dots, path) => {
+  return content.replace(/\[(.*?)\]\(((\.\.\/)*)([^)]+)\)/g, (match, altText, dots, _, path) => {
     // Skip image markdown links (which start with !)
     if (match.startsWith("!")) {
       return match;
@@ -36,11 +42,24 @@ function replaceRelativeMarkdownLinks(content: string, currentDocUrl: string): s
 
     if (path.startsWith("http")) return match;
 
-    let resolvedUrl = resolveRelativePath(path, currentDocUrl, dots);
+    const fullPath = dots ? dots + path : path;
+    let resolvedUrl = resolveRelativePath(fullPath, currentDocUrl);
     resolvedUrl = resolvedUrl.replace(markdownUrl, docsUrl).replace(".md", "");
 
     return `[${altText}](${resolvedUrl})`;
   });
+}
+
+function replaceDetailsSummary(content: string): string {
+  let result = content.replaceAll(/<details>\s*<summary>(.*?)<\/summary>/g, "\n---\n**$1**\n");
+  result = result.replaceAll(/<\/details>/g, "");
+  return result;
+}
+
+function replaceLinks(content: string): string {
+  let result = content.replaceAll(/<a href="(.*?)">(.*?)<\/a>/g, "[$2]($1)");
+  result = result.replaceAll(/<a href="(.*?)" target="_blank">(.*?)<\/a>/g, "[$2]($1)");
+  return result;
 }
 
 function replaceMarkedText(content: string): string {

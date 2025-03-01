@@ -1,36 +1,38 @@
-export function resolveRelativePath(path: string, currentDocUrl: string, dots?: string): string {
+export function resolveRelativePath(path: string, currentDocUrl: string): string {
   // Handle anchor links
-  if (path.startsWith("#")) {
+  if (path?.startsWith("#")) {
     return `${currentDocUrl}${path}`;
   }
 
   // Don't modify absolute URLs
-  if (path.startsWith("http")) {
+  if (path?.startsWith("http")) {
     return path;
   }
 
   // Build the proper URL based on the current document path
-  const baseUrl = currentDocUrl.substring(0, currentDocUrl.lastIndexOf("/"));
+  const lastSlashIndex = currentDocUrl.lastIndexOf("/");
+  const baseUrl = lastSlashIndex !== -1 ? currentDocUrl.substring(0, lastSlashIndex) : currentDocUrl;
 
+  // Count the number of '../' prefixes and process them
   let depth = 0;
-
-  // Count the number of '../' to determine how far up to go
-  if (dots) {
-    depth = (dots.match(/\.\.\//g) || []).length;
+  let normalizedPath = path;
+  while (normalizedPath.startsWith("../")) {
+    depth++;
+    normalizedPath = normalizedPath.slice(3); // Remove one "../"
   }
 
   // Go up the directory tree based on depth
   let resolvedBaseUrl = baseUrl;
   for (let i = 0; i < depth; i++) {
-    resolvedBaseUrl = resolvedBaseUrl.substring(0, resolvedBaseUrl.lastIndexOf("/"));
+    const lastSlashIndex = resolvedBaseUrl.lastIndexOf("/");
+    if (lastSlashIndex === -1) {
+      break; // Can't go up any further
+    }
+    resolvedBaseUrl = resolvedBaseUrl.substring(0, lastSlashIndex);
   }
 
-  // Normalize path by removing leading '/' or './'
-  let normalizedPath = path;
-
-  if (normalizedPath.startsWith("/")) {
-    normalizedPath = normalizedPath.slice(1);
-  } else if (normalizedPath.startsWith("./")) {
+  // Handle './' prefix
+  if (normalizedPath.startsWith("./")) {
     normalizedPath = normalizedPath.slice(2);
   }
 
