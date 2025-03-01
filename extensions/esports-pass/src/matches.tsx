@@ -37,32 +37,32 @@ export default function Command() {
           subtitle={match.day}
           key={match.day}
         >
-          {match.items?.map((item) => <MatcheItem key={item.slug} matche={item} />)}
+          {match.items?.map((item) => <MatchItem key={item.slug} match={item} />)}
         </List.Section>
       ))}
     </List>
   );
 }
 
-function MatcheItem({ matche }: { matche: Matche }) {
+function MatchItem({ match }: { match: Match }) {
   return (
     <List.Item
       title={
-        matche.status === "running"
+        match.status === "running"
           ? "Live now"
-          : new Date(matche.scheduled_at).toLocaleTimeString([], {
+          : new Date(match.scheduled_at).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,
             })
       }
-      subtitle={matche.name}
-      accessories={[{ text: matche.tournament }, { icon: matche.league.image_url }]}
-      icon={matche.league.image_url}
+      subtitle={match.name}
+      accessories={[{ text: match.tournament }, { icon: match.league.image_url }]}
+      icon={match.league.image_url}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={matche.slug} />
+            <Action.OpenInBrowser title="Open in Browser" url={match.slug} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -73,7 +73,7 @@ function MatcheItem({ matche }: { matche: Matche }) {
 async function parseFetchResponseMatches(response: Response) {
   const responseJson = await response.json();
 
-  const payload = responseJson as Matche[] | { error: string };
+  const payload = responseJson as Match[] | { error: string };
 
   if ("error" in payload) {
     throw new Error(payload.error);
@@ -107,7 +107,7 @@ async function parseFetchResponseMatches(response: Response) {
   }));
 }
 
-interface Matche {
+interface Match {
   name: string;
   number_of_games: number;
   scheduled_at: string;
@@ -132,5 +132,5 @@ interface Matche {
 }
 
 interface Shedule {
-  [key: string]: Matche[];
+  [key: string]: Match[];
 }
