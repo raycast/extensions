@@ -32,7 +32,7 @@ Transactions are executed securely using your private key, which is stored local
 
 ### Multi-Chain Support
 
-Midas Currently supports Mode and Mantle with more chains coming soon.
+Midas currently supports Mode and Mantle with more chains coming soon.
 
 # How to Use
 
