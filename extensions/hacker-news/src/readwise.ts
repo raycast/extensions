@@ -25,6 +25,14 @@ export type SaveResult = {
 export async function saveToReadwise(url: string): Promise<SaveResult> {
   try {
     const token = getReadwiseToken();
+    if (!token) {
+      return {
+        success: false,
+        message: "Readwise API token not configured",
+        error: "Please configure your Readwise API token in preferences"
+      };
+    }
+
     const response = await fetch("https://readwise.io/api/v3/save/", {
       method: "POST",
       headers: {

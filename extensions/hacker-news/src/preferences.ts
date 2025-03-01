@@ -17,13 +17,13 @@ export function hasReadwiseToken(): boolean {
 /**
  * Gets the Readwise API token from preferences.
  *
- * @returns The configured Readwise API token
- * @throws Error if the token is not configured
+ * @returns The configured Readwise API token, or undefined if not configured
  */
-export function getReadwiseToken(): string {
-  const preferences = getPreferenceValues<Preferences>();
-  if (!preferences.readwiseToken) {
-    throw new Error("Readwise API token not configured");
+export function getReadwiseToken(): string | undefined {
+  try {
+    const preferences = getPreferenceValues<Preferences>();
+    return preferences.readwiseToken || undefined;
+  } catch {
+    return undefined;
   }
-  return preferences.readwiseToken;
 }
