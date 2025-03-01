@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "intermittent-fasting",
+  "title": "Intermittent Fasting",
+  "description": "Tracks intermittent fasting",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "intermittent-fasting",
+      "title": "Track Fasting",
+      "description": "List intermittent fasting",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Fasting Status",
+      "description": "Show current fasting status in menubar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "menubarTitle",
+          "type": "textfield",
+          "required": false,
+          "title": "Menubar Title Format",
+          "description": "Customize the menubar title. Available variables: {timeLeft}, {percentage}, {time}",
+          "default": "{percentage}"
+        },
+        {
+          "name": "idleDisplay",
+          "type": "dropdown",
+          "required": false,
+          "title": "Idle Display",
+          "description": "Choose how the menubar appears when no timer is running",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Icon Only",
+              "value": "icon"
+            },
+            {
+              "title": "Icon with Text",
+              "value": "full"
+            },
+            {
+              "title": "Show Eating Window",
+              "value": "eating"
+            }
+          ],
+          "default": "eating"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fastingHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Fasting Hours",
+      "description": "Number of hours to fast (e.g., 16)",
+      "placeholder": "16",
+      "default": "16"
+    },
+    {
+      "name": "eatingHours",
+      "type": "textfield",
+      "required": false,
+      "title": "Eating Window Hours",
+      "description": "Number of hours for eating window (e.g., 8)",
+      "placeholder": "8",
+      "default": "8"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.18.0",
+    "uniqid": "^5.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/uniqid": "^5.3.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
