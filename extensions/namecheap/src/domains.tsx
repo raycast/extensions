@@ -21,11 +21,15 @@ export default function ListDomains() {
     </List>
 }
 
-function ListDomainDNSServers({domainName}: {domainName: string}) {
+function extractLDs(domainName: string) {
     const parts = domainName.split(".");
     const sld = parts.slice(0, -1).join(".");
     const tld = parts[parts.length - 1];
+    return { sld, tld };
+}
 
+function ListDomainDNSServers({domainName}: {domainName: string}) {
+    const { sld, tld } = extractLDs(domainName);
     const { isLoading, data } = useListDomainDNSServers(sld, tld);
 
     const markdown = `## ${domainName} \n\n ${!data ? "" : data.Nameserver.join(`\n\n`)}`
@@ -33,10 +37,7 @@ function ListDomainDNSServers({domainName}: {domainName: string}) {
 }
 
 function ListDomainDNSHosts({domainName}: {domainName: string}) {
-    const parts = domainName.split(".");
-    const sld = parts.slice(0, -1).join(".");
-    const tld = parts[parts.length - 1];
-
+    const { sld, tld } = extractLDs(domainName);
     const { isLoading, data: hosts } = useListDomainDNSHosts(sld, tld);
 
     return <List isLoading={isLoading} isShowingDetail>
