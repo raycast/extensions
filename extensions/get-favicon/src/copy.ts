@@ -3,9 +3,9 @@ import { getFavicon } from "@raycast/utils";
 import download from "image-downloader";
 import isUrl from "is-url";
 import tempfile from "tempfile";
-import { Arguments, Preferences } from "./common";
+import { Arguments } from "./common";
 export default async function copyFavicon(props: { arguments: Arguments }) {
-  const preferences = await getPreferenceValues<Preferences>();
+  const preferences = await getPreferenceValues();
 
   let url = props.arguments.url;
   if (!url.includes("https://")) {

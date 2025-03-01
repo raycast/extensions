@@ -1,10 +1,10 @@
 import { Clipboard, closeMainWindow, getPreferenceValues, PopToRootType, showHUD, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import isUrl from "is-url";
-import { Arguments, Preferences } from "./common";
+import { Arguments } from "./common";
 
 export default async function copyFavicon(props: { arguments: Arguments }) {
-  const preferences = await getPreferenceValues<Preferences>();
+  const preferences = await getPreferenceValues();
 
   let url = props.arguments.url;
   if (!url.includes("https://")) {

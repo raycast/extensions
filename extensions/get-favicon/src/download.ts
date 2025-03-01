@@ -4,10 +4,10 @@ import download from "image-downloader";
 import isUrl from "is-url";
 import { nanoid } from "nanoid";
 import path from "path";
-import { Arguments, Preferences } from "./common";
+import { Arguments } from "./common";
 
 export default async function downloadFavicon(props: { arguments: Arguments }) {
-  const preferences = await getPreferenceValues<Preferences>();
+  const preferences = await getPreferenceValues();
 
   let url = props.arguments.url;
   if (!url.includes("https://")) {
