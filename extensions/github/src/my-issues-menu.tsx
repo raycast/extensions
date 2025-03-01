@@ -25,8 +25,15 @@ function MyIssuesMenu() {
   const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", ISSUE_DEFAULT_SORT_QUERY, {
     cacheNamespace: "github-my-issue-menu",
   });
-  const { showtext, showCreated, showAssigned, showMentioned, showRecentlyClosed, useUnreadIndicator } =
-    getPreferenceValues<Preferences.MyIssuesMenu>();
+  const {
+    showtext,
+    showCreated,
+    showAssigned,
+    showMentioned,
+    showRecentlyClosed,
+    useUnreadIndicator,
+    excludedRepositories,
+  } = getPreferenceValues<Preferences.MyIssuesMenu>();
   const { data: sections, isLoading } = useMyIssues({
     repository: null,
     sortQuery,
@@ -34,6 +41,7 @@ function MyIssuesMenu() {
     showAssigned,
     showMentioned,
     showRecentlyClosed,
+    excludedRepositories,
   });
 
   const issuesCount = sections?.reduce((acc, section) => acc + (section.issues ?? []).length, 0);

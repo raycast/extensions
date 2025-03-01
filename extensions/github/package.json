@@ -33,7 +33,8 @@
     "vlasischar",
     "javalangruntimeexception",
     "shyaka",
-    "sushichan044"
+    "sushichan044",
+    "nicolas-marien"
   ],
   "categories": [
     "Developer Tools",
@@ -144,6 +145,14 @@
           "required": false,
           "label": "Recently Closed",
           "default": false
+        },
+        {
+          "name": "excludedRepositories",
+          "title": "Excluded repositories",
+          "description": "A comma-separated list of repositories to exlude when listing your issues",
+          "type": "textfield",
+          "required": false,
+          "label": "Excluded repositories"
         }
       ]
     },
@@ -338,6 +347,14 @@
           "required": false,
           "label": "Recently Closed",
           "default": false
+        },
+        {
+          "name": "excludedRepositories",
+          "title": "Excluded repositories",
+          "description": "A comma-separated list of repositories to exlude when listing your issues",
+          "type": "textfield",
+          "required": false,
+          "label": "Excluded repositories"
         }
       ]
     },
