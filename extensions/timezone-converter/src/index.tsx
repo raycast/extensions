@@ -21,7 +21,7 @@ interface Preferences {
 }
 
 const preferences = getPreferenceValues<Preferences>();
-const ALL_TIMEZONES = (Intl as any).supportedValuesOf("timeZone");
+const ALL_TIMEZONES = ["UTC", ...(Intl as any).supportedValuesOf("timeZone")];
 
 function formatZoneName(zoneName: string) {
   return zoneName?.replaceAll("/", " - ").replaceAll("_", " ");
