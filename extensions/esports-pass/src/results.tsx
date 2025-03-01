@@ -43,24 +43,24 @@ export default function Command() {
           subtitle={match.day}
           key={match.day}
         >
-          {match.items?.map((item) => <ResultItem key={item.slug} matche={item} />)}
+          {match.items?.map((item) => <ResultItem key={item.slug} match={item} />)}
         </List.Section>
       ))}
     </List>
   );
 }
 
-function ResultItem({ matche }: { matche: Matche }) {
+function ResultItem({ match }: { match: Match }) {
   return (
     <List.Item
-      title={matche.name}
-      subtitle={`(${matche.teamAscore}-${matche.teamBscore})`}
-      accessories={[{ text: matche.tournament }, { icon: matche.league.image_url }]}
-      icon={matche.videogame}
+      title={match.name}
+      subtitle={`(${match.teamAscore}-${match.teamBscore})`}
+      accessories={[{ text: match.tournament }, { icon: match.league.image_url }]}
+      icon={match.videogame}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={matche.slug} />
+            <Action.OpenInBrowser title="Open in Browser" url={match.slug} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -71,7 +71,7 @@ function ResultItem({ matche }: { matche: Matche }) {
 async function parseFetchResponseMatches(response: Response) {
   const responseJson = await response.json();
 
-  const payload = responseJson as Matche[] | { error: string };
+  const payload = responseJson as Match[] | { error: string };
 
   if ("error" in payload) {
     throw new Error(payload.error);
@@ -99,7 +99,7 @@ async function parseFetchResponseMatches(response: Response) {
       videogame: videogames.find((v) => v.slug === result.videoGame.slug)?.icon,
     });
     return acc;
-  }, {} as Shedule);
+  }, {} as Schedule);
 
   return Object.entries(groupedByDay).map(([day, items]) => ({
     day,
@@ -107,7 +107,7 @@ async function parseFetchResponseMatches(response: Response) {
   }));
 }
 
-interface Matche {
+interface Match {
   name: string;
   number_of_games: number;
   scheduled_at: string;
@@ -136,6 +136,6 @@ interface Matche {
   videogame?: string;
 }
 
-interface Shedule {
+interface Schedule {
   [key: string]: Matche[];
 }
