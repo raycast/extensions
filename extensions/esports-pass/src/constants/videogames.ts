@@ -3,4 +3,3 @@ export const videogames = [
     { name: "VALORANT", slug: "valorant", icon: "./valorant.png" },
     { name: "Counter-Strike", slug: "cs-go", icon: "./cs.png" },
 ];
-  
