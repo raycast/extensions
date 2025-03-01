@@ -1,10 +1,17 @@
-import { Cache, showToast, Toast } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import fetch from "node-fetch";
 import { getReadwiseToken } from "./preferences";
 export { hasReadwiseToken } from "./preferences";
 
 const cache = new Cache();
 const CACHE_KEY = "readwise-saved-urls";
+
+export type SaveResult = {
+  success: boolean;
+  message: string;
+  error?: string;
+  isRateLimited?: boolean;
+};
 
 /**
  * Saves an article to Readwise Reader.
@@ -13,8 +20,9 @@ const CACHE_KEY = "readwise-saved-urls";
  * Requires a Readwise API token to be configured in preferences.
  *
  * @param url - The URL of the article to save
+ * @returns A SaveResult object with the result of the operation
  */
-export async function saveToReadwise(url: string) {
+export async function saveToReadwise(url: string): Promise<SaveResult> {
   try {
     const token = getReadwiseToken();
     const response = await fetch("https://readwise.io/api/v3/save/", {
@@ -34,32 +42,33 @@ export async function saveToReadwise(url: string) {
     if (!response.ok) {
       if (response.status === 429) {
         console.error("Readwise rate limit exceeded");
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Rate limit exceeded",
-          message: "Please try again later",
-        });
+        return {
+          success: false,
+          message: "Rate limit exceeded",
+          isRateLimited: true
+        };
       } else {
         console.error("Error saving to Readwise, status:", response.status);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to save to Readwise Reader",
-        });
+        return {
+          success: false,
+          message: "Failed to save to Readwise Reader",
+          error: `HTTP error ${response.status}`
+        };
       }
-      return;
     }
+
     addSavedUrl(url);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Saved to Readwise Reader",
-    });
+    return {
+      success: true,
+      message: "Saved to Readwise Reader"
+    };
   } catch (error) {
     console.error("Error saving to Readwise:", error);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to save to Readwise Reader",
-      message: String(error),
-    });
+    return {
+      success: false,
+      message: "Failed to save to Readwise Reader",
+      error: String(error)
+    };
   }
 }
 

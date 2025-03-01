@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { startCase } from "lodash";
 import { getStories } from "./hackernews";
 import { Topic } from "./types";
@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
-import { saveToReadwise, hasReadwiseToken, isUrlSaved, getSavedUrls } from "./readwise";
+import { saveToReadwise, hasReadwiseToken, isUrlSaved, getSavedUrls, SaveResult } from "./readwise";
 
 export default function Command() {
   const [topic, setTopic] = useState<Topic | null>(null);
@@ -20,9 +20,17 @@ export default function Command() {
 
   // Function to handle saving to Readwise and updating UI
   const handleSaveToReadwise = async (url: string) => {
-    await saveToReadwise(url);
-    // Refresh from cache after saving
-    setSavedUrls(getSavedUrls());
+    const result = await saveToReadwise(url);
+    // Show toast notification based on the result
+    await showToast({
+      style: result.success ? Toast.Style.Success : Toast.Style.Failure,
+      title: result.message,
+      message: result.isRateLimited ? "Please try again later" : result.error
+    });
+    // Reload saved URLs
+    if (result.success) {
+      setSavedUrls(getSavedUrls());
+    }
   };
 
   return (
