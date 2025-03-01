@@ -101,7 +101,7 @@ async function parseFetchResponseMatches(response: Response) {
       teamAscore: result.teamAscore,
       teamBscore: result.teamBscore,
       videoGame: result.videoGame,
-      videogame: videogames.find((v) => v.slug === result.videoGame.slug)?.icon,
+      videogame: videogames.find((v) => v.slug === result.videoGame.slug)?.icon ?? "",
     });
     return acc;
   }, {} as Schedule);
