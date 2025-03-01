@@ -11,22 +11,21 @@
     {
       "name": "frigate",
       "title": "Frigate",
-      "description": "Show your frigate frames as well as link to videos streams.",
+      "description": "Show your frigate frames as well as link to video streams.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
+    "@raycast/api": "^1.93.0",
     "title-case": "^4.3.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.13.5",
     "@types/react": "18.2.27",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
-    "eslint": "^9.21.0",
+    "eslint": "^8.51.0",
     "prettier": "^3.5.2",
     "typescript": "^5.7.3"
   },

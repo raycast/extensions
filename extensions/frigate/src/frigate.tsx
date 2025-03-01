@@ -14,7 +14,11 @@ export default function Command() {
     (async () => {
       const storedVideos = await LocalStorage.getItem<string>("videos");
       if (storedVideos) {
-        setVideos(JSON.parse(storedVideos));
+        try {
+          setVideos(JSON.parse(storedVideos));
+        } catch (error) {
+          console.error("Failed to parse stored videos:", error);
+        }
       }
     })();
   }, []);
@@ -128,7 +132,6 @@ function AddVideoForm({ onAdd }: { onAdd: (video: Video) => void }) {
     >
       {error && <Form.Description text={error} />}
       <Form.TextField id="title" title="Title" placeholder="Enter camera name" />
-      <small>Name of the camera</small>
       <Form.TextField id="static" title="Static Image URL" placeholder="Enter snapshot URL" />
       <Form.Description text="Url from go2rtc for static image e.g. http://192.168.0.1:1984/api/frame.jpeg?src=NAME_OF_CAMERA" />
       <Form.TextField id="stream" title="Stream URL" placeholder="Enter stream URL" />
