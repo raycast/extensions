@@ -1,22 +1,15 @@
-import { Detail, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { open } from "@raycast/api";
-import { SearchEngine, useFindSearchEngine } from "./lib/search-engines";
+import { findSearchEngine, SearchEngine } from "./lib/search-engines";
 
 type Props = LaunchProps<{ arguments: { query: string }; fallbackText?: string }>;
 
-export default function Command(props: Props) {
-  const query = props.arguments.query ?? props.fallbackText ?? "";
+export default async function search(props: Props) {
+  const query = (props.arguments.query ?? props.fallbackText) as string;
   const trimmedQuery = query.trim();
   const match = trimmedQuery.match(/!(\S+)/i);
   const searchEngineKey = match?.[1]?.toLowerCase();
   const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
-
-  useFindSearchEngine({
-    searchEngineKey,
-    onSearchEngineFound: async (searchEngine) => {
-      await performSearch(searchEngine, cleanQuery);
-    },
-  });
 
   const performSearch = async (searchEngine: SearchEngine, cleanQuery: string) => {
     console.log("Performing search with search engine:", searchEngine, cleanQuery);
@@ -25,7 +18,6 @@ export default function Command(props: Props) {
 
       if (searchUrl) {
         await openUrl(searchUrl);
-        popToRoot({ clearSearchBar: true });
       } else {
         await showToast({
           style: Toast.Style.Failure,
@@ -54,9 +46,6 @@ export default function Command(props: Props) {
     }
   };
 
-  return (
-    <Detail
-      markdown={`Searching for: \`${cleanQuery}\` using ${searchEngineKey ? `!${searchEngineKey}` : "default search engine"}`}
-    />
-  );
+  const searchEngine = await findSearchEngine(searchEngineKey);
+  await performSearch(searchEngine, cleanQuery);
 }

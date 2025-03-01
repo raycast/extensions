@@ -20,7 +20,7 @@
       ],
       "subtitle": "Search the Web using DuckDuckGo-style bangs",
       "description": "Search the Web using any of the available search engines. Powered by DuckDuckGo's bangs.",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "query",

@@ -1,4 +1,4 @@
-import { useSQL } from "@raycast/utils";
+import { executeSQL, useSQL } from "@raycast/utils";
 import { DB_PATH, readPreferences } from "./config";
 
 export interface SearchEngine {
@@ -16,12 +16,12 @@ export const useListSearchEngines = (searchText: string) =>
   useSQL<SearchEngine>(
     DB_PATH,
     searchText.trim()
-      ? `SELECT * FROM search_engines 
-         WHERE t LIKE '%${searchText.trim()}%' OR s LIKE '%${searchText.trim()}%' 
-         ORDER BY r DESC, t ASC 
+      ? `SELECT * FROM search_engines
+         WHERE t LIKE '%${searchText.trim()}%' OR s LIKE '%${searchText.trim()}%'
+         ORDER BY r DESC, t ASC
          LIMIT 100`
-      : `SELECT * FROM search_engines 
-         ORDER BY r DESC, t ASC 
+      : `SELECT * FROM search_engines
+         ORDER BY r DESC, t ASC
          LIMIT 100`,
     {
       permissionPriming: "This is required to list search engines.",
@@ -31,24 +31,14 @@ export const useListSearchEngines = (searchText: string) =>
     },
   );
 
-export const useFindSearchEngine = ({
-  searchEngineKey,
-  onSearchEngineFound,
-}: {
-  searchEngineKey: string | undefined;
-  onSearchEngineFound: (searchEngine: SearchEngine) => void;
-}) =>
-  useSQL<SearchEngine>(
+export const findSearchEngine = async (searchEngineKey: string | undefined) => {
+  const value = await executeSQL<SearchEngine>(
     DB_PATH,
     `SELECT * FROM search_engines 
-     WHERE t = '${searchEngineKey}' OR t = '${readPreferences().defaultSearchEngine}' 
-     ORDER BY t = '${searchEngineKey}' DESC 
+     WHERE t = '${searchEngineKey ?? ""}' OR t = '${readPreferences().defaultSearchEngine}' 
+     ORDER BY t = '${searchEngineKey ?? ""}' DESC 
      LIMIT 1`,
-    {
-      permissionPriming: "This is required to find a search engine to use for searching.",
-      onData: (data) => {
-        console.log("Found search engine:", searchEngineKey, readPreferences().defaultSearchEngine);
-        onSearchEngineFound(data[0]);
-      },
-    },
   );
+
+  return value[0];
+};
