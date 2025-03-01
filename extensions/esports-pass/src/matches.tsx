@@ -7,7 +7,7 @@ export default function Command() {
 
   const { data, isLoading } = useFetch(
     "https://lobby.maisesports.com.br/featured/matches?" +
-      new URLSearchParams({ videogame: videogame == "" ? "" : videogame }),
+      new URLSearchParams({ videogame: videogame === "" ? "" : videogame }),
     {
       parseResponse: parseFetchResponseMatches,
     },
