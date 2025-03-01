@@ -79,7 +79,7 @@ export function isUrlSaved(url: string): boolean {
  *
  * @returns An array of saved URLs
  */
-function getSavedUrls(): string[] {
+export function getSavedUrls(): string[] {
   const cached = cache.get(CACHE_KEY);
   return cached ? JSON.parse(cached) : [];
 }

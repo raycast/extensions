@@ -2,15 +2,28 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { startCase } from "lodash";
 import { getStories } from "./hackernews";
 import { Topic } from "./types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
-import { saveToReadwise, hasReadwiseToken } from "./readwise";
+import { saveToReadwise, hasReadwiseToken, isUrlSaved, getSavedUrls } from "./readwise";
 
 export default function Command() {
   const [topic, setTopic] = useState<Topic | null>(null);
+  const [savedUrls, setSavedUrls] = useState<string[]>([]);
   const { data, isLoading } = usePromise(getStories, [topic], { execute: !!topic });
+
+  // Load saved URLs from cache when component mounts
+  useEffect(() => {
+    setSavedUrls(getSavedUrls());
+  }, []);
+
+  // Function to handle saving to Readwise and updating UI
+  const handleSaveToReadwise = async (url: string) => {
+    await saveToReadwise(url);
+    // Refresh from cache after saving
+    setSavedUrls(getSavedUrls());
+  };
 
   return (
     <List
@@ -28,7 +41,16 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {data?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} topic={topic} />)}
+      {data?.map((item, index) => (
+        <StoryListItem 
+          key={item.guid} 
+          item={item} 
+          index={index} 
+          topic={topic} 
+          savedUrls={savedUrls}
+          onSave={handleSaveToReadwise}
+        />
+      ))}
     </List>
   );
 }
@@ -46,19 +68,31 @@ function setTitle(title: string, topic: Topic) {
   return title;
 }
 
-function StoryListItem(props: { item: Parser.Item; index: number; topic: Topic | null }) {
+function StoryListItem(props: { 
+  item: Parser.Item; 
+  index: number; 
+  topic: Topic | null;
+  savedUrls: string[];
+  onSave: (url: string) => Promise<void>;
+}) {
+  // Check if this item is in the savedUrls array
+  const isSaved = props.item.link ? (props.savedUrls.includes(props.item.link) || isUrlSaved(props.item.link)) : false;
+  
   return (
     <List.Item
       icon={getIcon(props.index + 1)}
       title={setTitle(props.item.title || "No Title", props.topic || Topic.FrontPage)}
       subtitle={props.item.creator}
-      accessories={getAccessories(props.item)}
-      actions={<Actions item={props.item} />}
+      accessories={getAccessories(props.item, isSaved)}
+      actions={<Actions item={props.item} onSave={props.onSave} />}
     />
   );
 }
 
-function Actions(props: { item: Parser.Item }) {
+function Actions(props: { 
+  item: Parser.Item;
+  onSave: (url: string) => Promise<void>;
+}) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
@@ -77,7 +111,7 @@ function Actions(props: { item: Parser.Item }) {
           <Action
             icon={Icon.SaveDocument}
             title="Save to Readwise Reader"
-            onAction={() => saveToReadwise(props.item.link || "")}
+            onAction={() => props.onSave(props.item.link || "")}
           />
         )}
       </ActionPanel.Section>
