@@ -9,7 +9,7 @@ export default function Command() {
 
   const { data, isLoading } = useFetch(
     "https://lobby.maisesports.com.br/featured/series?" +
-      new URLSearchParams({ videogame: videogame == "" ? "" : videogame }),
+      new URLSearchParams({ videogame: videogame === "" ? "" : videogame }),
     {
       parseResponse: parseFetchResponseTournaments,
     },
