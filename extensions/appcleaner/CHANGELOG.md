@@ -1,10 +1,10 @@
 # App Cleaner Changelog
 
-## [New uninstallers] - 2025-03-02
+## [New uninstallers] - {PR_MERGE_DATE}
 - Add support for TrashMe 3
 
-## [Bugfixing] - 2025-02-16
+## [Bugfixing] - {PR_MERGE_DATE}
 - Fix #17110, icon finding issue with apps that have non-standard folder structure
 
-## [Initial Version] - 2025-01-30
+## [Initial Version] - {PR_MERGE_DATE}
 - First version of App Cleaner
