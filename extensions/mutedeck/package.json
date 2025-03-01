@@ -15,6 +15,7 @@
     {
       "name": "show-status",
       "title": "Show Status",
+      "subtitle": "MuteDeck",
       "description": "Show MuteDeck status and controls",
       "mode": "view",
       "icon": "info.png"
@@ -22,6 +23,7 @@
     {
       "name": "toggle-microphone",
       "title": "Toggle Microphone",
+      "subtitle": "MuteDeck",
       "description": "Toggle microphone mute/unmute",
       "mode": "no-view",
       "icon": "microphone.png"
@@ -29,6 +31,7 @@
     {
       "name": "toggle-video",
       "title": "Toggle Video",
+      "subtitle": "MuteDeck",
       "description": "Toggle camera on/off",
       "mode": "no-view",
       "icon": "camera.png"
@@ -36,6 +39,7 @@
     {
       "name": "leave-meeting",
       "title": "Leave Meeting",
+      "subtitle": "MuteDeck",
       "description": "Leave current meeting",
       "mode": "no-view",
       "icon": "door.png"
