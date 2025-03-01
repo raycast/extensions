@@ -4,7 +4,6 @@ import AssetDetails from "./components/AssetDetails.js";
 import Runtime, { effectView } from "./lib/Runtime.js";
 import { Effect } from "effect";
 import { MuxRepo } from "./lib/MuxRepo.js";
-import Raycast from "raycast-effect";
 
 export default effectView(
   Effect.fn(function* (props: LaunchProps<{ arguments: Arguments.InspectAsset }>) {
@@ -15,10 +14,6 @@ export default effectView(
       [props.arguments.muxAssetId],
     );
 
-    return asset.isLoading ? (
-      <Detail isLoading={true} />
-    ) : (
-      <AssetDetails asset={asset.data!} onDelete={() => Raycast.Navigate.pop.pipe(Runtime.runPromise)} />
-    );
+    return asset.isLoading ? <Detail isLoading={true} /> : <AssetDetails asset={asset.data!} />;
   }),
 );
