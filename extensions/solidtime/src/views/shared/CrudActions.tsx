@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard } from "@raycast/api";
 import type { Fn } from "../../utils/types.js";
 
 type CrudActionsProps = {
@@ -20,15 +20,15 @@ export function CrudActions(props: CrudActionsProps) {
           <Action
             title="Show Details"
             icon={Icon.Eye}
-            // shortcut={{ modifiers: [], key: "enter" }}
             onAction={props.onDetails}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
         )}
         {props.onEdit && (
           <Action
             title={`Edit ${props.name}`}
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             onAction={props.onEdit}
           />
         )}
@@ -37,9 +37,19 @@ export function CrudActions(props: CrudActionsProps) {
           <Action
             title={`Delete ${props.name}`}
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             style={Action.Style.Destructive}
-            onAction={props.onDelete}
+            onAction={async () => {
+              confirmAlert({
+                title: "Are you sure?",
+                icon: Icon.Trash,
+                primaryAction: {
+                  title: "Delete",
+                  style: Alert.ActionStyle.Destructive,
+                  onAction: props.onDelete,
+                },
+              });
+            }}
           />
         )}
       </ActionPanel.Section>
@@ -48,7 +58,7 @@ export function CrudActions(props: CrudActionsProps) {
           <Action
             title={`New ${props.name}`}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
             onAction={props.onNew}
           />
         )}
