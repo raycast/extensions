@@ -12,7 +12,7 @@ A Raycast extension for interacting with Motion, the AI-powered productivity too
 1. Install the extension from the Raycast store.
 2. Set up your Motion API credentials:
    - Get your API key from Motion's developer settings
-   - Find your User ID in your Motion account
+   - Find your workspace ID in your Motion account (to be confirmed how to do this)
    - Add these to the extension preferences in Raycast
 
 ## Commands
