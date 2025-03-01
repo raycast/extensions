@@ -10,4 +10,4 @@ Get favicon from website URL
 ## Roadmap and TODOs
 
 - [ ] update API without adding http:// once fixed in [minor fix of getFavicon](https://github.com/raycast/utils/pull/46)
-- [ ] commond extracting refactoring
+- [ ] common extracting refactoring
