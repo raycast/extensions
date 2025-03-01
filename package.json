@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "add-task",
-      "title": "Add task",
+      "title": "Add Task",
       "subtitle": "Add task to Motion",
       "description": "Add a task to Motion, including priority, deadline, etc.",
       "mode": "view"
@@ -21,7 +21,7 @@
       "name": "query-motion",
       "title": "Query Motion",
       "subtitle": "Ask Motion a question",
-      "description": "Ask Motion about your deadlines, diary, etc. ",
+      "description": "Ask Motion about your deadlines, diary, etc.",
       "mode": "view"
     },
     {

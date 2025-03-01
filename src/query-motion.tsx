@@ -9,26 +9,25 @@ export default function Command() {
   const [tasksData, setTasksData] = useState<string | null>(null);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [workspaces, setWorkspaces] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  
+
   // Load Motion task data to provide context to the AI
   async function loadMotionData() {
     setIsLoadingTasks(true);
     try {
       const motionClient = getMotionApiClient();
       const tasks = await motionClient.getTasks();
-      
+
       // Check if tasks is an array and not empty
       if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
         console.log("[DEBUG] No tasks found or tasks is not an array:", tasks);
         setTasksData("No tasks found in Motion.");
         return;
       }
-      
+
       // Format tasks data for AI context
-      const formattedTasks = tasks.map(task => {
-        return `
+      const formattedTasks = tasks
+        .map((task) => {
+          return `
 Title: ${task.name}
 Description: ${task.description || "N/A"}
 Due Date: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}
@@ -36,8 +35,9 @@ Priority: ${task.priority || "N/A"}
 Status: ${task.status || "N/A"}
 Label: ${task.label || "N/A"}
         `;
-      }).join("\n---\n");
-      
+        })
+        .join("\n---\n");
+
       setTasksData(formattedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
@@ -51,14 +51,14 @@ Label: ${task.label || "N/A"}
       setIsLoadingTasks(false);
     }
   }
-  
+
   // Submit query to AI with tasks context
   function handleSubmit(values: { query: string }) {
     setQuery(values.query);
     loadMotionData();
     setIsSubmitted(true);
   }
-  
+
   // AI prompt with Motion tasks context
   const prompt = `You are an AI assistant for the Motion app, a task and productivity tool.
   
@@ -74,25 +74,19 @@ ${query}`;
     execute: isSubmitted && !isLoadingTasks && !!tasksData,
   });
 
+  // Initialize the application
   useEffect(() => {
-    async function fetchWorkspaces() {
+    // We don't need to store workspaces or errors in this component,
+    // just need to mark loading as complete when initialization is done
+    async function initialize() {
       try {
         const motionClient = getMotionApiClient();
-        const data = await motionClient.getWorkspaces();
-        
-        // Handle the API response structure correctly
-        if (data.workspaces && Array.isArray(data.workspaces)) {
-          setWorkspaces(data.workspaces);
-        } else {
-          console.error("Unexpected workspaces data format:", data);
-          setError("Unexpected data format from API");
-        }
+        await motionClient.getWorkspaces();
       } catch (err) {
-        console.error("Error fetching workspaces:", err);
-        setError(String(err));
+        console.error("Error initializing:", err);
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to fetch workspaces",
+          title: "Failed to initialize",
           message: String(err),
         });
       } finally {
@@ -100,7 +94,7 @@ ${query}`;
       }
     }
 
-    fetchWorkspaces();
+    initialize();
   }, []);
 
   // Form view for entering the query
@@ -114,11 +108,7 @@ ${query}`;
         }
       >
         <Form.Description text="Ask AI about your Motion tasks and schedule" />
-        <Form.TextField
-          id="query"
-          title="Question"
-          placeholder="When are my upcoming deadlines?"
-        />
+        <Form.TextField id="query" title="Question" placeholder="When are my upcoming deadlines?" />
       </Form>
     );
   }

@@ -1,43 +1,39 @@
-# Motion for Raycast
+# Motion Raycast Extension
 
-A Raycast extension for interacting with Motion, the AI-powered productivity tool.
+A Raycast extension for interacting with the [Motion](https://www.usemotion.com/) task management platform directly from your desktop.
 
 ## Features
 
-- **Add Tasks Quickly**: Add tasks to Motion directly from Raycast, including title, description, due date, priority, status, and tags.
-- **Query Your Motion Data**: Ask questions about your tasks and schedule using AI, directly within Raycast.
+- **Add Task**: Quickly create new tasks with title, description, due date, priority, and label
+- **Query Motion**: Ask AI about your Motion tasks and schedule
+- **Debug Workspaces**: View and debug workspace information
 
-## Setup
+## Installation
 
-1. Install the extension from the Raycast store.
-2. Set up your Motion API credentials:
-   - Get your API key from Motion's developer settings
-   - Find your User ID in your Motion account
-   - Add these to the extension preferences in Raycast
+1. Clone this repository
+2. Open the directory in your terminal
+3. Run `npm install` to install dependencies
+4. Run `npm run dev` to start the development server
 
-## Commands
+## Configuration
 
-### Add Task
-
-Quickly add a new task to Motion with all the metadata:
-- Title
-- Description
-- Due Date
-- Priority (Low, Medium, High, Urgent)
-- Status (To Do, In Progress, Done)
-- Tags
-
-### Query Motion
-
-Ask questions about your Motion tasks and schedule using AI:
-- "When are my upcoming deadlines?"
-- "What high priority tasks do I have this week?"
-- "How many tasks are in progress?"
-- "What tasks are tagged as 'important'?"
+1. Get your Motion API key from the Motion platform
+2. Configure the extension with your API key
 
 ## Development
 
-This extension is built using the Raycast Extension API and React.
+This extension is built with:
+- React
+- Raycast API
+- TypeScript
+
+## License
+
+MIT
+
+## Author
+
+Created by Owen Price
 
 ```bash
 # Install dependencies

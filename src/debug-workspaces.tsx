@@ -2,9 +2,18 @@ import { useState, useEffect } from "react";
 import { ActionPanel, Action, List, Toast, showToast } from "@raycast/api";
 import { getMotionApiClient } from "./api/motion";
 
+// Define workspace interface to avoid using 'any'
+interface Workspace {
+  id: string;
+  name: string;
+  type: string;
+  teamId: string | null;
+  labels: string[];
+}
+
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -12,7 +21,7 @@ export default function Command() {
       try {
         const motionClient = getMotionApiClient();
         const data = await motionClient.getWorkspaces();
-        
+
         // Handle the API response structure correctly
         // The API returns { workspaces: [...] } rather than the array directly
         if (data.workspaces && Array.isArray(data.workspaces)) {
@@ -40,10 +49,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter workspaces...">
       {error ? (
-        <List.EmptyView
-          title="Error fetching workspaces"
-          description={error}
-        />
+        <List.EmptyView title="Error fetching workspaces" description={error} />
       ) : workspaces.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No workspaces found"
@@ -63,7 +69,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
-                  title="Copy Workspace ID"
+                  title="Copy Workspace Id"
                   content={workspace.id}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
@@ -79,4 +85,4 @@ export default function Command() {
       )}
     </List>
   );
-} 
+}
