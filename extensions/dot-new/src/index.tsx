@@ -1,4 +1,4 @@
-import { Action, ActionPanel, environment, List } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import fs from "fs";
 import Fuse from "fuse.js";
@@ -31,7 +31,7 @@ export default function main() {
           key={index}
           title={url}
           subtitle={text}
-          icon={getFavicon("https://" + url)}
+          icon={getFavicon("https://" + url, { fallback: Icon.Globe })}
           accessories={[{ text: provider }]}
           actions={
             <ActionPanel>
