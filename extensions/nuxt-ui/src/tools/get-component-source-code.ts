@@ -11,8 +11,9 @@ type Input = {
 
 /**
  * Fetch the complete source code for a specified Nuxt UI component
+ * This includes props, types, structure, and props documentation
  *
- * This tool MUST be called after get-component-theme
+ * This tool MUST be called after get-component-theme (except when user asks for props or related information)
  *
  * @param input.componentName The exact camelCase name from the components list (e.g., "button", "buttonGroup")
  * @returns The full source code of the component as a string

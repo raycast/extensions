@@ -2,11 +2,6 @@ import { showToast, Toast, LaunchProps, getPreferenceValues, open, getSelectedTe
 import { kebabCase, camelCase } from "scule";
 import { components, proComponents, proseComponents } from "./components";
 
-interface Preferences {
-  prefix: string;
-  version: string;
-}
-
 interface ComponentInfo {
   exists: boolean;
   isBase: boolean;
