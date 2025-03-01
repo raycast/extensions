@@ -6,7 +6,7 @@ const getSoxPath = () => {
   const defaultSoxPath = getPreference('customSoxPath')
   const commandFolderPath = execSync(`
   locations=(
-      ${defaultSoxPath}
+      "${defaultSoxPath.replace(/"/g, '\"')}"
       /opt/homebrew/bin/sox
       /usr/local/bin/sox
       /usr/bin/sox

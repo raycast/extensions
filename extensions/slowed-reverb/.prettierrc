@@ -5,7 +5,7 @@
   "trailingComma": "none",
   "overrides": [
     {
-      "files": ["*/.tsx", "*/.ts"],
+      "files": ["*.tsx", "*.ts"],
       "options": {
         "parser": "typescript"
       }

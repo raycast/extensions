@@ -102,7 +102,7 @@
     {
       "name": "defaultNightcoreSpeed",
       "title": "Default Nightcore Speed",
-      "description": "Default speed for the Slowed version",
+      "description": "Default speed for the Nightcore version",
       "type": "dropdown",
       "default": "1.2",
       "required": true,
