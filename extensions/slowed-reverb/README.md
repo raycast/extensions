@@ -1,3 +1,5 @@
+# Slowed + Reverb
+
 ## Description
 
 This extension allows you to slow down or speed up songs that you have stored locally.
@@ -11,7 +13,7 @@ Here are the options available:
 
 The extension requires `sox` to function properly, but informs the user and tries to find the library in a bunch of common places, and also allows the user to customise the location.
 
-## How to use
+### How to use
 
 To use the extension, simply select an audio file in the Finder, and open Raycast and select the type of audio conversion you want to make. It will add your converted songs into the same folder.
 
@@ -24,10 +26,6 @@ To use the extension, simply select an audio file in the Finder, and open Raycas
 You can modify the defaults of Slowed and Nightcore speeds to match your tastes, as well as put a custom path for sox if you require a special config (but should not be needed in most cases).
 
 <img width="307" alt="image" src="https://github.com/user-attachments/assets/9d044e7f-2789-470e-917e-1b5623ddaefe" />
-
-## Screencast
-
-This extension does not have any UI, it runs directly as a command and saves the files to the same folder as the input file.
 
 ## Checklist
 
