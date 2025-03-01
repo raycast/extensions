@@ -13,9 +13,9 @@ export function filterApps(apps: Application[]): Application[] {
   return apps.filter((app) => isSystem(app.path) === false).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function pathExists(path: string): Promise<boolean> {
+export async function pathExists(filePath: string): Promise<boolean> {
   return fsPromises
-    .access(path)
+    .access(filePath)
     .then(() => true)
     .catch(() => false);
 }
