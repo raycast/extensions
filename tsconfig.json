@@ -5,7 +5,7 @@
   "compilerOptions": {
     "lib": ["ES2024"],
     "module": "commonjs",
-    "target": "ES2021",
+    "target": "ES2024",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
