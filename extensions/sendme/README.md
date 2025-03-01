@@ -12,9 +12,9 @@
 
 Share files directly between devices with no intermediary servers. Your data never leaves the direct connection between sender and receiver.
 ![Direct Transfer](image.png)
-![alt text](metadata/image3.png)
-![alt text](metadata/screenshot2.png)
-![alt text](metadata/screenshot1.png)
+![User Interface](metadata/image3.png)
+![Session Management](metadata/screenshot2.png)
+![File Transfer](metadata/screenshot1.png)
 
 ### 🔒 Secure by Design
 
@@ -30,7 +30,7 @@ Direct peer connections mean maximum transfer speeds limited only by your networ
 
 ### 💻 Seamless Raycast Integration
 
-Access powerful file sharing right from your productivity command center - no need to switch contexts or open another app.
+Access powerful file sharing right from your productivity command center 
 
 ## How It Works
 
@@ -51,17 +51,41 @@ Access powerful file sharing right from your productivity command center - no ne
 ## No Servers, No Limits
 
 Unlike traditional file sharing services:
-
-- No file size limits
+- P2P
 - No accounts or logins required
 - No third-party servers involved
 
 ## Getting Started
 
-1. Install [sendme](https://github.com/nazifishrak/sendme-extension) on your system
-2. Install this Raycast extension
-3. Use the "Share File" command to begin sharing
+### Installation
+This extension is currently not available on the Raycast Extension store, but installation from source is extremely simple.
 
+You need to have nodejs installed to install it locally:
+
+1. Download the source code from the latest release, or clone the repository:
+   ```
+   git clone git@github.com:nazifishrak/sendme-extension.git
+   ```
+
+2. Navigate to the directory where it is downloaded, and open a Terminal window at the downloaded folder.
+
+3. Install dependencies and run the extension:
+   ```
+   npm install
+   npm run dev
+   ```
+
+4. The extension and its full set of commands should then show up in your Raycast app.
+
+### Troubleshooting
+The extension looks for homebrew to install sendme. If homebrew isn't found, it tries to install in another way. But if you get an error saying sendme isn't installed, please run these commands:
+
+```bash
+curl -fsSL https://iroh.computer/sendme.sh -o ~/sendme
+chmod +x ~/sendme
+```
+
+Now try Raycast again.
 
 ## Privacy & Security
 
