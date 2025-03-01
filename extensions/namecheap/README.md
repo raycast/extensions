@@ -27,7 +27,8 @@ This is a Raycast extension for [Namecheap](https://www.namecheap.com/). With th
 
 ## 🗒️ NOTES
 
-- To use the API you **must** meet Namecheap requirements available at https://www.namecheap.com/support/knowledgebase/article.aspx/9739/63/api-faq/#c
+- The API does not seem to handle non-traditional/modern TLDs well. If you get an Error, it could be because of your TLD.
+- To use the API you **must** meet Namecheap requirements available at https://www.namecheap.com/support/knowledgebase/article.aspx/9739/63/api-faq/#c.
 
 ---
 
