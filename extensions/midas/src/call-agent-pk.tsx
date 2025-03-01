@@ -44,10 +44,15 @@ export default function Command() {
     setIsLoading(true);
     const url = `${config.apiUrl}/call/agent/viem`;
     try {
-      console.log("Sending request to:", url, {
+      console.log("=== API Call Details (Private Key Mode) ===");
+      console.log("🎯 Endpoint:", url);
+      console.log("📦 Payload:", {
         prompt: values.command,
         chain: CHAIN,
+        privateKeyProvided: !!preferences.privateKey, // logs true/false without exposing the actual key
       });
+      console.log("==================");
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -64,11 +69,16 @@ export default function Command() {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.log("❌ API Error:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+        });
         throw new Error(`Server error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log("Response:", data);
+      console.log("✅ API Response:", data);
 
       // Type guard to check if the response matches our interface
       if (typeof data === "object" && data !== null && "response" in data && typeof data.response === "string") {
