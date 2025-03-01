@@ -1,12 +1,12 @@
-import { Clipboard, closeMainWindow, PopToRootType, showHUD, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, PopToRootType, showHUD, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import isUrl from "is-url";
-
-interface Arguments {
-  url: string;
-}
+import { Arguments, Preferences } from "./common";
 
 export default async function copyFavicon(props: { arguments: Arguments }) {
+  const preferences = await getPreferenceValues<Preferences>();
+  console.log(preferences.default_icon_size);
+
   let url = props.arguments.url;
   if (!url.includes("https://")) {
     url = "https://" + url;
@@ -27,7 +27,7 @@ export default async function copyFavicon(props: { arguments: Arguments }) {
   }
 
   try {
-    const favicon = await getFavicon(url);
+    const favicon = await getFavicon(url, { size: preferences.default_icon_size });
 
     if (!favicon || !(favicon as any).source) {
       throw new Error("Favicon not found");

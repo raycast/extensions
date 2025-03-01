@@ -5,10 +5,11 @@
   "description": "Get favicon from website URL",
   "icon": "icon.png",
   "author": "vimtor",
-    "contributors": [
-      "charlie_deets",
-    "PaperCloud"
-    ],
+  "contributors": [
+    "charlie_deets",
+    "PaperCloud",
+    "ViGeng"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -65,6 +66,36 @@
       "required": true,
       "default": "~/Downloads",
       "description": "Directory to download favicon"
+    },
+    {
+      "name": "default_icon_size",
+      "title": "Default Icon Size",
+      "type": "dropdown",
+      "description": "Default size of favicon",
+      "required": false,
+      "default": "128",
+      "data": [
+        {
+          "value": "16",
+          "title": "16x16"
+        },
+        {
+          "value": "32",
+          "title": "32x32"
+        },
+        {
+          "value": "64",
+          "title": "64x64"
+        },
+        {
+          "value": "128",
+          "title": "128x128"
+        },
+        {
+          "value": "256",
+          "title": "256x256"
+        }
+      ]
     }
   ],
   "dependencies": {
