@@ -84,7 +84,7 @@ function StoryListItem(props: {
   onSave: (url: string) => Promise<void>;
 }) {
   // Check if this item is in the savedUrls array
-  const isSaved = props.item.link ? (props.savedUrls.includes(props.item.link) || isUrlSaved(props.item.link)) : false;
+  const isSaved = props.item.link ? props.savedUrls.includes(props.item.link) : false;
   
   return (
     <List.Item
