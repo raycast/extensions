@@ -12,15 +12,13 @@
   "commands": [
     {
       "name": "call-agent",
-      "title": "Call Agent",
-      "subtitle": "Make a call to Midas",
+      "title": "Call Midas Agent",
       "description": "Helps you to make a call to Midas",
       "mode": "view"
     },
     {
       "name": "call-agent-pk",
-      "title": "Call Agent (pk)",
-      "subtitle": "Make a call to Midas with Private Key",
+      "title": "Call Midas Agent with Private Key",
       "description": "Helps you to make a call to Midas with your private key",
       "mode": "view"
     }
