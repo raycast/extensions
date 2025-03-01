@@ -80,12 +80,7 @@ See the [API Reference](../api-reference/menu-bar-commands.md) for more informat
 
 ### Run Script
 
-<details>
-<summary>Renders a simple HUD indicating the completion of the script.</summary>
-
-![Run Script Template Render](../.gitbook/assets/run-script-template.webp)
-
-</details>
+Renders a simple [HUD](../api-reference/feedback/hud.md) indicating the completion of the script.
 
 ### Show List
 
