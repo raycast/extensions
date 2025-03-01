@@ -9,6 +9,7 @@ const Init = async (currentConverter: keyof Converters) => {
   const { getSelectedFilePaths } = fileUtils;
   const { command, fileNameSuffix, initialToast } = converters[currentConverter];
   const { isSoxInstalled } = soxUtils;
+  const { successToast } = converters[currentConverter];
 
   try {
     if (!isSoxInstalled()) throwError(CONSTANTS.noSoxInstalled);
@@ -16,6 +17,8 @@ const Init = async (currentConverter: keyof Converters) => {
 
     const files = await getSelectedFilePaths();
     await Promise.all(files.map((inputPath) => converter(inputPath, command, fileNameSuffix)));
+
+    await errorUtils.showToastSuccess({ title: successToast.title });
   } catch (error) {
     await showToastError(error);
   }

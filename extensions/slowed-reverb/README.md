@@ -1,4 +1,4 @@
-# Slowed + Reverb
+## Description
 
 This extension allows you to slow down or speed up songs that you have stored locally.
 
@@ -9,22 +9,30 @@ Here are the options available:
 - **Reverb**: Adds `reverb` to the song.
 - **Nightcore**: Speeds up the song by a factor of `1.2`.
 
-## Installation
+The extension requires `sox` to function properly, but informs the user and tries to find the library in a bunch of common places, and also allows the user to customise the location.
 
-To use this extension, you are required to have `sox` installed on your system. You can install it by running the following command:
+## How to use
 
-```bash
-brew install sox
-```
+To use the extension, simply select an audio file in the Finder, and open Raycast and select the type of audio conversion you want to make. It will add your converted songs into the same folder.
 
-If you have sox installed in some other path, it will **most likely** still work, as the extension checks for a bunch of common paths. You can set the path manually in the extension settings.
+## Screencast
 
-## Configuration
+![Raycast 2025-03-01 at 15 44 38](https://github.com/user-attachments/assets/1720b235-ed32-4737-a2df-d9f4c0c9e661)
 
-You can configure the extension by going to the settings of the extension.
+## Settings
 
-Here are the options available:
+You can modify the defaults of Slowed and Nightcore speeds to match your tastes, as well as put a custom path for sox if you require a special config (but should not be needed in most cases).
 
-- **Sox Path**: The path to the sox executable - usually no change needed here.
-- **Default Slowed Speed**: The default speed to slow down the song by.
-- **Default Nightcore Speed**: The default speed to speed up the song by.
+<img width="307" alt="image" src="https://github.com/user-attachments/assets/9d044e7f-2789-470e-917e-1b5623ddaefe" />
+
+## Screencast
+
+This extension does not have any UI, it runs directly as a command and saves the files to the same folder as the input file.
+
+## Checklist
+
+- [x] I read the [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store)
+- [x] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
+- [x] I ran `npm run build` and [tested this distribution build in Raycast](https://developers.raycast.com/basics/prepare-an-extension-for-store#metadata-and-configuration)
+- [x] I checked that files in the `assets` folder are used by the extension itself
+- [x] I checked that assets used by the `README` are placed outside of the `metadata` folder
