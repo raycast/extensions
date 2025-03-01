@@ -2,6 +2,8 @@ import { ActionPanel, Action, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
+import { videogames } from "./constants/videogames";
+
 export default function Command() {
   const [videogame, setVideoGame] = useState("");
 
@@ -37,14 +39,14 @@ export default function Command() {
           subtitle={match.day}
           key={match.day}
         >
-          {match.items?.map((item) => <MatchItem key={item.slug} match={item} />)}
+          {match.items?.map((item) => <MatcheItem key={item.slug} match={item} />)}
         </List.Section>
       ))}
     </List>
   );
 }
 
-function MatchItem({ match }: { match: Match }) {
+function MatcheItem({ match }: { match: Match }) {
   return (
     <List.Item
       title={
@@ -58,7 +60,7 @@ function MatchItem({ match }: { match: Match }) {
       }
       subtitle={match.name}
       accessories={[{ text: match.tournament }, { icon: match.league.image_url }]}
-      icon={match.league.image_url}
+      icon={match.videogame}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -97,9 +99,11 @@ async function parseFetchResponseMatches(response: Response) {
       teamB: result.teamB,
       teamAscore: result.teamAscore,
       teamBscore: result.teamBscore,
+      videoGame: result.videoGame,
+      videogame: videogames.find((v) => v.slug === result.videoGame.slug)?.icon,
     });
     return acc;
-  }, {} as Shedule);
+  }, {} as Schedule);
 
   return Object.entries(groupedByDay).map(([day, items]) => ({
     day,
@@ -129,8 +133,13 @@ interface Match {
     name: string;
     image_url: string;
   };
+  videoGame: {
+    name: string;
+    slug: string;
+  };
+  videogame?: string;
 }
 
-interface Shedule {
+interface Schedule {
   [key: string]: Match[];
 }

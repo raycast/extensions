@@ -2,11 +2,7 @@ import { ActionPanel, Action, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
-const videogames = [
-  { name: "League of legends", slug: "league-of-legends", icon: "./lol.png" },
-  { name: "VALORANT", slug: "valorant", icon: "./valorant.png" },
-  { name: "Counter-Strike", slug: "cs-go", icon: "./cs.png" },
-];
+import { videogames } from "./constants/videogames";
 
 export default function Command() {
   const [videogame, setVideoGame] = useState("");
