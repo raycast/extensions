@@ -1,5 +1,5 @@
 # Changelog
 
-## [Initial Version] - 2025-02-28
+## [Initial Version] - {PR_MERGE_DATE}
 
-- Initial version of the MuteDeck extension 
+- Initial version of the MuteDeck extension
