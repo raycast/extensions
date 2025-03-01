@@ -29,7 +29,7 @@ export default function Command() {
     >
       {data?.map((match) => (
         <List.Section
-        title={
+          title={
             new Date(match.day).toISOString().split("T")[0] === new Date().toISOString().split("T")[0]
               ? "Today"
               : new Date(match.day).toISOString().split("T")[0] ===
