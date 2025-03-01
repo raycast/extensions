@@ -33,9 +33,3 @@
   - Secure API key storage
   - Configurable request timeout
   - Input validation
-
-### Supported Printers
-- Prusa XL (built-in PrusaLink)
-- Prusa MK4 (built-in PrusaLink)
-- Prusa MINI+ (built-in PrusaLink)
-- Prusa MK3S+ (via Raspberry Pi running PrusaLink)

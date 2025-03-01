@@ -4,6 +4,15 @@ import { PrusaApiError, ERROR_MESSAGES } from "./errors";
 import { logger } from "../utils/logger";
 import type { PrinterInfo, PrinterStatus, FileList, JobDetails } from "./types";
 import type { PrusaClientConfig } from "./config";
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  printerIP: string;
+  apiKey: string;
+  requestTimeout?: string;
+}
+
+const DEFAULT_TIMEOUT = 10; // seconds
 
 const DEFAULT_CONFIG: Partial<PrusaClientConfig> = {
   timeout: 10000,
@@ -11,6 +20,39 @@ const DEFAULT_CONFIG: Partial<PrusaClientConfig> = {
   initialRetryDelay: 1000,
   maxRetryDelay: 8000,
 };
+
+/**
+ * Creates a configured PrusaClient instance based on preferences.
+ * Handles preference validation and default values.
+ * @returns A configured PrusaClient instance.
+ * @throws Error if preferences are invalid.
+ */
+export function createPrusaClientFromPreferences(): PrusaClient {
+  const prefs = getPreferenceValues<Preferences>();
+
+  // Validate preferences
+  if (!prefs.printerIP?.trim()) {
+    throw new Error("Printer IP address is not configured. Please set it in extension preferences.");
+  }
+  if (!prefs.apiKey?.trim()) {
+    throw new Error("API key is not configured. Please set it in extension preferences.");
+  }
+
+  let timeout = DEFAULT_TIMEOUT;
+  if (prefs.requestTimeout) {
+    const parsedTimeout = parseInt(prefs.requestTimeout);
+    if (isNaN(parsedTimeout)) {
+      throw new Error("Invalid request timeout value. Please enter a valid number in seconds.");
+    }
+    timeout = parsedTimeout;
+  }
+
+  return new PrusaClient({
+    baseURL: `http://${prefs.printerIP.trim()}`,
+    apiKey: prefs.apiKey.trim(),
+    timeout: timeout * 1000,
+  });
+}
 
 /**
  * Client for interacting with the Prusa Connect API.

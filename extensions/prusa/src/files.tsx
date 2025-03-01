@@ -1,26 +1,9 @@
-import {
-  ActionPanel,
-  List,
-  Action,
-  Icon,
-  Image,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  confirmAlert,
-} from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Image, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import { PrusaClient } from "./api/prusaClient";
+import { createPrusaClientFromPreferences } from "./api/prusaClient";
 import { PrusaApiError } from "./api/errors";
 import type { FileInfo } from "./api/types";
 
-interface Preferences {
-  printerIP: string;
-  apiKey: string;
-  requestTimeout?: string;
-}
-
-const DEFAULT_TIMEOUT = 10; // seconds
 const DEFAULT_STORAGE = "usb"; // Changed from "local" to "usb" to match printer config
 
 interface SortOption {
@@ -55,30 +38,7 @@ export default function Command() {
 
   const fetchFiles = useCallback(async () => {
     try {
-      const prefs = getPreferenceValues<Preferences>();
-
-      // Validate preferences
-      if (!prefs.printerIP?.trim()) {
-        throw new Error("Printer IP address is not configured. Please set it in extension preferences.");
-      }
-      if (!prefs.apiKey?.trim()) {
-        throw new Error("API key is not configured. Please set it in extension preferences.");
-      }
-
-      let timeout = DEFAULT_TIMEOUT;
-      if (prefs.requestTimeout) {
-        const parsedTimeout = parseInt(prefs.requestTimeout);
-        if (isNaN(parsedTimeout)) {
-          throw new Error("Invalid request timeout value. Please enter a valid number in seconds.");
-        }
-        timeout = parsedTimeout;
-      }
-
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-        timeout: timeout * 1000,
-      });
+      const client = createPrusaClientFromPreferences();
 
       const fileList = await client.listFiles(DEFAULT_STORAGE, "/");
 
@@ -128,22 +88,21 @@ export default function Command() {
 
   async function handleStartPrint(file: FileInfo) {
     try {
-      const shouldPrint = await confirmAlert({
+      const shouldStart = await confirmAlert({
         title: "Start Print",
-        message: `Start printing ${file.display_name}?`,
+        message: `Start printing ${file.display_name}?\n\nMake sure the printer is ready and the print bed is clear.`,
         primaryAction: {
-          title: "Print",
+          title: "Start Print",
+        },
+        dismissAction: {
+          title: "Cancel",
         },
       });
 
-      if (!shouldPrint) return;
+      if (!shouldStart) return;
 
-      const prefs = getPreferenceValues<Preferences>();
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-      });
-
+      setIsLoading(true);
+      const client = createPrusaClientFromPreferences();
       await client.startPrint(DEFAULT_STORAGE, file.name);
       await showToast({
         style: Toast.Style.Success,
@@ -164,20 +123,19 @@ export default function Command() {
     try {
       const shouldDelete = await confirmAlert({
         title: "Delete File",
-        message: `Are you sure you want to delete ${file.display_name}? This cannot be undone.`,
+        message: `Are you sure you want to delete ${file.display_name}?\n\nThis action cannot be undone.`,
         primaryAction: {
           title: "Delete",
+        },
+        dismissAction: {
+          title: "Cancel",
         },
       });
 
       if (!shouldDelete) return;
 
-      const prefs = getPreferenceValues<Preferences>();
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-      });
-
+      setIsLoading(true);
+      const client = createPrusaClientFromPreferences();
       await client.deleteFile(DEFAULT_STORAGE, file.name);
       await showToast({
         style: Toast.Style.Success,

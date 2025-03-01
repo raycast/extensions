@@ -20,18 +20,18 @@ import { logger } from "./logger";
  * ```
  */
 export async function withRetry<T>(operation: () => Promise<T>, config: PrusaClientConfig): Promise<T> {
-  let lastError: Error = new Error("Operation failed");
+  let lastError: Error | undefined;
   let delay = config.initialRetryDelay ?? 1000;
   const maxRetries = config.maxRetries ?? 3;
   const maxDelay = config.maxRetryDelay ?? 8000;
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error as Error;
 
-      if (!PrusaApiError.isRetryable(error) || attempt === maxRetries) {
+      if (!PrusaApiError.isRetryable(error)) {
         throw error;
       }
 
@@ -42,5 +42,11 @@ export async function withRetry<T>(operation: () => Promise<T>, config: PrusaCli
     }
   }
 
-  throw lastError;
+  // This will only be reached if all retries failed
+  if (lastError) {
+    throw lastError;
+  }
+
+  // This should never happen, but TypeScript requires it
+  throw new Error("All retries failed without an error");
 }

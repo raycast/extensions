@@ -11,7 +11,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import { PrusaClient } from "./api/prusaClient";
+import { PrusaClient, createPrusaClientFromPreferences } from "./api/prusaClient";
 import { PrusaApiError } from "./api/errors";
 import { PrinterStatus, PrinterInfo } from "./api/types";
 import { logger } from "./utils/logger";
@@ -21,8 +21,6 @@ interface Preferences {
   apiKey: string;
   requestTimeout?: string;
 }
-
-const DEFAULT_TIMEOUT = 10; // seconds
 
 function formatTime(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -103,29 +101,8 @@ export default function Command() {
     async (isRetry = false) => {
       try {
         logger.debug("Fetching preferences...");
-        const prefs = getPreferenceValues<Preferences>();
 
-        if (!prefs.printerIP?.trim()) {
-          throw new Error("Printer IP address is not configured. Please set it in extension preferences.");
-        }
-        if (!prefs.apiKey?.trim()) {
-          throw new Error("API key is not configured. Please set it in extension preferences.");
-        }
-
-        let timeout = DEFAULT_TIMEOUT;
-        if (prefs.requestTimeout) {
-          const parsedTimeout = parseInt(prefs.requestTimeout);
-          if (isNaN(parsedTimeout)) {
-            throw new Error("Invalid request timeout value. Please enter a valid number in seconds.");
-          }
-          timeout = parsedTimeout;
-        }
-
-        const client = new PrusaClient({
-          baseURL: `http://${prefs.printerIP.trim()}`,
-          apiKey: prefs.apiKey.trim(),
-          timeout: timeout * 1000,
-        });
+        const client = createPrusaClientFromPreferences();
 
         const printerStatus = await client.getStatus();
         setStatus(printerStatus);
@@ -143,14 +120,16 @@ export default function Command() {
 
         // Handle network errors with automatic retry
         if (e instanceof PrusaApiError && e.retryable && retryCount < MAX_RETRIES) {
-          setRetryCount((prev) => prev + 1);
           await showToast({
             style: Toast.Style.Animated,
             title: `Connection failed (Attempt ${retryCount + 1}/${MAX_RETRIES})`,
             message: "Retrying...",
           });
 
-          setTimeout(() => fetchStatus(true), RETRY_DELAY);
+          setTimeout(() => {
+            setRetryCount((prev) => prev + 1);
+            fetchStatus(true);
+          }, RETRY_DELAY);
           return;
         }
 
@@ -190,7 +169,7 @@ export default function Command() {
         clearInterval(interval);
       }
     };
-  }, [fetchStatus]);
+  }, [fetchStatus, status]);
 
   async function handlePausePrint() {
     if (!status?.job?.id) return;
@@ -209,11 +188,7 @@ export default function Command() {
 
       if (!shouldPause) return;
 
-      const prefs = getPreferenceValues<Preferences>();
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-      });
+      const client = createPrusaClientFromPreferences();
 
       await client.pausePrint(status.job.id.toString());
       await showToast({
@@ -248,11 +223,7 @@ export default function Command() {
 
       if (!shouldResume) return;
 
-      const prefs = getPreferenceValues<Preferences>();
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-      });
+      const client = createPrusaClientFromPreferences();
 
       await client.resumePrint(status.job.id.toString());
       await showToast({
@@ -287,11 +258,7 @@ export default function Command() {
 
       if (!shouldCancel) return;
 
-      const prefs = getPreferenceValues<Preferences>();
-      const client = new PrusaClient({
-        baseURL: `http://${prefs.printerIP.trim()}`,
-        apiKey: prefs.apiKey.trim(),
-      });
+      const client = createPrusaClientFromPreferences();
 
       await client.cancelPrint(status.job.id.toString());
       await showToast({
