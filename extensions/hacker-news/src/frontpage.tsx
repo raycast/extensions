@@ -25,7 +25,7 @@ export default function Command() {
     await showToast({
       style: result.success ? Toast.Style.Success : Toast.Style.Failure,
       title: result.message,
-      message: result.isRateLimited ? "Please try again later" : result.error
+      message: result.isRateLimited ? "Please try again later" : result.error,
     });
     // Reload saved URLs
     if (result.success) {
@@ -50,11 +50,11 @@ export default function Command() {
       }
     >
       {data?.map((item, index) => (
-        <StoryListItem 
-          key={item.guid} 
-          item={item} 
-          index={index} 
-          topic={topic} 
+        <StoryListItem
+          key={item.guid}
+          item={item}
+          index={index}
+          topic={topic}
           savedUrls={savedUrls}
           onSave={handleSaveToReadwise}
         />
@@ -76,16 +76,16 @@ function setTitle(title: string, topic: Topic) {
   return title;
 }
 
-function StoryListItem(props: { 
-  item: Parser.Item; 
-  index: number; 
+function StoryListItem(props: {
+  item: Parser.Item;
+  index: number;
   topic: Topic | null;
   savedUrls: string[];
   onSave: (url: string) => Promise<void>;
 }) {
   // Check if this item is in the savedUrls array
   const isSaved = props.item.link ? props.savedUrls.includes(props.item.link) : false;
-  
+
   return (
     <List.Item
       icon={getIcon(props.index + 1)}
@@ -97,10 +97,7 @@ function StoryListItem(props: {
   );
 }
 
-function Actions(props: { 
-  item: Parser.Item;
-  onSave: (url: string) => Promise<void>;
-}) {
+function Actions(props: { item: Parser.Item; onSave: (url: string) => Promise<void> }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>

@@ -31,7 +31,7 @@ export async function saveToReadwise(url: string): Promise<SaveResult> {
       return {
         success: false,
         message: "Readwise API token not configured",
-        error: "Please configure your Readwise API token in preferences"
+        error: "Please configure your Readwise API token in preferences",
       };
     }
 
@@ -55,14 +55,14 @@ export async function saveToReadwise(url: string): Promise<SaveResult> {
         return {
           success: false,
           message: "Rate limit exceeded",
-          isRateLimited: true
+          isRateLimited: true,
         };
       } else {
         console.error("Error saving to Readwise, status:", response.status);
         return {
           success: false,
           message: "Failed to save to Readwise Reader",
-          error: `HTTP error ${response.status}`
+          error: `HTTP error ${response.status}`,
         };
       }
     }
@@ -73,20 +73,20 @@ export async function saveToReadwise(url: string): Promise<SaveResult> {
       return {
         success: true,
         message: "Saved to Readwise Reader",
-        error: "Note: Failed to update local cache. The article was saved but may not appear in your saved list."
+        error: "Note: Failed to update local cache. The article was saved but may not appear in your saved list.",
       };
     }
 
     return {
       success: true,
-      message: "Saved to Readwise Reader"
+      message: "Saved to Readwise Reader",
     };
   } catch (error) {
     console.error("Error saving to Readwise:", error);
     return {
       success: false,
       message: "Failed to save to Readwise Reader",
-      error: String(error)
+      error: String(error),
     };
   }
 }
