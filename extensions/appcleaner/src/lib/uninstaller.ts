@@ -31,7 +31,7 @@ export const UNINSTALLERS = [
 
 export class Uninstaller {
   /**
-   * Find an uninstaller app. (try the preffered first, and if not found, try the others)
+   * Find an uninstaller app. (try the preferred first, and if not found, try the others)
    * @returns The uninstaller app or undefined if none is found.
    */
   static async getUninstaller(): Promise<UninstallerApp | undefined> {
