@@ -1,5 +1,11 @@
 # Supernotes Changelog
 
+## [Daily Append Formatting + AI Extension] - {PR_MERGE_DATE}
+- Add a date format option for daily append command
+- Added in tool to search cards
+- Added in a tool to append to a card
+- Added in a tool to create a new card
+
 ## [Daily Append Local Time]
 - Use the local day when appending content to a daily card
 
