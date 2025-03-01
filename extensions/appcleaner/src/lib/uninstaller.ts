@@ -24,7 +24,7 @@ export const UNINSTALLERS = [
     id: "trashme",
     name: "TrashMe 3",
     path: "/Applications/TrashMe 3.app",
-    url: "https://www.jibapps.com/apps/trashme",
+    url: "https://www.jibapps.com/apps/trashme3/",
     icon: "trashme.png",
   },
 ];
