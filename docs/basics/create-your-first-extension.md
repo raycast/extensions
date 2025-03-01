@@ -12,6 +12,8 @@ Open the Create Extension command, name your extension "Hello World" and select 
 
 {% hint style="info" %}
 To create a private extension, select your organization in the first dropdown. You need to be logged in and part of an organization to see the dropdown. Learn more about Raycast for Teams [here](../teams/getting-started.md).
+
+To assist developers, Raycast provides various templates and boilerplates for commands, tools, and extensions. Learn more [here](./templates-and-boilerplates.md).
 {% endhint %}
 
 Next, you'll need to follow the on-screen instructions to build the extension.
