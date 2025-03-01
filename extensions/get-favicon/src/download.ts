@@ -1,15 +1,15 @@
 import { closeMainWindow, getPreferenceValues, PopToRootType, showHUD, showInFinder, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import download from "image-downloader";
-import path from "path";
-import { nanoid } from "nanoid";
 import isUrl from "is-url";
-
-interface Arguments {
-  url: string;
-}
+import { nanoid } from "nanoid";
+import path from "path";
+import { Arguments, Preferences } from "./common";
 
 export default async function downloadFavicon(props: { arguments: Arguments }) {
+  const preferences = await getPreferenceValues<Preferences>();
+  console.log(preferences.default_icon_size);
+
   let url = props.arguments.url;
   if (!url.includes("https://")) {
     url = "https://" + url;
@@ -27,8 +27,6 @@ export default async function downloadFavicon(props: { arguments: Arguments }) {
     toast.style = Toast.Style.Failure;
     return;
   }
-
-  const preferences = getPreferenceValues();
 
   const destination = path.join(preferences.downloadDirectory, `${nanoid()}.png`);
   const favicon = await getFavicon(url);
