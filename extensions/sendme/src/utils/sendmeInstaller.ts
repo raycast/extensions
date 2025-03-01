@@ -162,7 +162,7 @@ async function installWithCurl(): Promise<boolean> {
     const confirmed = await confirmAlert({
       title: "Install sendme Using Terminal",
       message:
-        "We need to run 'curl -fsSL https://iroh.computer/sendme.sh | sh' in your terminal to install sendme. This will download and set up the sendme CLI tool.",
+        "We need to run 'curl -fsSL https://iroh.computer/sendme.sh -o ~/sendme && chmod +x ~/sendme' in your terminal to install sendme. This will download and set up the sendme CLI tool.",
       primaryAction: {
         title: "Open Terminal & Install",
       },
@@ -185,7 +185,7 @@ async function installWithCurl(): Promise<boolean> {
 
     // Use runInTerminal from shellHelper instead of direct AppleScript execution
     await runInTerminal(
-      "curl -fsSL https://iroh.computer/sendme.sh | sh",
+      "curl -fsSL https://iroh.computer/sendme.sh -o ~/sendme && chmod +x ~/sendme",
       homedir(),
     );
 
