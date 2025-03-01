@@ -52,7 +52,7 @@ export class Uninstaller {
   }
 
   /**
-   * Checks is an uninstaller app is available.
+   * Checks if an uninstaller app is available.
    * @returns A promise that resolves if an uninstaller app is found, otherwise it rejects.
    */
   static checkDependencies(): Promise<void> {
