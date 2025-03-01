@@ -1,6 +1,6 @@
 # Esports Pass Changelog
 
-## [Launch Extension] - 2025-02-23
+## [Launch Extension] - {PR_MERGE_DATE}
 
 - Add Show Matches command
 - Add Show Results command
