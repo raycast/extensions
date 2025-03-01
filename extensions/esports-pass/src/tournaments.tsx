@@ -27,7 +27,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Tournaments" subtitle={`${data?.length} tournaments`}>
+      <List.Section title="Tournaments" subtitle={`${data?.length || 0} tournaments`}>
         {data?.map((item) => <TournamentItem key={item.slug} tournament={item} />)}
       </List.Section>
     </List>
