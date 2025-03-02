@@ -124,22 +124,22 @@ export const getMotionApiClient = () => {
 
       // Simplify our approach now that we know the correct format
       const url = `${BASE_URL}/tasks`;
-      
-      // Destructure all properties except label which API doesn't accept
-      const { label, ...taskWithoutLabel } = taskInput;
+
+      // Destructure to remove the label property which API doesn't accept
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { label, ...taskData } = taskInput;
 
       // Create task object with the correct properties
       const task = {
-        name: taskWithoutLabel.title,
-        description: taskWithoutLabel.description,
-        dueDate: taskWithoutLabel.dueDate?.toISOString(),
-        priority: taskWithoutLabel.priority,
-        status: taskWithoutLabel.status,
+        name: taskData.title,
+        description: taskData.description,
+        dueDate: taskData.dueDate?.toISOString(),
+        priority: taskData.priority,
+        status: taskData.status,
         workspaceId: correctWorkspaceId, // Use the correct ID
-        projectId: taskWithoutLabel.projectId,
+        projectId: taskData.projectId,
       };
 
-      // Note: We're omitting the label property as the API doesn't accept it directly
       logRequest("POST", url, headers, task);
 
       try {

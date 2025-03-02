@@ -90,7 +90,6 @@ export default function Command() {
         message: "Are you sure you want to delete this task? This action cannot be undone.",
         primaryAction: {
           title: "Delete",
-          style: "destructive",
         },
       });
 
@@ -169,31 +168,36 @@ export default function Command() {
   // Safely get task priority as string with proper capitalization
   function getTaskPriority(priority?: string): string {
     if (!priority) return "No Priority";
-    
+
     // Convert "HIGH" to "High", "MEDIUM" to "Medium", etc.
     switch (priority) {
-      case "URGENT": return "Urgent";
-      case "HIGH": return "High";
-      case "MEDIUM": return "Medium";
-      case "LOW": return "Low";
-      default: return String(priority);
+      case "URGENT":
+        return "Urgent";
+      case "HIGH":
+        return "High";
+      case "MEDIUM":
+        return "Medium";
+      case "LOW":
+        return "Low";
+      default:
+        return String(priority);
     }
   }
 
   // Safely get task label as string, or empty array if it's an object
-  function getTaskLabels(label: any): string[] {
+  function getTaskLabels(label: string | string[] | null | undefined): string[] {
     // If it's not defined, return empty array
     if (!label) return [];
-    
+
     // If it's a simple string, return as an array with one item
     if (typeof label === "string") return [label];
-    
+
     // If it's an array of strings, return it
-    if (Array.isArray(label) && label.every(item => typeof item === "string")) {
+    if (Array.isArray(label) && label.every((item) => typeof item === "string")) {
       return label;
     }
-    
-    // In all other cases (objects, etc.), don't display anything
+
+    // Default case, return empty array
     return [];
   }
 
@@ -224,21 +228,29 @@ export default function Command() {
                   color: task.status === "DONE" ? "#4CAF50" : undefined,
                 },
               },
-              ...(task.dueDate ? [{
-                tag: {
-                  value: formatDueDate(task.dueDate),
-                  color: undefined,
-                },
-              }] : []),
-              ...(task.priority ? [{
-                tag: {
-                  value: getTaskPriority(task.priority),
-                  color: getPriorityColor(task.priority),
-                },
-              }] : []),
+              ...(task.dueDate
+                ? [
+                    {
+                      tag: {
+                        value: formatDueDate(task.dueDate),
+                        color: undefined,
+                      },
+                    },
+                  ]
+                : []),
+              ...(task.priority
+                ? [
+                    {
+                      tag: {
+                        value: getTaskPriority(task.priority),
+                        color: getPriorityColor(task.priority),
+                      },
+                    },
+                  ]
+                : []),
               // Map each label to a tag, but only if we have valid string labels
-              ...getTaskLabels(task.label).map(label => ({
-                tag: { value: label }
+              ...getTaskLabels(task.label).map((label) => ({
+                tag: { value: label },
               })),
             ]}
             actions={
