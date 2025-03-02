@@ -24,8 +24,8 @@
     {
       "name": "status",
       "title": "Status",
-      "subtitle": "V2raya Control",
-      "description": "Check V2rayA Status",
+      "subtitle": "V2RayA Control",
+      "description": "Check V2RayA Status",
       "mode": "no-view"
     }
   ],
