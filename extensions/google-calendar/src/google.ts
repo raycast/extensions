@@ -1,5 +1,5 @@
 import { auth, calendar_v3 } from "@googleapis/calendar";
-import { OAuthService, useCachedPromise, withAccessToken } from "@raycast/utils";
+import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { Tool } from "@raycast/api";
 import { isInternal } from "./utils";
@@ -81,12 +81,30 @@ export async function searchContacts(query?: string) {
   return [...(contacts ?? []), ...(otherContacts ?? [])];
 }
 
+export async function getAutoAddHangouts() {
+  const cachedFunction = withCache(async () => {
+    const calendar = getCalendarClient();
+    const settings = await calendar.settings.get({ setting: "autoAddHangouts" });
+    return settings.data.value === "true";
+  });
+  return await cachedFunction();
+}
+
 export function useContacts(query?: string) {
   return useCachedPromise(searchContacts, [query], {
     keepPreviousData: true,
   });
 }
 
+export function useCalendar(calendarId: string) {
+  return useCachedPromise(
+    async (calendarId: string) => {
+      const calendar = getCalendarClient();
+      return await calendar.calendars.get({ calendarId });
+    },
+    [calendarId],
+  );
+}
 export function useEvents() {
   return useCachedPromise(
     () =>

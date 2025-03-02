@@ -18,11 +18,12 @@ type Input = {
    * The start of the time range to check for availability
    *
    * @remarks
-   * Must be a valid ISO 8601 datetime string in UTC format.
-   * The format should be: YYYY-MM-DDTHH:mm:ss.sssZ
+   * Must be a valid ISO 8601 datetime string with timezone offset.
+   * The format should be: YYYY-MM-DDTHH:mm:ss±HH:MM
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    *
    * @example
-   * "2024-03-20T09:00:00.000Z"
+   * "2024-03-20T09:00:00-07:00" or "2024-03-20T09:00:00+02:00"
    */
   timeMin: string;
 
@@ -30,12 +31,13 @@ type Input = {
    * The end of the time range to check for availability
    *
    * @remarks
-   * Must be a valid ISO 8601 datetime string in UTC format.
-   * The format should be: YYYY-MM-DDTHH:mm:ss.sssZ
+   * Must be a valid ISO 8601 datetime string with timezone offset.
+   * The format should be: YYYY-MM-DDTHH:mm:ss±HH:MM
    * Must be later than timeMin.
+   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
    *
    * @example
-   * "2024-03-20T17:00:00.000Z"
+   * "2024-03-20T17:00:00-07:00" or "2024-03-20T17:00:00+02:00"
    */
   timeMax: string;
 };

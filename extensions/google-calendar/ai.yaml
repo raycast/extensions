@@ -34,16 +34,17 @@ evals:
       - callsTool:
           name: "search-contacts"
           arguments:
-            query: "Alice"
+            query:
+              includes: "lice"
   - input: "@google-calendar What's on my calendar for today?"
     mocks:
       get-current-time:
-        currentTime: "2025-02-09T12:00:00Z"
+        currentTime: "2025-02-09T12:00:00+01:00"
       search-events:
         events:
           - id: "evt-101"
             title: "Daily Standup"
-            start: "2025-02-09T09:00:00Z"
+            start: "2025-02-09T09:00:00+01:00"
     expected:
       - callsTool:
           name: "search-events"
@@ -53,31 +54,37 @@ evals:
         events:
           - id: "evt-123"
             title: "Project Sync"
-            startDate: "2025-02-10T10:00:00Z"
+            startDate: "2025-02-10T00:00:00+00:00"
             duration: 60
       edit-event:
         success: true
         event:
           eventId: "evt-123"
-          startDate: "2025-02-17T10:00:00Z"
+          startDate: "2025-02-17T00:00:00+00:00"
     expected:
       - callsTool:
           name: "edit-event"
           arguments:
             eventId: "evt-123"
-            startDate: "2025-02-17T10:00:00Z"
+            startDate: "2025-02-17T00:00:00+00:00"
   - input: "@google-calendar find 2 hours slot this week for lunch"
     mocks:
+      search-events:
+        events:
+          - id: "evt-123"
+            title: "Project Sync"
+            startDate: "2025-02-26T10:00:00+04:00"
+            duration: 60
       check-availability:
         - busyPeriods:
-            - end: "2025-02-26T16:30:00Z"
-              start: "2025-02-26T15:30:00Z"
-            - end: "2025-02-27T13:00:00Z"
-              start: "2025-02-27T12:00:00Z"
-            - end: "2025-02-27T15:30:00Z"
-              start: "2025-02-27T15:00:00Z"
+            - end: "2025-02-26T16:30:00+04:00"
+              start: "2025-02-26T15:30:00+04:00"
+            - end: "2025-02-27T13:00:00+04:00"
+              start: "2025-02-27T12:00:00+04:00"
+            - end: "2025-02-27T15:30:00+04:00"
+              start: "2025-02-27T15:00:00+04:00"
       get-current-time:
-        time: "2025-02-10T15:36:39.039Z"
+        time: "2025-02-10T15:36:39.039+04:00"
     expected:
       - callsTool: "get-current-time"
       - callsTool:
@@ -91,11 +98,11 @@ evals:
         events:
           - id: "evt-123"
             title: "Project Sync"
-            startDate: "2025-02-10T10:00:00Z"
+            startDate: "2025-02-10T10:00:00+00:00"
             duration: 60
       delete-event: "ok"
       get-current-time:
-        time: "2025-02-10T15:36:39.039Z"
+        time: "2025-02-10T15:36:39.039+00:00"
     expected:
       - callsTool:
           name: "delete-event"

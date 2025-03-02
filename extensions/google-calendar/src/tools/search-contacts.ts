@@ -1,3 +1,4 @@
+import { withCache } from "@raycast/utils";
 import { searchContacts, withGoogleAPIs } from "../google";
 
 type Input = {
@@ -24,11 +25,23 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
-  const contacts = await searchContacts(input.query);
-  return contacts.map((contact) => ({
-    name: contact.names?.[0]?.displayName,
-    email: contact.emailAddresses?.[0]?.value,
-  }));
+  const cachedSearchContacts = withCache(
+    async () => {
+      const contacts = await searchContacts(input.query);
+      return contacts.map((contact) => ({
+        name: contact.names?.[0]?.displayName,
+        email: contact.emailAddresses?.[0]?.value,
+      }));
+    },
+    {
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      validate(data) {
+        return !data.length; // If no contacts are found, invalidate the cache
+      },
+    },
+  );
+
+  return await cachedSearchContacts();
 };
 
 export default withGoogleAPIs(tool);
