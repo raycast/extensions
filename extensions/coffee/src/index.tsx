@@ -3,6 +3,20 @@ import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { startCaffeinate, stopCaffeinate } from "./utils";
 
+function useExtraInfoStr(): string {
+  const { data } = useExec("ps -o args= -p $(pgrep caffeinate)", [], {
+    shell: true,
+    parseOutput: (output) => output.stdout,
+  });
+
+  if (!data) {
+    return "";
+  }
+
+  const match = data.match(/-t (\d+)/);
+  return match ? `For ${match[1]}s` : "";
+}
+
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
@@ -15,6 +29,8 @@ export default function Command(props: LaunchProps) {
   const caffeinateStatus = hasLaunchContext ? props?.launchContext?.caffeinated : data;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
   const preferences = getPreferenceValues<Preferences.Index>();
+
+  const extraInfoStr = useExtraInfoStr();
 
   const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState(caffeinateStatus);
 
@@ -55,6 +71,7 @@ export default function Command(props: LaunchProps) {
       {isLoading ? null : (
         <>
           <MenuBarExtra.Section title={`Your mac is ${localCaffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
+          {localCaffeinateStatus && extraInfoStr && <MenuBarExtra.Section title={extraInfoStr} />}
           <MenuBarExtra.Item
             title={localCaffeinateStatus ? "Decaffeinate" : "Caffeinate"}
             onAction={handleCaffeinateStatus}
