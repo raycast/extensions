@@ -24,8 +24,6 @@ It seems like the Espanso command-line tool is not currently installed on your s
 
 Please follow these steps to install Espanso:
 
-For MacOS:
-
 1. Open Terminal.
 
 2. Install Homebrew by pasting the following command and pressing Enter:
@@ -38,18 +36,7 @@ brew install espanso
 \`\`\`
 4. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
 
-For Windows:
-1. Download the latest Espanso installer from the official website: https://espanso.org/install/
-2. Run the installer and follow the on-screen instructions.
-3. Verify the installation by opening PowerShell and typing \`espanso\`. If the installation was successful, you'll see information about how to use Espanso.
-
-For Linux:
-1. Open Terminal.
-2. Depending on your distribution, use the appropriate command to install Espanso. For example, on Debian-based distributions (like Ubuntu), you'd use:
-\`\`\`
-sudo apt install espanso
-\`\`\`
-3. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
+If there are still issues with the installation, try adding the output of \`which espanso\` to the \`Espanso CLI Path\` extension preference.
 
 Remember to restart your computer after the installation process. If you need more detailed instructions, please refer to the official Espanso installation guide at https://espanso.org/install/.
 `;
