@@ -1,5 +1,14 @@
 # Safari Changelog
 
+## [Update] - 2025-03-03
+
+Improvements:
+- Speed up extension by loading plugins asynchronously.
+- Support `parseBookmarksWithGo` option to unlimit the size of bookmarks
+  - [issue#17188](https://github.com/raycast/extensions/issues/17188)
+  - [issue#14384](https://github.com/raycast/extensions/issues/14384)
+  - [issue#13833](https://github.com/raycast/extensions/issues/13833)
+
 ## [Chore: Moved contributor to past contributors list] - 2025-02-27
 
 ## [Update] - 2025-02-21
