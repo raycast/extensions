@@ -1,0 +1,56 @@
+{
+  "author": "NormC",
+  "commands": [
+    {
+      "title": "List Orgs",
+      "name": "index",
+      "description": "List all connected Salesforce orgs",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "title": "Copy Salesforce Id from Browser",
+      "name": "copy-sf-id",
+      "description": "Lists all open browser tabs that contain a Salesforce ID. Select one and it will be copied to the clipboard",
+      "mode": "view",
+      "icon": "extension-icon-sf-copy.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "preferences": [
+    {
+      "name": "searchLimit",
+      "type": "textfield",
+      "title": "Global Search Result Limit",
+      "description": "The maximum number of search results returned in a global search query.",
+      "default": "100",
+      "required": true
+    }
+  ],
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "@types/react": "18.3.3",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "typescript": "^5.4.5"
+  },
+  "title": "Salesforce Navigator",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "scripts": {
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "build": "ray build"
+  },
+  "description": "Salesforce Navigator lists your connected Salesforce orgs and makes it easy to copy Salesforce IDs from open browser tabs.",
+  "license": "MIT",
+  "name": "salesforce-navigator",
+  "categories": ["Developer Tools", "Productivity"],
+  "icon": "extension-icon.png"
+}
