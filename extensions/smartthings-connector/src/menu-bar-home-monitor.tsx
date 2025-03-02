@@ -323,7 +323,7 @@ export default function Command() {
             // First sort by status (on lights first)
             const aIsOn = a.status?.switch?.switch?.value === "on";
             const bIsOn = b.status?.switch?.switch?.value === "on";
-            if (aIsOn !== bIsOn) return bIsOn ? 1 : -1;
+            if (aIsOn !== bIsOn) return aIsOn ? -1 : 1;
 
             // Finally sort by name
             return a.label.localeCompare(b.label);
