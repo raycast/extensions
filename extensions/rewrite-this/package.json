@@ -87,15 +87,6 @@
       "default": "Rewrite this with correct spelling and grammar. Aim to have a conversational and human tone of voice."
     },
     {
-      "name": "preserveLineBreaks",
-      "title": "Preserve Line Breaks",
-      "description": "Maintain the original text's line breaks and paragraph structure",
-      "type": "checkbox",
-      "label": "Preserve line breaks",
-      "required": false,
-      "default": true
-    },
-    {
       "name": "avoidEmDashes",
       "title": "Avoid Em Dashes",
       "description": "Don't use em dashes (—) in the rewritten text",
@@ -103,6 +94,15 @@
       "label": "Avoid em dashes",
       "required": false,
       "default": true
+    },
+    {
+      "name": "autoPasteAfterGeneration",
+      "title": "Auto Paste After Generation",
+      "description": "Automatically paste the rewritten text after generation",
+      "type": "checkbox",
+      "label": "Auto-paste after generation",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

@@ -7,7 +7,7 @@ Rewrite This is a Raycast extension that instantly rewrites any text using Anthr
 **Eliminate frustrating context switching** - No more copying text, switching to ChatGPT or Claude's website, waiting for it to load, pasting your text, writing a prompt, copying the result, and switching back to your original app.
 
 With Rewrite This, you can:
-- Stay in your current application (email, document, browser, wherever)
+- Stay in your current application (email, slack, document, browser or wherever)
 - Use a simple hotkey (we recommend setting up OPTION + R)
 - Get your rewritten text instantly copied back to your clipboard
 
@@ -24,8 +24,9 @@ This workflow saves you time and mental energy, letting you focus on your work w
   - Concise & Clear
   - Grammar Fixes Only
   - Plus a custom prompt option for your specific needs
-- **Format Preservation**: Option to maintain original line breaks and paragraph structure
-- **Style Preferences**: Additional options like avoiding em dashes
+- **Format Preservation**: All line breaks and paragraph structures are preserved automatically
+- **Style Preferences**: Optional to remove pesky em dashes
+- **Auto-Paste**: Optional setting to automatically paste the rewritten text after generation
 
 ## Security & Privacy
 
@@ -42,8 +43,23 @@ This workflow saves you time and mental energy, letting you focus on your work w
 4. Run the "Rewrite This" command
 5. The rewritten text is automatically copied to your clipboard
 
-**Pro Tip**: Set up a hotkey (we recommend OPTION + R) in Raycast preferences to rewrite text without ever opening the Raycast search bar. This makes the workflow even faster!
+## Even Faster Rewriting
 
-## What you need
+For the absolute fastest text rewriting experience, combine these two powerful features:
+
+1. **Set up a dedicated hotkey** (OPTION + R recommended) in Raycast preferences
+2. **Enable auto-paste** in the extension preferences
+
+This combination creates a seamless workflow that requires just two actions:
+1. **Select and copy text** you want to rewrite (CMD + C)
+2. **Press your hotkey** (e.g., OPTION + R)
+
+That's it! The extension will:
+- Automatically send your text to Claude
+- Process it according to your preferences
+- Copy the rewritten text to your clipboard
+- Instantly paste it back where your cursor is
+
+## What you need to bring
 
 - A Claude API key from [Anthropic Console](https://console.anthropic.com/)

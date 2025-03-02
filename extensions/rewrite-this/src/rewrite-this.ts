@@ -8,8 +8,8 @@ interface Preferences {
   claudeModel?: string;
   promptPreset?: string;
   customPrompt?: string;
-  preserveLineBreaks?: boolean;
   avoidEmDashes?: boolean;
+  autoPasteAfterGeneration?: boolean;
 }
 
 interface ClaudeContentBlock {
@@ -41,8 +41,8 @@ export default async function command() {
     const customPrompt =
       preferences.customPrompt ||
       "Rewrite this with correct spelling and grammar. Aim to have a conversational and human tone of voice.";
-    const preserveLineBreaks = preferences.preserveLineBreaks !== false; // Default to true if undefined
     const avoidEmDashes = preferences.avoidEmDashes !== false; // Default to true if undefined
+    const autoPaste = preferences.autoPasteAfterGeneration === true;
 
     if (!apiKey) {
       await showToast({
@@ -108,11 +108,7 @@ export default async function command() {
 
     // Prepare system message based on preferences
     let systemMessage =
-      "You are a helpful text rewriting assistant. Your job is to take the provided text and rewrite it as instructed";
-
-    if (preserveLineBreaks) {
-      systemMessage += " while preserving the original line breaks, paragraph structure, and formatting";
-    }
+      "You are a helpful text rewriting assistant. Your job is to take the provided text and rewrite it as instructed while preserving the original line breaks, paragraph structure, and formatting";
 
     if (avoidEmDashes) {
       systemMessage += ". Do not use em dashes (—) in your rewrite";
@@ -120,26 +116,17 @@ export default async function command() {
 
     systemMessage += ". You should return ONLY the rewritten text, with no additional commentary.";
 
-    // Prepare user instructions based on preferences
-    let preserveFormatInstructions = "";
+    // Prepare user instructions
+    let preserveFormatInstructions = "\n\nIMPORTANT INSTRUCTIONS:";
+    preserveFormatInstructions +=
+      "\n1. Return ONLY the rewritten text without any additional commentary or explanations";
+    preserveFormatInstructions += "\n2. Preserve all line breaks and paragraph structure from the original text";
+    preserveFormatInstructions += "\n3. Maintain the original formatting (including spacing between paragraphs)";
+    preserveFormatInstructions += "\n4. Do not add any headers, footers, or wrapper text";
 
-    if (preserveLineBreaks || avoidEmDashes) {
-      preserveFormatInstructions = "\n\nIMPORTANT INSTRUCTIONS:";
+    if (avoidEmDashes) {
       preserveFormatInstructions +=
-        "\n1. Return ONLY the rewritten text without any additional commentary or explanations";
-
-      if (preserveLineBreaks) {
-        preserveFormatInstructions += "\n2. Preserve all line breaks and paragraph structure from the original text";
-        preserveFormatInstructions += "\n3. Maintain the original formatting (including spacing between paragraphs)";
-        preserveFormatInstructions += "\n4. Do not add any headers, footers, or wrapper text";
-      }
-
-      if (avoidEmDashes) {
-        preserveFormatInstructions += `\n${preserveLineBreaks ? "5" : "2"}. Do not use em dashes (—) in your rewrite. Use other punctuation like commas, parentheses, or colons instead`;
-      }
-    } else {
-      preserveFormatInstructions =
-        "\n\nIMPORTANT: Return ONLY the rewritten text without any additional commentary, explanations, or notes.";
+        "\n5. Do not use em dashes (—) in your rewrite. Use other punctuation like commas, parentheses, or colons instead";
     }
 
     // Make API request to Claude
@@ -187,8 +174,22 @@ ${clipboardContent}${preserveFormatInstructions}`,
     // Copy rewritten text to clipboard
     await Clipboard.copy(rewrittenText);
 
-    // Show success message with model info
-    await showHUD(`✅ Text rewritten using ${getModelDisplayName(selectedModel)}`);
+    // Auto-paste after generation if enabled
+    if (autoPaste) {
+      try {
+        await promisify(exec)(
+          'pbpaste | osascript -e \'tell application "System Events" to keystroke "v" using command down\'',
+        );
+        await showHUD(`✅ Text rewritten and pasted using ${getModelDisplayName(selectedModel)}`);
+      } catch (pasteError) {
+        console.error("Error auto-pasting:", pasteError);
+        // Fall back to just showing success for the rewrite if pasting fails
+        await showHUD(`✅ Text rewritten using ${getModelDisplayName(selectedModel)} (auto-paste failed)`);
+      }
+    } else {
+      // Show success message with model info (without auto-paste)
+      await showHUD(`✅ Text rewritten using ${getModelDisplayName(selectedModel)}`);
+    }
   } catch (error) {
     console.error("Error:", error);
     await showToast({
