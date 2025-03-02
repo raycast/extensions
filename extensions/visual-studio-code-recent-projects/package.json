@@ -26,12 +26,14 @@
     "Tarocch1",
     "jonas_list",
     "xilopaint",
-    "lachero"
+    "lachero",
+    "pascal_burkhard"
   ],
   "keywords": [
     "vscode",
     "cursor",
     "codium",
+    "positron",
     "windsurf",
     "trae"
   ],
@@ -103,6 +105,10 @@
         {
           "value": "Cursor",
           "title": "Cursor"
+        },
+        {
+          "value": "Positron",
+          "title": "Positron"
         },
         {
           "value": "Windsurf",

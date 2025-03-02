@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2025-03-02
+
+- Adds support for Positron as an option in the extension settings.
+
 ## [Performance] - 2025-03-02
 
 - Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
