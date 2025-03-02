@@ -70,6 +70,7 @@ const cliPaths: Record<string, string> = {
   "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
   Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
   VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
+  Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
   Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
   Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
 };
