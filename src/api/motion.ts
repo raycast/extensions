@@ -17,6 +17,13 @@ interface MotionTask {
   workspaceId: string;
   status?: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
+  projectId?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  workspaceId: string;
 }
 
 interface Workspace {
@@ -99,6 +106,11 @@ export const getMotionApiClient = () => {
   console.log("[DEBUG] Using corrected workspace ID:", correctWorkspaceId);
 
   return {
+    // Get the workspace ID (for use in components)
+    getWorkspaceId(): string {
+      return correctWorkspaceId;
+    },
+
     async createTask(taskInput: {
       title: string;
       description?: string;
@@ -106,22 +118,28 @@ export const getMotionApiClient = () => {
       priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
       status?: "TODO" | "IN_PROGRESS" | "DONE";
       label?: string;
+      projectId?: string;
     }): Promise<MotionTask> {
       console.log("[DEBUG] Creating task with input:", JSON.stringify(taskInput, null, 2));
 
       // Simplify our approach now that we know the correct format
       const url = `${BASE_URL}/tasks`;
+      
+      // Destructure all properties except label which API doesn't accept
+      const { label, ...taskWithoutLabel } = taskInput;
 
+      // Create task object with the correct properties
       const task = {
-        name: taskInput.title,
-        description: taskInput.description,
-        dueDate: taskInput.dueDate?.toISOString(),
-        priority: taskInput.priority,
-        status: taskInput.status,
+        name: taskWithoutLabel.title,
+        description: taskWithoutLabel.description,
+        dueDate: taskWithoutLabel.dueDate?.toISOString(),
+        priority: taskWithoutLabel.priority,
+        status: taskWithoutLabel.status,
         workspaceId: correctWorkspaceId, // Use the correct ID
-        label: taskInput.label,
+        projectId: taskWithoutLabel.projectId,
       };
 
+      // Note: We're omitting the label property as the API doesn't accept it directly
       logRequest("POST", url, headers, task);
 
       try {
@@ -139,6 +157,52 @@ export const getMotionApiClient = () => {
         return response.json() as Promise<MotionTask>;
       } catch (error) {
         console.error("[DEBUG] Create task error:", error);
+        throw error;
+      }
+    },
+
+    async getProjects(): Promise<Project[]> {
+      const url = `${BASE_URL}/projects?workspaceId=${correctWorkspaceId}`;
+      logRequest("GET", url, headers);
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers,
+        });
+
+        if (!response.ok) {
+          const responseText = await logResponse(response);
+          throw new Error(`Failed to get projects: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+        }
+
+        // Parse the response
+        const data = await response.json();
+
+        // Log full response for debugging
+        console.log("[DEBUG] Projects response data:", JSON.stringify(data, null, 2));
+
+        // Handle both array and object with projects property formats
+        if (Array.isArray(data)) {
+          return data as Project[];
+        } else if (data && typeof data === "object") {
+          // Check for common wrapper properties like 'projects', 'items', 'data', etc.
+          for (const key of ["projects", "items", "data", "results"]) {
+            if (Array.isArray(data[key])) {
+              return data[key] as Project[];
+            }
+          }
+
+          // If we can't find a projects array in a known property, return whatever we got
+          console.warn("[DEBUG] Couldn't find projects array in response, returning raw data");
+          return Array.isArray(data) ? data : ([data] as Project[]);
+        }
+
+        // Fallback to empty array if we couldn't parse anything
+        console.warn("[DEBUG] Returning empty array as couldn't parse projects response");
+        return [];
+      } catch (error) {
+        console.error("[DEBUG] Get projects error:", error);
         throw error;
       }
     },

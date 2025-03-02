@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
-import { getMotionApiClient, LABEL_PRESETS } from "./api/motion";
+import { useState, useEffect } from "react";
+import { getMotionApiClient, LABEL_PRESETS, Project } from "./api/motion";
 
 type Values = {
   name: string;
@@ -9,6 +9,7 @@ type Values = {
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label: string;
+  projectId: string;
 };
 
 // Helper function to get tomorrow's date
@@ -21,9 +22,33 @@ function getTomorrow() {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
 
   // Set default values
   const tomorrow = getTomorrow();
+
+  // Fetch projects when component mounts
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const motionClient = getMotionApiClient();
+        const projectsData = await motionClient.getProjects();
+        setProjects(projectsData);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load projects",
+          message: String(error),
+        });
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    }
+
+    fetchProjects();
+  }, []);
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
@@ -39,6 +64,7 @@ export default function Command() {
         priority: values.priority,
         status: values.status,
         label: values.label,
+        projectId: values.projectId,
       });
 
       await showToast({
@@ -61,7 +87,7 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingProjects}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -96,6 +122,13 @@ export default function Command() {
         <Form.Dropdown.Item value="" title="None" />
         {LABEL_PRESETS.map((label) => (
           <Form.Dropdown.Item key={label} value={label} title={label} />
+        ))}
+      </Form.Dropdown>
+
+      <Form.Dropdown id="projectId" title="Project">
+        <Form.Dropdown.Item value="" title="None" />
+        {projects.map((project) => (
+          <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
         ))}
       </Form.Dropdown>
     </Form>
