@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openrouter-models",
+  "title": "OpenRouter Models",
+  "description": "Browse and search OpenRouter AI models",
+  "icon": "extension-icon.png",
+  "author": "mikedemarais",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-models",
+      "title": "OpenRouter Models",
+      "description": "View AI models available through the OpenRouter API",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "description": "Choose what happens when you press ↵ on a model",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Open Model Page",
+          "value": "page"
+        },
+        {
+          "title": "Copy Model ID",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    {
+      "file": "metadata/openrouter-models-1.png",
+      "title": "Browse Recently Added OpenRouter Models",
+      "description": "Search through 300+ AI models available on OpenRouter"
+    },
+    {
+      "file": "metadata/openrouter-models-2.png", 
+      "title": "Search Recently Added OpenRouter Models",
+      "description": "Search through 300+ AI models available on OpenRouter"
+    },
+    {
+      "file": "metadata/openrouter-models-3.png",
+      "title": "Sort by Various Parameters",
+      "description": "Sort models by newest, context length, or price"
+    },
+    {
+      "file": "metadata/openrouter-models-4.png",
+      "title": "Quick Model Actions",
+      "description": "Easily copy model IDs or view documentation"
+    }
+  ],
+  "keywords": [
+    "openrouter",
+    "anthropic",
+    "openai",
+    "deepseek",
+    "gemini",
+    "api",
+    "ai",
+    "models",
+    "llm",
+    "language models",
+    "chatgpt",
+    "claude"
+  ]
+}
