@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Performance] - {PR_MERGE_DATE}
+## [Performance] - 2025-03-02
 
 - Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
 
