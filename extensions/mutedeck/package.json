@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mutedeck",
-  "title": "Mutedeck",
+  "title": "MuteDeck",
   "description": "Control MuteDeck from Raycast",
   "icon": "icon.png",
   "author": "chad_walters",
