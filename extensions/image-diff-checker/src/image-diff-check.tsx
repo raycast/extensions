@@ -14,13 +14,13 @@ export default function Command() {
         }
       >
         <Form.FilePicker
-          title="actual"
+          title="Actual"
           allowMultipleSelection={false}
           info="Only files with the extensions .png, .jpeg, .jpg, and .gif are supported."
           {...fields.actual}
         />
         <Form.FilePicker
-          title="expected"
+          title="Expected"
           allowMultipleSelection={false}
           info="Only files with the extensions .png, .jpeg, .jpg, and .gif are supported."
           {...fields.expected}
