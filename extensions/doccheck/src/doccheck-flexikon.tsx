@@ -635,6 +635,22 @@ export default function Command(props: LaunchProps) {
             <List.Item
               key={"e5-" + entry.url}
               title={{ value: entry.title, tooltip: entry.title }}
+              accessories={
+                entry.date_publish
+                  ? [
+                      {
+                        tag: new Date(entry.date_publish),
+                        tooltip:
+                          "Created " +
+                          new Date(entry.date_publish).toLocaleDateString("de-DE", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          }),
+                      },
+                    ]
+                  : []
+              }
               actions={EntryActions(entry.url, entry.title, query, getHistoryAndFavourites, fetchTopArticles, "")}
             />
           );
