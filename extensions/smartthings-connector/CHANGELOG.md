@@ -1,6 +1,6 @@
 # SmartThings Connector Changelog
 
-## [Initial Version] - 2024-03-19
+## [Version 1.0.0] - 2024-03-19
 
 - Add menu bar monitoring of SmartThings home mode
 - Support for viewing and controlling lights
