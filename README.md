@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p align="center">
   <img src="images/store-logo.webp" height="128">
   <h1 align="center">Raycast Extensions</h1>
@@ -29,3 +30,16 @@ Raycast wouldn't be where it is without the feedback from our community, so we w
 ## Community
 
 Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
+=======
+## Set Up Extension
+
+### Configure your Pipedrive Domain
+
+As a Pipedrive customer, you should have a custom domain like `https://mycompany.pipedrive.com`. Enter the `mycompany.pipedrive.com` part in the extension's preference under `Domain`.
+
+### Configure your Pipedrive API Token
+
+Find your user's Pipedrive API token in your preferences on the Pipedrive website, then save it in the extension's preference under `API Token`.
+
+If you need help finding your API token, Pipedrive has some documentation [here](https://support.pipedrive.com/en/article/how-can-i-find-my-personal-api-key).
+>>>>>>> f6da773d8d (Add links to launch Pipedrive to add new person, deal, org or view email or activity when no results are found)
