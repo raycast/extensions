@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "libre-blocks",
+  "title": "Libre Blocks",
+  "description": "Explore transactions, blocks, and valuable data for the Libre Blockchain",
+  "icon": "extension-icon.png",
+  "author": "salimcan",
+  "owner": "libreblocks",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-account",
+      "title": "Libre Account Explorer",
+      "description": "View detailed information about Libre blockchain accounts including balances, resources, and permissions",
+      "mode": "view"
+    },
+    {
+      "name": "get-transaction",
+      "title": "Libre Transaction Viewer",
+      "description": "Examine transaction details by ID including actions, timestamps, and block information",
+      "mode": "view"
+    },
+    {
+      "name": "dex-trades",
+      "title": "Libre DEX Trades Explorer",
+      "description": "Monitor recent trades on Libre DEX with filtering by pairs, trade types, and accounts",
+      "mode": "view"
+    },
+    {
+      "name": "show-btc-price",
+      "title": "BTC Price Tracker",
+      "description": "Real-time Bitcoin price in USD displayed directly in your menubar with configurable refresh interval",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "title": "Refresh Interval",
+          "description": "How often to refresh the BTC price (in seconds)",
+          "type": "textfield",
+          "required": true,
+          "default": "10",
+          "placeholder": "Enter refresh interval in seconds (e.g., 10)"
+        }
+      ]
+    },
+    {
+      "name": "show-libre-price",
+      "title": "Libre Price Tracker",
+      "description": "Real-time Libre price in sats, BTC, or USD with customizable display format and refresh interval",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "title": "Refresh Interval",
+          "description": "How often to refresh the Libre price (in seconds)",
+          "type": "textfield",
+          "required": true,
+          "default": "10",
+          "placeholder": "Enter refresh interval in seconds (e.g., 10)"
+        },
+        {
+          "name": "defaultFormat",
+          "title": "Default Price Format",
+          "description": "Choose how to display the Libre price",
+          "type": "dropdown",
+          "required": true,
+          "default": "sats",
+          "data": [
+            {
+              "title": "Sats",
+              "value": "sats"
+            },
+            {
+              "title": "BTC",
+              "value": "btc"
+            },
+            {
+              "title": "USD",
+              "value": "usd"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+}
