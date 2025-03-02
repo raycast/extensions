@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import OpenAI from "openai";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types";
 
 const OPENAI_MODEL = "gpt-4o-mini";
 

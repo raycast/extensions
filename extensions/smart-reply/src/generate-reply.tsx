@@ -1,6 +1,5 @@
 import { AI, environment, getPreferenceValues, showHUD } from "@raycast/api";
 import { useSelectedText } from "./hooks/useSelectedText";
-import { Preferences } from "./types";
 import TranslationResult from "./components/TranslationResult";
 
 export default function Command() {

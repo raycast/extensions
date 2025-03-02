@@ -39,10 +39,3 @@ export type Language =
   | "sv"
   | "da"
   | "fi";
-
-export interface Preferences {
-  openAIApiKey: string;
-  targetLanguage: Language;
-  defaultTone: string;
-  defaultStyle: string;
-}

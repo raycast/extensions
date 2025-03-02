@@ -9,7 +9,7 @@ import {
   PopToRootType,
 } from "@raycast/api";
 import { LANGUAGES, PROMPTS } from "../constants";
-import { Language, Preferences } from "../types";
+import { Language } from "../types";
 import { useGenerate } from "../hooks/useGenerate";
 
 interface ResultProps {

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Result } from "./Result";
-import { Preferences, TONE_OPTIONS, TRANSLATION_STYLE_OPTIONS } from "../constants";
+import { TONE_OPTIONS, TRANSLATION_STYLE_OPTIONS } from "../constants";
 interface ReplyFormProps {
   translationText: string;
   detectedLanguage: string;

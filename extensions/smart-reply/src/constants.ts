@@ -92,10 +92,3 @@ export const TRANSLATION_STYLE_OPTIONS = {
 
 export type ToneOption = (typeof TONE_OPTIONS)[keyof typeof TONE_OPTIONS];
 export type TranslationStyleOption = (typeof TRANSLATION_STYLE_OPTIONS)[keyof typeof TRANSLATION_STYLE_OPTIONS];
-
-export interface Preferences {
-  openAIApiKey: string;
-  targetLanguage: Language;
-  defaultTone: string;
-  defaultStyle: string;
-}
