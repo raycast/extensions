@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rewrite-this",
   "title": "Rewrite This",
-  "description": "Quickly rewrites your a piece of text using your Claude Key",
+  "description": "Quickly rewrites a piece of text using your Claude Key",
   "icon": "extension-icon.png",
   "author": "shavin_peiries",
   "categories": [
@@ -45,22 +45,6 @@
         {
           "title": "Claude 3.5 Sonnet (Balanced)",
           "value": "claude-3-5-sonnet-20240620"
-        },
-        {
-          "title": "Claude 3.5 Haiku (Fastest)",
-          "value": "claude-3-5-haiku-20241022"
-        },
-        {
-          "title": "Claude 3 Opus (High quality legacy)",
-          "value": "claude-3-opus-20240229"
-        },
-        {
-          "title": "Claude 3 Sonnet (Balanced legacy)",
-          "value": "claude-3-sonnet-20240229"
-        },
-        {
-          "title": "Claude 3 Haiku (Fast legacy)",
-          "value": "claude-3-haiku-20240307"
         }
       ]
     },
