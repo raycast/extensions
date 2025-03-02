@@ -183,6 +183,7 @@ const buildSchemes: Record<string, string> = {
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
   VSCodium: "vscode-oss",
+  Positron: "positron",
   Windsurf: "windsurf",
   Trae: "trae",
 };
