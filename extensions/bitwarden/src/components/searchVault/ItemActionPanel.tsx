@@ -16,6 +16,7 @@ import {
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
+  CopyPublicKeyAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
@@ -71,6 +72,11 @@ const VaultItemActionPanel = () => {
       {type === ItemType.NOTE && (
         <ActionPanel.Section>
           <ShowNotesAction />
+        </ActionPanel.Section>
+      )}
+      {type === ItemType.SSH_KEY && (
+        <ActionPanel.Section>
+          <CopyPublicKeyAction />
         </ActionPanel.Section>
       )}
       <ActionPanel.Section title="Custom Fields">

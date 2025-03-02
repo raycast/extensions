@@ -18,6 +18,7 @@ export interface Item {
   passwordHistory?: PasswordHistory[];
   secureNote?: SecureNote;
   card?: Card;
+  sshKey?: SshKey;
 }
 
 export enum ItemType {
@@ -87,6 +88,12 @@ export interface Card {
   expMonth: string | null;
   expYear: string | null;
   code: string | null;
+}
+
+export interface SshKey {
+  privateKey: string;
+  publicKey: string;
+  keyFingerprint: string;
 }
 
 export enum FieldType {
