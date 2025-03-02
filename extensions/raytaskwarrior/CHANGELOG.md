@@ -1,6 +1,6 @@
 # RayTaskwarrior Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2025-03-02
 
 - Prevent `ERR_CHILD_PROCESS_STDIO_MAXBUFFER` error when reading tasks
 
