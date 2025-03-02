@@ -2,7 +2,17 @@ import { getPreferenceValues } from "@raycast/api";
 import { formatDuration, intervalToDuration } from "date-fns";
 import isUrlSuperb from "is-url-superb";
 
-export const preferences = getPreferenceValues<ExtensionPreferences>();
+export const {
+  downloadPath,
+  homebrewPath,
+  ytdlPath,
+  ffmpegPath,
+  ffprobePath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  forceIpv4,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export type DownloadOptions = {
   url: string;
