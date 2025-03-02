@@ -5,6 +5,9 @@
   "description": "Search DocCheck Flexikon with Raycast",
   "icon": "doccheck.png",
   "author": "spacedog",
+  "contributors": [
+    "H16nning"
+  ],
   "categories": [
     "Web"
   ],
