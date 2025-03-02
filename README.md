@@ -10,10 +10,18 @@ A Raycast extension for interacting with the [Motion](https://www.usemotion.com/
 
 ## Installation
 
+<<<<<<< HEAD
 1. Clone this repository
 2. Open the directory in your terminal
 3. Run `npm install` to install dependencies
 4. Run `npm run dev` to start the development server
+=======
+1. Install the extension from the Raycast store.
+2. Set up your Motion API credentials:
+   - Get your API key from Motion's developer settings
+   - Find your workspace ID in your Motion account (to be confirmed how to do this)
+   - Add these to the extension preferences in Raycast
+>>>>>>> origin/main
 
 ## Configuration
 
