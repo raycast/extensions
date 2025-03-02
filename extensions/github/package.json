@@ -149,7 +149,7 @@
         {
           "name": "excludedRepositories",
           "title": "Excluded repositories",
-          "description": "A comma-separated list of repositories to exlude when listing your issues",
+          "description": "A comma-separated list of repositories to exclude when listing your issues",
           "type": "textfield",
           "required": false,
           "label": "Excluded repositories"
