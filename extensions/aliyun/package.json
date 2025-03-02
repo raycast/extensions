@@ -20,7 +20,7 @@
     },
     {
       "name": "api",
-      "title": "Api",
+      "title": "Search API",
       "subtitle": "Aliyun",
       "description": "search aliyun api",
       "mode": "view"
