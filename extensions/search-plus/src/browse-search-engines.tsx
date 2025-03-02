@@ -1,29 +1,18 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, openExtensionPreferences, showHUD } from "@raycast/api";
 import { useState } from "react";
-import { readPreferences, writePreferences } from "./lib/config";
-import { SearchEngine, useListSearchEngines } from "./lib/search-engines";
+import { SearchEngine, useListSearchEngines } from "./lib/db";
+import { Clipboard } from "@raycast/api";
 
-export default function BrowseSearchTools() {
+export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
-  const { defaultSearchEngine } = readPreferences();
+  const defaultSearchEngine = getPreferenceValues<Preferences>().defaultSearchEngine;
 
   const { data: searchEngines, isLoading } = useListSearchEngines(searchText);
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
-    try {
-      writePreferences({ defaultSearchEngine: searchEngine.t });
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Default Updated",
-        message: `${searchEngine.s} is now your default search engine`,
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Update Default Search Engine",
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+    await Clipboard.copy(`${searchEngine.t}`);
+    showHUD(`Shortcut for ${searchEngine.s} copied to clipboard`);
+    await openExtensionPreferences();
   };
 
   return (
@@ -44,8 +33,8 @@ export default function BrowseSearchTools() {
           ]}
           actions={
             <ActionPanel>
-              <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
               <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+              <Action title="Copy and Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
               <Action.CopyToClipboard title="Copy Search Engine Shortcut" content={`!${searchEngine.t}`} />
             </ActionPanel>
           }

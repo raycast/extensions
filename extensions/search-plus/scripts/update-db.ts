@@ -77,14 +77,14 @@ async function initializeDatabase() {
         sc = excluded.sc
     `);
 
-    const processedsearchEngines = new Set();
+    const processedSearchEngines = new Set();
 
     for (const searchEngine of searchEngines) {
-      if (processedsearchEngines.has(searchEngine.t)) {
+      if (processedSearchEngines.has(searchEngine.t)) {
         throw new Error(`Error: Duplicate search engine trigger '${searchEngine.t}' found`);
       }
 
-      processedsearchEngines.add(searchEngine.t);
+      processedSearchEngines.add(searchEngine.t);
 
       const existing = await db.get("SELECT * FROM search_engines WHERE t = ?", searchEngine.t);
 
@@ -116,9 +116,9 @@ async function initializeDatabase() {
 
     await stmt.finalize();
 
-    const dbsearchEngines = await db.all("SELECT t FROM search_engines");
+    const dbSearchEngines = await db.all("SELECT t FROM search_engines");
     const searchEngineKeys = new Set(searchEngines.map((b) => b.t));
-    const toDelete = dbsearchEngines.filter((b) => !searchEngineKeys.has(b.t));
+    const toDelete = dbSearchEngines.filter((b) => !searchEngineKeys.has(b.t));
 
     let deleted = 0;
     if (toDelete.length > 0) {

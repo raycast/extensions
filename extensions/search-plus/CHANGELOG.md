@@ -1,6 +1,6 @@
 # Search Plus Changelog
 
-## [Initial Release] - 2025-02-27
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Implemented DuckDuckGo-style bangs search functionality directly in Raycast
 - Added support for searching specific websites using bang shortcuts (e.g., `!g`, `!w`, `!t3`)

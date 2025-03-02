@@ -5,10 +5,23 @@
   "description": "Implements DuckDuckGo-style bangs search directly in Raycast.",
   "icon": "extension-icon.png",
   "author": "franzwilhelm",
+  "contributors": [
+    "lachero"
+  ],
   "categories": [
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultSearchEngine",
+      "title": "Default Search Engine",
+      "description": "The default search engine to use when no bang is provided.",
+      "type": "textfield",
+      "default": "g",
+      "required": true
+    }
+  ],
   "commands": [
     {
       "name": "search",
