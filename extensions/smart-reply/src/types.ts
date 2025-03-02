@@ -43,4 +43,6 @@ export type Language =
 export interface Preferences {
   openAIApiKey: string;
   targetLanguage: Language;
+  defaultTone: string;
+  defaultStyle: string;
 }

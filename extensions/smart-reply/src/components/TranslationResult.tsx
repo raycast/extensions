@@ -4,7 +4,7 @@ import { Language } from "../types";
 import { LANGUAGES } from "../constants";
 import { PROMPTS } from "../constants";
 import { detectLanguage } from "../utils/detectLanguage";
-import { useGenerate } from "../hooks/useGenearate";
+import { useGenerate } from "../hooks/useGenerate";
 import { Preferences } from "../types";
 
 interface TranslationResultProps {

@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { LANGUAGES, PROMPTS } from "../constants";
 import { Language, Preferences } from "../types";
-import { useGenerate } from "../hooks/useGenearate";
+import { useGenerate } from "../hooks/useGenerate";
 
 interface ResultProps {
   translationText: string;

@@ -9,6 +9,7 @@ export default function Command() {
 
   if (!(environment.canAccess(AI) || preferences.openAIApiKey)) {
     showHUD("Error: To use this command, please either upgrade to Pro or use your own API key");
+    return null;
   }
 
   return <TranslationResult selectedText={selectedText} isLoading={isSelectedTextLoading} />;

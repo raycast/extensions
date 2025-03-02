@@ -36,7 +36,7 @@ export function useOpenAIStreaming(prompt: string, execute: boolean) {
           return;
         }
 
-        chatCompletion.on("content", async (delta) => {
+        chatCompletion.on("content", (delta) => {
           if (isCancelled) return;
           setData((result) => {
             if (!delta) return result;

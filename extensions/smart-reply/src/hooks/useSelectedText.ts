@@ -4,7 +4,7 @@ import { usePromise } from "@raycast/utils";
 export function useSelectedText() {
   const { data: selectedText, isLoading } = usePromise(
     async () => {
-      return await getSelectedText();
+      return getSelectedText();
     },
     [],
     {

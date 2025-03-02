@@ -32,6 +32,10 @@ const languageCodeMap: Record<string, Language> = {
 
 export function detectLanguage(text: string): string {
   const detectedCode = franc(text);
+  if (detectedCode === "und") {
+    return "en";
+  }
+
   const languageCode = languageCodeMap[detectedCode];
 
   if (languageCode && LANGUAGES[languageCode]) {
