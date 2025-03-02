@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "console",
-      "title": "Console",
+      "title": "Search Console",
       "subtitle": "Aliyun",
       "description": "visit aliyun console",
       "mode": "view"
