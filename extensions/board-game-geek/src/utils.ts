@@ -30,7 +30,7 @@ export async function parseResults(response: Response): Promise<BggSearchRespons
   return resultsArr;
 }
 
-export async function parseGameData(response: Response): Promise<BggDetailsResponse | undefined> {
+export async function parseGameData(response: Response): Promise<BggDetailsResponse> {
   let gameData: BggDetailsResponse;
 
   try {
@@ -55,7 +55,7 @@ export async function parseGameData(response: Response): Promise<BggDetailsRespo
     };
   } catch (error) {
     showFailureToast('Could not parse response');
-    return;
+    throw error;
   }
 
   return gameData;
