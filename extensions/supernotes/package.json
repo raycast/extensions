@@ -84,7 +84,7 @@
     "instructions": "Cards support markdown formatting. The name is stored separately from the content and should not be included in the content. If asking about a daily card or today card, then you should search for the date in ISO-8601 format rather than daily card. If one does not exist, then create it with the title as the ISO-8601 date.",
     "evals": [
       {
-        "input": "@supernotes Add a task for today to upgrade to Raycast Pro"
+        "input": "@supernotes Add a task for today to buy milk"
       },
       {
         "input": "@supernotes Summarize the composition of the moon and add it to a new card"
@@ -121,40 +121,6 @@
       "description": "Get your API key from Supernotes.",
       "type": "password",
       "required": true
-    },
-    {
-      "name": "dailyDateFormat",
-      "title": "Daily Date Format",
-      "description": "The format of the daily card date.",
-      "type": "dropdown",
-      "required": false,
-      "default": "yyyy-M-d",
-      "data": [
-        {
-          "title": "YYYY-M-D",
-          "value": "yyyy-M-d"
-        },
-        {
-          "title": "YYYY-MM-DD",
-          "value": "yyyy-MM-dd"
-        },
-        {
-          "title": "MM-DD-YYYY",
-          "value": "MM-dd-yyyy"
-        },
-        {
-          "title": "MMM DD, YYYY",
-          "value": "MMM dd, yyyy"
-        },
-        {
-          "title": "DD MMM, YYYY",
-          "value": "dd MMM, yyyy"
-        },
-        {
-          "title": "DD-MM-YYYY",
-          "value": "dd-MM-yyyy"
-        }
-      ]
     }
   ],
   "dependencies": {

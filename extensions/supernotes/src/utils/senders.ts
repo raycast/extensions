@@ -13,7 +13,7 @@ export async function sendToDaily(text: string, headless?: boolean) {
     await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
   }
   const now = new Date();
-  const localDate = format(now, getSupernotesPrefs().dailyDateFormat);
+  const localDate = format(now, "yyyy-MM-dd");
   const fetched = await superfetch("/v1/cards/daily", "put", {
     apiKey,
     body: { markup: text, local_date: localDate },
