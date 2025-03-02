@@ -20,3 +20,8 @@ export async function createDocFromUrl(prefix: Prefix, title?: string) {
 
   await open(url);
 }
+
+// open fixed url
+export async function openURL(url: string) {
+  await open(url);
+}
