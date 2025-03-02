@@ -17,8 +17,8 @@
     {
       "name": "toggle",
       "title": "Toggle",
-      "subtitle": "V2raya Control",
-      "description": "Toggle V2rayA Connection",
+      "subtitle": "V2RayA Control",
+      "description": "Toggle V2RayA Connection",
       "mode": "no-view"
     },
     {
