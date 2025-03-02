@@ -25,6 +25,7 @@ export enum ItemType {
   NOTE = 2,
   CARD = 3,
   IDENTITY = 4,
+  SSH_KEY = 5,
 }
 
 export interface Folder {

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix search when vault contains SSH keys
+
 ## [Feature] - 2025-02-19
 
 - Add fuzzy search for vault and include url or username in search
