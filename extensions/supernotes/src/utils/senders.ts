@@ -1,5 +1,4 @@
 import { popToRoot, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
-import { format } from "date-fns";
 
 import { superfetch } from "~/api/superfetch";
 import { getSupernotesPrefs, textToSimpleCard } from "~/utils/helpers";
@@ -13,7 +12,7 @@ export async function sendToDaily(text: string, headless?: boolean) {
     await showToast({ style: Toast.Style.Animated, title: "Sending to Daily Card" });
   }
   const now = new Date();
-  const localDate = format(now, "yyyy-MM-dd");
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const fetched = await superfetch("/v1/cards/daily", "put", {
     apiKey,
     body: { markup: text, local_date: localDate },
