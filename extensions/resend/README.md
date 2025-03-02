@@ -40,3 +40,5 @@ This extension provides the following commands:
 - Contacts
   - View Contacts
   - Create, Update And Delete Contacts
+
+Additionally, this extension supports [AI tools](https://youtu.be/sHIlFKKaq0A), so you can use it with natural language by mentioning `@resend`.
