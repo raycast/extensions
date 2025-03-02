@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Performance] - 2025-03-02
+
+- Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
+
 ## [Improvement] - 2025-02-27
 
 - Improved UI by showing the actual editor name and icon (Windsurf, VSCodium, Cursor, etc.) in both `Search Recent Projects` and `Show Installed Extensions` commands.

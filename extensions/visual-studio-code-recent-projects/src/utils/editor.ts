@@ -1,4 +1,7 @@
 import { Application, getApplications } from "@raycast/api";
+import { cacheFunc } from "cache-func";
+
+const cachedGetApplications = cacheFunc(getApplications);
 
 // Map of build names to bundle IDs
 const bundleIdMap: Record<string, string> = {
@@ -26,7 +29,7 @@ export function getBundleId(buildName: string): string {
  * @returns Promise resolving to the Application object or undefined if not found
  */
 export async function getEditorApplication(buildName: string): Promise<Application | undefined> {
-  const apps = await getApplications();
+  const apps = await cachedGetApplications();
 
   // Find the app by bundle ID
   const bundleId = bundleIdMap[buildName];
