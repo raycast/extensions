@@ -9,7 +9,7 @@ type Input = {
   searchText: string;
 };
 
-const tool = async (input: Input) => {
+export default async function tool(input: Input) {
   const safariBookmarksPlist = (await readPlist(PLIST_PATH)) as BookmarkPListResult;
   const bookmarks = extractReadingListBookmarks(safariBookmarksPlist, false);
   const filteredBookmarks = search(
@@ -22,6 +22,4 @@ const tool = async (input: Input) => {
     input.searchText,
   ) as GeneralBookmark[];
   return filteredBookmarks;
-};
-
-export default tool;
+}

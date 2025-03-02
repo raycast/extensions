@@ -8,8 +8,6 @@ type Input = {
   url: string;
 };
 
-const tool = async (input: Input) => {
+export default async function tool(input: Input) {
   await open(input.url, safariAppIdentifier);
-};
-
-export default tool;
+}

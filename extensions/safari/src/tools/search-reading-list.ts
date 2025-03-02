@@ -11,7 +11,7 @@ type Input = {
   searchText: string;
 };
 
-const tool = async (input: Input) => {
+export default async function tool(input: Input) {
   const { hideReadItems } = getPreferenceValues<Preferences.ReadingList>();
   const safariBookmarksPlist = (await readPlist(PLIST_PATH)) as BookmarkPListResult;
   const bookmarks = extractReadingListBookmarks(safariBookmarksPlist, true);
@@ -29,6 +29,4 @@ const tool = async (input: Input) => {
   ) as ReadingListBookmark[];
 
   return filteredBookmarks;
-};
-
-export default tool;
+}
