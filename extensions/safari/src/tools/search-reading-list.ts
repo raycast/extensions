@@ -1,8 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
-import { extractReadingListBookmarks, PLIST_PATH, readPlist } from "../hooks/useBookmarks";
-import { BookmarkPListResult, ReadingListBookmark } from "../types";
-import { search } from "../utils";
 import { filter } from "lodash";
+
+import { extractReadingListBookmarks, readPlist } from "../hooks/useBookmarks";
+import { BookmarkPListResult, ReadingListBookmark } from "../types";
+import { PLIST_PATH } from "../constants";
+import { search } from "../utils";
 
 type Input = {
   /**

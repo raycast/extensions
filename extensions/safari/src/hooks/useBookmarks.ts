@@ -1,14 +1,19 @@
 import _ from "lodash";
-import { homedir } from "os";
-import { useCallback, useEffect, useState } from "react";
+import { useMemoizedFn } from "ahooks";
+import { useEffect, useState } from "react";
 import { readFile } from "simple-plist";
 import { promisify } from "util";
+import { getPreferenceValues } from "@raycast/api";
+
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";
+import { PLIST_PATH } from "../constants";
+import { execSync } from "child_process";
+import path from "path";
 
 export const readPlist = promisify(readFile);
 
-export const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
+const { parseBookmarksWithGo } = getPreferenceValues();
 
 export function extractReadingListBookmarks(
   bookmarks: BookmarkPListResult,
@@ -73,7 +78,19 @@ export default function useBookmarks(readingListOnly?: boolean) {
   const [hasPermission, setHasPermission] = useState(true);
   const [bookmarks, setBookmarks] = useState<(ReadingListBookmark | GeneralBookmark)[]>();
 
-  const fetchItems = useCallback(async () => {
+  const fetchItemsWithGo = useMemoizedFn(() => {
+    try {
+      const GO_PARSER_PATH = path.join(__dirname, "tools", "bookmarks-parser");
+      const result = execSync(`"${GO_PARSER_PATH}" -input "${PLIST_PATH}"`, { encoding: "utf-8" });
+      const parsedResult = extractReadingListBookmarks(JSON.parse(result) as BookmarkPListResult);
+      setBookmarks(parsedResult);
+    } catch (e) {
+      console.error("parse bookmarks with err");
+      console.error(e);
+    }
+  });
+
+  const fetchItemsWithPlistNode = useMemoizedFn(async () => {
     try {
       const safariBookmarksPlist = (await readPlist(PLIST_PATH)) as BookmarkPListResult;
       const bookmarks = extractReadingListBookmarks(safariBookmarksPlist, readingListOnly);
@@ -86,11 +103,15 @@ export default function useBookmarks(readingListOnly?: boolean) {
 
       throw err;
     }
-  }, []);
+  });
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    if (parseBookmarksWithGo) {
+      fetchItemsWithGo();
+    } else {
+      fetchItemsWithPlistNode();
+    }
+  }, [fetchItemsWithPlistNode, fetchItemsWithGo]);
 
   return { bookmarks, hasPermission };
 }

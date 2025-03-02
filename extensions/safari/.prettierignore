@@ -1,0 +1,5 @@
+src/go/**
+src/tools/bookmarks-parser
+**/*.plist
+**/mock
+**/*.js

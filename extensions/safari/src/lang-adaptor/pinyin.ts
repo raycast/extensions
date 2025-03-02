@@ -1,4 +1,3 @@
-import pinyin from "pinyin";
 import { LanguageHandler } from "./base";
 
 export class PinyinHandler implements LanguageHandler {
@@ -21,6 +20,9 @@ export class PinyinHandler implements LanguageHandler {
     if (chineseChars.length > 0) {
       return chineseChars.reduce((formatted, matchItem) => {
         const [char] = matchItem;
+        // improve the performance by importing pinyin in runtime
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const pinyin = require("pinyin").default; // import pinyin from 'pinyin'
         const pinyinCollection = pinyin(char, { style: pinyin.STYLE_NORMAL });
         return formatted.replace(char, pinyinCollection.join("") + " ");
       }, text);
