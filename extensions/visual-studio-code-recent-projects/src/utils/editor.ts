@@ -10,6 +10,7 @@ const bundleIdMap: Record<string, string> = {
   VSCodium: "com.vscodium",
   "VSCodium - Insiders": "com.vscodium.VSCodiumInsiders",
   Cursor: "com.todesktop.230313mzl4w4u92",
+  Positron: "com.rstudio.positron",
   Windsurf: "com.exafunction.windsurf",
   Trae: "com.trae.app",
 };
