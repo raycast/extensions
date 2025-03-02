@@ -2,7 +2,7 @@
 
 ## [Maintenance Release] - {PR_MERGE_DATE}
 
-- chore: update `@atproto/api` so we have better TS typing
+- chore: update `@atproto/api` so we have better TS typing (ref: [@atproto/api v0.14.0 release notes](https://docs.bsky.app/blog))
 
 ## [Updated Logo] - 2025-01-10
 

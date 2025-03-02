@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import {
-  BlueskyImageEmbedType,
   ErrorLoadingNotification,
   LoadingNotificationContent,
   MarkNotificationsAsRead,
