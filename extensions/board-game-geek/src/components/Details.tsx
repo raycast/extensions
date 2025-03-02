@@ -1,9 +1,9 @@
-import { ActionPanel, Detail, Toast, showToast } from '@raycast/api';
+import { List } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import { useFetch } from '@raycast/utils';
 
 import { BoardGame, BggDetailsResponse } from '../models';
 import { parseGameData } from '../utils';
-import UrlActions from './UrlActions';
 
 interface DetailsProps {
   item: BoardGame;
@@ -15,31 +15,23 @@ export default function Details({ item }: DetailsProps) {
     parseResponse: (response: Response) => parseGameData(response),
     onError: (error) => {
       console.error(error);
-      showToast(Toast.Style.Failure, 'Could not fetch game details');
+      showFailureToast('Could not fetch game details');
     },
-    keepPreviousData: true,
   });
 
+  const markdown = `![](${data?.img})\n\n${data?.description?.split('<br/>')?.join('\n')}`;
+
   return (
-    <Detail
+    <List.Item.Detail
       isLoading={isLoading}
-      markdown={`
-![](${data?.img})
-
-
-${data?.description?.split('<br/>')?.join('\n')}
-        `}
-      navigationTitle={item.title}
+      markdown={data && markdown}
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Players" text={`${data?.minPlayers} - ${data?.maxPlayers}`} />
-          <Detail.Metadata.Label title="Average Playtime" text={`${data?.avgPlaytime} Minutes`} />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <UrlActions item={item} />
-        </ActionPanel>
+        data && (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="Players" text={`${data?.minPlayers} - ${data?.maxPlayers}`} />
+            <List.Item.Detail.Metadata.Label title="Average Playtime" text={`${data?.avgPlaytime} Minutes`} />
+          </List.Item.Detail.Metadata>
+        )
       }
     />
   );

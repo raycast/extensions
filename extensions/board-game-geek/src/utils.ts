@@ -1,8 +1,8 @@
-import { showToast, Toast } from '@raycast/api';
+import { showFailureToast } from '@raycast/utils';
 import convert from 'xml-js';
 import { BggSearchResponse, BggDetailsResponse, BoardGameXml, GameDetailsXml } from './models';
 
-export async function parseResults(response: Response): Promise<BggSearchResponse> {
+export async function parseResults(response: Response): Promise<BggSearchResponse | undefined> {
   const resultsArr: BggSearchResponse = [];
 
   try {
@@ -23,31 +23,39 @@ export async function parseResults(response: Response): Promise<BggSearchRespons
       });
     });
   } catch (error) {
-    console.error(error);
-    showToast(Toast.Style.Failure, 'Could not parse response');
+    showFailureToast('Could not parse response');
+    return;
   }
 
   return resultsArr;
 }
 
-export async function parseGameData(response: Response): Promise<BggDetailsResponse> {
-  const gameData: BggDetailsResponse = {};
+export async function parseGameData(response: Response): Promise<BggDetailsResponse | undefined> {
+  let gameData: BggDetailsResponse;
 
   try {
     const xml = await response.text();
 
     const result = convert.xml2js(xml, { compact: true }) as GameDetailsXml;
 
-    gameData.bggId = result?.items?.item?._attributes?.objectid;
-    gameData.title = result?.items?.item.name?._text;
-    gameData.img = result?.items?.item?.thumbnail?._text;
-    gameData.description = result?.items?.item?.description?._text;
-    gameData.minPlayers = parseInt(result?.items?.item?.minplayers?._attributes?.value);
-    gameData.maxPlayers = parseInt(result?.items?.item?.maxplayers?._attributes?.value);
-    gameData.avgPlaytime = parseInt(result?.items?.item?.playingtime?._attributes?.value);
+    gameData = {
+      bggId: result?.items?.item?._attributes?.objectid,
+      title: result?.items?.item.name?._text,
+      img: result?.items?.item?.thumbnail?._text,
+      description: result?.items?.item?.description?._text,
+      minPlayers: result?.items?.item?.minplayers?._attributes?.value
+        ? parseInt(result.items.item.minplayers._attributes.value)
+        : undefined,
+      maxPlayers: result?.items?.item?.maxplayers?._attributes?.value
+        ? parseInt(result.items.item.maxplayers._attributes.value)
+        : undefined,
+      avgPlaytime: result?.items?.item?.playingtime?._attributes?.value
+        ? parseInt(result.items.item.playingtime._attributes.value)
+        : undefined,
+    };
   } catch (error) {
-    console.error(error);
-    showToast(Toast.Style.Failure, 'Could not parse response');
+    showFailureToast('Could not parse response');
+    return;
   }
 
   return gameData;
