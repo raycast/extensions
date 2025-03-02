@@ -1,6 +1,6 @@
 # Flush DNS Changelog
 
-## [macOS Sequoia Support] - 2025-03-01
+## [macOS Sequoia Support] - {PR_MERGE_DATE}
 
 - Added macOS Sequoia support.
 
