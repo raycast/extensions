@@ -25,6 +25,13 @@
       "mode": "view"
     },
     {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "subtitle": "Delete task from Motion",
+      "description": "Select and delete tasks from your Motion account",
+      "mode": "view"
+    },
+    {
       "name": "debug-workspaces",
       "title": "Debug: List Workspaces",
       "subtitle": "List available Motion workspaces",
@@ -49,6 +56,24 @@
       "default": "J2-2vXH85SltZ52ieplcF"
     }
   ],
+  "tools": [
+    {
+      "name": "ask-motion",
+      "title": "Ask Motion",
+      "description": "Ask about your Motion tasks, deadlines, and schedule. The AI can help you with information about your tasks, upcoming deadlines, and your schedule in Motion.",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "What tasks are due today?",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "You are a helpful AI assistant for Motion, a task and productivity tool. Your role is to help users understand their tasks, deadlines, and schedules in Motion. Be conversational, concise, and friendly. When users ask about tasks, answer based on the information provided to you about their Motion tasks. Remember the context of the conversation when they ask follow-up questions. If you don't know something or the information is not provided, be honest about it."
+  },
   "dependencies": {
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.17.0",
