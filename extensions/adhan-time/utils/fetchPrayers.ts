@@ -1,6 +1,7 @@
 import { getPreferenceValues, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { PrayerType, Preferences } from "../src/prayer-types";
+
 export function fetchPrayers() {
     const userPreference: Preferences = getPreferenceValues();
     return useFetch<PrayerType>(
