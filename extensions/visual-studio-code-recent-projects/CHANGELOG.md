@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-02
 
 - Adds support for Positron as an option in the extension settings.
 
