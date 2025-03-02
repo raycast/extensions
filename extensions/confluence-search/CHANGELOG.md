@@ -1,6 +1,12 @@
 # Confluence Changelog
 
-## [] - {PR_MERGE_DATE}
+## [Modernize Extension + Fix People Panel] - {PR_MERGE_DATE}
+
+- fix: "People" would error out during search
+- `usePromise` hook in "Switch Site" for proper loading and control
+- `usePromise` hook in "People" for proper loading and control
+- `usePromise` hook in "Search" for proper loading and control
+- modernize extension: update deps + use hooks in some places
 
 ## [Bug fix] - 2023-11-19
 
