@@ -17,12 +17,14 @@
     {
       "name": "toggle",
       "title": "Toggle",
+      "subtitle": "V2raya Control",
       "description": "Toggle V2rayA Connection",
       "mode": "no-view"
     },
     {
       "name": "status",
       "title": "Status",
+      "subtitle": "V2raya Control",
       "description": "Check V2rayA Status",
       "mode": "no-view"
     }
