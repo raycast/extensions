@@ -1,6 +1,6 @@
 # Can I PHP? Changelog
 
-## Bugfixes - {PR_MERGE_DATE}
+## Bugfixes - 2025-03-02
 
 Ensures fetched data is always mapable. 
 
