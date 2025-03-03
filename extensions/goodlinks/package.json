@@ -20,6 +20,7 @@
     {
       "name": "list-unread",
       "title": "List Unread Links",
+      "subtitle": "GoodLinks",
       "description": "List the unread links of your GoodLinks database.",
       "mode": "view"
     },
