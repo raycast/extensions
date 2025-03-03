@@ -12,6 +12,17 @@ type Values = {
   projectId: string;
 };
 
+// Define the task payload type to match what we're creating
+type TaskPayload = {
+  title: string;
+  description: string;
+  dueDate: Date;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  status: "TODO" | "IN_PROGRESS" | "DONE";
+  label?: string;
+  projectId?: string;
+};
+
 // Helper function to get tomorrow's date
 function getTomorrow() {
   const tomorrow = new Date();
@@ -57,7 +68,7 @@ export default function Command() {
       const motionClient = getMotionApiClient();
 
       // Create a task payload with required fields
-      const taskPayload = {
+      const taskPayload: TaskPayload = {
         title: values.name,
         description: values.description,
         dueDate: values.dueDate,
