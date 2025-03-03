@@ -1,6 +1,6 @@
 # WhatsApp Changelog
 
-## [AI Extension] - 2025-03-01
+## [AI Extension] - {PR_MERGE_DATE}
 - Added AI tools: `add-new-whatsapp-chat`, `add-whatsapp-group`, and `open-chat`
 - Updated Raycast packages to support AI extensions
 
