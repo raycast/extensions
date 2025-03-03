@@ -238,13 +238,13 @@ export default function Command() {
       console.log("[DEBUG] Using workspace ID:", workspaceId);
 
       // Verify workspace ID is valid
-      if (!workspaceId || typeof workspaceId !== 'string' || workspaceId.trim() === '') {
+      if (!workspaceId || typeof workspaceId !== "string" || workspaceId.trim() === "") {
         console.error("[ERROR] Invalid workspace ID:", workspaceId);
         throw new Error("Invalid workspace ID. Please check your Motion preferences.");
       }
 
       // Verify task ID is valid
-      if (!selectedTask.id || typeof selectedTask.id !== 'string' || selectedTask.id.trim() === '') {
+      if (!selectedTask.id || typeof selectedTask.id !== "string" || selectedTask.id.trim() === "") {
         console.error("[ERROR] Invalid task ID:", selectedTask.id);
         throw new Error("Selected task has an invalid ID");
       }
@@ -274,7 +274,7 @@ export default function Command() {
       try {
         // Update the task
         await motionClient.updateTask(taskUpdate);
-        
+
         console.log("[DEBUG] Task update successful");
 
         await showToast({
@@ -290,10 +290,10 @@ export default function Command() {
         setIsEditing(false);
       } catch (updateError) {
         console.error("[ERROR] Task update failed:", updateError);
-        
+
         // More detailed error for the user
         let errorMessage = String(updateError);
-        
+
         // Check for specific API error patterns
         if (errorMessage.includes("404")) {
           errorMessage += "\n\nThe task or endpoint couldn't be found. This may be due to:";
@@ -305,7 +305,7 @@ export default function Command() {
         } else if (errorMessage.includes("403")) {
           errorMessage += "\n\nYou may not have permission to update this task.";
         }
-        
+
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to update task",
