@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { cache, CACHE_KEY, fetchFromGitHub } from "./api";
 import { Item } from "./types";
@@ -154,7 +154,7 @@ export default function Command() {
     } catch (error) {
       console.error("Unexpected error in fetchData:", error);
       showToast({
-        style: "failure",
+        style: Toast.Style.Failure,
         title: "Error",
         message: "An unexpected error occurred",
       });
