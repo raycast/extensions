@@ -7,12 +7,12 @@ const cachedGetApplications = cacheFunc(getApplications);
 const bundleIdMap: Record<string, string> = {
   Code: "com.microsoft.VSCode",
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
-  VSCodium: "com.vscodium",
-  "VSCodium - Insiders": "com.vscodium.VSCodiumInsiders",
   Cursor: "com.todesktop.230313mzl4w4u92",
   Positron: "com.rstudio.positron",
-  Windsurf: "com.exafunction.windsurf",
   Trae: "com.trae.app",
+  VSCodium: "com.vscodium",
+  "VSCodium - Insiders": "com.vscodium.VSCodiumInsiders",
+  Windsurf: "com.exafunction.windsurf",
 };
 
 /**
