@@ -1,5 +1,5 @@
 import { Detail, Form, ActionPanel, Action, showToast, Toast, LaunchProps, Icon, Color } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { streamInkeepCompletion, InkeepLink, InkeepResponse, AIAnnotations } from "./services/inkeep";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.AskInkeep }>) {
@@ -13,6 +13,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.AskInk
   const [links, setLinks] = useState<InkeepLink[]>([]);
   const [aiAnnotations, setAIAnnotations] = useState<AIAnnotations | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const uniqueLinks = useMemo(
+    () => links.filter((link, index, self) => index === self.findIndex((l) => l.url === link.url)),
+    [links],
+  );
 
   // Process the initial prompt if provided as an argument
   useEffect(() => {
@@ -150,30 +155,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.AskInk
         {links.length > 0 && (
           <>
             <Detail.Metadata.Separator />
-            {/* Get deduplicated links first */}
-            {(() => {
-              const uniqueLinks = links.filter(
-                (link, index, self) => index === self.findIndex((l) => l.url === link.url),
-              );
-              return (
-                <>
-                  <Detail.Metadata.Label
-                    title="Sources"
-                    text={`${uniqueLinks.length} document${uniqueLinks.length === 1 ? "" : "s"}`}
-                    icon={Icon.Document}
-                  />
+            <Detail.Metadata.Label
+              title="Sources"
+              text={`${uniqueLinks.length} document${uniqueLinks.length === 1 ? "" : "s"}`}
+              icon={Icon.Document}
+            />
 
-                  {uniqueLinks.map((link, index) => (
-                    <Detail.Metadata.Link
-                      key={index}
-                      title={link.breadcrumbs?.join(" > ") || link.type || "Document"}
-                      text={link.title || link.label || "Link"}
-                      target={link.url}
-                    />
-                  ))}
-                </>
-              );
-            })()}
+            {uniqueLinks.map((link, index) => (
+              <Detail.Metadata.Link
+                key={index}
+                title={link.breadcrumbs?.join(" > ") || link.type || "Document"}
+                text={link.title || link.label || "Link"}
+                target={link.url}
+              />
+            ))}
           </>
         )}
 
