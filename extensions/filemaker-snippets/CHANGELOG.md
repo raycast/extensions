@@ -1,5 +1,10 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2025-03-03
+
+- Update to Raycast API 1.93.0
+- Fix a bug where the snippet text was not being saved when editing the XML of a snippet
+
 ## [Fixes] - 2024-03-20
 
 - Fix snippet creation from clipboard
