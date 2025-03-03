@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { setData } from "@/utils";
 import type { ProfileFormProps, FormValues } from "./types";
 
 export default function ProfileForm({ id, profile, revalidate }: ProfileFormProps) {
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: profile,
     async onSubmit(values) {
@@ -17,9 +18,12 @@ export default function ProfileForm({ id, profile, revalidate }: ProfileFormProp
         title: "Success!",
         message: `${values.name} profile saved.`,
       });
+
       if (revalidate) {
         await revalidate();
       }
+
+      pop();
     },
     validation: {
       name: FormValidation.Required,

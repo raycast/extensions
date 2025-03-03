@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { setGitProfile } from "@/utils";
 import type { GitProfileFormProps, FormValues } from "./types";
 
 export default function GitProfileForm({ scope, profile, revalidate }: GitProfileFormProps) {
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
       name: profile.name || "",
@@ -16,9 +17,12 @@ export default function GitProfileForm({ scope, profile, revalidate }: GitProfil
         title: "Success!",
         message: `${profile.name} profile applied.`,
       });
+
       if (revalidate) {
         await revalidate();
       }
+
+      pop();
     },
     validation: {
       name: FormValidation.Required,
