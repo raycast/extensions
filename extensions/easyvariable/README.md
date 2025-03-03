@@ -22,9 +22,10 @@ EasyVariable is a Raycast extension that helps developers quickly generate stand
 ## How to Use
 
 1. Enter the text you want to convert in Raycast
-2. Choose your desired variable naming style
-3. The extension will automatically translate and generate variable names in the corresponding format
-4. Copy or paste directly into your code
+2. Wait for automatic translation
+3. Select your preferred translation result
+4. Choose a variable naming style
+5. Copy or paste the formatted variable name into your code
 
 ## Configuration
 
