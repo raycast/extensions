@@ -28,7 +28,6 @@ type Input = {
    */
   to: string[];
   /**
-   
    * The subject of the email.
    * Make sure it's short and concise.
    * Make sure it's based on the content of the email.
@@ -162,7 +161,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   }
 
   return {
-    title: "Send Email",
+    title: "Send email",
     message: input.sendAt
       ? `Are you sure you want to schedule this email for ${new Date(input.sendAt).toLocaleString()}?`
       : "Are you sure you want to send this email?",

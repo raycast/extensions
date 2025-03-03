@@ -26,7 +26,7 @@ type Input = {
    * This is used for confirmation purposes only.
    * You can get this from the list-audiences tool first.
    */
-  audienceName?: string;
+  audienceName: string;
 };
 
 /**
@@ -55,6 +55,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   );
 
   return {
+    message: `New contact:`,
     info: infoItems,
   };
 };

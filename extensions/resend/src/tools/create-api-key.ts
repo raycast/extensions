@@ -43,6 +43,7 @@ const tool = async (input: Input) => {
 
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   return {
+    message: `New API key:`,
     info: [
       { name: "Name", value: input.name },
       { name: "Permission", value: input.permission },
