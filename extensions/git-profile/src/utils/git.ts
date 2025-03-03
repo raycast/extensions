@@ -1,8 +1,7 @@
 import { execPromise } from "@/lib";
 import type { Scope, Profile, GitProfile } from "@/types";
 
-export async function getGitProfiles(): Promise<GitProfile[]> {
-  const scopes = ["global", "system"] satisfies Scope[];
+export async function getGitProfiles(scopes: Scope[]): Promise<GitProfile[]> {
   return Promise.all(scopes.map((x) => getGitProfile(x)));
 }
 

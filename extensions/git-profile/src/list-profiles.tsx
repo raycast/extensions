@@ -62,29 +62,28 @@ export default function Command() {
         }
       />
       <List.Section title="My Profiles">
-        {data &&
-          data.map((profile) => (
-            <List.Item
-              accessories={[{ text: profile.email }]}
-              key={profile.email}
-              title={profile.name}
-              icon={{
-                source: Icon.Bird,
-                tintColor: Color.Yellow,
-              }}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    icon={Icon.Bird}
-                    title="Edit Profile"
-                    target={<ProfileForm id={profile.id} profile={profile} revalidate={revalidate} />}
-                  />
-                  <Action icon={Icon.Gear} title="Apply Profile" onAction={() => handleSetProfile(profile)} />
-                  <Action icon={Icon.Trash} title="Delete Profile" onAction={() => handleDeleteProfile(profile)} />
-                </ActionPanel>
-              }
-            />
-          ))}
+        {data?.map((profile) => (
+          <List.Item
+            accessories={[{ text: profile.email }]}
+            key={profile.email}
+            title={profile.name}
+            icon={{
+              source: Icon.Bird,
+              tintColor: Color.Yellow,
+            }}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Bird}
+                  title="Edit Profile"
+                  target={<ProfileForm id={profile.id} profile={profile} revalidate={revalidate} />}
+                />
+                <Action icon={Icon.Gear} title="Apply Profile" onAction={() => handleSetProfile(profile)} />
+                <Action icon={Icon.Trash} title="Delete Profile" onAction={() => handleDeleteProfile(profile)} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
