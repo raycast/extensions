@@ -212,13 +212,13 @@ export default function Command() {
         <List.Item.Detail.Metadata.Label
           title="RAM"
           text={`${accountData.account.ram_usage}/${accountData.account.ram_quota} bytes`}
-          icon={Icon.HardDrive}
+          icon={{ source: "cpu" }}
         />
         <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label
           title="CPU"
           text={`${accountData.account.cpu_limit.used}/${accountData.account.cpu_limit.max} µs`}
-          icon={Icon.Cpu}
+          icon={{ source: "cpu" }}
         />
         <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label
@@ -278,10 +278,10 @@ export default function Command() {
                       ? `$${parseFloat(token.usdPrice.toString()).toLocaleString("en-US")}`
                       : `$${parseFloat(token.usdPrice.toString()).toFixed(token.symbol === "USDT" ? 2 : 6)}`
                   }
-                  icon={Icon.PriceTag}
+                  icon={{ source: "tag" }}
                 />
                 {token.apy > 0 && (
-                  <List.Item.Detail.Metadata.Label title="APY" text={`${token.apy}%`} icon={Icon.Percent} />
+                  <List.Item.Detail.Metadata.Label title="APY" text={`${token.apy}%`} icon={{ source: "percent" }} />
                 )}
                 <List.Item.Detail.Metadata.Label title="Contract" text={token.contractName} icon={Icon.Document} />
                 {index < balances.length - 1 && <List.Item.Detail.Metadata.Separator />}
@@ -316,7 +316,7 @@ export default function Command() {
         <>
           <List.Item
             id="general-info"
-            title="General Info"
+            title={`General Info ${selectedView === "generalInfo" ? "✓" : ""}`}
             icon={Icon.Info}
             detail={<List.Item.Detail metadata={renderGeneralInfoMetadata()} />}
             actions={
@@ -324,11 +324,10 @@ export default function Command() {
                 <Action title="View General Info" onAction={() => setSelectedView("generalInfo")} />
               </ActionPanel>
             }
-            selected={selectedView === "generalInfo"}
           />
           <List.Item
             id="balances"
-            title="Balances"
+            title={`Balances ${selectedView === "balances" ? "✓" : ""}`}
             icon={Icon.Coins}
             detail={<List.Item.Detail metadata={renderBalancesMetadata()} />}
             actions={
@@ -336,7 +335,6 @@ export default function Command() {
                 <Action title="View Balances" onAction={() => setSelectedView("balances")} />
               </ActionPanel>
             }
-            selected={selectedView === "balances"}
           />
         </>
       )}

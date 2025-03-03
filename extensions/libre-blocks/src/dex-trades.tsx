@@ -142,7 +142,7 @@ export default function Command() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Trade Information" />
-        <List.Item.Detail.Metadata.Label title="Trade ID" text={`#${trade.id}`} icon={Icon.Hash} />
+        <List.Item.Detail.Metadata.Label title="Trade ID" text={`#${trade.id}`} icon={{ source: "hash" }} />
         <List.Item.Detail.Metadata.Label
           title="Date & Time"
           text={formatTimestamp(trade.timestamp)}
@@ -153,7 +153,7 @@ export default function Command() {
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Price Details" />
-        <List.Item.Detail.Metadata.Label title="Price" text={formatPrice(trade.price)} icon={Icon.PriceTag} />
+        <List.Item.Detail.Metadata.Label title="Price" text={formatPrice(trade.price)} icon={{ source: "tag" }} />
         <List.Item.Detail.Metadata.Label
           title="Base Asset"
           text={trade.baseAsset}
@@ -199,14 +199,14 @@ export default function Command() {
       throttle={true}
       isShowingDetail
       navigationTitle="Libre DEX Trades"
-      toolbar={
+    >
+      <List.Section title="Filter by Type">
         <List.Dropdown tooltip="Filter by Trade Type" value={selectedType} onChange={setSelectedType}>
           <List.Dropdown.Item title="All Types" value="all" />
           <List.Dropdown.Item title="Buy" value="buy" />
           <List.Dropdown.Item title="Sell" value="sell" />
         </List.Dropdown>
-      }
-    >
+      </List.Section>
       {filteredTrades.map((trade) => {
         const typeColor = getTradeTypeColor(trade.type);
 
@@ -215,7 +215,7 @@ export default function Command() {
             key={trade.id}
             id={`trade-${trade.id}`}
             title={`${trade.seller} → ${trade.buyer}`}
-            icon={{ source: { value: `#${trade.id}` }, tintColor: typeColor }}
+            icon={{ source: `#${trade.id}`, tintColor: typeColor }}
             detail={<List.Item.Detail metadata={renderTradeMetadata(trade)} />}
             actions={
               <ActionPanel>

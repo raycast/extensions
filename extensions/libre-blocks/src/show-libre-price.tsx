@@ -55,8 +55,8 @@ export default function Command() {
       }
 
       const jsonResponse = await response.json();
-      const librePrice = jsonResponse?.rows?.find((row) => row.pair === "librebtc")?.price;
-      const btcUsdPrice = jsonResponse?.rows?.find((row) => row.pair === "btcusd")?.price;
+      const librePrice = jsonResponse?.rows?.find((row: { pair: string }) => row.pair === "librebtc")?.price;
+      const btcUsdPrice = jsonResponse?.rows?.find((row: { pair: string }) => row.pair === "btcusd")?.price;
 
       if (librePrice) {
         const librePriceNum = parseFloat(librePrice);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import React from "react";
 
@@ -98,51 +98,51 @@ export default function Command() {
   function getActionIcon(actionName: string) {
     switch (actionName) {
       case "transfer":
-        return Icon.ArrowRight;
+        return { source: "arrow.right" };
       case "issue":
-        return Icon.Plus;
+        return { source: "plus" };
       case "open":
-        return Icon.Folder;
+        return { source: "folder" };
       case "close":
-        return Icon.XmarkCircle;
+        return { source: "xmark.circle" };
       case "retire":
-        return Icon.Trash;
+        return { source: "trash" };
       case "create":
-        return Icon.NewDocument;
+        return { source: "new.document" };
       case "updateauth":
-        return Icon.Lock;
+        return { source: "lock" };
       case "linkauth":
-        return Icon.Link;
+        return { source: "link" };
       case "unlinkauth":
-        return Icon.Unlink;
+        return { source: "unlink" };
       case "deleteauth":
-        return Icon.Trash;
+        return { source: "trash" };
       case "newaccount":
-        return Icon.Person;
+        return { source: "person" };
       case "setcode":
-        return Icon.Code;
+        return { source: "code" };
       case "setabi":
-        return Icon.Code;
+        return { source: "code" };
       case "updatecode":
-        return Icon.Code;
+        return { source: "code" };
       case "updateabi":
-        return Icon.Code;
+        return { source: "code" };
       case "voteproducer":
-        return Icon.Star;
+        return { source: "star" };
       case "delegatebw":
-        return Icon.ArrowRight;
+        return { source: "arrow.right" };
       case "undelegatebw":
-        return Icon.ArrowLeft;
+        return { source: "arrow.left" };
       case "buyram":
-        return Icon.Download;
+        return { source: "download" };
       case "sellram":
-        return Icon.Upload;
+        return { source: "upload" };
       case "buyrambytes":
-        return Icon.Download;
+        return { source: "download" };
       case "onblock":
-        return Icon.Checkmark;
+        return { source: "checkmark" };
       default:
-        return Icon.Document;
+        return { source: "document" };
     }
   }
 
@@ -150,26 +150,30 @@ export default function Command() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Transaction Information" />
-        <List.Item.Detail.Metadata.Label title="Transaction ID" text={action.trx_id} icon={Icon.Document} />
-        <List.Item.Detail.Metadata.Label title="Block" text={`${action.block_num}`} icon={Icon.Box} />
-        <List.Item.Detail.Metadata.Label title="Block ID" text={action.block_id} icon={Icon.Box} />
+        <List.Item.Detail.Metadata.Label title="Transaction ID" text={action.trx_id} icon={{ source: "document" }} />
+        <List.Item.Detail.Metadata.Label title="Block" text={`${action.block_num}`} icon={{ source: "box" }} />
+        <List.Item.Detail.Metadata.Label title="Block ID" text={action.block_id} icon={{ source: "box" }} />
         <List.Item.Detail.Metadata.Label
           title="Timestamp"
           text={new Date(action.timestamp).toLocaleString()}
-          icon={Icon.Calendar}
+          icon={{ source: "calendar" }}
         />
-        <List.Item.Detail.Metadata.Label title="Producer" text={action.producer} icon={Icon.Computer} />
+        <List.Item.Detail.Metadata.Label title="Producer" text={action.producer} icon={{ source: "desktop" }} />
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Action Details" />
-        <List.Item.Detail.Metadata.Label title="Contract" text={action.act.account} icon={Icon.Code} />
+        <List.Item.Detail.Metadata.Label title="Contract" text={action.act.account} icon={{ source: "code" }} />
         <List.Item.Detail.Metadata.Label title="Action" text={action.act.name} icon={getActionIcon(action.act.name)} />
-        <List.Item.Detail.Metadata.Label title="CPU Usage" text={`${action.cpu_usage_us} µs`} icon={Icon.Cpu} />
+        <List.Item.Detail.Metadata.Label
+          title="CPU Usage"
+          text={`${action.cpu_usage_us} µs`}
+          icon={{ source: "cpu" }}
+        />
         {action.net_usage_words !== undefined && (
           <List.Item.Detail.Metadata.Label
             title="NET Usage"
             text={`${action.net_usage_words} words`}
-            icon={Icon.Globe}
+            icon={{ source: "globe" }}
           />
         )}
         <List.Item.Detail.Metadata.Separator />
@@ -177,11 +181,15 @@ export default function Command() {
         <List.Item.Detail.Metadata.Label title="Authorization" />
         {action.act.authorization.map((auth, index) => (
           <React.Fragment key={`auth-${index}`}>
-            <List.Item.Detail.Metadata.Label title={`Actor ${index + 1}`} text={auth.actor} icon={Icon.Person} />
+            <List.Item.Detail.Metadata.Label
+              title={`Actor ${index + 1}`}
+              text={auth.actor}
+              icon={{ source: "person" }}
+            />
             <List.Item.Detail.Metadata.Label
               title={`Permission ${index + 1}`}
               text={auth.permission}
-              icon={Icon.Lock}
+              icon={{ source: "lock" }}
             />
           </React.Fragment>
         ))}
@@ -195,12 +203,12 @@ export default function Command() {
                 <List.Item.Detail.Metadata.Label
                   title={`Account ${index + 1}`}
                   text={delta.account}
-                  icon={Icon.Person}
+                  icon={{ source: "person" }}
                 />
                 <List.Item.Detail.Metadata.Label
                   title={`Delta ${index + 1}`}
                   text={delta.delta}
-                  icon={Icon.HardDrive}
+                  icon={{ source: "hard.drive" }}
                 />
               </React.Fragment>
             ))}
@@ -210,21 +218,21 @@ export default function Command() {
 
         <List.Item.Detail.Metadata.Label title="Action Data" />
         {Object.entries(action.act.data).map(([key, value], index) => {
-          let icon = Icon.Document;
+          let icon = { source: "document" };
           let displayValue = String(value);
 
           if (key === "from" || key === "to" || key === "sender" || key === "receiver") {
-            icon = Icon.Person;
+            icon = { source: "person" };
           } else if (key === "amount" || key === "quantity") {
-            icon = Icon.BankNote;
+            icon = { source: "bank.note" };
           } else if (key === "memo") {
-            icon = Icon.Message;
+            icon = { source: "message" };
           } else if (key === "symbol") {
-            icon = Icon.Coins;
+            icon = { source: "coins" };
           } else if (key === "precision") {
-            icon = Icon.Number;
+            icon = { source: "number" };
           } else if (key === "timestamp") {
-            icon = Icon.Calendar;
+            icon = { source: "calendar" };
             displayValue = new Date(String(value)).toLocaleString();
           }
 
@@ -248,7 +256,7 @@ export default function Command() {
       searchBarPlaceholder="Enter transaction ID"
       searchBarAccessory={
         <ActionPanel>
-          <Action title="Search" icon={Icon.MagnifyingGlass} onAction={performSearch} />
+          <Action title="Search" icon={{ source: "magnifyingglass" }} onAction={performSearch} />
         </ActionPanel>
       }
       navigationTitle="Libre Transaction Explorer"
@@ -258,14 +266,14 @@ export default function Command() {
         <List.EmptyView
           title="Enter transaction ID"
           description="Type a transaction ID and click Search to find details"
-          icon={Icon.MagnifyingGlass}
+          icon={{ source: "magnifyingglass" }}
         />
       ) : transaction && transaction.actions && transaction.actions.length > 0 ? (
         transaction.actions.map((action, index) => (
           <List.Item
             key={`action-${index}`}
             id={`action-${index}`}
-            title={`${action.act.name.charAt(0).toUpperCase() + action.act.name.slice(1)} (${action.act.account})`}
+            title={`${action.act.name.charAt(0).toUpperCase() + action.act.name.slice(1)} (${action.act.account})${selectedAction?.action_ordinal === action.action_ordinal ? " ✓" : ""}`}
             subtitle={`Action ${index + 1} of ${transaction.actions.length}`}
             icon={getActionIcon(action.act.name)}
             detail={<List.Item.Detail metadata={renderActionMetadata(action)} />}
@@ -279,14 +287,13 @@ export default function Command() {
                 <Action.CopyToClipboard title="Copy Transaction Id" content={action.trx_id} />
               </ActionPanel>
             }
-            selected={selectedAction?.action_ordinal === action.action_ordinal}
           />
         ))
       ) : (
         <List.EmptyView
           title="No actions found"
           description="This transaction has no actions or could not be found"
-          icon={Icon.XmarkCircle}
+          icon={{ source: "xmark.circle" }}
         />
       )}
     </List>
