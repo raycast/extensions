@@ -372,9 +372,35 @@ export const getMotionApiClient = () => {
           });
 
           if (response.ok) {
-            const data = (await response.json()) as WorkspacesResponse;
-            console.log(`[DEBUG] Success with endpoint ${endpoint}:`, JSON.stringify(data, null, 2));
-            return data; // Return the full response object, not just the array
+            const rawData = await response.json();
+            console.log(`[DEBUG] Raw response from ${endpoint}:`, JSON.stringify(rawData, null, 2));
+
+            // Check if the response is already in the expected format
+            if (rawData && typeof rawData === 'object' && 'workspaces' in rawData && Array.isArray(rawData.workspaces)) {
+              console.log(`[DEBUG] Found standard format response with ${rawData.workspaces.length} workspaces`);
+              return rawData as WorkspacesResponse;
+            }
+
+            // Check if the response is an array of workspaces
+            if (Array.isArray(rawData)) {
+              console.log(`[DEBUG] Found array format response with ${rawData.length} workspaces`);
+              return { workspaces: rawData } as WorkspacesResponse;
+            }
+
+            // Check if the response is a different format but contains workspace information
+            if (rawData && typeof rawData === 'object') {
+              // Look for arrays in the object that might contain workspaces
+              for (const [key, value] of Object.entries(rawData)) {
+                if (Array.isArray(value) && value.length > 0 && value[0] && typeof value[0] === 'object' && 'id' in value[0]) {
+                  console.log(`[DEBUG] Found workspaces in '${key}' property with ${value.length} workspaces`);
+                  return { workspaces: value } as WorkspacesResponse;
+                }
+              }
+            }
+
+            // If we couldn't parse it in a standard way, return the raw data wrapped
+            console.log("[DEBUG] Could not identify standard format, returning raw data wrapped in workspaces property");
+            return { workspaces: [rawData] } as WorkspacesResponse;
           } else {
             const responseText = await logResponse(response);
             console.log(`[DEBUG] Failed with endpoint ${endpoint}: ${response.statusText} - ${responseText}`);
@@ -384,7 +410,9 @@ export const getMotionApiClient = () => {
         }
       }
 
-      throw new Error("Failed to get workspace information from any endpoint");
+      // Return empty workspaces array instead of throwing an error
+      console.log("[DEBUG] Failed to get workspace information from any endpoint, returning empty workspace array");
+      return { workspaces: [] };
     },
   };
 };
