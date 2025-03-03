@@ -16,7 +16,7 @@ import {
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
-  CopyPublicKeyAction
+  CopyPublicKeyAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
