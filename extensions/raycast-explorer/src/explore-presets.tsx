@@ -60,7 +60,7 @@ export default function ExplorePresets() {
                 key={preset.id}
                 title={preset.name}
                 icon={Icon[icon] ?? Icon.Code}
-                keywords={[category.name, preset.creativity]}
+                keywords={[category.name, preset.creativity || "unspecified"]}
                 detail={
                   <List.Item.Detail
                     markdown={preset.instructions}
@@ -70,7 +70,11 @@ export default function ExplorePresets() {
                         <List.Item.Detail.Metadata.Label title="Model" text={modelName} />
                         <List.Item.Detail.Metadata.Label
                           title="Creativity"
-                          text={preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)}
+                          text={
+                            preset.creativity
+                              ? preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)
+                              : "Not specified"
+                          }
                           icon={getCreativityIcon(preset.creativity)}
                         />
                         <List.Item.Detail.Metadata.Label title="Web Search" text={preset.web_search ? "On" : "Off"} />
@@ -122,7 +126,7 @@ export default function ExplorePresets() {
 }
 
 function getCreativityIcon(creativity: Preset["creativity"]) {
-  if (creativity === "none") {
+  if (!creativity || creativity === "none") {
     return Icon.CircleDisabled;
   }
 
