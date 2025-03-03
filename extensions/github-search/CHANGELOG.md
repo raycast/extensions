@@ -1,6 +1,6 @@
 # GitHub Search Changelog
 
-## [Updates] - 2025-03-03
+- ## [Updates] - {PR_MERGE_DATE}
 
 - Improve Chrome & Safari window handling
 - Don't show sort options for code search
