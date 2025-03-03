@@ -1,5 +1,9 @@
 # UUID Generator Changelog
 
+## [Added support for parsing TypeID] - 2025-02-26
+
+- You can now parse TypeID into a UUID
+
 ## [Added support for TypeID] - 2024-09-10
 
 - You can now create Base32 encoded, Stripe ID-inspired V7 UUIDs with & without prefix.

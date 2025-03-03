@@ -1,6 +1,10 @@
 # Claude Changelog
 
-## [Added missing contributor] - 2025-02-26
+## [Added missing contributor] - {PR_MERGE_DATE}
+
+## [Update] - 2025-02-26
+
+- Fix: Don't append default model when local models exist
 
 ## [Update] - 2025-02-25
 

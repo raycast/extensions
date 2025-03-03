@@ -1,5 +1,7 @@
 # Safari Changelog
 
+## [Chore: Moved contributor to past contributors list] - 2025-02-27
+
 ## [Update] - 2025-02-21
 
 AI Tools to;
