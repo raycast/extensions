@@ -7,7 +7,7 @@ interface Task {
   name: string;
   description?: string;
   dueDate?: string;
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "ASAP";
   status?: string;
   label?: string;
 }
@@ -147,7 +147,7 @@ export default function Command() {
   // Get color for priority
   function getPriorityColor(priority?: string) {
     switch (priority) {
-      case "URGENT":
+      case "ASAP":
         return "#FF5252";
       case "HIGH":
         return "#FFA000";
@@ -171,8 +171,8 @@ export default function Command() {
 
     // Convert "HIGH" to "High", "MEDIUM" to "Medium", etc.
     switch (priority) {
-      case "URGENT":
-        return "Urgent";
+      case "ASAP":
+        return "ASAP";
       case "HIGH":
         return "High";
       case "MEDIUM":
