@@ -1,6 +1,6 @@
 # BetterDisplay Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2025-03-03
 
 * Added the ability to change contrast.
 * Refactored the code to offer a better user experience.
