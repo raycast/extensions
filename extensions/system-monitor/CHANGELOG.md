@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-03
 
 - Update the action to open the corresponding tab in the System Monitor
 
