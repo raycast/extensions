@@ -14,5 +14,5 @@
 - Save the URL in the clipboard
 
 ### Open random link
-
+- Let GoodLinks select a random link and open it
 - Let GoodLink select a random link and open it
