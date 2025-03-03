@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [Added missing contributor] - {PR_MERGE_DATE}
+## [Added missing contributor] - 2025-03-03
 
 ## [Update] - 2025-02-26
 
