@@ -33,9 +33,9 @@
     },
     {
       "name": "debug-workspaces",
-      "title": "List Workspaces",
-      "subtitle": "List available Motion workspaces",
-      "description": "View available Motion workspaces and get their IDs for task creation",
+      "title": "Debug Workspaces",
+      "subtitle": "Diagnose Motion API connection issues",
+      "description": "Test connection to Motion API and diagnose any issues with workspaces and tasks",
       "mode": "view"
     }
   ],
