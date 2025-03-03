@@ -39,11 +39,11 @@ I've answered your question about "${question}" based on the information above.
 `;
   } catch (error) {
     console.error("Error in Ask Motion tool:", error);
-    
+
     // Extract more useful information from the error
-    let errorDetails = String(error);
+    const errorDetails = String(error);
     let troubleshootingSteps = "";
-    
+
     // Add specific troubleshooting steps based on error message
     if (errorDetails.includes("Failed to get tasks")) {
       troubleshootingSteps = `
@@ -69,7 +69,7 @@ Troubleshooting steps:
 4. Contact the extension developer with the error details below
 `;
     }
-    
+
     return `
 ## Error Accessing Motion
 

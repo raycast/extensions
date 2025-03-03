@@ -251,7 +251,7 @@ export const getMotionApiClient = () => {
         // Log full response for debugging
         console.log("[DEBUG] Tasks response data:", JSON.stringify(data, null, 2));
         console.log(`[DEBUG] Response data type: ${typeof data}, isArray: ${Array.isArray(data)}`);
-        
+
         if (data === null || data === undefined) {
           console.warn("[DEBUG] Response data is null or undefined");
           return [];
