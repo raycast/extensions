@@ -47,7 +47,7 @@ function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   );
 }
 
-export const EditSpaceNameForm = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) => {
+export const EditSpaceOneValueForm = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) => {
   const { spaceId, keyToEdit, value } = props;
   return (
     <CachedQueryClientProvider>

@@ -4,7 +4,7 @@ import { trpc } from "@/utils/trpc.util";
 import { useMe } from "../hooks/use-me.hook";
 import { useAtom } from "jotai";
 import { sessionTokenAtom } from "../states/session-token.state";
-import { EditSpaceNameForm, KeyToEdit } from "./EditSpaceOneValueForm";
+import { EditSpaceOneValueForm, KeyToEdit } from "./EditSpaceOneValueForm";
 import { SpaceMembersView } from "./SpaceMembersView";
 import { SpaceTagsView } from "./SpaceTagsView";
 
@@ -14,7 +14,7 @@ const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: strin
     <Action.Push
       title="Edit"
       icon={Icon.Pencil}
-      target={<EditSpaceNameForm spaceId={spaceId} keyToEdit={keyToEdit} value={value} />}
+      target={<EditSpaceOneValueForm spaceId={spaceId} keyToEdit={keyToEdit} value={value} />}
       onPop={refetch}
     />
   );
