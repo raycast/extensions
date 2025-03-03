@@ -98,9 +98,8 @@ function cleanSshKey(sshKey: Item["sshKey"]): Item["sshKey"] {
   if (!sshKey) return undefined;
   return {
     publicKey: sshKey.publicKey,
+    keyFingerprint: sshKey.keyFingerprint,
     privateKey: hideIfDefined(sshKey.privateKey),
-    // not necessarily sensitive, but not necessary to expose
-    keyFingerprint: hideIfDefined(sshKey.keyFingerprint),
   };
 }
 

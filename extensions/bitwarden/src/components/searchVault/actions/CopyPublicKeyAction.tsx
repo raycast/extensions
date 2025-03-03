@@ -4,6 +4,7 @@ import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
+import { getTransientCopyPreference } from "~/utils/preferences";
 
 function CopyPublicKeyAction() {
   const selectedItem = useSelectedVaultItem();
@@ -19,7 +20,7 @@ function CopyPublicKeyAction() {
         "Getting public key..."
       );
       if (publicKey) {
-        await Clipboard.copy(publicKey);
+        await Clipboard.copy(publicKey, { transient: getTransientCopyPreference("other") });
         await showCopySuccessMessage("Copied public key to clipboard");
       }
     } catch (error) {
