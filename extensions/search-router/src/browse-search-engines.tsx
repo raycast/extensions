@@ -1,13 +1,19 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, openExtensionPreferences, showHUD } from "@raycast/api";
-import { useState } from "react";
-import { SearchEngine, useListSearchEngines } from "./lib/db";
+import { useMemo, useState } from "react";
 import { Clipboard } from "@raycast/api";
+import { SearchEngine, searchEngines } from "./data/search-engines";
 
 export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
   const defaultSearchEngine = getPreferenceValues<Preferences>().defaultSearchEngine;
 
-  const { data: searchEngines, isLoading } = useListSearchEngines(searchText);
+  const filteredSearchEngines = useMemo(() => {
+    const trimmedSearch = searchText.trim();
+    return searchEngines
+      .sort((a, b) => (b.r ?? 0) - (a.r ?? 0))
+      .filter((engine) => engine.t.includes(trimmedSearch) || engine.s.includes(trimmedSearch))
+      .slice(0, 20);
+  }, [searchText]);
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
     await Clipboard.copy(`${searchEngine.t}`);
@@ -17,14 +23,13 @@ export default function BrowseSearchEngines() {
 
   return (
     <List
-      isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Browse search engines by shortcut or name..."
       throttle
     >
-      {searchEngines?.map((searchEngine) => (
+      {filteredSearchEngines?.map((searchEngine) => (
         <List.Item
-          key={searchEngine.id}
+          key={searchEngine.t}
           title={searchEngine.s}
           subtitle={`!${searchEngine.t}`}
           accessories={[
