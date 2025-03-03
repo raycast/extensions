@@ -13,7 +13,7 @@ interface MotionTask {
   name: string;
   description?: string;
   dueDate?: string;
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "ASAP";
   workspaceId: string;
   status?: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
@@ -115,7 +115,7 @@ export const getMotionApiClient = () => {
       title: string;
       description?: string;
       dueDate?: Date;
-      priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+      priority?: "LOW" | "MEDIUM" | "HIGH" | "ASAP";
       status?: "TODO" | "IN_PROGRESS" | "DONE";
       label?: string;
       projectId?: string;
