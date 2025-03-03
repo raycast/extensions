@@ -2,7 +2,6 @@
 import { MenuBarExtra, getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchInverterInfo, fetchPowerFlowRealtimeData } from "./api";
-// import { InverterInfoResponse, PowerFlowRealtimeDataResponse } from "./types";
 
 interface Preferences {
   baseUrl: string;
@@ -96,9 +95,7 @@ export default function Watch() {
     return () => clearInterval(interval);
   }, [baseUrl]);
 
-  // When the user clicks "Show Dashboard", open the dashboard command.
   function openDashboard() {
-    // Replace "YourName" with your actual publisher/extension identifier.
     open("raycast://extensions/Olli0103/fronius-inverter/dashboard");
   }
 
@@ -155,7 +152,7 @@ export default function Watch() {
     >
       <MenuBarExtra.Section title={"Inverter Info"}>
         {inverterListItems.map((item) => (
-          <MenuBarExtra.Item key={item.id} title={item.title} subtitle={item.subtitle} />
+          <MenuBarExtra.Item key={item.id} title={item.title} subtitle={`${item.subtitle} • ${item.accessory}`} />
         ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title={"System Overview"}>
