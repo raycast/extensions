@@ -15,7 +15,7 @@ export default function GitProfileForm({ scope, profile, revalidate }: GitProfil
       await showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `${profile.name} profile applied.`,
+        message: `${values.name} profile applied.`,
       });
 
       if (revalidate) {
