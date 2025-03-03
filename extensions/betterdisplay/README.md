@@ -16,4 +16,4 @@ This extension allows you to control your display using [BetterDisplay](https://
 
 ## Disclaimer
 
-This project is not affiliated, associated, endorsed by, or in any way officially connected with BetterDisplay. BetterDisplay can be found at [betterdisplay.pro](betterdisplay.pro). All issues or feature requests related to [this extension](https://www.raycast.com/pascal_burkhard/betterdisplay) should be filed using the appropriate button on the [store page](https://www.raycast.com/pascal_burkhard/betterdisplay).
+This project is not affiliated, associated, endorsed by, or in any way officially connected with BetterDisplay. BetterDisplay can be found at [betterdisplay.pro](https://betterdisplay.pro). All issues or feature requests related to [this extension](https://www.raycast.com/pascal_burkhard/betterdisplay) should be filed using the appropriate button on the [store page](https://www.raycast.com/pascal_burkhard/betterdisplay).
