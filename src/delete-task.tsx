@@ -122,29 +122,6 @@ export default function Command() {
     }
   }
 
-  // Format the due date
-  function formatDueDate(dateString?: string) {
-    if (!dateString) return "No due date";
-
-    const dueDate = new Date(dateString);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const dueDay = new Date(dueDate);
-    dueDay.setHours(0, 0, 0, 0);
-
-    if (dueDay.getTime() === today.getTime()) {
-      return "Today";
-    } else if (dueDay.getTime() === tomorrow.getTime()) {
-      return "Tomorrow";
-    } else {
-      return dueDate.toLocaleDateString();
-    }
-  }
-
   // Get a relative description of the due date
   function getRelativeDate(dateString?: string): string {
     if (!dateString) return "Not scheduled";
@@ -222,23 +199,6 @@ export default function Command() {
     }
   }
 
-  // Safely get task label as string, or empty array if it's an object
-  function getTaskLabels(label: string | string[] | null | undefined): string[] {
-    // If it's not defined, return empty array
-    if (!label) return [];
-
-    // If it's a simple string, return as an array with one item
-    if (typeof label === "string") return [label];
-
-    // If it's an array of strings, return it
-    if (Array.isArray(label) && label.every((item) => typeof item === "string")) {
-      return label;
-    }
-
-    // Default case, return empty array
-    return [];
-  }
-
   // Safe HTML remover
   function removeHtml(text?: string): string {
     if (!text) return "";
@@ -256,7 +216,7 @@ export default function Command() {
         <List.Dropdown
           tooltip="View options"
           storeValue={true}
-          onChange={(id) => {
+          onChange={() => {
             /* This is just to create a header, no action needed */
           }}
         >
@@ -273,18 +233,18 @@ export default function Command() {
             accessories={[
               {
                 text: getTaskPriority(task.priority),
-                tooltip: "Priority"
+                tooltip: "Priority",
               },
               {
                 text: getRelativeDate(task.dueDate),
-                tooltip: "Scheduled For"
+                tooltip: "Scheduled For",
               },
               {
                 tag: {
                   value: getTaskStatus(task.status),
                   color: task.status === "DONE" ? "#4CAF50" : undefined,
                 },
-                tooltip: "Status"
+                tooltip: "Status",
               },
             ]}
             actions={
