@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { readFile } from "simple-plist";
 import { promisify } from "util";
 import { getPreferenceValues } from "@raycast/api";
+import { execSync } from "child_process";
 
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";
-import { PLIST_PATH } from "../constants";
-import { execSync } from "child_process";
-import path from "path";
+import { GO_PARSER_PATH, PLIST_PATH } from "../constants";
 
 export const readPlist = promisify(readFile);
 
@@ -80,9 +79,10 @@ export default function useBookmarks(readingListOnly?: boolean) {
 
   const fetchItemsWithGo = useMemoizedFn(() => {
     try {
-      const GO_PARSER_PATH = path.join(__dirname, "tools", "bookmarks-parser");
+      const startTime = performance.now();
       const result = execSync(`"${GO_PARSER_PATH}" -input "${PLIST_PATH}"`, { encoding: "utf-8" });
       const parsedResult = extractReadingListBookmarks(JSON.parse(result) as BookmarkPListResult);
+      console.log(`[info] parse bookmarks with go parser cost ${performance.now() - startTime}ms`);
       setBookmarks(parsedResult);
     } catch (e) {
       console.error("parse bookmarks with err");
@@ -92,8 +92,10 @@ export default function useBookmarks(readingListOnly?: boolean) {
 
   const fetchItemsWithPlistNode = useMemoizedFn(async () => {
     try {
+      const startTime = performance.now();
       const safariBookmarksPlist = (await readPlist(PLIST_PATH)) as BookmarkPListResult;
       const bookmarks = extractReadingListBookmarks(safariBookmarksPlist, readingListOnly);
+      console.log(`[info] parse bookmarks with plist node cost ${performance.now() - startTime}ms`);
       setBookmarks(bookmarks);
     } catch (err) {
       if (err instanceof Error && err.message.includes("operation not permitted")) {

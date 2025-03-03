@@ -7,5 +7,5 @@
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
-  "ignorePatterns": ["src/go/**", "src/tools/bookmarks-parser", "**/*.plist", "**/mock", "**/*.js"]
+  "ignorePatterns": ["src/go/**", "**/*.plist", "**/mock", "**/*.js"]
 }

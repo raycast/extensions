@@ -18,7 +18,7 @@ const path = require("path");
 function parseSafariBookmarks(inputPath) {
   try {
     // Path to the pre-compiled executable
-    const executablePath = path.join(__dirname, "tools", "bookmarks-parser");
+    const executablePath = path.join(__dirname, "../assets", "bookmarks-parser");
 
     // Ensure the executable exists
     if (!fs.existsSync(executablePath)) {
@@ -64,15 +64,15 @@ try {
   const result = parseSafariBookmarks(plistFile);
   console.log('=== GO PARSER PERF ===')
   console.log('go parser cost', performance.now() - goStart);
-  console.log('=== GO PARSER RESULT ===')
-  console.log(JSON.stringify(result, null, 2));
+  // console.log('=== GO PARSER RESULT ===')
+  // console.log(JSON.stringify(result, null, 2));
 
   const plistStart = performance.now();
   require("simple-plist").readFileSync(plistFile);
   console.log('=== SIMPLE PLIST PERF ===')
   console.log('plist cost', performance.now() - plistStart);
-  console.log('=== SIMPLE PLIST RESULT ===')
-  console.log(JSON.stringify(result, null, 2));
+  // console.log('=== SIMPLE PLIST RESULT ===')
+  // console.log(JSON.stringify(result, null, 2));
 } catch (error) {
   console.error("Program execution failed:", error);
 }

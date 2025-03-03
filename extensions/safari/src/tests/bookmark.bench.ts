@@ -14,7 +14,7 @@ describe("test bookmark parser benchmark", async () => {
   });
 
   bench("parse in go parser", async () => {
-    const GO_PARSER_PATH = path.join(__dirname, "../tools", "bookmarks-parser");
+    const GO_PARSER_PATH = path.join(__dirname, "../../assets", "bookmarks-parser");
     execSync(`${GO_PARSER_PATH} -input ${PLIST_PATH}`);
   });
 });
