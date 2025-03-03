@@ -63,7 +63,7 @@ export default function Command() {
     const filtered = tasks.filter(
       (task) =>
         task.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase()))
+        (task.description && task.description.toLowerCase().includes(searchText.toLowerCase())),
     );
 
     setFilteredTasks(filtered);
@@ -88,7 +88,7 @@ export default function Command() {
       setFilteredTasks(sortedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load tasks",
@@ -107,7 +107,7 @@ export default function Command() {
       setProjects(projectsData);
     } catch (error) {
       console.error("Error loading projects:", error);
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load projects",
@@ -125,20 +125,25 @@ export default function Command() {
   // Format priority for display
   function formatPriority(priority?: string): string {
     if (!priority) return "None";
-    
+
     switch (priority) {
-      case "ASAP": return "ASAP";
-      case "HIGH": return "High";
-      case "MEDIUM": return "Medium";
-      case "LOW": return "Low";
-      default: return String(priority);
+      case "ASAP":
+        return "ASAP";
+      case "HIGH":
+        return "High";
+      case "MEDIUM":
+        return "Medium";
+      case "LOW":
+        return "Low";
+      default:
+        return String(priority);
     }
   }
 
   // Format date for display
   function formatDate(dateString?: string): string {
     if (!dateString) return "No due date";
-    
+
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString();
@@ -147,20 +152,10 @@ export default function Command() {
     }
   }
 
-  // Get task label(s) as string array
-  function getTaskLabels(label: string | string[] | null | undefined): string[] {
-    if (!label) return [];
-    if (typeof label === "string") return [label];
-    if (Array.isArray(label) && label.every(item => typeof item === "string")) {
-      return label;
-    }
-    return [];
-  }
-
   // Get project name by ID
   function getProjectName(projectId?: string): string {
     if (!projectId) return "None";
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find((p) => p.id === projectId);
     return project ? project.name : "Unknown Project";
   }
 
@@ -176,7 +171,9 @@ export default function Command() {
         {filteredTasks.length === 0 ? (
           <List.EmptyView
             title={searchText ? "No matching tasks found" : "No tasks found"}
-            description={searchText ? "Try a different search term" : "Add tasks in Motion or with the Add Task command"}
+            description={
+              searchText ? "Try a different search term" : "Add tasks in Motion or with the Add Task command"
+            }
           />
         ) : (
           filteredTasks.map((task) => (
@@ -188,15 +185,12 @@ export default function Command() {
                 { text: formatPriority(task.priority) },
                 { text: formatDate(task.dueDate) },
                 { text: task.status || "No Status" },
-                { text: getProjectName(task.projectId) }
+                { text: getProjectName(task.projectId) },
               ]}
               actions={
                 <ActionPanel>
                   <Action title="Edit Task" onAction={() => handleTaskSelect(task.id || "")} />
-                  <Action.CopyToClipboard
-                    title="Copy Task Details"
-                    content={JSON.stringify(task, null, 2)}
-                  />
+                  <Action.CopyToClipboard title="Copy Task Details" content={JSON.stringify(task, null, 2)} />
                 </ActionPanel>
               }
             />
@@ -207,8 +201,8 @@ export default function Command() {
   }
 
   // Task edit form
-  const selectedTask = tasks.find(task => task.id === selectedTaskId);
-  
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId);
+
   if (!selectedTask) {
     return (
       <List>
@@ -230,7 +224,7 @@ export default function Command() {
 
     try {
       const motionClient = getMotionApiClient();
-      
+
       if (!selectedTask) {
         throw new Error("No task selected");
       }
@@ -239,7 +233,7 @@ export default function Command() {
       const preferences = getMotionApiClient().getWorkspaceId();
 
       // Convert Date object to ISO string for API
-      const dueDateString = values.dueDate ? values.dueDate.toISOString().split('T')[0] : undefined;
+      const dueDateString = values.dueDate ? values.dueDate.toISOString().split("T")[0] : undefined;
 
       // Prepare update payload
       const taskUpdate: MotionTask = {
@@ -251,7 +245,7 @@ export default function Command() {
         status: values.status,
         label: values.label || undefined,
         projectId: values.projectId || undefined,
-        workspaceId: selectedTask.workspaceId || preferences
+        workspaceId: selectedTask.workspaceId || preferences,
       };
 
       // Update the task
@@ -260,21 +254,21 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Success,
         title: "Task updated",
-        message: `"${values.name}" has been updated`
+        message: `"${values.name}" has been updated`,
       });
 
       // Reload tasks to get the updated list
       await loadTasks();
-      
+
       // Return to the task list view
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating task:", error);
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to update task",
-        message: String(error)
+        message: String(error),
       });
     } finally {
       setIsLoading(false);
@@ -292,12 +286,7 @@ export default function Command() {
       }
     >
       <Form.Description text="Edit task details" />
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Task name"
-        defaultValue={selectedTask.name}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Task name" defaultValue={selectedTask.name} />
       <Form.TextArea
         id="description"
         title="Description"
@@ -305,50 +294,31 @@ export default function Command() {
         defaultValue={selectedTask.description || ""}
       />
 
-      <Form.DatePicker
-        id="dueDate"
-        title="Due Date"
-        defaultValue={dueDateObj}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker id="dueDate" title="Due Date" defaultValue={dueDateObj} type={Form.DatePicker.Type.Date} />
 
-      <Form.Dropdown
-        id="priority"
-        title="Priority"
-        defaultValue={selectedTask.priority || "MEDIUM"}
-      >
+      <Form.Dropdown id="priority" title="Priority" defaultValue={selectedTask.priority || "MEDIUM"}>
         <Form.Dropdown.Item value="LOW" title="Low" />
         <Form.Dropdown.Item value="MEDIUM" title="Medium" />
         <Form.Dropdown.Item value="HIGH" title="High" />
         <Form.Dropdown.Item value="ASAP" title="ASAP" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="status"
-        title="Status"
-        defaultValue={selectedTask.status || "TODO"}
-      >
+      <Form.Dropdown id="status" title="Status" defaultValue={selectedTask.status || "TODO"}>
         <Form.Dropdown.Item value="TODO" title="To Do" />
         <Form.Dropdown.Item value="IN_PROGRESS" title="In Progress" />
         <Form.Dropdown.Item value="DONE" title="Done" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="label"
-        title="Label"
-        defaultValue={selectedTask.label || ""}
-      >
+      <Form.Dropdown id="label" title="Label" defaultValue={selectedTask.label || ""}>
         <Form.Dropdown.Item value="" title="None" />
-        {["House", "Personal", "St Faith's", "Westside", "Goals", "BAU", "ACA", "Job hunt", "Boys", "Board"].map((label) => (
-          <Form.Dropdown.Item key={label} value={label} title={label} />
-        ))}
+        {["House", "Personal", "St Faith's", "Westside", "Goals", "BAU", "ACA", "Job hunt", "Boys", "Board"].map(
+          (label) => (
+            <Form.Dropdown.Item key={label} value={label} title={label} />
+          ),
+        )}
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="projectId"
-        title="Project"
-        defaultValue={selectedTask.projectId || ""}
-      >
+      <Form.Dropdown id="projectId" title="Project" defaultValue={selectedTask.projectId || ""}>
         <Form.Dropdown.Item value="" title="None" />
         {projects.map((project) => (
           <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
@@ -356,4 +326,4 @@ export default function Command() {
       </Form.Dropdown>
     </Form>
   );
-} 
+}

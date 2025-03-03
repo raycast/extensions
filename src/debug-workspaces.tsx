@@ -70,7 +70,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title="Copy Workspace ID"
+                    title="Copy Workspace Id"
                     content={workspace.id}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
