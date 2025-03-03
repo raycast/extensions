@@ -1,6 +1,19 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Item } from "./types";
 
+function getMarkdownTable(item: Item) {
+  // turn the item into a markdown table
+  return `
+    **Next Conference**
+    | Information | Value |
+    | ----------- | ----- |
+    | Date | ${item.confs?.[0].date || "Not announced"} |
+    | Location | ${item.confs?.[0].place || "Not announced"} |
+    | Deadline | ${item.confs?.[0].timeline?.[0]?.deadline || "Not announced"} |
+    | Website | ${item.confs?.[0].link ? `[${item.confs?.[0].link}](${item.confs?.[0].link})` : "Not announced"} |
+  `;
+}
+
 export function renderListItem(item: Item, isShowingDetail: boolean, setIsShowingDetail: (showing: boolean) => void) {
   // Get the most recent conference
   const latestConf = item.confs?.[0];
@@ -30,7 +43,7 @@ export function renderListItem(item: Item, isShowingDetail: boolean, setIsShowin
       }
       detail={
         <List.Item.Detail
-          markdown={`# ${item.title}\n\n${item.description}\n\n## Next Conference\n* **Date:** ${latestConf?.date || "Not announced"}\n* **Location:** ${latestConf?.place || "Not announced"}\n* **Deadline:** ${latestConf?.timeline?.[0]?.deadline || "Not announced"}\n* **Website:** ${latestConf?.link ? `[${latestConf.link}](${latestConf.link})` : "Not announced"}`}
+          markdown={getMarkdownTable(item)}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Conference" text={item.title} />

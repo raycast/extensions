@@ -1,6 +1,6 @@
 import { Cache, List } from "@raycast/api";
 import * as yaml from "js-yaml";
-import fetch from "node-fetch";
+// Use dynamic import for ESM-only node-fetch v3
 import { useEffect, useState } from "react";
 import { renderListItem } from "./list";
 import { GitHubContent, Item } from "./types";
@@ -34,6 +34,15 @@ export default function Command() {
         await fetchFromGitHub();
       } catch (error) {
         console.error("Failed to load conference data:", error);
+
+        const { showFailureToast } = await import("@raycast/utils");
+        showFailureToast("Failed to load conference data", {
+          title: "Loading Error",
+          primaryAction: {
+            title: "Try Again",
+            onAction: () => fetchFromGitHub(),
+          },
+        });
         setLoading(false);
       }
     }
@@ -46,6 +55,8 @@ export default function Command() {
         const conferenceDirPath = "conference";
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${conferenceDirPath}`;
 
+        // Dynamically import node-fetch
+        const { default: fetch } = await import("node-fetch");
         console.log("Fetching categories from GitHub:", apiUrl);
 
         const categoriesResponse = await fetch(apiUrl);

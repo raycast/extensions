@@ -24,7 +24,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node-fetch": "^2.6.12",
     "js-yaml": "^4.1.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
