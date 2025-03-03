@@ -1,4 +1,4 @@
-import { ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 interface ActionsProps {
@@ -26,6 +26,7 @@ export const Actions = ({ radioButtonNumber }: ActionsProps) => {
   const handleRunAppleScript = async () => {
     try {
       await runAppleScript(appleScript);
+      await closeMainWindow();
     } catch (error) {
       await showToast({
         title: "Failed to open activity monitor",
