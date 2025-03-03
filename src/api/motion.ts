@@ -308,36 +308,178 @@ export const getMotionApiClient = () => {
     },
 
     async updateTask(task: MotionTask): Promise<MotionTask> {
-      // Ensure the task has the correct workspaceId
-      const taskToUpdate = { ...task, workspaceId: correctWorkspaceId };
+      console.log("[DEBUG] updateTask called with task:", JSON.stringify(task, null, 2));
 
-      // Make sure we have a task ID
       if (!task.id) {
-        throw new Error("Task ID is required for updating");
+        const error = new Error("Task ID is required for updating a task");
+        console.error("[ERROR] Update task failed:", error);
+        throw error;
       }
 
-      // Construct URL with both task ID and workspaceId as a query param to ensure API compatibility
-      const url = `${BASE_URL}/tasks/${task.id}?workspaceId=${correctWorkspaceId}`;
-
-      // Log both URL and payload for debugging
-      console.log(`[DEBUG] updateTask URL: ${url}`);
-      console.log(`[DEBUG] updateTask payload:`, JSON.stringify(taskToUpdate, null, 2));
-
-      logRequest("PUT", url, headers, taskToUpdate);
-
-      const response = await fetch(url, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(taskToUpdate),
-      });
-
-      if (!response.ok) {
-        const responseText = await logResponse(response);
-        console.error(`[ERROR] Update task failed with status ${response.status}: ${responseText}`);
-        throw new Error(`Failed to update task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+      const workspaceId = this.getWorkspaceId();
+      if (!workspaceId) {
+        const error = new Error("Workspace ID is missing. Please set up your Motion preferences");
+        console.error("[ERROR] Update task failed:", error);
+        throw error;
       }
 
-      return response.json() as Promise<MotionTask>;
+      // Validate essential task properties
+      const requiredProps = ["name"];
+      for (const prop of requiredProps) {
+        if (!task[prop as keyof MotionTask]) {
+          const error = new Error(`Task ${prop} is required for updating a task`);
+          console.error("[ERROR] Update task failed:", error);
+          throw error;
+        }
+      }
+
+      // Extract clean update payload (remove undefined values)
+      const cleanPayload = Object.entries(task).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Ensure workspaceId is included in the payload
+      cleanPayload.workspaceId = workspaceId;
+      
+      // Log exact character codes of IDs to debug encoding issues
+      console.log("[DEBUG] Task ID character codes:", [...task.id].map(c => c.charCodeAt(0)));
+      console.log("[DEBUG] Workspace ID character codes:", [...workspaceId].map(c => c.charCodeAt(0)));
+      
+      // *** IMPORTANT: The "0" and "O" characters can be confused, and there may be other encoding issues ***
+      // Try a direct fetch via the Task List endpoint first, which should give us the correct task data with exact IDs
+      try {
+        console.log("[DEBUG] Fetching current task data to ensure correct IDs...");
+        const tasksUrl = `${BASE_URL}/tasks?workspaceId=${workspaceId}`;
+        const tasksResponse = await fetch(tasksUrl, {
+          method: "GET",
+          headers,
+        });
+        
+        if (tasksResponse.ok) {
+          const tasksData = await tasksResponse.json();
+          console.log("[DEBUG] Successfully fetched tasks list");
+          
+          // Find the task in the list by comparing IDs (lenient matching)
+          let exactTask;
+          let matchMethod = "";
+          
+          if (Array.isArray(tasksData)) {
+            // Try direct match first
+            exactTask = tasksData.find(t => t.id === task.id);
+            if (exactTask) {
+              matchMethod = "direct match";
+            } 
+            
+            // If no direct match, try case-insensitive match
+            if (!exactTask) {
+              const taskIdLower = task.id.toLowerCase();
+              exactTask = tasksData.find(t => t.id && t.id.toLowerCase() === taskIdLower);
+              if (exactTask) {
+                matchMethod = "case-insensitive match";
+              }
+            }
+            
+            // Last resort: try matching by name if ID doesn't match
+            if (!exactTask && task.name) {
+              exactTask = tasksData.find(t => t.name === task.name);
+              if (exactTask) {
+                matchMethod = "name match";
+              }
+            }
+            
+            if (exactTask) {
+              console.log(`[DEBUG] Found matching task using ${matchMethod}:`);
+              console.log("[DEBUG] Original ID:", task.id);
+              console.log("[DEBUG] Exact ID from API:", exactTask.id);
+              
+              // Use the exact IDs from the API for the update
+              const exactTaskId = exactTask.id;
+              const exactWorkspaceId = exactTask.workspaceId;
+              
+              // Update with the exact IDs from the API
+              const updateUrl = `${BASE_URL}/tasks/${exactTaskId}?workspaceId=${exactWorkspaceId}`;
+              console.log("[DEBUG] Using exact IDs for update URL:", updateUrl);
+              
+              // Update our payload with exact IDs
+              cleanPayload.id = exactTaskId;
+              cleanPayload.workspaceId = exactWorkspaceId;
+              
+              const response = await fetch(updateUrl, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify(cleanPayload),
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                console.log("[DEBUG] Task update successful with exact IDs");
+                return data;
+              } else {
+                const responseText = await response.text();
+                console.error(`[ERROR] Failed to update task with exact IDs. Status: ${response.status}. Response:`, responseText);
+                // Continue to fallback approach
+              }
+            } else {
+              console.log("[DEBUG] Could not find exact matching task in tasks list");
+            }
+          } else {
+            console.log("[DEBUG] Tasks data is not an array, unexpected format:", typeof tasksData);
+          }
+        } else {
+          console.log(`[DEBUG] Failed to fetch tasks list: ${tasksResponse.status} ${tasksResponse.statusText}`);
+        }
+      } catch (error) {
+        console.error("[ERROR] Error fetching task data:", error);
+        // Continue to fallback approach
+      }
+      
+      // Fallback: Try multiple URL formats as we've done before
+      console.log("[DEBUG] Using fallback approach with multiple URL formats");
+      
+      // Try different URL formats in sequence
+      const urlFormats = [
+        // Format 1: workspaces/{workspaceId}/tasks/{taskId}
+        `${BASE_URL}/workspaces/${workspaceId}/tasks/${task.id}`,
+        // Format 2: tasks/{taskId}?workspaceId={workspaceId}
+        `${BASE_URL}/tasks/${task.id}?workspaceId=${workspaceId}`,
+        // Format 3: tasks/{taskId}?workspace_id={workspaceId}
+        `${BASE_URL}/tasks/${task.id}?workspace_id=${workspaceId}`,
+      ];
+      
+      let lastError = null;
+      
+      // Try each URL format in sequence
+      for (const url of urlFormats) {
+        console.log("[DEBUG] Trying URL format:", url);
+        
+        try {
+          const response = await fetch(url, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(cleanPayload),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log("[DEBUG] Task update successful with URL:", url);
+            return data;
+          } else {
+            const responseText = await response.text();
+            console.error(`[ERROR] Failed to update task with URL ${url}. Status: ${response.status}. Response:`, responseText);
+            lastError = new Error(`API Error (${response.status}): ${responseText}`);
+          }
+        } catch (error) {
+          console.error("[ERROR] Network error with URL:", url, error);
+          lastError = error;
+        }
+      }
+      
+      // All URL formats failed
+      console.error("[ERROR] All URL formats failed for task update");
+      throw lastError || new Error("Failed to update task: All URL formats failed");
     },
 
     async deleteTask(id: string): Promise<void> {

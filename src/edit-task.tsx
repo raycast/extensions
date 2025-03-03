@@ -223,17 +223,35 @@ export default function Command() {
     setIsLoading(true);
 
     try {
+      console.log("[DEBUG] Edit Task - handleSubmit called with values:", JSON.stringify(values, null, 2));
       const motionClient = getMotionApiClient();
 
       if (!selectedTask) {
+        console.error("[ERROR] No task selected for update");
         throw new Error("No task selected");
       }
 
+      console.log("[DEBUG] Selected task for update:", JSON.stringify(selectedTask, null, 2));
+
       // Get the Motion workspace ID from preferences
-      const preferences = getMotionApiClient().getWorkspaceId();
+      const workspaceId = motionClient.getWorkspaceId();
+      console.log("[DEBUG] Using workspace ID:", workspaceId);
+
+      // Verify workspace ID is valid
+      if (!workspaceId || typeof workspaceId !== 'string' || workspaceId.trim() === '') {
+        console.error("[ERROR] Invalid workspace ID:", workspaceId);
+        throw new Error("Invalid workspace ID. Please check your Motion preferences.");
+      }
+
+      // Verify task ID is valid
+      if (!selectedTask.id || typeof selectedTask.id !== 'string' || selectedTask.id.trim() === '') {
+        console.error("[ERROR] Invalid task ID:", selectedTask.id);
+        throw new Error("Selected task has an invalid ID");
+      }
 
       // Convert Date object to ISO string for API
       const dueDateString = values.dueDate ? values.dueDate.toISOString().split("T")[0] : undefined;
+      console.log("[DEBUG] Converted due date:", dueDateString);
 
       // Prepare update payload
       const taskUpdate: MotionTask = {
@@ -243,30 +261,59 @@ export default function Command() {
         dueDate: dueDateString,
         priority: values.priority,
         status: values.status,
-        label: values.label || undefined,
-        projectId: values.projectId || undefined,
-        workspaceId: preferences,
+        label: values.label && values.label.trim() !== "" ? values.label : undefined,
+        projectId: values.projectId && values.projectId.trim() !== "" ? values.projectId : undefined,
+        workspaceId: workspaceId,
       };
 
       // Log the task update for debugging
-      console.log("Updating task with payload:", JSON.stringify(taskUpdate, null, 2));
+      console.log("[DEBUG] Updating task with payload:", JSON.stringify(taskUpdate, null, 2));
+      console.log("[DEBUG] Task ID to update:", selectedTask.id);
+      console.log("[DEBUG] Workspace ID for update:", workspaceId);
 
-      // Update the task
-      await motionClient.updateTask(taskUpdate);
+      try {
+        // Update the task
+        await motionClient.updateTask(taskUpdate);
+        
+        console.log("[DEBUG] Task update successful");
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Task updated",
-        message: `"${values.name}" has been updated`,
-      });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Task updated",
+          message: `"${values.name}" has been updated`,
+        });
 
-      // Reload tasks to get the updated list
-      await loadTasks();
+        // Reload tasks to get the updated list
+        await loadTasks();
 
-      // Return to the task list view
-      setIsEditing(false);
+        // Return to the task list view
+        setIsEditing(false);
+      } catch (updateError) {
+        console.error("[ERROR] Task update failed:", updateError);
+        
+        // More detailed error for the user
+        let errorMessage = String(updateError);
+        
+        // Check for specific API error patterns
+        if (errorMessage.includes("404")) {
+          errorMessage += "\n\nThe task or endpoint couldn't be found. This may be due to:";
+          errorMessage += "\n- Task ID might be invalid or the task was deleted";
+          errorMessage += "\n- Incorrect workspace ID";
+          errorMessage += "\n- API endpoint structure has changed";
+        } else if (errorMessage.includes("400")) {
+          errorMessage += "\n\nThis may be due to invalid fields in your request.";
+        } else if (errorMessage.includes("403")) {
+          errorMessage += "\n\nYou may not have permission to update this task.";
+        }
+        
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to update task",
+          message: errorMessage,
+        });
+      }
     } catch (error) {
-      console.error("Error updating task:", error);
+      console.error("[ERROR] General error in handleSubmit:", error);
 
       await showToast({
         style: Toast.Style.Failure,
