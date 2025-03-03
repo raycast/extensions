@@ -6,7 +6,7 @@ type Values = {
   name: string;
   description: string;
   dueDate: Date;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "ASAP";
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label: string;
   projectId: string;
@@ -17,7 +17,7 @@ type TaskPayload = {
   title: string;
   description: string;
   dueDate: Date;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "ASAP";
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
   projectId?: string;
@@ -131,7 +131,7 @@ export default function Command() {
         <Form.Dropdown.Item value="LOW" title="Low" />
         <Form.Dropdown.Item value="MEDIUM" title="Medium" />
         <Form.Dropdown.Item value="HIGH" title="High" />
-        <Form.Dropdown.Item value="URGENT" title="Urgent" />
+        <Form.Dropdown.Item value="ASAP" title="ASAP" />
       </Form.Dropdown>
 
       <Form.Dropdown id="status" title="Status" defaultValue="TODO">
