@@ -66,18 +66,25 @@ export default function Command() {
     }
   }
 
-  // Render a single list item with export action
+  // Render a single list item with export action or empty state
   return (
-    <List isLoading={isLoading}>
-      <List.Item
-        title={`Export ${templates.length} templates`}
-        subtitle={`Save to: ${DEFAULT_TEMPLATE_PATH}`}
-        actions={
-          <ActionPanel>
-            <Action title="Export" onAction={handleExport} />
-          </ActionPanel>
-        }
-      />
+    <List isLoading={isLoading} searchBarPlaceholder="Export templates">
+      {templates.length > 0 ? (
+        <List.Item
+          title={`Export ${templates.length} templates`}
+          subtitle={`Save to: ${DEFAULT_TEMPLATE_PATH}`}
+          actions={
+            <ActionPanel>
+              <Action title="Export" onAction={handleExport} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          title="No Templates Available"
+          description="Create some templates first before using the export feature."
+        />
+      )}
     </List>
   );
 }

@@ -4,7 +4,7 @@
  */
 import React from "react";
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { getAccessToken, showFailureToast, withAccessToken } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { SlackTemplate } from "./types";
 import { validateAndNormalizeThreadTs, slack } from "./lib/slack";
@@ -57,7 +57,8 @@ function Command() {
       // Initialize Slack client
       const { token } = await getAccessToken();
       if (!token) {
-        throw new Error("Failed to get authentication credentials");
+        await showFailureToast("Failed to get authentication credentials");
+        return;
       }
 
       const client = new WebClient(token);

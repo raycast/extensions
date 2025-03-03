@@ -33,7 +33,7 @@ A Raycast Extension for sending messages to Slack channels using customizable te
 1. Open Raycast and run `Send Slack Message`
 2. Select a template to use
 3. The message will be sent to the pre-configured channel with the variables automatically replaced
-4. Press `⌘ + K` to edit or delete the selected template
+4. Press `⌘ + E` to edit or `⌃ + X` to delete the selected template
 
 ### Template Management
 

@@ -29,11 +29,7 @@ export default function Command() {
    * @param overwrite - Whether to overwrite existing templates with the same name
    * @returns Merged array of templates
    */
-  function mergeTemplates(
-    importedTemplates: SlackTemplate[],
-    existingTemplates: SlackTemplate[],
-    overwrite: boolean,
-  ) {
+  function mergeTemplates(importedTemplates: SlackTemplate[], existingTemplates: SlackTemplate[], overwrite: boolean) {
     if (overwrite) {
       // If overwrite is true, keep existing templates that don't conflict with imported ones
       const uniqueExisting = existingTemplates.filter((t) => !importedTemplates.some((it) => it.name === t.name));
@@ -83,7 +79,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text={`Specify a JSON file to import.`} />
+      <Form.Description text={"Specify a JSON file to import."} />
       <Form.TextField
         id="filePath"
         title="File Path"

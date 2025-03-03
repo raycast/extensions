@@ -4,7 +4,7 @@
  */
 import { WebClient } from "@slack/web-api";
 import { showToast, Toast } from "@raycast/api";
-import { OAuthService } from "@raycast/utils";
+import { OAuthService, showFailureToast } from "@raycast/utils";
 import { Channel } from "../types";
 
 /** Slack API error codes for channel-related operations */
@@ -137,7 +137,6 @@ export async function validateAndNormalizeThreadTs(
  * @param channelId - ID of the target channel
  * @param message - Message content to send
  * @param threadTs - Optional thread timestamp for reply
- * @throws Error if message sending fails
  */
 export async function sendMessage(token: string, channelId: string, message: string, threadTs?: string) {
   const client = new WebClient(token);
@@ -156,13 +155,16 @@ export async function sendMessage(token: string, channelId: string, message: str
       title: "Message sent successfully",
     });
   } catch (error) {
-    if ((error as SlackError).data?.error === SLACK_API_ERROR_CODES.NOT_IN_CHANNEL) {
-      throw new Error("You need to join the channel before sending messages");
+    const errorTitle = "Failed to send message";
+    const slackError = error as SlackError;
+
+    if (slackError.data?.error === SLACK_API_ERROR_CODES.NOT_IN_CHANNEL) {
+      await showFailureToast("You need to join the channel before sending messages", { title: errorTitle });
+    } else if (slackError.data?.error === SLACK_API_ERROR_CODES.CHANNEL_NOT_FOUND) {
+      await showFailureToast("Channel not found", { title: errorTitle });
+    } else {
+      await showFailureToast(error, { title: errorTitle });
     }
-    if ((error as SlackError).data?.error === SLACK_API_ERROR_CODES.CHANNEL_NOT_FOUND) {
-      throw new Error("Channel not found");
-    }
-    throw error;
   }
 }
 
@@ -182,7 +184,6 @@ export async function showCustomToast(options: ToastOptions): Promise<void> {
  * Fetches all accessible Slack channels
  * @param client - Authenticated Slack Web API client
  * @returns Promise<Channel[]> Array of channel information
- * @throws Error if channel fetching fails
  */
 export async function fetchAllChannels(client: WebClient): Promise<Channel[]> {
   try {
@@ -217,6 +218,7 @@ export async function fetchAllChannels(client: WebClient): Promise<Channel[]> {
       title: "Failed to fetch channel list",
       message: error instanceof Error ? error.message : "Unknown error",
     });
-    throw error;
+    // Return empty array instead of throwing the error to avoid duplicate error handling
+    return [];
   }
 }

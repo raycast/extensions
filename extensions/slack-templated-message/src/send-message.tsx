@@ -3,8 +3,8 @@
  * Supports editing, deleting templates and sending messages to threads.
  */
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, List, Toast, useNavigation } from "@raycast/api";
-import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { Action, ActionPanel, Form, Keyboard, List, Toast, useNavigation } from "@raycast/api";
+import { getAccessToken, showFailureToast, withAccessToken } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import { SlackTemplate } from "./types";
 import { showCustomToast, slack, sendMessage, validateAndNormalizeThreadTs } from "./lib/slack";
@@ -35,7 +35,12 @@ function EditTemplateForm({ template, onUpdate }: { template: SlackTemplate; onU
               // Validate channel selection
               const selectedChannel = channels.find((c) => c.id === values.slackChannelId);
               if (!selectedChannel) {
-                throw new Error("Selected channel not found");
+                await showCustomToast({
+                  style: Toast.Style.Failure,
+                  title: "Channel Error",
+                  message: "Selected channel not found",
+                });
+                return;
               }
 
               // Validate and normalize thread timestamp if provided
@@ -118,15 +123,12 @@ function Command() {
     try {
       const { token } = await getAccessToken();
       if (!token) {
-        throw new Error("Failed to get authentication token");
+        await showFailureToast("Failed to get authentication token");
+        return;
       }
       await sendMessage(token, template.slackChannelId, template.message, template.threadTimestamp);
     } catch (error) {
-      await showCustomToast({
-        style: Toast.Style.Failure,
-        title: "Failed to send message",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
+      // Error toast is already handled in sendMessage function
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +174,7 @@ function Command() {
               <Action
                 title="Delete"
                 onAction={() => handleDeleteTemplate(template)}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
               />
             </ActionPanel>

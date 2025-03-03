@@ -134,7 +134,15 @@ export async function readTemplatesFromFile(filePath: string): Promise<SlackTemp
  * @param templates - Templates to write
  */
 export async function writeTemplatesToFile(filePath: string, templates: SlackTemplate[]): Promise<void> {
-  await fs.writeFile(filePath, JSON.stringify(templates, null, 2));
+  try {
+    await fs.writeFile(filePath, JSON.stringify(templates, null, 2));
+  } catch (error) {
+    await showCustomToast({
+      style: Toast.Style.Failure,
+      title: "Failed to write to file",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 }
 
 /**
@@ -175,7 +183,7 @@ export async function loadTemplates(): Promise<SlackTemplate[]> {
  */
 export async function updateTemplate(updatedTemplate: SlackTemplate, originalName: string): Promise<void> {
   try {
-    const templates = await loadTemplates();
+    const templates = await loadTemplatesFromFile();
     const updatedTemplates = templates.map((t) => (t.name === originalName ? updatedTemplate : t));
     await saveTemplatesToFile(updatedTemplates);
 

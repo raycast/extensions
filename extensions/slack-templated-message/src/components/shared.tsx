@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { Form } from "@raycast/api";
 import { WebClient } from "@slack/web-api";
-import { getAccessToken } from "@raycast/utils";
+import { getAccessToken, showFailureToast } from "@raycast/utils";
 import { Channel } from "../types";
 import { fetchAllChannels } from "../lib/slack";
 
@@ -30,7 +30,7 @@ export function useChannels() {
         const allChannels = await fetchAllChannels(client);
         setChannels(allChannels);
       } catch (error) {
-        console.error(error);
+        showFailureToast(error, { title: "Failed to fetch channels" });
       } finally {
         setIsLoading(false);
       }
