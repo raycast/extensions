@@ -80,7 +80,6 @@ const FORK_OPTIONS = [
 
 const EXCLUDE_APPS = [
   'app/alithya-oss-backstage-ci',
-  'apps/pull',
   'app/backstage-goalie',
   'app/dependabot',
   'app/depfu',
@@ -92,6 +91,7 @@ const EXCLUDE_APPS = [
   'app/github-actions',
   'app/live-github-bot',
   'app/mend-for-github-com',
+  'app/pull',
   'app/renovate',
   'app/snyk-io',
   'app/staging-whitesource-for-github-com',
