@@ -1,6 +1,6 @@
 # Hacker News Changelog
 
-## [🚀 Add Readwise Reader integration] - {PR_MERGE_DATE}
+## [🚀 Add Readwise Reader integration] - 2025-03-03
 
 - Add ability to save articles to Readwise Reader
 - Show visual indicator for previously saved articles
