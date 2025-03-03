@@ -10,6 +10,8 @@ export default function Command() {
     return await getAllItems();
   });
 
+  const isEmpty = data === undefined || data.length === 0;
+
   const handleSetProfile = async (profile: Profile) => {
     const options: Alert.Options = {
       title: "Are you sure?",
@@ -52,15 +54,29 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for Git profiles...">
-      <List.Item
-        title={"Create New Profile"}
-        icon={Icon.PlusSquare}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Create Profile" target={<ProfileForm id={uniqueKey()} revalidate={revalidate} />} />
-          </ActionPanel>
-        }
-      />
+      {isEmpty && (
+        <List.EmptyView
+          icon={Icon.Bird}
+          title="No profiles found."
+          description="You don't have any profiles yet."
+          actions={
+            <ActionPanel>
+              <Action.Push title="Create Profile" target={<ProfileForm id={uniqueKey()} revalidate={revalidate} />} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isEmpty && (
+        <List.Item
+          title={"Create Profile"}
+          icon={Icon.PlusSquare}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Create Profile" target={<ProfileForm id={uniqueKey()} revalidate={revalidate} />} />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title="My Profiles">
         {data?.map((profile) => (
           <List.Item
