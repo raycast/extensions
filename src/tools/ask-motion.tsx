@@ -39,12 +39,45 @@ I've answered your question about "${question}" based on the information above.
 `;
   } catch (error) {
     console.error("Error in Ask Motion tool:", error);
+    
+    // Extract more useful information from the error
+    let errorDetails = String(error);
+    let troubleshootingSteps = "";
+    
+    // Add specific troubleshooting steps based on error message
+    if (errorDetails.includes("Failed to get tasks")) {
+      troubleshootingSteps = `
+Troubleshooting steps:
+1. Verify your Motion API key is correct in Raycast preferences
+2. Check that your specified workspace ID exists and is accessible
+3. Try running the 'Debug Workspaces' command to verify connectivity
+4. Ensure you have tasks in your Motion workspace
+`;
+    } else if (errorDetails.includes("fetch failed") || errorDetails.includes("network")) {
+      troubleshootingSteps = `
+Troubleshooting steps:
+1. Check your internet connection
+2. Verify that motion.usemotion.com is accessible from your browser
+3. Check if there's a Motion service outage
+`;
+    } else {
+      troubleshootingSteps = `
+Troubleshooting steps:
+1. Verify your Motion API key is correct in Raycast preferences
+2. Check that your workspace ID exists and is accessible
+3. Try running the 'Debug Workspaces' command to verify connectivity
+4. Contact the extension developer with the error details below
+`;
+    }
+    
     return `
 ## Error Accessing Motion
 
-I encountered an error while trying to access your Motion data. Please check your Motion API key and workspace ID in the extension preferences, and make sure your internet connection is working.
+I encountered an error while trying to access your Motion data. 
 
-Error details: ${String(error)}
+${troubleshootingSteps}
+
+Error details: ${errorDetails}
 `;
   }
 }

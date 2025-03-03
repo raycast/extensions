@@ -230,14 +230,19 @@ export const getMotionApiClient = () => {
       logRequest("GET", url, headers);
 
       try {
+        console.log("[DEBUG] Attempting to fetch tasks from Motion API...");
         const response = await fetch(url, {
           method: "GET",
           headers,
         });
 
+        console.log(`[DEBUG] Motion API response status: ${response.status} ${response.statusText}`);
+
         if (!response.ok) {
           const responseText = await logResponse(response);
-          throw new Error(`Failed to get tasks: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
+          const errorMessage = `Failed to get tasks: ${response.statusText}${responseText ? ` - ${responseText}` : ""} (Status: ${response.status})`;
+          console.error("[DEBUG] API Error:", errorMessage);
+          throw new Error(errorMessage);
         }
 
         // Parse the response
@@ -245,14 +250,22 @@ export const getMotionApiClient = () => {
 
         // Log full response for debugging
         console.log("[DEBUG] Tasks response data:", JSON.stringify(data, null, 2));
+        console.log(`[DEBUG] Response data type: ${typeof data}, isArray: ${Array.isArray(data)}`);
+        
+        if (data === null || data === undefined) {
+          console.warn("[DEBUG] Response data is null or undefined");
+          return [];
+        }
 
         // Handle both array and object with tasks property formats
         if (Array.isArray(data)) {
+          console.log(`[DEBUG] Found ${data.length} tasks in array format`);
           return data as MotionTask[];
         } else if (data && typeof data === "object") {
           // Check for common wrapper properties like 'tasks', 'items', 'data', etc.
           for (const key of ["tasks", "items", "data", "results"]) {
             if (Array.isArray(data[key])) {
+              console.log(`[DEBUG] Found ${data[key].length} tasks in '${key}' property`);
               return data[key] as MotionTask[];
             }
           }
@@ -268,6 +281,11 @@ export const getMotionApiClient = () => {
         return [];
       } catch (error) {
         console.error("[DEBUG] Get tasks error:", error);
+        if (error instanceof Error) {
+          console.error("[DEBUG] Error name:", error.name);
+          console.error("[DEBUG] Error message:", error.message);
+          console.error("[DEBUG] Error stack:", error.stack);
+        }
         throw error;
       }
     },
