@@ -152,8 +152,8 @@ export const getMotionApiClient = () => {
         // Add auto-scheduling by default
         autoScheduled: {
           deadlineType: "SOFT", // Use SOFT deadline by default
-          schedule: "Work Hours" // Use standard work hours for scheduling
-        }
+          schedule: "Work Hours", // Use standard work hours for scheduling
+        },
       };
 
       logRequest("POST", url, headers, task);
