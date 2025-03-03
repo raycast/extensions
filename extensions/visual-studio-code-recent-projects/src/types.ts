@@ -33,7 +33,9 @@ export enum VSCodeBuild {
   Cursor = "Cursor",
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
+  Positron = "Positron",
   Windsurf = "Windsurf",
+  Trae = "Trae",
 }
 
 export type RecentEntries = {

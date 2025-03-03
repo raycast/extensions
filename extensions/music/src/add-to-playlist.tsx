@@ -48,9 +48,9 @@ export default function AddToPlaylist() {
           (data) => {
             setPlaylists(data);
             setIsLoading(false);
-          }
-        )
-      )
+          },
+        ),
+      ),
     )();
   }, []);
 
@@ -97,7 +97,7 @@ function Actions({ playlist: { name }, pop }: ActionsProps) {
       name,
       music.currentTrack.addToPlaylist,
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError("Could not add current track to this playlist", `Track added to playlist "${name}"`)
+      handleTaskEitherError("Could not add current track to this playlist", `Track added to playlist "${name}"`),
     )();
 
     pop();

@@ -6,15 +6,60 @@ import {
   ChromeAdapterTopVisited,
   OrionAdapterRecents,
   OrionAdapterTopVisited,
+  SafariAdapterRecents,
+  SafariAdapterTopVisited,
+  FirefoxAdapterRecents,
+  FirefoxAdapterTopVisited,
+  BraveAdapterRecents,
+  BraveAdapterTopVisited,
+  VivaldiAdapterRecents,
+  VivaldiAdapterTopVisited,
+  OperaAdapterRecents,
+  OperaAdapterTopVisited,
+  EdgeAdapterRecents,
+  EdgeAdapterTopVisited,
 } from "./adapters";
-import { OrionQueryBuilder, QueryBuilder, ChromeQueryBuilder, ArcQueryBuilder } from "./query-builder";
-import { ChromeRecord, OrionRecord, Record, ArcRecord } from "./record";
+import {
+  OrionQueryBuilder,
+  QueryBuilder,
+  ChromeQueryBuilder,
+  ArcQueryBuilder,
+  SafariQueryBuilder,
+  FirefoxQueryBuilder,
+  BraveQueryBuilder,
+  VivaldiQueryBuilder,
+  OperaQueryBuilder,
+  EdgeQueryBuilder,
+} from "./query-builder";
+import {
+  ChromeRecord,
+  OrionRecord,
+  Record,
+  ArcRecord,
+  SafariRecord,
+  FirefoxRecord,
+  ZenRecord,
+  BraveRecord,
+  VivaldiRecord,
+  OperaRecord,
+  EdgeRecord,
+} from "./record";
 import { resolve } from "path";
 import { homedir } from "os";
+import ini from "ini";
+import fs from "node:fs";
 
 interface Configurations {
   chrome: Factory<ChromeRecord>;
   orion: Factory<OrionRecord>;
+  arc: Factory<ArcRecord>;
+  safari: Factory<SafariRecord>;
+  firefox: Factory<FirefoxRecord>;
+  zen: Factory<ZenRecord>;
+  brave: Factory<BraveRecord>;
+  vivaldi: Factory<VivaldiRecord>;
+  opera: Factory<OperaRecord>;
+  edge: Factory<EdgeRecord>;
   [key: string]: Factory<Record>;
 }
 
@@ -37,6 +82,13 @@ export class Factory<T extends Record> {
       chrome: new ChromeFactory(profile),
       orion: new OrionFactory(),
       arc: new ArcFactory(),
+      safari: new SafariFactory(),
+      firefox: new FirefoxFactory(),
+      zen: new ZenFactory(),
+      brave: new BraveFactory(),
+      vivaldi: new VivaldiFactory(),
+      opera: new OperaFactory(),
+      edge: new EdgeFactory(),
     };
 
     return config[browser];
@@ -61,6 +113,24 @@ class OrionFactory extends Factory<OrionRecord> {
   }
 }
 
+class SafariFactory extends Factory<SafariRecord> {
+  getQueryBuilder() {
+    return new SafariQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<SafariRecord> {
+    return new SafariAdapterRecents();
+  }
+
+  getTopVisitedAdapter(): Adapter<SafariRecord> {
+    return new SafariAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), "Library/Safari/History.db");
+  }
+}
+
 class ArcFactory extends Factory<ArcRecord> {
   getSrc(): string {
     return resolve(homedir(), "Library/Application Support/Arc/User Data/Default/History");
@@ -78,7 +148,7 @@ class ArcFactory extends Factory<ArcRecord> {
   }
 }
 
-class ChromeFactory extends Factory<ChromeRecord> {
+class ChromeFactory<T extends ChromeRecord> extends Factory<T> {
   profile: string;
 
   getQueryBuilder(): QueryBuilder {
@@ -94,10 +164,140 @@ class ChromeFactory extends Factory<ChromeRecord> {
     this.profile = profile;
   }
 
-  getRecentsAdapter(): Adapter<ChromeRecord> {
-    return new ChromeAdapterRecents();
+  getRecentsAdapter(): Adapter<T> {
+    return new ChromeAdapterRecents<ChromeRecord>();
   }
-  getTopVisitedAdapter(): Adapter<ChromeRecord> {
+  getTopVisitedAdapter(): Adapter<T> {
     return new ChromeAdapterTopVisited();
+  }
+}
+
+class BraveFactory extends ChromeFactory<BraveRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new BraveQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<BraveRecord> {
+    return new BraveAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<BraveRecord> {
+    return new BraveAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/BraveSoftware/Brave-Browser/Default/History`);
+  }
+}
+
+class VivaldiFactory extends ChromeFactory<VivaldiRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new VivaldiQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<VivaldiRecord> {
+    return new VivaldiAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<VivaldiRecord> {
+    return new VivaldiAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/Vivaldi/Default/History`);
+  }
+}
+
+class OperaFactory extends ChromeFactory<OperaRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new OperaQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<OperaRecord> {
+    return new OperaAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<OperaRecord> {
+    return new OperaAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/com.operasoftware.Opera/Default/History`);
+  }
+}
+
+class EdgeFactory extends ChromeFactory<EdgeRecord> {
+  constructor() {
+    super("");
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new EdgeQueryBuilder();
+  }
+
+  getRecentsAdapter(): Adapter<EdgeRecord> {
+    return new EdgeAdapterRecents();
+  }
+  getTopVisitedAdapter(): Adapter<EdgeRecord> {
+    return new EdgeAdapterTopVisited();
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `Library/Application Support/Microsoft Edge/Default/History`);
+  }
+}
+
+class FirefoxFactory<T extends FirefoxRecord> extends Factory<T> {
+  profile: string;
+
+  constructor() {
+    super();
+    this.profile = this.getProfile();
+  }
+
+  getQueryBuilder(): QueryBuilder {
+    return new FirefoxQueryBuilder();
+  }
+
+  getBaseDir(): string {
+    return "Library/Application Support/Firefox";
+  }
+
+  getSrc(): string {
+    return resolve(homedir(), `${this.getBaseDir()}/${this.profile}/places.sqlite`);
+  }
+
+  getRecentsAdapter(): Adapter<T> {
+    return new FirefoxAdapterRecents<FirefoxRecord>();
+  }
+  getTopVisitedAdapter(): Adapter<T> {
+    return new FirefoxAdapterTopVisited();
+  }
+
+  getProfile(): string {
+    const file = fs.readFileSync(resolve(homedir(), `${this.getBaseDir()}/profiles.ini`), "utf8");
+    const iniFile = ini.parse(file);
+
+    const profiles = Object.keys(iniFile).map((key) => ({ name: iniFile[key].Name, path: iniFile[key].Path }));
+
+    const installKey = Object.keys(iniFile).find((key) => key.startsWith("Install"));
+
+    const defaultProfile: string = installKey ? iniFile[installKey]?.Default : profiles[0].path;
+    return defaultProfile;
+  }
+}
+
+class ZenFactory extends FirefoxFactory<ZenRecord> {
+  getBaseDir(): string {
+    return "Library/Application Support/zen";
   }
 }

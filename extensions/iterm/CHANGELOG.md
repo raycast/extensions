@@ -1,5 +1,7 @@
 # iTerm Changelog
 
+## [✨ AI Enhancements] - 2025-02-21
+
 ## [Extension improvement] - 2024-04-17
 - Added open file path when nothing is selected in `Open iTerm here` command
 

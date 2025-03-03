@@ -5,6 +5,7 @@ export enum MacOSVersion {
   Monterey = 12,
   Ventura = 13,
   Sonoma = 14,
+  Sequoia = 15,
 }
 
 type Semver = {
