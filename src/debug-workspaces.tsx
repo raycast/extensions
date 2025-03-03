@@ -2,15 +2,6 @@ import { ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getMotionApiClient } from "./api/motion";
 
-// Define workspace interface to avoid using 'any'
-interface Workspace {
-  id: string;
-  name: string;
-  type: string;
-  teamId: string | null;
-  labels: string[];
-}
-
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [debugInfo, setDebugInfo] = useState<string>("Loading debug information...");
@@ -22,26 +13,26 @@ export default function Command() {
       setIsLoading(true);
       setError(null);
       setDebugInfo("Loading debug information...");
-      
+
       const motionClient = getMotionApiClient();
-      
+
       let infoText = "# Motion Debug Information\n\n";
-      
+
       // Test API key and workspace ID
       infoText += "## API Configuration\n";
       infoText += "Testing API key and workspace ID configuration...\n\n";
-      
+
       // Test workspace endpoint
       try {
         infoText += "## Workspaces Test\n";
         infoText += "Attempting to fetch workspaces...\n\n";
-        
+
         const workspaces = await motionClient.getWorkspaces();
-        
+
         if (workspaces && Array.isArray(workspaces) && workspaces.length > 0) {
           infoText += "✅ Successfully retrieved workspaces\n\n";
           infoText += `Found ${workspaces.length} workspace(s):\n\n`;
-          
+
           workspaces.forEach((workspace, index) => {
             infoText += `### Workspace ${index + 1}\n`;
             infoText += `- ID: \`${workspace.id}\`\n`;
@@ -58,18 +49,18 @@ export default function Command() {
       } catch (workspacesError) {
         infoText += `❌ Error fetching workspaces: ${String(workspacesError)}\n\n`;
       }
-      
+
       // Test tasks endpoint
       try {
         infoText += "## Tasks Test\n";
         infoText += "Attempting to fetch tasks...\n\n";
-        
+
         const tasks = await motionClient.getTasks();
-        
+
         if (tasks && Array.isArray(tasks) && tasks.length > 0) {
           infoText += "✅ Successfully retrieved tasks\n\n";
           infoText += `Found ${tasks.length} task(s):\n\n`;
-          
+
           // Show first 5 tasks as a sample
           const sampleTasks = tasks.slice(0, 5);
           sampleTasks.forEach((task, index) => {
@@ -80,7 +71,7 @@ export default function Command() {
             infoText += `- Due Date: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}\n`;
             infoText += "\n";
           });
-          
+
           if (tasks.length > 5) {
             infoText += `... and ${tasks.length - 5} more task(s)\n\n`;
           }
@@ -90,7 +81,7 @@ export default function Command() {
       } catch (tasksError) {
         infoText += `❌ Error fetching tasks: ${String(tasksError)}\n\n`;
       }
-      
+
       infoText += "## Connection Summary\n";
       infoText += "The debug information above can help diagnose any issues with your Motion connection.\n\n";
       infoText += "If you're seeing error messages, please check:\n";
@@ -98,12 +89,12 @@ export default function Command() {
       infoText += "2. Your workspace ID is correct (or let the extension auto-detect it)\n";
       infoText += "3. You have an active internet connection\n";
       infoText += "4. The Motion API service is available\n";
-      
+
       setDebugInfo(infoText);
     } catch (e) {
       console.error("Debug error:", e);
       setError(`Failed to load debug information: ${String(e)}`);
-      
+
       await showToast({
         style: Toast.Style.Failure,
         title: "Debug Error",
@@ -127,28 +118,33 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Debug Info" content={markdown} />
-          <Action title="Refresh" onAction={() => {
-            const motionClient = getMotionApiClient();
-            Promise.all([
-              motionClient.getWorkspaces().catch(e => `Error: ${e}`),
-              motionClient.getTasks().catch(e => `Error: ${e}`),
-            ]).then(() => {
-              showToast({
-                style: Toast.Style.Success,
-                title: "Refreshed",
-                message: "Debug information refreshed",
-              });
-              // Run the debug info loader again
-              loadDebugInfo();
-            }).catch(error => {
-              showToast({
-                style: Toast.Style.Failure,
-                title: "Refresh Failed",
-                message: String(error),
-              });
-              setIsLoading(false);
-            });
-          }} />
+          <Action
+            title="Refresh"
+            onAction={() => {
+              const motionClient = getMotionApiClient();
+              Promise.all([
+                motionClient.getWorkspaces().catch((e) => `Error: ${e}`),
+                motionClient.getTasks().catch((e) => `Error: ${e}`),
+              ])
+                .then(() => {
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Refreshed",
+                    message: "Debug information refreshed",
+                  });
+                  // Run the debug info loader again
+                  loadDebugInfo();
+                })
+                .catch((error) => {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Refresh Failed",
+                    message: String(error),
+                  });
+                  setIsLoading(false);
+                });
+            }}
+          />
         </ActionPanel>
       }
     />
