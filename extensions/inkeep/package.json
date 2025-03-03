@@ -13,9 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "ask-inkeep",
-      "title": "Inkeep",
-      "description": "Interact with Inkeep to get answers from your knowledge base.",
+      "name": "search-inkeep",
+      "title": "Search Inkeep",
+      "description": "Search Inkeep to get answers from your knowledge base.",
       "mode": "view",
       "icon": "icon.png",
       "arguments": [
