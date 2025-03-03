@@ -242,8 +242,12 @@ export default function ManageDisplays() {
   // Load main display.
   useEffect(() => {
     async function loadMainDisplay() {
-      const main = await fetchMainDisplay();
-      setMainDisplay(main);
+      try {
+        const main = await fetchMainDisplay();
+        setMainDisplay(main);
+      } catch (error) {
+        console.error("Failed to load main display", error);
+      }
     }
     loadMainDisplay();
   }, []);
