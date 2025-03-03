@@ -1,20 +1,49 @@
 import { Color, LaunchProps, MenuBarExtra, getPreferenceValues, showHUD } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { startCaffeinate, stopCaffeinate } from "./utils";
+import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
 
-function useExtraInfoStr(): string {
-  const { data } = useExec("ps -o args= -p $(pgrep caffeinate)", [], {
+function parseEtime(etime: string): number {
+  const parts = etime.split(":").reverse();
+  const seconds = parseInt(parts[0]) || 0;
+  const minutes = parseInt(parts[1]) || 0;
+
+  let hours = parts[2] ? parseInt(parts[2]) : 0;
+  let days = 0;
+
+  if (parts[2] && parts[2].includes("-")) {
+    const dayHour = parts[2].split("-");
+    days = parseInt(dayHour[0]) || 0;
+    hours = parseInt(dayHour[1]) || 0;
+  }
+
+  return seconds + minutes * 60 + hours * 3600 + days * 86400;
+}
+
+function useExtraInfoStr(): string | null {
+  const { data } = useExec("ps -o etime,args= -p $(pgrep caffeinate)", [], {
     shell: true,
     parseOutput: (output) => output.stdout,
   });
 
   if (!data) {
-    return "";
+    // caffeinate not running
+    return null;
   }
 
-  const match = data.match(/-t (\d+)/);
-  return match ? `For ${match[1]}s` : "";
+  const lines = data.trim().split("\n");
+  const [etime, ...cmdArgs] = lines[lines.length - 1].trim().split(/\s+/);
+
+  const secondsRunning = parseEtime(etime);
+
+  const timeoutMatch = cmdArgs.join(" ").match(/-t (\d+)/);
+  if (timeoutMatch) {
+    const secondsRemain = parseInt(timeoutMatch[1]) - secondsRunning;
+
+    return `${formatDuration(secondsRemain)} remain`;
+  }
+
+  return null;
 }
 
 export default function Command(props: LaunchProps) {
