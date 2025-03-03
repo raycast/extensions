@@ -173,7 +173,7 @@ export default function Command() {
         return `${diffDays} days ago`;
       } else if (diffDays < 30) {
         const weeks = Math.floor(diffDays / 7);
-        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+        return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
       } else {
         return "Over a month ago";
       }
@@ -185,32 +185,16 @@ export default function Command() {
       // Future due date
       if (diffDays < 7) {
         // Get the day name
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         return dayNames[dueDay.getDay()];
       } else if (diffDays < 14) {
         return "Next week";
       } else if (diffDays < 30) {
         const weeks = Math.floor(diffDays / 7);
-        return `In ${weeks} week${weeks > 1 ? 's' : ''}`;
+        return `In ${weeks} week${weeks > 1 ? "s" : ""}`;
       } else {
         return "In over a month";
       }
-    }
-  }
-
-  // Get color for priority
-  function getPriorityColor(priority?: string) {
-    switch (priority) {
-      case "ASAP":
-        return "#FF5252";
-      case "HIGH":
-        return "#FFA000";
-      case "MEDIUM":
-        return "#4CAF50";
-      case "LOW":
-        return "#2196F3";
-      default:
-        return "#757575";
     }
   }
 
@@ -278,27 +262,27 @@ export default function Command() {
             accessories={[
               {
                 text: getTaskPriority(task.priority),
-                tooltip: "Priority"
+                tooltip: "Priority",
               },
               {
                 text: formatDueDate(task.dueDate),
-                tooltip: "Due Date"
+                tooltip: "Due Date",
               },
               {
                 text: getRelativeDate(task.dueDate),
-                tooltip: "Scheduled For"
+                tooltip: "Scheduled For",
               },
               {
                 tag: {
                   value: getTaskStatus(task.status),
                   color: task.status === "DONE" ? "#4CAF50" : undefined,
                 },
-                tooltip: "Status"
+                tooltip: "Status",
               },
               // Map each label to a tag, but only if we have valid string labels
               ...getTaskLabels(task.label).map((label) => ({
                 tag: { value: label },
-                tooltip: "Label"
+                tooltip: "Label",
               })),
             ]}
             actions={

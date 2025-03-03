@@ -290,11 +290,11 @@ export const getMotionApiClient = () => {
 
       // Construct URL with both task ID and workspaceId as a query param to ensure API compatibility
       const url = `${BASE_URL}/tasks/${task.id}?workspaceId=${correctWorkspaceId}`;
-      
+
       // Log both URL and payload for debugging
       console.log(`[DEBUG] updateTask URL: ${url}`);
       console.log(`[DEBUG] updateTask payload:`, JSON.stringify(taskToUpdate, null, 2));
-      
+
       logRequest("PUT", url, headers, taskToUpdate);
 
       const response = await fetch(url, {
