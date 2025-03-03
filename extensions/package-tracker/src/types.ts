@@ -122,7 +122,7 @@ export interface IRejected {
 
 export interface Data {
   accepted: Accepted[];
-  rejected: IRejectected[];
+  rejected: IRejected[];
   errors?: Errors[];
 }
 
