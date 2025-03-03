@@ -2,7 +2,7 @@ import { Detail, Form, ActionPanel, Action, showToast, Toast, LaunchProps, Icon,
 import { useState, useEffect, useMemo } from "react";
 import { streamInkeepCompletion, InkeepLink, InkeepResponse, AIAnnotations } from "./services/inkeep";
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.AskInkeep }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchInkeep }>) {
   const { prompt: initialPrompt } = props.arguments;
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
