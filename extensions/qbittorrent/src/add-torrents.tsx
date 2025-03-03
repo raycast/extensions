@@ -1,7 +1,6 @@
 import { getPreferenceValues, showToast, Toast, Form, ActionPanel, Action, getSelectedFinderItems } from "@raycast/api";
 import { AddTorrentOptions, QBittorrent, Preferences as QbittorrentPreferences } from "@ctrl/qbittorrent";
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Preferences } from "./types/preferences";
 import { readFile } from "node:fs/promises";
 
 interface Values extends AddTorrentOptions {
@@ -10,7 +9,7 @@ interface Values extends AddTorrentOptions {
 }
 
 export default function AddTorrents() {
-  const { address, username, password } = getPreferenceValues<Preferences>();
+  const { address, username, password } = getPreferenceValues<Preferences.AddTorrents>();
   const qbit = useMemo(() => {
     return new QBittorrent({
       baseUrl: address,

@@ -1,8 +1,7 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Keyboard } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbittorrent";
 import { filesize } from "filesize";
-import { Preferences } from "./types/preferences";
 import { filterStates } from "./types/filterStates";
 import { sentenceCase } from "change-case";
 
@@ -46,7 +45,7 @@ export default function Torrents() {
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   let updateTimeout: NodeJS.Timeout;
 
-  const { address, username, password, timeout } = getPreferenceValues<Preferences>();
+  const { address, username, password, timeout } = getPreferenceValues<Preferences.Torrents>();
 
   const qbit = useMemo(() => {
     return new QBittorrent({
@@ -160,27 +159,18 @@ export default function Torrents() {
                 <ActionPanel.Submenu
                   icon={Icon.Trash}
                   title="Delete Torrent"
-                  shortcut={{
-                    key: "backspace",
-                    modifiers: ["cmd"],
-                  }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 >
                   <Action
                     icon={Icon.Trash}
                     title="Keep local data"
-                    shortcut={{
-                      key: "backspace",
-                      modifiers: ["cmd"],
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => torrentAction(TorrentActionType.DELETE, torrent.hash)}
                   />
                   <Action
                     icon={Icon.Trash}
                     title="Delete local data"
-                    shortcut={{
-                      key: "backspace",
-                      modifiers: ["cmd", "shift"],
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     style={Action.Style.Destructive}
                     onAction={() => torrentAction(TorrentActionType.DELETE_INCLUDING_DATA, torrent.hash)}
                   />
