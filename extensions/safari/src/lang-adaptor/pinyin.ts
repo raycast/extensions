@@ -17,12 +17,12 @@ export class PinyinHandler implements LanguageHandler {
   serialize(text: string): string {
     const chineseRegex = new RegExp(PinyinHandler.chineseChar, "g");
     const chineseChars = Array.from(text.matchAll(chineseRegex));
+    // improve the performance by importing pinyin in runtime
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pinyin = require("pinyin").default; // import pinyin from 'pinyin'
     if (chineseChars.length > 0) {
       return chineseChars.reduce((formatted, matchItem) => {
         const [char] = matchItem;
-        // improve the performance by importing pinyin in runtime
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const pinyin = require("pinyin").default; // import pinyin from 'pinyin'
         const pinyinCollection = pinyin(char, { style: pinyin.STYLE_NORMAL });
         return formatted.replace(char, pinyinCollection.join("") + " ");
       }, text);
