@@ -1,12 +1,18 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { getPreferenceValues, Application } from "@raycast/api";
+import { getPreferenceValues, Application, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 const execPromise = promisify(exec);
 const cliPath = "Contents/MacOS/BetterDisplay";
 const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
 if (!betterdisplayApp?.path) {
-  throw new Error("BetterDisplay app path not configured in preferences");
+  showFailureToast("BetterDisplay app not set", {
+    title: "BetterDisplay app not set",
+    message: "Please set the BetterDisplay app in the extension preferences.",
+  });
+
+  popToRoot();
 }
 const cmdPath = `${betterdisplayApp.path}/${cliPath}`;
 

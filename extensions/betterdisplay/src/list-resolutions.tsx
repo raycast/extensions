@@ -122,6 +122,7 @@ export default function ResolutionList(props: ResolutionListProps) {
         setResolutionOptions(options);
       } catch (error) {
         console.error("Failed to load resolution options", error);
+        showFailureToast(error, { title: "Error Loading Resolutions" });
       } finally {
         setIsLoading(false);
       }

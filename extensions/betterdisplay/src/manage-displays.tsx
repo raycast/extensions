@@ -37,14 +37,20 @@ type DisplayItemProps = {
 };
 
 function verifyAppAvailability() {
-  const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
-
-  if (betterdisplayApp.name !== "BetterDisplay") {
-    showFailureToast("BetterDisplay app not set", {
-      title: "BetterDisplay app not set",
-      message: "Please set the BetterDisplay app in the extension preferences.",
+  try {
+    const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
+    if (betterdisplayApp.name !== "BetterDisplay") {
+      showFailureToast("BetterDisplay app not set", {
+        title: "BetterDisplay app not set",
+        message: "Please set the BetterDisplay app in the extension preferences.",
+      });
+      popToRoot();
+    }
+  } catch (error) {
+    showFailureToast("Failed to verify BetterDisplay app", {
+      title: "Preference Error",
+      message: "Could not access extension preferences.",
     });
-
     popToRoot();
   }
 }
