@@ -267,7 +267,7 @@ export default function ManageDisplays() {
       setStatuses(newStatuses);
 
       const newResolutions: { [tagID: string]: string } = {};
-      await Promise.all(
+      await Promise.allSettled(
         displays.map(async (display) => {
           const status = newStatuses[display.tagID];
           if (status && status.toLowerCase() === "on") {
