@@ -27,6 +27,7 @@ export default function Command() {
   useEffect(() => {
     if (!searchText) {
       setFilteredTasks(tasks);
+      setFilteredTasks(tasks);
       return;
     }
 
