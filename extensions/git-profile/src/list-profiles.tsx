@@ -65,7 +65,7 @@ export default function Command() {
         {data?.map((profile) => (
           <List.Item
             accessories={[{ text: profile.email }]}
-            key={profile.email}
+            key={profile.id}
             title={profile.name}
             icon={{
               source: Icon.Bird,
