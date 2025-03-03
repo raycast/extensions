@@ -1,5 +1,8 @@
 # ssh-manager Changelog
 
+## [Add Ghostty Support] - 2024-03-03
+- Added support for Ghostty as on option to open ssh connections.
+
 ## [New Feature and Improvements] - 2025-02-27
 
 - 📋 Add `Copy Connection String`
