@@ -3,8 +3,7 @@ import { getFavicon } from "@raycast/utils";
 import download from "image-downloader";
 import isUrl from "is-url";
 import tempfile from "tempfile";
-import { Arguments } from "./common";
-export default async function copyFavicon(props: { arguments: Arguments }) {
+export default async function copyFavicon(props: { arguments: Arguments.Copy }) {
   const preferences = await getPreferenceValues();
 
   let url = props.arguments.url;

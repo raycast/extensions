@@ -1,12 +1,19 @@
-import { closeMainWindow, getPreferenceValues, PopToRootType, showHUD, showInFinder, Toast } from "@raycast/api";
+import {
+  closeMainWindow,
+  getPreferenceValues,
+  LaunchProps,
+  PopToRootType,
+  showHUD,
+  showInFinder,
+  Toast,
+} from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import download from "image-downloader";
 import isUrl from "is-url";
 import { nanoid } from "nanoid";
 import path from "path";
-import { Arguments } from "./common";
 
-export default async function downloadFavicon(props: { arguments: Arguments }) {
+export default async function downloadFavicon(props: LaunchProps<{ arguments: Arguments.Download }>) {
   const preferences = await getPreferenceValues();
 
   let url = props.arguments.url;
