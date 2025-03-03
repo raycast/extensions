@@ -2,11 +2,7 @@ import { Detail, Form, ActionPanel, Action, showToast, Toast, LaunchProps, Icon,
 import { useState, useEffect } from "react";
 import { streamInkeepCompletion, InkeepLink, InkeepResponse, AIAnnotations } from "./services/inkeep";
 
-interface CommandArguments {
-  prompt?: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.AskInkeep }>) {
   const { prompt: initialPrompt } = props.arguments;
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -62,14 +58,10 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
               }
             } else if (toolName === "provideAIAnnotations") {
               try {
-                console.log("provideAIAnnotations tool call received with args:", args);
                 const toolData = JSON.parse(args);
-                console.log("Parsed AI annotations tool data:", toolData);
+
                 if (toolData.aiAnnotations) {
-                  console.log("Setting AI annotations:", toolData.aiAnnotations);
                   setAIAnnotations(toolData.aiAnnotations);
-                } else {
-                  console.log("No aiAnnotations found in tool data");
                 }
               } catch (e) {
                 console.error("Error parsing provideAIAnnotations tool call:", e);
@@ -86,10 +78,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
             setLinks(fullResponse.links);
           }
           if (fullResponse.aiAnnotations) {
-            console.log("AI Annotations received:", fullResponse.aiAnnotations);
             setAIAnnotations(fullResponse.aiAnnotations);
-          } else {
-            console.log("No AI Annotations in fullResponse:", fullResponse);
           }
         },
       );
@@ -137,8 +126,6 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
 
   // Render metadata for the Detail view
   function renderMetadata(prompt: string, showConfidence = false) {
-    console.log("Rendering metadata with aiAnnotations:", aiAnnotations);
-
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Query" text={prompt} icon={Icon.MagnifyingGlass} />
@@ -200,12 +187,41 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     );
   }
 
+  // Show streaming response if we're streaming
+  if (isStreaming) {
+    return (
+      <Detail
+        markdown={streamedResponse || "Loading response from Inkeep..."}
+        metadata={renderMetadata(currentPrompt, false)}
+        isLoading
+        navigationTitle="Inkeep Response"
+        actions={
+          <ActionPanel>
+            <Action
+              title="Cancel"
+              icon={Icon.XmarkCircle}
+              onAction={() => {
+                setIsStreaming(false);
+                setShowForm(true);
+              }}
+            />
+            {streamedResponse && (
+              <Action.CopyToClipboard title="Copy Current Response" content={streamedResponse} icon={Icon.Clipboard} />
+            )}
+            {links.length > 0 && <Action.OpenInBrowser title="Open First Source" url={links[0].url} icon={Icon.Link} />}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   // Show final response if we have one
   if (response) {
     return (
       <Detail
         markdown={response.content}
         metadata={renderMetadata(currentPrompt, true)}
+        navigationTitle="Inkeep Response"
         actions={
           <ActionPanel>
             <Action.CopyToClipboard title="Copy Response" content={response.content} icon={Icon.Clipboard} />
@@ -222,33 +238,6 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
                 setShowForm(true);
               }}
             />
-            {links.length > 0 && <Action.OpenInBrowser title="Open First Source" url={links[0].url} icon={Icon.Link} />}
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  // Show streaming response if we're streaming
-  if (isStreaming) {
-    return (
-      <Detail
-        markdown={streamedResponse || "Loading response from Inkeep..."}
-        metadata={renderMetadata(currentPrompt, false)}
-        isLoading
-        actions={
-          <ActionPanel>
-            <Action
-              title="Cancel"
-              icon={Icon.XmarkCircle}
-              onAction={() => {
-                setIsStreaming(false);
-                setShowForm(true);
-              }}
-            />
-            {streamedResponse && (
-              <Action.CopyToClipboard title="Copy Current Response" content={streamedResponse} icon={Icon.Clipboard} />
-            )}
             {links.length > 0 && <Action.OpenInBrowser title="Open First Source" url={links[0].url} icon={Icon.Link} />}
           </ActionPanel>
         }

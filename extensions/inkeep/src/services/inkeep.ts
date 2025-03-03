@@ -1,12 +1,6 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-  aiApiBaseUrl: string;
-  model: string;
-}
-
 interface Message {
   role: "user" | "assistant" | "system";
   content: string;
@@ -99,7 +93,7 @@ export interface InkeepResponse {
 }
 
 export async function getInkeepCompletion(prompt: string): Promise<InkeepResponse> {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const apiBaseUrl = preferences.aiApiBaseUrl.endsWith("/")
     ? preferences.aiApiBaseUrl.slice(0, -1)
     : preferences.aiApiBaseUrl;
@@ -157,6 +151,9 @@ export async function getInkeepCompletion(prompt: string): Promise<InkeepRespons
       },
     );
 
+    if (!response.data.choices || response.data.choices.length === 0) {
+      throw new Error("No completion choices returned from the API");
+    }
     const message = response.data.choices[0].message;
     const result: InkeepResponse = {
       content: message.content,
@@ -197,6 +194,7 @@ export async function streamInkeepCompletion(
     ? preferences.aiApiBaseUrl.slice(0, -1)
     : preferences.aiApiBaseUrl;
   let fullContent = "";
+  let lastChunkEndedWithNewline = true;
   const toolCalls: ToolCall[] = [];
   let partialToolCalls: Partial<ToolCall>[] = [];
 
@@ -281,8 +279,29 @@ export async function streamInkeepCompletion(
             // Handle content updates
             if (choice.delta.content) {
               const content = choice.delta.content;
-              fullContent += content;
-              onChunk(content);
+
+              // Format markdown content
+              let formattedContent = content;
+
+              // Add proper spacing around inline code
+              formattedContent = formattedContent.replace(/`([^`]+)`/g, " `$1` ");
+
+              // Ensure bullet points and ordered lists have proper spacing
+              if (formattedContent.match(/^\s*[-*]\s/) || formattedContent.match(/^\s*\d+\.\s/)) {
+                if (!lastChunkEndedWithNewline) {
+                  formattedContent = "\n" + formattedContent;
+                }
+                if (!formattedContent.endsWith("\n")) {
+                  formattedContent = formattedContent + "\n";
+                }
+              }
+
+              // Add extra spacing after ordered list items to ensure proper rendering
+              formattedContent = formattedContent.replace(/(\d+\.\s.*?)(?=\n|$)/g, "$1\n");
+
+              lastChunkEndedWithNewline = formattedContent.endsWith("\n");
+              fullContent += formattedContent;
+              onChunk(formattedContent);
             }
 
             // Handle tool calls
