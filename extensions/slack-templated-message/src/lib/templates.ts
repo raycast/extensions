@@ -69,6 +69,10 @@ async function saveTemplatesToFile(templates: SlackTemplate[]): Promise<void> {
  * @throws Error if validation fails
  */
 export async function validateTemplateFormat(templates: unknown): Promise<SlackTemplate[]> {
+  if (!Array.isArray(templates)) {
+    throw new Error("Invalid template format: expected an array");
+  }
+
   const importedTemplates = templates as SlackTemplate[];
 
   const isValid = importedTemplates.every(

@@ -22,7 +22,10 @@ export function useChannels() {
     async function fetchChannels() {
       try {
         const { token } = await getAccessToken();
-        if (!token) return;
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
         const client = new WebClient(token);
         const allChannels = await fetchAllChannels(client);
         setChannels(allChannels);

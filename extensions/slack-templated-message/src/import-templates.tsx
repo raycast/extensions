@@ -29,7 +29,7 @@ export default function Command() {
    * @param overwrite - Whether to overwrite existing templates with the same name
    * @returns Merged array of templates
    */
-  async function mergeTemplates(
+  function mergeTemplates(
     importedTemplates: SlackTemplate[],
     existingTemplates: SlackTemplate[],
     overwrite: boolean,
