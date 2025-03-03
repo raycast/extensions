@@ -5,6 +5,9 @@ import { getPreferenceValues, Application } from "@raycast/api";
 const execPromise = promisify(exec);
 const cliPath = "Contents/MacOS/BetterDisplay";
 const { betterdisplayApp } = getPreferenceValues<{ betterdisplayApp: Application }>();
+if (!betterdisplayApp?.path) {
+  throw new Error("BetterDisplay app path not configured in preferences");
+}
 const cmdPath = `${betterdisplayApp.path}/${cliPath}`;
 
 // Helper function to run commands uniformly.
