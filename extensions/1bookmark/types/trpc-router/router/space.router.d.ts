@@ -43,8 +43,16 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
         output: void;
     }>;
     get: import("@trpc/server").TRPCQueryProcedure<{
-        input: string;
-        output: {
+        input: {
+            spaceId: string;
+        };
+        output: ({
+            _count: {
+                tags: number;
+                bookmarks: number;
+                users: number;
+            };
+        } & {
             type: import(".prisma/client").$Enums.SpaceType;
             status: string | null;
             description: string | null;
@@ -53,7 +61,16 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             name: string;
             updatedAt: Date;
             image: string | null;
-        } | null;
+        }) | null;
+    }>;
+    update: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            description?: string | undefined;
+            name?: string | undefined;
+            image?: string | undefined;
+        };
+        output: void;
     }>;
     removeUser: import("@trpc/server").TRPCMutationProcedure<{
         input: {
