@@ -334,20 +334,29 @@ export const getMotionApiClient = () => {
       }
 
       // Extract clean update payload (remove undefined values)
-      const cleanPayload = Object.entries(task).reduce((acc, [key, value]) => {
-        if (value !== undefined) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, any>);
+      const cleanPayload = Object.entries(task).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined) {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, string | number | boolean | object | null>,
+      );
 
       // Ensure workspaceId is included in the payload
       cleanPayload.workspaceId = workspaceId;
-      
+
       // Log exact character codes of IDs to debug encoding issues
-      console.log("[DEBUG] Task ID character codes:", [...task.id].map(c => c.charCodeAt(0)));
-      console.log("[DEBUG] Workspace ID character codes:", [...workspaceId].map(c => c.charCodeAt(0)));
-      
+      console.log(
+        "[DEBUG] Task ID character codes:",
+        [...task.id].map((c) => c.charCodeAt(0)),
+      );
+      console.log(
+        "[DEBUG] Workspace ID character codes:",
+        [...workspaceId].map((c) => c.charCodeAt(0)),
+      );
+
       // *** IMPORTANT: The "0" and "O" characters can be confused, and there may be other encoding issues ***
       // Try a direct fetch via the Task List endpoint first, which should give us the correct task data with exact IDs
       try {
@@ -357,69 +366,72 @@ export const getMotionApiClient = () => {
           method: "GET",
           headers,
         });
-        
+
         if (tasksResponse.ok) {
           const tasksData = await tasksResponse.json();
           console.log("[DEBUG] Successfully fetched tasks list");
-          
+
           // Find the task in the list by comparing IDs (lenient matching)
           let exactTask;
           let matchMethod = "";
-          
+
           if (Array.isArray(tasksData)) {
             // Try direct match first
-            exactTask = tasksData.find(t => t.id === task.id);
+            exactTask = tasksData.find((t) => t.id === task.id);
             if (exactTask) {
               matchMethod = "direct match";
-            } 
-            
+            }
+
             // If no direct match, try case-insensitive match
             if (!exactTask) {
               const taskIdLower = task.id.toLowerCase();
-              exactTask = tasksData.find(t => t.id && t.id.toLowerCase() === taskIdLower);
+              exactTask = tasksData.find((t) => t.id && t.id.toLowerCase() === taskIdLower);
               if (exactTask) {
                 matchMethod = "case-insensitive match";
               }
             }
-            
+
             // Last resort: try matching by name if ID doesn't match
             if (!exactTask && task.name) {
-              exactTask = tasksData.find(t => t.name === task.name);
+              exactTask = tasksData.find((t) => t.name === task.name);
               if (exactTask) {
                 matchMethod = "name match";
               }
             }
-            
+
             if (exactTask) {
               console.log(`[DEBUG] Found matching task using ${matchMethod}:`);
               console.log("[DEBUG] Original ID:", task.id);
               console.log("[DEBUG] Exact ID from API:", exactTask.id);
-              
+
               // Use the exact IDs from the API for the update
               const exactTaskId = exactTask.id;
               const exactWorkspaceId = exactTask.workspaceId;
-              
+
               // Update with the exact IDs from the API
               const updateUrl = `${BASE_URL}/tasks/${exactTaskId}?workspaceId=${exactWorkspaceId}`;
               console.log("[DEBUG] Using exact IDs for update URL:", updateUrl);
-              
+
               // Update our payload with exact IDs
               cleanPayload.id = exactTaskId;
               cleanPayload.workspaceId = exactWorkspaceId;
-              
+
               const response = await fetch(updateUrl, {
                 method: "PUT",
                 headers,
                 body: JSON.stringify(cleanPayload),
               });
-              
+
               if (response.ok) {
                 const data = await response.json();
                 console.log("[DEBUG] Task update successful with exact IDs");
                 return data;
               } else {
                 const responseText = await response.text();
-                console.error(`[ERROR] Failed to update task with exact IDs. Status: ${response.status}. Response:`, responseText);
+                console.error(
+                  `[ERROR] Failed to update task with exact IDs. Status: ${response.status}. Response:`,
+                  responseText,
+                );
                 // Continue to fallback approach
               }
             } else {
@@ -435,10 +447,10 @@ export const getMotionApiClient = () => {
         console.error("[ERROR] Error fetching task data:", error);
         // Continue to fallback approach
       }
-      
+
       // Fallback: Try multiple URL formats as we've done before
       console.log("[DEBUG] Using fallback approach with multiple URL formats");
-      
+
       // Try different URL formats in sequence
       const urlFormats = [
         // Format 1: workspaces/{workspaceId}/tasks/{taskId}
@@ -448,27 +460,30 @@ export const getMotionApiClient = () => {
         // Format 3: tasks/{taskId}?workspace_id={workspaceId}
         `${BASE_URL}/tasks/${task.id}?workspace_id=${workspaceId}`,
       ];
-      
+
       let lastError = null;
-      
+
       // Try each URL format in sequence
       for (const url of urlFormats) {
         console.log("[DEBUG] Trying URL format:", url);
-        
+
         try {
           const response = await fetch(url, {
             method: "PUT",
             headers,
             body: JSON.stringify(cleanPayload),
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             console.log("[DEBUG] Task update successful with URL:", url);
             return data;
           } else {
             const responseText = await response.text();
-            console.error(`[ERROR] Failed to update task with URL ${url}. Status: ${response.status}. Response:`, responseText);
+            console.error(
+              `[ERROR] Failed to update task with URL ${url}. Status: ${response.status}. Response:`,
+              responseText,
+            );
             lastError = new Error(`API Error (${response.status}): ${responseText}`);
           }
         } catch (error) {
@@ -476,7 +491,7 @@ export const getMotionApiClient = () => {
           lastError = error;
         }
       }
-      
+
       // All URL formats failed
       console.error("[ERROR] All URL formats failed for task update");
       throw lastError || new Error("Failed to update task: All URL formats failed");
