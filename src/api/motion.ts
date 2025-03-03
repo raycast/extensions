@@ -18,6 +18,11 @@ interface MotionTask {
   status?: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
   projectId?: string;
+  autoScheduled?: {
+    startDate?: string;
+    deadlineType?: "HARD" | "SOFT" | "NONE";
+    schedule?: string;
+  };
 }
 
 export interface Project {
@@ -144,6 +149,11 @@ export const getMotionApiClient = () => {
         status: taskData.status,
         workspaceId: correctWorkspaceId, // Use the correct ID
         projectId: taskData.projectId,
+        // Add auto-scheduling by default
+        autoScheduled: {
+          deadlineType: "SOFT", // Use SOFT deadline by default
+          schedule: "Work Hours" // Use standard work hours for scheduling
+        }
       };
 
       logRequest("POST", url, headers, task);

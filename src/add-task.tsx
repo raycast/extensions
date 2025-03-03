@@ -21,6 +21,11 @@ type TaskPayload = {
   status: "TODO" | "IN_PROGRESS" | "DONE";
   label?: string;
   projectId?: string;
+  autoScheduled?: {
+    startDate?: string;
+    deadlineType?: "HARD" | "SOFT" | "NONE";
+    schedule?: string;
+  };
 };
 
 // Helper function to get tomorrow's date
@@ -116,7 +121,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Add a new task to your Motion account." />
+      <Form.Description text="Add a new task to your Motion account. All tasks are auto-scheduled by default using Motion's AI." />
       <Form.TextField id="name" title="Name" placeholder="Task name" />
       <Form.TextArea id="description" title="Description" placeholder="Task description" />
 
