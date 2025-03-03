@@ -3,7 +3,7 @@
   "name": "motion",
   "title": "Motion",
   "description": "Extension for interacting with Motion.",
-  "icon": "extension-icon.png",
+  "icon": "Motion_extension_icon.png",
   "author": "owendavidprice",
   "categories": [
     "Productivity"

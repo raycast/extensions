@@ -56,16 +56,27 @@ export default function Command() {
     try {
       const motionClient = getMotionApiClient();
 
-      // Convert form values to match the API client's expected format
-      await motionClient.createTask({
+      // Create a task payload with required fields
+      const taskPayload = {
         title: values.name,
         description: values.description,
         dueDate: values.dueDate,
         priority: values.priority,
         status: values.status,
-        label: values.label,
-        projectId: values.projectId,
-      });
+      };
+
+      // Only add label if it has a value
+      if (values.label) {
+        taskPayload.label = values.label;
+      }
+
+      // Only add projectId if it has a value
+      if (values.projectId) {
+        taskPayload.projectId = values.projectId;
+      }
+
+      // Create the task with the prepared payload
+      await motionClient.createTask(taskPayload);
 
       await showToast({
         style: Toast.Style.Success,
