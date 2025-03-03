@@ -163,7 +163,7 @@ export default function CombinedDashboard() {
           <List.Item key={idx} title={`${item.emoji} ${item.label}`} accessories={[{ text: item.value }]} />
         ))}
       </List.Section>
-      {!inverterItems.length && !systemOverview && !isLoading ? (
+      {!isLoading && (!inverterItems.length || !systemOverview) ? (
         <List.EmptyView
           title={"No data available"}
           description={"Try refreshing the data"}
