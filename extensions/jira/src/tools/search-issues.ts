@@ -1,4 +1,4 @@
-import { getIssues } from "../api/issues";
+import { getIssuesForAI } from "../api/issues";
 import { withJiraCredentials } from "../helpers/withJiraCredentials";
 
 type Input = {
@@ -145,6 +145,6 @@ type Input = {
 };
 
 export default withJiraCredentials(async function (input: Input) {
-  const issues = await getIssues({ jql: input.jql });
+  const issues = await getIssuesForAI({ jql: input.jql });
   return issues;
 });

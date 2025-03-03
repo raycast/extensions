@@ -16,14 +16,8 @@ export const textToSpeech = async (text: string, voice?: string) => {
       type: LaunchType.Background,
       extensionName: "say",
       ownerOrAuthorName: "litomore",
-      arguments: {
-        content: text,
-      },
-      context: {
-        sayOptions: {
-          voice,
-        },
-      },
+      arguments: { content: text },
+      context: { sayOptions: { voice } },
     });
   } catch {
     const confirm = await confirmAlert({
