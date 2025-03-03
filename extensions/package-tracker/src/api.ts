@@ -27,7 +27,11 @@ export class PackageTrackAPI {
       })
       .then((trackValue) => {
         console.debug(JSON.stringify(trackValue.data));
-        axios.post(this.url + "deletetrack", this.packageNumber, { headers: this.headers });
+
+        axios
+          .post(this.url + "deletetrack", this.packageNumber, { headers: this.headers })
+          .catch((error) => console.error("Error deleting track:", error));
+
         return trackValue;
       });
   }
