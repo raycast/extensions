@@ -87,36 +87,36 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
-          "value": "Code",
-          "title": "Visual Studio Code"
+          "title": "Cursor",
+          "value": "Cursor"
         },
         {
-          "value": "Code - Insiders",
-          "title": "Visual Studio Code - Insiders"
+          "title": "Positron",
+          "value": "Positron"
         },
         {
-          "value": "VSCodium",
-          "title": "VSCodium"
+          "title": "Trae",
+          "value": "Trae"
         },
         {
-          "value": "VSCodium - Insiders",
-          "title": "VSCodium - Insiders"
+          "title": "VSCodium",
+          "value": "VSCodium"
         },
         {
-          "value": "Cursor",
-          "title": "Cursor"
+          "title": "VSCodium - Insiders",
+          "value": "VSCodium - Insiders"
         },
         {
-          "value": "Positron",
-          "title": "Positron"
+          "title": "Visual Studio Code",
+          "value": "Code"
         },
         {
-          "value": "Windsurf",
-          "title": "Windsurf"
+          "title": "Visual Studio Code - Insiders",
+          "value": "Code - Insiders"
         },
         {
-          "value": "Trae",
-          "title": "Trae"
+          "title": "Windsurf",
+          "value": "Windsurf"
         }
       ]
     },
