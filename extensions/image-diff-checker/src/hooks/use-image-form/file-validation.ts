@@ -10,4 +10,5 @@ export const fileValidation = (value?: string[]) => {
   if (value?.length === 0) return "The item is required.";
   const isValid = checkExtension(value[0]);
   if (!isValid) return "Invalid file type.";
+  return undefined;
 };
