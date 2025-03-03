@@ -768,6 +768,7 @@ export type User = {
   id: string;
   is_premium: boolean;
   time_format: number;
+  premium_status: "not_premium" | "current_personal_plan" | "active_business_account" | "teams_business_account";
 };
 
 export type Event = {
