@@ -8,7 +8,7 @@ type Input = {
   id: string;
 
   /**
-   * The content markup to append to the card. If not provided then ask for it.
+   * The content markup to append to the card. Required.
    */
   content: string;
 };
@@ -29,7 +29,7 @@ export default async function (input: Input) {
   });
 
   if (!fetched.ok) {
-    throw new Error("There was a problem appending to the card.");
+    throw new Error(`There was a problem appending to the card: ${fetched.body.detail}`);
   }
 
   return fetched.body;

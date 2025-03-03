@@ -34,7 +34,7 @@ export default async function ({ name, content, parentIds }: Input) {
   });
 
   if (!fetched.ok) {
-    throw new Error("There was a problem creating the card.");
+    throw new Error(`There was a problem creating the card: ${fetched.body.detail}`);
   }
 
   return fetched.body;

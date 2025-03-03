@@ -3,7 +3,7 @@ import { getSupernotesPrefs } from "~/utils/helpers";
 
 type Input = {
   /**
-   * The search term to search for when looking for a cards, optional
+   * The search term to search for when looking for cards, optional
    */
   searchTerm?: string;
 
@@ -37,7 +37,7 @@ export default async function ({ searchTerm, dateRangeFrom, dateRangeTo }: Input
   });
 
   if (!fetched.ok) {
-    throw new Error("There was a problem searching for cards.");
+    throw new Error(`There was a problem searching for cards: ${fetched.body.detail}`);
   }
 
   return Object.values(fetched.body);
