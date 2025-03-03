@@ -1,11 +1,20 @@
-## [Unreleased]
+# WhatsApp Changelog
 
-### Added
+## [AI Extension] - 2025-03-01
 - Added AI tools: `add-new-whatsapp-chat`, `add-whatsapp-group`, and `open-chat`
 - Updated Raycast packages to support AI extensions
 
-### Changed
-- Updated `package-lock.json` and `package.json` with dependency updates
-- Modified `src/add-chat.tsx` and `src/add-existing-group.tsx` to use new services
-- Added new services: `src/services/openChat.ts`, `src/services/saveChat.ts`, and `src/services/saveWhatsappGroup.ts`
-- Added new tools: `src/tools/add-new-whatsapp-chat.ts`, `src/tools/add-whatsapp-group.ts`, and `src/tools/open-chat.ts`
+## [Enhancements] - 2024-10-01
+- "Group Code" when adding a group is now **required**
+- "Edit Chat" action in `open-chat` now has a shortcut
+- Changed group icon to be `two-people`
+- You can now also "Add" from within the `open-chat` command (improvement for https://github.com/raycast/extensions/issues/14456)
+- Upgrade dependencies
+
+## [Upgrade dependencies] - 2023-03-12
+- Migrate local storage to `@raycast/utils`
+- Upgrade `phone` lib to improve phone number validation
+- Add alert modal to `Delete Chat` subcommand
+
+## [Added WhatsApp extension] - 2021-12-06
+- Initial version code
