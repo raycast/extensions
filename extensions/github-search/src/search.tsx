@@ -419,11 +419,13 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown id="sort" title="Sort by" storeValue value={sort} onChange={setSort}>
-        {SORT_OPTIONS.map(sort => (
-          <Form.Dropdown.Item key={sort.id} value={sort.id} title={sort.title} />
-        ))}
-      </Form.Dropdown>
+      {filter !== 'code' && (
+        <Form.Dropdown id="sort" title="Sort by" storeValue value={sort} onChange={setSort}>
+          {SORT_OPTIONS.map(sort => (
+            <Form.Dropdown.Item key={sort.id} value={sort.id} title={sort.title} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       {(filter === 'code' || filter === 'repositories' || filter === 'pullrequests' || filter === 'users') && (
         <Form.Dropdown id="language" title="Language" storeValue value={language} onChange={setLanguage}>
