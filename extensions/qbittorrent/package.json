@@ -64,6 +64,7 @@
     "@ctrl/qbittorrent": "^9.4.0",
     "@raycast/api": "^1.92.1",
     "change-case": "^5.4.4",
+    "cross-fetch": "^4.1.0",
     "filesize": "^10.1.6"
   },
   "devDependencies": {

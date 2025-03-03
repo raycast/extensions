@@ -1,18 +1,13 @@
 import { getPreferenceValues, showToast, Toast, Form, ActionPanel, Action, getSelectedFinderItems } from "@raycast/api";
-import { QBittorrent, Preferences as QbittorrentPreferences } from "@ctrl/qbittorrent";
+import { AddTorrentOptions, QBittorrent, Preferences as QbittorrentPreferences } from "@ctrl/qbittorrent";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Preferences } from "./types/preferences";
+import { readFile } from "node:fs/promises";
+import { fetch } from "cross-fetch";
 
-interface Values {
+interface Values extends AddTorrentOptions {
   torrentPaths: string[];
   urls: string;
-  skip_checking: boolean;
-  paused: boolean;
-  savepath: string;
-  rename: string;
-  category: string;
-  dlLimit: string;
-  upLimit: string;
 }
 
 export default function AddTorrents() {
@@ -67,7 +62,18 @@ export default function AddTorrents() {
       .split(/\r?\n/)
       .map((url) => url.trim())
       .filter(Boolean);
-    const torrents = [...torrentPaths, ...urls];
+    const localTorrents = await Promise.all(torrentPaths.map((path) => readFile(path)));
+    const magnets = urls.filter((torrent) => torrent.startsWith("magnet:"));
+    const torrentUrls = urls.filter((torrent) => !magnets.includes(torrent));
+    const downloadedTorrents = await Promise.all(
+      torrentUrls.map(async (url) => {
+        const response = await fetch(url);
+        return Buffer.from(await response.text());
+      }),
+    );
+
+    const torrents = [...downloadedTorrents, ...localTorrents];
+
     if (!torrents.length) {
       await showToast({
         style: Toast.Style.Failure,
@@ -83,6 +89,11 @@ export default function AddTorrents() {
     await Promise.all(
       torrents.map((torrent) => {
         return qbit.addTorrent(torrent, options);
+      }),
+    );
+    await Promise.all(
+      magnets.map((magnet) => {
+        return qbit.addMagnet(magnet, options);
       }),
     );
     setLoading(false);
