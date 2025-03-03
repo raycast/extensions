@@ -1,5 +1,10 @@
 # Laravel Documentation Changelog
 
+## [Update] - 2025-02-26
+
+- Added laravel 12.x support.
+- Update the documentation list for master.
+
 ## [Update] - 2024-03-28
 
 - Added laravel 11.x support.

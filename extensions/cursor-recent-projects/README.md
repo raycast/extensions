@@ -1,6 +1,6 @@
 # Cursor
 
-Control Cursor, Cursor & Codium directly from Raycast
+Control Cursor directly from Raycast
 
 [![raycast-cross-extension-badge]][raycast-cross-extension-link]
 

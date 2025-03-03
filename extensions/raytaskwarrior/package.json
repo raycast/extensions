@@ -5,6 +5,9 @@
   "description": "Taskwarrior integration to Raycast",
   "icon": "icon.png",
   "author": "yosy2010",
+  "contributors": [
+    "tim.shilov"
+  ],
   "categories": [
     "Productivity"
   ],
