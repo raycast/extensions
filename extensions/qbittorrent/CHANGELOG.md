@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Update] - 2025-02-26
+## [Update] - {PR_MERGE_DATE}
 
 - Switch to `@ctrl/qbittorrent` package as api wrapper
 - Added support for deleting torrent data when removing torrent
