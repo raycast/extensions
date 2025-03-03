@@ -4,5 +4,5 @@ export type Link = {
   title: string;
   tagNames: string[];
   read: boolean;
-  starred: string;
+  starred: boolean;
 };
