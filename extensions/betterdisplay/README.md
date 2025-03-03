@@ -4,7 +4,7 @@
 
 # BetterDisplay
 
-This extension allows you to control your display using [BetterDisplay](betterdisplay.pro) from the comfort of Raycast.
+This extension allows you to control your display using [BetterDisplay](https://betterdisplay.pro) from the comfort of Raycast.
 
 ## Features
 
