@@ -81,7 +81,7 @@ export default function useBookmarks(readingListOnly?: boolean) {
     try {
       const startTime = performance.now();
       const result = execSync(`"${GO_PARSER_PATH}" -input "${PLIST_PATH}"`, { encoding: "utf-8" });
-      const parsedResult = extractReadingListBookmarks(JSON.parse(result) as BookmarkPListResult);
+      const parsedResult = extractReadingListBookmarks(JSON.parse(result) as BookmarkPListResult, readingListOnly);
       console.log(`[info] parse bookmarks with go parser cost ${performance.now() - startTime}ms`);
       setBookmarks(parsedResult);
     } catch (e) {
