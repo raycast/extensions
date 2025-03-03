@@ -1,6 +1,6 @@
 # MultiForce Changelog
 
-## 1.2 - 2025-02-28
+## 1.2 - {PR_MERGE_DATE}
 Version 1.2 introduces a recently used section to the org list. This section shows the 3 orgs that you most recently created or opened. This version also adds a warning indicator to scratch orgs that are set to expire in the next 7 days.
 
 ## 1.1 - 2024-08-06
