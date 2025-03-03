@@ -1,18 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { setGitProfile } from "@/utils";
-import type { GitProfile, Scope } from "@/types";
-
-type GitProfileFormProps = {
-  scope: Scope;
-  profile: GitProfile;
-  revalidate?: () => Promise<GitProfile[]>;
-};
-
-type FormValues = {
-  name: string;
-  email: string;
-};
+import type { GitProfileFormProps, FormValues } from "./types";
 
 export default function GitProfileForm({ scope, profile, revalidate }: GitProfileFormProps) {
   const { handleSubmit, itemProps } = useForm<FormValues>({

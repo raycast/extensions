@@ -1,12 +1,7 @@
 import { useMemo } from "react";
-import type { GitProfile } from "@/types";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import GitProfileForm from "@/components/GitProfileForm";
-
-type GitProfileListItemProps = {
-  profile: GitProfile;
-  revalidate?: () => Promise<GitProfile[]>;
-};
+import type { GitProfileListItemProps } from "./types";
 
 const ALLOWED_EDIT_SCOPES = ["global"];
 

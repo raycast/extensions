@@ -1,18 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { setData } from "@/utils";
-import type { Profile } from "@/types";
-
-type ProfileFormProps = {
-  id: string;
-  profile?: Profile;
-  revalidate?: () => Promise<Profile[]>;
-};
-
-type FormValues = {
-  name: string;
-  email: string;
-};
+import type { ProfileFormProps, FormValues } from "./types";
 
 export default function ProfileForm({ id, profile, revalidate }: ProfileFormProps) {
   const { handleSubmit, itemProps } = useForm<FormValues>({
