@@ -1,8 +1,8 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 
-export const execPromise = (command: string) =>
+export const execPromise = (command: string, args: string[] = []) =>
   new Promise<string | null | undefined>((resolve) => {
-    exec(command, (err, stdout, stderr) => {
+    execFile(command, args, (err, stdout, stderr) => {
       if (err || stderr) {
         resolve(undefined);
         return;
