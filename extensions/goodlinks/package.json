@@ -13,6 +13,7 @@
     {
       "name": "save-link",
       "title": "Save Link",
+      "subtitle": "GoodLinks",
       "description": "Get a link from your clipboard and saves it to GoodLinks.",
       "mode": "no-view"
     },
