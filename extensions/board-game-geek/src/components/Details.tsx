@@ -1,6 +1,5 @@
 import { List } from '@raycast/api';
-import { showFailureToast } from '@raycast/utils';
-import { useFetch } from '@raycast/utils';
+import { showFailureToast, useFetch } from '@raycast/utils';
 
 import { BoardGame, BggDetailsResponse } from '../models';
 import { parseGameData } from '../utils';
