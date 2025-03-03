@@ -252,6 +252,17 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search tasks..."
       throttle
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="View options"
+          storeValue={true}
+          onChange={(id) => {
+            /* This is just to create a header, no action needed */
+          }}
+        >
+          <List.Dropdown.Item title="Task | Priority | Scheduled For" value="header" />
+        </List.Dropdown>
+      }
     >
       <List.Section title="Tasks" subtitle={filteredTasks.length.toString()}>
         {filteredTasks.map((task) => (
@@ -262,28 +273,19 @@ export default function Command() {
             accessories={[
               {
                 text: getTaskPriority(task.priority),
-                tooltip: "Priority",
-              },
-              {
-                text: formatDueDate(task.dueDate),
-                tooltip: "Due Date",
+                tooltip: "Priority"
               },
               {
                 text: getRelativeDate(task.dueDate),
-                tooltip: "Scheduled For",
+                tooltip: "Scheduled For"
               },
               {
                 tag: {
                   value: getTaskStatus(task.status),
                   color: task.status === "DONE" ? "#4CAF50" : undefined,
                 },
-                tooltip: "Status",
+                tooltip: "Status"
               },
-              // Map each label to a tag, but only if we have valid string labels
-              ...getTaskLabels(task.label).map((label) => ({
-                tag: { value: label },
-                tooltip: "Label",
-              })),
             ]}
             actions={
               <ActionPanel>
