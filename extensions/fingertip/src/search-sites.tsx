@@ -25,12 +25,12 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [showSettings, setShowSettings] = useState(!preferences.apiKey);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const [allSites, setAllSites] = useState<Fingertip.API.V1.Sites.SiteListResponse[]>([]);
+  const [allSites, setAllSites] = useState<Fingertip.API.V1.Sites.SiteListResponse.Item[]>([]);
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [endCursor, setEndCursor] = useState<string | undefined>(undefined);
-  const [fuse, setFuse] = useState<Fuse<Fingertip.API.V1.Sites.SiteListResponse> | null>(null);
+  const [fuse, setFuse] = useState<Fuse<Fingertip.API.V1.Sites.SiteListResponse.Item> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
