@@ -376,7 +376,12 @@ export const getMotionApiClient = () => {
             console.log(`[DEBUG] Raw response from ${endpoint}:`, JSON.stringify(rawData, null, 2));
 
             // Check if the response is already in the expected format
-            if (rawData && typeof rawData === 'object' && 'workspaces' in rawData && Array.isArray(rawData.workspaces)) {
+            if (
+              rawData &&
+              typeof rawData === "object" &&
+              "workspaces" in rawData &&
+              Array.isArray(rawData.workspaces)
+            ) {
               console.log(`[DEBUG] Found standard format response with ${rawData.workspaces.length} workspaces`);
               return rawData as WorkspacesResponse;
             }
@@ -388,10 +393,16 @@ export const getMotionApiClient = () => {
             }
 
             // Check if the response is a different format but contains workspace information
-            if (rawData && typeof rawData === 'object') {
+            if (rawData && typeof rawData === "object") {
               // Look for arrays in the object that might contain workspaces
               for (const [key, value] of Object.entries(rawData)) {
-                if (Array.isArray(value) && value.length > 0 && value[0] && typeof value[0] === 'object' && 'id' in value[0]) {
+                if (
+                  Array.isArray(value) &&
+                  value.length > 0 &&
+                  value[0] &&
+                  typeof value[0] === "object" &&
+                  "id" in value[0]
+                ) {
                   console.log(`[DEBUG] Found workspaces in '${key}' property with ${value.length} workspaces`);
                   return { workspaces: value } as WorkspacesResponse;
                 }
@@ -399,7 +410,9 @@ export const getMotionApiClient = () => {
             }
 
             // If we couldn't parse it in a standard way, return the raw data wrapped
-            console.log("[DEBUG] Could not identify standard format, returning raw data wrapped in workspaces property");
+            console.log(
+              "[DEBUG] Could not identify standard format, returning raw data wrapped in workspaces property",
+            );
             return { workspaces: [rawData] } as WorkspacesResponse;
           } else {
             const responseText = await logResponse(response);

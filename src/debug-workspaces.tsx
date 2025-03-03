@@ -28,10 +28,10 @@ export default function Command() {
         infoText += "Attempting to fetch workspaces...\n\n";
 
         const workspacesResponse = await motionClient.getWorkspaces();
-        
+
         // Log the raw response for debugging
         console.log("[DEBUG] Workspaces response:", JSON.stringify(workspacesResponse, null, 2));
-        
+
         // Extract workspaces array from the response
         const workspaces = workspacesResponse.workspaces || [];
 
@@ -51,30 +51,31 @@ export default function Command() {
           });
         } else {
           infoText += "⚠️ No workspaces found\n\n";
-          
+
           // Add more detailed debugging information
           infoText += "**Debug Information:**\n\n";
           infoText += "```\n";
           infoText += `Response type: ${typeof workspacesResponse}\n`;
-          infoText += `Has workspaces property: ${workspacesResponse && 'workspaces' in workspacesResponse}\n`;
-          
+          infoText += `Has workspaces property: ${workspacesResponse && "workspaces" in workspacesResponse}\n`;
+
           if (workspacesResponse) {
             infoText += "Response keys: " + Object.keys(workspacesResponse).join(", ") + "\n";
-            
-            if ('workspaces' in workspacesResponse) {
+
+            if ("workspaces" in workspacesResponse) {
               infoText += `Workspaces type: ${typeof workspacesResponse.workspaces}\n`;
               infoText += `Is array: ${Array.isArray(workspacesResponse.workspaces)}\n`;
-              
+
               if (Array.isArray(workspacesResponse.workspaces)) {
                 infoText += `Array length: ${workspacesResponse.workspaces.length}\n`;
               }
             }
           }
-          
+
           infoText += "Raw response: " + JSON.stringify(workspacesResponse, null, 2) + "\n";
           infoText += "```\n\n";
-          
-          infoText += "This may be normal if you don't have any workspaces, or it could indicate an issue with the API response format.\n\n";
+
+          infoText +=
+            "This may be normal if you don't have any workspaces, or it could indicate an issue with the API response format.\n\n";
         }
       } catch (workspacesError) {
         infoText += `❌ Error fetching workspaces: ${String(workspacesError)}\n\n`;
@@ -153,24 +154,26 @@ export default function Command() {
             onAction={() => {
               const motionClient = getMotionApiClient();
               Promise.all([
-                motionClient.getWorkspaces().catch(e => `Error: ${e}`),
-                motionClient.getTasks().catch(e => `Error: ${e}`),
-              ]).then(() => {
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Refreshed",
-                  message: "Debug information refreshed",
+                motionClient.getWorkspaces().catch((e) => `Error: ${e}`),
+                motionClient.getTasks().catch((e) => `Error: ${e}`),
+              ])
+                .then(() => {
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Refreshed",
+                    message: "Debug information refreshed",
+                  });
+                  // Run the debug info loader again
+                  loadDebugInfo();
+                })
+                .catch((error) => {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Refresh Failed",
+                    message: String(error),
+                  });
+                  setIsLoading(false);
                 });
-                // Run the debug info loader again
-                loadDebugInfo();
-              }).catch(error => {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Refresh Failed",
-                  message: String(error),
-                });
-                setIsLoading(false);
-              });
             }}
           />
         </ActionPanel>
