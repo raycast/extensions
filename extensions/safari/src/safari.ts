@@ -52,9 +52,10 @@ export async function getAllTabs() {
 }
 
 export async function addToReadingList(url: string) {
+  const escapedUrl = encodeURI(url);
   await runAppleScript(`
     tell application "${safariAppIdentifier}"
-      add reading list item "${url}"
+      add reading list item "${escapedUrl}"
     end tell
   `);
 }
