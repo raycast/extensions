@@ -1,5 +1,24 @@
 # Safari Changelog
 
+## [Chore: Moved contributor to past contributors list] - 2025-02-27
+
+## [Update] - 2025-02-21
+
+AI Tools to;
+- Search Bookmarks
+- Search History
+- Search Reading List
+- Add to Reading List
+- Open (in Safari)
+
+## [Update] - 2025-02-14
+
+- Added a preference to enable pinyin search for Chinese characters.
+
+## [Update] - 2025-02-12
+
+- Add an action to set the color of a bookmark tag.
+
 ## [Chore: Moved contributor to past contributors list] - 2025-01-15
 
 ## [Update] - 2025-01-12

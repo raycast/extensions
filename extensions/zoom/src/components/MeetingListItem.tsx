@@ -62,7 +62,7 @@ function MeetingActionPanel({ meeting, mutate }: MeetingListItemProps) {
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting meeting" });
 
-        await mutate(zoomDeleteMeeting(meeting), {
+        await mutate(zoomDeleteMeeting(meeting.id), {
           optimisticUpdate(data) {
             if (!data) {
               return data;

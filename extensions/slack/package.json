@@ -93,9 +93,66 @@
       "default": true
     }
   ],
+  "tools": [
+    {
+      "title": "Slack Channels",
+      "name": "get-channels",
+      "description": "Lists all channels in the Slack team"
+    },
+    {
+      "title": "Slack Channel History",
+      "name": "get-channel-history",
+      "description": "Fetches a channel's history of messages and events."
+    },
+    {
+      "title": "Slack Users",
+      "name": "get-users",
+      "description": "List all users in the Slack team"
+    },
+    {
+      "title": "Set Status",
+      "name": "set-status",
+      "description": "Set or unset the status of the current user"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@slack set my status to away",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "set-status",
+              "arguments": {
+                "text": {
+                  "includes": "away"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "set-status": "success"
+        }
+      },
+      {
+        "input": "@slack summarize what happened in #general yesterday",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-channels"
+            }
+          }
+        ],
+        "mocks": {
+          "get-channels": []
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.16.0",
+    "@raycast/api": "^1.87.0",
+    "@raycast/utils": "^1.18.0",
     "@slack/web-api": "^7.0.4",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.1.3",

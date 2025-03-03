@@ -9,6 +9,7 @@
  */
 
 import { runAppleScript } from "@raycast/utils";
+
 import { Generator, GeneratorKey } from "./types";
 
 /**
@@ -221,6 +222,7 @@ export const getCheckerboardOptions = (
   greenValues: number[],
   blueValues: number[],
   alphaValues: number[],
+  customSize?: number,
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -229,7 +231,7 @@ export const getCheckerboardOptions = (
     inputColor1: `current application's CIColor's colorWithRed:${redValues[1] / 255} green:${
       greenValues[1] / 255
     } blue:${blueValues[1] / 255} alpha:${alphaValues[1] / 255}`,
-    inputWidth: "imgWidth / 4",
+    inputWidth: `imgWidth / ${customSize || 4}`,
   },
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[2] / 255} green:${
@@ -274,6 +276,7 @@ export const getStripeOptions = (
   greenValues: number[],
   blueValues: number[],
   alphaValues: number[],
+  customSize?: number,
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -282,7 +285,7 @@ export const getStripeOptions = (
     inputColor1: `current application's CIColor's colorWithRed:${redValues[1] / 255} green:${
       greenValues[1] / 255
     } blue:${blueValues[1] / 255} alpha:${alphaValues[1] / 255}`,
-    inputWidth: "imgWidth / 4",
+    inputWidth: `imgWidth / ${customSize || 4}`,
   },
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[2] / 255} green:${

@@ -25,37 +25,37 @@ export function countToken(content: string) {
   return encode(content).length;
 }
 
-// get priceoutput, priceinput from preference
-const input_price = getPreferenceValues().priceinput || 0.27;
-const output_price = getPreferenceValues().priceoutput || 1.1;
+const { priceinput, priceoutput } = getPreferenceValues();
 
-export function estimatePrice(prompt_token: number, output_token: number, model: string) {
-  // price is per 1M tokens in dollars, but we are measuring in cents. Hence the denominator is 10,000
-  // from : https://openai.com/api/pricing/
-  //
-  let price = 0;
-  if (model == "gpt-3.5-turbo") {
-    price = (prompt_token * 0.5 + output_token * 1.5) / 10000;
-  } else if (model == "gpt-4-turbo") {
-    price = (prompt_token * 10.0 + output_token * 30.0) / 10000;
-  } else if (model == "gpt-4") {
-    price = (prompt_token * 30.0 + output_token * 60.0) / 10000;
-  } else if (model == "gpt-4o-mini") {
-    price = (prompt_token * 0.15 + output_token * 0.6) / 10000;
-  } else if (model == "gpt-4o") {
-    price = (prompt_token * 5.0 + output_token * 15.0) / 10000;
-  } else if (model == "deepseek-reasoner") {
-    price = (prompt_token * 2.0 + output_token * 2.5) / 10000;
-  } else if (model == "deepseek-chat") {
-    price = (prompt_token * input_price + output_token * output_price) / 10000;
-    // * there is a tmeporary discount for deepseek-chat, we ignore it for now
-    // * there is cache discount for deepseek-chat, we ignore it
-    // so your actual price may be lower than this
-    // https://api-docs.deepseek.com/quick_start/pricing
-  } else {
-    return -1;
+const prices: Record<string, { in: number; out: number }> = {
+  "gpt-3.5-turbo": { in: 0.5, out: 1.5 },
+  "gpt-4-turbo": { in: 10, out: 30 },
+  "gpt-4": { in: 30, out: 60 },
+  "gpt-4o-mini": { in: 0.15, out: 0.6 },
+  "gpt-4o": { in: 5, out: 15 },
+  "deepseek-reasoner": { in: 0.55, out: 2.19 },
+  "deepseek-chat": { in: 0.27, out: 1.1 },
+};
+
+function isValidNumber(value: unknown): value is number {
+  return typeof value === "number" && !Number.isNaN(value) && value > 0;
+}
+
+function calculate_cost(token_in: number, token_out: number, price_in: number, price_out: number): number {
+  const cost = (token_in * price_in + token_out * price_out) / 10000;
+  return naiveRound(cost, 3);
+}
+
+export function estimatePrice(promptTokens: number, outputTokens: number, model: string): number {
+  if (isValidNumber(+priceinput) && isValidNumber(+priceoutput)) {
+    return calculate_cost(promptTokens, outputTokens, priceinput, priceoutput);
   }
-  return naiveRound(price, 3);
+
+  if (model in prices) {
+    return calculate_cost(promptTokens, outputTokens, prices[model].in, prices[model].out);
+  }
+
+  return -1;
 }
 
 export async function runAppleScriptSilently(appleScript: string) {
