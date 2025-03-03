@@ -38,8 +38,8 @@ export default function GitProfileForm({ scope, profile, revalidate }: GitProfil
         </ActionPanel>
       }
     >
-      <Form.TextField title="user.name" placeholder="Your name" {...itemProps.name} />
-      <Form.TextField title="user.email" placeholder="test@example.com" {...itemProps.email} />
+      <Form.TextField title="Full Name" placeholder="Your name" {...itemProps.name} />
+      <Form.TextField title="Email address" placeholder="test@example.com" {...itemProps.email} />
     </Form>
   );
 }

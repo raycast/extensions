@@ -1,4 +1,4 @@
-import { Alert, Action, ActionPanel, Color, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
+import { Alert, Action, ActionPanel, Color, Icon, List, confirmAlert, showToast, Toast, Keyboard } from "@raycast/api";
 import { getAllItems, deleteData } from "@/utils";
 import { usePromise } from "@raycast/utils";
 import type { Profile } from "@/types";
@@ -51,7 +51,7 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Show the list of profiles">
+    <List isLoading={isLoading} searchBarPlaceholder="Search for Git profiles...">
       <List.Item
         title={"Create New Profile"}
         icon={Icon.PlusSquare}
@@ -78,8 +78,14 @@ export default function Command() {
                   title="Edit Profile"
                   target={<ProfileForm id={profile.id} profile={profile} revalidate={revalidate} />}
                 />
-                <Action icon={Icon.Gear} title="Apply Profile" onAction={() => handleSetProfile(profile)} />
-                <Action icon={Icon.Trash} title="Delete Profile" onAction={() => handleDeleteProfile(profile)} />
+                <Action icon={Icon.Gear} title="Set Git User" onAction={() => handleSetProfile(profile)} />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete"
+                  onAction={() => handleDeleteProfile(profile)}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                />
               </ActionPanel>
             }
           />
