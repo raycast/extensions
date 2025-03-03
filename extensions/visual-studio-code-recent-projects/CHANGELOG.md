@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-03
 
 - Fixed support for VSCodium - Insiders.
 - Sorted the list of builds in alphabetical order within the extension settings.
