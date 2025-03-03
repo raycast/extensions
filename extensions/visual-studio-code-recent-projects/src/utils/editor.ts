@@ -5,8 +5,8 @@ const cachedGetApplications = cacheFunc(getApplications);
 
 // Map of build names to bundle IDs
 const bundleIdMap: Record<string, string> = {
-  "Code - Insiders": "com.microsoft.VSCodeInsiders",
   Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
   Cursor: "com.todesktop.230313mzl4w4u92",
   Positron: "com.rstudio.positron",
   Trae: "com.trae.app",
