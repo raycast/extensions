@@ -1,6 +1,6 @@
 # Get Favicon Changelog
 
-## [Add support for specifying icon size] - {PR_MERGE_DATE}
+## [Add support for specifying icon size] - 2025-03-03
 
 - Added support for specifying icon size, you can set the size of the icon in the settings.
 - Minor refactoring: extracted common interfaces and preferences to separate files.
