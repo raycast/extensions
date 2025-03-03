@@ -41,10 +41,9 @@ Contributions welcome! Submit a pull request to add more search engines or impro
 
 To add new search engines to the extension:
 
-1. Modify the `scripts/search-engines.ts` file with your new search engine definitions ✏️
-2. Run `npm run update-db` to update the database with your changes
-3. Test your changes locally with `npm run dev`
-4. Submit a pull request with your additions
+1. Modify the `src/data/search-engines.ts` file with your new search engine definitions
+2. Test your changes locally with `npm run dev`
+3. Submit a pull request with your additions
 
 ## Credits 🙏
 
