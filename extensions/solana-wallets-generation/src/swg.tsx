@@ -35,6 +35,7 @@ export default function Command() {
         title="Number of Wallets"
         defaultValue="10"
         onChange={(value) => setCount(Number(value) || 10)}
+        placeholder="10"
       />
       <Form.Checkbox id="includePublicKey" label="Include Public Keys" onChange={setIncludePublicKey} />
     </Form>
