@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, Keyboard, List, open } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { listLinks } from "./api/list-links";
-import { isApplicationInstalled } from "./utils/isApplicationInstalled";
+import { isApplicationInstalled, showMustBeInstalledToast } from "./utils/isApplicationInstalled";
 import { openLink } from "./utils/url-scheme";
 
 export default function Command() {
@@ -13,17 +13,15 @@ export default function Command() {
 
   const { data, isLoading, error } = usePromise(listLinks, [], { execute: isInstalled });
 
-  if (error || installedError) {
-    showToast({
-      title: "An error occurred",
-      style: Toast.Style.Failure,
-    });
+  if (installedError || error) {
+    installedError ? showMustBeInstalledToast() : showFailureToast(error);
     return null;
   }
 
   const links = data?.filter((link) => !link.read);
   return (
     <List isLoading={isLoading || isInstalledLoading}>
+      {links?.length === 0 && <List.EmptyView />}
       {links?.map((item) => (
         <List.Item
           key={item.id}
