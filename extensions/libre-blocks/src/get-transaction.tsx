@@ -20,7 +20,7 @@ interface TransactionAction {
       actor: string;
       permission: string;
     }[];
-    data: any;
+    data: Record<string, unknown>;
   };
   account_ram_deltas?: {
     account: string;
@@ -57,7 +57,7 @@ export default function Command() {
 
   async function performSearch() {
     if (searchText.length === 0) return;
-    
+
     setIsLoading(true);
     try {
       const response = await fetch(`https://lb.libre.org/v2/history/get_transaction?id=${searchText}`);
@@ -65,18 +65,18 @@ export default function Command() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      
+
       if (data.executed === undefined && data.actions === undefined) {
         throw new Error("Transaction not found or not executed yet");
       }
-      
+
       setTransaction(data);
       setHasSearched(true);
-      
+
       if (data.actions && data.actions.length > 0) {
         setSelectedAction(data.actions[0]);
       }
-      
+
       await showToast({
         style: Toast.Style.Success,
         title: "Transaction Found",
@@ -150,88 +150,56 @@ export default function Command() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Transaction Information" />
-        <List.Item.Detail.Metadata.Label 
-          title="Transaction ID" 
-          text={action.trx_id} 
-          icon={Icon.Document}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Block" 
-          text={`${action.block_num}`} 
-          icon={Icon.Box}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Block ID" 
-          text={action.block_id} 
-          icon={Icon.Box}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Timestamp" 
-          text={new Date(action.timestamp).toLocaleString()} 
+        <List.Item.Detail.Metadata.Label title="Transaction ID" text={action.trx_id} icon={Icon.Document} />
+        <List.Item.Detail.Metadata.Label title="Block" text={`${action.block_num}`} icon={Icon.Box} />
+        <List.Item.Detail.Metadata.Label title="Block ID" text={action.block_id} icon={Icon.Box} />
+        <List.Item.Detail.Metadata.Label
+          title="Timestamp"
+          text={new Date(action.timestamp).toLocaleString()}
           icon={Icon.Calendar}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Producer" 
-          text={action.producer} 
-          icon={Icon.Computer}
-        />
+        <List.Item.Detail.Metadata.Label title="Producer" text={action.producer} icon={Icon.Computer} />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Action Details" />
-        <List.Item.Detail.Metadata.Label 
-          title="Contract" 
-          text={action.act.account} 
-          icon={Icon.Code}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Action" 
-          text={action.act.name} 
-          icon={getActionIcon(action.act.name)}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="CPU Usage" 
-          text={`${action.cpu_usage_us} µs`} 
-          icon={Icon.Cpu}
-        />
+        <List.Item.Detail.Metadata.Label title="Contract" text={action.act.account} icon={Icon.Code} />
+        <List.Item.Detail.Metadata.Label title="Action" text={action.act.name} icon={getActionIcon(action.act.name)} />
+        <List.Item.Detail.Metadata.Label title="CPU Usage" text={`${action.cpu_usage_us} µs`} icon={Icon.Cpu} />
         {action.net_usage_words !== undefined && (
-          <List.Item.Detail.Metadata.Label 
-            title="NET Usage" 
-            text={`${action.net_usage_words} words`} 
+          <List.Item.Detail.Metadata.Label
+            title="NET Usage"
+            text={`${action.net_usage_words} words`}
             icon={Icon.Globe}
           />
         )}
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Authorization" />
         {action.act.authorization.map((auth, index) => (
           <React.Fragment key={`auth-${index}`}>
-            <List.Item.Detail.Metadata.Label 
-              title={`Actor ${index + 1}`} 
-              text={auth.actor} 
-              icon={Icon.Person}
-            />
-            <List.Item.Detail.Metadata.Label 
-              title={`Permission ${index + 1}`} 
-              text={auth.permission} 
+            <List.Item.Detail.Metadata.Label title={`Actor ${index + 1}`} text={auth.actor} icon={Icon.Person} />
+            <List.Item.Detail.Metadata.Label
+              title={`Permission ${index + 1}`}
+              text={auth.permission}
               icon={Icon.Lock}
             />
           </React.Fragment>
         ))}
         <List.Item.Detail.Metadata.Separator />
-        
+
         {action.account_ram_deltas && action.account_ram_deltas.length > 0 && (
           <>
             <List.Item.Detail.Metadata.Label title="RAM Changes" />
             {action.account_ram_deltas.map((delta, index) => (
               <React.Fragment key={`ram-${index}`}>
-                <List.Item.Detail.Metadata.Label 
-                  title={`Account ${index + 1}`} 
-                  text={delta.account} 
+                <List.Item.Detail.Metadata.Label
+                  title={`Account ${index + 1}`}
+                  text={delta.account}
                   icon={Icon.Person}
                 />
-                <List.Item.Detail.Metadata.Label 
-                  title={`Delta ${index + 1}`} 
-                  text={delta.delta} 
+                <List.Item.Detail.Metadata.Label
+                  title={`Delta ${index + 1}`}
+                  text={delta.delta}
                   icon={Icon.HardDrive}
                 />
               </React.Fragment>
@@ -239,13 +207,12 @@ export default function Command() {
             <List.Item.Detail.Metadata.Separator />
           </>
         )}
-        
+
         <List.Item.Detail.Metadata.Label title="Action Data" />
         {Object.entries(action.act.data).map(([key, value], index) => {
-          
           let icon = Icon.Document;
           let displayValue = String(value);
-          
+
           if (key === "from" || key === "to" || key === "sender" || key === "receiver") {
             icon = Icon.Person;
           } else if (key === "amount" || key === "quantity") {
@@ -260,12 +227,12 @@ export default function Command() {
             icon = Icon.Calendar;
             displayValue = new Date(String(value)).toLocaleString();
           }
-          
+
           return (
-            <List.Item.Detail.Metadata.Label 
+            <List.Item.Detail.Metadata.Label
               key={`data-${index}`}
-              title={key.charAt(0).toUpperCase() + key.slice(1)} 
-              text={displayValue} 
+              title={key.charAt(0).toUpperCase() + key.slice(1)}
+              text={displayValue}
               icon={icon}
             />
           );
@@ -281,11 +248,7 @@ export default function Command() {
       searchBarPlaceholder="Enter transaction ID"
       searchBarAccessory={
         <ActionPanel>
-          <Action
-            title="Search"
-            icon={Icon.MagnifyingGlass}
-            onAction={performSearch}
-          />
+          <Action title="Search" icon={Icon.MagnifyingGlass} onAction={performSearch} />
         </ActionPanel>
       }
       navigationTitle="Libre Transaction Explorer"
@@ -302,28 +265,18 @@ export default function Command() {
           <List.Item
             key={`action-${index}`}
             id={`action-${index}`}
-            title={`${action.act.name} (${action.act.account})`}
+            title={`${action.act.name.charAt(0).toUpperCase() + action.act.name.slice(1)} (${action.act.account})`}
             subtitle={`Action ${index + 1} of ${transaction.actions.length}`}
             icon={getActionIcon(action.act.name)}
-            detail={
-              <List.Item.Detail
-                metadata={renderActionMetadata(action)}
-              />
-            }
+            detail={<List.Item.Detail metadata={renderActionMetadata(action)} />}
             actions={
               <ActionPanel>
-                <Action
-                  title={`View Action ${index + 1}`}
-                  onAction={() => setSelectedAction(action)}
-                />
+                <Action title={`View Action ${index + 1}`} onAction={() => setSelectedAction(action)} />
                 <Action.OpenInBrowser
-                  title="View on LibreBlocks.io"
+                  title="View on Libreblocks.io"
                   url={`https://www.libreblocks.io/tx/${action.trx_id}`}
                 />
-                <Action.CopyToClipboard
-                  title="Copy Transaction ID"
-                  content={action.trx_id}
-                />
+                <Action.CopyToClipboard title="Copy Transaction Id" content={action.trx_id} />
               </ActionPanel>
             }
             selected={selectedAction?.action_ordinal === action.action_ordinal}

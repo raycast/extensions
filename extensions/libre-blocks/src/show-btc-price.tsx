@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
@@ -54,17 +54,9 @@ export default function Command() {
   }, [refreshInterval]);
 
   return (
-    <MenuBarExtra 
-      icon="btc.svg"
-      title={price} 
-      isLoading={price === "Loading..."}
-    >
+    <MenuBarExtra icon="btc.svg" title={price} isLoading={price === "Loading..."}>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item 
-          title="Refresh" 
-          onAction={fetchPrice}
-          shortcut={{ key: "r", modifiers: ["cmd"] }}
-        />
+        <MenuBarExtra.Item title="Refresh" onAction={fetchPrice} shortcut={{ key: "r", modifiers: ["cmd"] }} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
@@ -18,14 +18,17 @@ export default function Command() {
 
   const formatPrice = (rawLibrePrice: number, format: PriceFormat, btcUsdPrice: number | null) => {
     switch (format) {
-      case "sats":
+      case "sats": {
         return `${Math.round(rawLibrePrice * 10000000000).toLocaleString()} sats`;
-      case "btc":
+      }
+      case "btc": {
         return `₿${rawLibrePrice.toFixed(10)}`;
-      case "usd":
+      }
+      case "usd": {
         if (btcUsdPrice === null) return "USD price unavailable";
         const usdPrice = rawLibrePrice * btcUsdPrice;
         return `$${usdPrice.toFixed(6)}`;
+      }
       default:
         return "Invalid format";
     }
@@ -52,8 +55,8 @@ export default function Command() {
       }
 
       const jsonResponse = await response.json();
-      const librePrice = jsonResponse?.rows?.find(row => row.pair === "librebtc")?.price;
-      const btcUsdPrice = jsonResponse?.rows?.find(row => row.pair === "btcusd")?.price;
+      const librePrice = jsonResponse?.rows?.find((row) => row.pair === "librebtc")?.price;
+      const btcUsdPrice = jsonResponse?.rows?.find((row) => row.pair === "btcusd")?.price;
 
       if (librePrice) {
         const librePriceNum = parseFloat(librePrice);
@@ -85,34 +88,26 @@ export default function Command() {
   }, [refreshInterval]);
 
   return (
-    <MenuBarExtra 
-      icon="libre.svg"
-      title={price} 
-      isLoading={price === "Loading..."}
-    >
+    <MenuBarExtra icon="libre.svg" title={price} isLoading={price === "Loading..."}>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item 
-          title="Show as Sats" 
+        <MenuBarExtra.Item
+          title="Show as Sats"
           onAction={() => setFormat("sats")}
           shortcut={{ key: "s", modifiers: ["cmd"] }}
         />
-        <MenuBarExtra.Item 
-          title="Show as BTC" 
+        <MenuBarExtra.Item
+          title="Show as BTC"
           onAction={() => setFormat("btc")}
           shortcut={{ key: "b", modifiers: ["cmd"] }}
         />
-        <MenuBarExtra.Item 
-          title="Show as USD" 
+        <MenuBarExtra.Item
+          title="Show as USD"
           onAction={() => setFormat("usd")}
           shortcut={{ key: "u", modifiers: ["cmd"] }}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item 
-          title="Refresh" 
-          onAction={fetchPrice}
-          shortcut={{ key: "r", modifiers: ["cmd"] }}
-        />
+        <MenuBarExtra.Item title="Refresh" onAction={fetchPrice} shortcut={{ key: "r", modifiers: ["cmd"] }} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

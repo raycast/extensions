@@ -47,7 +47,7 @@ export default function Command() {
           scope: "dex.libre",
           json: true,
           reverse: true,
-          limit: 100
+          limit: 100,
         }),
       });
 
@@ -56,7 +56,7 @@ export default function Command() {
       }
 
       const data: DexTradesResponse = await response.json();
-      
+
       if (data.rows && Array.isArray(data.rows)) {
         setTrades(data.rows);
       } else {
@@ -80,15 +80,15 @@ export default function Command() {
     }
   }
 
-  const filteredTrades = trades.filter(trade => {
+  const filteredTrades = trades.filter((trade) => {
     if (selectedPair !== "all" && trade.pair !== selectedPair) {
       return false;
     }
-    
+
     if (selectedType !== "all" && !trade.type.toLowerCase().includes(selectedType.toLowerCase())) {
       return false;
     }
-    
+
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       return (
@@ -98,11 +98,11 @@ export default function Command() {
         trade.quoteAsset.toLowerCase().includes(searchLower)
       );
     }
-    
+
     return true;
   });
 
-  const uniquePairs = Array.from(new Set(trades.map(trade => trade.pair)));
+  const uniquePairs = Array.from(new Set(trades.map((trade) => trade.pair)));
 
   function formatPrice(price: string): string {
     const numPrice = parseFloat(price);
@@ -138,70 +138,43 @@ export default function Command() {
     return Color.PrimaryText;
   }
 
-  function parseAssetAmount(asset: string): { amount: number; symbol: string } {
-    const parts = asset.split(" ");
-    return {
-      amount: parseFloat(parts[0]),
-      symbol: parts[1]
-    };
-  }
-
   function renderTradeMetadata(trade: DexTrade) {
-    const baseAsset = parseAssetAmount(trade.baseAsset);
-    const quoteAsset = parseAssetAmount(trade.quoteAsset);
-    
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Trade Information" />
-        <List.Item.Detail.Metadata.Label 
-          title="Trade ID" 
-          text={`#${trade.id}`} 
-          icon={Icon.Hash}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Date & Time" 
-          text={formatTimestamp(trade.timestamp)} 
+        <List.Item.Detail.Metadata.Label title="Trade ID" text={`#${trade.id}`} icon={Icon.Hash} />
+        <List.Item.Detail.Metadata.Label
+          title="Date & Time"
+          text={formatTimestamp(trade.timestamp)}
           icon={Icon.Calendar}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Trading Pair" 
-          text={trade.pair.toUpperCase()} 
-          icon={Icon.Coins}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Type" 
-          text={trade.type} 
-          icon={getTradeTypeIcon(trade.type)}
-        />
+        <List.Item.Detail.Metadata.Label title="Trading Pair" text={trade.pair.toUpperCase()} icon={Icon.Coins} />
+        <List.Item.Detail.Metadata.Label title="Type" text={trade.type} icon={getTradeTypeIcon(trade.type)} />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Price Details" />
-        <List.Item.Detail.Metadata.Label 
-          title="Price" 
-          text={formatPrice(trade.price)} 
-          icon={Icon.PriceTag}
-        />
-        <List.Item.Detail.Metadata.Label 
-          title="Base Asset" 
-          text={trade.baseAsset} 
+        <List.Item.Detail.Metadata.Label title="Price" text={formatPrice(trade.price)} icon={Icon.PriceTag} />
+        <List.Item.Detail.Metadata.Label
+          title="Base Asset"
+          text={trade.baseAsset}
           icon={{ source: Icon.Coins, tintColor: Color.Blue }}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Quote Asset" 
-          text={trade.quoteAsset} 
+        <List.Item.Detail.Metadata.Label
+          title="Quote Asset"
+          text={trade.quoteAsset}
           icon={{ source: Icon.Coins, tintColor: Color.Yellow }}
         />
         <List.Item.Detail.Metadata.Separator />
-        
+
         <List.Item.Detail.Metadata.Label title="Participants" />
-        <List.Item.Detail.Metadata.Label 
-          title="Seller" 
-          text={trade.seller} 
+        <List.Item.Detail.Metadata.Label
+          title="Seller"
+          text={trade.seller}
           icon={{ source: Icon.Person, tintColor: Color.Red }}
         />
-        <List.Item.Detail.Metadata.Label 
-          title="Buyer" 
-          text={trade.buyer} 
+        <List.Item.Detail.Metadata.Label
+          title="Buyer"
+          text={trade.buyer}
           icon={{ source: Icon.Person, tintColor: Color.Green }}
         />
       </List.Item.Detail.Metadata>
@@ -215,18 +188,10 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by account or asset..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Trading Pair"
-          value={selectedPair}
-          onChange={setSelectedPair}
-        >
+        <List.Dropdown tooltip="Filter by Trading Pair" value={selectedPair} onChange={setSelectedPair}>
           <List.Dropdown.Item title="All Pairs" value="all" />
-          {uniquePairs.map(pair => (
-            <List.Dropdown.Item 
-              key={pair} 
-              title={pair.toUpperCase()} 
-              value={pair} 
-            />
+          {uniquePairs.map((pair) => (
+            <List.Dropdown.Item key={pair} title={pair.toUpperCase()} value={pair} />
           ))}
         </List.Dropdown>
       }
@@ -235,55 +200,29 @@ export default function Command() {
       isShowingDetail
       navigationTitle="Libre DEX Trades"
       toolbar={
-        <List.Dropdown
-          tooltip="Filter by Trade Type"
-          value={selectedType}
-          onChange={setSelectedType}
-        >
+        <List.Dropdown tooltip="Filter by Trade Type" value={selectedType} onChange={setSelectedType}>
           <List.Dropdown.Item title="All Types" value="all" />
           <List.Dropdown.Item title="Buy" value="buy" />
           <List.Dropdown.Item title="Sell" value="sell" />
         </List.Dropdown>
       }
     >
-      {filteredTrades.map(trade => {
-        const baseAsset = parseAssetAmount(trade.baseAsset);
-        const quoteAsset = parseAssetAmount(trade.quoteAsset);
-        
-      
-        const typeIcon = getTradeTypeIcon(trade.type);
+      {filteredTrades.map((trade) => {
         const typeColor = getTradeTypeColor(trade.type);
-        
+
         return (
           <List.Item
             key={trade.id}
             id={`trade-${trade.id}`}
             title={`${trade.seller} → ${trade.buyer}`}
             icon={{ source: { value: `#${trade.id}` }, tintColor: typeColor }}
-            detail={
-              <List.Item.Detail
-                metadata={renderTradeMetadata(trade)}
-              />
-            }
+            detail={<List.Item.Detail metadata={renderTradeMetadata(trade)} />}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="View on LibreBlocks.io"
-                  url={`https://www.libreblocks.io/dex`}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Seller Account"
-                  content={trade.seller}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Buyer Account"
-                  content={trade.buyer}
-                />
-                <Action
-                  title="Refresh Trades"
-                  icon={Icon.RotateClockwise}
-                  onAction={fetchTrades}
-                />
+                <Action.OpenInBrowser title="View on Libreblocks.io" url={`https://www.libreblocks.io/dex`} />
+                <Action.CopyToClipboard title="Copy Seller's Account" content={trade.seller} />
+                <Action.CopyToClipboard title="Copy Buyer's Account" content={trade.buyer} />
+                <Action title="Refresh Trades" icon={Icon.RotateClockwise} onAction={fetchTrades} />
               </ActionPanel>
             }
           />

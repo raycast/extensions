@@ -4,7 +4,7 @@
   "title": "Libre Blocks",
   "description": "Explore transactions, blocks, and valuable data for the Libre Blockchain",
   "icon": "extension-icon.png",
-  "author": "salimcansatici",
+  "author": "salimcan",
   "categories": [
     "Finance"
   ],
@@ -24,13 +24,13 @@
     },
     {
       "name": "dex-trades",
-      "title": "Libre DEX Trades Explorer",
+      "title": "Libre Dex Trades Explorer",
       "description": "Monitor recent trades on Libre DEX with filtering by pairs, trade types, and accounts",
       "mode": "view"
     },
     {
       "name": "show-btc-price",
-      "title": "BTC Price Tracker",
+      "title": "Btc Price Tracker",
       "description": "Real-time Bitcoin price in USD displayed directly in your menubar with configurable refresh interval",
       "mode": "menu-bar",
       "interval": "10s",
