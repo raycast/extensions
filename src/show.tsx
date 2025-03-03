@@ -42,20 +42,99 @@ async function runTerminal(item: ISSHConnection) {
     command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
   }
 
+  const scriptGhostty = `
+  --For the latest version:
+  --https://github.com/DavidMChan/custom-alfred-warp-scripts
+
+  --Set this property to true to always open in a new window
+      property open_in_new_window: ${openIn == "newWindow"}
+
+  --Set this property to true to always open in a new tab
+      property open_in_new_tab: ${openIn == "newTab"}
+
+  --Don't change this :)
+      property opened_new_window: false
+
+  --Handlers
+      on new_window()
+          tell application "System Events" to tell process "Ghostty"
+              click menu item "New Window" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+          delay 0.5
+      end new_window
+
+      on new_tab()
+          tell application "System Events" to tell process "Ghostty"
+              click menu item "New Tab" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+      end new_tab
+
+      on call_forward()
+          tell application "Ghostty" to activate
+      end call_forward
+
+      on is_running()
+          application "Ghostty" is running
+      end is_running
+
+      on has_windows()
+  if not is_running() then return false
+          tell application "System Events"
+  if windows of process "Ghostty" is { } then return false
+          end tell
+  true
+      end has_windows
+
+      on send_text(custom_text)
+          tell application "System Events"
+              keystroke custom_text
+          end tell
+      end send_text
+
+  --Main
+  if not is_running() then
+  call_forward()
+          set opened_new_window to true
+      else
+  call_forward()
+          set opened_new_window to false
+      end if
+  delay 0.1
+      if has_windows() then
+  if open_in_new_window and not opened_new_window then
+  new_window()
+          else if open_in_new_tab and not opened_new_window then
+  new_tab()
+          end if
+      else
+    new_window()
+      end if
+
+      --Make sure a window exists before we continue, or the write may fail
+      --repeat until has_windows()
+          delay 0.1
+      --end repeat
+      --delay 0.1
+
+      send_text("${command}\n")
+      call_forward()
+  `;
   const scriptWarp = `
-      -- For the latest version:
-      -- https://github.com/DavidMChan/custom-alfred-warp-scripts
+  --For the latest version:
+  --https://github.com/DavidMChan/custom-alfred-warp-scripts
 
-      -- Set this property to true to always open in a new window
-      property open_in_new_window : ${openIn == "newWindow"}
+  --Set this property to true to always open in a new window
+      property open_in_new_window: ${openIn == "newWindow"}
 
-      -- Set this property to true to always open in a new tab
-      property open_in_new_tab : ${openIn == "newTab"}
+  --Set this property to true to always open in a new tab
+      property open_in_new_tab: ${openIn == "newTab"}
 
-      -- Don't change this :)
-      property opened_new_window : false
+  --Don't change this :)
+      property opened_new_window: false
 
-      -- Handlers
+  --Handlers
       on new_window()
           tell application "System Events" to tell process "Warp"
               click menu item "New Window" of menu "File" of menu bar 1
@@ -80,11 +159,11 @@ async function runTerminal(item: ISSHConnection) {
       end is_running
 
       on has_windows()
-          if not is_running() then return false
+  if not is_running() then return false
           tell application "System Events"
-              if windows of process "Warp" is {} then return false
+  if windows of process "Warp" is { } then return false
           end tell
-          true
+  true
       end has_windows
 
       on send_text(custom_text)
@@ -94,52 +173,52 @@ async function runTerminal(item: ISSHConnection) {
       end send_text
 
 
-      -- Main
-      if not is_running() then
-          call_forward()
+  --Main
+  if not is_running() then
+  call_forward()
           set opened_new_window to true
       else
-          call_forward()
+  call_forward()
           set opened_new_window to false
       end if
 
       if has_windows() then
-          if open_in_new_window and not opened_new_window then
-              new_window()
+  if open_in_new_window and not opened_new_window then
+  new_window()
           else if open_in_new_tab and not opened_new_window then
-              new_tab()
+  new_tab()
           end if
       else
-          new_window()
+    new_window()
       end if
 
 
-      -- Make sure a window exists before we continue, or the write may fail
+      --Make sure a window exists before we continue, or the write may fail
       repeat until has_windows()
           delay 0.5
       end repeat
       delay 0.5
 
-      send_text("${command}")
-      call_forward()
-  `;
+  send_text("${command}")
+  call_forward()
+    `;
   const scriptTerminal = `
     tell application "Terminal"
-      do script ""
+  do script ""
       activate
-      set position of front window to {1, 1}
+      set position of front window to { 1, 1 }
       set shell to do script "${command}" in window 1
     end tell
 
     tell application "System Events" to tell process "Terminal"
         set frontmost to true
         windows where title contains "bash"
-        if result is not {} then perform action "AXRaise" of item 1 of result
+  if result is not { } then perform action "AXRaise" of item 1 of result
     end tell
-  `;
+    `;
   const scriptIterm = `
-    -- Set this property to true to open in a new window instead of a new tab
-      property open_in_new_window : ${openIn == "newWindow"}
+  --Set this property to true to open in a new window instead of a new tab
+      property open_in_new_window: ${openIn == "newWindow"}
 
     on new_window()
     	tell application "iTerm" to create window with default profile
@@ -162,58 +241,58 @@ async function runTerminal(item: ISSHConnection) {
     end is_processing
 
     on has_windows()
-    	if not is_running() then return false
-    	if windows of application "iTerm" is {} then return false
-    	true
+  if not is_running() then return false
+  if windows of application "iTerm" is { } then return false
+  true
     end has_windows
 
     on send_text(custom_text)
     	tell application "iTerm" to tell the first window to tell current session to write text custom_text
     end send_text
 
-    -- Main
-    if has_windows() then
-      if open_in_new_window then
-        new_window()
+  --Main
+  if has_windows() then
+  if open_in_new_window then
+  new_window()
       else
-        new_tab()
+  new_tab()
       end if
     else
-    	-- If iTerm is not running and we tell it to create a new window, we get two
-    	-- One from opening the application, and the other from the command
-    	if is_running() then
-    		new_window()
+    --If iTerm is not running and we tell it to create a new window, we get two
+  --One from opening the application, and the other from the command
+  if is_running() then
+  new_window()
     	else
-    		call_forward()
+  call_forward()
     	end if
     end if
 
-    -- Make sure a window exists before we continue, or the write may fail
+    --Make sure a window exists before we continue, or the write may fail
     repeat until has_windows()
     	delay 0.01
     end repeat
 
-    send_text("${command}")
-    call_forward()
-  `;
+  send_text("${command}")
+  call_forward()
+    `;
 
   const scriptAlacritty = `
-  -- Set this property to true to always open in a new window
-  property open_in_new_window : ${openIn == "newWindow"}
+  --Set this property to true to always open in a new window
+  property open_in_new_window: ${openIn == "newWindow"}
 
-  -- Set this property to true to always open in a new tab
-  property open_in_new_tab : ${openIn == "newTab"}
+  --Set this property to true to always open in a new tab
+  property open_in_new_tab: ${openIn == "newTab"}
 
-  -- Don't change this :)
-  property opened_new_window : false
+  --Don't change this :)
+  property opened_new_window: false
 
-  -- Handlers
+  --Handlers
   on new_window()
       tell application "Alacritty"
-          activate
+  activate
           delay 0.5
           tell application "System Events" to tell process "Alacritty"
-              keystroke "n" using {command down}
+              keystroke "n" using {command down }
           end tell
       end tell
       delay 0.5
@@ -221,9 +300,9 @@ async function runTerminal(item: ISSHConnection) {
 
   on new_tab()
       tell application "Alacritty"
-          activate
+  activate
           tell application "System Events" to tell process "Alacritty"
-              keystroke "t" using {command down}
+              keystroke "t" using {command down }
           end tell
       end tell
       delay 0.5
@@ -239,11 +318,11 @@ async function runTerminal(item: ISSHConnection) {
   end is_running
 
   on has_windows()
-      if not is_running() then return false
+  if not is_running() then return false
       tell application "System Events"
-          if windows of process "Alacritty" is {} then return false
+  if windows of process "Alacritty" is { } then return false
       end tell
-      true
+  true
   end has_windows
 
   on send_text(custom_text)
@@ -253,12 +332,12 @@ async function runTerminal(item: ISSHConnection) {
   end send_text
 
 
-  -- Main
+  --Main
   if not is_running() then
-      call_forward()
+  call_forward()
       set opened_new_window to true
   else
-      call_forward()
+  call_forward()
       set opened_new_window to false
   end if
 
@@ -269,13 +348,13 @@ async function runTerminal(item: ISSHConnection) {
   end if
 
   if open_in_new_window and not opened_new_window then
-      new_window()
+  new_window()
   else if open_in_new_tab and not opened_new_window then
-      new_tab()
+  new_tab()
   end if
 
 
-  -- Make sure a window exists before we continue, or the write may fail
+  --Make sure a window exists before we continue, or the write may fail
   repeat until has_windows()
       delay 0.5
   end repeat
@@ -283,10 +362,10 @@ async function runTerminal(item: ISSHConnection) {
   send_text("${command}
 ") -- Enter at the end of string
   call_forward()
-  `;
+      `;
 
   const scriptHyper = `
-  -- Set this property to true to open in a new window instead of a new tab
+  --Set this property to true to open in a new window instead of a new tab
   property open_in_new_window : ${openIn == "newWindow"}
 
   on new_window()
@@ -297,15 +376,15 @@ async function runTerminal(item: ISSHConnection) {
 
   on new_tab()
       tell application "System Events"
-          -- Check if Hyper is already running
-          set isRunning to (exists process "Hyper")
+--Check if Hyper is already running
+          set isRunning to(exists process "Hyper")
 
-          if isRunning then
-              -- If Hyper is running, bring it to the front and open a new tab
+if isRunning then
+--If Hyper is running, bring it to the front and open a new tab
               tell application "Hyper" to activate
               tell application "System Events" to keystroke "t" using command down
           else
-              -- If Hyper isn't running, launch it
+--If Hyper isn't running, launch it
               launch application "Hyper"
           end if
       end tell
@@ -319,15 +398,15 @@ async function runTerminal(item: ISSHConnection) {
       application "Hyper" is running
   end is_running
 
-  -- Hyper doesn't have a direct equivalent to 'is processing', so we'll assume it's ready if it's running
+--Hyper doesn't have a direct equivalent to 'is processing', so we'll assume it's ready if it's running
   on is_processing()
-      is_running()
+is_running()
   end is_processing
 
   on has_windows()
-      if not is_running() then return false
-      -- Hyper always has at least one window, so we'll just check if it's running
-      true
+if not is_running() then return false
+--Hyper always has at least one window, so we'll just check if it's running
+true
   end has_windows
 
   on send_text(custom_text)
@@ -336,34 +415,35 @@ async function runTerminal(item: ISSHConnection) {
       end tell
   end send_text
 
-  -- Main
-  if has_windows() then
-      if open_in_new_window then
-          new_window()
+--Main
+if has_windows() then
+if open_in_new_window then
+new_window()
       else
-          new_tab()
+new_tab()
       end if
   else
-      -- If Hyper is not running and we tell it to create a new window, we get two
-      -- One from opening the application, and the other from the command
-      if is_running() then
-          new_window()
+  --If Hyper is not running and we tell it to create a new window, we get two
+--One from opening the application, and the other from the command
+if is_running() then
+new_window()
       else
-          call_forward()
+call_forward()
       end if
   end if 
 
 
-  -- Give Hyper some time to load 
+  --Give Hyper some time to load 
   repeat until has_windows()
       delay 0.5
   end repeat
   delay 0.5
 
-  send_text("${command}")
-  call_forward()
+send_text("${command}")
+call_forward()
   `;
 
+  await closeMainWindow(); // neccessary
   if (terminal == "iTerm") {
     try {
       await runAppleScript(scriptIterm);
@@ -380,7 +460,6 @@ async function runTerminal(item: ISSHConnection) {
     }
   } else if (terminal == "Alacritty") {
     try {
-      await closeMainWindow(); // neccessary when alacritty already in fullscreen
       await runAppleScript(scriptAlacritty);
     } catch (error) {
       await runAppleScript(scriptTerminal);
@@ -393,11 +472,22 @@ async function runTerminal(item: ISSHConnection) {
       await runAppleScript(scriptTerminal);
       console.log(error);
     }
+  } else if (terminal == "Ghostty") {
+    console.log("Ghostty is valid setting")
+    try {
+      console.log("ghostty applescript is ran")
+      const result = await runAppleScript(scriptGhostty);
+      console.log(result);
+    } catch (error) {
+      console.log("backup applescript is ran")
+      await runAppleScript(scriptTerminal);
+      console.log(error);
+    }
   } else {
     await runAppleScript(scriptTerminal);
   }
 
-  await showHUD(`✅ Connection [${item.name}] opened with [${terminal}].`);
+  await showHUD(`✅ Connection[${item.name}] opened with [${terminal}].`);
 }
 
 function getConnectionString(item: ISSHConnection) {
@@ -406,11 +496,11 @@ function getConnectionString(item: ISSHConnection) {
   }
 
   const parts = [];
-  if (item.sshKey) parts.push(`-i ${item.sshKey}`);
-  if (item.port) parts.push(`-p ${item.port}`);
+  if (item.sshKey) parts.push(`- i ${item.sshKey} `);
+  if (item.port) parts.push(`- p ${item.port} `);
   if (item.command) parts.push(`"${item.command}"`);
 
-  const address = item.user ? `${item.user}@${item.address}` : item.address;
+  const address = item.user ? `${item.user} @${item.address} ` : item.address;
   parts.unshift("ssh", address);
 
   return parts.filter(Boolean).join(" ");
@@ -437,7 +527,7 @@ export default function Command() {
 
     await saveConnections(items);
     setConnectionsList(items);
-    await showHUD(`🗑 Connection [${item.name}] removed!`);
+    await showHUD(`🗑 Connection[${item.name}]removed!`);
   }
 
   return (
@@ -495,7 +585,6 @@ function GetAction({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
-    item.sshKey ? " SSH Key: " + item.sshKey : ""
-  } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
+  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${item.sshKey ? " SSH Key: " + item.sshKey : ""
+    } ${item.command ? ' Command: "' + item.command + '"' : ""} `;
 }
