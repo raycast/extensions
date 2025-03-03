@@ -36,18 +36,18 @@
   "tools": [
     {
       "name": "add-new-whatsapp-chat",
-      "title": "Add new whatsapp chat",
-      "description": "Adds a new whatsapp chat."
+      "title": "Add new WhatsApp chat",
+      "description": "Adds a new WhatsApp chat."
     },
     {
       "name": "add-whatsapp-group",
-      "title": "Add Whatsapp Group",
-      "description": "Adds an existing whatsapp group."
+      "title": "Add WhatsApp Group",
+      "description": "Adds an existing WhatsApp group."
     },
     {
       "name": "open-chat",
       "title": "Open Chat",
-      "description": "Opens a chat in Whatsapp"
+      "description": "Opens a chat in WhatsApp"
     }
   ],
   "ai": {
@@ -73,7 +73,7 @@
         ]
       },
       {
-        "input": "@whatsapp Add whatsapp group Raycasters with code AbcdefgHijklmnop",
+        "input": "@whatsapp Add WhatsApp group Raycasters with code AbcdefgHijklmnop",
         "mocks": {
           "add-whatsapp-group": "undefined"
         },
@@ -88,7 +88,7 @@
             }
           },
           {
-            "meetsCriteria": "Tells that the Whatsapp group Raycasters has been added"
+            "meetsCriteria": "Tells that the WhatsApp group Raycasters has been added"
           }
         ]
       },
