@@ -11,7 +11,6 @@ import { GitHubContent, Item } from "./types";
 // TODO: add CDN support for better performance
 // Constants
 const CACHE_KEY = "ccfddl-conference-data";
-const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours in milliseconds
 const cache = new Cache();
 
 export default function Command() {
