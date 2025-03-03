@@ -48,7 +48,9 @@
           {
             "callsTool": {
               "arguments": {
-                "searchQuery": "How does the decorator work?"
+                "searchQuery": {
+                  "includes": "decorator"
+                }
               },
               "name": "inkeep"
             }
