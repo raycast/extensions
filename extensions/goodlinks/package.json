@@ -25,7 +25,7 @@
     {
       "name": "random-link",
       "title": "Random Link",
-      "description": "Open a random link from",
+      "description": "Open a random link from GoodLinks.",
       "mode": "no-view"
     }
   ],
