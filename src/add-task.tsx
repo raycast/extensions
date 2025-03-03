@@ -112,7 +112,7 @@ export default function Command() {
       isLoading={isLoading || isLoadingProjects}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

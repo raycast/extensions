@@ -18,6 +18,13 @@
       "mode": "view"
     },
     {
+      "name": "edit-task",
+      "title": "Edit Task",
+      "subtitle": "Edit existing Motion tasks",
+      "description": "View and edit your existing tasks in Motion",
+      "mode": "view"
+    },
+    {
       "name": "delete-task",
       "title": "Delete Task",
       "subtitle": "Delete task from Motion",
@@ -26,9 +33,9 @@
     },
     {
       "name": "debug-workspaces",
-      "title": "Debug: List Workspaces",
+      "title": "List Workspaces",
       "subtitle": "List available Motion workspaces",
-      "description": "Debug tool to list available Motion workspaces and get their IDs",
+      "description": "View available Motion workspaces and get their IDs for task creation",
       "mode": "view"
     }
   ],

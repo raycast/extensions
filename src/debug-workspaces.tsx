@@ -48,41 +48,43 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter workspaces...">
-      {error ? (
-        <List.EmptyView title="Error fetching workspaces" description={error} />
-      ) : workspaces.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No workspaces found"
-          description="Make sure your API key is correct and you have access to at least one workspace."
-        />
-      ) : (
-        workspaces.map((workspace) => (
-          <List.Item
-            key={workspace.id}
-            title={workspace.name || "Unnamed Workspace"}
-            subtitle={`ID: ${workspace.id}`}
-            accessories={[
-              {
-                text: workspace.type || "Unknown Type",
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Workspace Id"
-                  content={workspace.id}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Workspace Details"
-                  content={JSON.stringify(workspace, null, 2)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-              </ActionPanel>
-            }
+      <List.Section title="Your Motion Workspaces" subtitle="Find your workspace ID here">
+        {error ? (
+          <List.EmptyView title="Error fetching workspaces" description={error} />
+        ) : workspaces.length === 0 && !isLoading ? (
+          <List.EmptyView
+            title="No workspaces found"
+            description="Make sure your API key is correct and you have access to at least one workspace."
           />
-        ))
-      )}
+        ) : (
+          workspaces.map((workspace) => (
+            <List.Item
+              key={workspace.id}
+              title={workspace.name || "Unnamed Workspace"}
+              subtitle={`ID: ${workspace.id}`}
+              accessories={[
+                {
+                  text: workspace.type || "Unknown Type",
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Workspace ID"
+                    content={workspace.id}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Workspace Details"
+                    content={JSON.stringify(workspace, null, 2)}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        )}
+      </List.Section>
     </List>
   );
 }
