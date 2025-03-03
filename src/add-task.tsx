@@ -149,7 +149,7 @@ export default function Command() {
 
       <Form.Dropdown id="projectId" title="Project">
         <Form.Dropdown.Item value="" title="None" />
-        {projects.map((project) => (
+        {projects.map((project: Project) => (
           <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
         ))}
       </Form.Dropdown>
