@@ -283,7 +283,18 @@ export const getMotionApiClient = () => {
       // Ensure the task has the correct workspaceId
       const taskToUpdate = { ...task, workspaceId: correctWorkspaceId };
 
-      const url = `${BASE_URL}/tasks/${task.id}`;
+      // Make sure we have a task ID
+      if (!task.id) {
+        throw new Error("Task ID is required for updating");
+      }
+
+      // Construct URL with both task ID and workspaceId as a query param to ensure API compatibility
+      const url = `${BASE_URL}/tasks/${task.id}?workspaceId=${correctWorkspaceId}`;
+      
+      // Log both URL and payload for debugging
+      console.log(`[DEBUG] updateTask URL: ${url}`);
+      console.log(`[DEBUG] updateTask payload:`, JSON.stringify(taskToUpdate, null, 2));
+      
       logRequest("PUT", url, headers, taskToUpdate);
 
       const response = await fetch(url, {
@@ -294,6 +305,7 @@ export const getMotionApiClient = () => {
 
       if (!response.ok) {
         const responseText = await logResponse(response);
+        console.error(`[ERROR] Update task failed with status ${response.status}: ${responseText}`);
         throw new Error(`Failed to update task: ${response.statusText}${responseText ? ` - ${responseText}` : ""}`);
       }
 

@@ -224,7 +224,7 @@ export default function Command() {
 
     try {
       const motionClient = getMotionApiClient();
-
+      
       if (!selectedTask) {
         throw new Error("No task selected");
       }
@@ -245,8 +245,11 @@ export default function Command() {
         status: values.status,
         label: values.label || undefined,
         projectId: values.projectId || undefined,
-        workspaceId: selectedTask.workspaceId || preferences,
+        workspaceId: preferences,
       };
+
+      // Log the task update for debugging
+      console.log("Updating task with payload:", JSON.stringify(taskUpdate, null, 2));
 
       // Update the task
       await motionClient.updateTask(taskUpdate);
@@ -259,16 +262,16 @@ export default function Command() {
 
       // Reload tasks to get the updated list
       await loadTasks();
-
+      
       // Return to the task list view
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating task:", error);
-
+      
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to update task",
-        message: String(error),
+        message: String(error)
       });
     } finally {
       setIsLoading(false);

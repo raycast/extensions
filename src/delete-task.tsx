@@ -145,6 +145,59 @@ export default function Command() {
     }
   }
 
+  // Get a relative description of the due date
+  function getRelativeDate(dateString?: string): string {
+    if (!dateString) return "Not scheduled";
+
+    const dueDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    const dueDay = new Date(dueDate);
+    dueDay.setHours(0, 0, 0, 0);
+
+    const diffTime = Math.abs(dueDay.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (dueDay < today) {
+      // Past due
+      if (diffDays === 1) {
+        return "Yesterday";
+      } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+      } else if (diffDays < 30) {
+        const weeks = Math.floor(diffDays / 7);
+        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+      } else {
+        return "Over a month ago";
+      }
+    } else if (dueDay.getTime() === today.getTime()) {
+      return "Today";
+    } else if (dueDay.getTime() === tomorrow.getTime()) {
+      return "Tomorrow";
+    } else {
+      // Future due date
+      if (diffDays < 7) {
+        // Get the day name
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return dayNames[dueDay.getDay()];
+      } else if (diffDays < 14) {
+        return "Next week";
+      } else if (diffDays < 30) {
+        const weeks = Math.floor(diffDays / 7);
+        return `In ${weeks} week${weeks > 1 ? 's' : ''}`;
+      } else {
+        return "In over a month";
+      }
+    }
+  }
+
   // Get color for priority
   function getPriorityColor(priority?: string) {
     switch (priority) {
@@ -224,34 +277,28 @@ export default function Command() {
             subtitle={removeHtml(task.description)}
             accessories={[
               {
+                text: getTaskPriority(task.priority),
+                tooltip: "Priority"
+              },
+              {
+                text: formatDueDate(task.dueDate),
+                tooltip: "Due Date"
+              },
+              {
+                text: getRelativeDate(task.dueDate),
+                tooltip: "Scheduled For"
+              },
+              {
                 tag: {
                   value: getTaskStatus(task.status),
                   color: task.status === "DONE" ? "#4CAF50" : undefined,
                 },
+                tooltip: "Status"
               },
-              ...(task.dueDate
-                ? [
-                    {
-                      tag: {
-                        value: formatDueDate(task.dueDate),
-                        color: undefined,
-                      },
-                    },
-                  ]
-                : []),
-              ...(task.priority
-                ? [
-                    {
-                      tag: {
-                        value: getTaskPriority(task.priority),
-                        color: getPriorityColor(task.priority),
-                      },
-                    },
-                  ]
-                : []),
               // Map each label to a tag, but only if we have valid string labels
               ...getTaskLabels(task.label).map((label) => ({
                 tag: { value: label },
+                tooltip: "Label"
               })),
             ]}
             actions={
