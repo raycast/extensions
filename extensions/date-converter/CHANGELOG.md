@@ -1,6 +1,6 @@
 # Date Converter Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-03
 
 - Support configuring primary and secondary actions
 
