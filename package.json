@@ -37,7 +37,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm, Warp, Alacritty, or Hyper is available, you can use them instead of Terminal.",
+      "description": "Choose your preferred terminal application for SSH connections.",
       "data": [
         {
           "title": "Terminal",
@@ -58,6 +58,10 @@
         {
           "title": "Hyper",
           "value": "Hyper"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
         }
       ],
       "default": "Terminal"
