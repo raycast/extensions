@@ -3,7 +3,7 @@
 ## [Feature] - {PR_MERGE_DATE}
 
 * Added the ability to change contrast.
-* Refactored the code offer a better user experience.
+* Refactored the code to offer a better user experience.
 
 ## [Feature] - 2025-03-01
 
