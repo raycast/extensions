@@ -33,6 +33,12 @@ interface Workspace {
   type: string;
   labels: string[];
   taskStatuses: TaskStatus[];
+  // Adding debug properties to help with testing
+  createdAt?: string;
+  updatedAt?: string;
+  isActive?: boolean;
+  memberCount?: number;
+  settings?: Record<string, unknown>;
 }
 
 interface TaskStatus {
