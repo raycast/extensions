@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2025-03-03
 
 - **Unified Dashboard:**  
   - Combined inverter info and system overview into one intuitive dashboard command.
