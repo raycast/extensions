@@ -36,6 +36,27 @@
       "icon": "icon.png"
     }
   ],
+  "ai": {
+    "instructions": "When using Inkeep, always provide relevant links and confidence scores with the responses. If the response includes code snippets, format them properly in markdown. Describe the searchQuery in a way that is easy to understand.",
+    "evals": [
+      {
+        "input": "@inkeep How does the decorator work?",
+        "mocks": {
+          "inkeep": " \n\nThe Langfuse Python SDK provides an `@observe()` decorator that automatically captures:\n\n- Nesting via context vars [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Timings/durations [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Function name [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Args and kwargs as input dict [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n- Returned values as output [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n\nHere's a basic example:\n\n```python\nfrom langfuse.decorators import observe\n\n@observe()\ndef fn():\n    pass\n\n@observe()\ndef main():\n    fn()\n\nmain()\n```\n[(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)\n\nThe decorator will automatically create a trace for the top-level function and spans for any nested functions [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments). You can also configure additional parameters like disabling input/output capture using `capture_input=False` and `capture_output=False` [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments).\n\nFor short-lived environments like AWS Lambda, make sure to call `flush()` before the function terminates to avoid losing events [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments).\n\nThe decorator integrates seamlessly with OpenAI, LangChain, and LlamaIndex frameworks [(1)](https://langfuse.com/docs/sdk/python/decorators#decorator-arguments)."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "searchQuery": "How does the decorator work?"
+              },
+              "name": "inkeep"
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "apiKey",
