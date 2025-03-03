@@ -115,7 +115,7 @@ export interface Errors {
   message: string;
 }
 
-export interface IRejectected {
+export interface IRejected {
   number: string;
   error: Errors;
 }
