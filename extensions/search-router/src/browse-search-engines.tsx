@@ -1,11 +1,19 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, openExtensionPreferences, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  openExtensionPreferences,
+  showHUD,
+  Clipboard,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
-import { Clipboard } from "@raycast/api";
 import { SearchEngine, searchEngines } from "./data/search-engines";
 
 export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
-  const defaultSearchEngine = getPreferenceValues<Preferences>().defaultSearchEngine;
+  const defaultSearchEngineKey = getPreferenceValues<{ defaultSearchEngine: string }>().defaultSearchEngine;
 
   const filteredSearchEngines = useMemo(() => {
     const trimmedSearch = searchText.trim();
@@ -33,8 +41,8 @@ export default function BrowseSearchEngines() {
           title={searchEngine.s}
           subtitle={`!${searchEngine.t}`}
           accessories={[
-            { text: searchEngine.t === defaultSearchEngine ? "Default" : "" },
-            { icon: searchEngine.t === defaultSearchEngine ? Icon.CheckCircle : undefined },
+            { text: searchEngine.t === defaultSearchEngineKey ? "Default" : "" },
+            { icon: searchEngine.t === defaultSearchEngineKey ? Icon.CheckCircle : undefined },
           ]}
           actions={
             <ActionPanel>

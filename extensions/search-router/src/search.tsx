@@ -2,7 +2,7 @@ import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api
 import { open } from "@raycast/api";
 import { searchEngines } from "./data/search-engines";
 
-const defaultSearchEngineKey = getPreferenceValues<Preferences>().defaultSearchEngine;
+const defaultSearchEngineKey = getPreferenceValues<{ defaultSearchEngine: string }>().defaultSearchEngine;
 const defaultSearchEngine = searchEngines.find((engine) => engine.t === defaultSearchEngineKey);
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
