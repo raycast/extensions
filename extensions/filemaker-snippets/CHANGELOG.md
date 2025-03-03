@@ -4,6 +4,7 @@
 
 - Update to Raycast API 1.93.0
 - Fix a bug where the snippet text was not being saved when editing the XML of a snippet
+- Update FileMaker icons to the latest version
 
 ## [Fixes] - 2024-03-20
 
