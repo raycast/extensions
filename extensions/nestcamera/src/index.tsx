@@ -5,6 +5,7 @@ import { Icon } from "@raycast/api";
 import { CameraList } from "./components/CameraList";
 import { NestCamera } from "./types";
 import { NestDeviceService } from "./services/camera/NestDeviceService";
+import { logEnvironment } from "./debug-env";
 
 export default function Command() {
   const [cameras, setCameras] = useState<NestCamera[]>([]);
@@ -15,6 +16,10 @@ export default function Command() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Log environment variables for debugging
+        const logResult = logEnvironment();
+        console.log(logResult);
+
         const authManager = OAuthManager.getInstance();
         // Check if we have a valid token
         try {

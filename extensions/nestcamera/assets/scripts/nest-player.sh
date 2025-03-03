@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # nest-player.sh - A script to play RTSP streams from Nest cameras using FFplay
-# This script is designed to be wrapped by Platypus to create a native macOS app
+# This script is designed to be called directly from the Raycast extension
 
 # Enable debug output
 set -x
 
 # Create a log file for debugging
-LOG_FILE=$(mktemp)
+LOG_DIR="$HOME/Library/Logs/NestCameraViewer"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/nest-player-$(date +%Y%m%d-%H%M%S).log"
 echo "Nest Camera Viewer log started at $(date)" > "$LOG_FILE"
 
 # Function to log messages
@@ -30,11 +32,9 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-# Store URL in a file to avoid command line length issues
+# Store URL in a variable
 RTSP_URL="$1"
-URL_FILE=$(mktemp)
-echo "$RTSP_URL" > "$URL_FILE"
-log_message "RTSP URL stored in $URL_FILE"
+log_message "RTSP URL: $RTSP_URL"
 
 CAMERA_NAME="${2:-Nest Camera}"
 WINDOW_TITLE="Nest Camera: $CAMERA_NAME"
@@ -83,22 +83,48 @@ FFPLAY_PATHS=(
   "$(which ffplay 2>/dev/null)"
 )
 
-# Find FFplay
-FFPLAY_PATH=""
-for path in "${FFPLAY_PATHS[@]}"; do
-  if [ -x "$path" ]; then
-    FFPLAY_PATH="$path"
-    log_message "Found FFplay at: $FFPLAY_PATH"
-    break
+# Parse command line arguments
+RTSP_URL=""
+CAMERA_NAME="Nest Camera"
+CUSTOM_FFPLAY_PATH=""
+
+for arg in "$@"; do
+  if [[ $arg == --ffplay-path=* ]]; then
+    CUSTOM_FFPLAY_PATH="${arg#*=}"
+    log_message "Using provided FFplay path: $CUSTOM_FFPLAY_PATH"
+  elif [[ $arg == --check-ffplay ]]; then
+    RTSP_URL="--check-ffplay"
+  elif [[ -z "$RTSP_URL" ]]; then
+    RTSP_URL="$arg"
+  elif [[ -z "$CAMERA_NAME" || "$CAMERA_NAME" == "Nest Camera" ]]; then
+    CAMERA_NAME="$arg"
   fi
 done
+
+# Find FFplay
+FFPLAY_PATH=""
+
+# First check the custom path if provided
+if [[ -n "$CUSTOM_FFPLAY_PATH" && -x "$CUSTOM_FFPLAY_PATH" ]]; then
+  FFPLAY_PATH="$CUSTOM_FFPLAY_PATH"
+  log_message "Using provided FFplay at: $FFPLAY_PATH"
+else
+  # Otherwise check common paths
+  for path in "${FFPLAY_PATHS[@]}"; do
+    if [ -x "$path" ]; then
+      FFPLAY_PATH="$path"
+      log_message "Found FFplay at: $FFPLAY_PATH"
+      break
+    fi
+  done
+fi
 
 # Check if ffplay is found
 if [ -z "$FFPLAY_PATH" ]; then
   log_error "FFplay not found. Please install FFmpeg using 'brew install ffmpeg'"
   close_loading_dialog
   osascript -e "display notification \"FFplay not found. Please install FFmpeg using 'brew install ffmpeg'.\" with title \"Nest Camera Error\""
-  rm -f "$URL_FILE" "$LOADING_SCRIPT"
+  rm -f "$LOADING_SCRIPT"
   exit 1
 fi
 
@@ -107,7 +133,6 @@ log_message "Starting FFplay with RTSP URL: $RTSP_URL"
 log_message "Camera: $CAMERA_NAME"
 
 # Set window size and position
-# Using more conservative values that should work on most displays
 WINDOW_WIDTH=640
 WINDOW_HEIGHT=480
 
@@ -132,24 +157,8 @@ fi
 
 log_message "Window position: ${X_POSITION},${Y_POSITION}"
 
-# Try to find the bundle identifier for FFplay
-FFPLAY_BUNDLE_ID=$(osascript -e 'id of app "ffplay"' 2>/dev/null || echo "org.ffmpeg.ffplay")
-log_message "FFplay bundle ID: $FFPLAY_BUNDLE_ID"
-
-# Set FFplay as a background-only application
-defaults write "$FFPLAY_BUNDLE_ID" LSUIElement -bool true
-defaults write "$FFPLAY_BUNDLE_ID" LSBackgroundOnly -bool true
-log_message "Set FFplay as background-only application"
-
-# Create a wrapper script that will launch FFplay through nohup
-WRAPPER_SCRIPT=$(mktemp)
-cat > "$WRAPPER_SCRIPT" << EOF
-#!/bin/bash
-
-# Set environment variables to help hide FFplay from dock
-export DISPLAY_IN_DOCK=0
-export LSUIElement=1
-export LSBackgroundOnly=1
+# Launch FFplay with optimized parameters for RTSP streaming
+log_message "Launching FFplay..."
 
 # Launch FFplay with the noborder flag and other optimizations
 "$FFPLAY_PATH" \
@@ -165,155 +174,45 @@ export LSBackgroundOnly=1
   -volume 100 \
   -stats \
   -ast 0 \
-  -i "$(cat "$URL_FILE")" \
-  2>&1 | grep -v "deprecated"
-EOF
+  -i "$RTSP_URL" \
+  2>&1 | tee -a "$LOG_FILE" | grep -v "deprecated" &
 
-chmod +x "$WRAPPER_SCRIPT"
-log_message "Created FFplay wrapper script at $WRAPPER_SCRIPT"
-
-# Create a more robust AppleScript to hide FFplay from dock
-APPLESCRIPT_FILE=$(mktemp)
-cat > "$APPLESCRIPT_FILE" << EOF
-#!/usr/bin/osascript
-
-on run
-  -- Use polling instead of fixed delay
-  set maxAttempts to 20
-  set attemptCount to 0
-  set ffplayFound to false
-  
-  log "Starting to look for FFplay process"
-  
-  repeat until ffplayFound or attemptCount > maxAttempts
-    set attemptCount to attemptCount + 1
-    log "Attempt " & attemptCount & " to find FFplay process"
-    
-    try
-      tell application "System Events"
-        if exists (processes where name contains "ffplay" or name contains "FFplay") then
-          set ffplayFound to true
-          set ffplayProcess to first process where name contains "ffplay" or name contains "FFplay"
-          
-          log "Found FFplay process on attempt " & attemptCount
-          
-          tell ffplayProcess
-            -- Try different properties to hide from dock
-            try
-              set background only to true
-              log "Set FFplay process to background only"
-            on error errorMessage
-              log "Failed to set background only: " & errorMessage
-            end try
-            
-            try
-              set visible to false
-              delay 0.1
-              set visible to true
-              log "Toggled FFplay visibility"
-            on error errorMessage
-              log "Failed to toggle visibility: " & errorMessage
-            end try
-            
-            -- Position the window
-            try
-              set position of window 1 to {$X_POSITION, $Y_POSITION}
-              log "Positioned FFplay window at $X_POSITION, $Y_POSITION"
-            on error errorMessage
-              log "Failed to position window: " & errorMessage
-            end try
-            
-            -- Set up a handler for when FFplay quits
-            try
-              tell application "Nest Camera Viewer" to set has quit handler to true
-              log "Set quit handler for Nest Camera Viewer"
-            on error errorMessage
-              log "Failed to set quit handler: " & errorMessage
-            end try
-          end tell
-        else
-          log "FFplay process not found on attempt " & attemptCount
-          delay 0.5
-        end if
-      end tell
-    on error errorMessage
-      log "Error checking for FFplay: " & errorMessage
-      delay 0.5
-    end try
-  end repeat
-  
-  if not ffplayFound then
-    log "Failed to find FFplay process after " & maxAttempts & " attempts"
-    return
-  end if
-  
-  -- Try to hide FFplay icon from Dock
-  try
-    tell application "Dock"
-      quit
-      delay 0.5
-      activate
-      log "Restarted Dock to refresh icons"
-    end tell
-  on error errorMessage
-    log "Failed to restart Dock: " & errorMessage
-  end try
-end run
-EOF
-
-chmod +x "$APPLESCRIPT_FILE"
-log_message "Created AppleScript file at $APPLESCRIPT_FILE"
-
-# Launch FFplay using nohup to detach it from the terminal and prevent it from showing in the dock
-# The /dev/null redirection helps prevent it from creating a dock icon
-log_message "Launching FFplay..."
-FFPLAY_PID=$(nohup "$WRAPPER_SCRIPT" </dev/null >/dev/null 2>&1 & echo $!)
+FFPLAY_PID=$!
 log_message "FFplay launched with PID $FFPLAY_PID"
-
-# Run the AppleScript to set the process properties
-osascript "$APPLESCRIPT_FILE" > /tmp/ffplay_applescript.log 2>&1 &
-log_message "Running AppleScript to configure FFplay window"
-
-# Create a monitor script to quit the app when FFplay exits
-MONITOR_SCRIPT=$(mktemp)
-cat > "$MONITOR_SCRIPT" << EOF
-#!/bin/bash
-
-# Monitor FFplay process and quit the app when it exits
-while kill -0 $FFPLAY_PID 2>/dev/null; do
-  sleep 1
-done
-
-# FFplay has exited, quit the app
-echo "[$(date +%H:%M:%S)] FFplay process $FFPLAY_PID has exited, quitting Nest Camera Viewer" >> "$LOG_FILE"
-osascript -e 'tell application "Nest Camera Viewer" to quit'
-EOF
-
-chmod +x "$MONITOR_SCRIPT"
-log_message "Created monitor script at $MONITOR_SCRIPT"
-"$MONITOR_SCRIPT" &
-log_message "Started monitor script"
 
 # Wait for FFplay to start and become visible (give it a few seconds)
 log_message "Waiting for FFplay to initialize (5 seconds)..."
 sleep 5
+
+# Position the FFplay window using AppleScript
+osascript -e "
+tell application \"System Events\"
+  if exists (processes where name contains \"ffplay\") then
+    tell process \"ffplay\"
+      try
+        set position of window 1 to {$X_POSITION, $Y_POSITION}
+        log \"Positioned FFplay window at $X_POSITION, $Y_POSITION\"
+      on error errorMessage
+        log \"Failed to position window: \" & errorMessage
+      end try
+    end tell
+  end if
+end tell
+" >> "$LOG_FILE" 2>&1
 
 # Close the loading dialog once FFplay is running
 close_loading_dialog
 
 # Wait for FFplay to exit
 log_message "Waiting for FFplay to exit..."
-while kill -0 $FFPLAY_PID 2>/dev/null; do
-  sleep 1
-done
+wait $FFPLAY_PID
 
-# Get the exit code (this will be approximate since we're using nohup)
+# Get the exit code
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
   log_error "FFplay exited with error code $EXIT_CODE"
-  close_loading_dialog
   osascript -e "display notification \"FFplay may have failed to play the stream (exit code: $EXIT_CODE).\" with title \"Nest Camera Error\""
-  rm -f "$URL_FILE" "$APPLESCRIPT_FILE" "$MONITOR_SCRIPT" "$WRAPPER_SCRIPT" "$LOADING_SCRIPT"
+  rm -f "$LOADING_SCRIPT"
   exit $EXIT_CODE
 fi
 
@@ -321,17 +220,7 @@ log_message "FFplay exited normally"
 
 # Clean up
 log_message "Cleaning up temporary files"
-rm -f "$URL_FILE" "$APPLESCRIPT_FILE" "$MONITOR_SCRIPT" "$WRAPPER_SCRIPT" "$LOADING_SCRIPT"
+rm -f "$LOADING_SCRIPT"
 
-# Quit the app
-log_message "Quitting Nest Camera Viewer"
-osascript -e 'tell application "Nest Camera Viewer" to quit'
-
-# Copy the log file to a more permanent location for debugging
-LOG_DIR="$HOME/Library/Logs/NestCameraViewer"
-mkdir -p "$LOG_DIR"
-cp "$LOG_FILE" "$LOG_DIR/nest-player-$(date +%Y%m%d-%H%M%S).log"
-log_message "Log saved to $LOG_DIR/nest-player-$(date +%Y%m%d-%H%M%S).log"
-rm -f "$LOG_FILE"
-
+log_message "Stream ended successfully"
 exit 0 

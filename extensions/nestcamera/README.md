@@ -28,20 +28,36 @@ Other Nest camera models are not currently supported as they use different strea
 1. Nest Cam Indoor (1st generation)
 2. macOS 12.0 or later
 3. Raycast 1.50.0 or later
-4. **FFmpeg/FFplay installed** (`brew install ffmpeg`) - This is required for video playback
+4. **FFmpeg/FFplay installed** - This is **required** for video playback
 5. Google Device Access registration ($5 one-time fee)
 6. Google Cloud OAuth2 client credentials
 
+### Required Software
+
 The extension relies on the following software being installed on your Mac:
-- **FFmpeg/FFplay**: Used for RTSP video streaming (install with `brew install ffmpeg`)
+- **FFmpeg/FFplay**: Used for RTSP video streaming
 - **AppleScript**: Used for window management and loading dialogs (built into macOS)
 - **Bash**: Used for scripting (built into macOS)
+
+### Installing FFmpeg
+
+FFmpeg is required for this extension to work. You can install it using Homebrew:
+
+```bash
+# Install Homebrew if you don't have it
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install FFmpeg
+brew install ffmpeg
+```
+
+Alternatively, you can download FFmpeg from the [official website](https://ffmpeg.org/download.html).
 
 If you encounter any issues with the extension, please ensure these prerequisites are properly installed.
 
 ## Installation
 
-1. Install FFmpeg/FFplay:
+1. Install FFmpeg/FFplay (if not already installed):
    ```bash
    brew install ffmpeg
    ```
@@ -116,7 +132,7 @@ If you encounter issues with the extension, try these steps:
 ### Common Issues
 
 - **No video appears**: This could be due to network issues, incorrect RTSP URL, or FFmpeg configuration problems. Check the logs for specific error messages.
-- **Multiple dock icons**: If you see multiple dock icons, try quitting all instances of the Nest Camera Viewer app and restarting Raycast.
+- **FFplay not found**: If you see an error about FFplay not being found, make sure you have installed FFmpeg using `brew install ffmpeg`.
 - **Loading dialog doesn't close**: If the loading dialog remains on screen, the stream may have failed to start. Check the logs for error messages.
 
 ## Known Limitations
@@ -126,17 +142,18 @@ If you encounter issues with the extension, try these steps:
 - One camera stream at a time
 - FFplay required for playback
 - macOS only
-- Two dock icons appear when viewing a camera (see note below)
+- FFplay window appears in the dock when viewing a camera
 
-## Dock Icon Behavior
+## FFplay Window Behavior
 
-When viewing a camera stream, you will notice two icons in your dock:
-1. The **Nest Camera Viewer** app icon
-2. The **FFplay** icon (used for video playback)
+When viewing a camera stream, you will see an FFplay window in your dock. This is the standard behavior of FFplay and is expected. Some notes about this behavior:
 
-This is expected behavior due to how FFplay integrates with macOS. When you're done viewing the stream, you can press **Command+Q** to close both applications at once. The extension ensures that both icons are removed from your dock when you quit the stream.
+- The FFplay window will show in your dock while the stream is active
+- When you're done viewing the stream, you can close the FFplay window using the standard window controls or by pressing **Command+Q**
+- The extension will automatically clean up any FFplay processes when you close the stream or quit Raycast
+- If you experience any issues with FFplay windows not closing properly, you can manually terminate FFplay processes using Activity Monitor or by running `pkill -f ffplay` in Terminal
 
-While we've made extensive efforts to hide the FFplay icon, technical limitations with how FFplay interacts with macOS make this challenging. We've optimized for functional behavior (proper quitting with Command+Q) over visual appearance.
+While we've optimized the FFplay parameters for the best viewing experience, the dock icon behavior is a limitation of how FFplay works on macOS and cannot be completely eliminated without using a custom video player application.
 
 ## Development
 
@@ -150,30 +167,15 @@ While we've made extensive efforts to hide the FFplay icon, technical limitation
    npm install
    ```
 
-3. Creating/Updating the Nest Camera Viewer App:
-   - The extension includes a pre-built Platypus app in the `assets/app` directory
-   - **You only need to recreate this app if you modify:**
-     - The `nest-player.sh` script
-     - The app icon
-     - The app's behavior or appearance
-   - To recreate the app, run:
-     ```bash
-     ./scripts/create-app.sh
-     ```
-   - This will create the app in the `assets/app` directory
-   - The app is automatically included in the extension package during build
-
-4. Run in development:
+3. Run in development:
    ```bash
    npm run dev
    ```
 
-5. Build the extension:
+4. Build the extension:
    ```bash
    npm run build
    ```
-   - The build process automatically copies the app from `assets/app` to the distribution package
-   - End users will receive the pre-built app and never need to run `create-app.sh`
 
 ### Logging
 

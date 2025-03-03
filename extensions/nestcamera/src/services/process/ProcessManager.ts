@@ -7,7 +7,6 @@ export interface StreamProcess {
   pid: number;
   deviceId: string;
   startTime: Date;
-  player: string;
   process: ChildProcess;
 }
 
@@ -19,8 +18,6 @@ export class ProcessManager {
   private static instance: ProcessManager;
   private activeProcesses: Map<string, StreamProcess> = new Map();
   private scriptPath: string = "";
-  private appPath: string = "";
-  private useApp: boolean = false;
   private isCleaningUp: boolean = false;
 
   private constructor() {
@@ -32,39 +29,19 @@ export class ProcessManager {
     // Also check the direct src path
     const directSrcPath = join(process.cwd(), "src", "scripts", "nest-player.sh");
 
-    // Check for the Platypus app in various locations
-    const assetsAppPath = join(environment.assetsPath, "app", "Nest Camera Viewer.app");
-    const appPath = join(environment.assetsPath, "..", "dist", "Nest Camera Viewer.app");
-    const devAppPath = join(process.cwd(), "dist", "Nest Camera Viewer.app");
-
-    // Prefer using the app if it exists
-    if (existsSync(assetsAppPath)) {
-      this.appPath = assetsAppPath;
-      this.useApp = true;
-      console.log(`ProcessManager: Using app at ${this.appPath}`);
-    } else if (existsSync(appPath)) {
-      this.appPath = appPath;
-      this.useApp = true;
-      console.log(`ProcessManager: Using app at ${this.appPath}`);
-    } else if (existsSync(devAppPath)) {
-      this.appPath = devAppPath;
-      this.useApp = true;
-      console.log(`ProcessManager: Using app at ${this.appPath}`);
+    // Set the script path based on what exists
+    if (existsSync(assetsScriptPath)) {
+      this.scriptPath = assetsScriptPath;
+    } else if (existsSync(devScriptPath)) {
+      this.scriptPath = devScriptPath;
+    } else if (existsSync(directSrcPath)) {
+      this.scriptPath = directSrcPath;
     } else {
-      // Fall back to the script
-      if (existsSync(assetsScriptPath)) {
-        this.scriptPath = assetsScriptPath;
-      } else if (existsSync(devScriptPath)) {
-        this.scriptPath = devScriptPath;
-      } else if (existsSync(directSrcPath)) {
-        this.scriptPath = directSrcPath;
-      } else {
-        // Fallback to the original path
-        this.scriptPath = join(environment.supportPath, "src", "scripts", "nest-player.sh");
-      }
-
-      console.log(`ProcessManager: Using script at ${this.scriptPath}`);
+      // Fallback to the original path
+      this.scriptPath = join(environment.supportPath, "src", "scripts", "nest-player.sh");
     }
+
+    console.log(`ProcessManager: Using script at ${this.scriptPath}`);
 
     // Register cleanup on process exit
     process.on("exit", () => this.cleanup());
@@ -132,6 +109,46 @@ export class ProcessManager {
   }
 
   /**
+   * Find the FFplay executable path
+   */
+  private async findFFplayPath(): Promise<string | null> {
+    // First try the standard which command
+    try {
+      const { code, stdout } = await this.executeCommand("which", ["ffplay"]);
+      if (code === 0 && stdout.trim()) {
+        return stdout.trim();
+      }
+    } catch (error) {
+      console.error("Error finding FFplay path using 'which':", error);
+      // Continue with other checks
+    }
+
+    // Check common paths where FFplay might be installed
+    const commonPaths = ["/opt/homebrew/bin/ffplay", "/usr/local/bin/ffplay", "/usr/bin/ffplay"];
+
+    for (const path of commonPaths) {
+      try {
+        const { code } = await this.executeCommand("test", ["-x", path]);
+        if (code === 0) {
+          console.log(`FFplay found at: ${path}`);
+          return path;
+        }
+      } catch (error) {
+        console.error(`Error checking if FFplay exists at ${path}:`, error);
+        // Continue checking other paths
+      }
+    }
+
+    console.error("FFplay not found in any common locations");
+    return null;
+  }
+
+  private async isFFplayInstalled(): Promise<boolean> {
+    const ffplayPath = await this.findFFplayPath();
+    return ffplayPath !== null;
+  }
+
+  /**
    * Start an RTSP stream for a device
    * @param deviceId The ID of the device
    * @param rtspUrl The RTSP URL to stream
@@ -148,235 +165,153 @@ export class ProcessManager {
 
     console.log(`ProcessManager: Starting RTSP stream for device ${deviceId}`);
 
-    if (this.useApp) {
-      console.log(`ProcessManager: Using app: ${this.appPath}`);
+    // Check if FFplay is installed
+    const ffplayInstalled = await this.isFFplayInstalled();
+    if (!ffplayInstalled) {
+      const error = new Error("FFplay not found. Please install FFmpeg.");
+      console.error(`Error starting RTSP stream: ${error}`);
 
-      try {
-        // First, check if the app is already running and quit it
-        const isNestAppRunning = await this.isProcessRunning("Nest Camera Viewer");
-        if (isNestAppRunning) {
-          console.log("ProcessManager: Nest Camera Viewer is already running, quitting it first");
-          await this.executeCommand("osascript", [
-            "-e",
-            'if application "Nest Camera Viewer" is running then',
-            "-e",
-            'tell application "Nest Camera Viewer" to quit',
-            "-e",
-            "delay 1",
-            "-e",
-            "end if",
-          ]);
-        }
-
-        // Kill any existing FFplay processes
-        const isFFplayRunning = await this.isProcessRunning("ffplay");
-        if (isFFplayRunning) {
-          console.log("ProcessManager: FFplay is already running, killing it first");
-          await this.executeCommand("pkill", ["-f", "ffplay"]);
-          // Give it a moment to terminate
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-
-        // Start the app with the RTSP URL and camera name as arguments
-        // Using -n flag to ensure a new instance
-        const appProcess = spawn("open", ["-n", "-a", this.appPath, "--args", rtspUrl, cameraName], {
-          detached: true, // Allow the process to run independently
-          stdio: ["ignore", "pipe", "pipe"], // Capture stdout and stderr
-        });
-
-        // Create process record
-        const streamProcess: StreamProcess = {
-          pid: appProcess.pid!,
-          deviceId,
-          startTime: new Date(),
-          player: "Nest Camera Viewer",
-          process: appProcess,
-        };
-
-        // Store in active processes map
-        this.activeProcesses.set(deviceId, streamProcess);
-
-        // Handle process output
-        appProcess.stdout?.on("data", (data: Buffer) => {
-          console.log(`App launcher output: ${data.toString()}`);
-        });
-
-        appProcess.stderr?.on("data", (data: Buffer) => {
-          console.error(`App launcher error: ${data.toString()}`);
-        });
-
-        // Handle process exit
-        appProcess.on("exit", async (code: number | null) => {
-          console.log(`App launcher process exited with code ${code}`);
-          // Note: This only tracks the 'open' command process, not the actual app
-          // The app will continue running independently
-        });
-
-        // Use AppleScript to ensure the app is properly focused and FFplay doesn't show in dock
-        setTimeout(async () => {
-          try {
-            // Check if FFplay is running before trying to manipulate it
-            const isFFplayRunningNow = await this.isProcessRunning("ffplay");
-            if (!isFFplayRunningNow) {
-              console.log("ProcessManager: FFplay not found after app launch, stream may have failed to start");
-              return;
-            }
-
-            const { code, stderr } = await this.executeCommand("osascript", [
-              "-e",
-              'tell application "System Events"',
-              "-e",
-              'set nestApp to first application process whose name is "Nest Camera Viewer"',
-              "-e",
-              "set frontmost of nestApp to true",
-              "-e",
-              "end tell",
-              "-e",
-              "delay 0.5",
-              "-e",
-              'tell application "System Events"',
-              "-e",
-              'set ffplayProcess to first process whose name contains "ffplay"',
-              "-e",
-              "set visible of ffplayProcess to false",
-              "-e",
-              "end tell",
-            ]);
-
-            if (code !== 0) {
-              console.error(`Error focusing app: ${stderr}`);
-            }
-          } catch (error) {
-            console.error(`Error running focus script: ${error}`);
-          }
-        }, 2000);
-
-        return streamProcess;
-      } catch (error) {
-        console.error(`Error starting RTSP stream: ${error}`);
-
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stream Error",
-          message: "Failed to start stream. Check logs for details.",
-        });
-
-        throw error;
-      }
-    } else {
-      console.log(`ProcessManager: Using script: ${this.scriptPath}`);
-
-      // Check if the script exists
-      if (!existsSync(this.scriptPath)) {
-        const error = new Error(`Script not found at ${this.scriptPath}`);
-        console.error(`Error starting RTSP stream: ${error}`);
-
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Stream Error",
-          message: "Script not found. Please reinstall the extension.",
-        });
-
-        throw error;
-      }
-
-      // Make sure the script is executable
-      try {
-        const { code, stderr } = await this.executeCommand("chmod", ["+x", this.scriptPath]);
-        if (code !== 0) {
-          console.error(`Error making script executable: ${stderr}`);
-        }
-      } catch (error) {
-        console.error(`Error making script executable: ${error}`);
-        // Continue anyway, it might already be executable
-      }
-
-      // Start the FFplay process using our script
-      const process = spawn(this.scriptPath, [rtspUrl, cameraName], {
-        detached: true, // Allow the process to run independently
-        stdio: ["ignore", "pipe", "pipe"], // Capture stdout and stderr
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "FFplay Not Found",
+        message: "Please install FFmpeg using Homebrew",
+        primaryAction: {
+          title: "Install FFmpeg",
+          onAction: () => {
+            open("https://formulae.brew.sh/formula/ffmpeg");
+          },
+        },
       });
 
-      // Create process record
-      const streamProcess: StreamProcess = {
-        pid: process.pid!,
-        deviceId,
-        startTime: new Date(),
-        player: "ffplay",
-        process,
-      };
-
-      // Store in active processes map
-      this.activeProcesses.set(deviceId, streamProcess);
-
-      let errorOutput = "";
-      let hasStarted = false;
-
-      // Log process output
-      process.stdout?.on("data", (data) => {
-        const output = data.toString();
-        console.log(`FFplay output: ${output}`);
-
-        if (output.includes("Starting FFplay")) {
-          hasStarted = true;
-        }
-
-        if (output.includes("Error:")) {
-          errorOutput += output;
-        }
-      });
-
-      process.stderr?.on("data", (data) => {
-        const error = data.toString();
-        console.error(`FFplay error: ${error}`);
-        errorOutput += error;
-      });
-
-      // Handle process exit
-      process.on("exit", async (code) => {
-        console.log(`FFplay process exited with code ${code}`);
-        this.activeProcesses.delete(deviceId);
-
-        // If process exited with error and didn't start properly
-        if (code !== 0 && !hasStarted) {
-          console.error(`Stream failed to start: ${errorOutput}`);
-
-          if (errorOutput.includes("ffplay not found") || errorOutput.includes("FFplay not found")) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "FFplay Not Found",
-              message: "Please install FFmpeg using Homebrew",
-              primaryAction: {
-                title: "Install FFmpeg",
-                onAction: () => {
-                  open("https://formulae.brew.sh/formula/ffmpeg");
-                },
-              },
-            });
-          } else if (errorOutput.includes("Connection refused") || errorOutput.includes("Failed to connect")) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Connection Error",
-              message: "Failed to connect to camera. Check if it's online.",
-            });
-          } else if (errorOutput.includes("Invalid data")) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Stream Error",
-              message: "Invalid data received from camera.",
-            });
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Stream Error",
-              message: `Failed to start stream (code: ${code})`,
-            });
-          }
-        }
-      });
-
-      return streamProcess;
+      throw error;
     }
+
+    // Check if the script exists
+    if (!existsSync(this.scriptPath)) {
+      const error = new Error(`Script not found at ${this.scriptPath}`);
+      console.error(`Error starting RTSP stream: ${error}`);
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Stream Error",
+        message: "Script not found. Please reinstall the extension.",
+      });
+
+      throw error;
+    }
+
+    // Make sure the script is executable
+    try {
+      const { code, stderr } = await this.executeCommand("chmod", ["+x", this.scriptPath]);
+      if (code !== 0) {
+        console.error(`Error making script executable: ${stderr}`);
+      }
+    } catch (error) {
+      console.error(`Error making script executable: ${error}`);
+      // Continue anyway, it might already be executable
+    }
+
+    // Kill any existing FFplay processes to avoid conflicts
+    const isFFplayRunning = await this.isProcessRunning("ffplay");
+    if (isFFplayRunning) {
+      console.log("ProcessManager: FFplay is already running, killing it first");
+      await this.executeCommand("pkill", ["-f", "ffplay"]);
+      // Give it a moment to terminate
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    // Start the FFplay process using our script
+    const ffplayPath = await this.findFFplayPath();
+    if (!ffplayPath) {
+      const error = new Error("FFplay not found. Please install FFmpeg.");
+      console.error(`Error starting RTSP stream: ${error}`);
+      throw error;
+    }
+
+    console.log(`Using FFplay at: ${ffplayPath}`);
+    const process = spawn(this.scriptPath, [rtspUrl, cameraName, `--ffplay-path=${ffplayPath}`], {
+      detached: true, // Allow the process to run independently
+      stdio: ["ignore", "pipe", "pipe"], // Capture stdout and stderr
+    });
+
+    // Create process record
+    const streamProcess: StreamProcess = {
+      pid: process.pid!,
+      deviceId,
+      startTime: new Date(),
+      process,
+    };
+
+    // Store in active processes map
+    this.activeProcesses.set(deviceId, streamProcess);
+
+    let errorOutput = "";
+    let hasStarted = false;
+
+    // Log process output
+    process.stdout?.on("data", (data) => {
+      const output = data.toString();
+      console.log(`FFplay output: ${output}`);
+
+      if (output.includes("Starting FFplay")) {
+        hasStarted = true;
+      }
+
+      if (output.includes("Error:")) {
+        errorOutput += output;
+      }
+    });
+
+    process.stderr?.on("data", (data) => {
+      const error = data.toString();
+      console.error(`FFplay error: ${error}`);
+      errorOutput += error;
+    });
+
+    // Handle process exit
+    process.on("exit", async (code) => {
+      console.log(`FFplay process exited with code ${code}`);
+      this.activeProcesses.delete(deviceId);
+
+      // If process exited with error and didn't start properly
+      if (code !== 0 && !hasStarted) {
+        console.error(`Stream failed to start: ${errorOutput}`);
+
+        if (errorOutput.includes("ffplay not found") || errorOutput.includes("FFplay not found")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "FFplay Not Found",
+            message: "Please install FFmpeg using Homebrew",
+            primaryAction: {
+              title: "Install FFmpeg",
+              onAction: () => {
+                open("https://formulae.brew.sh/formula/ffmpeg");
+              },
+            },
+          });
+        } else if (errorOutput.includes("Connection refused") || errorOutput.includes("Failed to connect")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Connection Error",
+            message: "Failed to connect to camera. Check if it's online.",
+          });
+        } else if (errorOutput.includes("Invalid data")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stream Error",
+            message: "Invalid data received from camera.",
+          });
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stream Error",
+            message: `Failed to start stream (code: ${code})`,
+          });
+        }
+      }
+    });
+
+    return streamProcess;
   }
 
   /**
@@ -406,78 +341,17 @@ export class ProcessManager {
         // Process may already be terminated, which is fine
       }
 
-      // If we're using the app, we need to quit it as well
-      if (this.useApp && process.player === "Nest Camera Viewer") {
-        console.log(`ProcessManager: Quitting Nest Camera Viewer app`);
+      // Check if FFplay is still running
+      const isFFplayRunning = await this.isProcessRunning("ffplay");
+      if (isFFplayRunning) {
+        console.log("ProcessManager: FFplay is still running, attempting to terminate it");
 
-        // First try to quit the app gracefully
-        const { code: quitCode, stderr: quitError } = await this.executeCommand("osascript", [
-          "-e",
-          'tell application "Nest Camera Viewer" to quit',
-        ]);
+        // First try SIGTERM
+        const { code: killCode } = await this.executeCommand("pkill", ["-f", "ffplay"]);
 
-        if (quitCode !== 0) {
-          console.error(`Error quitting app: ${quitError}`);
-        }
-
-        // Check if FFplay is still running
-        const isFFplayRunning = await this.isProcessRunning("ffplay");
-        if (isFFplayRunning) {
-          console.log("ProcessManager: FFplay is still running, attempting to terminate it");
-
-          // First try SIGTERM
-          const { code: killCode } = await this.executeCommand("pkill", ["-f", "ffplay"]);
-
-          if (killCode !== 0) {
-            console.log("ProcessManager: Failed to terminate FFplay with SIGTERM, trying SIGKILL");
-            await this.executeCommand("pkill", ["-9", "-f", "ffplay"]);
-          }
-        }
-
-        // Check if Nest Camera Viewer is still running
-        const isNestAppRunning = await this.isProcessRunning("Nest Camera Viewer");
-        if (isNestAppRunning) {
-          console.log("ProcessManager: Nest Camera Viewer is still running, attempting to force quit");
-          await this.executeCommand("pkill", ["-9", "-f", "Nest Camera Viewer"]);
-        }
-
-        // Reset FFplay dock settings to default
-        try {
-          // Get all possible FFplay bundle IDs
-          const bundleIds = ["org.ffmpeg.ffplay"];
-
-          // Try to find the actual bundle ID using AppleScript
-          const { stdout: bundleIdOutput } = await this.executeCommand("osascript", [
-            "-e",
-            "try",
-            "-e",
-            'id of app "ffplay"',
-            "-e",
-            "on error",
-            "-e",
-            'return ""',
-            "-e",
-            "end try",
-          ]);
-
-          const customBundleId = bundleIdOutput.trim();
-          if (customBundleId && !bundleIds.includes(customBundleId)) {
-            bundleIds.push(customBundleId);
-          }
-
-          // Reset settings for all possible bundle IDs
-          for (const bundleId of bundleIds) {
-            if (!bundleId) continue;
-
-            console.log(`ProcessManager: Resetting dock settings for ${bundleId}`);
-            await this.executeCommand("defaults", ["delete", bundleId, "LSUIElement"]);
-            await this.executeCommand("defaults", ["delete", bundleId, "LSBackgroundOnly"]);
-          }
-
-          // Restart the Dock to clear any cached icons
-          await this.executeCommand("killall", ["Dock"]);
-        } catch (error) {
-          console.error(`Error resetting FFplay dock settings: ${error}`);
+        if (killCode !== 0) {
+          console.log("ProcessManager: Failed to terminate FFplay with SIGTERM, trying SIGKILL");
+          await this.executeCommand("pkill", ["-9", "-f", "ffplay"]);
         }
       }
 
@@ -509,6 +383,17 @@ export class ProcessManager {
       } catch (error) {
         console.error(`Error cleaning up process for device ${deviceId}: ${error}`);
       }
+    }
+
+    // Make sure all FFplay processes are terminated
+    try {
+      const isFFplayRunning = await this.isProcessRunning("ffplay");
+      if (isFFplayRunning) {
+        console.log("ProcessManager: FFplay processes still running, force killing them");
+        await this.executeCommand("pkill", ["-9", "-f", "ffplay"]);
+      }
+    } catch (error) {
+      console.error(`Error killing FFplay processes: ${error}`);
     }
 
     // Clear the map
