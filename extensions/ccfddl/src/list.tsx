@@ -1,18 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Item } from "./types";
-
-function getMarkdownTable(item: Item) {
-  // turn the item into a markdown table
-  return `
-    **Next Conference**
-    | Information | Value |
-    | ----------- | ----- |
-    | Date | ${item.confs?.[0].date || "Not announced"} |
-    | Location | ${item.confs?.[0].place || "Not announced"} |
-    | Deadline | ${item.confs?.[0].timeline?.[0]?.deadline || "Not announced"} |
-    | Website | ${item.confs?.[0].link ? `[${item.confs?.[0].link}](${item.confs?.[0].link})` : "Not announced"} |
-  `;
-}
+import { getMarkdownTable } from "./utils";
 
 export function renderListItem(item: Item, isShowingDetail: boolean, setIsShowingDetail: (showing: boolean) => void) {
   // Get the most recent conference
