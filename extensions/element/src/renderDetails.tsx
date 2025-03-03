@@ -1,9 +1,12 @@
 import dedent from "dedent-js";
 import { SingleElement } from "./interfaces/element";
+import { getPreferenceValues } from "@raycast/api";
 
 const NL = "  \n";
 
 export const renderDetails = (item: SingleElement) => {
+  const { decimalPlaces } = getPreferenceValues<{ decimalPlaces: string }>();
+
   return dedent(`
     ## ${item.name}
 
@@ -11,7 +14,9 @@ export const renderDetails = (item: SingleElement) => {
 
     Symbol: **${item.symbol}**
 
-    Atomic Mass: **${item.atomic_mass}**
+    Atomic Number: **${item.number}**
+
+    Atomic Mass: **${item.atomic_mass.toFixed(parseInt(decimalPlaces))}**
 
     Electron Configuration: **${item.electron_configuration_semantic}**
 
