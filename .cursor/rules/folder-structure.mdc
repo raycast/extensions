@@ -1,0 +1,20 @@
+---
+description: Guidelines to folder structure
+globs: 
+alwaysApply: false
+---
+
+# Project Folder Structure
+
+│── /src                   # Main source code
+│   │── /api               # Firebase service calls (Firestore, Auth, etc.)
+│   │── /commands          # Raycast command implementations
+│   │── /hooks             # Custom hooks (if needed)
+│   │── /utils             # Helper functions (date formatting, etc.)
+│   │── index.ts           # Entry point for the extension
+│── /config                # Configuration files (Firebase setup, API keys)
+│── /types                 # TypeScript types and interfaces
+│── package.json           # Dependencies and scripts
+│── tsconfig.json          # TypeScript configuration
+│── .env                   # Environment variables (service account keys)
+│── README.md              # Project documentation
