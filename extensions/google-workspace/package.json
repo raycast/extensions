@@ -84,7 +84,7 @@
     },
     {
       "name": "open-google-drive-home",
-      "title": "Google Drive Home",
+      "title": "Open Google Drive Home",
       "description": "Open Google Drive in your default browser.",
       "icon": "google-drive.png",
       "mode": "no-view",
