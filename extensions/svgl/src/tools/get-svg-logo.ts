@@ -9,7 +9,12 @@ type Input = {
 };
 
 const tool = async ({ name, wordmark, color = "light" }: Input) => {
-  const svgs = (await fetchSvgs()) as Svg[];
+  let svgs;
+  try {
+    svgs = (await fetchSvgs()) as Svg[];
+  } catch (error) {
+    return `Failed to fetch SVGs: ${error}`;
+  }
   const filteredSvgs = svgs.filter((svg) => svg.title.toLowerCase() === name.toLowerCase());
 
   if (filteredSvgs.length === 0) {
@@ -24,9 +29,17 @@ const tool = async ({ name, wordmark, color = "light" }: Input) => {
         return `No wordmark SVG found for ${name}`;
       }
       if (typeof svg.wordmark === "string") {
-        svgContent = await fetchSvg(svg.wordmark);
+        try {
+          svgContent = await fetchSvg(svg.wordmark);
+        } catch (error) {
+          return `Failed to fetch wordmark SVG: ${error}`;
+        }
       } else if (color && color in svg.wordmark) {
-        svgContent = await fetchSvg(svg.wordmark[color]);
+        try {
+          svgContent = await fetchSvg(svg.wordmark[color]);
+        } catch (error) {
+          return `Failed to fetch ${color} wordmark SVG: ${error}`;
+        }
       } else {
         return `No ${color || "specified"} wordmark SVG found for ${name}`;
       }

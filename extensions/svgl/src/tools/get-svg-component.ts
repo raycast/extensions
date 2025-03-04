@@ -48,8 +48,12 @@ const tool = async ({ name, color, framework, lang }: Input) => {
       return `No ${color || "default"} SVG found for ${name}.`;
     }
 
-    const svgContent = await fetchSvg(svgUrl);
-    await Clipboard.copy(svgContent);
+    try {
+      const svgContent = await fetchSvg(svgUrl);
+      await Clipboard.copy(svgContent);
+    } catch (error) {
+      return `❌ Failed to fetch SVG: ${(error as Error).message}`;
+    }
     return `✅ ${name} SVG ${framework} component copied to clipboard!`;
   };
 
