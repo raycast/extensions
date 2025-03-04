@@ -12,16 +12,6 @@
     "Web"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "defaultSearchEngine",
-      "title": "Default Search Engine",
-      "description": "The default search engine to use when no bang is provided.",
-      "type": "textfield",
-      "default": "g",
-      "required": true
-    }
-  ],
   "keywords": [
     "unduck",
     "duckduckgo",
@@ -33,11 +23,10 @@
       "title": "Search the Web",
       "keywords": [
         "search",
-        "bang",
-        "!"
+        "bang"
       ],
-      "subtitle": "Search the Web using DuckDuckGo !Bangs",
-      "description": "Search the Web using any of the available search engines. Powered by DuckDuckGo !Bangs",
+      "subtitle": "Search the Web using DuckDuckGo Bangs",
+      "description": "Search the Web using any of the available search engines. Powered by DuckDuckGo Bangs",
       "mode": "no-view",
       "arguments": [
         {

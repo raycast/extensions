@@ -1,9 +1,8 @@
-import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { open } from "@raycast/api";
 import { searchEngines } from "./data/search-engines";
-
-const defaultSearchEngineKey = getPreferenceValues<{ defaultSearchEngine: string }>().defaultSearchEngine;
-const defaultSearchEngine = searchEngines.find((engine) => engine.t === defaultSearchEngineKey);
+import { showFailureToast } from "@raycast/utils";
+import { getDefaultSearchEngine } from "./data/cache";
 
 export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
   try {
@@ -11,7 +10,9 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
     const match = query.trim().match(/!(\S+)/i);
     const searchEngineKey = match?.[1]?.toLowerCase();
 
-    const searchEngine = searchEngines.find((engine) => engine.t === searchEngineKey) ?? defaultSearchEngine;
+    const searchEngine =
+      (searchEngineKey && searchEngines.find((engine) => engine.t === searchEngineKey)) || getDefaultSearchEngine();
+
     if (!searchEngine) {
       await showToast({
         style: Toast.Style.Failure,
@@ -24,10 +25,6 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
     const searchUrl = searchEngine.u.replace("{{{s}}}", encodeURIComponent(cleanQuery).replace(/%2F/g, "/"));
     await open(searchUrl);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Unexpected Error",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error);
   }
 }

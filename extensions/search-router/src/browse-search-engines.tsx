@@ -1,20 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-  openExtensionPreferences,
-  showHUD,
-  Clipboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { SearchEngine, searchEngines } from "./data/search-engines";
+import { useDefaultSearchEngine } from "./data/cache";
 
 export default function BrowseSearchEngines() {
   const [searchText, setSearchText] = useState("");
-  const defaultSearchEngineKey = getPreferenceValues<{ defaultSearchEngine: string }>().defaultSearchEngine;
 
+  const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
   const filteredSearchEngines = useMemo(() => {
     const trimmedSearch = searchText.trim();
     return searchEngines
@@ -24,9 +16,11 @@ export default function BrowseSearchEngines() {
   }, [searchText]);
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
-    await Clipboard.copy(`${searchEngine.t}`);
-    showHUD(`Shortcut for ${searchEngine.s} copied to clipboard`);
-    await openExtensionPreferences();
+    setDefaultSearchEngine(searchEngine);
+    showToast({
+      title: `Default search engine set to ${searchEngine.s}`,
+      message: `!${searchEngine.t}`,
+    });
   };
 
   return (
@@ -34,20 +28,21 @@ export default function BrowseSearchEngines() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Browse search engines by shortcut or name..."
       throttle
+      isLoading={false}
     >
-      {filteredSearchEngines?.map((searchEngine) => (
+      {filteredSearchEngines.map((searchEngine) => (
         <List.Item
           key={searchEngine.t}
           title={searchEngine.s}
           subtitle={`!${searchEngine.t}`}
           accessories={[
-            { text: searchEngine.t === defaultSearchEngineKey ? "Default" : "" },
-            { icon: searchEngine.t === defaultSearchEngineKey ? Icon.CheckCircle : undefined },
+            { text: searchEngine.t === defaultSearchEngine?.t ? "Default" : "" },
+            { icon: searchEngine.t === defaultSearchEngine?.t ? Icon.CheckCircle : undefined },
           ]}
           actions={
             <ActionPanel>
+              <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
               <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
-              <Action title="Copy and Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
               <Action.CopyToClipboard title="Copy Search Engine Shortcut" content={`!${searchEngine.t}`} />
             </ActionPanel>
           }
