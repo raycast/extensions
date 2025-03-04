@@ -7,6 +7,7 @@ import { Delivery } from "../delivery";
 const cache = new Cache();
 const cacheKey = "upsLogin";
 const host = "onlinetools.ups.com";
+const deliveredStatusCode = "011";
 
 export async function ableToTrackUpsRemotely(): Promise<boolean> {
   const preferences = getPreferenceValues<Preferences.TrackDeliveries>();
@@ -169,7 +170,7 @@ function convertUpsTrackingToPackages(upsTrackingInfo: UpsTrackingInfo): Package
       const scheduledDeliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "SDD")?.date;
 
       return {
-        delivered: aPackage.currentStatus.code === "011",
+        delivered: aPackage.currentStatus.code === deliveredStatusCode,
         deliveryDate: convertUpsDateToDate(deliveryDate || rescheduledDeliveryDate || scheduledDeliveryDate),
         activity: [],
       };
