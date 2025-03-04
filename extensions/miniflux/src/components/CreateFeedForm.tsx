@@ -25,7 +25,7 @@ const CreateFeedForm = ({ feeds, categoryId }: FromType) => {
       await apiServer.createFeed({ ...remainingSettings, category_id: Number(categoryId) });
 
       setIsLoading(false);
-      showToast(Toast.Style.Animated, "Subscribed!");
+      showToast(Toast.Style.Success, "Subscribed");
     } catch (error) {
       handleError(error as MinifluxApiError);
       setIsLoading(false);

@@ -1,5 +1,8 @@
 # Google Chrome Changelog
 
+## [Add Copy Title action for Search Tab] - 2025-02-11
+- Add Copy Title action for Search Tab command.
+
 ## [Add AI Tools] - 2025-02-21
 
 ## [Allow to configure profile path] - 2025-01-18
