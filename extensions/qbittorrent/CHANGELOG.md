@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2025-03-04
 
 - Improved error handling for qBittorrent Web UI connection issues
 - Enhanced extension and command descriptions for better clarity
