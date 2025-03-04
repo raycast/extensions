@@ -31,7 +31,7 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
 
       const openai = new OpenAI({
         baseURL: ollamaEndpoint,
-        apiKey: "ollama", // Ollama doesn't require an API key
+        apiKey: "ollama", // required but unused by Ollama
       });
 
       setQuestions((prevQuestions) => [
@@ -43,29 +43,30 @@ export function useOllamaFollowUpQuestion({ setQuestions, setQuestion, transcrip
         ...prevQuestions,
       ]);
 
-      const stream = openai.beta.chat.completions.stream({
-        model: ollamaModel || "llama2",
-        messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
-        stream: true,
-      });
+      try {
+        const stream = openai.chat.completions.create({
+          model: ollamaModel || "llama2",
+          messages: [{ role: "user", content: getFollowUpQuestionSnippet(question, transcript) }],
+          stream: true,
+        });
 
-      stream.on("content", (delta) => {
-        toast.show();
-        setQuestions((prevQuestions) =>
-          prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
-        );
-      });
+        for await (const chunk of await stream) {
+          const delta = chunk.choices[0]?.delta?.content || "";
+          if (delta) {
+            toast.show();
+            setQuestions((prevQuestions) =>
+              prevQuestions.map((q) => (q.id === qID ? { ...q, answer: q.answer + delta } : q)),
+            );
+          }
+        }
 
-      stream.finalChatCompletion().then(() => {
         toast.hide();
         setQuestion("");
-      });
-
-      stream.on("error", (error) => {
+      } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = ALERT.title;
-        toast.message = error.message;
-      });
+        toast.message = error instanceof Error ? error.message : "An unknown error occurred";
+      }
     };
 
     handleAdditionalQuestion();
