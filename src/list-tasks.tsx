@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, ActionPanel, Action, Toast, showToast, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Toast, showToast, Icon } from "@raycast/api";
 import { getMotionApiClient, Project } from "./api/motion";
 
 // Define task types
@@ -53,16 +53,16 @@ export default function Command() {
       });
 
       setTasks(sortedTasks);
-      
+
       // Extract unique labels
       const uniqueLabels = new Set<string>();
-      sortedTasks.forEach(task => {
+      sortedTasks.forEach((task) => {
         if (task.label) {
           uniqueLabels.add(task.label);
         }
       });
       setLabels(Array.from(uniqueLabels).sort());
-      
+
       // Apply initial filters
       filterTasks(sortedTasks);
     } catch (error) {
@@ -102,7 +102,7 @@ export default function Command() {
       filtered = filtered.filter(
         (task) =>
           task.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          (task.description && task.description.toLowerCase().includes(searchText.toLowerCase()))
+          (task.description && task.description.toLowerCase().includes(searchText.toLowerCase())),
       );
     }
 
@@ -117,24 +117,6 @@ export default function Command() {
     }
 
     setFilteredTasks(filtered);
-  }
-
-  // Format priority for display
-  function formatPriority(priority?: string): string {
-    if (!priority) return "None";
-
-    switch (priority) {
-      case "ASAP":
-        return "ASAP";
-      case "HIGH":
-        return "High";
-      case "MEDIUM":
-        return "Medium";
-      case "LOW":
-        return "Low";
-      default:
-        return String(priority);
-    }
   }
 
   // Format date for display
@@ -225,7 +207,7 @@ export default function Command() {
           onChange={(value) => {
             // Parse the filter type and value
             const [type, filterValue] = value.split(":");
-            
+
             if (type === "label") {
               setSelectedLabel(filterValue === "all" ? null : filterValue);
               // Reset project filter if a label is selected
@@ -242,22 +224,18 @@ export default function Command() {
           <List.Dropdown.Section title="Filter Type">
             <List.Dropdown.Item title="All Tasks" value="all" />
           </List.Dropdown.Section>
-          
+
           <List.Dropdown.Section title="By Label">
             <List.Dropdown.Item title="All Labels" value="label:all" />
             {labels.map((label) => (
               <List.Dropdown.Item key={`label-${label}`} title={label} value={`label:${label}`} />
             ))}
           </List.Dropdown.Section>
-          
+
           <List.Dropdown.Section title="By Project">
             <List.Dropdown.Item title="All Projects" value="project:all" />
             {projects.map((project) => (
-              <List.Dropdown.Item 
-                key={`project-${project.id}`} 
-                title={project.name} 
-                value={`project:${project.id}`} 
-              />
+              <List.Dropdown.Item key={`project-${project.id}`} title={project.name} value={`project:${project.id}`} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -295,32 +273,29 @@ export default function Command() {
                 { text: task.label, icon: task.label ? Icon.Tag : undefined },
                 { text: getProjectName(task.projectId) },
                 { text: formatDate(task.dueDate), icon: Icon.Calendar },
-                { 
-                  tag: { 
-                    value: formatStatus(task.status), 
-                    color: getStatusColor(task.status)
-                  } 
+                {
+                  tag: {
+                    value: formatStatus(task.status),
+                    color: getStatusColor(task.status),
+                  },
                 },
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser 
-                    title="Open in Motion" 
-                    url={`https://app.usemotion.com/tasks/${task.id}`} 
-                  />
-                  <Action.CopyToClipboard 
-                    title="Copy Task ID" 
-                    content={String(task.id)} 
+                  <Action.OpenInBrowser title="Open in Motion" url={`https://app.usemotion.com/tasks/${task.id}`} />
+                  <Action.CopyToClipboard
+                    title="Copy Task Id"
+                    content={String(task.id)}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
-                  <Action.CopyToClipboard 
-                    title="Copy Task Details" 
-                    content={JSON.stringify(task, null, 2)} 
+                  <Action.CopyToClipboard
+                    title="Copy Task Details"
+                    content={JSON.stringify(task, null, 2)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   />
-                  <Action 
-                    title="Refresh Tasks" 
-                    onAction={loadTasks} 
+                  <Action
+                    title="Refresh Tasks"
+                    onAction={loadTasks}
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
@@ -332,4 +307,4 @@ export default function Command() {
       </List.Section>
     </List>
   );
-} 
+}
