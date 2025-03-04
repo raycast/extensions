@@ -79,7 +79,17 @@
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "quick-add-task",
@@ -91,7 +101,6 @@
         {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
-          "title": "Advanced",
           "label": "Close window immediately",
           "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
           "default": false,
@@ -202,7 +211,6 @@
         {
           "name": "showTaskCount",
           "type": "checkbox",
-          "title": "Advanced",
           "label": "Show the task count besides the project",
           "description": "When enabled, you can see the task count besides your project.",
           "default": false,

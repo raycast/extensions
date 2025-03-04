@@ -133,17 +133,3 @@ export const groupHistoryByDay = (groups: Map<string, HistoryItem[]>, entry: His
   groups.set(date, group);
   return groups;
 };
-
-export async function getCurrentTabName() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return name of front document`);
-}
-
-export async function getCurrentTabURL() {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return URL of front document`);
-}
-
-export type ContentType = "text" | "source";
-
-export async function getCurrentTabContents(type: ContentType) {
-  return await runAppleScript(`tell application "${safariAppIdentifier}" to return ${type} of front document`);
-}
