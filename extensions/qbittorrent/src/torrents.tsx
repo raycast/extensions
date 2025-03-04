@@ -65,15 +65,17 @@ export default function Torrents() {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load torrents",
-        message: "Please check your preferences.",
+        title: "Failed to connect to qBittorrent",
+        message: "Please check your Web UI settings and make sure qBittorrent is running.",
       });
-    }
-    setLoading(false);
-    if (+timeout) {
-      updateTimeout = setTimeout(() => {
-        setUpdateTimestamp(+new Date());
-      }, +timeout * 1000);
+      setTorrents([]);
+    } finally {
+      setLoading(false);
+      if (+timeout) {
+        updateTimeout = setTimeout(() => {
+          setUpdateTimestamp(+new Date());
+        }, +timeout * 1000);
+      }
     }
   };
 
