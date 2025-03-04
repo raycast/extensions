@@ -1,7 +1,7 @@
 # EasyVariable Changelog
 
 
-## [1.0.0] - 2025-02-24
+## [1.0.0] - {PR_MERGE_DATE}
 - Optimize interaction experience
 - Support Raycast Pro AI
 
