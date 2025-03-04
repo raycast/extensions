@@ -82,7 +82,7 @@ async function login(clientId: string, clientSecret: string): Promise<LoginRespo
   const response = await fetch(`https://${host}/security/v1/oauth/token`, {
     method: "POST",
     headers: {
-      Authorization: "Basic " + btoa(clientId + ":" + clientSecret),
+      Authorization: "Basic " + Buffer.from(clientId + ":" + clientSecret).toString("base64"),
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
