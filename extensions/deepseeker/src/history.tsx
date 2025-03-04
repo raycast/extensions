@@ -167,7 +167,14 @@ function HistoryListItem({
 }
 
 export default function History() {
-  const [historyItems] = useState<HistoryItem[]>(getHistory());
+  const [historyItems] = useState<HistoryItem[]>(() => {
+    try {
+      return getHistory();
+    } catch (error) {
+      console.error('Failed to load history:', error);
+      return [];
+    }
+  });
   const [isShowingDetail, setIsShowingDetail] = useState(true);
 
   return (
