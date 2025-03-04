@@ -100,57 +100,37 @@ export function HarmonyCommand(): React.ReactElement {
 
   // Handle view transitions based on state
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     // If we have a selected hub but no devices are showing, switch to hubs view
     if (!selectedHub && currentView !== View.HUBS) {
       info("No hub selected, switching to hubs view");
-      timeoutId = setTimeout(() => {
-        viewStore.changeView(View.HUBS);
-      }, 0);
+      viewStore.changeView(View.HUBS);
     }
     // If we have a selected hub and devices, switch from hubs view
     else if (selectedHub && devices.length > 0 && currentView === View.HUBS) {
       info("Hub selected with devices, switching from hubs view");
-      timeoutId = setTimeout(() => {
-        viewStore.changeView(View.DEVICES);
-      }, 0);
+      viewStore.changeView(View.DEVICES);
     }
 
-    // Cleanup timeout on unmount or deps change
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    // No cleanup needed since we removed timeouts
+    return () => {};
   }, [selectedHub, devices.length, currentView, viewStore]);
 
   // Handle device detail view transitions
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     if (currentView === View.DEVICE_DETAIL && !selectedDevice) {
       info("No device selected, switching to devices view");
-      timeoutId = setTimeout(() => {
-        viewStore.changeView(View.DEVICES);
-      }, 0);
+      viewStore.changeView(View.DEVICES);
     }
 
-    // Cleanup timeout on unmount or deps change
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    // No cleanup needed since we removed timeouts
+    return () => {};
   }, [currentView, selectedDevice, viewStore]);
 
   // Memoize device selection handler
   const handleDeviceSelect = useCallback(
     (device: HarmonyDevice) => {
       debug("Device selected", { device: device.name });
-      setTimeout(() => {
-        viewStore.selectDevice(device);
-      }, 0);
+      viewStore.selectDevice(device);
     },
     [viewStore]
   );

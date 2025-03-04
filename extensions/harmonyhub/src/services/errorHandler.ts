@@ -4,11 +4,10 @@
  * @module
  */
 
-import { showToast, Toast } from "@raycast/api";
-
 import { HarmonyError, ErrorCategory, ErrorSeverity, ErrorRecoveryAction } from "../types/core/errors";
 
 import { logError } from "./logger";
+import { ToastManager } from "./toast";
 
 /**
  * Configuration for error handling
@@ -115,17 +114,13 @@ export class ErrorHandler {
 
   /**
    * Show an error toast to the user.
-   * Displays user-friendly error information.
+   * Uses ToastManager for consistent error display.
    * @param error - The error to display
    * @private
    */
   private static showErrorToast(error: HarmonyError): void {
     const title = ErrorHandler.getCategoryTitle(error.category);
-    showToast({
-      style: Toast.Style.Failure,
-      title,
-      message: error.message,
-    });
+    ToastManager.error(title, error.message);
   }
 
   /**
@@ -211,25 +206,15 @@ export class ErrorHandler {
    */
   static showSuccess(title: string, message?: string): void {
     if (!ErrorHandler.config.showToasts) return;
-
-    showToast({
-      style: Toast.Style.Success,
-      title,
-      message,
-    });
+    ToastManager.success(title, message);
   }
 
   /**
-   * Show a warning toast
+   * Show a warning toast using ToastManager
    */
   static showWarning(title: string, message?: string): void {
     if (!ErrorHandler.config.showToasts) return;
-
-    showToast({
-      style: Toast.Style.Failure,
-      title,
-      message,
-    });
+    ToastManager.warning(title, message);
   }
 
   /**
@@ -237,11 +222,6 @@ export class ErrorHandler {
    */
   static showLoading(title: string, message?: string): void {
     if (!ErrorHandler.config.showToasts) return;
-
-    showToast({
-      style: Toast.Style.Animated,
-      title,
-      message,
-    });
+    ToastManager.loading(title, message);
   }
 }

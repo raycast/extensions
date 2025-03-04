@@ -2,7 +2,7 @@
 
 All notable changes to the Harmony Control extension will be documented in this file.
 
-## [1.0.0] - 2025-02-07
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - Initial release of Harmony Control extension

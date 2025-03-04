@@ -5,12 +5,13 @@
  */
 
 import { Explorer } from "@harmonyhub/discover";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 import { HarmonyClient } from "../../services/harmony/harmonyClient";
 import { HarmonyError, ErrorCategory } from "../../types/core/errors";
 import { HarmonyHub } from "../../types/core/harmony";
 import { debug, error, info, warn } from "../logger";
+import { ToastManager } from "../toast";
 
 /** Discovery timeout in milliseconds */
 const DISCOVERY_TIMEOUT = 5000;
@@ -171,11 +172,7 @@ export class HarmonyManager {
           if (verifiedHubs.length === 1) {
             const hub = verifiedHubs[0];
             if (hub) {
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Auto-connecting to Hub",
-                message: `Found single Harmony Hub: ${hub.name}`,
-              });
+              await ToastManager.success("Auto-connecting to Hub", `Found single Harmony Hub: ${hub.name}`);
             }
           }
           onProgress?.(1, `Found ${verifiedHubs.length} hub(s)`);

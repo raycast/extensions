@@ -75,14 +75,14 @@ export function useActivityFiltering(): ActivityFilteringResult {
     const byType = new Map<string, HarmonyActivity[]>();
 
     filteredActivities.forEach((activity) => {
-      const activities = byType.get(activity.type) || [];
-      activities.push(activity);
-      byType.set(activity.type, activities);
+      const typeActivities = byType.get(activity.type) || [];
+      typeActivities.push(activity);
+      byType.set(activity.type, typeActivities);
     });
 
     // Sort activities within each type
-    byType.forEach((activities) => {
-      activities.sort((a, b) => {
+    byType.forEach((typeActivities) => {
+      typeActivities.sort((a, b) => {
         // Put current activity first
         if (a.id === currentActivity?.id) return -1;
         if (b.id === currentActivity?.id) return 1;

@@ -21,6 +21,15 @@
   ],
   "preferences": [
     {
+      "name": "autoConnect",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Connect",
+      "description": "Automatically connect to the first discovered hub",
+      "default": true,
+      "label": "Enable Auto Connect"
+    },
+    {
       "name": "defaultView",
       "type": "dropdown",
       "required": false,

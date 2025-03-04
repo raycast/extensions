@@ -5,6 +5,7 @@
  */
 
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { error, info } from "./logger";
 
@@ -61,7 +62,7 @@ export class ToastManager {
 
   /**
    * Show an error toast.
-   * Displays an error message with optional details.
+   * Displays an error message with optional details using showFailureToast.
    * @param title - Toast title
    * @param message - Optional toast message
    */
@@ -70,11 +71,21 @@ export class ToastManager {
       error(`Error: ${title}${message ? ` - ${message}` : ""}`);
     }
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-      message,
-    });
+    await showFailureToast({ title, message });
+  }
+
+  /**
+   * Show a warning toast.
+   * Displays a warning message with optional details using showFailureToast.
+   * @param title - Toast title
+   * @param message - Optional toast message
+   */
+  static async warning(title: string, message?: string): Promise<void> {
+    if (ToastManager.config.logToasts) {
+      info(`Warning: ${title}${message ? ` - ${message}` : ""}`);
+    }
+
+    await showFailureToast({ title, message });
   }
 
   /**

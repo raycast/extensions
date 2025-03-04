@@ -56,7 +56,7 @@ interface CommandExecutionResult {
  */
 export function useCommandExecution(): CommandExecutionResult {
   const { executeCommand } = useHarmony();
-  const [state] = useState<CommandExecutionState>({
+  const [state, setState] = useState<CommandExecutionState>({
     isExecuting: false,
     lastCommand: null,
     error: null,
@@ -75,6 +75,8 @@ export function useCommandExecution(): CommandExecutionResult {
    */
   const execute = useCallback(
     async (command: HarmonyCommand) => {
+      setState(prev => ({ ...prev, isExecuting: true, lastCommand: command, error: null }));
+      
       try {
         let retries = 0;
         let success = false;
@@ -93,6 +95,7 @@ export function useCommandExecution(): CommandExecutionResult {
           }
         }
 
+        setState(prev => ({ ...prev, isExecuting: false }));
         ToastManager.success(`Executed ${command.label}`);
       } catch (error) {
         const harmonyError = new HarmonyError(
@@ -101,6 +104,7 @@ export function useCommandExecution(): CommandExecutionResult {
           error instanceof Error ? error : undefined
         );
 
+        setState(prev => ({ ...prev, isExecuting: false, error: harmonyError }));
         ToastManager.error(`Failed to execute ${command.label}`, harmonyError.message);
       }
     },

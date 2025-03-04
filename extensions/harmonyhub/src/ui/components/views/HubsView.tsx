@@ -23,6 +23,24 @@ interface HubsViewProps {
 }
 
 /**
+ * Determines if the view is in a loading state based on the current stage
+ * @param stage - Current HarmonyStage
+ * @returns boolean indicating if the view is loading
+ */
+function isViewLoading(stage: HarmonyStage): boolean {
+  const loadingStages = [
+    HarmonyStage.CONNECTING,
+    HarmonyStage.LOADING_DEVICES,
+    HarmonyStage.LOADING_ACTIVITIES,
+    HarmonyStage.STARTING_ACTIVITY,
+    HarmonyStage.STOPPING_ACTIVITY,
+    HarmonyStage.EXECUTING_COMMAND,
+    HarmonyStage.REFRESHING
+  ];
+  return loadingStages.includes(stage);
+}
+
+/**
  * Component for displaying and selecting Harmony Hubs.
  * Shows discovered hubs with their connection status and firmware version.
  * Provides actions for selecting hubs and managing connections.
@@ -60,14 +78,12 @@ function HubsViewImpl({ onHubSelect, onBack }: HubsViewProps): JSX.Element {
                 onAction={refresh}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
               />
-              {clearCache && (
-                <Action
-                  title="Clear Cache"
-                  icon={Icon.Trash}
-                  onAction={clearCache}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-              )}
+              <Action
+                title="Clear Cache"
+                icon={Icon.Trash}
+                onAction={clearCache}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -79,7 +95,7 @@ function HubsViewImpl({ onHubSelect, onBack }: HubsViewProps): JSX.Element {
     <List
       navigationTitle="Harmony Hubs"
       searchBarPlaceholder="Search hubs..."
-      isLoading={loadingState.stage !== HarmonyStage.INITIAL && loadingState.stage !== HarmonyStage.ERROR}
+      isLoading={isViewLoading(loadingState.stage)}
       isShowingDetail={false}
     >
       {hubs.map((hub) => (
@@ -100,22 +116,18 @@ function HubsViewImpl({ onHubSelect, onBack }: HubsViewProps): JSX.Element {
                 <Action title="Select Hub" icon={Icon.ArrowRight} onAction={() => onHubSelect(hub)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                {refresh && (
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={refresh}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                )}
-                {clearCache && (
-                  <Action
-                    title="Clear Cache"
-                    icon={Icon.Trash}
-                    onAction={clearCache}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  />
-                )}
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={refresh}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+                <Action
+                  title="Clear Cache"
+                  icon={Icon.Trash}
+                  onAction={clearCache}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
                 {onBack && (
                   <Action
                     title="Back"

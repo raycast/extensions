@@ -9,6 +9,7 @@ import { memo, useMemo } from "react";
 
 import { useHarmony } from "../../../hooks/useHarmony";
 import { HarmonyActivity } from "../../../types/core/harmony";
+import { HarmonyStage } from "../../../types/core/state";
 
 /**
  * Props for the ActivitiesView component
@@ -30,7 +31,7 @@ interface ActivitiesViewProps {
  * @returns JSX element
  */
 function ActivitiesViewImpl({ onActivitySelect, onBack }: ActivitiesViewProps): JSX.Element {
-  const { activities, refresh, clearCache } = useHarmony();
+  const { activities, refresh, clearCache, loadingState } = useHarmony();
 
   // Memoize activity grouping
   const { activityTypes, activitiesByType } = useMemo(() => {
@@ -85,7 +86,7 @@ function ActivitiesViewImpl({ onActivitySelect, onBack }: ActivitiesViewProps): 
     <List
       navigationTitle="Activities"
       searchBarPlaceholder="Search activities..."
-      isLoading={false}
+      isLoading={loadingState.stage !== HarmonyStage.CONNECTED && loadingState.stage !== HarmonyStage.ERROR}
       isShowingDetail={false}
     >
       {activityTypes.map((type) => {

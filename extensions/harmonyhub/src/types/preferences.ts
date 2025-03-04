@@ -2,6 +2,8 @@
  * Preferences for the Harmony extension.
  */
 export interface Preferences {
+  /** Whether to automatically connect to the first discovered hub */
+  autoConnect: boolean;
   /** The default view to display */
   defaultView: "activities" | "devices";
   /** The duration to hold a command in milliseconds */
