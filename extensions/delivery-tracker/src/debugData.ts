@@ -98,12 +98,12 @@ debugPackages[debugDeliveries[4].id] = {
       activity: [],
     },
     {
-      deliveryDate: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 4), // 2 days ahead
+      deliveryDate: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 2), // 2 days ahead
       delivered: false,
       activity: [],
     },
     {
-      deliveryDate: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 4), // 1 days ahead
+      deliveryDate: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 1), // 1 day ahead
       delivered: true,
       activity: [],
     },
