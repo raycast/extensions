@@ -2,22 +2,41 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "firebase-manage",
   "title": "Firebase Manage",
-  "description": "",
+  "description": "Manage your Firebase Firestore database directly from Raycast",
   "icon": "extension-icon.png",
   "author": "bharath21",
   "owner": "doshi",
   "license": "MIT",
   "commands": [
     {
-      "name": "find-user",
-      "title": "Find User",
-      "description": "",
+      "name": "list-documents",
+      "title": "List Firestore Documents",
+      "description": "List documents from a Firestore collection",
+      "mode": "view"
+    },
+    {
+      "name": "filter-documents",
+      "title": "Filter Firestore Documents",
+      "description": "Filter documents based on field values",
+      "mode": "view"
+    },
+    {
+      "name": "setup-service-account",
+      "title": "Setup Firebase Service Account",
+      "description": "Configure your Firebase service account for the extension",
+      "mode": "view"
+    },
+    {
+      "name": "reset-service-account",
+      "title": "Reset Firebase Service Account",
+      "description": "Reset your Firebase service account configuration",
       "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "firebase-admin": "^13.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
