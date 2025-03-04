@@ -1546,6 +1546,7 @@
   "aesign/sketch": "sketch",
   "mommertf/slack": "slack",
   "petr/slack-status": "slack-status",
+  "koh-sh/slack-templated-message": "slack-templated-message",
   "timoransky/slackmojis": "slackmojis",
   "dtmzr/sleep-timer": "sleep-timer",
   "unreadablename/slugify": "slugify",
